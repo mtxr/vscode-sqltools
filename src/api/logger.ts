@@ -1,20 +1,32 @@
-export class Logger {
+class Logger {
     static packageName: string = '';
     static packageVersion: string = '';
     static logging: boolean = false;
 
-    get packageName() {return Logger.packageName;}
-    get packageVersion() {return Logger.packageVersion;}
-    get logging() {return Logger.logging;}
-    set packageName(val: string) {Logger.packageName = val;}
-    set packageVersion(val: string) {Logger.packageVersion = val;}
-    set logging(val: boolean) {Logger.logging = val;}
+    get packageName() {
+        return Logger.packageName;
+    }
+    get packageVersion() {
+        return Logger.packageVersion;
+    }
+    get logging() {
+        return Logger.logging;
+    }
+    set packageName(val: string) {
+        Logger.packageName = val;
+    }
+    set packageVersion(val: string) {
+        Logger.packageVersion = val;
+    }
+    set logging(val: boolean) {
+        Logger.logging = val;
+    }
 
     static debug(message: string) {
         if (!Logger.isLogging()) return;
         console.log(`${Logger.packageName} (${Logger.packageVersion}): ` + (message));
     }
-    
+
     static setLogging(param: boolean) {
         Logger.logging = param;
         Log('Logging is active');
@@ -44,6 +56,9 @@ export class Logger {
     }
 }
 
-export function Log(message: string) {
-    return Logger.debug(message)
+let Log = (message: string) => Logger.debug(message);
+
+export {
+    Logger,
+    Log
 }
