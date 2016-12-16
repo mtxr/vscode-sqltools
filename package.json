@@ -25,7 +25,7 @@
         "command": "sqltools.formatSql",
         "key": "ctrl+e ctrl+b",
         "mac": "cmd+e cmd+b",
-        "when": "editorTextFocus"
+        "when": "editorTextFocus && !editorReadonly"
     }]
   },
   "scripts": {

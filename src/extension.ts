@@ -15,7 +15,7 @@ import {
     VERSION as API_VERSION
 } from './api';
 
-const VERSION             = '0.0.0';
+const VERSION             = '0.0.1';
 const EXTENSION_NAMESPACE = 'sqltools';
 
 Logger.setPackageName(EXTENSION_NAMESPACE);
