@@ -1,40 +1,21 @@
 'use strict';
 
 import {
-    ExtensionContext,
-    commands as Commands,
-    window as Window,
-    TextEditor, 
-    TextEditorEdit
+  ExtensionContext,
+  commands as VsCommands
 } from 'vscode';
 
+import * as ST from './sqltools-commands';
+
 import {
-    Log,
-    Logger,
-    formatSql as Format,
-    VERSION as API_VERSION
-} from './api';
-
-const VERSION             = '0.0.1';
-const EXTENSION_NAMESPACE = 'sqltools';
-
-Logger.setPackageName(EXTENSION_NAMESPACE);
-Logger.setPackageVersion(VERSION);
-Logger.setLogging(true);
+  extensionNamespace,
+  version
+} from './constants';
 
 export function activate(context: ExtensionContext) {
-
-    let disposable = Commands.registerTextEditorCommand(`${EXTENSION_NAMESPACE}.formatSql`, (editor: TextEditor, edit: TextEditorEdit) => {
-        try {
-            let sel = editor.selection;
-            let document = editor.document;
-            edit.replace(sel, Format(document.getText(sel)))
-            
-        } catch (error) {
-            console.log(error)
-        }
-        Window.showInformationMessage('Query formatted!');
-    });
-
-    context.subscriptions.push(disposable);
+  context.subscriptions.push(VsCommands.registerCommand(`${extensionNamespace}.aboutVersion`, ST.aboutVersion));
+  context.subscriptions.push(VsCommands.registerTextEditorCommand(`${extensionNamespace}.formatSql`, ST.formatSql));
+  context.subscriptions.push(VsCommands.registerTextEditorCommand(`${extensionNamespace}.saveQuery`, ST.saveQuery));
+  context.subscriptions.push(VsCommands.registerCommand(`${extensionNamespace}.deleteSavedQuery`, ST.deleteSavedQuery));
+  context.subscriptions.push(VsCommands.registerCommand(`${extensionNamespace}.editSavedQuery`, ST.editSavedQuery));
 }

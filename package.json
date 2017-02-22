@@ -10,35 +10,115 @@
   "categories": [
     "Other"
   ],
-   "activationEvents": [
-        "onLanguage:sql",
-        "onLanguage:javascript",
-        "onCommand:sqltools.formatSql"
-    ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onLanguage:javascript"
+  ],
   "main": "./out/src/extension",
   "contributes": {
-      "commands": [{
+    "commands": [
+      {
         "command": "sqltools.formatSql",
         "title": "SQLTools: Format SQL"
-      }],
-      "keybindings": [{
+      },
+      {
+        "command": "sqltools.saveQuery",
+        "title": "SQLTools: Save selected query"
+      },
+      {
+        "command": "sqltools.deleteSavedQuery",
+        "title": "SQLTools: Delete saved query"
+      },
+      {
+        "command": "sqltools.editSavedQuery",
+        "title": "SQLTools: Edit saved query"
+      },
+      {
+        "command": "sqltools.version",
+        "title": "SQLTools: Version"
+      }
+    ],
+    "keybindings": [
+      {
         "command": "sqltools.formatSql",
         "key": "ctrl+e ctrl+b",
         "mac": "cmd+e cmd+b",
         "when": "editorTextFocus && !editorReadonly"
-    }]
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "SQLTools Settings",
+      "properties": {
+        "sqltools.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show debugging messages on console."
+        },
+        "sqltools.query_timeout": {
+          "type": "number",
+          "default": 5000,
+          "decription": "Kill query process after defined timeout."
+        },
+        "sqltools.history_size": {
+          "type": "number",
+          "default": 100,
+          "decription": "Number of queries to keep on History."
+        },
+        "sqltools.show_result_on_tab": {
+          "type": "boolean",
+          "default": false,
+          "decription": "Show results using new tab."
+        },
+        "sqltools.clear_output": {
+          "type": "boolean",
+          "default": false,
+          "decription": ""
+        },
+        "sqltools.connections": {
+          "type": "array",
+          "default": []
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "tsc -p ./",
     "compile": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test"
+    "test-vscode": "node ./node_modules/vscode/bin/test",
+    "test": "mocha --recursive --compilers ts:ts-node/register test/**/*.test.ts",
+    "test:coverage": "nyc npm t"
   },
   "devDependencies": {
+    "chai": "^3.5.0",
+    "ts-node": "^2.1.0",
     "typescript": "^2.0.3",
     "vscode": "^1.0.0"
   },
   "dependencies": {
+    "mysql": "^2.12.0",
     "sql-formatter": "^1.1.1"
+  },
+  "nyc": {
+    "include": [
+      "src/*.ts",
+      "src/**/*.ts"
+    ],
+    "exclude": [
+      "typings"
+    ],
+    "extension": [
+      ".ts"
+    ],
+    "require": [
+      "ts-node/register"
+    ],
+    "reporter": [
+      "json",
+      "html"
+    ],
+    "all": true
   }
 }

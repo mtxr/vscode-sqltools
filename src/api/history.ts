@@ -15,7 +15,7 @@ class History {
             this.items.shift();
         }
 
-        this.items.push(query)
+        this.items.push(query);
     }
 
     get(index) {
