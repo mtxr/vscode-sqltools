@@ -5,7 +5,7 @@
         {
             "type": "node",
             "request": "launch",
-            "name": "Launch via NPM",
+            "name": "Coverage",
             "runtimeExecutable": "npm",
             "windows": {
                 "runtimeExecutable": "npm.cmd"

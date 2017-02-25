@@ -88,11 +88,15 @@
     "compile": "tsc -watch -p ./",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test-vscode": "node ./node_modules/vscode/bin/test",
-    "test": "mocha --recursive --compilers ts:ts-node/register test/**/*.test.ts",
+    "test": "mocha -c --recursive --compilers ts:ts-node/register test/",
     "test:coverage": "nyc npm t"
   },
   "devDependencies": {
+    "@types/chai": "^3.4.35",
+    "@types/mocha": "^2.2.39",
     "chai": "^3.5.0",
+    "semver": "^5.3.0",
+    "sinon": "^1.17.7",
     "ts-node": "^2.1.0",
     "typescript": "^2.0.3",
     "vscode": "^1.0.0"
