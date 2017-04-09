@@ -1,28 +1,29 @@
+// tslint:disable:no-unused-expression
+// tslint:disable:no-reference
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 /// <reference path="../../node_modules/@types/chai/index.d.ts" />
 
-
-import * as vscode from 'vscode';
 import { expect } from 'chai';
-import { getHome } from '../../src/api/utils'
+import * as vscode from 'vscode';
+import { Utils } from '../../src/api';
 
-describe("API Utils", () => {
-  describe("getHome()", () => {
+describe('API Utils', () => {
+  describe('getHome()', () => {
     it('Should find a home path', () => {
-      const HOME = getHome();
+      const HOME = Utils.getHome();
 
       expect(HOME).to.be.not.undefined;
       expect(HOME).to.be.a('string');
     });
 
     it('Should find a home path for env HOME', () => {
-      let oldU = process.env.USERPROFILE;
-      let oldH = process.env.HOME;
+      const oldU = process.env.USERPROFILE;
+      const oldH = process.env.HOME;
       delete process.env.USERPROFILE;
       delete process.env.HOME;
       process.env.HOME = 'Fake home';
 
-      const HOME = getHome();
+      const HOME = Utils.getHome();
 
       expect(HOME).to.be.not.undefined;
       expect(HOME).to.be.a('string');
@@ -32,13 +33,13 @@ describe("API Utils", () => {
     });
 
     it('Should find a home path for env USERPROFILE', () => {
-      let oldU = process.env.USERPROFILE;
-      let oldH = process.env.HOME;
+      const oldU = process.env.USERPROFILE;
+      const oldH = process.env.HOME;
       delete process.env.USERPROFILE;
       delete process.env.HOME;
       process.env.USERPROFILE = 'Fake home';
 
-      const HOME = getHome();
+      const HOME = Utils.getHome();
 
       expect(HOME).to.be.not.undefined;
       expect(HOME).to.be.a('string');
@@ -48,12 +49,12 @@ describe("API Utils", () => {
     });
 
     it('Should throw an error if can\'t find home', () => {
-      let oldU = process.env.USERPROFILE;
-      let oldH = process.env.HOME;
+      const oldU = process.env.USERPROFILE;
+      const oldH = process.env.HOME;
       delete process.env.USERPROFILE;
       delete process.env.HOME;
 
-      expect(getHome).to.throw();
+      expect(Utils.getHome).to.throw();
     });
   });
 });

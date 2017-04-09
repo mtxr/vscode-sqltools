@@ -1,12 +1,14 @@
-import * as vscode from 'vscode';
+// tslint:disable:no-unused-expression
+
 import { expect } from 'chai';
 import * as semver from 'semver';
-import * as Constants from '../src/constants';
-const mustExportProps = ['bufferName', 'version', 'extensionNamespace']
+import * as vscode from 'vscode';
+import Constants from '../src/constants';
+const mustExportProps = ['bufferName', 'version', 'extensionNamespace'];
 
-describe("Constants Tests", () => {
+describe('Constants Tests', () => {
   it(`Should export ${mustExportProps.join(', ')}`, () => {
-    mustExportProps.forEach(prop => {
+    mustExportProps.forEach((prop) => {
       expect(Constants).to.have.property(prop).and.to.be.a('string');
     });
   });
@@ -14,4 +16,4 @@ describe("Constants Tests", () => {
     expect(semver.valid(Constants.version)).to.be.not.null;
     expect(semver.valid(Constants.version)).to.be.a('string');
   });
-})
+});

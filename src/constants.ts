@@ -1,13 +1,8 @@
 import * as path from 'path';
-import { getHome } from './api';
+import { Utils } from './api';
 
-const version             = 'v0.0.1';
-const extensionNamespace = 'sqltools';
-
-let bufferName =  path.join(getHome(),'SQLTools.buffer');
-
-export {
-    bufferName,
-    version,
-    extensionNamespace
+export default class Constants {
+  public static version      = 'v0.0.1';
+  public static extNamespace = 'SQLTools';
+  public static bufferName   = path.join(Utils.getHome(), 'SQLTools.buffer.sql');
 }

@@ -1,51 +1,36 @@
 import * as fs from 'fs';
+import * as jsonc from 'jsonc-parser';
 import * as path from 'path';
+import BaseStorage from './base-storage';
+import { NotFoundException } from './exception';
+import { LoggerInterface } from './interface';
+import Utils from './utils';
 
-import { getHome } from './utils';
+export default class Storage extends BaseStorage {
 
-class NotFoundException extends Error {}
+  constructor() {
+    super(path.join(Utils.getHome(), '.SQLToolsStorage.json'), {});
+  }
 
-export class Storage {
-    private items: Object = {};
-    private storagePath: string = path.join(getHome(), '.SQLToolsStorage.json');
+  public add(name: string, query: string): Storage {
+    this.items[name] = query;
+    return this.save();
+  }
 
-    constructor() {
-        if (!fs.existsSync(this.storagePath)) {
-            fs.writeFileSync(this.storagePath, JSON.stringify(this.items));
-        }
-
-        this.items = JSON.parse(fs.readFileSync(this.storagePath, 'utf8'));
+  public get(key): Object {
+    if (!this.items[key]) {
+      throw new NotFoundException('No query selected');
     }
+    return this.items[key];
+  }
 
-    add(name: string, query: string): Storage {
-        this.items[name] = query;
-        return this.save();
-    }
+  public delete(key): this {
+    this.get(key);
+    delete this.items[key];
+    return this.save();
+  }
 
-    get(key): Object {
-        if (!this.items[key]) {
-            throw new NotFoundException("No query selected")
-        }
-        return this.items[key];
-    }
+  public getSize = (): number => Object.keys(this.items).length;
 
-    delete(key): Storage {
-        this.get(key);
-        delete this.items[key];
-        return this.save();
-    }
-
-    getSize = (): number => Object.keys(this.items).length;
-
-    all = (): Object => this.items;
-
-    clear(): Storage {
-        this.items = [];
-        return this;
-    }
-
-    save(): Storage {
-        fs.writeFileSync(this.storagePath, JSON.stringify(this.items));
-        return this;
-    }
+  public all = (): Object => this.items;
 }

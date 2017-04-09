@@ -1,51 +1,46 @@
-class SizeException extends Error {}
+import { NotFoundException, SizeException } from './exception';
 
-class NotFoundException extends Error {}
+export default class History {
+  private items: string[] = [];
+  private maxSize: number = 100;
 
-class History {
-    private items: string[] = [];
-    private maxSize: number = 100;
+  constructor(maxSize: number = 100) {
+    this.maxSize = maxSize;
+  }
 
-    constructor(maxSize: number = 100) {
-        this.maxSize = maxSize;
+  public add(query: string) {
+    if (this.getSize() >= this.getMaxSize()) {
+      this.items.shift();
     }
 
-    add(query: string) {
-        if (this.getSize() >= this.getMaxSize()) {
-            this.items.shift();
-        }
+    this.items.push(query);
+  }
 
-        this.items.push(query);
+  public get(index) {
+    if (index < 0 || index > this.items.length - 1) {
+      throw new NotFoundException('No query selected');
     }
 
-    get(index) {
-        if (index < 0 || index > this.items.length - 1) {
-            throw new NotFoundException("No query selected")
-        }
+    return this.items[index];
+  }
 
-        return this.items[index]
+  public setMaxSize(size: number) {
+    if (size < 1) {
+      throw new SizeException('Size can\'t be lower than 1');
     }
 
-    setMaxSize(size: number) {
-        if (size < 1) {
-            throw new SizeException("Size can't be lower than 1");
-        }
+    this.maxSize = size;
+    return this.maxSize;
+  }
 
-        this.maxSize = size;
-        return this.maxSize;
-    }
+  public getMaxSize = () => this.maxSize;
 
-    getMaxSize = () => this.maxSize;
+  public getSize = () => this.items.length;
 
-    getSize = () => this.items.length;
+  public all = () => this.items;
 
-    all = () => this.items;
-
-    clear() {
-        this.items = [];
-        return this.items;
-    }
-}
-export {
-    History
+  public clear() {
+    this.items = [];
+    return this.items;
+  }
 }
