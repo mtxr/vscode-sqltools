@@ -35,7 +35,7 @@
         "title": "SQLTools: Edit saved query"
       },
       {
-        "command": "SQLTools.version",
+        "command": "SQLTools.aboutVersion",
         "title": "SQLTools: Version"
       }
     ],

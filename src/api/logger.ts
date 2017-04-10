@@ -1,3 +1,4 @@
+import Constants from '../constants';
 import { LoggerInterface } from './interface';
 
 export default class Logger implements LoggerInterface {
@@ -8,7 +9,6 @@ export default class Logger implements LoggerInterface {
 
   public static setLogging(param: boolean) {
     Logger.logging = param;
-    // Logger.instance().debug('Logging is active');
     return Logger;
   }
 
@@ -34,15 +34,20 @@ export default class Logger implements LoggerInterface {
     return Logger.packageVersion;
   }
 
-  public static instance(): Logger {
+  public static instance(writer?: any): Logger {
     if (!Logger.loggerInstance) {
-      Logger.loggerInstance = new Logger();
+      Logger.loggerInstance = new Logger(writer);
     }
     return Logger.loggerInstance;
   }
 
-  private constructor() {
-    // this.debug('Logger started!');
+  private writer: any;
+
+  private constructor(writer?: any) {
+    if (!writer) {
+      writer = console;
+    }
+    this.writer = writer;
   }
 
   public debug(message: string, ...data: any[]) {
@@ -57,12 +62,11 @@ export default class Logger implements LoggerInterface {
   public warn(message: string, ...data: any[]) {
     this.emitMessage('warn', message, ...data);
   }
-
   private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]) {
     if (!Logger.isLogging) {
       return false;
     }
-    console[type](message, ...data);
+    this.writer[type](message, ...data);
   }
 
   get instance() {

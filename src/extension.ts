@@ -6,8 +6,6 @@ import { ST } from './sqltools-commands';
 
 export function activate(ctx: ExtensionContext) {
   Object.keys(ST).forEach((cmd) => {
-    console.log(`${Constants.extNamespace}.${cmd}`);
-
     ctx.subscriptions.push(VSCode.registerTextEditorCommand(`${Constants.extNamespace}.${cmd}`, ST[cmd]));
   });
 }

@@ -17,7 +17,9 @@ export default class BaseStorage implements StorageInterface {
       } else if (err.code === 'ENOENT') {
         this.save();
       }
-      this.logger.error('Ops, we\'ve got an error', err);
+      else if (err) {
+        this.logger.error('Ops, we\'ve got an error', err);
+      }
     });
   }
 

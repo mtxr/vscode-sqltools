@@ -14,25 +14,25 @@ import {
 } from 'vscode';
 import { Logger, Storage, Utils } from './api';
 import Constants from './constants';
+import LogWriter from './log-writer';
 
 const config: WorkspaceConfiguration = Workspace.getConfiguration('sqltools');
-const debug: boolean = config.get('debug', false);
-const queries: Storage = new Storage();
-
 Logger.setPackageName(Constants.extNamespace);
 Logger.setPackageVersion(Constants.version);
-Logger.setLogging(debug);
-const logger = Logger.instance();
+Logger.setLogging(config.get('debug', false));
+const queries: Storage = new Storage();
+const logger = Logger.instance(new LogWriter());
 
 function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
   try {
     edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
     const position = editor.selection.active;
-
     const newPosition = position.with(position.line, 0);
     const newSelection = new Selection(newPosition, newPosition);
     editor.selection = newSelection;
+    logger.debug('Query formatted!');
   } catch (error) {
+    logger.error('Error formating query', error);
     Window.showErrorMessage('Error formatting query' + error.toString());
   }
 }
