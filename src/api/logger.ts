@@ -1,64 +1,84 @@
-class Logger {
-    static packageName: string = '';
-    static packageVersion: string = '';
-    static logging: boolean = false;
+import Constants from '../constants';
+import { LoggerInterface } from './interface';
 
-    get packageName() {
-        return Logger.packageName;
-    }
-    get packageVersion() {
-        return Logger.packageVersion;
-    }
-    get logging() {
-        return Logger.logging;
-    }
-    set packageName(val: string) {
-        Logger.packageName = val;
-    }
-    set packageVersion(val: string) {
-        Logger.packageVersion = val;
-    }
-    set logging(val: boolean) {
-        Logger.logging = val;
-    }
-
-    static debug(message: string) {
-        if (!Logger.isLogging()) return;
-        console.log(`${Logger.packageName} (${Logger.packageVersion}): ` + (message));
-    }
-
-    static setLogging(param: boolean) {
-        Logger.logging = param;
-        Log('Logging is active');
-        return Logger;
-    }
-
-    static isLogging() {
-        return Logger.logging;
-    }
-
-    static setPackageName(param: string) {
-        Logger.packageName = param;
-        return Logger;
-    }
-
-    static getPackageName() {
-        return Logger.packageName;
-    }
-
-    static setPackageVersion(param: string) {
-        Logger.packageVersion = param;
-        return Logger;
-    }
-
-    static getPackageVersion() {
-        return Logger.packageVersion;
-    }
+export enum Levels {
+  DEBUG = 1,
+  INFO = 2,
+  WARN = 3,
+  ERROR = 4,
 }
 
-let Log = (message: string) => Logger.debug(message);
+export default class Logger implements LoggerInterface {
+  public static loggerInstance: Logger;
+  public static levels = Levels;
+  public static instance(writer?: any): Logger {
+    if (!Logger.loggerInstance) {
+      Logger.loggerInstance = new Logger(writer);
+    }
+    return Logger.loggerInstance;
+  }
 
-export {
-    Logger,
-    Log
+  public packageName: string = '';
+  public packageVersion: string = '';
+  public logging: boolean = false;
+  public level: Levels = Levels.DEBUG;
+  private writer: any;
+
+  private constructor(writer?: any) {
+    if (!writer) {
+      writer = console;
+      writer.debug('Using console for logging. Logs will appear on \'OUTPUT\' tab.');
+    }
+    this.writer = writer;
+  }
+
+  public setLogging(param: boolean): this {
+    this.logging = param;
+    const level: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
+    this.debug(this.logging ? `Logger is active for >= ${level}` : 'Logger deactivated');
+    return this;
+  }
+  public setLevel(level: Levels): this {
+    this.level = level;
+    const levelString: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
+    this.debug(`Log level set to '${levelString}'`);
+    return this;
+  }
+  public isLogging(): boolean {
+    return this.logging;
+  }
+  public setPackageName(param: string): this {
+    this.packageName = param;
+    return this;
+  }
+  public getPackageName(): string {
+    return this.packageName;
+  }
+  public setPackageVersion(param: string) {
+    this.packageVersion = param;
+    return this;
+  }
+  public getPackageVersion(): string {
+    return this.packageVersion;
+  }
+  public debug(message: string, ...data: any[]): this {
+    return this.emitMessage('debug', message, ...data);
+  }
+  public error(message: string, ...data: any[]): this {
+    return this.emitMessage('error', message, ...data);
+  }
+  public info(message: string, ...data: any[]): this {
+    return this.emitMessage('info', message, ...data);
+  }
+  public warn(message: string, ...data: any[]): this {
+    return this.emitMessage('warn', message, ...data);
+  }
+  private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]): this {
+
+    if (!this.isLogging || Levels[type.toUpperCase()] < this.level) {
+      return this;
+    }
+    this.writer[type](message, ...data);
+    return this;
+  }
 }

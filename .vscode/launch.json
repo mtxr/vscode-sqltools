@@ -3,6 +3,22 @@
     "version": "0.1.0",
     "configurations": [
         {
+            "type": "node",
+            "request": "launch",
+            "name": "Coverage",
+            "runtimeExecutable": "npm",
+            "windows": {
+                "runtimeExecutable": "npm.cmd"
+            },
+            "runtimeArgs": [
+                "run",
+                "test:coverage"
+            ],
+            "timeout": 1000000,
+            "port": 5858,
+            "cwd": "${workspaceRoot}"
+        },
+        {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",

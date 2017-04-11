@@ -1,0 +1,20 @@
+{
+  "defaultSeverity": "error",
+  "extends": [
+    "tslint:recommended"
+  ],
+  "jsRules": {},
+  "rules": {
+    "align": [ true, "parameters", "statements" ],
+    "arrow-parens": true,
+    "arrow-return-shorthand": [ true ],
+    "ban-types": [ false ],
+    "comment-format": [ true, "check-space", { "ignore-words": [ "TODO", "HACK" ] } ],
+    "curly": false,
+    "indent": [ true, "spaces" ],
+    "interface-name": [ false ],
+    "linebreak-style": [ true, "LF" ],
+    "quotemark": [ true, "single", "jsx-double" ]
+  },
+  "rulesDirectory": []
+}

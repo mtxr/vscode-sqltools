@@ -1,4 +1,6 @@
-export const VERSION = 'v0.0.1';
-export * from './logger';
-export * from './history';
-export * from './utils';
+import BookmarksStorage from './bookmarks-storage';
+import History from './history';
+import Logger from './logger';
+import Utils from './utils';
+
+export { Utils, BookmarksStorage, Logger, History };
