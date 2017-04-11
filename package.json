@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "",
-    "version": "0.1.0",
+    "version": "0.1.1",
     "publisher": "mtxr",
     "engines": {
         "vscode": "^1.10.0"
