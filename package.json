@@ -35,6 +35,10 @@
         "title": "SQLTools: Edit saved query"
       },
       {
+        "command": "SQLTools.showOutputChannel",
+        "title": "SQLTools: Show output channel (Logs)"
+      },
+      {
         "command": "SQLTools.aboutVersion",
         "title": "SQLTools: Version"
       }
@@ -51,32 +55,43 @@
       "type": "object",
       "title": "SQLTools Settings",
       "properties": {
-        "SQLTools.debug": {
+        "sqltools.logging": {
           "type": "boolean",
           "default": true,
           "description": "Show debugging messages on console."
         },
-        "SQLTools.query_timeout": {
-          "type": "number",
-          "default": 5000,
-          "decription": "Kill query process after defined timeout."
+        "sqltools.log_level": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR"
+          ],
+          "default": "DEBUG",
+          "description": "Show debugging messages on console."
         },
-        "SQLTools.history_size": {
+        "sqltools.query_timeout": {
+          "type": "number",
+          "default": 300000,
+          "decription": "Timeout in seconds for killing query process after the timeout."
+        },
+        "sqltools.history_size": {
           "type": "number",
           "default": 100,
           "decription": "Number of queries to keep on History."
         },
-        "SQLTools.show_result_on_tab": {
+        "sqltools.show_result_on_tab": {
           "type": "boolean",
           "default": false,
           "decription": "Show results using new tab."
         },
-        "SQLTools.clear_output": {
+        "sqltools.clear_output": {
           "type": "boolean",
           "default": false,
-          "decription": ""
+          "decription": "Clear output for new commands."
         },
-        "SQLTools.connections": {
+        "sqltools.connections": {
           "type": "array",
           "default": []
         }

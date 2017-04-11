@@ -1,23 +1,34 @@
 import * as vscode from 'vscode';
 import Constants from './constants';
 
-const outputChannel = vscode.window.createOutputChannel(`${Constants.extNamespace} Logs`);
-const writeLog = (message: string, ...data: any[]) => {
-  const richData = data.length > 0 ? `: ${JSON.stringify(data)}` : '';
-  outputChannel.appendLine(`${message}${richData}`);
-};
-
 export default class Logwriter {
-  public debug (message: string, ...data: any[]) {
-    writeLog(message, ...data);
+  private static outputChannel: vscode.OutputChannel = null;
+  private output: vscode.OutputChannel = null;
+  constructor() {
+    Logwriter.outputChannel = (
+      Logwriter.outputChannel || vscode.window.createOutputChannel(`${Constants.extNamespace} Logs`)
+    );
+    this.output = Logwriter.outputChannel;
   }
-  public error (message: string, ...data: any[]) {
-    writeLog(message, ...data);
+  public debug(message: string, ...data: any[]) {
+    this.writeLog(`DEBUG: ${message}`, ...data);
   }
-  public info (message: string, ...data: any[]) {
-    writeLog(message, ...data);
+  public error(message: string, ...data: any[]) {
+    this.writeLog(`ERROR: ${message}`, ...data);
   }
-  public warn (message: string, ...data: any[]) {
-    writeLog(message, ...data);
+  public info(message: string, ...data: any[]) {
+    this.writeLog(`INFO: ${message}`, ...data);
+  }
+  public warn(message: string, ...data: any[]) {
+    this.writeLog(`WARN: ${message}`, ...data);
+  }
+  public showOutput() {
+    this.output.show();
+  }
+  private writeLog(message: string, ...data: any[]) {
+    this.output.appendLine(`[${(new Date()).toLocaleString()}] ${message}`);
+    if (data.length > 0) {
+      this.output.appendLine(data.join('\n'));
+    }
   }
 }

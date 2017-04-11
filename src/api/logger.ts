@@ -1,39 +1,16 @@
 import Constants from '../constants';
 import { LoggerInterface } from './interface';
 
+export enum Levels {
+  DEBUG = 1,
+  INFO = 2,
+  WARN = 3,
+  ERROR = 4,
+}
+
 export default class Logger implements LoggerInterface {
   public static loggerInstance: Logger;
-  public static packageName: string = '';
-  public static packageVersion: string = '';
-  public static logging: boolean = false;
-
-  public static setLogging(param: boolean) {
-    Logger.logging = param;
-    return Logger;
-  }
-
-  public static isLogging() {
-    return Logger.logging;
-  }
-
-  public static setPackageName(param: string) {
-    Logger.packageName = param;
-    return Logger;
-  }
-
-  public static getPackageName() {
-    return Logger.packageName;
-  }
-
-  public static setPackageVersion(param: string) {
-    Logger.packageVersion = param;
-    return Logger;
-  }
-
-  public static getPackageVersion() {
-    return Logger.packageVersion;
-  }
-
+  public static levels = Levels;
   public static instance(writer?: any): Logger {
     if (!Logger.loggerInstance) {
       Logger.loggerInstance = new Logger(writer);
@@ -41,53 +18,67 @@ export default class Logger implements LoggerInterface {
     return Logger.loggerInstance;
   }
 
+  public packageName: string = '';
+  public packageVersion: string = '';
+  public logging: boolean = false;
+  public level: Levels = Levels.DEBUG;
   private writer: any;
 
   private constructor(writer?: any) {
     if (!writer) {
       writer = console;
+      writer.debug('Using console for logging. Logs will appear on \'OUTPUT\' tab.');
     }
     this.writer = writer;
   }
 
-  public debug(message: string, ...data: any[]) {
-    this.emitMessage('debug', message, ...data);
+  public setLogging(param: boolean): this {
+    this.logging = param;
+    const level: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
+    this.debug(this.logging ? `Logger is active for >= ${level}` : 'Logger deactivated');
+    return this;
   }
-  public error(message: string, ...data: any[]) {
-    this.emitMessage('error', message, ...data);
+  public setLevel(level: Levels): this {
+    this.level = level;
+    const levelString: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
+    this.debug(`Log level set to '${levelString}'`);
+    return this;
   }
-  public info(message: string, ...data: any[]) {
-    this.emitMessage('info', message, ...data);
+  public isLogging(): boolean {
+    return this.logging;
   }
-  public warn(message: string, ...data: any[]) {
-    this.emitMessage('warn', message, ...data);
+  public setPackageName(param: string): this {
+    this.packageName = param;
+    return this;
   }
-  private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]) {
-    if (!Logger.isLogging) {
-      return false;
+  public getPackageName(): string {
+    return this.packageName;
+  }
+  public setPackageVersion(param: string) {
+    this.packageVersion = param;
+    return this;
+  }
+  public getPackageVersion(): string {
+    return this.packageVersion;
+  }
+  public debug(message: string, ...data: any[]): this {
+    return this.emitMessage('debug', message, ...data);
+  }
+  public error(message: string, ...data: any[]): this {
+    return this.emitMessage('error', message, ...data);
+  }
+  public info(message: string, ...data: any[]): this {
+    return this.emitMessage('info', message, ...data);
+  }
+  public warn(message: string, ...data: any[]): this {
+    return this.emitMessage('warn', message, ...data);
+  }
+  private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]): this {
+
+    if (!this.isLogging || Levels[type.toUpperCase()] < this.level) {
+      return this;
     }
     this.writer[type](message, ...data);
-  }
-
-  get instance() {
-    return Logger.loggerInstance;
-  }
-  get packageName() {
-    return Logger.packageName;
-  }
-  set packageName(val: string) {
-    Logger.packageName = val;
-  }
-  get packageVersion() {
-    return Logger.packageVersion;
-  }
-  set packageVersion(val: string) {
-    Logger.packageVersion = val;
-  }
-  get logging() {
-    return Logger.logging;
-  }
-  set logging(val: boolean) {
-    Logger.logging = val;
+    return this;
   }
 }

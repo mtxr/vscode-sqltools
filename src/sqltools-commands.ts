@@ -16,20 +16,20 @@ import { Logger, Storage, Utils } from './api';
 import Constants from './constants';
 import LogWriter from './log-writer';
 
-const config: WorkspaceConfiguration = Workspace.getConfiguration('sqltools');
-Logger.setPackageName(Constants.extNamespace);
-Logger.setPackageVersion(Constants.version);
-Logger.setLogging(config.get('debug', false));
+const output = new LogWriter();
+const config: WorkspaceConfiguration = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
+const logger = Logger.instance(output)
+  .setPackageName(Constants.extNamespace)
+  .setPackageVersion(Constants.version)
+  .setLevel(Logger.levels[config.get('log_level', 'DEBUG')])
+  .setLogging(config.get('logging', false));
+
 const queries: Storage = new Storage();
-const logger = Logger.instance(new LogWriter());
 
 function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
   try {
     edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
-    const position = editor.selection.active;
-    const newPosition = position.with(position.line, 0);
-    const newSelection = new Selection(newPosition, newPosition);
-    editor.selection = newSelection;
+    VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
     logger.debug('Query formatted!');
   } catch (error) {
     logger.error('Error formating query', error);
@@ -56,7 +56,9 @@ function describeFunction() {}
 function executeQuery() {}
 
 function aboutVersion(): void {
-  Window.showInformationMessage(`Using SQLTools ${Constants.version}`);
+  const message = `Using SQLTools ${Constants.version}`;
+  logger.info(message);
+  Window.showInformationMessage(message);
 }
 
 // tslint:disable-next-line:no-empty
@@ -68,7 +70,8 @@ function saveQuery(editor: TextEditor, edit: TextEditorEdit): void {
     Window.showInputBox({ prompt: 'Query name' })
       .then((val) => queries.add(val, query));
   } catch (error) {
-    Window.showErrorMessage('Error saving query');
+    logger.error('Error saving query: ', error);
+    Window.showErrorMessage('Error saving query. Check SQLTools logs for more information.');
   }
 }
 
@@ -120,6 +123,10 @@ function editSavedQuery(): void {
     });
 }
 
+function showOutputChannel(): void {
+  output.showOutput();
+}
+
 export const ST = {
   formatSql,
   selectConnection,
@@ -133,4 +140,5 @@ export const ST = {
   deleteSavedQuery,
   deleteAllSavedQueries,
   editSavedQuery,
+  showOutputChannel,
 };
