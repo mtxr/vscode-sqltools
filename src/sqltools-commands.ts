@@ -12,7 +12,7 @@ import {
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
-import { Logger, Storage, Utils } from './api';
+import { BookmarksStorage, Logger, Utils } from './api';
 import Constants from './constants';
 import LogWriter from './log-writer';
 
@@ -24,7 +24,7 @@ const logger = Logger.instance(output)
   .setLevel(Logger.levels[config.get('log_level', 'DEBUG')])
   .setLogging(config.get('logging', false));
 
-const queries: Storage = new Storage();
+const bookmarks: BookmarksStorage = new BookmarksStorage();
 
 function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
   try {
@@ -33,7 +33,7 @@ function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
     logger.debug('Query formatted!');
   } catch (error) {
     logger.error('Error formating query', error);
-    Window.showErrorMessage('Error formatting query' + error.toString());
+    errorHandler('Error formatting query.');
   }
 }
 
@@ -64,19 +64,28 @@ function aboutVersion(): void {
 // tslint:disable-next-line:no-empty
 function showHistory() {}
 
-function saveQuery(editor: TextEditor, edit: TextEditorEdit): void {
+function bookmarkSelection(editor: TextEditor, edit: TextEditorEdit) {
   try {
     const query = editor.document.getText(editor.selection);
+    if (!query || query.length === 0) {
+      return Window.showInformationMessage('Can\'t bookmark. You have selected nothing.');
+    }
     Window.showInputBox({ prompt: 'Query name' })
-      .then((val) => queries.add(val, query));
+      .then((name) => {
+        if (!name || name.length === 0) {
+          return Window.showInformationMessage('Can\'t bookmark. Name not provided.');
+        }
+        bookmarks.add(name, query);
+        logger.debug(`Bookmarked query named '${name}'`);
+      });
   } catch (error) {
-    logger.error('Error saving query: ', error);
-    Window.showErrorMessage('Error saving query. Check SQLTools logs for more information.');
+    logger.error('Error bookmarking query: ', error);
+    errorHandler('Error bookmarking query.');
   }
 }
 
-function showSavedQueries(): Thenable < QuickPickItem > {
-  const all: Object = queries.all();
+function showBookmarks(): Thenable < QuickPickItem > {
+  const all: Object = bookmarks.all();
   const options: QuickPickItem[] = [];
 
   Object.keys(all).forEach((key) => {
@@ -89,23 +98,25 @@ function showSavedQueries(): Thenable < QuickPickItem > {
   return Window.showQuickPick(options);
 }
 
-function deleteSavedQuery(): void {
-  showSavedQueries()
+function deleteBookmark(): void {
+  showBookmarks()
     .then((toDelete) => {
       if (!toDelete) return;
-      queries.delete(toDelete.label);
+      bookmarks.delete(toDelete.label);
+      logger.debug(`Bookmarked query '${toDelete.label}' deleted!`);
     });
 }
 
-function deleteAllSavedQueries(): void {
-  queries.clear();
+function clearBookmarks(): void {
+  bookmarks.clear();
+  logger.debug(`Bookmark cleared!`);
 }
 
-function editSavedQuery(): void {
-  showSavedQueries()
+function editBookmark(): void {
+  showBookmarks()
     .then((query) => {
       if (!query) return;
-      logger.debug(`Selected query ${query.label}`);
+      logger.debug(`Selected bookmarked query ${query.label}`);
 
       const editingBufferName = `${Constants.bufferName}`;
       Workspace.openTextDocument(Uri.parse(`untitled:${editingBufferName}`)).then((document: TextDocument) => {
@@ -116,15 +127,27 @@ function editSavedQuery(): void {
           });
         });
       }, (error: any) => {
-        Window.showErrorMessage('No query selected');
+        logger.error('Unexpected error: ', error);
+        errorHandler('Ops, we\'ve got an error!');
       });
     }, (error) => {
-      logger.error(error.toString());
+      logger.error('Unexpected error: ', error);
+      errorHandler('Ops, we\'ve got an error!');
     });
 }
 
 function showOutputChannel(): void {
   output.showOutput();
+}
+
+function errorHandler(message) {
+  return Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No')
+    .then((res) => {
+      if (res === 'Yes') {
+        showOutputChannel();
+      }
+      return res;
+    });
 }
 
 export const ST = {
@@ -136,9 +159,9 @@ export const ST = {
   executeQuery,
   aboutVersion,
   showHistory,
-  saveQuery,
-  deleteSavedQuery,
-  deleteAllSavedQueries,
-  editSavedQuery,
+  bookmarkSelection,
+  deleteBookmark,
+  clearBookmarks,
+  editBookmark,
   showOutputChannel,
 };

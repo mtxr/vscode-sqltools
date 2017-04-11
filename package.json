@@ -23,16 +23,20 @@
         "title": "SQLTools: Format SQL"
       },
       {
-        "command": "SQLTools.saveQuery",
-        "title": "SQLTools: Save selected query"
+        "command": "SQLTools.bookmarkSelection",
+        "title": "SQLTools: Bookmark selection"
       },
       {
-        "command": "SQLTools.deleteSavedQuery",
-        "title": "SQLTools: Delete saved query"
+        "command": "SQLTools.deleteBookmark",
+        "title": "SQLTools: Delete a bookmark"
       },
       {
-        "command": "SQLTools.editSavedQuery",
-        "title": "SQLTools: Edit saved query"
+        "command": "SQLTools.clearBookmarks",
+        "title": "SQLTools: Delete all bookmarks"
+      },
+      {
+        "command": "SQLTools.editBookmark",
+        "title": "SQLTools: Edit a bookmarked"
       },
       {
         "command": "SQLTools.showOutputChannel",

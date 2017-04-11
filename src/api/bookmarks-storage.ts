@@ -6,13 +6,12 @@ import { NotFoundException } from './exception';
 import { LoggerInterface } from './interface';
 import Utils from './utils';
 
-export default class Storage extends BaseStorage {
-
-  constructor() {
-    super(path.join(Utils.getHome(), '.SQLToolsStorage.json'), {});
+export default class BookmarksStorage extends BaseStorage {
+  constructor(public name: string = '.Bookmarks') {
+    super(path.join(Utils.getHome(), `${name}.SQLToolsStorage.json`), {});
   }
 
-  public add(name: string, query: string): Storage {
+  public add(name: string, query: string): BookmarksStorage {
     this.items[name] = query;
     return this.save();
   }
