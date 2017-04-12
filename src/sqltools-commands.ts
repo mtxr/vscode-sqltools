@@ -26,8 +26,8 @@ const logger = Logger.instance(output)
 
 const bookmarks: BookmarksStorage = new BookmarksStorage();
 
-function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
-  try {
+function formatSql(editor: TextEditor, edit: TextEditorEdit): void {
+  try {       
     edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
     VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
     logger.debug('Query formatted!');
@@ -151,17 +151,28 @@ function errorHandler(message) {
 }
 
 export const ST = {
-  formatSql,
-  selectConnection,
-  showRecords,
-  describeTable,
-  describeFunction,
-  executeQuery,
-  aboutVersion,
-  showHistory,
-  bookmarkSelection,
-  deleteBookmark,
-  clearBookmarks,
-  editBookmark,
-  showOutputChannel,
+  /**
+   * TextEditor commands
+   */
+  textEditor: {
+    formatSql,
+    executeQuery,
+    bookmarkSelection,
+
+  },
+  /**
+   * General commands
+   */
+  workspace: {
+    selectConnection,
+    showRecords,
+    describeTable,
+    describeFunction,
+    aboutVersion,
+    showHistory,
+    deleteBookmark,
+    clearBookmarks,
+    editBookmark,
+    showOutputChannel,
+  },
 };
