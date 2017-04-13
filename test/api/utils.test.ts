@@ -57,4 +57,27 @@ describe('API Utils', () => {
       expect(Utils.getHome).to.throw();
     });
   });
+
+  describe('formatSql()', () => {
+    it('Should format query properly',  () => {
+      let query = 'SELECT * FROM A WHERE colname = \'value\';';
+      let expected = 'SELECT\n' +
+        '  *\n' +
+        'FROM\n' +
+        '  A\n' +
+        'WHERE\n' +
+        '  colname = \'value\';\n';
+      expect(Utils.formatSql(query)).to.be.eqls(expected);
+      
+      query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
+      expected = 'SELECT\n' +
+        '  *\n' +
+        'FROM\n' +
+        '  [A]\n' +
+        'WHERE\n' +
+        '  [colname] = N\'value\';\n';
+      expect(Utils.formatSql(query)).to.be.eqls(expected);
+
+    })
+  });
 });
