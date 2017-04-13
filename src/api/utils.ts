@@ -1,4 +1,4 @@
-import * as formatter from 'sql-formatter';
+import * as formatter from 'sql-formatter-sqltools';
 import { EnvironmentException } from './exception';
 
 export default class Utils {
