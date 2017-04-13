@@ -1,4 +1,4 @@
-# SQLTools     
+# SQLTools
 
 [https://github.com/mtxr/vscode-sqltools](https://github.com/mtxr/vscode-sqltools)
 

@@ -27,7 +27,7 @@ const logger = Logger.instance(output)
 const bookmarks: BookmarksStorage = new BookmarksStorage();
 
 function formatSql(editor: TextEditor, edit: TextEditorEdit): void {
-  try {       
+  try {
     edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
     VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
     logger.debug('Query formatted!');
