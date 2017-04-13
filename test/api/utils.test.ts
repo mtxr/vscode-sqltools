@@ -68,7 +68,7 @@ describe('API Utils', () => {
         'WHERE\n' +
         '  colname = \'value\';\n';
       expect(Utils.formatSql(query)).to.be.eqls(expected);
-      
+
       query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
       expected = 'SELECT\n' +
         '  *\n' +
