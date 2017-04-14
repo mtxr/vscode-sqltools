@@ -3,3 +3,4 @@ node_modules/
 .vscode-test/
 coverage/
 .nyc_output/
+coverage.enabled

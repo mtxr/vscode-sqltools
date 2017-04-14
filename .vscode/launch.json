@@ -7,10 +7,10 @@
             "request": "launch",
             "name": "Launch Coverage Tests",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
-            "preLaunchTask": "compile"
+            "preLaunchTask": "pre-coverage:vscode"
         },
         {
             "name": "Launch Extension",
@@ -21,7 +21,7 @@
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/src/**/*.js"],
-            "preLaunchTask": "compile"
+            "preLaunchTask": "pre-run:vscode"
         },
         {
             "name": "Launch Tests",

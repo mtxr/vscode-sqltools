@@ -1,21 +1,19 @@
-// tslint:disable:no-reference
 // tslint:disable:no-console
-
-/// <reference path="../node_modules/@types/node/index.d.ts" />
 
 'use strict';
 
+import * as fs from 'fs';
 import * as TestRunner from './test-runner';
 
 const testRunner = TestRunner;
-const mochaConfig: any = { ui: 'bdd', useColors: true };
+const mochaConfig: any = { ui: 'bdd', useColors: true, reporter: 'spec' };
 let coverageConfig: any;
 
-if (process.argv.indexOf('--coverage') >= 0) {
+if (fs.existsSync(`${__dirname}/../../coverage.enabled`)) {
   coverageConfig = {
-    coverageDir: `${__dirname}/../coverage`,
+    coverageDir: `../../coverage`,
     ignorePatterns: ['**/node_modules/**'],
-    sourcePath: `${__dirname}/../src`,
+    sourcePath: `../src`,
   };
 }
 

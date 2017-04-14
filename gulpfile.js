@@ -13,13 +13,13 @@ function runTests () {
     }))
 }
 
-gulp.task('compile', function () {
+gulp.task('compile', () => {
   return tsProject.src()
     .pipe(tsProject())
     .js.pipe(gulp.dest('out'))
 })
 
-gulp.task('pre-test', ['compile'], function () {
+gulp.task('pre-test', ['compile'], () => {
   // This tells gulp which files you want to pipe
   // In our case we want to pipe every `.js` file inside any folders inside `test`
   return gulp.src('./out/**/*.js')
@@ -28,19 +28,28 @@ gulp.task('pre-test', ['compile'], function () {
     .pipe(istanbul.hookRequire())
 })
 
-gulp.task('test', ['compile'], function () {
+gulp.task('test', ['compile'], () => {
   runTests()
 })
 
-gulp.task('coverage', ['pre-test'], function () {
+gulp.task('coverage', ['pre-test'], () => {
   runTests()
     // Here we will create report files using the test's results
     .pipe(istanbul.writeReports())
 })
 
-gulp.task('watch', function () {
+gulp.task('watch', () => {
   gulp.watch('./src/**/*.ts', ['compile'])
   gulp.watch('./test/**/*.ts', ['compile'])
 })
 
-gulp.task('default', ['watch', 'coverage'])
+gulp.task('default', ['pre-run:vscode', 'watch', 'coverage'])
+
+gulp.task('pre-coverage:vscode', ['compile'], () => {
+  require('fs').writeFileSync(`${__dirname}/coverage.enabled`, 'true')
+})
+
+gulp.task('pre-run:vscode', ['compile'], () => {
+  const fs = require('fs')
+  if (fs.existsSync(`${__dirname}/coverage.enabled`)) fs.unlinkSync(`${__dirname}/coverage.enabled`)
+})

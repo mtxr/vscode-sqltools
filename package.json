@@ -110,10 +110,8 @@
     "test:coverage": "gulp coverage"
   },
   "devDependencies": {
-    "@types/chai": "^3.4.35",
-    "@types/mocha": "^2.3.3",
-    "@types/node": "^7.0.12",
     "chai": "^3.5.0",
+    "decache": "^4.1.0",
     "gulp": "^3.9.1",
     "gulp-istanbul": "^1.1.1",
     "gulp-mocha": "^3.0.1",
@@ -123,6 +121,7 @@
     "remap-istanbul": "^0.6.4",
     "semver": "^5.3.0",
     "sinon": "^1.17.7",
+    "source-map-support": "^0.4.14",
     "ts-node": "^2.1.0",
     "typescript": "^2.0.3",
     "vscode": "^1.0.0"
