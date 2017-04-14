@@ -3,42 +3,36 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "type": "node",
+            "type": "extensionHost",
             "request": "launch",
-            "name": "Coverage",
-            "runtimeExecutable": "npm",
-            "windows": {
-                "runtimeExecutable": "npm.cmd"
-            },
-            "runtimeArgs": [
-                "run",
-                "test:coverage"
-            ],
-            "timeout": 1000000,
-            "port": 5858,
-            "cwd": "${workspaceRoot}"
+            "name": "Launch Coverage Tests",
+            "runtimeExecutable": "${execPath}",
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+            "sourceMaps": true,
+            "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
+            "preLaunchTask": "compile"
         },
         {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}" ],
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
             "stopOnEntry": false,
             "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/out/src/**/*.js" ],
-            "preLaunchTask": "npm"
+            "outFiles": ["${workspaceRoot}/out/src/**/*.js"],
+            "preLaunchTask": "compile"
         },
         {
             "name": "Launch Tests",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test" ],
+            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/test/**/*.ts"],
-            "preLaunchTask": "npm"
+            "preLaunchTask": "compile"
         }
     ]
 }
