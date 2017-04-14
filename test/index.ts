@@ -10,6 +10,7 @@ const mochaConfig: any = { ui: 'bdd', useColors: true, reporter: 'spec' };
 let coverageConfig: any;
 
 if (fs.existsSync(`${__dirname}/../../coverage.enabled`)) {
+  fs.unlinkSync(`${__dirname}/../../coverage.enabled`);
   coverageConfig = {
     coverageDir: `../../coverage`,
     ignorePatterns: ['**/node_modules/**'],
