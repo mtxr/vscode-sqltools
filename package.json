@@ -106,8 +106,8 @@
     "vscode:prepublish": "gulp",
     "compile": "gulp watch",
     "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "node ./node_modules/vscode/bin/test",
-    "test:coverage": "gulp coverage"
+    "test": "gulp compile && node ./node_modules/vscode/bin/test",
+    "test:coverage": "gulp pre-coverage:vscode && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
     "chai": "^3.5.0",

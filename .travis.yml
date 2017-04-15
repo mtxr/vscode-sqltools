@@ -16,4 +16,4 @@ install:
   - npm run vscode:prepublish
 
 script:
-  - npm test
+  - npm run test:coverage

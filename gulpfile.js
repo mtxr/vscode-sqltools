@@ -1,18 +1,18 @@
 const gulp = require('gulp')
-const mocha = require('gulp-mocha')
-const istanbul = require('gulp-istanbul')
+// const mocha = require('gulp-mocha')
+// const istanbul = require('gulp-istanbul')
 const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 
-function runTests () {
-  // Here we're piping our `.js` files inside the `test` folder
-  return gulp.src(['./out/test/**/*.test.js'])
-    // You can change the reporter if you want, try using `nyan`
-    .pipe(mocha({
-      reporter: 'spec'
-    }))
-}
+// function runTests () {
+//   // Here we're piping our `.js` files inside the `test` folder
+//   return gulp.src(['./out/test/**/*.test.js'])
+//     // You can change the reporter if you want, try using `nyan`
+//     .pipe(mocha({
+//       reporter: 'spec'
+//     }))
+// }
 
 gulp.task('compile', () => {
   return tsProject.src()
@@ -20,7 +20,7 @@ gulp.task('compile', () => {
     .pipe(tsProject())
     .js
     .pipe(sourcemaps.write('.', {
-      sourceRoot: function (file) { return file.cwd + '/src'; }
+      sourceRoot: function (file) { return file.cwd + '/src' }
     }))
     .pipe(gulp.dest('out'))
 })
@@ -34,9 +34,9 @@ gulp.task('compile', () => {
 //     .pipe(istanbul.hookRequire())
 // })
 
-gulp.task('test', ['compile'], () => {
-  runTests()
-})
+// gulp.task('test', ['compile'], () => {
+//   runTests()
+// })
 
 // gulp.task('coverage', ['pre-test'], () => {
 //   runTests()
