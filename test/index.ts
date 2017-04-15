@@ -6,7 +6,7 @@ import * as fs from 'fs';
 import * as TestRunner from './test-runner';
 
 const testRunner = TestRunner;
-const mochaConfig: any = { ui: 'bdd', useColors: true, reporter: 'spec' };
+const mochaConfig: any = { ui: 'bdd', useColors: true, reporter: 'spec', compilers: 'ts:ts-node/register' };
 let coverageConfig: any;
 
 if (fs.existsSync(`${__dirname}/../../coverage.enabled`)) {

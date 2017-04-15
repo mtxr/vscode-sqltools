@@ -2,6 +2,7 @@ const gulp = require('gulp')
 const mocha = require('gulp-mocha')
 const istanbul = require('gulp-istanbul')
 const ts = require('gulp-typescript')
+const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 
 function runTests () {
@@ -15,8 +16,13 @@ function runTests () {
 
 gulp.task('compile', () => {
   return tsProject.src()
+    .pipe(sourcemaps.init())
     .pipe(tsProject())
-    .js.pipe(gulp.dest('out'))
+    .js
+    .pipe(sourcemaps.write('.', {
+      sourceRoot: function (file) { return file.cwd + '/src'; }
+    }))
+    .pipe(gulp.dest('out'))
 })
 
 gulp.task('pre-test', ['compile'], () => {

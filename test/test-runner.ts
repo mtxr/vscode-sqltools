@@ -8,9 +8,9 @@ import * as glob from 'glob';
 import istanbul = require('istanbul');
 import Mocha = require('mocha');
 import * as paths from 'path';
-import * as remapIstanbul from 'remap-istanbul';
 // import * as SMSupport from 'source-map-support';
 
+const remapIstanbul = require('remap-istanbul');
 const tty = require('tty');
 
 /* tty setup from vscode-mssql */
@@ -194,9 +194,7 @@ class CoverageRunner {
       warn: (warning) => {
         // We expect some warnings as any JS file without a typescript mapping will cause this.
         // By default, we'll skip printing these to the console as it clutters it up
-        if (this.options.verbose) {
-          console.warn(warning);
-        }
+        console.warn(warning);
       },
     });
 
