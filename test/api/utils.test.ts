@@ -2,6 +2,8 @@
 // tslint:disable:no-reference
 /// <reference path="../../node_modules/@types/mocha/index.d.ts" />
 /// <reference path="../../node_modules/@types/chai/index.d.ts" />
+/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+
 
 import { expect } from 'chai';
 import * as vscode from 'vscode';
@@ -56,5 +58,28 @@ describe('API Utils', () => {
 
       expect(Utils.getHome).to.throw();
     });
+  });
+
+  describe('formatSql()', () => {
+    it('Should format query properly',  () => {
+      let query = 'SELECT * FROM A WHERE colname = \'value\';';
+      let expected = 'SELECT\n' +
+        '  *\n' +
+        'FROM\n' +
+        '  A\n' +
+        'WHERE\n' +
+        '  colname = \'value\';\n';
+      expect(Utils.formatSql(query)).to.be.eqls(expected);
+
+      query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
+      expected = 'SELECT\n' +
+        '  *\n' +
+        'FROM\n' +
+        '  [A]\n' +
+        'WHERE\n' +
+        '  [colname] = N\'value\';\n';
+      expect(Utils.formatSql(query)).to.be.eqls(expected);
+
+    })
   });
 });

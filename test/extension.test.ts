@@ -1,22 +1,32 @@
-// //
-// // Note: This example test is leveraging the Mocha test framework.
-// // Please refer to their documentation on https://mochajs.org/ for help.
-// //
+// tslint:disable:no-unused-expression
+// tslint:disable:no-reference
+/// <reference path="./../node_modules/@types/node/index.d.ts" />
 
-// // The module 'assert' provides assertion methods from node
-// import * as assert from 'assert';
+/// <reference path="../node_modules/@types/mocha/index.d.ts" />
+/// <reference path="../node_modules/@types/chai/index.d.ts" />
 
-// // You can import and use all API from the 'vscode' module
-// // as well as import your extension to test it
-// import * as vscode from 'vscode';
-// import * as myExtension from '../src/extension';
+import { expect } from 'chai';
+import { commands as VSCode, ExtensionContext } from 'vscode';
+import Constants from './../src/constants';
+import { ST } from './../src/sqltools-commands';
 
-// // Defines a Mocha test suite to group tests of similar kind together
-// suite("Extension Tests", () => {
-
-//     // Defines a Mocha unit test
-//     test("Something 1", () => {
-//         assert.equal(-1, [1, 2, 3].indexOf(5));
-//         assert.equal(-1, [1, 2, 3].indexOf(0));
-//     });
-// });
+describe('Check exported commands', () => {
+  it('Check all commands was exported', (done) => {
+    VSCode.getCommands(true)
+      .then((commands) => {
+        commands = commands.filter((cmd) => cmd.indexOf(Constants.extNamespace) === 0);
+        Object.keys(ST.textEditor).forEach((cmd) => {
+          const index = commands.indexOf(`${Constants.extNamespace}.${cmd}`);
+          expect(index >= 0).to.be.true;
+          commands.splice(index, 1);
+        });
+        Object.keys(ST.workspace).forEach((cmd) => {
+          const index = commands.indexOf(`${Constants.extNamespace}.${cmd}`);
+          expect(index >= 0).to.be.true;
+          commands.splice(index, 1);
+        });
+        expect(commands.length).to.be.eql(0);
+        done();
+      });
+  });
+});

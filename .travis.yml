@@ -1,10 +1,17 @@
 sudo: false
+language: node_js
+node_js:
+  - "6"
+  - "7"
 
 os:
   - osx
   - linux
 
 before_install:
+  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
+  - sudo apt-get update -y
+  - sudo apt-get install libstdc++6-4.7-dev -y
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
@@ -15,5 +22,7 @@ install:
   - npm install
   - npm run vscode:prepublish
 
+before_script:
+  - npm install -g gulp
 script:
-  - npm test --silent
+  - npm run test-coverage --silent

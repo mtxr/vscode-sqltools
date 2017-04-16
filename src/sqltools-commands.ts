@@ -1,3 +1,6 @@
+// tslint:disable:no-reference
+/// <reference path="./../node_modules/@types/node/index.d.ts" />
+
 import * as Path from 'path';
 import {
   commands as VsCommands,
@@ -26,7 +29,7 @@ const logger = Logger.instance(output)
 
 const bookmarks: BookmarksStorage = new BookmarksStorage();
 
-function formatSql(editor: TextEditor, edit: TextEditorEdit): any {
+function formatSql(editor: TextEditor, edit: TextEditorEdit): void {
   try {
     edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
     VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
@@ -151,17 +154,28 @@ function errorHandler(message) {
 }
 
 export const ST = {
-  formatSql,
-  selectConnection,
-  showRecords,
-  describeTable,
-  describeFunction,
-  executeQuery,
-  aboutVersion,
-  showHistory,
-  bookmarkSelection,
-  deleteBookmark,
-  clearBookmarks,
-  editBookmark,
-  showOutputChannel,
+  /**
+   * TextEditor commands
+   */
+  textEditor: {
+    formatSql,
+    executeQuery,
+    bookmarkSelection,
+
+  },
+  /**
+   * General commands
+   */
+  workspace: {
+    selectConnection,
+    showRecords,
+    describeTable,
+    describeFunction,
+    aboutVersion,
+    showHistory,
+    deleteBookmark,
+    clearBookmarks,
+    editBookmark,
+    showOutputChannel,
+  },
 };

@@ -4,15 +4,20 @@ import { expect } from 'chai';
 import * as semver from 'semver';
 import * as vscode from 'vscode';
 import Constants from '../src/constants';
-const mustExportProps = ['bufferName', 'version', 'extensionNamespace'];
+const mustExportProps = [
+  'version',
+  'extNamespace',
+  'outputChannelName',
+  'bufferName',
+];
 
 describe('Constants Tests', () => {
-  it(`Should export ${mustExportProps.join(', ')}`, () => {
+  it(`Should have prop ${mustExportProps.join(', ')}`, () => {
     mustExportProps.forEach((prop) => {
       expect(Constants).to.have.property(prop).and.to.be.a('string');
     });
   });
-  it('Should export valid version', () => {
+  it('Should have a valid version', () => {
     expect(semver.valid(Constants.version)).to.be.not.null;
     expect(semver.valid(Constants.version)).to.be.a('string');
   });
