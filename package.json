@@ -110,6 +110,7 @@
     "test-coverage": "gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test"
   },
   "devDependencies": {
+    "@types/node": "^7.0.12",
     "chai": "^3.5.0",
     "decache": "^4.1.0",
     "gulp": "^3.9.1",

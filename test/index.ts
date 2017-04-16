@@ -1,4 +1,6 @@
 // tslint:disable:no-console
+// tslint:disable:no-reference
+/// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 'use strict';
 
