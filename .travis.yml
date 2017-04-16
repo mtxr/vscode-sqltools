@@ -1,8 +1,9 @@
 sudo: false
-
+language: node_js
 os:
   - osx
   - linux
+
 
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
@@ -15,5 +16,7 @@ install:
   - npm install
   - npm run vscode:prepublish
 
+before_script:
+  - npm install -g gulp
 script:
   - npm run test:coverage --silent
