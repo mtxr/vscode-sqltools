@@ -1,6 +1,6 @@
 export default class EnvironmentException extends Error {
   public name = 'EnvironmentError';
-  constructor(public message: string) {
+  constructor(message: string = null) {
     super(message || 'Could not retrived env vars');
   }
 }
