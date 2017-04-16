@@ -1,4 +1,6 @@
-# SQLTools
+# SQLTools for VSCode
+
+[![Build Status](https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master)](https://travis-ci.org/mtxr/vscode-sqltools)
 
 [https://github.com/mtxr/vscode-sqltools](https://github.com/mtxr/vscode-sqltools)
 
@@ -10,7 +12,6 @@
 
 
 ## Known Issues
-
 
 
 ## Release Notes
