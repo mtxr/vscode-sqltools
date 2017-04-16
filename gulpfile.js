@@ -49,13 +49,13 @@ gulp.task('watch', () => {
   gulp.watch('./test/**/*.ts', ['compile'])
 })
 
-gulp.task('default', ['pre-run:vscode', 'watch', 'coverage'])
+gulp.task('default', ['pre-run-vscode', 'watch'])
 
-gulp.task('pre-coverage:vscode', ['compile'], () => {
+gulp.task('pre-coverage-vscode', ['compile'], () => {
   require('fs').writeFileSync(`${__dirname}/coverage.enabled`, 'true')
 })
 
-gulp.task('pre-run:vscode', ['compile'], () => {
+gulp.task('pre-run-vscode', ['compile'], () => {
   const fs = require('fs')
   if (fs.existsSync(`${__dirname}/coverage.enabled`)) fs.unlinkSync(`${__dirname}/coverage.enabled`)
 })
