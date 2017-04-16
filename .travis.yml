@@ -1,5 +1,13 @@
 sudo: false
 language: node_js
+
+addons:
+  apt:
+    sources:
+      - sourceline: 'ppa:ubuntu-toolchain-r/test'
+    packages:
+      - libstdc++6-4.7-dev
+
 node_js:
   - "6"
   - "7"
@@ -9,9 +17,6 @@ os:
   - linux
 
 before_install:
-  - sudo add-apt-repository ppa:ubuntu-toolchain-r/test -y
-  - sudo apt-get update -y
-  - sudo apt-get install libstdc++6-4.7-dev -y
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
