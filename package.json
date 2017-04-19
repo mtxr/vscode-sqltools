@@ -1,174 +1,174 @@
 {
-  "name": "sqltools",
-  "displayName": "SQLTools",
-  "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-  "version": "0.1.4",
-  "publisher": "mtxr",
-  "repository": {
-    "url": "https://github.com/mtxr/vscode-sqltools",
-    "type": "git"
-  },
-  "engines": {
-    "vscode": "^1.10.0"
-  },
-  "categories": [
-    "Languages",
-    "Snippets",
-    "Formatters",
-    "Other"
-  ],
-  "keywords": [
-    "SQLTools",
-    "SQL",
-    "sgdb",
-    "formatter"
-  ],
-  "galleryBanner": {
-    "theme": "dark",
-    "color": "#333333"
-  },
-  "icon": "static/icon.png",
-  "badges": [
-    {
-      "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
-      "href": "https://travis-ci.org/mtxr/vscode-sqltools",
-      "description": "Build Status"
+    "name": "sqltools",
+    "displayName": "SQLTools",
+    "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
+    "version": "0.1.5",
+    "publisher": "mtxr",
+    "repository": {
+        "url": "https://github.com/mtxr/vscode-sqltools",
+        "type": "git"
     },
-    {
-      "description": "Codacy Badge",
-      "url": "https://api.codacy.com/project/badge/Grade/5d888832ec9645f3bdd1214fefcb88e2",
-      "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mtxr/vscode-sqltools&amp;utm_campaign=Badge_Grade"
+    "engines": {
+        "vscode": "^1.10.0"
     },
-    {
-      "description": "Codacy Badge",
-      "url": "https://api.codacy.com/project/badge/Coverage/5d888832ec9645f3bdd1214fefcb88e2",
-      "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&utm_medium=referral&utm_content=mtxr/vscode-sqltools&utm_campaign=Badge_Coverage"
-    }
-  ],
-  "activationEvents": [
-    "*",
-    "onLanguage:sql"
-  ],
-  "main": "./out/src/extension",
-  "contributes": {
-    "commands": [
-      {
-        "command": "SQLTools.formatSql",
-        "title": "SQLTools: Format SQL"
-      },
-      {
-        "command": "SQLTools.bookmarkSelection",
-        "title": "SQLTools: Bookmark selection"
-      },
-      {
-        "command": "SQLTools.deleteBookmark",
-        "title": "SQLTools: Delete a bookmark"
-      },
-      {
-        "command": "SQLTools.clearBookmarks",
-        "title": "SQLTools: Delete all bookmarks"
-      },
-      {
-        "command": "SQLTools.editBookmark",
-        "title": "SQLTools: Edit a bookmarked"
-      },
-      {
-        "command": "SQLTools.showOutputChannel",
-        "title": "SQLTools: Show output channel (Logs)"
-      },
-      {
-        "command": "SQLTools.aboutVersion",
-        "title": "SQLTools: Version"
-      }
+    "categories": [
+        "Languages",
+        "Snippets",
+        "Formatters",
+        "Other"
     ],
-    "keybindings": [
-      {
-        "command": "SQLTools.formatSql",
-        "key": "ctrl+e ctrl+b",
-        "mac": "cmd+e cmd+b",
-        "when": "editorTextFocus && !editorReadonly"
-      }
+    "keywords": [
+        "SQLTools",
+        "SQL",
+        "sgdb",
+        "formatter"
     ],
-    "configuration": {
-      "type": "object",
-      "title": "SQLTools Settings",
-      "properties": {
-        "sqltools.logging": {
-          "type": "boolean",
-          "default": true,
-          "description": "Show debugging messages on console."
+    "galleryBanner": {
+        "theme": "dark",
+        "color": "#333333"
+    },
+    "icon": "static/icon.png",
+    "badges": [
+        {
+            "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
+            "href": "https://travis-ci.org/mtxr/vscode-sqltools",
+            "description": "Build Status"
         },
-        "sqltools.log_level": {
-          "type": "string",
-          "enum": [
-            "DEBUG",
-            "INFO",
-            "WARN",
-            "ERROR"
-          ],
-          "default": "DEBUG",
-          "description": "Show debugging messages on console."
+        {
+            "description": "Codacy Badge",
+            "url": "https://api.codacy.com/project/badge/Grade/5d888832ec9645f3bdd1214fefcb88e2",
+            "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mtxr/vscode-sqltools&amp;utm_campaign=Badge_Grade"
         },
-        "sqltools.query_timeout": {
-          "type": "number",
-          "default": 300000,
-          "decription": "Timeout in seconds for killing query process after the timeout."
-        },
-        "sqltools.history_size": {
-          "type": "number",
-          "default": 100,
-          "decription": "Number of queries to keep on History."
-        },
-        "sqltools.show_result_on_tab": {
-          "type": "boolean",
-          "default": false,
-          "decription": "Show results using new tab."
-        },
-        "sqltools.clear_output": {
-          "type": "boolean",
-          "default": false,
-          "decription": "Clear output for new commands."
-        },
-        "sqltools.connections": {
-          "type": "array",
-          "default": []
+        {
+            "description": "Codacy Badge",
+            "url": "https://api.codacy.com/project/badge/Coverage/5d888832ec9645f3bdd1214fefcb88e2",
+            "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&utm_medium=referral&utm_content=mtxr/vscode-sqltools&utm_campaign=Badge_Coverage"
         }
-      }
+    ],
+    "activationEvents": [
+        "*",
+        "onLanguage:sql"
+    ],
+    "main": "./out/src/extension",
+    "contributes": {
+        "commands": [
+            {
+                "command": "SQLTools.formatSql",
+                "title": "SQLTools: Format SQL"
+            },
+            {
+                "command": "SQLTools.bookmarkSelection",
+                "title": "SQLTools: Bookmark selection"
+            },
+            {
+                "command": "SQLTools.deleteBookmark",
+                "title": "SQLTools: Delete a bookmark"
+            },
+            {
+                "command": "SQLTools.clearBookmarks",
+                "title": "SQLTools: Delete all bookmarks"
+            },
+            {
+                "command": "SQLTools.editBookmark",
+                "title": "SQLTools: Edit a bookmarked"
+            },
+            {
+                "command": "SQLTools.showOutputChannel",
+                "title": "SQLTools: Show output channel (Logs)"
+            },
+            {
+                "command": "SQLTools.aboutVersion",
+                "title": "SQLTools: Version"
+            }
+        ],
+        "keybindings": [
+            {
+                "command": "SQLTools.formatSql",
+                "key": "ctrl+e ctrl+b",
+                "mac": "cmd+e cmd+b",
+                "when": "editorTextFocus && !editorReadonly"
+            }
+        ],
+        "configuration": {
+            "type": "object",
+            "title": "SQLTools Settings",
+            "properties": {
+                "sqltools.logging": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show debugging messages on console."
+                },
+                "sqltools.log_level": {
+                    "type": "string",
+                    "enum": [
+                        "DEBUG",
+                        "INFO",
+                        "WARN",
+                        "ERROR"
+                    ],
+                    "default": "DEBUG",
+                    "description": "Show debugging messages on console."
+                },
+                "sqltools.query_timeout": {
+                    "type": "number",
+                    "default": 300000,
+                    "decription": "Timeout in seconds for killing query process after the timeout."
+                },
+                "sqltools.history_size": {
+                    "type": "number",
+                    "default": 100,
+                    "decription": "Number of queries to keep on History."
+                },
+                "sqltools.show_result_on_tab": {
+                    "type": "boolean",
+                    "default": false,
+                    "decription": "Show results using new tab."
+                },
+                "sqltools.clear_output": {
+                    "type": "boolean",
+                    "default": false,
+                    "decription": "Clear output for new commands."
+                },
+                "sqltools.connections": {
+                    "type": "array",
+                    "default": []
+                }
+            }
+        }
+    },
+    "scripts": {
+        "vscode:prepublish": "gulp compile",
+        "compile": "gulp watch",
+        "postinstall": "node ./node_modules/vscode/bin/install",
+        "test": "gulp compile && node ./node_modules/vscode/bin/test",
+        "test-coverage": "gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test && npm run codacy",
+        "codacy": "cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript"
+    },
+    "devDependencies": {
+        "@types/chai": "^3.5.0",
+        "@types/mocha": "^2.2.40",
+        "@types/node": "^7.0.12",
+        "chai": "^3.5.0",
+        "codacy-coverage": "^2.0.1",
+        "decache": "^4.1.0",
+        "gulp": "^3.9.1",
+        "gulp-codacy": "^1.0.0",
+        "gulp-istanbul": "^1.1.1",
+        "gulp-mocha": "^3.0.1",
+        "gulp-sourcemaps": "^2.6.0",
+        "gulp-typescript": "^3.1.6",
+        "gulp-watch": "^4.3.11",
+        "istanbul": "^0.4.5",
+        "remap-istanbul": "^0.6.4",
+        "semver": "^5.3.0",
+        "sinon": "^1.17.7",
+        "source-map-support": "^0.4.14",
+        "ts-node": "^2.1.0",
+        "typescript": "^2.0.3",
+        "vscode": "^1.0.0"
+    },
+    "dependencies": {
+        "jsonc-parser": "^0.4.1",
+        "sql-formatter-sqltools": "^1.2.0"
     }
-  },
-  "scripts": {
-    "vscode:prepublish": "gulp compile",
-    "compile": "gulp watch",
-    "postinstall": "node ./node_modules/vscode/bin/install",
-    "test": "gulp compile && node ./node_modules/vscode/bin/test",
-    "test-coverage": "gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test && npm run codacy",
-    "codacy": "cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript"
-  },
-  "devDependencies": {
-    "@types/chai": "^3.5.0",
-    "@types/mocha": "^2.2.40",
-    "@types/node": "^7.0.12",
-    "chai": "^3.5.0",
-    "codacy-coverage": "^2.0.1",
-    "decache": "^4.1.0",
-    "gulp": "^3.9.1",
-    "gulp-codacy": "^1.0.0",
-    "gulp-istanbul": "^1.1.1",
-    "gulp-mocha": "^3.0.1",
-    "gulp-sourcemaps": "^2.6.0",
-    "gulp-typescript": "^3.1.6",
-    "gulp-watch": "^4.3.11",
-    "istanbul": "^0.4.5",
-    "remap-istanbul": "^0.6.4",
-    "semver": "^5.3.0",
-    "sinon": "^1.17.7",
-    "source-map-support": "^0.4.14",
-    "ts-node": "^2.1.0",
-    "typescript": "^2.0.3",
-    "vscode": "^1.0.0"
-  },
-  "dependencies": {
-    "jsonc-parser": "^0.4.1",
-    "sql-formatter-sqltools": "^1.2.0"
-  }
 }
