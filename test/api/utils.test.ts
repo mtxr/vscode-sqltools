@@ -4,7 +4,6 @@
 /// <reference path="../../node_modules/@types/chai/index.d.ts" />
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-
 import { expect } from 'chai';
 import * as vscode from 'vscode';
 import { Utils } from '../../src/api';
@@ -80,6 +79,6 @@ describe('API Utils', () => {
         '  [colname] = N\'value\';\n';
       expect(Utils.formatSql(query)).to.be.eqls(expected);
 
-    })
+    });
   });
 });
