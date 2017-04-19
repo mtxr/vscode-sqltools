@@ -12,22 +12,12 @@ export enum Levels {
 }
 
 export default class Logger implements LoggerInterface {
-  public static loggerInstance: Logger;
   public static levels = Levels;
-  public static instance(writer?: any): Logger {
-    if (!Logger.loggerInstance) {
-      Logger.loggerInstance = new Logger(writer);
-    }
-    return Logger.loggerInstance;
-  }
-
-  public packageName: string = '';
-  public packageVersion: string = '';
   public logging: boolean = false;
   public level: Levels = Levels.DEBUG;
   private writer: any;
 
-  private constructor(writer?: any) {
+  public constructor(writer?: any) {
     if (!writer) {
       throw new Error('Logger writer not provided.');
     }
@@ -49,20 +39,6 @@ export default class Logger implements LoggerInterface {
   public isLogging(): boolean {
     return this.logging;
   }
-  public setPackageName(param: string): this {
-    this.packageName = param;
-    return this;
-  }
-  public getPackageName(): string {
-    return this.packageName;
-  }
-  public setPackageVersion(param: string) {
-    this.packageVersion = param;
-    return this;
-  }
-  public getPackageVersion(): string {
-    return this.packageVersion;
-  }
   public debug(message: string, ...data: any[]): this {
     return this.emitMessage('debug', message, ...data);
   }
@@ -76,8 +52,7 @@ export default class Logger implements LoggerInterface {
     return this.emitMessage('warn', message, ...data);
   }
   private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]): this {
-
-    if (!this.isLogging || Levels[type.toUpperCase()] < this.level) {
+    if (!this.isLogging() || Levels[type.toUpperCase()] < this.level) {
       return this;
     }
     this.writer[type](message, ...data);

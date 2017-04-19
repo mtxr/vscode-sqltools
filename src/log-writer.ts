@@ -26,7 +26,7 @@ export default class Logwriter {
     this.output.show();
   }
   private writeLog(message: string, ...data: any[]) {
-    this.output.appendLine(`[${(new Date()).toLocaleString()}] ${message}`);
+    this.output.appendLine(`[${(new Date()).toLocaleString()}][${Constants.version}] ${message}`);
     if (data.length > 0) {
       this.output.appendLine(data.join('\n'));
     }
