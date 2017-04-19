@@ -10,7 +10,7 @@ import * as vscode from 'vscode';
 import { Logger } from '../../src/api';
 import LogWriter from './../../src/log-writer';
 
-describe.only('Logger', () => {
+describe('Logger', () => {
   it('should throws error if no writer provided', () => {
     expect(() => new Logger()).to.throws(Error);
   });
