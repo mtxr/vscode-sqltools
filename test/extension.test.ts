@@ -11,7 +11,7 @@ import Constants from './../src/constants';
 import { ST } from './../src/sqltools-commands';
 
 describe('Check exported commands', () => {
-  it('Check all commands was exported', (done) => {
+  it('Check all commands were exported', (done) => {
     VSCode.getCommands(true)
       .then((commands) => {
         commands = commands.filter((cmd) => cmd.indexOf(Constants.extNamespace) === 0);

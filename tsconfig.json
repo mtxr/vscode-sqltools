@@ -4,7 +4,6 @@
         "target": "es6",
         "outDir": "out",
         "sourceMap": true,
-        // "inlineSourceMap": true,
         "lib": [
             "es6"
         ],

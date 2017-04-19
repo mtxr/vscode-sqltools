@@ -29,8 +29,7 @@ export default class Logger implements LoggerInterface {
 
   private constructor(writer?: any) {
     if (!writer) {
-      writer = console;
-      writer.debug('Using console for logging. Logs will appear on \'OUTPUT\' tab.');
+      throw new Error('Logger writer not provided.');
     }
     this.writer = writer;
   }

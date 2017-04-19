@@ -15,6 +15,7 @@ const tsProject = ts.createProject('tsconfig.json')
 // }
 
 gulp.task('compile', () => {
+  gulp.src('./package.json').pipe(gulp.dest('out'))
   return tsProject.src()
     .pipe(sourcemaps.init())
     .pipe(tsProject())
@@ -45,8 +46,11 @@ gulp.task('compile', () => {
 // })
 
 gulp.task('watch', () => {
-  gulp.watch('./src/**/*.ts', ['compile'])
-  gulp.watch('./test/**/*.ts', ['compile'])
+  gulp.watch([
+    './src/**/*.ts',
+    './test/**/*.ts',
+    './package.json'
+  ], ['compile'])
 })
 
 gulp.task('default', ['pre-run-vscode', 'watch'])
