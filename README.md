@@ -1,7 +1,7 @@
 # SQLTools for VSCode
 
 [![Build Status](https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master)](https://travis-ci.org/mtxr/vscode-sqltools)
-
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/5d888832ec9645f3bdd1214fefcb88e2)](https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mtxr/vscode-sqltools&amp;utm_campaign=Badge_Grade)
 
 Your swiss knife SQL for VSCode.
 
