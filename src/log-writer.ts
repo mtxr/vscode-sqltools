@@ -25,8 +25,12 @@ export default class Logwriter {
   public showOutput() {
     this.output.show();
   }
+  public getOutputChannel(): vscode.OutputChannel {
+    return this.output;
+  }
+
   private writeLog(message: string, ...data: any[]) {
-    this.output.appendLine(`[${(new Date()).toLocaleString()}] ${message}`);
+    this.output.appendLine(`[${(new Date()).toLocaleString()}][${Constants.version}] ${message}`);
     if (data.length > 0) {
       this.output.appendLine(data.join('\n'));
     }

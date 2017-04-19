@@ -21,9 +21,7 @@ import LogWriter from './log-writer';
 
 const output = new LogWriter();
 const config: WorkspaceConfiguration = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
-const logger = Logger.instance(output)
-  .setPackageName(Constants.extNamespace)
-  .setPackageVersion(Constants.version)
+const logger = (new Logger(output))
   .setLevel(Logger.levels[config.get('log_level', 'DEBUG')])
   .setLogging(config.get('logging', false));
 

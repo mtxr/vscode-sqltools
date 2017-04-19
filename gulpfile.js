@@ -4,6 +4,15 @@ const gulp = require('gulp')
 const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
+const codacy = require('gulp-codacy')
+
+gulp.task('codacy', function codacyTask () {
+  return gulp
+    .src(['./coverage/lcov.info'], { read: false })
+    .pipe(codacy({
+      token: process.env.CODACY_PROJECT_TOKEN
+    }))
+})
 
 // function runTests () {
 //   // Here we're piping our `.js` files inside the `test` folder
