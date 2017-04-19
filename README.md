@@ -3,7 +3,7 @@
 [![Build Status](https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master)](https://travis-ci.org/mtxr/vscode-sqltools)
 
 
-Your swiss knife SQL for VSCode. 
+Your swiss knife SQL for VSCode.
 
 Project website: [https://github.com/mtxr/vscode-sqltools](https://github.com/mtxr/vscode-sqltools)
 
