@@ -10,7 +10,7 @@
             "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
-            "preLaunchTask": "pre-coverage:vscode"
+            "preLaunchTask": "pre-coverage-vscode"
         },
         {
             "name": "Launch Extension",
@@ -21,7 +21,7 @@
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/src/**/*.js"],
-            "preLaunchTask": "pre-run:vscode"
+            "preLaunchTask": "pre-run-vscode"
         },
         {
             "name": "Launch Tests",
