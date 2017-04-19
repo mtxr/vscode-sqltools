@@ -10,7 +10,7 @@ export default class History {
 
   public add(query: string) {
     if (this.getSize() >= this.getMaxSize()) {
-      this.items.shift();
+      this.items.length = this.maxSize - 1;
     }
 
     this.items.push(query);
