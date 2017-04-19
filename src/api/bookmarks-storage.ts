@@ -2,7 +2,6 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
 import * as fs from 'fs';
-import * as jsonc from 'jsonc-parser';
 import * as path from 'path';
 import BaseStorage from './base-storage';
 import { NotFoundException } from './exception';

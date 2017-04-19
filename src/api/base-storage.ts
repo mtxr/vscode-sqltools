@@ -13,28 +13,20 @@ export default class BaseStorage implements StorageInterface {
     this.defaultSerializable = JSON.stringify(defaultSerializable);
     this.storagePath = storagePath;
     this.items = defaultSerializable;
-    fs.stat(this.storagePath, (err, stats) => {
-      if (err === null) {
-        this.readFile();
-      } else if (err.code === 'ENOENT') {
-        this.save();
-      } else if (err) {
-        throw err;
-      }
-    });
+    this.readFile();
   }
 
   public readFile(): this {
-    fs.readFile(this.storagePath, this.encoding, (err, content) => {
-      if (err) {
-        throw err;
-      }
+    try {
+      const content = fs.readFileSync(this.storagePath, this.encoding);
       if (content && content.length > 0) {
         this.items = JSON.parse(content);
-        return;
+      } else {
+        this.clear().save();
       }
+    } catch (e) {
       this.clear().save();
-    });
+    }
     return this;
   }
 
@@ -45,11 +37,7 @@ export default class BaseStorage implements StorageInterface {
     return this.writeFile();
   }
   public writeFile(): this {
-    fs.writeFile(this.storagePath, this.serializeContent(), (err) => {
-      if (err) {
-        throw err;
-      }
-    });
+    fs.writeFileSync(this.storagePath, this.serializeContent());
     return this;
   }
 

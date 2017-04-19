@@ -30,13 +30,6 @@ describe('History', () => {
     expect(history.getSize()).to.be.eql(1);
   });
 
-  it('should add and get size correctly', () => {
-    const history = new History(10);
-    expect(history.getSize()).to.be.eql(0);
-    history.add('Query');
-    expect(history.getSize()).to.be.eql(1);
-  });
-
   it('should return all items', () => {
     const history = new History(10);
     history.add('Query');
