@@ -12,6 +12,7 @@
     "comment-format": [ true, "check-space", { "ignore-words": [ "TODO", "HACK" ] } ],
     "curly": false,
     "indent": [ true, "spaces" ],
+    "only-arrow-functions": [ "allow-declarations" ],
     "interface-name": [ false ],
     "linebreak-style": [ true, "LF" ],
     "quotemark": [ true, "single", "jsx-double" ]

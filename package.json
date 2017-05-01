@@ -61,6 +61,10 @@
                 "title": "SQLTools: Bookmark selection"
             },
             {
+                "command": "SQLTools.selectConnection",
+                "title": "SQLTools: Select conection"
+            },
+            {
                 "command": "SQLTools.deleteBookmark",
                 "title": "SQLTools: Delete a bookmark"
             },
@@ -131,7 +135,60 @@
                 },
                 "sqltools.connections": {
                     "type": "array",
-                    "default": []
+                    "title": "Connections",
+                    "default": [],
+                    "items": {
+                        "type": "object",
+                        "properties": {
+                            "name": {
+                                "type": ["string", "null"],
+                                "description": "Connection name"
+                            },
+                            "server": {
+                                "type": "string",
+                                "description": "Server address",
+                                "default": "127.0.0.1"
+                            },
+                            "port": {
+                                "type": "number",
+                                "description": "Port for connection"
+                            },
+                            "database": {
+                                "type": "string",
+                                "description": "Database name"
+                            },
+                            "username": {
+                                "type": "string",
+                                "description": "Database username"
+                            },
+                            "password": {
+                                "type": "string",
+                                "description": "Connection password",
+                                "required": false
+                            },
+                            "passwordPath": {
+                                "type": "string",
+                                "description": "Path for you password file",
+                                "required": false
+                            },
+                            "dialect": {
+                                "type": "string",
+                                "enum": [
+                                    "mssql",
+                                    "mysql",
+                                    "mariadb"
+                                ],
+                                "description": "Path for you password file",
+                                "required": false
+                            },
+                            "connectionTimeout": {
+                                "type": "number",
+                                "description": "Connection timeout in seconds",
+                                "required": false,
+                                "default": 15
+                            }
+                        }
+                    }
                 }
             }
         }
