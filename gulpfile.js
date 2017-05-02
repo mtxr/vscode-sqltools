@@ -24,15 +24,19 @@ gulp.task('codacy', function codacyTask () {
 // }
 
 gulp.task('compile', () => {
-  gulp.src('./package.json').pipe(gulp.dest('out'))
-  return tsProject.src()
+  const dest = './out'
+  gulp.src('./package.json').pipe(gulp.dest(dest))
+
+  const tsResult = tsProject.src()
     .pipe(sourcemaps.init())
     .pipe(tsProject())
-    .js
+
+  return tsResult.js
     .pipe(sourcemaps.write('.', {
-      sourceRoot: function (file) { return file.cwd + '/src' }
+      includeContent: false
+      // sourceRoot: (file) => { return file.cwd + '/src' }
     }))
-    .pipe(gulp.dest('out'))
+    .pipe(gulp.dest(dest))
 })
 
 // gulp.task('pre-test', ['compile'], () => {

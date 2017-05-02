@@ -1,3 +1,4 @@
+import { ConnectionCredentials } from './api/interface/connection-credentials';
 // tslint:disable:no-reference
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
@@ -14,17 +15,22 @@ import {
   StatusBarAlignment,
   StatusBarItem,
   TextDocument,
+  TextDocumentChangeEvent,
   TextEditor,
   TextEditorEdit,
+  TextEditorSelectionChangeEvent,
   Uri,
+  ViewColumn,
   window as Window,
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
 import { BookmarksStorage, Logger, Utils } from './api';
+import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import LogWriter from './log-writer';
+import OutputProvider from './output-provider';
 
 const {
   registerCommand,
@@ -45,9 +51,17 @@ export default class SQLTools {
   private outputLogs: LogWriter;
   private config: WorkspaceConfiguration;
   private connectionsManager: ConnectionManager;
+  private activeConnection: Connection;
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
+  private provider: OutputProvider;
+  private previewUri = Uri.parse('sqltools://results');
+
+  private set Connection(connection: Connection) {
+    this.activeConnection = connection;
+    this.updateStatusBar(this.activeConnection.credentials.name);
+  }
 
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
@@ -55,6 +69,8 @@ export default class SQLTools {
     this.setupLogger();
     this.registerCommands();
     this.registerStatusBar();
+    this.autoConnectIfActive();
+    this.registerProviders();
   }
 
   /**
@@ -160,38 +176,56 @@ export default class SQLTools {
    * Connection commands
    */
 
-  public selectConnection() {
+  public selectConnection(): Thenable<Connection> {
+    return this.showConnectionMenu().then((selection: QuickPickItem) => {
+      if (this.activeConnection) {
+        this.activeConnection.close();
+        this.updateStatusBar();
+      }
+      this.Connection = new Connection(this.connectionsManager.getConnection(selection.label));
+      return this.Connection;
+    });
+  }
+
+  public showConnectionMenu(): Thenable<QuickPickItem> {
     const options: QuickPickItem[] = [];
 
     this.connectionsManager.getConnections().forEach((connection) => {
-
       options.push({
         description: '',
         detail: `${connection.username}@${connection.server}:${connection.port}`,
         label: connection.name,
       });
     });
-    Window.showQuickPick(options).then((selection) => {
-      this.logger.info('', selection);
-    });
+    return Window.showQuickPick(options);
   }
-  /**
-   * TO-DO:
-   */
 
-  // tslint:disable-next-line:no-empty
-  public showConnectionMenu() { }
-
+  public showTableMenu(): Thenable<QuickPickItem> {
+    return this.activeConnection.getTables(true)
+      .then((tables) => {
+        const options: QuickPickItem[] = tables.map((table) => {
+          return { label: table } as QuickPickItem;
+        });
+        return Window.showQuickPick(options);
+      });
+  }
   // tslint:disable-next-line:no-empty
   public showRecords() { }
 
-  // tslint:disable-next-line:no-empty
-  public describeTable() { }
+  public describeTable(): void {
+    this.showTableMenu()
+    .then((selected) => {
+      this.activeConnection.describeTable(selected.label)
+      .then((description) => {
+        this.provider.setResults(description);
+        this.provider.update(this.previewUri);
+        return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.Two, 'SQLTools Results')
+          .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
+      });
+    });
+  }
   // tslint:disable-next-line:no-empty
   public describeFunction() { }
-
-  // tslint:disable-next-line:no-empty
-  public describepublic() { }
 
   // tslint:disable-next-line:no-empty
   public executeQuery() { }
@@ -202,6 +236,12 @@ export default class SQLTools {
   /**
    * Management functions
    */
+  private autoConnectIfActive() {
+    const defaultConnection: string = this.config.get('autoConnectTo', null);
+    if (defaultConnection) {
+      this.Connection = new Connection(this.connectionsManager.getConnection(defaultConnection));
+    }
+  }
   private loadConfigs() {
     this.config = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
     this.bookmarks = new BookmarksStorage();
@@ -234,12 +274,13 @@ export default class SQLTools {
 
   private registerCommand(command: string, registerFunction: Function) {
     this.logger.debug(`Registering command ${Constants.extNamespace}.${command}`);
-    const self = this;
     this.events.on(command, (...event) => {
-      self[command](...event);
+      this.logger.debug(`Event received: ${command}`, ...event);
+      this[command](...event);
     });
-    this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, function() {
-      self.events.emit(command, ...arguments);
+    this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
+      this.logger.debug(`Triggering command: ${command}`, ...args);
+      this.events.emit(command, ...args);
     }));
   }
 
@@ -258,8 +299,12 @@ export default class SQLTools {
     this.extDatabaseStatus.show();
   }
 
-  private updateStatusBar(databaseName: string) {
-    this.extDatabaseStatus.text = `$(database) ${databaseName}`;
+  private updateStatusBar(databaseName: string = null) {
+    if (databaseName) {
+      this.extDatabaseStatus.text = `$(database) ${databaseName}`;
+    } else {
+      this.extDatabaseStatus.text = '$(database) Connect to database';
+    }
   }
 
   private errorHandler(message: string, error?: Error) {
@@ -273,5 +318,45 @@ export default class SQLTools {
         }
         return res;
       });
+  }
+
+  private registerProviders() {
+    this.provider = new OutputProvider();
+    this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.provider));
+
+    // Workspace.onDidChangeTextDocument((e: TextDocumentChangeEvent) => {
+    //   if (e.document === Window.activeTextEditor.document) {
+    //     provider.update(this.previewUri);
+    //   }
+    // });
+
+    // Window.onDidChangeTextEditorSelection((e: TextEditorSelectionChangeEvent) => {
+    //   if (e.textEditor === Window.activeTextEditor) {
+    //     provider.update(this.previewUri);
+    //   }
+    // });
+
+    // const disposable = registerCommand('extension.showCssPropertyPreview', () => {
+    //   return VsCommands.executeCommand('vscode.previewHtml', previewUri, ViewColumn.Two, 'CSS Property Preview')
+    //   .then((success) => false, (reason) => {
+    //     Window.showErrorMessage(reason);
+    //   });
+    // });
+
+    // let highlight = Window.createTextEditorDecorationType({ backgroundColor: 'rgba(200,200,200,.35)' });
+
+    // vscode.commands.registerCommand('extension.revealCssRule', (uri: vscode.Uri,
+    // propStart: number, propEnd: number) => {
+
+    //   for (let editor of Window.visibleTextEditors) {
+    //     if (editor.document.uri.toString() === uri.toString()) {
+    //       let start = editor.document.positionAt(propStart);
+    //       let end = editor.document.positionAt(propEnd + 1);
+
+    //       editor.setDecorations(highlight, [new vscode.Range(start, end)]);
+    //       setTimeout(() => editor.setDecorations(highlight, []), 1500);
+    //     }
+    //   }
+    // });
   }
 }
