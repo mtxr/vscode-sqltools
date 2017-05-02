@@ -25,7 +25,7 @@ import {
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
-import { BookmarksStorage, Logger, Utils } from './api';
+import { BookmarksStorage, Logger, Utils, History } from './api';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
@@ -48,6 +48,7 @@ export default class SQLTools {
   private static instance: SQLTools = null;
   private logger: Logger;
   private bookmarks: BookmarksStorage;
+  private history: History;
   private outputLogs: LogWriter;
   private config: WorkspaceConfiguration;
   private connectionsManager: ConnectionManager;
@@ -217,25 +218,40 @@ export default class SQLTools {
     .then((selected) => {
       this.activeConnection.describeTable(selected.label)
       .then((description) => {
-        this.provider.setResults(description);
-        this.provider.update(this.previewUri);
-        return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.Two, 'SQLTools Results')
-          .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
+        this.printOutput(description);
       });
     });
   }
   // tslint:disable-next-line:no-empty
   public describeFunction() { }
 
-  // tslint:disable-next-line:no-empty
-  public executeQuery() { }
-
+  public executeQuery(editor: TextEditor, edit: TextEditorEdit): void {
+    const selectedQuery: string = editor.document.getText(editor.selection);
+    if (!selectedQuery || selectedQuery.length === 0) {
+      Window.showInformationMessage('You should select a query first.');
+      return;
+    }
+    this.activeConnection.query(selectedQuery)
+      .then((result) => {
+        this.history.add(selectedQuery);
+        this.printOutput(result);
+      })
+      .catch((error) => {
+        this.errorHandler('Error while running query.', error);
+      });
+  }
   // tslint:disable-next-line:no-empty
   public showHistory() { }
 
   /**
    * Management functions
    */
+  private printOutput(results) {
+    this.provider.setResults(results);
+    this.provider.update(this.previewUri);
+    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.One, 'SQLTools Results')
+      .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
+  }
   private autoConnectIfActive() {
     const defaultConnection: string = this.config.get('autoConnectTo', null);
     if (defaultConnection) {
@@ -246,6 +262,7 @@ export default class SQLTools {
     this.config = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
     this.bookmarks = new BookmarksStorage();
     this.connectionsManager = new ConnectionManager(this.config);
+    this.history = new History(this.config.get('history_size', 100));
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
@@ -309,7 +326,7 @@ export default class SQLTools {
 
   private errorHandler(message: string, error?: Error) {
     if (error) {
-      this.logger.error(`${message}: `, error);
+      this.logger.error(`${message}: `, error.stack);
     }
     return Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No')
       .then((res) => {
@@ -323,40 +340,5 @@ export default class SQLTools {
   private registerProviders() {
     this.provider = new OutputProvider();
     this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.provider));
-
-    // Workspace.onDidChangeTextDocument((e: TextDocumentChangeEvent) => {
-    //   if (e.document === Window.activeTextEditor.document) {
-    //     provider.update(this.previewUri);
-    //   }
-    // });
-
-    // Window.onDidChangeTextEditorSelection((e: TextEditorSelectionChangeEvent) => {
-    //   if (e.textEditor === Window.activeTextEditor) {
-    //     provider.update(this.previewUri);
-    //   }
-    // });
-
-    // const disposable = registerCommand('extension.showCssPropertyPreview', () => {
-    //   return VsCommands.executeCommand('vscode.previewHtml', previewUri, ViewColumn.Two, 'CSS Property Preview')
-    //   .then((success) => false, (reason) => {
-    //     Window.showErrorMessage(reason);
-    //   });
-    // });
-
-    // let highlight = Window.createTextEditorDecorationType({ backgroundColor: 'rgba(200,200,200,.35)' });
-
-    // vscode.commands.registerCommand('extension.revealCssRule', (uri: vscode.Uri,
-    // propStart: number, propEnd: number) => {
-
-    //   for (let editor of Window.visibleTextEditors) {
-    //     if (editor.document.uri.toString() === uri.toString()) {
-    //       let start = editor.document.positionAt(propStart);
-    //       let end = editor.document.positionAt(propEnd + 1);
-
-    //       editor.setDecorations(highlight, [new vscode.Range(start, end)]);
-    //       setTimeout(() => editor.setDecorations(highlight, []), 1500);
-    //     }
-    //   }
-    // });
   }
 }

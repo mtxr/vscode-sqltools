@@ -38,8 +38,7 @@ export default class Mssql implements ConnectionDialect {
       if (results.recordsets.lenght === 0) {
         return [];
       }
-      return results.recordsets
-        .reduce((prev, cur) => prev.concat(cur), []);
+      return results.recordsets;
     });
   }
 
@@ -47,6 +46,7 @@ export default class Mssql implements ConnectionDialect {
     return this.query(Util.format(this.queries.fetchTables, this.credentials.database))
     .then((results) => {
       return results
+        .reduce((prev, curr) => prev.concat(curr), [])
         .map((obj) => obj.TABLE_NAME)
         .sort();
     });

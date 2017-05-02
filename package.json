@@ -54,39 +54,53 @@
     "commands": [
       {
         "command": "SQLTools.formatSql",
-        "title": "SQLTools: Format SQL"
+        "title": "SQLTools: Format SQL",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.bookmarkSelection",
-        "title": "SQLTools: Bookmark selection"
+        "title": "SQLTools: Bookmark selection",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.selectConnection",
-        "title": "SQLTools: Connect"
+        "title": "SQLTools: Connect",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.describeTable",
-        "title": "SQLTools: Describe Table"
+        "title": "SQLTools: Describe Table",
+        "category": "SQLTools"
+      },
+      {
+        "command": "SQLTools.executeQuery",
+        "title": "SQLTools: Run selected query",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.deleteBookmark",
-        "title": "SQLTools: Delete a bookmark"
+        "title": "SQLTools: Delete a bookmark",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.clearBookmarks",
-        "title": "SQLTools: Delete all bookmarks"
+        "title": "SQLTools: Delete all bookmarks",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.editBookmark",
-        "title": "SQLTools: Edit a bookmarked"
+        "title": "SQLTools: Edit a bookmarked",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.showOutputChannel",
-        "title": "SQLTools: Show output channel (Logs)"
+        "title": "SQLTools: Show output channel (Logs)",
+        "category": "SQLTools"
       },
       {
         "command": "SQLTools.aboutVersion",
-        "title": "SQLTools: Version"
+        "title": "SQLTools: Version",
+        "category": "SQLTools"
       }
     ],
     "keybindings": [
@@ -95,6 +109,12 @@
         "key": "ctrl+e ctrl+b",
         "mac": "cmd+e cmd+b",
         "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "SQLTools.executeQuery",
+        "key": "ctrl+e ctrl+e",
+        "mac": "cmd+e cmd+e",
+        "when": "editorTextFocus"
       }
     ],
     "configuration": {

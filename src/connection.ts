@@ -30,4 +30,8 @@ export default class Connection {
   public describeTable(tableName: string): Promise<any> {
     return this.connection.describeTable(tableName);
   }
+
+  public query(query: string): Promise<any> {
+    return this.connection.query(query);
+  }
 }
