@@ -3,28 +3,34 @@ import * as vscode from 'vscode';
 export default class OutputProvider implements vscode.TextDocumentContentProvider {
   private content: any[][];
   private evtOnDidChange = new vscode.EventEmitter<vscode.Uri>();
-
-  public provideTextDocumentContent(uri: vscode.Uri): string {
-    const head = `<style>
+  private styles: string = `<style>
     body {
       color: gray;
       margin: 0;
       padding: 0;
     }
     table {
+      background: #eaeaea;
       border-collapse: collapse;
     }
-
+    table tr:nth-child(2n) {
+      background: #ffffff;
+    }
+    table th {
+      color: #ffffff;
+      background: #666666;
+    }
     table, th, td {
-      border: 1px solid gray;
+      padding: 2px;
+      border: 1px solid #333;
     }
     </style>`;
-
+  public provideTextDocumentContent(uri: vscode.Uri): string {
     const tables = this.content.map((queryResult) => {
       return this.createResultTable(queryResult);
     }).join('</br>');
     return `
-        ${head}
+        ${this.styles}
         <body>
           ${tables}
         </body>`;
