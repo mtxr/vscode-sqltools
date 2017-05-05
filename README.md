@@ -32,7 +32,7 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
   * `cmd+e, cmd+r`
 * Edit Bookmarked query
 
-## Features
+## To-do
 
 * Auto complete (for PostgreSQL & MySQL. Looking for help with other SGDBs)
 * List and Run bookmarked queries
