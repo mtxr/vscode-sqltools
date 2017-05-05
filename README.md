@@ -6,6 +6,8 @@
 
 Your swiss knife SQL for VSCode.
 
+> (The project is currently under development.)
+
 Project website: [https://github.com/mtxr/vscode-sqltools](https://github.com/mtxr/vscode-sqltools)
 
 > If you are looking for Sublime Text version go to [http://mtxr.github.io/SQLTools/](http://mtxr.github.io/SQLTools/).
