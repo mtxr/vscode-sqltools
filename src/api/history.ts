@@ -8,15 +8,16 @@ export default class History {
     this.maxSize = maxSize;
   }
 
-  public add(query: string) {
+  public add(query: string): this {
     if (this.getSize() >= this.getMaxSize()) {
       this.items.length = this.maxSize - 1;
     }
 
     this.items.push(query);
+    return this;
   }
 
-  public get(index) {
+  public get(index): string {
     if (index < 0 || index > this.items.length - 1) {
       throw new NotFoundException('No query selected');
     }
@@ -24,7 +25,7 @@ export default class History {
     return this.items[index];
   }
 
-  public setMaxSize(size: number) {
+  public setMaxSize(size: number): number {
     if (size < 1) {
       throw new SizeException('Size can\'t be lower than 1');
     }
@@ -33,14 +34,20 @@ export default class History {
     return this.maxSize;
   }
 
-  public getMaxSize = () => this.maxSize;
+  public getMaxSize(): number {
+    return this.maxSize;
+  }
 
-  public getSize = () => this.items.length;
+  public getSize(): number {
+    return this.items.length;
+  }
 
-  public all = () => this.items;
-
-  public clear() {
-    this.items = [];
+  public all(): string[] {
     return this.items;
+  }
+
+  public clear(): this {
+    this.items = [];
+    return this;
   }
 }

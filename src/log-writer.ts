@@ -30,9 +30,16 @@ export default class Logwriter {
   }
 
   private writeLog(message: string, ...data: any[]) {
-    this.output.appendLine(`[${(new Date()).toLocaleString()}][${Constants.version}] ${message}`);
+    const date = (new Date()).toLocaleString();
+    this.output.appendLine(`[${date}][${Constants.version}] ${message}`);
     if (data.length > 0) {
-      this.output.appendLine(data.join('\n'));
+      data.forEach((obj) => {
+        try {
+          this.output.appendLine(`[${date}][${Constants.version}]` + JSON.stringify(data));
+        } catch (e) {
+          this.output.appendLine(`[${date}][${Constants.version}]` + data.toString());
+        }
+      });
     }
   }
 }
