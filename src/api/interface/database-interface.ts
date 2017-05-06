@@ -9,6 +9,10 @@ namespace DatabaseInterface {
     type: string;
     size: number;
   }
+
+  export interface Function {
+    name: string;
+  }
 }
 
 export default DatabaseInterface;

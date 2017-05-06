@@ -48,7 +48,7 @@ export default class Mssql implements ConnectionDialect {
     });
   }
 
-  public getTables() {
+  public getTables(): Promise<DatabaseInterface.Table[]> {
     return this.query(Util.format(this.queries.fetchTables, this.credentials.database))
       .then((results) => {
         return results

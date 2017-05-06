@@ -91,12 +91,8 @@ export default class SQLTools {
               edit.insert(new Position(0, 0), `${headerText}${query.detail}`);
             });
           });
-        }, (error: any) => {
-          this.errorHandler('Ops, we\'ve got an error!', error);
-        });
-      }, (error) => {
-        this.errorHandler('Ops, we\'ve got an error!', error);
-      });
+        }, (error) => this.errorHandler('Ops, we\'ve got an error!', error));
+      }, (error) => this.errorHandler('Ops, we\'ve got an error!', error));
   }
   public bookmarkSelection(editor: TextEditor, edit: TextEditorEdit) {
     try {
@@ -179,20 +175,18 @@ export default class SQLTools {
 
   public selectConnection(): Thenable<Connection> {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
+      this.history.clear();
       this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label)));
       return this.activeConnection;
     });
   }
 
   public showConnectionMenu(): Thenable<QuickPickItem> {
-    const options: QuickPickItem[] = [];
-
-    this.connectionsManager.getConnections().forEach((connection) => {
-      options.push({
-        description: '',
+    const options: QuickPickItem[] = this.connectionsManager.getConnections().map((connection) => {
+      return {
         detail: `${connection.username}@${connection.server}:${connection.port}`,
         label: connection.name,
-      });
+      } as QuickPickItem;
     });
     return Window.showQuickPick(options);
   }
@@ -206,15 +200,13 @@ export default class SQLTools {
         return Window.showQuickPick(options);
       });
   }
-  // tslint:disable-next-line:no-empty
+
   public showRecords() {
     this.showTableMenu()
       .then((selected) => {
         this.activeConnection.showRecords(selected.label)
-          .then((description) => {
-            this.printOutput(description);
-          })
-          .catch((e) => console.error(e));
+          .then((results) => this.printOutput(results))
+          .catch((error) => this.errorHandler('Error fetching records.', error));
       });
   }
 
@@ -222,13 +214,14 @@ export default class SQLTools {
     this.showTableMenu()
     .then((selected) => {
       this.activeConnection.describeTable(selected.label)
-      .then((description) => {
-        this.printOutput(description);
-      });
+        .then((results) => this.printOutput(results))
+        .catch((error) => this.errorHandler('Error describing table.', error));
     });
   }
-  // tslint:disable-next-line:no-empty
-  public describeFunction() { }
+
+  public describeFunction() {
+    Window.showInformationMessage('Not implemented yet.');
+  }
 
   public executeQuery(editor: TextEditor, edit: TextEditorEdit): void {
     const selectedQuery: string = editor.document.getText(editor.selection);
@@ -241,12 +234,35 @@ export default class SQLTools {
         this.history.add(selectedQuery);
         this.printOutput(result);
       })
-      .catch((error) => {
-        this.errorHandler('Error while running query.', error);
+      .catch((error) => this.errorHandler('Error fetching records.', error));
+  }
+
+  public showHistory(): Thenable<QuickPickItem> {
+    const options: QuickPickItem[] = this.history.all().map((query) => {
+      return {
+        description: '',
+        label: query,
+      } as QuickPickItem;
+    });
+    return Window.showQuickPick(options);
+  }
+
+  public runFromHistory(): void {
+    this.showHistory()
+      .then((selected) => {
+        this.activeConnection.query((selected.label))
+          .then((results) => this.printOutput(results))
+          .catch((error) => this.errorHandler('Error while running query.', error));      });
+  }
+
+  public runFromBookmarks(): void {
+    this.showBookmarks()
+      .then((selected) => {
+        this.activeConnection.query((selected.detail))
+          .then((results) => this.printOutput(results))
+          .catch((error) => this.errorHandler('Error while running bookmarked query.', error));
       });
   }
-  // tslint:disable-next-line:no-empty
-  public showHistory() { }
 
   /**
    * Management functions
@@ -257,6 +273,7 @@ export default class SQLTools {
     return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.One, 'SQLTools Results')
       .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
   }
+
   private autoConnectIfActive() {
     const defaultConnection: string = this.config.get('autoConnectTo', null);
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
@@ -285,30 +302,32 @@ export default class SQLTools {
 
   private registerCommands(): void {
     this.logger.debug('Registering commands');
-    this.registerCommand('formatSql', registerTextEditorCommand);
-    this.registerCommand('executeQuery', registerTextEditorCommand);
     this.registerCommand('bookmarkSelection', registerTextEditorCommand);
+    this.registerCommand('executeQuery', registerTextEditorCommand);
+    this.registerCommand('formatSql', registerTextEditorCommand);
 
-    this.registerCommand('selectConnection', registerCommand);
-    this.registerCommand('showRecords', registerCommand);
-    this.registerCommand('describeTable', registerCommand);
-    this.registerCommand('describeFunction', registerCommand);
     this.registerCommand('aboutVersion', registerCommand);
-    this.registerCommand('showHistory', registerCommand);
-    this.registerCommand('deleteBookmark', registerCommand);
     this.registerCommand('clearBookmarks', registerCommand);
+    this.registerCommand('deleteBookmark', registerCommand);
+    this.registerCommand('describeFunction', registerCommand);
+    this.registerCommand('describeTable', registerCommand);
     this.registerCommand('editBookmark', registerCommand);
+    this.registerCommand('runFromBookmarks', registerCommand);
+    this.registerCommand('runFromHistory', registerCommand);
+    this.registerCommand('selectConnection', registerCommand);
+    this.registerCommand('showHistory', registerCommand);
     this.registerCommand('showOutputChannel', registerCommand);
+    this.registerCommand('showRecords', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
     this.logger.debug(`Registering command ${Constants.extNamespace}.${command}`);
     this.events.on(command, (...event) => {
-      this.logger.debug(`Event received: ${command}`, ...event);
+      this.logger.debug(`Event received: ${command}`);
       this[command](...event);
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
-      this.logger.debug(`Triggering command: ${command}`, ...args);
+      this.logger.debug(`Triggering command: ${command}`);
       this.events.emit(command, ...args);
     }));
   }
@@ -352,9 +371,7 @@ export default class SQLTools {
     this.outputProvider = new OutputProvider();
     this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.outputProvider));
     this.suggestionsProvider = new SuggestionsProvider();
-    const completionTriggers = [
-
-    ];
+    const completionTriggers = ['.', ' '];
     this.context.subscriptions.push(
       Languages.registerCompletionItemProvider(['sql', 'plaintext'],
       this.suggestionsProvider, ...completionTriggers));
@@ -380,5 +397,4 @@ export default class SQLTools {
     this.updateStatusBar();
     this.suggestionsProvider.setConnection(connection);
   }
-
 }

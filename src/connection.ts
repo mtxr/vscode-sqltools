@@ -1,3 +1,4 @@
+import { History } from './api';
 import Dialects from './api/dialect';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import { ConnectionDialect } from './api/interface/connection-dialect';
@@ -6,7 +7,7 @@ export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
   private connection: ConnectionDialect;
-  constructor(public credentials: ConnectionCredentials) {
+  constructor(private credentials: ConnectionCredentials) {
     const dialectClass = Dialects.getClass(this.credentials.dialect);
     this.connection = new Dialects[dialectClass](credentials);
   }
