@@ -26,7 +26,7 @@ gulp.task('codacy', function codacyTask () {
 
 gulp.task('compile', () => {
   const dest = './out'
-  fs.unlinkSync(dest);
+  fs.unlinkSync(dest)
   gulp.src('./package.json').pipe(gulp.dest(dest))
 
   const tsResult = tsProject.src()
