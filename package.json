@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools",
   "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publisher": "mtxr",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
@@ -70,6 +70,11 @@
       {
         "command": "SQLTools.describeTable",
         "title": "SQLTools: Describe Table",
+        "category": "SQLTools"
+      },
+      {
+        "command": "SQLTools.showRecords",
+        "title": "SQLTools: Show Table Records",
         "category": "SQLTools"
       },
       {
@@ -254,7 +259,7 @@
     "sinon": "^1.17.7",
     "source-map-support": "^0.4.14",
     "ts-node": "^2.1.0",
-    "typescript": "^2.0.3",
+    "typescript": "^2.3.2",
     "vscode": "^1.0.0"
   },
   "dependencies": {

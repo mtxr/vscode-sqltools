@@ -1,4 +1,3 @@
-import { ConnectionCredentials } from './api/interface/connection-credentials';
 // tslint:disable:no-reference
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
@@ -7,7 +6,9 @@ import * as Path from 'path';
 import {
   commands as VSCode,
   commands as VsCommands,
+  Disposable,
   ExtensionContext,
+  languages as Languages,
   OutputChannel,
   Position,
   QuickPickItem,
@@ -25,12 +26,14 @@ import {
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
-import { BookmarksStorage, Logger, Utils, History } from './api';
+import { BookmarksStorage, History, Logger, Utils } from './api';
+import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
+import { SuggestionsProvider } from './suggestions-provider';
 
 const {
   registerCommand,
@@ -56,22 +59,19 @@ export default class SQLTools {
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
-  private provider: OutputProvider;
+  private outputProvider: OutputProvider;
+  private suggestionsProvider: SuggestionsProvider;
   private previewUri = Uri.parse('sqltools://results');
-
-  private set Connection(connection: Connection) {
-    this.activeConnection = connection;
-    this.updateStatusBar(this.activeConnection.credentials.name);
-  }
 
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
     this.loadConfigs();
     this.setupLogger();
+    this.registerProviders();
+    this.registerEvents();
     this.registerCommands();
     this.registerStatusBar();
     this.autoConnectIfActive();
-    this.registerProviders();
   }
 
   /**
@@ -179,12 +179,8 @@ export default class SQLTools {
 
   public selectConnection(): Thenable<Connection> {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
-      if (this.activeConnection) {
-        this.activeConnection.close();
-        this.updateStatusBar();
-      }
-      this.Connection = new Connection(this.connectionsManager.getConnection(selection.label));
-      return this.Connection;
+      this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label)));
+      return this.activeConnection;
     });
   }
 
@@ -205,13 +201,22 @@ export default class SQLTools {
     return this.activeConnection.getTables(true)
       .then((tables) => {
         const options: QuickPickItem[] = tables.map((table) => {
-          return { label: table } as QuickPickItem;
+          return { label: table.name } as QuickPickItem;
         });
         return Window.showQuickPick(options);
       });
   }
   // tslint:disable-next-line:no-empty
-  public showRecords() { }
+  public showRecords() {
+    this.showTableMenu()
+      .then((selected) => {
+        this.activeConnection.showRecords(selected.label)
+          .then((description) => {
+            this.printOutput(description);
+          })
+          .catch((e) => console.error(e));
+      });
+  }
 
   public describeTable(): void {
     this.showTableMenu()
@@ -247,22 +252,29 @@ export default class SQLTools {
    * Management functions
    */
   private printOutput(results) {
-    this.provider.setResults(results);
-    this.provider.update(this.previewUri);
+    this.outputProvider.setResults(results);
+    this.outputProvider.update(this.previewUri);
     return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.One, 'SQLTools Results')
       .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
   }
   private autoConnectIfActive() {
     const defaultConnection: string = this.config.get('autoConnectTo', null);
+    this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
     if (defaultConnection) {
-      this.Connection = new Connection(this.connectionsManager.getConnection(defaultConnection));
+      this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection)));
+    } else {
+      this.setConnection();
     }
   }
   private loadConfigs() {
     this.config = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
     this.bookmarks = new BookmarksStorage();
     this.connectionsManager = new ConnectionManager(this.config);
-    this.history = new History(this.config.get('history_size', 100));
+    if (this.history) {
+      this.history.setMaxSize(this.config.get('history_size', 100));
+    } else {
+      this.history = new History(this.config.get('history_size', 100));
+    }
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
@@ -316,11 +328,10 @@ export default class SQLTools {
     this.extDatabaseStatus.show();
   }
 
-  private updateStatusBar(databaseName: string = null) {
-    if (databaseName) {
-      this.extDatabaseStatus.text = `$(database) ${databaseName}`;
-    } else {
-      this.extDatabaseStatus.text = '$(database) Connect to database';
+  private updateStatusBar() {
+    this.extDatabaseStatus.text = '$(database) Connect to database';
+    if (this.activeConnection) {
+      this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
     }
   }
 
@@ -338,7 +349,36 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.provider = new OutputProvider();
-    this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.provider));
+    this.outputProvider = new OutputProvider();
+    this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.outputProvider));
+    this.suggestionsProvider = new SuggestionsProvider();
+    const completionTriggers = [
+
+    ];
+    this.context.subscriptions.push(
+      Languages.registerCompletionItemProvider(['sql', 'plaintext'],
+      this.suggestionsProvider, ...completionTriggers));
   }
+
+  private registerEvents() {
+    const event: Disposable = Workspace.onDidChangeConfiguration(this.reloadConfig.bind(this));
+    this.context.subscriptions.push(event);
+  }
+
+  private reloadConfig() {
+    this.logger.debug('Config reloaded!');
+    this.loadConfigs();
+    this.setupLogger();
+    this.autoConnectIfActive();
+  }
+
+  private setConnection(connection?: Connection) {
+    if (connection && this.activeConnection) {
+      this.activeConnection.close();
+    }
+    this.activeConnection = connection;
+    this.updateStatusBar();
+    this.suggestionsProvider.setConnection(connection);
+  }
+
 }

@@ -56,7 +56,7 @@ export default class OutputProvider implements vscode.TextDocumentContentProvide
       return '<td>' + colNames.map((header) => row[header]).join('</td><td>') + '</td>';
     }).join('</tr><tr>') + '</tr></tbody>';
 
-    return `<table>
+    return `<table class="scroll width="100%"
         ${tableHeaders}
         ${tableBody}
       </table>`;
