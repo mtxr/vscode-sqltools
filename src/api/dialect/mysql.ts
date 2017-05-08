@@ -1,21 +1,21 @@
 import Utils from './../utils';
-import mssql = require('mssql');
+import mysql = require('mysql');
 import { ConnectionCredentials } from './../interface/connection-credentials';
 import { ConnectionDialect } from './../interface/connection-dialect';
 import DatabaseInterface from './../interface/database-interface';
 import { DialectQueries } from './../interface/dialect-queries';
 
-export default class MSSQL implements ConnectionDialect {
+export default class MySQL implements ConnectionDialect {
   public connection: Promise<any>;
   private queries: DialectQueries = {
-    describeTable: 'SP_COLUMNS :table',
+    describeTable: 'DESCRIBE :table',
     fetchColumns: `SELECT TABLE_NAME AS tableName,
         COLUMN_NAME AS columnName, DATA_TYPE AS type, CHARACTER_MAXIMUM_LENGTH AS size
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG= DB_NAME()`,
-    fetchRecords: 'SELECT TOP :limit * FROM :table',
+      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()`,
+    fetchRecords: 'SELECT * FROM :table LIMIT :limit',
     fetchTables: `SELECT TABLE_NAME as tableName
       FROM INFORMATION_SCHEMA.TABLES
-      WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG= DB_NAME() ORDER BY TABLE_NAME`,
+      WHERE TABLE_SCHEMA = DATABASE() ORDER BY TABLE_NAME`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -27,24 +27,50 @@ export default class MSSQL implements ConnectionDialect {
     }
     const options = {
       database: this.credentials.database,
+      host: this.credentials.server,
+      multipleStatements: true,
       password: this.credentials.password,
-      server: this.credentials.server,
       user: this.credentials.username,
     };
-    this.connection = mssql.connect(options);
-    return this.connection;
+    const connection = mysql.createConnection(options);
+    return new Promise((resolve, reject) => {
+      connection.connect((err) => {
+        if (err) {
+          reject('error connecting: ' + err.stack);
+          return;
+        }
+        this.connection = Promise.resolve(connection);
+        resolve(this.connection);
+      });
+    });
   }
 
   public close() {
-    return this.connection.then((pool) => pool.close());
+    return this.connection.then((conn) => {
+      conn.destroy();
+      this.connection = null;
+    });
   }
 
   public query(query: string): Promise<any> {
-    return this.open().then((pool) => pool.request().query(query)).then((results) => {
-      if (results.recordsets.lenght === 0) {
+    return this.open().then((conn) => {
+      return new Promise((resolve, reject) => {
+        conn.query(query, (error, results) => {
+          if (error) return reject(error);
+          if (results.length === 0) {
+            return resolve([]);
+          }
+          if (!Array.isArray(results[0])) {
+            results = [results];
+          }
+          return resolve(results);
+        });
+      });
+    }).then((results: any[]) => {
+      if (results.length === 0) {
         return [];
       }
-      return results.recordsets;
+      return results;
     });
   }
 
@@ -75,6 +101,6 @@ export default class MSSQL implements ConnectionDialect {
   }
 
   public showRecords(table: string, limit: number = 10) {
-    return this.query(Utils.replacer(this.queries.fetchRecords, {limit, table }));
+    return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
   }
 }

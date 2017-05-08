@@ -26,4 +26,10 @@ export default class Utils {
       return (process.env.HOME || process.env.USERPROFILE);
     throw new EnvironmentException('Could not find user home path');
   }
+
+  public static replacer(source: string, toReplace: object) {
+    return Object.keys(toReplace).reduce((destination, replaceParam) => {
+      return destination.replace(`:${replaceParam}`, toReplace[replaceParam]);
+    }, source);
+  }
 }

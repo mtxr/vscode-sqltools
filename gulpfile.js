@@ -5,7 +5,7 @@ const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 const codacy = require('gulp-codacy')
-const fs = require('fs')
+const fs = require('fs-extra')
 
 gulp.task('codacy', function codacyTask () {
   return gulp
@@ -26,7 +26,7 @@ gulp.task('codacy', function codacyTask () {
 
 gulp.task('compile', () => {
   const dest = './out'
-  fs.unlinkSync(dest)
+  fs.removeSync(dest)
   gulp.src('./package.json').pipe(gulp.dest(dest))
 
   const tsResult = tsProject.src()
