@@ -1,11 +1,8 @@
 const gulp = require('gulp')
-// const mocha = require('gulp-mocha')
-// const istanbul = require('gulp-istanbul')
 const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 const codacy = require('gulp-codacy')
-const fs = require('fs-extra')
 
 gulp.task('codacy', function codacyTask () {
   return gulp
@@ -15,18 +12,8 @@ gulp.task('codacy', function codacyTask () {
     }))
 })
 
-// function runTests () {
-//   // Here we're piping our `.js` files inside the `test` folder
-//   return gulp.src(['./out/test/**/*.test.js'])
-//     // You can change the reporter if you want, try using `nyan`
-//     .pipe(mocha({
-//       reporter: 'spec'
-//     }))
-// }
-
 gulp.task('compile', () => {
   const dest = './out'
-  if (fs.existsSync(dest)) fs.removeSync(dest)
   gulp.src('./package.json').pipe(gulp.dest(dest))
 
   const tsResult = tsProject.src()
@@ -40,25 +27,6 @@ gulp.task('compile', () => {
     }))
     .pipe(gulp.dest(dest))
 })
-
-// gulp.task('pre-test', ['compile'], () => {
-//   // This tells gulp which files you want to pipe
-//   // In our case we want to pipe every `.js` file inside any folders inside `test`
-//   return gulp.src('./out/**/*.js')
-//     .pipe(istanbul({includeUntested: true}))
-//     // This overwrites `require` so it returns covered files
-//     .pipe(istanbul.hookRequire())
-// })
-
-// gulp.task('test', ['compile'], () => {
-//   runTests()
-// })
-
-// gulp.task('coverage', ['pre-test'], () => {
-//   runTests()
-//     // Here we will create report files using the test's results
-//     .pipe(istanbul.writeReports())
-// })
 
 gulp.task('watch', () => {
   gulp.watch([
