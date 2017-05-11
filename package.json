@@ -312,6 +312,7 @@
   "dependencies": {
     "jsonc-parser": "^0.4.1",
     "mssql": "^4.0.4",
+    "mysql": "^2.13.0",
     "sql-formatter-sqltools": "^1.2.0"
   }
 }
