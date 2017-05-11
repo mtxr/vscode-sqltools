@@ -278,11 +278,11 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "gulp compile",
-        "compile": "gulp watch",
+        "vscode:prepublish": "./node_modules/.bin/gulp compile",
+        "compile": "./node_modules/.bin/gulp watch",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "gulp compile && node ./node_modules/vscode/bin/test",
-        "test-coverage": "gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test && npm run codacy",
+        "test": "./node_modules/.bin/gulp compile && node ./node_modules/vscode/bin/test",
+        "test-coverage": "./node_modules/.bin/gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test && npm run codacy",
         "codacy": "cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript"
     },
     "devDependencies": {
