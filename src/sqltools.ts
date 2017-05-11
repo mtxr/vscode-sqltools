@@ -192,13 +192,15 @@ export default class SQLTools {
   }
 
   public showTableMenu(): Thenable<QuickPickItem> {
-    return this.activeConnection.getTables(true)
-      .then((tables) => {
-        const options: QuickPickItem[] = tables.map((table) => {
-          return { label: table.name } as QuickPickItem;
+    return this.checkIfConnected().then(() => {
+      return this.activeConnection.getTables(true)
+        .then((tables) => {
+          const options: QuickPickItem[] = tables.map((table) => {
+            return { label: table.name } as QuickPickItem;
+          });
+          return Window.showQuickPick(options);
         });
-        return Window.showQuickPick(options);
-      });
+    });
   }
 
   public showRecords() {
@@ -229,12 +231,14 @@ export default class SQLTools {
       Window.showInformationMessage('You should select a query first.');
       return;
     }
-    this.activeConnection.query(selectedQuery)
+    this.checkIfConnected().then(() => {
+    return this.activeConnection.query(selectedQuery)
       .then((result) => {
         this.history.add(selectedQuery);
         this.printOutput(result);
       })
       .catch((error) => this.errorHandler('Error fetching records.', error));
+    });
   }
 
   public showHistory(): Thenable<QuickPickItem> {
@@ -248,20 +252,24 @@ export default class SQLTools {
   }
 
   public runFromHistory(): void {
-    this.showHistory()
-      .then((selected) => {
-        this.activeConnection.query((selected.label))
-          .then((results) => this.printOutput(results))
-          .catch((error) => this.errorHandler('Error while running query.', error));      });
+    this.checkIfConnected().then(() => {
+      this.showHistory()
+        .then((selected) => {
+          this.activeConnection.query((selected.label))
+            .then((results) => this.printOutput(results))
+            .catch((error) => this.errorHandler('Error while running query.', error));      });
+    });
   }
 
   public runFromBookmarks(): void {
-    this.showBookmarks()
-      .then((selected) => {
-        this.activeConnection.query((selected.detail))
-          .then((results) => this.printOutput(results))
-          .catch((error) => this.errorHandler('Error while running bookmarked query.', error));
-      });
+    this.checkIfConnected().then(() => {
+      this.showBookmarks()
+        .then((selected) => {
+          this.activeConnection.query((selected.detail))
+            .then((results) => this.printOutput(results))
+            .catch((error) => this.errorHandler('Error while running bookmarked query.', error));
+        });
+    });
   }
 
   /**
@@ -396,5 +404,14 @@ export default class SQLTools {
     this.activeConnection = connection;
     this.updateStatusBar();
     this.suggestionsProvider.setConnection(connection);
+  }
+
+  private checkIfConnected(): Promise<Connection> {
+    if (this.activeConnection) {
+      return Promise.resolve(this.activeConnection);
+    }
+    return this.selectConnection().then(() => {
+      return Promise.resolve(this.activeConnection);
+    }) as Promise<Connection>;
   }
 }

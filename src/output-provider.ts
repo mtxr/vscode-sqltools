@@ -47,16 +47,21 @@ export default class OutputProvider implements vscode.TextDocumentContentProvide
     this.content = results;
   }
 
-  private createResultTable(rowset: object[]): string {
-    if (rowset.length === 0) return 'No results.';
-    const colNames = Object.keys(rowset[0]);
+  private createResultTable(resultSet: object[] | object): string {
+    const resultSetArray: object[] = Array.isArray(resultSet) ? resultSet : [resultSet];
+
+    if (resultSetArray.length === 0) {
+      return 'No results.';
+    }
+
+    const colNames = Object.keys(resultSetArray[0]);
     const headers = colNames.map((colName, index) => colName ? colName : `Col ${index}`);
     const tableHeaders = '<thead><tr><th>' + headers.join('</th><th>') + '</th></tr></thead>';
-    const tableBody = '<tbody><tr>' + rowset.map((row) => {
-      return '<td>' + colNames.map((header) => row[header]).join('</td><td>') + '</td>';
+    const tableBody = '<tbody><tr>' + resultSetArray.map((row) => {
+      return '<td>' + colNames.map((header) => `${row[header]}`).join('</td><td>') + '</td>';
     }).join('</tr><tr>') + '</tr></tbody>';
 
-    return `<table class="scroll width="100%"
+    return `<table>
         ${tableHeaders}
         ${tableBody}
       </table>`;

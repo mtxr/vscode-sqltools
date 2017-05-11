@@ -1,10 +1,9 @@
-import Mssql from './mssql';
+import MSSQL from './mssql';
+import MySQL from './mysql';
 
 const dialects = {
-  Mssql,
-  getClass: (dialect: string) => {
-    return dialect.charAt(0).toUpperCase() + dialect.slice(1).toLowerCase();
-  },
+  MSSQL,
+  MySQL,
 };
 
 export default dialects;
