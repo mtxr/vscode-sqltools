@@ -8,8 +8,7 @@ export default class Connection {
   private columns: DatabaseInterface.TableColumn[] = [];
   private connection: ConnectionDialect;
   constructor(private credentials: ConnectionCredentials) {
-    const dialectClass = Dialects.getClass(this.credentials.dialect);
-    this.connection = new Dialects[dialectClass](credentials);
+    this.connection = new Dialects[this.credentials.dialect](credentials);
   }
 
   public close() {

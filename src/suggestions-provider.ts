@@ -31,6 +31,9 @@ export class SuggestionsProvider implements CompletionItemProvider {
   public setConnection(connection: Connection) {
     this.connection = connection;
     this.completionItems = [];
+    if (!connection) {
+      return;
+    }
     this.connection.getTables()
       .then((tables) => {
         this.completionItems = tables.map((table) => {
