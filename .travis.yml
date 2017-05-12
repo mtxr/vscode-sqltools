@@ -9,7 +9,6 @@ addons:
       - libstdc++6-4.7-dev
 
 node_js:
-  - "6"
   - "7"
 
 os:
@@ -25,9 +24,6 @@ before_install:
 
 install:
   - npm install
-  - npm run vscode:prepublish
 
-before_script:
-  - npm install -g gulp
 script:
   - npm run test-coverage

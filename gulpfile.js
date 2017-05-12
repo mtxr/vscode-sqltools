@@ -22,8 +22,8 @@ gulp.task('compile', () => {
 
   return tsResult.js
     .pipe(sourcemaps.write('.', {
-      includeContent: false
-      // sourceRoot: (file) => { return file.cwd + '/src' }
+      includeContent: false,
+      sourceRoot: (file) => { return file.cwd + '/src' }
     }))
     .pipe(gulp.dest(dest))
 })
