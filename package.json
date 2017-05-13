@@ -188,6 +188,11 @@
                     "default": true,
                     "description": "Show debugging messages on console."
                 },
+                "sqltools.show_statusbar": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Toggle statusbar visibility."
+                },
                 "sqltools.log_level": {
                     "type": "string",
                     "enum": [
@@ -218,6 +223,16 @@
                     "type": "boolean",
                     "default": false,
                     "decription": "Clear output for new commands."
+                },
+                "sqltools.format": {
+                    "type": "object",
+                    "properties": {
+                        "indent_size": {
+                            "type": "number",
+                            "default": 2,
+                            "description": "Indent size"
+                        }
+                    }
                 },
                 "sqltools.connections": {
                     "type": "array",

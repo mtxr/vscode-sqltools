@@ -149,7 +149,8 @@ export default class SQLTools {
    */
   public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
     try {
-      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
+      const indentSize: number = this.config.get('format.indent_size', 2);
+      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
       VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
       this.logger.debug('Query formatted!');
     } catch (error) {
@@ -349,16 +350,20 @@ export default class SQLTools {
 
     this.extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 9);
     this.context.subscriptions.push(this.extDatabaseStatus);
-    this.extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
-    this.extDatabaseStatus.text = '$(database) Connect to database';
-    this.extStatus.show();
-    this.extDatabaseStatus.show();
+    this.updateStatusBar();
   }
 
   private updateStatusBar() {
     this.extDatabaseStatus.text = '$(database) Connect to database';
     if (this.activeConnection) {
       this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
+    }
+    if (this.config.get('show_statusbar', true)) {
+      this.extStatus.show();
+      this.extDatabaseStatus.show();
+    } else {
+      this.extStatus.hide();
+      this.extDatabaseStatus.hide();
     }
   }
 
@@ -395,6 +400,7 @@ export default class SQLTools {
     this.loadConfigs();
     this.setupLogger();
     this.autoConnectIfActive();
+    this.updateStatusBar();
   }
 
   private setConnection(connection?: Connection) {
