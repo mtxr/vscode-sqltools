@@ -33,5 +33,6 @@
 
 - *Version*: vX.Y.Z
 - *OS*: ...
+- *SGDB*: MySQL, PostgresSQL...
 
 You can get this information from executing `SQLTools: Version` from VSCode `Quick Open`.
