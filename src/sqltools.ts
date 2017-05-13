@@ -149,7 +149,8 @@ export default class SQLTools {
    */
   public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
     try {
-      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection)));
+      const indentSize: number = this.config.get('format.indent_size', 2);
+      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
       VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
       this.logger.debug('Query formatted!');
     } catch (error) {

@@ -219,6 +219,16 @@
                     "default": false,
                     "decription": "Clear output for new commands."
                 },
+                "sqltools.format": {
+                    "type": "object",
+                    "properties": {
+                        "indent_size": {
+                            "type": "number",
+                            "default": 2,
+                            "description": "Indent size"
+                        }
+                    }
+                },
                 "sqltools.connections": {
                     "type": "array",
                     "title": "Connections",
