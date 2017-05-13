@@ -60,7 +60,7 @@ describe('API Utils', () => {
   });
 
   describe('formatSql()', () => {
-    it('Should format query properly',  () => {
+    it('Should format query properly', () => {
       let query = 'SELECT * FROM A WHERE colname = \'value\';';
       let expected = 'SELECT\n' +
         '  *\n' +
@@ -78,6 +78,27 @@ describe('API Utils', () => {
         'WHERE\n' +
         '  [colname] = N\'value\';\n';
       expect(Utils.formatSql(query)).to.be.eqls(expected);
+
+    });
+
+    it('Should format query properly using 4 space identation', () => {
+      let query = 'SELECT * FROM A WHERE colname = \'value\';';
+      let expected = 'SELECT\n' +
+        '    *\n' +
+        'FROM\n' +
+        '    A\n' +
+        'WHERE\n' +
+        '    colname = \'value\';\n';
+      expect(Utils.formatSql(query, 4)).to.be.eqls(expected);
+
+      query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
+      expected = 'SELECT\n' +
+        '    *\n' +
+        'FROM\n' +
+        '    [A]\n' +
+        'WHERE\n' +
+        '    [colname] = N\'value\';\n';
+      expect(Utils.formatSql(query, 4)).to.be.eqls(expected);
 
     });
   });

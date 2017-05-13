@@ -12,7 +12,7 @@ export default class Utils {
    * @returns {string} Returns user path as string
    */
   public static formatSql(query, indentSize: number = 2) {
-    return formatter.format(query, { indent: '        '.substring(0, indentSize) });
+    return formatter.format(query, { indent: ' '.repeat(indentSize) });
   }
 
   /**
