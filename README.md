@@ -34,6 +34,10 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
   * __OSX__: `cmd+e, cmd+r`
 * Edit Bookmarked query
 
+## Docs
+
+You can read the docs in the [SQLTools Wiki](https://github.com/mtxr/vscode-sqltools/wiki)
+
 ## To-do
 
 - [ ] :running: Auto complete

@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.4.0",
+    "version": "0.4.1",
     "publisher": "mtxr",
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
@@ -58,67 +58,67 @@
     "contributes": {
         "commands": [
             {
-                "title": "SQLTools Bookmarks: Create from selection",
+                "title": "Create from selection",
                 "command": "SQLTools.bookmarkSelection",
-                "category": "SQLTools"
+                "category": "SQLTools Bookmarks"
             },
             {
-                "title": "SQLTools Bookmarks: Delete all",
+                "title": "Delete all",
                 "command": "SQLTools.clearBookmarks",
-                "category": "SQLTools"
+                "category": "SQLTools Bookmarks"
             },
             {
-                "title": "SQLTools Bookmarks: Delete",
+                "title": "Delete",
                 "command": "SQLTools.deleteBookmark",
-                "category": "SQLTools"
+                "category": "SQLTools Bookmarks"
             },
             {
-                "title": "SQLTools Bookmarks: Edit",
+                "title": "Edit",
                 "command": "SQLTools.editBookmark",
-                "category": "SQLTools"
+                "category": "SQLTools Bookmarks"
             },
             {
-                "title": "SQLTools Bookmarks: Run",
+                "title": "Run",
                 "command": "SQLTools.runFromBookmarks",
-                "category": "SQLTools"
+                "category": "SQLTools Bookmarks"
             },
             {
-                "title": "SQLTools History: Run",
+                "title": "Run",
                 "command": "SQLTools.runFromHistory",
-                "category": "SQLTools"
+                "category": "SQLTools History"
             },
             {
-                "title": "SQLTools: Connect",
+                "title": "Connect",
                 "command": "SQLTools.selectConnection",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Describe table",
+                "title": "Describe table",
                 "command": "SQLTools.describeTable",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Format SQL",
+                "title": "Format SQL",
                 "command": "SQLTools.formatSql",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Run selected query",
+                "title": "Run selected query",
                 "command": "SQLTools.executeQuery",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Show output channel (Logs)",
+                "title": "Show output channel (Logs)",
                 "command": "SQLTools.showOutputChannel",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Show table records",
+                "title": "Show table records",
                 "command": "SQLTools.showRecords",
                 "category": "SQLTools"
             },
             {
-                "title": "SQLTools: Version",
+                "title": "Version",
                 "command": "SQLTools.aboutVersion",
                 "category": "SQLTools"
             }
@@ -207,22 +207,22 @@
                 "sqltools.query_timeout": {
                     "type": "number",
                     "default": 300000,
-                    "decription": "Timeout in seconds for killing query process after the timeout."
+                    "description": "Timeout in seconds for killing query process after the timeout."
                 },
                 "sqltools.history_size": {
                     "type": "number",
                     "default": 100,
-                    "decription": "Number of queries to keep on History."
+                    "description": "Number of queries to keep on History."
                 },
                 "sqltools.show_result_on_tab": {
                     "type": "boolean",
                     "default": false,
-                    "decription": "Show results using new tab."
+                    "description": "Show results using new tab."
                 },
                 "sqltools.clear_output": {
                     "type": "boolean",
                     "default": false,
-                    "decription": "Clear output for new commands."
+                    "description": "Clear output for new commands."
                 },
                 "sqltools.format": {
                     "type": "object",
