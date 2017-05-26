@@ -302,15 +302,13 @@
         "compile": "./node_modules/.bin/gulp watch",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test": "./node_modules/.bin/gulp compile && node ./node_modules/vscode/bin/test",
-        "test-coverage": "./node_modules/.bin/gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test && npm run codacy",
-        "codacy": "cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript"
+        "test-coverage": "./node_modules/.bin/gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test"
     },
     "devDependencies": {
         "@types/chai": "^3.5.0",
         "@types/mocha": "^2.2.40",
         "@types/node": "^7.0.12",
         "chai": "^3.5.0",
-        "codacy-coverage": "^2.0.1",
         "decache": "^4.1.0",
         "fs-extra": "^3.0.1",
         "gulp": "^3.9.1",
