@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.4.4",
+    "version": "0.4.5",
     "publisher": "mtxr",
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
@@ -330,6 +330,6 @@
         "jsonc-parser": "^0.4.1",
         "mssql": "^4.0.4",
         "mysql": "^2.13.0",
-        "sql-formatter-sqltools": "^1.2.0"
+        "sql-formatter": "^1.2.2"
     }
 }
