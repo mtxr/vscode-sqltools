@@ -278,9 +278,8 @@
                             "dialect": {
                                 "type": "string",
                                 "enum": [
-                                    "mssql",
-                                    "mysql",
-                                    "mariadb"
+                                    "MSSQL",
+                                    "MySQL"
                                 ],
                                 "description": "Path for you password file",
                                 "required": false
