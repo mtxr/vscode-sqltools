@@ -1,8 +1,5 @@
-// tslint:disable:no-unused-expression
+/// <reference path="./../node_modules/@types/jest/index.d.ts" />
 
-import { expect } from 'chai';
-import * as semver from 'semver';
-import * as vscode from 'vscode';
 import Constants from '../src/constants';
 const mustExportProps = [
   'version',
@@ -13,12 +10,16 @@ const mustExportProps = [
 
 describe('Constants Tests', () => {
   it(`Should have prop ${mustExportProps.join(', ')}`, () => {
+    const oldHome = process.env.HOME;
+    process.env.HOME = '/fakehome';
     mustExportProps.forEach((prop) => {
-      expect(Constants).to.have.property(prop).and.to.be.a('string');
+      expect(Constants).toHaveProperty(prop);
+      expect(typeof Constants[prop]).toBe('string');
     });
+    process.env.HOME = oldHome;
   });
   it('Should have a valid version', () => {
-    expect(semver.valid(Constants.version)).to.be.not.null;
-    expect(semver.valid(Constants.version)).to.be.a('string');
+    expect(Constants.version).not.toBe(true);
+    expect(Constants.version).toMatch(/v(\d+\.?){3}/);
   });
 });

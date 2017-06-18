@@ -1,4 +1,3 @@
-// tslint:disable:no-reference
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import { EventEmitter } from 'events';

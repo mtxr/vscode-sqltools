@@ -15,7 +15,8 @@
     "only-arrow-functions": [ "allow-declarations" ],
     "interface-name": [ false ],
     "linebreak-style": [ true, "LF" ],
-    "quotemark": [ true, "single", "jsx-double" ]
+    "quotemark": [ true, "single", "jsx-double" ],
+    "no-reference": false
   },
   "rulesDirectory": []
 }
