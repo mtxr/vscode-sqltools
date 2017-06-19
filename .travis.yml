@@ -1,6 +1,8 @@
 sudo: false
 language: node_js
 
+cache: yarn
+
 addons:
   apt:
     sources:
@@ -23,13 +25,16 @@ before_install:
     fi
 
 install:
-  - npm install
-  - npm install coveralls codacy-coverage
+  - yarn
+  - yarn add coveralls codacy-coverage
 
 script:
-  - npm run test:lint
-  - npm run test:unit -- --no-cache
+  - yarn run test:lint
+  - yarn run test:unit
 
 after_script:
-  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js
-  - cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript
+  - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && echo 'Coveralls updated!'
+  - cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript && echo 'Codacy coverage updated!'
+
+notifications:
+  webhooks: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN
