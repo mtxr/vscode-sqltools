@@ -321,6 +321,8 @@
     "vscode": "^1.0.0"
   },
   "dependencies": {
+    "codacy-coverage": "^2.0.2",
+    "coveralls": "^2.13.1",
     "jest-cli": "^20.0.4",
     "jsonc-parser": "^0.4.1",
     "mssql": "^4.0.4",
