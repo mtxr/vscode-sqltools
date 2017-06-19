@@ -3,16 +3,6 @@
     "version": "0.1.0",
     "configurations": [
         {
-            "type": "extensionHost",
-            "request": "launch",
-            "name": "Launch Coverage Tests",
-            "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
-            "sourceMaps": true,
-            "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
-            "preLaunchTask": "pre-coverage-vscode"
-        },
-        {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
@@ -21,18 +11,20 @@
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": ["${workspaceRoot}/out/src/**/*.js"],
-            "preLaunchTask": "pre-run-vscode"
+            "preLaunchTask": "compile"
         },
         {
-            "name": "Launch Tests",
-            "type": "extensionHost",
+            "type": "node",
             "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}", "--extensionTestsPath=${workspaceRoot}/out/test"],
-            "stopOnEntry": false,
-            "sourceMaps": true,
-            "outFiles": ["${workspaceRoot}/out/test/**/*.js"],
-            "preLaunchTask": "compile"
+            "name": "Run Tests",
+            "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+            "cwd": "${workspaceRoot}",
+            "args": [
+                "--i",
+                "--coverage",
+                "--config=${workspaceRoot}/jest.json",
+                "--no-cache"
+            ]
         }
     ]
 }

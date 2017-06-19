@@ -1,6 +1,4 @@
-// tslint:disable:no-reference
 // tslint:disable:no-var-requires
-
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import * as path from 'path';
@@ -13,5 +11,7 @@ export default class Constants {
   public static extName = pkg.displayName;
   public static extNamespace = Constants.extName;
   public static outputChannelName = Constants.extName;
-  public static bufferName   = path.join(Utils.getHome(), `${Constants.extName}.buffer.sql`);
+  public static get bufferName(): string {
+    return path.join(Utils.getHome(), `${Constants.extName}.buffer.sql`);
+  }
 }

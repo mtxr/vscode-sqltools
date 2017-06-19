@@ -1,20 +1,17 @@
-// tslint:disable:no-unused-expression
-// tslint:disable:no-reference
-/// <reference path="../../node_modules/@types/mocha/index.d.ts" />
-/// <reference path="../../node_modules/@types/chai/index.d.ts" />
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import { expect } from 'chai';
-import * as vscode from 'vscode';
 import { Utils } from '../../src/api';
 
 describe('API Utils', () => {
   describe('getHome()', () => {
+    beforeEach(() => {
+      jest.resetModules();
+    });
     it('Should find a home path', () => {
       const HOME = Utils.getHome();
 
-      expect(HOME).to.be.not.undefined;
-      expect(HOME).to.be.a('string');
+      expect(HOME).not.toBeUndefined();
+      expect(typeof HOME).toBe('string');
     });
 
     it('Should find a home path for env HOME', () => {
@@ -26,8 +23,8 @@ describe('API Utils', () => {
 
       const HOME = Utils.getHome();
 
-      expect(HOME).to.be.not.undefined;
-      expect(HOME).to.be.a('string');
+      expect(HOME).not.toBeUndefined();
+      expect(typeof HOME).toBe('string');
 
       process.env.USERPROFILE = oldU;
       process.env.HOME = oldH;
@@ -42,8 +39,8 @@ describe('API Utils', () => {
 
       const HOME = Utils.getHome();
 
-      expect(HOME).to.be.not.undefined;
-      expect(HOME).to.be.a('string');
+      expect(HOME).not.toBeUndefined();
+      expect(typeof HOME).toBe('string');
 
       process.env.USERPROFILE = oldU;
       process.env.HOME = oldH;
@@ -55,7 +52,7 @@ describe('API Utils', () => {
       delete process.env.USERPROFILE;
       delete process.env.HOME;
 
-      expect(Utils.getHome).to.throw();
+      expect(Utils.getHome).toThrow();
     });
   });
 
@@ -68,7 +65,7 @@ describe('API Utils', () => {
         '  A\n' +
         'WHERE\n' +
         '  colname = \'value\';\n';
-      expect(Utils.formatSql(query)).to.be.eqls(expected);
+      expect(Utils.formatSql(query)).toEqual(expected);
 
       query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
       expected = 'SELECT\n' +
@@ -77,7 +74,7 @@ describe('API Utils', () => {
         '  [A]\n' +
         'WHERE\n' +
         '  [colname] = N\'value\';\n';
-      expect(Utils.formatSql(query)).to.be.eqls(expected);
+      expect(Utils.formatSql(query)).toEqual(expected);
 
     });
 
@@ -89,7 +86,7 @@ describe('API Utils', () => {
         '    A\n' +
         'WHERE\n' +
         '    colname = \'value\';\n';
-      expect(Utils.formatSql(query, 4)).to.be.eqls(expected);
+      expect(Utils.formatSql(query, 4)).toEqual(expected);
 
       query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
       expected = 'SELECT\n' +
@@ -98,8 +95,14 @@ describe('API Utils', () => {
         '    [A]\n' +
         'WHERE\n' +
         '    [colname] = N\'value\';\n';
-      expect(Utils.formatSql(query, 4)).to.be.eqls(expected);
+      expect(Utils.formatSql(query, 4)).toEqual(expected);
 
     });
+  });
+  describe('replacer()', () => {
+    const source = 'String ":toBeReplaced"!';
+    const expected = 'String "replaced"!';
+    const toReplace = { toBeReplaced: 'replaced' };
+    expect(Utils.replacer(source, toReplace)).toBe(expected);
   });
 });

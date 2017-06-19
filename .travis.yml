@@ -24,10 +24,11 @@ before_install:
 
 install:
   - npm install
-  - npm install coveralls mocha-lcov-reporter codacy-coverage
+  - npm install coveralls codacy-coverage
 
 script:
-  - npm run test-coverage
+  - npm run test:lint
+  - npm run test:unit -- --no-cache
 
 after_script:
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js

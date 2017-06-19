@@ -1,0 +1,26 @@
+{
+  "collectCoverage": true,
+  "collectCoverageFrom": ["src/**/*.ts"],
+  "coverageDirectory": "<rootDir>/coverage",
+  "coverageReporters": ["lcov"],
+  "coveragePathIgnorePatterns": [ "/node_modules/", "/interface/" ],
+  "coverageThreshold": {
+    "global": {
+      "statements": 20,
+      "branches": 36,
+      "functions": 24,
+      "lines": 28
+    }
+  },
+  "mapCoverage": true,
+  "moduleFileExtensions": [
+    "ts",
+    "js"
+  ],
+  "transform": {
+    "^.+\\.ts$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
+  },
+  "testMatch": [
+    "**/test/**/*.test.ts"
+  ]
+}

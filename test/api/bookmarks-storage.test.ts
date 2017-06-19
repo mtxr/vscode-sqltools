@@ -1,19 +1,26 @@
-// tslint:disable:no-unused-expression
-// tslint:disable:no-reference
-/// <reference path="../../node_modules/@types/mocha/index.d.ts" />
-/// <reference path="../../node_modules/@types/chai/index.d.ts" />
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import { expect } from 'chai';
+jest.mock('fs');
+
 import * as fs from 'fs';
 import * as path from 'path';
-import { stub } from 'sinon';
 import * as vscode from 'vscode';
 import { BookmarksStorage, Utils } from './../../src/api';
 import { NotFoundException, SizeException } from './../../src/api/exception';
 
 describe('BookmarksStorage', () => {
-  const filepath = path.join(Utils.getHome(), 'Testing.SQLToolsStorage.json');
+  let filepath;
+  const oldH = process.env.HOME;
+
+  beforeAll(() => {
+    process.env.HOME = '/fakehome';
+    filepath = path.join(Utils.getHome(), 'Testing.SQLToolsStorage.json');
+  });
+
+  afterAll(() => {
+    process.env.HOME = oldH;
+  });
+
   beforeEach(() => {
     if (fs.existsSync(filepath)) {
       fs.unlinkSync(filepath);
@@ -21,43 +28,48 @@ describe('BookmarksStorage', () => {
   });
 
   it('create bookmarks', () => {
-    const bookmarks = new BookmarksStorage('Testing');
-    expect(bookmarks).to.be.instanceof(BookmarksStorage);
+    const bookmarks = new BookmarksStorage().clear();
+    expect(bookmarks).toBeInstanceOf(BookmarksStorage);
   });
 
   it('re-create bookmarks with file was truncated', () => {
     fs.writeFileSync(filepath, '');
-    const bookmarks = new BookmarksStorage('Testing');
-    expect(bookmarks).to.be.instanceof(BookmarksStorage);
+    const bookmarks = new BookmarksStorage('Testing').clear();
+    expect(bookmarks).toBeInstanceOf(BookmarksStorage);
   });
 
   it('should add and get size correctly', () => {
-    const bookmarks = new BookmarksStorage('Testing');
-    expect(bookmarks.getSize()).to.be.eql(0);
+    const bookmarks = new BookmarksStorage('Testing').clear();
+    expect(bookmarks.getSize()).toEqual(0);
     bookmarks.add('alias', 'Query');
-    expect(bookmarks.getSize()).to.be.eql(1);
+    expect(bookmarks.getSize()).toEqual(1);
     bookmarks.add('alias1', 'Query');
-    expect(bookmarks.getSize()).to.be.eql(2);
+    expect(bookmarks.getSize()).toEqual(2);
   });
 
   it('should return all items', () => {
-    const bookmarks = new BookmarksStorage('Testing');
+    const bookmarks = new BookmarksStorage('Testing').clear();
     bookmarks.add('alias', 'Query');
-    expect(bookmarks.all()).to.be.eql({alias: 'Query'});
+    expect(bookmarks.all()).toEqual({alias: 'Query'});
   });
 
   it('should return query for a given alias', () => {
-    const bookmarks = new BookmarksStorage('Testing');
+    const bookmarks = new BookmarksStorage('Testing').clear();
     bookmarks.add('alias', 'Query');
-    expect(bookmarks.get('alias')).to.be.eql('Query');
+    expect(bookmarks.get('alias')).toEqual('Query');
+  });
+
+  it('should throw error if query does\'t exists', () => {
+    const bookmarks = new BookmarksStorage('Testing').clear();
+    expect(() => bookmarks.get('alias')).toThrowError('Query not found!');
   });
 
   it('should delete query for a give nalias', () => {
-    const bookmarks = new BookmarksStorage('Testing');
+    const bookmarks = new BookmarksStorage('Testing').clear();
     bookmarks.add('alias', 'Query');
-    expect(bookmarks.get('alias')).to.be.eql('Query');
+    expect(bookmarks.get('alias')).toEqual('Query');
     bookmarks.delete('alias');
-    expect(bookmarks.getSize()).to.be.eql(0);
-    expect(() => bookmarks.get('alias')).to.throw(NotFoundException, 'No query selected');
+    expect(bookmarks.getSize()).toEqual(0);
+    expect(() => bookmarks.get('alias')).toThrowError(NotFoundException);
   });
 });

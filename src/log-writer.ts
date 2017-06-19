@@ -29,16 +29,15 @@ export default class Logwriter {
     return this.output;
   }
 
-  private writeLog(message: string, ...data: any[]) {
+  public writeLog(message: string, ...data: any[]) {
     const date = (new Date()).toLocaleString();
     this.output.appendLine(`[${date}][${Constants.version}] ${message}`);
     if (data.length > 0) {
-      data.forEach((obj) => {
-        try {
-          this.output.appendLine(`[${date}][${Constants.version}]` + JSON.stringify(data));
-        } catch (e) {
-          this.output.appendLine(`[${date}][${Constants.version}]` + data.toString());
+      data.forEach((obj: any | object) => {
+        if (typeof obj === 'object' || Array.isArray(obj)) {
+          return this.output.appendLine(`[${date}][${Constants.version}] ` + JSON.stringify(obj));
         }
+        return this.output.appendLine(`[${date}][${Constants.version}] ` + obj.toString());
       });
     }
   }
