@@ -48,6 +48,11 @@
       "description": "Codacy Badge",
       "url": "https://api.codacy.com/project/badge/Coverage/5d888832ec9645f3bdd1214fefcb88e2",
       "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&utm_medium=referral&utm_content=mtxr/vscode-sqltools&utm_campaign=Badge_Coverage"
+    },
+    {
+      "description": "Coveralls Badge",
+      "url": "https://coveralls.io/github/mtxr/vscode-sqltools?branch=master",
+      "href": "https://coveralls.io/repos/github/mtxr/vscode-sqltools/badge.svg?branch=master"
     }
   ],
   "activationEvents": [
