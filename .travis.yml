@@ -25,7 +25,7 @@ before_install:
     fi
 
 install:
-  - yarn yarn
+  - yarn
   - yarn add coveralls codacy-coverage
 
 script:
