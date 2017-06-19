@@ -30,7 +30,7 @@ install:
 
 script:
   - yarn run test:lint
-  - yarn run test:unit -- --no-cache
+  - yarn run test:unit
 
 after_script:
   - cat ./coverage/lcov.info | ./node_modules/coveralls/bin/coveralls.js && echo 'Coveralls updated!'
