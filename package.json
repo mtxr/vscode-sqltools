@@ -24,20 +24,20 @@
     "formatter"
   ],
   "galleryBanner": {
-    "theme": "light",
-    "color": "#ffca7a"
+    "theme": "dark",
+    "color": "#555555"
   },
   "icon": "static/icon.png",
   "badges": [
     {
+      "description": "PayPal Donate",
       "url": "https://img.shields.io/badge/paypal-donate-yellow.svg",
-      "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8",
-      "description": "PayPal Donate"
+      "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
     },
     {
+      "description": "Build Status",
       "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
-      "href": "https://travis-ci.org/mtxr/vscode-sqltools",
-      "description": "Build Status"
+      "href": "https://travis-ci.org/mtxr/vscode-sqltools"
     },
     {
       "description": "Codacy Badge",
@@ -48,11 +48,6 @@
       "description": "Codacy Badge",
       "url": "https://api.codacy.com/project/badge/Coverage/5d888832ec9645f3bdd1214fefcb88e2",
       "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&utm_medium=referral&utm_content=mtxr/vscode-sqltools&utm_campaign=Badge_Coverage"
-    },
-    {
-      "description": "Coveralls Badge",
-      "url": "https://coveralls.io/github/mtxr/vscode-sqltools?branch=master",
-      "href": "https://coveralls.io/repos/github/mtxr/vscode-sqltools/badge.svg?branch=master"
     }
   ],
   "activationEvents": [
@@ -311,25 +306,20 @@
   },
   "devDependencies": {
     "@types/jest": "^20.0.0",
-    "@types/node": "^7.0.12",
-    "decache": "^4.1.0",
+    "@types/node": "^8.0.0",
     "fs-extra": "^3.0.1",
     "gulp": "^3.9.1",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-typescript": "^3.1.6",
     "gulp-watch": "^4.3.11",
     "jest": "^20.0.4",
+    "jest-cli": "^20.0.4",
     "ts-jest": "^20.0.6",
-    "ts-node": "^2.1.0",
     "tslint": "^5.4.3",
     "typescript": "^2.3.2",
     "vscode": "^1.0.0"
   },
   "dependencies": {
-    "codacy-coverage": "^2.0.2",
-    "coveralls": "^2.13.1",
-    "jest-cli": "^20.0.4",
-    "jsonc-parser": "^0.4.1",
     "mssql": "^4.0.4",
     "mysql": "^2.13.0",
     "sql-formatter": "^1.2.2"

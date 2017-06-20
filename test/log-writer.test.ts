@@ -30,21 +30,21 @@ describe('Log writer', () => {
         return;
       }
       expect(call[0])
-        .toMatch(/\[(\d+\/?){3}, (\d+:?){3} [AP]M\]\[v(\d+\.?){3}\] \{"success":true,"message":"teste"\}/);
+        .toMatch(/^\[(\d+\-?){3}T(\d+:?){3}.+\]\[v(\d+\.?){3}\] \{"success":true,"message":"teste"\}/);
     });
     o.appendLine.mockClear();
 
     output.warn(message, 'teste');
     expect(o.appendLine.mock.calls[0][0]).toMatch(/[A-Z]+\: Message!/);
     expect(o.appendLine.mock.calls[1][0])
-          .toMatch(/\[(\d+\/?){3}, (\d+:?){3} [AP]M\]\[v(\d+\.?){3}\] teste/);
+          .toMatch(/^\[(\d+\-?){3}T(\d+:?){3}.+\]\[v(\d+\.?){3}\] teste/);
     o.appendLine.mockClear();
 
     expectedData = ['dados'];
     output.warn(message, expectedData);
     expect(o.appendLine.mock.calls[0][0]).toMatch(/[A-Z]+\: Message!/);
     expect(o.appendLine.mock.calls[1][0])
-          .toMatch(/\[(\d+\/?){3}, (\d+:?){3} [AP]M\]\[v(\d+\.?){3}\] \["dados"\]/);
+          .toMatch(/^\[(\d+\-?){3}T(\d+:?){3}.+\]\[v(\d+\.?){3}\] \["dados"\]/);
     o.appendLine.mockClear();
     o.appendLine.mockReset();
   });

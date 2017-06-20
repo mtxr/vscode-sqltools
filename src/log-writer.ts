@@ -30,7 +30,7 @@ export default class Logwriter {
   }
 
   public writeLog(message: string, ...data: any[]) {
-    const date = (new Date()).toLocaleString();
+    const date = (new Date()).toISOString().substring(0, 20);
     this.output.appendLine(`[${date}][${Constants.version}] ${message}`);
     if (data.length > 0) {
       data.forEach((obj: any | object) => {
