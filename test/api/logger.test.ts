@@ -38,7 +38,7 @@ describe('Logger', () => {
 
     o.appendLine.mock.calls.forEach((call) => {
       expect(call[0])
-        .toMatch(/^\[(\d+\/){2}\d{4}, (\d+:?){3} [AP]M\]\[v\d+\.\d+\.\d+\] [A-Z]{4,5}: teste$/);
+        .toMatch(/^\[(\d+\-?){3}T(\d+:?){3}.+\]\[v(\d+\.?){3}\] [A-Z]{4,5}: teste$/);
     });
     o.appendLine.mockReset();
   });
