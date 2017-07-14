@@ -14,8 +14,9 @@ const window = {
 const workspace = {
   getConfiguration: jest.fn(),
 };
-
+const ExtensionContext = {};
 export {
   window,
   workspace,
+  ExtensionContext,
 };

@@ -10,8 +10,8 @@
         "rootDir": "."
     },
     "exclude": [
-        "typings",
         "node_modules",
-        ".vscode-test"
+        ".vscode-test",
+        "__mocks__"
     ]
 }

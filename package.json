@@ -9,7 +9,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.10.0"
+        "vscode": "^1.13.0"
     },
     "categories": [
         "Languages",
@@ -294,6 +294,13 @@
                     }
                 }
             }
+        },
+        "views": {
+            "explorer": [{
+                    "id": "sqltoolsConnection",
+                    "name": "SQL Connection"
+                }
+            ]
         }
     },
     "scripts": {

@@ -32,6 +32,7 @@ import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
+import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SuggestionsProvider } from './suggestions-provider';
 
 const {
@@ -59,6 +60,7 @@ export default class SQLTools {
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
   private outputProvider: OutputProvider;
+  private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
   private previewUri = Uri.parse('sqltools://results');
 
@@ -349,6 +351,7 @@ export default class SQLTools {
 
     this.extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 9);
     this.context.subscriptions.push(this.extDatabaseStatus);
+    this.extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
     this.updateStatusBar();
   }
 
@@ -387,6 +390,12 @@ export default class SQLTools {
     this.context.subscriptions.push(
       Languages.registerCompletionItemProvider(['sql', 'plaintext'],
       this.suggestionsProvider, ...completionTriggers));
+
+    if (typeof Window.registerTreeDataProvider !== 'function') {
+      return;
+    }
+    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
+    Window.registerTreeDataProvider('sqltoolsConnection', this.sqlconnectionTreeProvider);
   }
 
   private registerEvents() {
@@ -409,6 +418,7 @@ export default class SQLTools {
     this.activeConnection = connection;
     this.updateStatusBar();
     this.suggestionsProvider.setConnection(connection);
+    this.sqlconnectionTreeProvider.setConnection(connection);
   }
 
   private checkIfConnected(): Promise<Connection> {
