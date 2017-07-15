@@ -2,14 +2,14 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.4.1",
+    "version": "0.5.1",
     "publisher": "mtxr",
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.10.0"
+        "vscode": "^1.13.0"
     },
     "categories": [
         "Languages",
@@ -25,19 +25,19 @@
     ],
     "galleryBanner": {
         "theme": "dark",
-        "color": "#333333"
+        "color": "#555555"
     },
     "icon": "static/icon.png",
     "badges": [
         {
+            "description": "PayPal Donate",
             "url": "https://img.shields.io/badge/paypal-donate-yellow.svg",
-            "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8",
-            "description": "PayPal Donate"
+            "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
         },
         {
+            "description": "Build Status",
             "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
-            "href": "https://travis-ci.org/mtxr/vscode-sqltools",
-            "description": "Build Status"
+            "href": "https://travis-ci.org/mtxr/vscode-sqltools"
         },
         {
             "description": "Codacy Badge",
@@ -188,6 +188,11 @@
                     "default": true,
                     "description": "Show debugging messages on console."
                 },
+                "sqltools.telemetry": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Help SQLTools development."
+                },
                 "sqltools.show_statusbar": {
                     "type": "boolean",
                     "default": true,
@@ -278,9 +283,8 @@
                             "dialect": {
                                 "type": "string",
                                 "enum": [
-                                    "mssql",
-                                    "mysql",
-                                    "mariadb"
+                                    "MSSQL",
+                                    "MySQL"
                                 ],
                                 "description": "Path for you password file",
                                 "required": false
@@ -295,42 +299,43 @@
                     }
                 }
             }
+        },
+        "views": {
+            "explorer": [
+                {
+                    "id": "sqltoolsConnection",
+                    "name": "SQL Connection"
+                }
+            ]
         }
     },
     "scripts": {
         "vscode:prepublish": "./node_modules/.bin/gulp compile",
         "compile": "./node_modules/.bin/gulp watch",
         "postinstall": "node ./node_modules/vscode/bin/install",
-        "test": "./node_modules/.bin/gulp compile && node ./node_modules/vscode/bin/test",
-        "test-coverage": "./node_modules/.bin/gulp pre-coverage-vscode && node ./node_modules/vscode/bin/test"
+        "test:unit": "./node_modules/.bin/jest --config jest.json",
+        "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
+        "test": "npm run test:lint && npm run test:unit"
     },
     "devDependencies": {
-        "@types/chai": "^3.5.0",
-        "@types/mocha": "^2.2.40",
-        "@types/node": "^7.0.12",
-        "chai": "^3.5.0",
-        "decache": "^4.1.0",
+        "@types/jest": "^20.0.0",
+        "@types/node": "^8.0.13",
         "fs-extra": "^3.0.1",
         "gulp": "^3.9.1",
-        "gulp-codacy": "^1.0.0",
-        "gulp-istanbul": "^1.1.1",
-        "gulp-mocha": "^3.0.1",
         "gulp-sourcemaps": "^2.6.0",
         "gulp-typescript": "^3.1.6",
         "gulp-watch": "^4.3.11",
-        "istanbul": "^0.4.5",
-        "remap-istanbul": "^0.6.4",
-        "semver": "^5.3.0",
-        "sinon": "^1.17.7",
-        "source-map-support": "^0.4.14",
-        "ts-node": "^2.1.0",
+        "jest": "^20.0.4",
+        "jest-cli": "^20.0.4",
+        "ts-jest": "^20.0.6",
+        "tslint": "^5.4.3",
         "typescript": "^2.3.2",
         "vscode": "^1.0.0"
     },
     "dependencies": {
-        "jsonc-parser": "^0.4.1",
         "mssql": "^4.0.4",
         "mysql": "^2.13.0",
-        "sql-formatter-sqltools": "^1.2.0"
+        "request": "^2.81.0",
+        "sql-formatter": "^1.2.2"
     }
 }

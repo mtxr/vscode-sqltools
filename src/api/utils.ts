@@ -1,7 +1,6 @@
-// tslint:disable:no-reference
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import * as formatter from 'sql-formatter-sqltools';
+import * as formatter from 'sql-formatter';
 import { EnvironmentException } from './exception';
 
 export default class Utils {

@@ -1,4 +1,3 @@
-// tslint:disable:no-reference
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
 import * as fs from 'fs';
@@ -20,7 +19,7 @@ export default class BookmarksStorage extends BaseStorage {
 
   public get(key): Object {
     if (!this.items[key]) {
-      throw new NotFoundException('No query selected');
+      throw new NotFoundException('Query not found!');
     }
     return this.items[key];
   }

@@ -1,4 +1,3 @@
-// tslint:disable:no-reference
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import { EventEmitter } from 'events';
@@ -33,8 +32,9 @@ import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
+import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SuggestionsProvider } from './suggestions-provider';
-
+import Telemetry from './telemetry';
 const {
   registerCommand,
   registerTextEditorCommand,
@@ -60,6 +60,7 @@ export default class SQLTools {
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
   private outputProvider: OutputProvider;
+  private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
   private previewUri = Uri.parse('sqltools://results');
 
@@ -301,12 +302,18 @@ export default class SQLTools {
     } else {
       this.history = new History(this.config.get('history_size', 100));
     }
+    if (this.config.get('telemetry', true)) {
+      Telemetry.enable();
+    } else {
+      Telemetry.disable();
+    }
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
       .setLevel(Logger.levels[this.config.get('log_level', 'DEBUG')])
       .setLogging(this.config.get('logging', false));
+    Telemetry.setLogger(this.logger);
   }
 
   private registerCommands(): void {
@@ -337,6 +344,7 @@ export default class SQLTools {
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
       this.logger.debug(`Triggering command: ${command}`);
+      Telemetry.registerCall(command);
       this.events.emit(command, ...args);
     }));
   }
@@ -350,6 +358,7 @@ export default class SQLTools {
 
     this.extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 9);
     this.context.subscriptions.push(this.extDatabaseStatus);
+    this.extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
     this.updateStatusBar();
   }
 
@@ -388,6 +397,12 @@ export default class SQLTools {
     this.context.subscriptions.push(
       Languages.registerCompletionItemProvider(['sql', 'plaintext'],
       this.suggestionsProvider, ...completionTriggers));
+
+    if (typeof Window.registerTreeDataProvider !== 'function') {
+      return;
+    }
+    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
+    Window.registerTreeDataProvider('sqltoolsConnection', this.sqlconnectionTreeProvider);
   }
 
   private registerEvents() {
@@ -410,6 +425,7 @@ export default class SQLTools {
     this.activeConnection = connection;
     this.updateStatusBar();
     this.suggestionsProvider.setConnection(connection);
+    this.sqlconnectionTreeProvider.setConnection(connection);
   }
 
   private checkIfConnected(): Promise<Connection> {
