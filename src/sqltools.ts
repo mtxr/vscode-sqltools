@@ -34,7 +34,7 @@ import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SuggestionsProvider } from './suggestions-provider';
-
+import Telemetry from './telemetry';
 const {
   registerCommand,
   registerTextEditorCommand,
@@ -302,12 +302,18 @@ export default class SQLTools {
     } else {
       this.history = new History(this.config.get('history_size', 100));
     }
+    if (this.config.get('telemetry', true)) {
+      Telemetry.enable();
+    } else {
+      Telemetry.disable();
+    }
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
       .setLevel(Logger.levels[this.config.get('log_level', 'DEBUG')])
       .setLogging(this.config.get('logging', false));
+    Telemetry.setLogger(this.logger);
   }
 
   private registerCommands(): void {
@@ -338,6 +344,7 @@ export default class SQLTools {
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
       this.logger.debug(`Triggering command: ${command}`);
+      Telemetry.registerCall(command);
       this.events.emit(command, ...args);
     }));
   }
