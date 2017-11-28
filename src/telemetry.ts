@@ -1,27 +1,21 @@
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import * as request from 'request';
-
-function getFunctionName(): string | null {
-  try {
-    return (new Error()).stack.match(/at (\S+)/g)[2].slice(3);
-  } catch (error) {
-    return null;
-  }
-}
+import Constants from './constants';
 
 export default class Telemetry {
-  public static registerCall(fnName?: string): void {
+  public static regiterEvent(event: string, ...extra: any[]): void {
     if (!Telemetry.isEnabled) return;
-    const fn = fnName || getFunctionName();
-    if (!fn) return;
+    // tslint:disable:object-literal-sort-keys
     request({
       json: {
+        version: Constants.version,
         date: (new Date()).toISOString().substr(0, 10),
-        fn,
+        event,
+        extra,
       },
       method: 'POST',
-      url: `${Telemetry.server}/registerCall`,
+      url: `${Telemetry.server}/registerEvent`,
     });
   }
 
@@ -36,7 +30,7 @@ export default class Telemetry {
   public static setLogger(logger: any = console) {
     Telemetry.logger = logger;
   }
-  private static server: string = 'https://us-central1-sqltools-a541d.cloudfunctions.net';
+  private static server: string = 'https://us-central1-sqltools-telemetry-api.cloudfunctions.net';
   private static isEnabled: Boolean = true;
   private static logger: any = console;
 }
