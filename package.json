@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.6.1",
+    "version": "0.6.2",
     "publisher": "mtxr",
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
@@ -193,6 +193,11 @@
                     "default": true,
                     "description": "Help SQLTools development."
                 },
+                "sqltools.telemetryUUID": {
+                    "type": "string",
+                    "default": null,
+                    "description": "Extension ID"
+                },
                 "sqltools.show_statusbar": {
                     "type": "boolean",
                     "default": true,
@@ -333,10 +338,11 @@
         "vscode": "^1.0.0"
     },
     "dependencies": {
+        "electron-google-analytics": "0.0.24",
         "mssql": "^4.0.4",
-        "mysql": "^2.13.0",
+        "mysql": "^2.15.0",
         "opn": "^5.1.0",
-        "request": "^2.81.0",
-        "sql-formatter": "^1.2.2"
+        "sql-formatter": "^2.1.0",
+        "uuid": "^3.1.0"
     }
 }
