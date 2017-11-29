@@ -307,18 +307,14 @@ export default class SQLTools {
     } else {
       this.history = new History(this.config.get('history_size', 100));
     }
-    if (this.config.get('telemetry', true)) {
-      Telemetry.enable();
-    } else {
-      Telemetry.disable();
-    }
+    this.setupLogger();
+    this.registerTelemetry();
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
       .setLevel(Logger.levels[this.config.get('log_level', 'DEBUG')])
       .setLogging(this.config.get('logging', false));
-    Telemetry.setLogger(this.logger);
   }
 
   private registerCommands(): void {
@@ -349,7 +345,7 @@ export default class SQLTools {
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
       this.logger.debug(`Triggering command: ${command}`);
-      Telemetry.regiterEvent(`command:${command}`);
+      Telemetry.registerCommandUsage(command);
       this.events.emit(command, ...args);
     }));
   }
@@ -418,7 +414,6 @@ export default class SQLTools {
   private reloadConfig() {
     this.logger.debug('Config reloaded!');
     this.loadConfigs();
-    this.setupLogger();
     this.autoConnectIfActive();
     this.updateStatusBar();
   }
@@ -445,14 +440,19 @@ export default class SQLTools {
   private help(): void {
     const moreInfo = 'More Info';
     const supportProject = 'Support This Project';
-    Window.showInformationMessage('Do you like SQLTools? Help us to keep making it better.', moreInfo, supportProject)
+    const message = 'Do you like SQLTools? Help us to keep making it better.';
+    Window.showInformationMessage(message, moreInfo, supportProject)
       .then((value) => {
-        Telemetry.regiterEvent(`click:help`, value);
+        Telemetry.infoMessage(message, value);
         if (value === moreInfo) {
           openurl('https://github.com/mtxr/vscode-sqltools#donate');
         } else if (value === supportProject) {
           openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
         }
       });
+  }
+
+  private registerTelemetry(): void {
+    Telemetry.register(this.config, this.logger);
   }
 }
