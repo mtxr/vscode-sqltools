@@ -64,7 +64,7 @@ describe('API Utils', () => {
         'FROM\n' +
         '  A\n' +
         'WHERE\n' +
-        '  colname = \'value\';\n';
+        '  colname = \'value\';';
       expect(Utils.formatSql(query)).toEqual(expected);
 
       query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
@@ -73,7 +73,7 @@ describe('API Utils', () => {
         'FROM\n' +
         '  [A]\n' +
         'WHERE\n' +
-        '  [colname] = N\'value\';\n';
+        '  [colname] = N\'value\';';
       expect(Utils.formatSql(query)).toEqual(expected);
 
     });
@@ -85,7 +85,7 @@ describe('API Utils', () => {
         'FROM\n' +
         '    A\n' +
         'WHERE\n' +
-        '    colname = \'value\';\n';
+        '    colname = \'value\';';
       expect(Utils.formatSql(query, 4)).toEqual(expected);
 
       query = 'SELECT * FROM [A] WHERE [colname]=N\'value\';';
@@ -94,7 +94,7 @@ describe('API Utils', () => {
         'FROM\n' +
         '    [A]\n' +
         'WHERE\n' +
-        '    [colname] = N\'value\';\n';
+        '    [colname] = N\'value\';';
       expect(Utils.formatSql(query, 4)).toEqual(expected);
 
     });
