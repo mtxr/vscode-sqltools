@@ -35,7 +35,7 @@ export default class Telemetry {
         );
       Telemetry.logger.info(`Telemetry random UUID generated: ${Telemetry.extensionUUID}`);
     }
-    Telemetry.analytics.pageview('vscode', '/', 'Started', Telemetry.uaCode)
+    Telemetry.analytics.pageview('vscode', '/', 'Started', Telemetry.extensionUUID)
       .catch((err) => Telemetry.logger.error('Register pageview error', err));
   }
 
