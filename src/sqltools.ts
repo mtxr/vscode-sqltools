@@ -39,6 +39,10 @@ const {
   registerCommand,
   registerTextEditorCommand,
 } = VSCode;
+
+/* tslint:disable: no-var-requires */
+const openurl = require('opn');
+
 export default class SQLTools {
   public static bootstrap(context: ExtensionContext): SQLTools {
     if (SQLTools.instance) {
@@ -73,6 +77,7 @@ export default class SQLTools {
     this.registerCommands();
     this.registerStatusBar();
     this.autoConnectIfActive();
+    this.help();
   }
 
   /**
@@ -344,7 +349,7 @@ export default class SQLTools {
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
       this.logger.debug(`Triggering command: ${command}`);
-      Telemetry.registerCall(command);
+      Telemetry.regiterEvent(`command:${command}`);
       this.events.emit(command, ...args);
     }));
   }
@@ -435,5 +440,19 @@ export default class SQLTools {
     return this.selectConnection().then(() => {
       return Promise.resolve(this.activeConnection);
     }) as Promise<Connection>;
+  }
+
+  private help(): void {
+    const moreInfo = 'More Info';
+    const supportProject = 'Support This Project';
+    Window.showInformationMessage('Do you like SQLTools? Help us to keep making it better.', moreInfo, supportProject)
+      .then((value) => {
+        Telemetry.regiterEvent(`click:help`, value);
+        if (value === moreInfo) {
+          openurl('https://github.com/mtxr/vscode-sqltools#donate');
+        } else if (value === supportProject) {
+          openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+        }
+      });
   }
 }
