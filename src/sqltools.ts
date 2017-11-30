@@ -77,7 +77,6 @@ export default class SQLTools {
     this.registerCommands();
     this.registerStatusBar();
     this.autoConnectIfActive();
-    this.help();
   }
 
   /**
