@@ -42,6 +42,7 @@ const {
 
 /* tslint:disable: no-var-requires */
 const openurl = require('opn');
+const fs = require('fs');
 
 export default class SQLTools {
   public static bootstrap(context: ExtensionContext): SQLTools {
@@ -441,15 +442,31 @@ export default class SQLTools {
     const moreInfo = 'More Info';
     const supportProject = 'Support This Project';
     const message = 'Do you like SQLTools? Help us to keep making it better.';
-    Window.showInformationMessage(message, moreInfo, supportProject)
-      .then((value) => {
-        Telemetry.infoMessage(message, value);
-        if (value === moreInfo) {
-          openurl('https://github.com/mtxr/vscode-sqltools#donate');
-        } else if (value === supportProject) {
-          openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+    const file = require('path').join(Utils.getHome(), '.sqltools-lasrun');
+    fs.readFile(file, (err, data) => {
+      let last = new Date(0);
+      if (!err) {
+        try {
+          last = new Date(parseInt(data.toString(), 10));
+          if (isNaN(last.getTime())) last = new Date(0);
+        } catch (e) {
+          last = new Date(0);
         }
-      });
+      }
+      if (last.getTime() >= new Date().setHours(0, 0, 0, 0)) {
+        return;
+      }
+      fs.writeFile(file, `${new Date().getTime()}`);
+      Window.showInformationMessage(message, moreInfo, supportProject)
+        .then((value) => {
+          Telemetry.infoMessage(message, value);
+          if (value === moreInfo) {
+            openurl('https://github.com/mtxr/vscode-sqltools#donate');
+          } else if (value === supportProject) {
+            openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+          }
+        });
+    });
   }
 
   private registerTelemetry(): void {
