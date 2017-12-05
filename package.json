@@ -170,7 +170,7 @@
             {
                 "command": "SQLTools.bookmarkSelection",
                 "key": "ctrl+e ctrl+q",
-                "mac": "cmd+e cmd+q",
+                "mac": "cmd+e q",
                 "when": "editorTextFocus && !editorReadonly"
             }
         ],
