@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.6.4",
+    "version": "0.6.5",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "repository": {
@@ -170,7 +170,7 @@
             {
                 "command": "SQLTools.bookmarkSelection",
                 "key": "ctrl+e ctrl+q",
-                "mac": "cmd+e cmd+q",
+                "mac": "cmd+e q",
                 "when": "editorTextFocus && !editorReadonly"
             }
         ],

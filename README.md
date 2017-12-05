@@ -25,14 +25,14 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 ## Features
 
 * SQL Format (Beautifier)
-  * __Win/Linux__: `ctrl+e ctrl+b`
-  * __OSX__: `cmd+e cmd+b`
+  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+b</kbd>
+  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+b</kbd>
 * Bookmark query
-  * __Win/Linux__: `ctrl+e, ctrl+q`
-  * __OSX__: `cmd+e, cmd+q`
+  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+q</kbd>
+  * __OSX__: <kbd>cmd+e</kbd> <kbd>q</kbd>
 * Delete Bookmarked query
-  * __Win/Linux__: `ctrl+e, ctrl+r`
-  * __OSX__: `cmd+e, cmd+r`
+  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+r</kbd>
+  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+r</kbd>
 * Edit Bookmarked query
 
 ## Docs

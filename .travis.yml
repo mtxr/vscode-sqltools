@@ -11,12 +11,10 @@ addons:
       - libstdc++6-4.7-dev
 
 node_js:
-  - "6"
-  - "7"
   - "8"
 
 os:
-  - osx
+  # - osx
   - linux
 
 before_install:
