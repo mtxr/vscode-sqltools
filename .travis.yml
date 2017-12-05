@@ -14,10 +14,8 @@ node_js:
   - "8"
 
 os:
-  - osx
+  # - osx
   - linux
-
-osx_image: xcode9.1
 
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
