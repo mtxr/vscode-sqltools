@@ -37,7 +37,9 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 
 ## Docs
 
-You can read the docs in the [SQLTools Wiki](https://github.com/mtxr/vscode-sqltools/wiki)
+[Setup your first connection](https://github.com/mtxr/vscode-sqltools/wiki/connections) using this guide: [Connections](https://github.com/mtxr/vscode-sqltools/wiki/connections)
+
+You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vscode-sqltools/wiki)
 
 ## To-do
 
