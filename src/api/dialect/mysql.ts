@@ -32,6 +32,7 @@ export default class MySQL implements ConnectionDialect {
       password: this.credentials.password,
       user: this.credentials.username,
     };
+    const self = this;
     const connection = mysql.createConnection(options);
     return new Promise((resolve, reject) => {
       connection.connect((err) => {
@@ -39,16 +40,19 @@ export default class MySQL implements ConnectionDialect {
           reject('error connecting: ' + err.stack);
           return;
         }
-        this.connection = Promise.resolve(connection);
-        resolve(this.connection);
+        self.connection = Promise.resolve(connection);
+        resolve(self.connection);
       });
     });
   }
 
   public close() {
+    if (!this.connection) return Promise.resolve();
+
     return this.connection.then((conn) => {
       conn.destroy();
       this.connection = null;
+      return Promise.resolve();
     });
   }
 

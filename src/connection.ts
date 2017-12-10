@@ -12,11 +12,13 @@ export default class Connection {
   }
 
   public close() {
-    return this.connection.close();
+    return this.connection.close()
+      .catch((e) => Promise.reject(e));
   }
 
   public open() {
-    return this.connection.open();
+    return this.connection.open()
+      .catch((e) => Promise.reject(e));
   }
 
   public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {

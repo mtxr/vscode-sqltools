@@ -24,6 +24,11 @@ export class SidebarTable extends TreeItem {
     public readonly command?: Command,
   ) {
     super(label, collapsibleState);
+    this.command = {
+      arguments: [ label ],
+      command: 'sqltools.appendToPointer',
+      title: 'Add to Cursor position',
+    };
   }
 
 }

@@ -39,7 +39,9 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable
   }
   public setConnection(connection: Connection) {
     this.connection = connection;
+    this.tree = [];
     if (!connection) {
+      this.refresh();
       return;
     }
     this.connection.getTables()
@@ -63,6 +65,7 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable
               });
               this.tree[this.tableIndex[column.tableName]].columns.push(col);
             });
+            this.refresh();
           });
       });
   }

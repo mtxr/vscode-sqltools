@@ -19,6 +19,7 @@
             "name": "Run Tests",
             "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
             "cwd": "${workspaceRoot}",
+            "preLaunchTask": "compile",
             "args": [
                 "--i",
                 "--coverage",

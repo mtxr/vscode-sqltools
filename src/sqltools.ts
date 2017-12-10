@@ -183,10 +183,17 @@ export default class SQLTools {
 
   public selectConnection(): Thenable<Connection> {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
+      if (!selection || !selection.label) return;
       this.history.clear();
       this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label)));
       return this.activeConnection;
+    }, (reason) => {
+      this.setConnection(null);
     });
+  }
+
+  public closeConnection(): void {
+    this.setConnection(null);
   }
 
   public showConnectionMenu(): Thenable<QuickPickItem> {
@@ -207,8 +214,10 @@ export default class SQLTools {
             return { label: table.name } as QuickPickItem;
           });
           return Window.showQuickPick(options);
-        });
-    });
+        })
+        .catch ((error) => this.errorHandler('Error fetching tables.', error));
+    })
+    .catch((error) => this.errorHandler('Error showing tables.', error));
   }
 
   public showRecords() {
@@ -333,6 +342,7 @@ export default class SQLTools {
     this.registerCommand('runFromBookmarks', registerCommand);
     this.registerCommand('runFromHistory', registerCommand);
     this.registerCommand('selectConnection', registerCommand);
+    this.registerCommand('closeConnection', registerCommand);
     this.registerCommand('showHistory', registerCommand);
     this.registerCommand('showOutputChannel', registerCommand);
     this.registerCommand('showRecords', registerCommand);
@@ -382,13 +392,14 @@ export default class SQLTools {
     if (error) {
       this.logger.error(`${message}: `, error.stack);
     }
-    return Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No')
+    Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No')
       .then((res) => {
         if (res === 'Yes') {
           this.showOutputChannel();
         }
         return res;
       });
+    return null;
   }
 
   private registerProviders() {
@@ -420,7 +431,7 @@ export default class SQLTools {
   }
 
   private setConnection(connection?: Connection) {
-    if (connection && this.activeConnection) {
+    if (this.activeConnection) {
       this.activeConnection.close();
     }
     this.activeConnection = connection;

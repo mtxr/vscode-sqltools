@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.6.5",
+    "version": "0.6.6",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "repository": {
@@ -91,6 +91,11 @@
             {
                 "title": "Connect",
                 "command": "SQLTools.selectConnection",
+                "category": "SQLTools"
+            },
+            {
+                "title": "Disconnect",
+                "command": "SQLTools.closeConnection",
                 "category": "SQLTools"
             },
             {

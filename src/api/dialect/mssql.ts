@@ -23,7 +23,7 @@ export default class MSSQL implements ConnectionDialect {
 
   public open() {
     if (this.connection) {
-      return this.connection;
+      return Promise.resolve(this.connection);
     }
     const options = {
       database: this.credentials.database,
@@ -31,12 +31,23 @@ export default class MSSQL implements ConnectionDialect {
       server: this.credentials.server,
       user: this.credentials.username,
     };
-    this.connection = mssql.connect(options);
-    return this.connection;
+
+    const self = this;
+    const pool = new mssql.ConnectionPool(options);
+    return new Promise((resolve, reject) => {
+      pool.connect((err) => {
+        if (err) return reject(err);
+        self.connection = Promise.resolve(pool);
+        return resolve(self.connection);
+      });
+    });
   }
 
   public close() {
-    return this.connection.then((pool) => pool.close());
+    if (!this.connection) return Promise.resolve();
+
+    return this.connection
+      .then((pool) => Promise.resolve(pool.close()));
   }
 
   public query(query: string): Promise<any> {
