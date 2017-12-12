@@ -31,6 +31,7 @@ import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import errorHandler from './error-handler';
+import { SelectionFormatter } from './formatting-provider';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
 import { SidebarColumn } from './sidebar-column';
@@ -38,6 +39,7 @@ import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarTable } from './sidebar-table';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
+
 const {
   registerCommand,
   registerTextEditorCommand,
@@ -429,6 +431,9 @@ export default class SQLTools {
     }
     this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
     Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
+
+    const formattingProvider = new SelectionFormatter();
+    Languages.registerDocumentRangeFormattingEditProvider('sql', formattingProvider);
   }
 
   private registerEvents() {

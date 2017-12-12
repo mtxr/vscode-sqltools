@@ -4,7 +4,7 @@ import {
 import { Logger } from './api';
 import Telemetry from './telemetry';
 
-function errorHandler(logger: Logger, message: string, error ?: Error, yesCallback?: Function) {
+function errorHandler(logger: Logger, message: string, error ?: Error, yesCallback?: Function): null {
   Telemetry.errorMessage(message);
   if (typeof yesCallback !== 'function') {
     Window.showErrorMessage(message);
@@ -19,6 +19,7 @@ function errorHandler(logger: Logger, message: string, error ?: Error, yesCallba
   if (error) {
     logger.error(`${message}: `, error.stack);
   }
+  return null;
 }
 
 export default errorHandler;

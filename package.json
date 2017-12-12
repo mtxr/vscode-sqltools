@@ -327,18 +327,30 @@
         "menus": {
             "commandPalette": [
                 {
-                    "command": "gitlens.gitExplorer.openChanges",
+                    "command": "SQLTools.appendToCursor",
                     "when": "false"
+                },
+                {
+                    "command": "SQLTools.formatSql",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.executeQuery",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.bookmarkSelection",
+                    "when": "editorHasSelection"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table"
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column"
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table"
                 }
             ]
         }
