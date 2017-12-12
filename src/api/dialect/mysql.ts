@@ -30,6 +30,7 @@ export default class MySQL implements ConnectionDialect {
       host: this.credentials.server,
       multipleStatements: true,
       password: this.credentials.password,
+      port: this.credentials.port,
       user: this.credentials.username,
     };
     const self = this;
