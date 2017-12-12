@@ -30,9 +30,12 @@ import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
+import errorHandler from './error-handler';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
+import { SidebarColumn } from './sidebar-column';
 import { SidebarTableColumnProvider } from './sidebar-provider';
+import { SidebarTable } from './sidebar-table';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
 const {
@@ -98,8 +101,8 @@ export default class SQLTools {
               edit.insert(new Position(0, 0), `${headerText}${query.detail}`);
             });
           });
-        }, (error) => this.errorHandler('Ops, we\'ve got an error!', error));
-      }, (error) => this.errorHandler('Ops, we\'ve got an error!', error));
+        }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
+      }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
   }
   public bookmarkSelection(editor: TextEditor, edit: TextEditorEdit) {
     try {
@@ -116,7 +119,7 @@ export default class SQLTools {
           this.logger.debug(`Bookmarked query named '${name}'`);
         });
     } catch (error) {
-      this.errorHandler('Error bookmarking query.', error);
+      errorHandler(this.logger, 'Error bookmarking query.', error);
     }
   }
 
@@ -161,7 +164,25 @@ export default class SQLTools {
       VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
       this.logger.debug('Query formatted!');
     } catch (error) {
-      this.errorHandler('Error formatting query.', error);
+      errorHandler(this.logger, 'Error formatting query.', error);
+    }
+  }
+
+  /**
+   * Utils commands
+   */
+  public appendToCursor(node: SidebarColumn | SidebarTable): void {
+    try {
+      const editor: TextEditor = Window.activeTextEditor;
+      if (!editor) return;
+      editor.edit((edit) => {
+        const cursors: Selection[] = editor.selections;
+        cursors.forEach((cursor: Selection) => {
+          edit.insert(cursor.active, node.label);
+        });
+      });
+    } catch (error) {
+      errorHandler(this.logger, 'Error adding table/column to editor.', error);
     }
   }
 
@@ -185,7 +206,7 @@ export default class SQLTools {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
       if (!selection || !selection.label) return;
       this.history.clear();
-      this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label)));
+      this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label), this.logger));
       return this.activeConnection;
     }, (reason) => {
       this.setConnection(null);
@@ -215,9 +236,9 @@ export default class SQLTools {
           });
           return Window.showQuickPick(options);
         })
-        .catch ((error) => this.errorHandler('Error fetching tables.', error));
+        .catch ((error) => errorHandler(this.logger, 'Error fetching tables.', error, this.showOutputChannel));
     })
-    .catch((error) => this.errorHandler('Error showing tables.', error));
+    .catch((error) => errorHandler(this.logger, 'Error showing tables.', error, this.showOutputChannel));
   }
 
   public showRecords() {
@@ -225,7 +246,7 @@ export default class SQLTools {
       .then((selected) => {
         this.activeConnection.showRecords(selected.label)
           .then((results) => this.printOutput(results))
-          .catch((error) => this.errorHandler('Error fetching records.', error));
+          .catch((error) => errorHandler(this.logger, 'Error fetching records.', error, this.showOutputChannel));
       });
   }
 
@@ -234,7 +255,7 @@ export default class SQLTools {
     .then((selected) => {
       this.activeConnection.describeTable(selected.label)
         .then((results) => this.printOutput(results))
-        .catch((error) => this.errorHandler('Error describing table.', error));
+        .catch((error) => errorHandler(this.logger, 'Error describing table.', error, this.showOutputChannel));
     });
   }
 
@@ -254,7 +275,7 @@ export default class SQLTools {
         this.history.add(selectedQuery);
         this.printOutput(result);
       })
-      .catch((error) => this.errorHandler('Error fetching records.', error));
+      .catch((error) => errorHandler(this.logger, 'Error fetching records.', error, this.showOutputChannel));
     });
   }
 
@@ -274,7 +295,8 @@ export default class SQLTools {
         .then((selected) => {
           this.activeConnection.query((selected.label))
             .then((results) => this.printOutput(results))
-            .catch((error) => this.errorHandler('Error while running query.', error));      });
+            .catch((error) => errorHandler(this.logger, 'Error while running query.', error, this.showOutputChannel));
+          });
     });
   }
 
@@ -284,7 +306,11 @@ export default class SQLTools {
         .then((selected) => {
           this.activeConnection.query((selected.detail))
             .then((results) => this.printOutput(results))
-            .catch((error) => this.errorHandler('Error while running bookmarked query.', error));
+            .catch((error) => errorHandler(
+              this.logger,
+              'Error while running bookmarked query.', error,
+              this.showOutputChannel,
+            ));
         });
     });
   }
@@ -296,14 +322,14 @@ export default class SQLTools {
     this.outputProvider.setResults(results);
     this.outputProvider.update(this.previewUri);
     return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.One, 'SQLTools Results')
-      .then(undefined, (reason) => this.errorHandler('Failed to show results', reason));
+      .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
   private autoConnectIfActive() {
     const defaultConnection: string = this.config.get('autoConnectTo', null);
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
     if (defaultConnection) {
-      this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection)));
+      this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection), this.logger));
     } else {
       this.setConnection();
     }
@@ -346,6 +372,7 @@ export default class SQLTools {
     this.registerCommand('showHistory', registerCommand);
     this.registerCommand('showOutputChannel', registerCommand);
     this.registerCommand('showRecords', registerCommand);
+    this.registerCommand('appendToCursor', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
@@ -388,24 +415,10 @@ export default class SQLTools {
     }
   }
 
-  private errorHandler(message: string, error?: Error) {
-    if (error) {
-      this.logger.error(`${message}: `, error.stack);
-    }
-    Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No')
-      .then((res) => {
-        if (res === 'Yes') {
-          this.showOutputChannel();
-        }
-        return res;
-      });
-    return null;
-  }
-
   private registerProviders() {
     this.outputProvider = new OutputProvider();
     this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.outputProvider));
-    this.suggestionsProvider = new SuggestionsProvider();
+    this.suggestionsProvider = new SuggestionsProvider(this.logger);
     const completionTriggers = ['.', ' '];
     this.context.subscriptions.push(
       Languages.registerCompletionItemProvider(['sql', 'plaintext'],
@@ -415,7 +428,7 @@ export default class SQLTools {
       return;
     }
     this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
-    Window.registerTreeDataProvider('sqltoolsConnection', this.sqlconnectionTreeProvider);
+    Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
   }
 
   private registerEvents() {

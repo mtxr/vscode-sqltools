@@ -7,12 +7,15 @@ import {
   TextDocument,
   workspace as workspace,
 } from 'vscode';
+import { Logger } from './api';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
 
 export class SuggestionsProvider implements CompletionItemProvider {
   private connection: Connection;
   private completionItems: CompletionItem[] = [];
+  constructor(private logger: Logger) {
+  }
   public provideCompletionItems(
     document: TextDocument,
     position: Position,
@@ -34,21 +37,23 @@ export class SuggestionsProvider implements CompletionItemProvider {
     if (!connection) {
       return;
     }
-    this.connection.getTables()
-      .then((tables) => {
-        this.completionItems = tables.map((table) => {
-          const item: CompletionItem = new CompletionItem(table.name, CompletionItemKind.Keyword);
+    Promise.all([
+      this.connection.getTables(),
+      this.connection.getColumns(),
+    ])
+      .then(([tables, columns]) => {
+        this.completionItems.push(...tables.map((table) => {
+          const item: CompletionItem = new CompletionItem(table.name, CompletionItemKind.Struct);
           item.detail = 'Table';
           return item;
-        });
-      });
-    this.connection.getColumns()
-      .then((columns) => {
-        this.completionItems = columns.map((table) => {
-          const item: CompletionItem = new CompletionItem(table.columnName, CompletionItemKind.Keyword);
-          item.detail = 'Column';
+        }));
+        this.completionItems.push(...columns.map((col) => {
+          const item: CompletionItem = new CompletionItem(col.columnName, CompletionItemKind.Property);
+          item.detail = `${col.tableName} Column`;
           return item;
-        });
+        }));
+      }).catch((e) => {
+        this.logger.error('Error while preparing columns completions', e);
       });
   }
 }

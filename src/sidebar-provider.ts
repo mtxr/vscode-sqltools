@@ -48,21 +48,13 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable
       .then((tables) => {
         this.tree = tables.sort((a, b) => a.name.localeCompare(b.name)).map((table, index) => {
           this.tableIndex[table.name] = index;
-          return new SidebarTable(table.name, TreeItemCollapsibleState.Collapsed, {
-            arguments: [table.name],
-            command: null,
-            title: '',
-          });
+          return new SidebarTable(table.name, TreeItemCollapsibleState.Collapsed);
         });
         this.refresh();
         return this.connection.getColumns()
           .then((columns) => {
             columns.forEach((column) => {
-              const col = new SidebarColumn(column.columnName, TreeItemCollapsibleState.None, {
-                arguments: [column.columnName],
-                command: null,
-                title: '',
-              });
+              const col = new SidebarColumn(column.columnName, TreeItemCollapsibleState.None);
               this.tree[this.tableIndex[column.tableName]].columns.push(col);
             });
             this.refresh();

@@ -1,24 +1,30 @@
-import { History } from './api';
+import { History, Logger } from './api';
 import Dialects from './api/dialect';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import { ConnectionDialect } from './api/interface/connection-dialect';
 import DatabaseInterface from './api/interface/database-interface';
+import errorHandler from './error-handler';
+
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
   private connection: ConnectionDialect;
-  constructor(private credentials: ConnectionCredentials) {
+  constructor(private credentials: ConnectionCredentials, private logger: Logger) {
     this.connection = new Dialects[this.credentials.dialect](credentials);
   }
 
   public close() {
     return this.connection.close()
-      .catch((e) => Promise.reject(e));
+      .catch((e) => {
+        errorHandler(this.logger, 'Error closing connection.', e);
+      });
   }
 
   public open() {
     return this.connection.open()
-      .catch((e) => Promise.reject(e));
+      .catch((e) => {
+        errorHandler(this.logger, 'Error connecting to database.', e);
+      });
   }
 
   public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {

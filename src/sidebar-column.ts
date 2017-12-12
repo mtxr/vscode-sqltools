@@ -19,9 +19,9 @@ export class SidebarColumn extends TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: TreeItemCollapsibleState,
-    public readonly command?: Command,
   ) {
     super(label, collapsibleState);
+    this.contextValue = 'connection.column';
   }
 
 }

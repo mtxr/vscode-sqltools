@@ -127,6 +127,11 @@
                 "title": "Version",
                 "command": "SQLTools.aboutVersion",
                 "category": "SQLTools"
+            },
+            {
+                "title": "Add to cursor",
+                "command": "SQLTools.appendToCursor",
+                "category": "SQLTools"
             }
         ],
         "keybindings": [
@@ -314,8 +319,26 @@
         "views": {
             "explorer": [
                 {
-                    "id": "sqltoolsConnection",
+                    "id": "SQLTools.connectionExplorer",
                     "name": "SQL Connection"
+                }
+            ]
+        },
+        "menus": {
+            "commandPalette": [
+                {
+                    "command": "gitlens.gitExplorer.openChanges",
+                    "when": "false"
+                }
+            ],
+            "view/item/context": [
+                {
+                    "command": "SQLTools.appendToCursor",
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table"
+                },
+                {
+                    "command": "SQLTools.appendToCursor",
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column"
                 }
             ]
         }
