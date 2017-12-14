@@ -11,6 +11,7 @@ import {
   OutputChannel,
   Position,
   QuickPickItem,
+  Range,
   Selection,
   StatusBarAlignment,
   StatusBarItem,
@@ -266,7 +267,11 @@ export default class SQLTools {
   }
 
   public executeQuery(editor: TextEditor, edit: TextEditorEdit): void {
-    const selectedQuery: string = editor.document.getText(editor.selection);
+    let range: Range;
+    if (!editor.selection.isEmpty) {
+      range = editor.selection;
+    }
+    const selectedQuery: string = editor.document.getText(range);
     if (!selectedQuery || selectedQuery.length === 0) {
       Window.showInformationMessage('You should select a query first.');
       return;
