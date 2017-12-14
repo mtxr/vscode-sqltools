@@ -323,7 +323,14 @@ export default class SQLTools {
   private printOutput(results) {
     this.outputProvider.setResults(results);
     this.outputProvider.update(this.previewUri);
-    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, ViewColumn.One, 'SQLTools Results')
+
+    let viewColumn: ViewColumn = ViewColumn.One;
+    const editor = Window.activeTextEditor;
+    if (editor && editor.viewColumn) {
+      viewColumn = editor.viewColumn;
+    }
+
+    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, viewColumn, 'SQLTools Results')
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
