@@ -358,7 +358,7 @@
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
         "test": "npm run test:lint && npm run test:unit",
-        "postversion": "vsce publish"
+        "postversion": "vsce publish && git push --tags"
     },
     "devDependencies": {
         "@types/jest": "^20.0.0",
