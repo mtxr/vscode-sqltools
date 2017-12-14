@@ -357,7 +357,8 @@
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
-        "test": "npm run test:lint && npm run test:unit"
+        "test": "npm run test:lint && npm run test:unit",
+        "postversion": "vsce publish"
     },
     "devDependencies": {
         "@types/jest": "^20.0.0",
