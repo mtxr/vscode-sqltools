@@ -150,32 +150,27 @@
             {
                 "command": "SQLTools.describeTable",
                 "key": "ctrl+e ctrl+d",
-                "mac": "cmd+e cmd+d",
-                "when": "editorTextFocus"
+                "mac": "cmd+e cmd+d"
             },
             {
                 "command": "SQLTools.runFromHistory",
                 "key": "ctrl+e ctrl+h",
-                "mac": "cmd+e cmd+h",
-                "when": "editorTextFocus"
+                "mac": "cmd+e cmd+h"
             },
             {
                 "command": "SQLTools.runFromBookmarks",
                 "key": "ctrl+e ctrl+a",
-                "mac": "cmd+e cmd+a",
-                "when": "editorTextFocus"
+                "mac": "cmd+e cmd+a"
             },
             {
                 "command": "SQLTools.showRecords",
                 "key": "ctrl+e ctrl+s",
-                "mac": "cmd+e cmd+s",
-                "when": "editorTextFocus"
+                "mac": "cmd+e cmd+s"
             },
             {
                 "command": "SQLTools.deleteBookmark",
                 "key": "ctrl+e ctrl+r",
-                "mac": "cmd+e cmd+r",
-                "when": "editorTextFocus"
+                "mac": "cmd+e cmd+r"
             },
             {
                 "command": "SQLTools.bookmarkSelection",
@@ -291,10 +286,11 @@
                                 "description": "Connection password",
                                 "required": false
                             },
-                            "passwordPath": {
-                                "type": "string",
-                                "description": "Path for you password file",
-                                "required": false
+                            "askForPassword": {
+                                "type": "boolean",
+                                "description": "Ask for password instead of set it in your settings",
+                                "required": false,
+                                "default": false
                             },
                             "dialect": {
                                 "type": "string",
@@ -302,7 +298,7 @@
                                     "MSSQL",
                                     "MySQL"
                                 ],
-                                "description": "Path for you password file",
+                                "description": "Connection Dialect",
                                 "required": false
                             },
                             "connectionTimeout": {

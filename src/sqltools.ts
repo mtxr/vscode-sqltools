@@ -208,10 +208,11 @@ export default class SQLTools {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
       if (!selection || !selection.label) return;
       this.history.clear();
-      this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label), this.logger));
-      return this.activeConnection;
+      return this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label), this.logger));
     }, (reason) => {
       this.setConnection(null);
+      errorHandler(this.logger, 'Error while selecting the connection.', reason, this.showOutputChannel);
+      // throw reason;
     });
   }
 
@@ -239,8 +240,7 @@ export default class SQLTools {
           return Window.showQuickPick(options);
         })
         .catch ((error) => errorHandler(this.logger, 'Error fetching tables.', error, this.showOutputChannel));
-    })
-    .catch((error) => errorHandler(this.logger, 'Error showing tables.', error, this.showOutputChannel));
+    }, (error) => errorHandler(this.logger, 'Error showing tables.', error, this.showOutputChannel));
   }
 
   public showRecords() {
@@ -448,23 +448,50 @@ export default class SQLTools {
     this.updateStatusBar();
   }
 
-  private setConnection(connection?: Connection) {
+  private setConnection(connection?: Connection): Thenable<Connection> {
     if (this.activeConnection) {
+      if (this.activeConnection.needsPassword()) {
+        this.activeConnection.setPassword(null);
+      }
       this.activeConnection.close();
     }
-    this.activeConnection = connection;
-    this.updateStatusBar();
-    this.suggestionsProvider.setConnection(connection);
-    this.sqlconnectionTreeProvider.setConnection(connection);
+    let result: Thenable<Connection> = Promise.resolve(connection);
+
+    if (connection && connection.needsPassword()) {
+      result = this.askForPassword(connection);
+    }
+    return result.then((conn): Connection => {
+      this.activeConnection = conn;
+      this.updateStatusBar();
+      this.suggestionsProvider.setConnection(conn);
+      this.sqlconnectionTreeProvider.setConnection(conn);
+      return this.activeConnection;
+    })
+    .then((conn) => {
+      if (!this.activeConnection) return this.activeConnection;
+      return this.activeConnection.connect();
+    })
+    .then(() => this.activeConnection, (reason) => {
+      errorHandler(this.logger, 'Error during connection.', reason, this.showOutputChannel);
+      if (connection !== null) this.setConnection(null);
+    });
   }
 
-  private checkIfConnected(): Promise<Connection> {
-    if (this.activeConnection) {
+  private askForPassword(connection): Thenable<Connection> {
+    return Window.showInputBox({ prompt: `${connection.getName()} password`, password: true })
+      .then((password: string): Connection => {
+        if (!password || password.length === 0) {
+          throw new Error('Password not provided.');
+        }
+        connection.setPassword(password);
+        return connection;
+      });
+  }
+  private checkIfConnected(): Thenable<Connection> {
+    if (this.activeConnection && this.activeConnection.isConnected()) {
       return Promise.resolve(this.activeConnection);
     }
-    return this.selectConnection().then(() => {
-      return Promise.resolve(this.activeConnection);
-    }) as Promise<Connection>;
+    return this.selectConnection();
   }
 
   private help(): void {

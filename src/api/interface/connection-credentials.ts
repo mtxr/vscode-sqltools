@@ -4,8 +4,8 @@ export interface ConnectionCredentials {
   port: number;
   database: string;
   username: string;
-  password: string;
-  passwordPath: string;
+  password?: string;
+  askForPassword?: boolean;
   dialect: string;
   connectionTimeout: string;
 }

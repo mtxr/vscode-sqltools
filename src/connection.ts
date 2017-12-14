@@ -8,12 +8,34 @@ import errorHandler from './error-handler';
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
+  private connected: boolean = false;
   private connection: ConnectionDialect;
   constructor(private credentials: ConnectionCredentials, private logger: Logger) {
     this.connection = new Dialects[this.credentials.dialect](credentials);
   }
 
+  public needsPassword() {
+    return this.connection.credentials.askForPassword;
+  }
+
+  public connect() {
+    return this.query('SELECT 1;')
+      .then(() => {
+        this.connected = true;
+        return true;
+      });
+  }
+
+  public setPassword(password: string) {
+    this.connection.credentials.password = password;
+  }
+
+  public isConnected() {
+    return this.connected;
+  }
+
   public close() {
+    this.connected = false;
     return this.connection.close()
       .catch((e) => {
         errorHandler(this.logger, 'Error closing connection.', e);

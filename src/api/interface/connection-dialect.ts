@@ -1,6 +1,8 @@
 import DatabaseInterface from './../interface/database-interface';
+import { ConnectionCredentials } from './connection-credentials';
 export interface ConnectionDialect {
   connection: any;
+  credentials: ConnectionCredentials;
   open(): Promise<any>;
   close(): Promise<any>;
   getTables(): Promise<DatabaseInterface.Table[]>;
