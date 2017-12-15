@@ -30,3 +30,4 @@ tsconfig.json
 tslint.json
 vsc-extension-quickstart.md
 yarn.lock
+!static/icon.png
