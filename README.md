@@ -60,7 +60,7 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 - [x] View table schemas
 - [x] MySQL/MariaDB Support
 - [x] MsSQL Support
-- [ ] :running: PostgreSQL Support
+- [x] PostgreSQL Support
 - [ ] :running: SQLite Support
 - [ ] Vertica Support
 - [ ] Oracle Support
