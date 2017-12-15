@@ -8,15 +8,30 @@ import Utils from './../utils';
 export default class PostgreSQL implements ConnectionDialect {
   public connection: Promise<any>;
   private queries: DialectQueries = {
-    describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE table_name = ':table'
-      AND table_schema NOT IN ('pg_catalog', 'information_schema')`,
+    describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE table_name = ':table'
+        AND TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')`,
     fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName, DATA_TYPE AS type, CHARACTER_MAXIMUM_LENGTH AS size
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE table_schema NOT IN ('pg_catalog', 'information_schema')`,
+        COLUMN_NAME AS columnName,
+        DATA_TYPE AS type,
+        CHARACTER_MAXIMUM_LENGTH AS size,
+        TABLE_CATALOG AS tableCatalog,
+        TABLE_SCHEMA AS tableSchema,
+        current_database() as dbName,
+        COLUMN_DEFAULT AS defaultValue,
+        IS_NULLABLE AS isNullable
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')`,
     fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-    fetchTables: `SELECT TABLE_NAME as tableName
-      FROM INFORMATION_SCHEMA.TABLES
-      WHERE table_schema NOT IN ('pg_catalog', 'information_schema') ORDER BY TABLE_NAME`,
+    fetchTables: `SELECT TABLE_NAME AS tableName,
+        TABLE_SCHEMA AS tableSchema,
+        TABLE_CATALOG AS tableCatalog,
+        current_database() as dbName,
+        COUNT(1) as numberOfColumns
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')
+      GROUP by tableName, tableSchema, tableCatalog, dbName
+      ORDER BY TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -67,7 +82,13 @@ export default class PostgreSQL implements ConnectionDialect {
         return results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            return { name: obj.tablename } as DatabaseInterface.Table;
+            return {
+              name: obj.tablename,
+              numberOfColumns: parseInt(obj.numberofcolumns, 10),
+              tableCatalog: obj.tablecatalog,
+              tableDatabase: obj.dbname,
+              tableSchema: obj.tableschema,
+            } as DatabaseInterface.Table;
           })
           .sort();
       });
@@ -81,8 +102,13 @@ export default class PostgreSQL implements ConnectionDialect {
           .map((obj) => {
             return {
               columnName: obj.columnname,
-              size: obj.size,
+              defaultValue: obj.defaultvalue,
+              isNullable: !!obj.isnullable ? obj.isnullable.toString() === 'yes' : null,
+              size: obj.size !== null ? parseInt(obj.size, 10) : null,
+              tableCatalog: obj.tablecatalog,
+              tableDatabase: obj.dbname,
               tableName: obj.tablename,
+              tableSchema: obj.tableschema,
               type: obj.type,
             } as DatabaseInterface.TableColumn;
           })

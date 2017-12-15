@@ -10,7 +10,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.13.0"
+        "vscode": "^1.18.0"
     },
     "categories": [
         "Languages",
@@ -374,7 +374,7 @@
         "ts-jest": "^20.0.6",
         "tslint": "^5.4.3",
         "typescript": "^2.3.2",
-        "vscode": "^1.0.0"
+        "vscode": "^1.1.0"
     },
     "dependencies": {
         "electron-google-analytics": "0.0.24",

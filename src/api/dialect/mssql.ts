@@ -10,12 +10,25 @@ export default class MSSQL implements ConnectionDialect {
   private queries: DialectQueries = {
     describeTable: 'SP_COLUMNS :table',
     fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName, DATA_TYPE AS type, CHARACTER_MAXIMUM_LENGTH AS size
+        COLUMN_NAME AS columnName,
+        DATA_TYPE AS type,
+        CHARACTER_MAXIMUM_LENGTH AS size,
+        TABLE_SCHEMA as tableSchema,
+        TABLE_CATALOG AS tableCatalog,
+        DB_NAME() as dbName,
+        COLUMN_DEFAULT as defaultValue,
+        IS_NULLABLE as isNullable
       FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG= DB_NAME()`,
     fetchRecords: 'SELECT TOP :limit * FROM :table',
-    fetchTables: `SELECT TABLE_NAME as tableName
-      FROM INFORMATION_SCHEMA.TABLES
-      WHERE TABLE_TYPE = 'BASE TABLE' AND TABLE_CATALOG= DB_NAME() ORDER BY TABLE_NAME`,
+    fetchTables: `SELECT TABLE_NAME AS tableName,
+        TABLE_SCHEMA AS tableSchema,
+        TABLE_CATALOG AS tableCatalog,
+        DB_NAME() as dbName,
+        COUNT(1) as numberOfColumns
+      FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE TABLE_SCHEMA = DB_NAME() AND TABLE_TYPE = 'BASE TABLE'
+      GROUP by tableName, tableSchema, tableCatalog, dbName
+      ORDER BY TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -66,7 +79,13 @@ export default class MSSQL implements ConnectionDialect {
         return results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            return { name: obj.tableName } as DatabaseInterface.Table;
+            return {
+              name: obj.tableName,
+              numberOfColumns: parseInt(obj.numberOfColumns, 10),
+              tableCatalog: obj.tableCatalog,
+              tableDatabase: obj.dbName,
+              tableSchema: obj.tableSchema,
+            } as DatabaseInterface.Table;
           })
           .sort();
       });
@@ -77,7 +96,12 @@ export default class MSSQL implements ConnectionDialect {
       .then((results) => {
         return results
           .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => obj as DatabaseInterface.TableColumn)
+          .map((obj) => {
+            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
+            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
+            obj.tableDatabase = obj.dbName;
+            return obj as DatabaseInterface.TableColumn;
+          })
           .sort();
       });
   }

@@ -16,7 +16,8 @@
     "interface-name": [ false ],
     "linebreak-style": [ true, "LF" ],
     "quotemark": [ true, "single", "jsx-double" ],
-    "no-reference": false
+    "no-reference": false,
+    "max-classes-per-file": false
   },
   "rulesDirectory": []
 }
