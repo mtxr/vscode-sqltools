@@ -296,7 +296,8 @@
                                 "type": "string",
                                 "enum": [
                                     "MSSQL",
-                                    "MySQL"
+                                    "MySQL",
+                                    "PostgreSQL"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -380,6 +381,7 @@
         "mssql": "^4.0.4",
         "mysql": "^2.15.0",
         "opn": "^5.1.0",
+        "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",
         "uuid": "^3.1.0"
     }
