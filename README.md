@@ -27,6 +27,7 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 * SQL Format (Beautifier)
   * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+b</kbd>
   * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+b</kbd>
+  * or using the standard VSCode Format Document/selection
 * Bookmark query
   * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+q</kbd>
   * __OSX__: <kbd>cmd+e</kbd> <kbd>q</kbd>
@@ -34,6 +35,13 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
   * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+r</kbd>
   * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+r</kbd>
 * Edit Bookmarked query
+* Auto complete for Table names and columns
+
+![static/autocomplete.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/autocomplete.png)
+
+* Sidebar database explorer
+
+![static/sidebar.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar.png)
 
 ## Docs
 
@@ -43,7 +51,7 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 
 ## To-do
 
-- [ ] :running: Auto complete
+- [x] Auto complete for columns and tables
 - [x] List and Run bookmarked queries
 - [x] Run SQL Queries
 - [ ] Show explain plan for queries
@@ -52,10 +60,11 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 - [x] View table schemas
 - [x] MySQL/MariaDB Support
 - [x] MsSQL Support
-- [ ] PostgreSQL Support
-- [ ] SQLite Support
+- [ ] :running: PostgreSQL Support
+- [ ] :running: SQLite Support
 - [ ] Vertica Support
-- [ ] Oraclea Support
+- [ ] Oracle Support
+- [ ] Sidebar explorer with Table Description, query generator, table records
 
 ## Known Issues
 

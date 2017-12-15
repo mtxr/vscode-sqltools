@@ -4,7 +4,7 @@
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
     "version": "0.7.4",
     "publisher": "mtxr",
-    "license": "GPL-3.0",
+    "license": "SEE LICENSE in LICENSE.md",
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
         "type": "git"
