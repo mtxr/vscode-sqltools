@@ -26,8 +26,7 @@ export default class MSSQL implements ConnectionDialect {
         DB_NAME() as dbName,
         COUNT(1) as numberOfColumns
       FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = DB_NAME() AND TABLE_TYPE = 'BASE TABLE'
-      GROUP by tableName, tableSchema, tableCatalog, dbName
+      GROUP by TABLE_NAME, table_Schema, table_Catalog
       ORDER BY TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {

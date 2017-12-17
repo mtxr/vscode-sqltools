@@ -5,25 +5,22 @@ export default class OutputProvider implements vscode.TextDocumentContentProvide
   private evtOnDidChange = new vscode.EventEmitter<vscode.Uri>();
   private styles: string = `<style>
     body {
-      color: gray;
       margin: 0;
       padding: 0;
     }
-    table {
-      background: #eaeaea;
-      border-collapse: collapse;
-    }
-    table tr:nth-child(2n) {
-      background: #ffffff;
-    }
-    table th {
-      color: #ffffff;
-      background: #666666;
-    }
     table, th, td {
       padding: 2px;
-      border: 1px solid #333;
+      border: 1px solid transparent;
     }
+    table { border-collapse: collapse; }
+    .vscode-light { color: #333; }
+    .vscode-dark { color: #ddd; }
+    .vscode-light table th { background: #ddd; }
+    .vscode-dark table th { background: #333; }
+    .vscode-light table tr:nth-child(2n) { background: #3333330F; }
+    .vscode-dark table tr:nth-child(2n) { background: #FFFFFF0F; }
+    .vscode-dark table, th, td { border-color: #FFFFFF5F; }
+    .vscode-light table, th, td { border-color: #3333335F; }
     </style>`;
   public provideTextDocumentContent(uri: vscode.Uri): string {
     const tables = this.content.map((queryResult) => {
