@@ -51,20 +51,22 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 
 ## To-do
 
+- [ ] :running: Sidebar explorer with Table Description, query generator, table records
+- [ ] Show query execution messages
+- [ ] Allow switch databases
+- [ ] Create connection profile tour
+- [ ] Show explain plan for queries
+- [ ] SQLite Support
 - [x] Auto complete for columns and tables
 - [x] List and Run bookmarked queries
 - [x] Run SQL Queries
-- [ ] Show explain plan for queries
 - [x] Show table records
 - [x] View Queries history
 - [x] View table schemas
 - [x] MySQL/MariaDB Support
 - [x] MsSQL Support
 - [x] PostgreSQL Support
-- [ ] :running: SQLite Support
-- [ ] Vertica Support
-- [ ] Oracle Support
-- [ ] Sidebar explorer with Table Description, query generator, table records
+
 
 ## Known Issues
 
