@@ -3,14 +3,12 @@ import * as path from 'path';
 import {
   Event,
   EventEmitter,
+  ProviderResult,
   TreeDataProvider,
-  TreeItem,
   TreeItemCollapsibleState,
-  window,
 } from 'vscode';
 import Connection from './connection';
-import { SidebarColumn } from './sidebar-column';
-import { SidebarTable } from './sidebar-table';
+import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
 
 export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable | SidebarColumn> {
   public onDidChange: EventEmitter<SidebarTable | undefined> = new EventEmitter<SidebarTable | undefined>();
@@ -26,14 +24,13 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable
     this.onDidChange.fire();
   }
 
-  public getTreeItem(element: SidebarTable): TreeItem {
+  public getTreeItem(element: SidebarTable | SidebarColumn): SidebarTable | SidebarColumn {
     return element;
   }
 
-  public getChildren(element?: SidebarTable): Thenable<SidebarTable[] | SidebarColumn[]> {
+  public getChildren(element?: SidebarTable): ProviderResult<SidebarTable[] | SidebarColumn[]> {
     if (element) {
-      const cols: SidebarColumn[] = this.tree[this.tableIndex[element.label]].columns;
-      return Promise.resolve(cols.sort((a, b) => a.label.localeCompare(b.label)));
+      return Promise.resolve(this.tree[this.tableIndex[element.value]].columns);
     }
     return Promise.resolve(this.tree);
   }
@@ -48,14 +45,13 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable
       .then((tables) => {
         this.tree = tables.sort((a, b) => a.name.localeCompare(b.name)).map((table, index) => {
           this.tableIndex[table.name] = index;
-          return new SidebarTable(table.name, TreeItemCollapsibleState.Collapsed);
+          return new SidebarTable(table);
         });
         this.refresh();
         return this.connection.getColumns()
           .then((columns) => {
-            columns.forEach((column) => {
-              const col = new SidebarColumn(column.columnName, TreeItemCollapsibleState.None);
-              this.tree[this.tableIndex[column.tableName]].columns.push(col);
+            columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
+              this.tree[this.tableIndex[column.tableName]].columns.push(new SidebarColumn(column));
             });
             this.refresh();
           });

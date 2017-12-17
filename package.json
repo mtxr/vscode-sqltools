@@ -129,8 +129,13 @@
                 "category": "SQLTools"
             },
             {
-                "title": "Add to cursor",
+                "title": "Add name to cursor",
                 "command": "SQLTools.appendToCursor",
+                "category": "SQLTools"
+            },
+            {
+                "title": "Generate Insert Query",
+                "command": "SQLTools.generateInsertQuery",
                 "category": "SQLTools"
             }
         ],
@@ -328,6 +333,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.generateInsertQuery",
+                    "when": "false"
+                },
+                {
                     "command": "SQLTools.formatSql",
                     "when": "editorHasSelection"
                 },
@@ -343,11 +352,28 @@
             "view/item/context": [
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column"
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column",
+                    "group": "sqltools.dbExplorer@1"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table"
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+                    "group": "sqltools.dbExplorer@1"
+                },
+                {
+                    "command": "SQLTools.generateInsertQuery",
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+                    "group": "sqltools.dbExplorer@4"
+                },
+                {
+                    "command": "SQLTools.describeTable",
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+                    "group": "sqltools.dbExplorer@2"
+                },
+                {
+                    "command": "SQLTools.showRecords",
+                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+                    "group": "sqltools.dbExplorer@3"
                 }
             ]
         }

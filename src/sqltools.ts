@@ -13,6 +13,7 @@ import {
   QuickPickItem,
   Range,
   Selection,
+  SnippetString,
   StatusBarAlignment,
   StatusBarItem,
   TextDocument,
@@ -35,9 +36,8 @@ import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
 import LogWriter from './log-writer';
 import OutputProvider from './output-provider';
-import { SidebarColumn } from './sidebar-column';
 import { SidebarTableColumnProvider } from './sidebar-provider';
-import { SidebarTable } from './sidebar-table';
+import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
 
@@ -175,18 +175,27 @@ export default class SQLTools {
    * Utils commands
    */
   public appendToCursor(node: SidebarColumn | SidebarTable): void {
-    try {
-      const editor: TextEditor = Window.activeTextEditor;
-      if (!editor) return;
+    this.getOrCreateEditor()
+    .then((editor) => {
       editor.edit((edit) => {
         const cursors: Selection[] = editor.selections;
         cursors.forEach((cursor: Selection) => {
-          edit.insert(cursor.active, node.label);
+          edit.insert(cursor.active, node.value);
         });
       });
-    } catch (error) {
+    }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
-    }
+    });
+  }
+
+  public generateInsertQuery(node: SidebarTable): void {
+    this.getOrCreateEditor()
+    .then((editor) => {
+      const indentSize = this.config.get('format.indent_size', 2);
+      return editor.insertSnippet(new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)));
+    }, (error) => {
+      errorHandler(this.logger, 'Error adding table/column to editor.', error);
+    });
   }
 
   public showOutputChannel(): void {
@@ -244,20 +253,32 @@ export default class SQLTools {
     }, (error) => errorHandler(this.logger, 'Error showing tables.', error, this.showOutputChannel));
   }
 
-  public showRecords() {
-    this.showTableMenu()
-      .then((selected) => {
-        this.activeConnection.showRecords(selected.label)
-          .then((results) => this.printOutput(results))
+  public showRecords(node?: SidebarTable) {
+    let tablePromise: PromiseLike<string>;
+    if (node) {
+      tablePromise = Promise.resolve(node.value);
+    } else {
+      tablePromise = this.showTableMenu().then((selected) => selected.label);
+    }
+    tablePromise
+      .then((table) => {
+        this.activeConnection.showRecords(table)
+          .then((results) => this.printOutput(results, `Some records of ${table} : SQLTools`))
           .catch((error) => errorHandler(this.logger, 'Error fetching records.', error, this.showOutputChannel));
       });
   }
 
-  public describeTable(): void {
-    this.showTableMenu()
-    .then((selected) => {
-      this.activeConnection.describeTable(selected.label)
-        .then((results) => this.printOutput(results))
+  public describeTable(node?: SidebarTable): void {
+    let tablePromise: PromiseLike<string>;
+    if (node) {
+      tablePromise = Promise.resolve(node.value);
+    } else {
+      tablePromise = this.showTableMenu().then((selected) => selected.label);
+    }
+    tablePromise
+    .then((table) => {
+      this.activeConnection.describeTable(table)
+        .then((results) => this.printOutput(results, `Describring table ${table} : SQLTools`))
         .catch((error) => errorHandler(this.logger, 'Error describing table.', error, this.showOutputChannel));
     });
   }
@@ -325,7 +346,7 @@ export default class SQLTools {
   /**
    * Management functions
    */
-  private printOutput(results) {
+  private printOutput(results, outputName: string = 'SQLTools Results') {
     this.outputProvider.setResults(results);
     this.outputProvider.update(this.previewUri);
 
@@ -335,7 +356,7 @@ export default class SQLTools {
       viewColumn = editor.viewColumn;
     }
 
-    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, viewColumn, 'SQLTools Results')
+    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, viewColumn, outputName)
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
@@ -386,7 +407,7 @@ export default class SQLTools {
     this.registerCommand('showHistory', registerCommand);
     this.registerCommand('showOutputChannel', registerCommand);
     this.registerCommand('showRecords', registerCommand);
-    this.registerCommand('appendToCursor', registerCommand);
+    this.registerCommand('generateInsertQuery', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
@@ -539,5 +560,12 @@ export default class SQLTools {
 
   private registerTelemetry(): void {
     Telemetry.register(this.config, this.logger);
+  }
+
+  private async getOrCreateEditor(): Promise<TextEditor> {
+    if (!Window.activeTextEditor) {
+      await VsCommands.executeCommand('workbench.action.files.newUntitledFile');
+    }
+    return Promise.resolve(Window.activeTextEditor);
   }
 }

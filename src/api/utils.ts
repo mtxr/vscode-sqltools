@@ -1,6 +1,7 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
 import * as formatter from 'sql-formatter';
+import { SidebarColumn } from '../sidebar-tree-items';
 import { EnvironmentException } from './exception';
 
 export default class Utils {
@@ -30,5 +31,13 @@ export default class Utils {
     return Object.keys(toReplace).reduce((destination, replaceParam) => {
       return destination.replace(`:${replaceParam}`, toReplace[replaceParam]);
     }, source);
+  }
+
+  public static generateInsertQuery(table: string, cols: SidebarColumn[], indentSize?: number): string {
+    let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.value).join(', ')}) VALUES (`;
+    cols.forEach((col, index) => {
+      insertQuery = insertQuery.concat(`'\${${index + 1}:${col.column.type}}', `);
+    });
+    return Utils.formatSql(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, indentSize).concat('$0');
   }
 }
