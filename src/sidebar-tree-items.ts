@@ -12,8 +12,8 @@ import DatabaseInterface from './api/interface/database-interface';
 
 export class SidebarTable extends TreeItem {
   public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-dark.png'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-light.png'),
+    dark: path.join(__dirname, 'resources', 'icon', 'database-dark.png'),
+    light: path.join(__dirname, 'resources', 'icon', 'database-light.png'),
   };
   public contextValue = 'connection.table';
   public value: string;
@@ -28,8 +28,8 @@ export class SidebarTable extends TreeItem {
 
 export class SidebarColumn extends TreeItem {
   public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'column-dark.png'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'column-light.png'),
+    dark: path.join(__dirname, 'resources', 'icon', 'column-dark.png'),
+    light: path.join(__dirname, 'resources', 'icon', 'column-light.png'),
   };
   public contextValue = 'connection.column';
   public value: string;

@@ -1,6 +1,6 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+/// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
-import { Utils } from '../../src/api';
+import { Utils } from '../../api';
 
 describe('API Utils', () => {
   describe('getHome()', () => {

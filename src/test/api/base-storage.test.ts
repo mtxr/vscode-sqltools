@@ -1,13 +1,13 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+/// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
 jest.mock('fs');
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import BaseStorage from './../../src/api/base-storage';
-import { NotFoundException, SizeException } from './../../src/api/exception';
-import Utils from './../../src/api/utils';
+import BaseStorage from './../../api/base-storage';
+import { NotFoundException, SizeException } from './../../api/exception';
+import Utils from './../../api/utils';
 
 describe('BaseStorage', () => {
   let filepath;

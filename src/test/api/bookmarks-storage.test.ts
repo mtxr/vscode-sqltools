@@ -1,12 +1,12 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+/// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
 jest.mock('fs');
 
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
-import { BookmarksStorage, Utils } from './../../src/api';
-import { NotFoundException, SizeException } from './../../src/api/exception';
+import { BookmarksStorage, Utils } from './../../api';
+import { NotFoundException, SizeException } from './../../api/exception';
 
 describe('BookmarksStorage', () => {
   let filepath;

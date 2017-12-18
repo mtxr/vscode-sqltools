@@ -1,9 +1,9 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+/// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
 jest.mock('vscode');
 
-import { Logger } from './../../src/api';
-import LogWriter from './../../src/log-writer';
+import { Logger } from './../../api';
+import LogWriter from './../../log-writer';
 
 describe('Logger', () => {
   it('should throws error if no writer provided', () => {

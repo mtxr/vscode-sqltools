@@ -1,5 +1,5 @@
 
-import { EnvironmentException } from './../../../src/api/exception';
+import { EnvironmentException } from './../../../api/exception';
 
 describe('Exceptions: EnvironmentException Tests', () => {
   it(`Should have prop  message like 'Could not retrived env vars'`, () => {
