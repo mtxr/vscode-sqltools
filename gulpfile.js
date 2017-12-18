@@ -4,11 +4,28 @@ const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 const source = require('vinyl-source-stream')
 const concat = require('gulp-concat')
+const uglifyify = require('uglifyify')
+const uglifyjs = require('gulp-uglify')
 const browserify = require('browserify')
 const babelify = require('babelify')
 const streamify = require('gulp-streamify')
 
 const dest = 'dist'
+
+function buildReactFile (file) {
+  return browserify({
+    entries: [`src/views/js/${file}.jsx`],
+    transform: [
+      [babelify, { presets: ['es2015', 'react'] }],
+      [uglifyify]
+    ]
+  })
+    .bundle()
+    .pipe(source(`${dest}/views/js/${file}.js`))
+    .pipe(streamify(concat(`${file}.js`)))
+    .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
+    .pipe(gulp.dest(`${dest}/views/js`))
+}
 
 gulp.task('compile:copy', () => {
   gulp.src([
@@ -35,16 +52,7 @@ gulp.task('compile:ts', () => {
 })
 
 gulp.task('compile:react:statistics', () => {
-  return browserify({
-    entries: ['src/views/js/statistics.jsx'],
-    transform: [
-      [ babelify, { presets: ['es2015', 'react'] } ]
-    ]
-  })
-        .bundle()
-        .pipe(source(`${dest}/views/js/statistics.js`))
-        .pipe(streamify(concat('statistics.js')))
-        .pipe(gulp.dest(`${dest}/views/js`))
+  return buildReactFile('statistics')
 })
 
 gulp.task('watch:ts', () => {

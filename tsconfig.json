@@ -4,9 +4,7 @@
         "target": "es6",
         "outDir": "dist",
         "sourceMap": true,
-        "lib": [
-            "es6"
-        ],
+        "lib": [ "es6" ],
         "rootDir": "./src"
     },
     "exclude": [
