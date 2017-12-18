@@ -35,9 +35,10 @@ import Constants from './constants';
 import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
 import LogWriter from './log-writer';
-import OutputProvider from './output-provider';
+import QueryResultsProvider from './query-results-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
+import StatisticsProvider from './statistics-provider';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
 
@@ -70,10 +71,12 @@ export default class SQLTools {
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
-  private outputProvider: OutputProvider;
+  private outputProvider: QueryResultsProvider;
+  private statisticsProvider: StatisticsProvider;
   private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
-  private previewUri = Uri.parse('sqltools://results');
+  private previewUri = Uri.parse('sqltools-query://results');
+  private statisticsUri = Uri.parse('sqltools-reports://statistics');
 
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
@@ -343,6 +346,18 @@ export default class SQLTools {
     });
   }
 
+  public showStatistics() {
+    this.statisticsProvider.update(this.statisticsUri);
+    let viewColumn: ViewColumn = ViewColumn.One;
+    const editor = Window.activeTextEditor;
+    if (editor && editor.viewColumn) {
+      viewColumn = editor.viewColumn;
+    }
+
+    return VsCommands.executeCommand('vscode.previewHtml', this.statisticsUri, viewColumn, 'SQLTools')
+      .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
+  }
+
   /**
    * Management functions
    */
@@ -409,6 +424,7 @@ export default class SQLTools {
     this.registerCommand('showRecords', registerCommand);
     this.registerCommand('appendToCursor', registerCommand);
     this.registerCommand('generateInsertQuery', registerCommand);
+    this.registerCommand('showStatistics', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
@@ -452,12 +468,18 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.outputProvider = new OutputProvider();
-    this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.outputProvider));
+    this.outputProvider = new QueryResultsProvider();
+    this.context.subscriptions.push(
+      Workspace.registerTextDocumentContentProvider(this.previewUri.scheme, this.outputProvider),
+    );
+    this.statisticsProvider = new StatisticsProvider(this.context.extensionPath);
+    this.context.subscriptions.push(
+      Workspace.registerTextDocumentContentProvider(this.statisticsUri.scheme, this.statisticsProvider),
+    );
     this.suggestionsProvider = new SuggestionsProvider(this.logger);
     const completionTriggers = ['.', ' '];
     this.context.subscriptions.push(
-      Languages.registerCompletionItemProvider(['sql', 'plaintext'],
+      Languages.registerCompletionItemProvider(this.config.get('completionLanguages', ['sql', 'plaintext']),
       this.suggestionsProvider, ...completionTriggers));
 
     if (typeof Window.registerTreeDataProvider !== 'function') {

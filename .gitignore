@@ -8,3 +8,4 @@ coverage.enabled
 yarn.lock
 npm-shrinkwrap.json
 *.log
+*.vsix

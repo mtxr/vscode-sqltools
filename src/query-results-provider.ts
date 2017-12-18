@@ -1,7 +1,7 @@
 import * as vscode from 'vscode';
 
-export default class OutputProvider implements vscode.TextDocumentContentProvider {
-  private content: any[][];
+export default class QueryResultsProvider implements vscode.TextDocumentContentProvider {
+  private content: any[][] = [];
   private evtOnDidChange = new vscode.EventEmitter<vscode.Uri>();
   private styles: string = `<style>
     body {
