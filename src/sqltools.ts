@@ -407,6 +407,7 @@ export default class SQLTools {
     this.registerCommand('showHistory', registerCommand);
     this.registerCommand('showOutputChannel', registerCommand);
     this.registerCommand('showRecords', registerCommand);
+    this.registerCommand('appendToCursor', registerCommand);
     this.registerCommand('generateInsertQuery', registerCommand);
   }
 
