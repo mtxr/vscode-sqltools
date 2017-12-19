@@ -7,6 +7,7 @@ test/**
 src/**
 **/*.map
 .gitignore
+**/.gitignore
 tsconfig.json
 vsc-extension-quickstart.md
 *.log
@@ -17,6 +18,10 @@ __mocks__/**
 **/__mocks__/**
 CHANGELOG.md
 **/CHANGELOG.md
+*example*
+**/*example*
+*example*/**
+**/*example*/**
 static/**
 **/static/**
 package-lock.json
@@ -27,10 +32,18 @@ gulpfile.js
 **/gulpfile.js
 tslint.json
 **/tslint.json
+.eslint*
+**/.eslint*
+.babel*
+**/.babel*
+.gitkeep*
+**/.gitkeep*
 .travis.yml
 **/.travis.yml
-ISSUE_TEMPLATE.md
-**/ISSUE_TEMPLATE.md
+*.md
+**/*.md
 
 # exceptions
 !static/icon.png
+!README.md
+!LICENSE.md

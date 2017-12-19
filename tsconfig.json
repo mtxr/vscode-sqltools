@@ -8,6 +8,7 @@
         "rootDir": "./src"
     },
     "exclude": [
+        "src/test",
         "node_modules",
         ".vscode-test",
         "__mocks__"

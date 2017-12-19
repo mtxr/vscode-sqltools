@@ -1,5 +1,3 @@
-/// <reference path="./../../node_modules/@types/jest/index.d.ts" />
-
 import Constants from '../constants';
 const mustExportProps = [
   'version',

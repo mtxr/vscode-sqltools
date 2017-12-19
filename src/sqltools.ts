@@ -363,7 +363,6 @@ export default class SQLTools {
    */
   private printOutput(results, outputName: string = 'SQLTools Results') {
     this.outputProvider.setResults(results);
-    this.outputProvider.update(this.previewUri);
 
     let viewColumn: ViewColumn = ViewColumn.One;
     const editor = Window.activeTextEditor;
@@ -468,7 +467,7 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.outputProvider = new QueryResultsProvider();
+    this.outputProvider = new QueryResultsProvider(this.context.extensionPath, this.previewUri);
     this.context.subscriptions.push(
       Workspace.registerTextDocumentContentProvider(this.previewUri.scheme, this.outputProvider),
     );

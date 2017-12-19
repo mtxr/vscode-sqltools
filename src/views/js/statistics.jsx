@@ -1,7 +1,21 @@
 import React from 'react'
-import ReactDOM from 'react-dom'
+import { render } from 'react-dom'
 
-ReactDOM.render(
-  <h1>Hello, world!</h1>,
-  document.getElementById('root')
-)
+import ReactTable from './lib/react-table'
+
+class App extends React.Component {
+  render () {
+    return (
+      <div>
+        <ReactTable
+          data={window.data}
+          columns={window.cols}
+          defaultPageSize={10}
+          className='-striped -highlight'
+        />
+      </div>
+    )
+  }
+}
+
+render(<App />, document.getElementById('root'))
