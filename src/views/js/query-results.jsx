@@ -5,22 +5,27 @@ import ReactTable from './lib/react-table'
 
 class App extends React.Component {
   render () {
+    console.log('render')
     return (
-      <div>
-        {(window.content || []).map((queryResult, i) => {
-          const size = Math.min(50, queryResult.data.length)
-          const showPagination = size > 50
-          return <ReactTable
-            data={queryResult.data}
-            columns={queryResult.cols}
-            defaultPageSize={size}
-            className='-striped'
-            showPageSizeOptions={showPagination}
-            showPagination={showPagination}
-            key={i}
-          />
-        })}
-      </div>
+      (window.content || []).map((queryResult, i) => {
+        queryResult.cols = queryResult.cols.map((col) => {
+          col.Cell = (row) => {
+            return typeof row.value === 'undefined' ? '' : (
+              row.value === null ? <small>(NULL)</small> : row.value
+            )
+          }
+          return col
+        })
+        return <ReactTable
+          data={queryResult.data}
+          columns={queryResult.cols}
+          className='-striped'
+          style={{
+            height: '100%' // This will force the table body to overflow and scroll, since there is not enough room
+          }}
+          key={i}
+        />
+      })
     )
   }
 }

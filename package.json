@@ -350,6 +350,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.showStatistics",
+                    "when": "false"
+                },
+                {
                     "command": "SQLTools.formatSql",
                     "when": "editorHasSelection"
                 },

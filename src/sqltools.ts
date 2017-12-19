@@ -564,7 +564,7 @@ export default class SQLTools {
           last = new Date(0);
         }
       }
-      if (last.getTime() >= new Date().setHours(0, 0, 0, 0)) {
+      if (new Date().getTime() - last.getTime() >= 604800000) {
         return;
       }
       fs.writeFile(file, `${new Date().getTime()}`);
