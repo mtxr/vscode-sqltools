@@ -1,5 +1,5 @@
 {
-    "name": "sqltools",
+    "name": "sqltools-client",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
     "version": "0.10.1",
@@ -53,7 +53,9 @@
     ],
     "activationEvents": [
         "*",
-        "onLanguage:sql"
+        "onLanguage:sql",
+        "onLanguage:plaintext",
+        "onCommand:SQLTools.selectConnection"
     ],
     "main": "./dist/extension",
     "contributes": {
@@ -214,12 +216,12 @@
                     "default": null,
                     "description": "Extension ID"
                 },
-                "sqltools.show_statusbar": {
+                "sqltools.showStatusbar": {
                     "type": "boolean",
                     "default": true,
                     "description": "Toggle statusbar visibility."
                 },
-                "sqltools.log_level": {
+                "sqltools.logLevel": {
                     "type": "string",
                     "enum": [
                         "DEBUG",
@@ -230,22 +232,22 @@
                     "default": "DEBUG",
                     "description": "Show debugging messages on console."
                 },
-                "sqltools.query_timeout": {
+                "sqltools.queryTimeout": {
                     "type": "number",
                     "default": 300000,
                     "description": "Timeout in seconds for killing query process after the timeout."
                 },
-                "sqltools.history_size": {
+                "sqltools.historySize": {
                     "type": "number",
                     "default": 100,
                     "description": "Number of queries to keep on History."
                 },
-                "sqltools.show_result_on_tab": {
+                "sqltools.showResultOnTab": {
                     "type": "boolean",
                     "default": false,
                     "description": "Show results using new tab."
                 },
-                "sqltools.clear_output": {
+                "sqltools.clearOutput": {
                     "type": "boolean",
                     "default": false,
                     "description": "Clear output for new commands."
@@ -261,7 +263,7 @@
                 "sqltools.format": {
                     "type": "object",
                     "properties": {
-                        "indent_size": {
+                        "indentSize": {
                             "type": "number",
                             "default": 2,
                             "description": "Indent size"
@@ -276,10 +278,7 @@
                         "type": "object",
                         "properties": {
                             "name": {
-                                "type": [
-                                    "string",
-                                    "null"
-                                ],
+                                "type": "string",
                                 "description": "Connection name"
                             },
                             "server": {
@@ -396,8 +395,10 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "./node_modules/.bin/gulp compile",
-        "compile": "./node_modules/.bin/gulp watch",
+        "vscode:prepublish": "npm run compile",
+        "gulp": "./node_modules/.bin/gulp",
+        "compile": "npm run gulp -- compile",
+        "watch": "npm run gulp -- watch",
         "postinstall": "node ./node_modules/vscode/bin/install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
@@ -435,6 +436,8 @@
         "opn": "^5.1.0",
         "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",
-        "uuid": "^3.1.0"
+        "uuid": "^3.1.0",
+        "vscode-languageserver": "^3.5.0",
+        "vscode-languageclient": "^3.5.0"
     }
 }

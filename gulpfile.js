@@ -25,11 +25,16 @@ function buildReactFile (file) {
     .pipe(gulp.dest(`${dest}/views/js`))
 }
 
-gulp.task('compile:copy', () => {
+gulp.task('compile:copy', (done) => {
+  let count = 0
   gulp.src([
     'package.json'
   ])
     .pipe(gulp.dest(dest))
+    .on('finish', () => {
+      if (count === 1) return done()
+      count++
+    })
 
   gulp.src([
     './src/resources/**/*',
@@ -37,10 +42,17 @@ gulp.task('compile:copy', () => {
     './src/views/css/*.*'
   ], { base: './src' })
     .pipe(gulp.dest(dest))
+    .on('finish', () => {
+      if (count === 1) return done()
+      count++
+    })
 })
 
 gulp.task('compile:ts', () => {
-  const tsResult = tsProject.src()
+  const tsResult = gulp.src([
+    './src/*.ts',
+    './src/**/*.ts'
+  ])
     .pipe(sourcemaps.init())
     .pipe(tsProject())
 
@@ -70,34 +82,55 @@ gulp.task('compile:sass:query-results', () => {
 })
 
 gulp.task('watch:ts', () => {
-  gulp.watch([
-    'src/*.ts',
-    'src/**/*.ts',
-    'package.json'
+  return gulp.watch([
+    './src/*.ts',
+    './src/**/*.ts',
+    './package.json'
   ], ['compile:ts'])
 })
 
 gulp.task('watch:copy', () => {
-  gulp.watch([
-    'package.json',
-    'src/views/*.html',
-    'src/views/css/*.css'
+  return gulp.watch([
+    './package.json',
+    './src/views/*.html',
+    './src/views/css/*.css'
   ], ['compile:copy'])
 })
 
 gulp.task('watch:react', () => {
-  gulp.watch([
-    'package.json',
-    'src/views/*.jsx',
-    'src/views/**/*.jsx'
+  return gulp.watch([
+    './package.json',
+    './src/views/*.jsx',
+    './src/views/**/*.jsx'
   ], ['compile:react'])
 })
 
 gulp.task('watch:sass', () => {
-  gulp.watch([
-    'src/views/sass/*.scss',
-    'src/views/sass/**/*.scss'
+  return gulp.watch([
+    './src/views/sass/*.scss',
+    './src/views/sass/**/*.scss'
   ], ['compile:sass'])
+})
+
+gulp.task('clean', (done) => {
+  const fs = require('fs')
+
+  const deleteFolderRecursive = function (path, cb = () => {}) {
+    if (fs.existsSync(path)) {
+      fs.readdirSync(path).forEach(function (file, index) {
+        var curPath = path + '/' + file
+        if (fs.lstatSync(curPath).isDirectory()) { // recurse
+          deleteFolderRecursive(curPath)
+        } else { // delete file
+          fs.unlinkSync(curPath)
+        }
+      })
+      fs.rmdirSync(path)
+      return cb()
+    }
+    cb()
+  }
+  deleteFolderRecursive(`${__dirname}/dist`, done)
 })
 
 gulp.task('compile:react', ['compile:react:query-results', 'compile:react:statistics'])

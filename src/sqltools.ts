@@ -27,6 +27,14 @@ import {
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
+import {
+  LanguageClient,
+  LanguageClientOptions,
+  RequestType,
+  RequestType0,
+  ServerOptions,
+  TransportKind,
+} from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
@@ -77,6 +85,7 @@ export default class SQLTools {
   private suggestionsProvider: SuggestionsProvider;
   private previewUri = Uri.parse('sqltools-query://results');
   private statisticsUri = Uri.parse('sqltools-reports://statistics');
+  private languageClient: LanguageClient;
 
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
@@ -88,6 +97,7 @@ export default class SQLTools {
     this.registerStatusBar();
     this.autoConnectIfActive();
     this.help();
+    this.registerLanguageServer();
   }
 
   /**
@@ -165,7 +175,7 @@ export default class SQLTools {
    */
   public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
     try {
-      const indentSize: number = this.config.get('format.indent_size', 2);
+      const indentSize: number = this.config.get('format.indentSize', 2);
       edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
       VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
       this.logger.debug('Query formatted!');
@@ -194,7 +204,7 @@ export default class SQLTools {
   public generateInsertQuery(node: SidebarTable): void {
     this.getOrCreateEditor()
     .then((editor) => {
-      const indentSize = this.config.get('format.indent_size', 2);
+      const indentSize = this.config.get('format.indentSize', 2);
       return editor.insertSnippet(new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)));
     }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
@@ -388,9 +398,9 @@ export default class SQLTools {
     this.bookmarks = new BookmarksStorage();
     this.connectionsManager = new ConnectionManager(this.config);
     if (this.history) {
-      this.history.setMaxSize(this.config.get('history_size', 100));
+      this.history.setMaxSize(this.config.get('historySize', 100));
     } else {
-      this.history = new History(this.config.get('history_size', 100));
+      this.history = new History(this.config.get('historySize', 100));
     }
     this.setupLogger();
     this.registerTelemetry();
@@ -398,7 +408,7 @@ export default class SQLTools {
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
-      .setLevel(Logger.levels[this.config.get('log_level', 'DEBUG')])
+      .setLevel(Logger.levels[this.config.get('logLevel', 'DEBUG')])
       .setLogging(this.config.get('logging', false));
   }
 
@@ -457,7 +467,7 @@ export default class SQLTools {
     if (this.activeConnection) {
       this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
     }
-    if (this.config.get('show_statusbar', true)) {
+    if (this.config.get('showStatusbar', true)) {
       this.extStatus.show();
       this.extDatabaseStatus.show();
     } else {
@@ -486,9 +496,6 @@ export default class SQLTools {
     }
     this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
     Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
-
-    const formattingProvider = new SelectionFormatter();
-    Languages.registerDocumentRangeFormattingEditProvider('sql', formattingProvider);
   }
 
   private registerEvents() {
@@ -582,6 +589,37 @@ export default class SQLTools {
 
   private registerTelemetry(): void {
     Telemetry.register(this.config, this.logger);
+  }
+
+  private registerLanguageServer() {
+    const serverModule = this.context.asAbsolutePath(Path.join('dist', 'languageserver', 'server.js'));
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+
+    const serverOptions: ServerOptions = {
+      debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+      run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+    };
+
+    const clientOptions: LanguageClientOptions = {
+      documentSelector: this.config.get('completionLanguages', ['sql', 'plaintext']) as string[],
+      synchronize: {
+        configurationSection: 'sqltools',
+        fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),
+      },
+    };
+
+    const languageClient = new LanguageClient(
+      'sqltools.language-server',
+      'SQLTools Language Server',
+      serverOptions,
+      clientOptions,
+    );
+
+    languageClient.onReady().then(() => {
+      this.logger.debug('Language server started!');
+      this.languageClient = languageClient;
+    }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
+    this.context.subscriptions.push(languageClient.start());
   }
 
   private async getOrCreateEditor(): Promise<TextEditor> {
