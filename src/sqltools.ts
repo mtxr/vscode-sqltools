@@ -36,12 +36,14 @@ import {
   TransportKind,
 } from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
+import * as ConfigManager from './api/config-manager';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
+import { Settings } from './interface/settings';
 import LogWriter from './log-writer';
 import QueryResultsProvider from './query-results-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
@@ -73,7 +75,6 @@ export default class SQLTools {
   private bookmarks: BookmarksStorage;
   private history: History;
   private outputLogs: LogWriter;
-  private config: WorkspaceConfiguration;
   private connectionsManager: ConnectionManager;
   private activeConnection: Connection;
   private extStatus: StatusBarItem;
@@ -175,7 +176,7 @@ export default class SQLTools {
    */
   public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
     try {
-      const indentSize: number = this.config.get('format.indentSize', 2);
+      const indentSize: number = ConfigManager.get('format.indentSize', 2) as number;
       edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
       VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
       this.logger.debug('Query formatted!');
@@ -204,7 +205,7 @@ export default class SQLTools {
   public generateInsertQuery(node: SidebarTable): void {
     this.getOrCreateEditor()
     .then((editor) => {
-      const indentSize = this.config.get('format.indentSize', 2);
+      const indentSize = ConfigManager.get('format.indentSize', 2) as number;
       return editor.insertSnippet(new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)));
     }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
@@ -385,7 +386,7 @@ export default class SQLTools {
   }
 
   private autoConnectIfActive() {
-    const defaultConnection: string = this.config.get('autoConnectTo', null);
+    const defaultConnection: string = ConfigManager.get('autoConnectTo', null) as string;
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
     if (defaultConnection) {
       this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection), this.logger));
@@ -394,13 +395,13 @@ export default class SQLTools {
     }
   }
   private loadConfigs() {
-    this.config = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
+    ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.bookmarks = new BookmarksStorage();
-    this.connectionsManager = new ConnectionManager(this.config);
+    this.connectionsManager = new ConnectionManager();
     if (this.history) {
-      this.history.setMaxSize(this.config.get('historySize', 100));
+      this.history.setMaxSize(ConfigManager.get('historySize', 100) as number);
     } else {
-      this.history = new History(this.config.get('historySize', 100));
+      this.history = new History(ConfigManager.get('historySize', 100) as number);
     }
     this.setupLogger();
     this.registerTelemetry();
@@ -408,8 +409,8 @@ export default class SQLTools {
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
-      .setLevel(Logger.levels[this.config.get('logLevel', 'DEBUG')])
-      .setLogging(this.config.get('logging', false));
+      .setLevel(Logger.levels[ConfigManager.get('logLevel', 'DEBUG') as string])
+      .setLogging(ConfigManager.get('logging', false) as boolean);
   }
 
   private registerCommands(): void {
@@ -467,7 +468,7 @@ export default class SQLTools {
     if (this.activeConnection) {
       this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
     }
-    if (this.config.get('showStatusbar', true)) {
+    if (ConfigManager.get('showStatusbar', true)) {
       this.extStatus.show();
       this.extDatabaseStatus.show();
     } else {
@@ -488,8 +489,11 @@ export default class SQLTools {
     this.suggestionsProvider = new SuggestionsProvider(this.logger);
     const completionTriggers = ['.', ' '];
     this.context.subscriptions.push(
-      Languages.registerCompletionItemProvider(this.config.get('completionLanguages', ['sql', 'plaintext']),
-      this.suggestionsProvider, ...completionTriggers));
+      Languages.registerCompletionItemProvider(
+        ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as any,
+        this.suggestionsProvider, ...completionTriggers,
+      ),
+    );
 
     if (typeof Window.registerTreeDataProvider !== 'function') {
       return;
@@ -504,6 +508,7 @@ export default class SQLTools {
   }
 
   private reloadConfig() {
+    ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.logger.debug('Config reloaded!');
     this.loadConfigs();
     this.autoConnectIfActive();
@@ -588,7 +593,7 @@ export default class SQLTools {
   }
 
   private registerTelemetry(): void {
-    Telemetry.register(this.config, this.logger);
+    Telemetry.register(this.logger);
   }
 
   private registerLanguageServer() {
@@ -601,7 +606,7 @@ export default class SQLTools {
     };
 
     const clientOptions: LanguageClientOptions = {
-      documentSelector: this.config.get('completionLanguages', ['sql', 'plaintext']) as string[],
+      documentSelector: ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
       synchronize: {
         configurationSection: 'sqltools',
         fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),

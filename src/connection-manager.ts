@@ -1,17 +1,18 @@
 import {
   WorkspaceConfiguration,
 } from 'vscode';
+import * as ConfigManager from './api/config-manager';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 export default class ConnectionManager {
   private connections: ConnectionCredentials[] = [];
-  constructor(public extConfig: WorkspaceConfiguration) {
+  constructor() {
     this.loadConnections();
   }
   public getConnections(): ConnectionCredentials[] {
     return this.connections;
   }
   public loadConnections(): this {
-    const connectionsConfig = this.extConfig.get('connections', []);
+    const connectionsConfig = ConfigManager.get('connections', []) as any[];
     this.connections = connectionsConfig.map((credentials): ConnectionCredentials => {
       return credentials as ConnectionCredentials;
     });

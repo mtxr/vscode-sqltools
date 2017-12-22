@@ -20,9 +20,9 @@ connection.onInitialize((params): InitializeResult => {
   workspaceRoot = params.rootPath;
   return {
     capabilities: {
-      completionProvider: {
-        resolveProvider: true,
-      },
+      // completionProvider: {
+      //   resolveProvider: true,
+      // },
       documentFormattingProvider: true,
       documentRangeFormattingProvider: true,
       textDocumentSync: docManager.syncKind,
@@ -42,8 +42,11 @@ let formatterRegistration: Thenable<Disposable> | null = null;
 let globalSettings: Settings = {};
 
 connection.onDidChangeConfiguration((change) => {
-  globalSettings = change.settings;
-
+  if (change.settings.sqltools) {
+    globalSettings = change.settings.sqltools as Settings;
+  } else {
+    globalSettings = change.settings as Settings;
+  }
   if (!formatterRegistration) {
     formatterRegistration = connection.client.register(DocumentRangeFormattingRequest.type, {
       documentSelector: [ 'sql' ],
