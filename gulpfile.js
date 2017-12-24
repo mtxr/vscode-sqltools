@@ -51,11 +51,7 @@ gulp.task('compile:copy', (done) => {
 gulp.task('compile:ts', () => {
   const tsResult = gulp.src([
     './src/*.ts',
-    './src/**/*.ts',
-    '!__mocks__/*',
-    '!__mocks__/**/*',
-    '!**/__mocks__/*',
-    '!**/__mocks__/**/*'
+    './src/**/*.ts'
   ])
     .pipe(sourcemaps.init())
     .pipe(tsProject())

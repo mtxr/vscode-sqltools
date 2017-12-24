@@ -54,7 +54,6 @@
     "activationEvents": [
         "*",
         "onLanguage:sql",
-        "onLanguage:plaintext",
         "onCommand:SQLTools.selectConnection"
     ],
     "main": "./dist/extension",

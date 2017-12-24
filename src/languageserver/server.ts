@@ -1,21 +1,21 @@
-import { SelectionFormatter } from './../formatting-provider';
-
 import {
-  CompletionItem, CompletionItemKind, createConnection, Diagnostic, DiagnosticSeverity, Disposable,
-  DocumentFormattingParams, DocumentOnTypeFormattingParams,
-  DocumentRangeFormattingParams, DocumentRangeFormattingRequest, DocumentSelector,
-  FormattingOptions, IConnection,
-  InitializeResult, IPCMessageReader, IPCMessageWriter, RequestType0,
-  TextDocument, TextDocumentPositionParams, TextDocuments, TextEdit,
+  createConnection, Disposable,
+  DocumentRangeFormattingRequest,
+  IConnection,
+  InitializeResult, IPCMessageReader, IPCMessageWriter,
+  TextDocuments, TextEdit,
 } from 'vscode-languageserver';
 import { Settings } from '../interface/settings';
+import * as Formatter from './fomatter';
 
+let formatterRegistration: Thenable<Disposable> | null = null;
+let globalSettings: Settings = {};
+let workspaceRoot: string;
 const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
-
 const docManager: TextDocuments = new TextDocuments();
+
 docManager.listen(connection);
 
-let workspaceRoot: string;
 connection.onInitialize((params): InitializeResult => {
   workspaceRoot = params.rootPath;
   return {
@@ -30,23 +30,11 @@ connection.onInitialize((params): InitializeResult => {
   };
 });
 
-connection.onDocumentFormatting(({ textDocument, options }) => {
-  return SelectionFormatter.handler(docManager.get(textDocument.uri), options);
-});
-
-connection.onDocumentRangeFormatting(({ textDocument, range, options }): TextEdit[] => {
-  return SelectionFormatter.handler(docManager.get(textDocument.uri), options, range);
-});
-
-let formatterRegistration: Thenable<Disposable> | null = null;
-let globalSettings: Settings = {};
+connection.onDocumentFormatting((params) => Formatter.handler(docManager, params));
+connection.onDocumentRangeFormatting((params) => Formatter.handler(docManager, params));
 
 connection.onDidChangeConfiguration((change) => {
-  if (change.settings.sqltools) {
-    globalSettings = change.settings.sqltools as Settings;
-  } else {
-    globalSettings = change.settings as Settings;
-  }
+  globalSettings = change.settings.sqltools as Settings;
   if (!formatterRegistration) {
     formatterRegistration = connection.client.register(DocumentRangeFormattingRequest.type, {
       documentSelector: [ 'sql' ],

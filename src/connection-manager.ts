@@ -1,28 +1,20 @@
-import {
-  WorkspaceConfiguration,
-} from 'vscode';
 import * as ConfigManager from './api/config-manager';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 export default class ConnectionManager {
-  private connections: ConnectionCredentials[] = [];
-  constructor() {
-    this.loadConnections();
-  }
-  public getConnections(): ConnectionCredentials[] {
-    return this.connections;
-  }
-  public loadConnections(): this {
+  public static getConnections(): ConnectionCredentials[] {
     const connectionsConfig = ConfigManager.get('connections', []) as any[];
-    this.connections = connectionsConfig.map((credentials): ConnectionCredentials => {
+    ConnectionManager.connections = connectionsConfig.map((credentials): ConnectionCredentials => {
       return credentials as ConnectionCredentials;
     });
-    return this;
+    return ConnectionManager.connections;
   }
 
-  public getConnection(connection: string|number) {
+  public static getConnection(connection: string|number) {
+    ConnectionManager.getConnections();
     if (typeof connection === 'number') {
-      return this.connections[connection];
+      return ConnectionManager.connections[connection];
     }
-    return this.connections.find((conn) => connection === conn.name);
+    return ConnectionManager.connections.find((conn) => connection === conn.name);
   }
+  private static connections: ConnectionCredentials[] = [];
 }

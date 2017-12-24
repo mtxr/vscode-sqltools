@@ -7,6 +7,7 @@ import {
   commands as VsCommands,
   Disposable,
   ExtensionContext,
+  FormattingOptions,
   languages as Languages,
   OutputChannel,
   Position,
@@ -18,6 +19,7 @@ import {
   StatusBarItem,
   TextDocument,
   TextDocumentChangeEvent,
+  TextEdit,
   TextEditor,
   TextEditorEdit,
   TextEditorSelectionChangeEvent,
@@ -28,11 +30,14 @@ import {
   WorkspaceConfiguration,
 } from 'vscode';
 import {
+  DocumentRangeFormattingParams,
+  DocumentRangeFormattingRequest,
   LanguageClient,
   LanguageClientOptions,
   RequestType,
   RequestType0,
   ServerOptions,
+  TextDocumentIdentifier,
   TransportKind,
 } from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
@@ -75,7 +80,6 @@ export default class SQLTools {
   private bookmarks: BookmarksStorage;
   private history: History;
   private outputLogs: LogWriter;
-  private connectionsManager: ConnectionManager;
   private activeConnection: Connection;
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
@@ -174,15 +178,8 @@ export default class SQLTools {
   /**
    * Utils commands
    */
-  public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
-    try {
-      const indentSize: number = ConfigManager.get('format.indentSize', 2) as number;
-      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
-      VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
-      this.logger.debug('Query formatted!');
-    } catch (error) {
-      errorHandler(this.logger, 'Error formatting query.', error);
-    }
+  public formatSql(editor: TextEditor, edit: TextEditorEdit) {
+    VsCommands.executeCommand('editor.action.formatSelection');
   }
 
   /**
@@ -232,7 +229,7 @@ export default class SQLTools {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
       if (!selection || !selection.label) return;
       this.history.clear();
-      return this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label), this.logger));
+      return this.setConnection(new Connection(ConnectionManager.getConnection(selection.label), this.logger));
     }, (reason) => {
       this.setConnection(null);
       errorHandler(this.logger, 'Error while selecting the connection.', reason, this.showOutputChannel);
@@ -245,7 +242,7 @@ export default class SQLTools {
   }
 
   public showConnectionMenu(): Thenable<QuickPickItem> {
-    const options: QuickPickItem[] = this.connectionsManager.getConnections().map((connection) => {
+    const options: QuickPickItem[] = ConnectionManager.getConnections().map((connection) => {
       return {
         detail: `${connection.username}@${connection.server}:${connection.port}`,
         label: connection.name,
@@ -389,7 +386,7 @@ export default class SQLTools {
     const defaultConnection: string = ConfigManager.get('autoConnectTo', null) as string;
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
     if (defaultConnection) {
-      this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection), this.logger));
+      this.setConnection(new Connection(ConnectionManager.getConnection(defaultConnection), this.logger));
     } else {
       this.setConnection();
     }
@@ -397,7 +394,6 @@ export default class SQLTools {
   private loadConfigs() {
     ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.bookmarks = new BookmarksStorage();
-    this.connectionsManager = new ConnectionManager();
     if (this.history) {
       this.history.setMaxSize(ConfigManager.get('historySize', 100) as number);
     } else {
@@ -486,14 +482,6 @@ export default class SQLTools {
     this.context.subscriptions.push(
       Workspace.registerTextDocumentContentProvider(this.statisticsUri.scheme, this.statisticsProvider),
     );
-    this.suggestionsProvider = new SuggestionsProvider(this.logger);
-    const completionTriggers = ['.', ' '];
-    this.context.subscriptions.push(
-      Languages.registerCompletionItemProvider(
-        ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as any,
-        this.suggestionsProvider, ...completionTriggers,
-      ),
-    );
 
     if (typeof Window.registerTreeDataProvider !== 'function') {
       return;
@@ -530,7 +518,7 @@ export default class SQLTools {
     return result.then((conn): Connection => {
       this.activeConnection = conn;
       this.updateStatusBar();
-      this.suggestionsProvider.setConnection(conn);
+      // this.suggestionsProvider.setConnection(conn);
       this.sqlconnectionTreeProvider.setConnection(conn);
       return this.activeConnection;
     })
