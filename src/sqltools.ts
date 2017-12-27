@@ -205,7 +205,7 @@ export default class SQLTools {
     .then((editor) => {
       const indentSize = ConfigManager.get('format.indentSize', 2) as number;
       return editor.insertSnippet(
-        new SnippetString(Utils.generateInsertQuery(node.value, [ ...node.columns.values() ], indentSize)),
+        new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)),
       );
     }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
@@ -247,6 +247,8 @@ export default class SQLTools {
   public showConnectionMenu(): Thenable<QuickPickItem> {
     const options: QuickPickItem[] = ConnectionManager.getConnections(this.logger).map((connection: Connection) => {
       return {
+        description: (this.activeConnection && connection.getName() === this.activeConnection.getName())
+          ? 'Currently connected' : '',
         detail: `${connection.getUsername()}@${connection.getServer()}:${connection.getPort()}`,
         label: connection.getName(),
       } as QuickPickItem;
