@@ -1,6 +1,6 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import * as formatter from 'sql-formatter';
+import formatter = require('sql-formatter');
 import { SidebarColumn } from '../sidebar-tree-items';
 import { EnvironmentException } from './exception';
 

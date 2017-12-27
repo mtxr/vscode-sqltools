@@ -5,9 +5,9 @@ import {
   InitializeResult, IPCMessageReader, IPCMessageWriter,
   TextDocuments, TextEdit,
 } from 'vscode-languageserver';
-import * as ConfigManager from '../api/config-manager';
+import ConfigManager = require('../api/config-manager');
 import { Settings } from '../interface/settings';
-import * as Formatter from './fomatter';
+import Formatter = require('./fomatter');
 
 let formatterRegistration: Thenable<Disposable> | null = null;
 let workspaceRoot: string;

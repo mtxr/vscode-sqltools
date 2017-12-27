@@ -65,11 +65,25 @@ export default class MSSQL implements ConnectionDialect {
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
-    return this.open().then((pool) => pool.request().query(query)).then((results) => {
-      if (results.recordsets.lenght === 0) {
+    return this.open()
+    .then((pool) => pool.request().query(query))
+    .then((results) => {
+      const queries = query.split(';');
+      if (results.recordsets.length === 0) {
         return [];
       }
-      return results.recordsets;
+      return results.recordsets.map((r, i) => {
+        const messages = [];
+        if (r.rowsAffected) {
+          messages.push(`${r.rowsAffected} were affected.`);
+        }
+        return {
+          cols: Array.isArray(r) ? Object.keys(r[0]) : [],
+          messages,
+          query: queries[i],
+          results: r,
+        };
+      });
     });
   }
 

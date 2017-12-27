@@ -2,9 +2,8 @@
 
 jest.mock('fs');
 
-import * as fs from 'fs';
-import * as path from 'path';
-import * as vscode from 'vscode';
+import fs = require('fs');
+import path = require('path');
 import { BookmarksStorage, Utils } from './../../api';
 import { NotFoundException, SizeException } from './../../api/exception';
 

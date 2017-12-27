@@ -1,7 +1,7 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import * as fs from 'fs';
-import * as path from 'path';
+import fs = require('fs');
+import path = require('path');
 import BaseStorage from './base-storage';
 import { NotFoundException } from './exception';
 import { LoggerInterface } from './interface';

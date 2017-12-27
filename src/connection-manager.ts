@@ -1,5 +1,5 @@
 import { Logger } from './api';
-import * as ConfigManager from './api/config-manager';
+import ConfigManager = require('./api/config-manager');
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import Connection from './connection';
 export default class ConnectionManager {

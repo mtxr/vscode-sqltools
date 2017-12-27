@@ -1,7 +1,7 @@
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import { EventEmitter } from 'events';
-import * as Path from 'path';
+import Path = require('path');
 import {
   commands as VSCode,
   commands as VsCommands,
@@ -41,7 +41,7 @@ import {
   TransportKind,
 } from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
-import * as ConfigManager from './api/config-manager';
+import ConfigManager = require('./api/config-manager');
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import DatabaseInterface from './api/interface/database-interface';
 import Connection from './connection';

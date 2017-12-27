@@ -1,6 +1,5 @@
 /// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
-import * as vscode from 'vscode';
 import { History } from './../../api';
 import { NotFoundException, SizeException } from './../../api/exception';
 

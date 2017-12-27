@@ -1,12 +1,15 @@
-import * as vscode from 'vscode';
+import {
+  OutputChannel,
+  window,
+} from 'vscode';
 import Constants from './constants';
 
 export default class Logwriter {
-  private static outputChannel: vscode.OutputChannel = null;
-  private output: vscode.OutputChannel = null;
+  private static outputChannel: OutputChannel = null;
+  private output: OutputChannel = null;
   constructor() {
     Logwriter.outputChannel = (
-      Logwriter.outputChannel || vscode.window.createOutputChannel(`${Constants.extNamespace} Logs`)
+      Logwriter.outputChannel || window.createOutputChannel(`${Constants.extNamespace} Logs`)
     );
     this.output = Logwriter.outputChannel;
   }
@@ -25,7 +28,7 @@ export default class Logwriter {
   public showOutput() {
     this.output.show();
   }
-  public getOutputChannel(): vscode.OutputChannel {
+  public getOutputChannel(): OutputChannel {
     return this.output;
   }
 

@@ -10,7 +10,7 @@ import Constants from './constants';
 
 // tslint:disable-next-line:no-var-requires
 const uuidv4 = require('uuid/v4');
-import * as ConfigManager from './api/config-manager';
+import ConfigManager = require('./api/config-manager');
 
 export default class Telemetry {
   public static register(logger: any): any {

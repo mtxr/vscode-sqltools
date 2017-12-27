@@ -1,7 +1,7 @@
 // tslint:disable:no-var-requires
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
-import * as path from 'path';
+import path = require('path');
 import { Utils } from './api';
 
 const  pkg = require('./../package.json');
