@@ -235,8 +235,7 @@ export default class SQLTools {
       return this.setConnection(ConnectionManager.getConnection(selection.label));
     }, (reason) => {
       this.setConnection(null);
-      errorHandler(this.logger, 'Error while selecting the connection.', reason, this.showOutputChannel);
-      // throw reason;
+      throw reason;
     });
   }
 
@@ -387,14 +386,17 @@ export default class SQLTools {
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
-  private autoConnectIfActive(currentConnection?: string) {
-    const defaultConnection: string = currentConnection || ConfigManager.get('autoConnectTo', null) as string;
+  private autoConnectIfActive(currConn?: string) {
+    const defaultConnection: string = currConn || ConfigManager.get('autoConnectTo', null) as string;
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
-    if (defaultConnection) {
-      this.setConnection(new Connection(ConnectionManager.getConnection(defaultConnection), this.logger));
-    } else {
-      this.setConnection();
+    if (!defaultConnection) {
+      return this.setConnection();
     }
+    const c = ConnectionManager.getConnection(defaultConnection);
+    if (!c) {
+      return this.setConnection();
+    }
+    this.setConnection(new Connection(c, this.logger));
   }
   private loadConfigs() {
     ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);

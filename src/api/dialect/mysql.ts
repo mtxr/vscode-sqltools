@@ -92,7 +92,7 @@ export default class MySQL implements ConnectionDialect {
               messages.push(`${r.changedRows} were changed.`);
             }
             return {
-              cols: Object.keys(r[0]),
+              cols: Array.isArray(r) ? Object.keys(r[0]) : [],
               messages,
               query: queries[i].sql,
               results: r,

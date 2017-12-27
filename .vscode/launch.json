@@ -9,17 +9,14 @@
             "port": 6009,
             "restart": true,
             "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/dist/*/*.js",
-                "${workspaceRoot}/dist/**/*.js"
-            ],
+            "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
         },
         {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
+            "args": ["${workspaceRoot}", "--extensionDevelopmentPath=${workspaceRoot}"],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
@@ -30,9 +27,7 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": [
-                "--extensionDevelopmentPath=${workspaceRoot}"
-            ],
+            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}"],
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
@@ -43,7 +38,7 @@
             "request": "launch",
             "name": "Run Client Tests",
             "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-            "cwd": "${workspaceRoot}",
+            "cwd": "${workspaceRoot}/.test-database/.",
             "preLaunchTask": "compile",
             "args": [
                 "--i",

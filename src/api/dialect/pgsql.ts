@@ -68,11 +68,22 @@ export default class PostgreSQL implements ConnectionDialect {
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
+        const queries = query.split(';');
+        const messages = [];
         if (!Array.isArray(results)) {
           results = [ results ];
         }
-        return results.map((r) => {
-          return r.rows.length === 0 && r.rowCount > 0 ? [ { affectedRows: r.rowCount } ] : r.rows;
+
+        return results.map((r, i) => {
+          if (r.rows.length === 0 && r.command.toLowerCase() === 'update') {
+            messages.push(`${r.rowCount} were affected.`);
+          }
+          return {
+            cols: r.rows.length > 0 ? Object.keys(r.rows[0]) : [],
+            messages,
+            query: queries[i],
+            results: r.rows,
+          };
         });
       });
   }
