@@ -43,6 +43,7 @@ import {
 import { BookmarksStorage, History, Logger, Utils } from './api';
 import * as ConfigManager from './api/config-manager';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
+import DatabaseInterface from './api/interface/database-interface';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
@@ -203,7 +204,9 @@ export default class SQLTools {
     this.getOrCreateEditor()
     .then((editor) => {
       const indentSize = ConfigManager.get('format.indentSize', 2) as number;
-      return editor.insertSnippet(new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)));
+      return editor.insertSnippet(
+        new SnippetString(Utils.generateInsertQuery(node.value, [ ...node.columns.values() ], indentSize)),
+      );
     }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
     });
@@ -229,7 +232,7 @@ export default class SQLTools {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
       if (!selection || !selection.label) return;
       this.history.clear();
-      return this.setConnection(new Connection(ConnectionManager.getConnection(selection.label), this.logger));
+      return this.setConnection(ConnectionManager.getConnection(selection.label));
     }, (reason) => {
       this.setConnection(null);
       errorHandler(this.logger, 'Error while selecting the connection.', reason, this.showOutputChannel);
@@ -242,10 +245,10 @@ export default class SQLTools {
   }
 
   public showConnectionMenu(): Thenable<QuickPickItem> {
-    const options: QuickPickItem[] = ConnectionManager.getConnections().map((connection) => {
+    const options: QuickPickItem[] = ConnectionManager.getConnections(this.logger).map((connection: Connection) => {
       return {
-        detail: `${connection.username}@${connection.server}:${connection.port}`,
-        label: connection.name,
+        detail: `${connection.getUsername()}@${connection.getServer()}:${connection.getPort()}`,
+        label: connection.getName(),
       } as QuickPickItem;
     });
     return Window.showQuickPick(options);
@@ -266,7 +269,7 @@ export default class SQLTools {
 
   public showRecords(node?: SidebarTable) {
     let tablePromise: PromiseLike<string>;
-    if (node) {
+    if (node && node.value) {
       tablePromise = Promise.resolve(node.value);
     } else {
       tablePromise = this.showTableMenu().then((selected) => selected.label);
@@ -281,7 +284,7 @@ export default class SQLTools {
 
   public describeTable(node?: SidebarTable): void {
     let tablePromise: PromiseLike<string>;
-    if (node) {
+    if (node && node.value) {
       tablePromise = Promise.resolve(node.value);
     } else {
       tablePromise = this.showTableMenu().then((selected) => selected.label);
@@ -369,7 +372,7 @@ export default class SQLTools {
   /**
    * Management functions
    */
-  private printOutput(results, outputName: string = 'SQLTools Results') {
+  private printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
     this.outputProvider.setResults(results);
 
     let viewColumn: ViewColumn = ViewColumn.One;
@@ -486,8 +489,16 @@ export default class SQLTools {
     if (typeof Window.registerTreeDataProvider !== 'function') {
       return;
     }
-    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
+    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection, this.logger);
     Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
+    this.suggestionsProvider = new SuggestionsProvider(this.logger);
+    const completionTriggers = ['.', ' '];
+    this.context.subscriptions.push(
+      Languages.registerCompletionItemProvider(
+        ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
+        this.suggestionsProvider, ...completionTriggers,
+      ),
+    );
   }
 
   private registerEvents() {
@@ -518,7 +529,7 @@ export default class SQLTools {
     return result.then((conn): Connection => {
       this.activeConnection = conn;
       this.updateStatusBar();
-      // this.suggestionsProvider.setConnection(conn);
+      this.suggestionsProvider.setConnection(conn);
       this.sqlconnectionTreeProvider.setConnection(conn);
       return this.activeConnection;
     })

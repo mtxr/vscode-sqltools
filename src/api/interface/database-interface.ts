@@ -1,5 +1,9 @@
 // tslint:disable:no-namespace
 namespace DatabaseInterface {
+  export interface Database {
+    name: string;
+  }
+
   export interface Table {
     tableSchema?: string;
     tableCatalog?: string;
@@ -23,6 +27,12 @@ namespace DatabaseInterface {
 
   export interface Function {
     name: string;
+  }
+  export interface QueryResults {
+    results: any[];
+    cols: string[];
+    query: string;
+    messages: string[];
   }
 }
 

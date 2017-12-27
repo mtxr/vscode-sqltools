@@ -2,7 +2,7 @@ export interface ConnectionCredentials {
   name: string;
   server: string;
   port: number;
-  database: string;
+  database?: string;
   username: string;
   password?: string;
   askForPassword?: boolean;

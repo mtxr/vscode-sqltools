@@ -5,11 +5,11 @@ import {
   InitializeResult, IPCMessageReader, IPCMessageWriter,
   TextDocuments, TextEdit,
 } from 'vscode-languageserver';
+import * as ConfigManager from '../api/config-manager';
 import { Settings } from '../interface/settings';
 import * as Formatter from './fomatter';
 
 let formatterRegistration: Thenable<Disposable> | null = null;
-let globalSettings: Settings = {};
 let workspaceRoot: string;
 const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 const docManager: TextDocuments = new TextDocuments();
@@ -34,7 +34,7 @@ connection.onDocumentFormatting((params) => Formatter.handler(docManager, params
 connection.onDocumentRangeFormatting((params) => Formatter.handler(docManager, params));
 
 connection.onDidChangeConfiguration((change) => {
-  globalSettings = change.settings.sqltools as Settings;
+  ConfigManager.setSettings(change.settings.sqltools);
   if (!formatterRegistration) {
     formatterRegistration = connection.client.register(DocumentRangeFormattingRequest.type, {
       documentSelector: [ 'sql' ],

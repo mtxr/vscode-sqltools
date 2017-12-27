@@ -47,3 +47,4 @@ tslint.json
 !static/icon.png
 !README.md
 !LICENSE.md
+.test-database

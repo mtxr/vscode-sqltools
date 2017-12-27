@@ -1,5 +1,5 @@
 import Utils from './../utils';
-import mysql = require('mysql');
+import mysql = require('mysql2');
 import { ConnectionCredentials } from './../interface/connection-credentials';
 import { ConnectionDialect } from './../interface/connection-dialect';
 import DatabaseInterface from './../interface/database-interface';
@@ -39,6 +39,7 @@ export default class MySQL implements ConnectionDialect {
       return this.connection;
     }
     const options = {
+      connectionTimeout: this.credentials.connectionTimeout,
       database: this.credentials.database,
       host: this.credentials.server,
       multipleStatements: true,
@@ -70,32 +71,42 @@ export default class MySQL implements ConnectionDialect {
     });
   }
 
-  public query(query: string): Promise<any> {
-    return this.open().then((conn) => {
+  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+    return this.open().then((conn): Promise<DatabaseInterface.QueryResults[]> => {
       return new Promise((resolve, reject) => {
-        conn.query(query, (error, results) => {
+        let queries = conn.query(query, (error, results) => {
           if (error) return reject(error);
-          if (results.length === 0) {
-            return resolve([]);
-          }
-          if (!Array.isArray(results[0])) {
+          if (results && !Array.isArray(results[0])) {
+            queries = [queries];
             results = [results];
           }
-          return resolve(results);
+          if (results.length === 0) {
+            return [];
+          }
+          return resolve(results.map((r, i) => {
+            const messages = [];
+            if (r.affectedRows) {
+              messages.push(`${r.affectedRows} were affected.`);
+            }
+            if (r.changedRows) {
+              messages.push(`${r.changedRows} were changed.`);
+            }
+            return {
+              cols: Object.keys(r[0]),
+              messages,
+              query: queries[i].sql,
+              results: r,
+            };
+          }));
         });
       });
-    }).then((results: any[]) => {
-      if (results.length === 0) {
-        return [];
-      }
-      return results;
     });
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
     return this.query(this.queries.fetchTables)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
@@ -112,8 +123,8 @@ export default class MySQL implements ConnectionDialect {
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
     return this.query(this.queries.fetchColumns)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;

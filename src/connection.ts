@@ -3,7 +3,6 @@ import Dialects from './api/dialect';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import { ConnectionDialect } from './api/interface/connection-dialect';
 import DatabaseInterface from './api/interface/database-interface';
-import errorHandler from './error-handler';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
@@ -36,17 +35,11 @@ export default class Connection {
 
   public close() {
     this.connected = false;
-    return this.connection.close()
-      .catch((e) => {
-        errorHandler(this.logger, 'Error closing connection.', e);
-      });
+    return this.connection.close();
   }
 
   public open() {
-    return this.connection.open()
-      .catch((e) => {
-        errorHandler(this.logger, 'Error connecting to database.', e);
-      });
+    return this.connection.open();
   }
 
   public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {
@@ -76,10 +69,30 @@ export default class Connection {
     return this.connection.showRecords(tableName, limit);
   }
 
-  public query(query: string): Promise<any> {
+  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     return this.connection.query(query);
   }
   public getName() {
     return this.credentials.name;
+  }
+  public getServer() {
+    return this.credentials.server;
+  }
+
+  public getPort() {
+    return this.credentials.port;
+  }
+  public getUsername() {
+    return this.credentials.username;
+  }
+
+  public serialize(): any {
+    return {
+      isConnected: this.isConnected(),
+      name: this.getName(),
+      port: this.getPort(),
+      server: this.getServer(),
+      username: this.getUsername(),
+    };
   }
 }

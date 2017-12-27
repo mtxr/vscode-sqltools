@@ -10,10 +10,30 @@ import {
 } from 'vscode';
 import DatabaseInterface from './api/interface/database-interface';
 
+export class SidebarDatabase extends TreeItem {
+  public iconPath = {
+    dark: path.join(__dirname, 'resources', 'icon', 'db-dark.png'),
+    light: path.join(__dirname, 'resources', 'icon', 'db-light.png'),
+  };
+  public contextValue = 'connection.database';
+  public value: string;
+
+  public tables: any = {};
+  constructor(private db: DatabaseInterface.Database) {
+    super(db.name, TreeItemCollapsibleState.Expanded);
+    this.value = db.name;
+    Object.defineProperty(this, 'label', {
+      get() {
+        return `${this.db.name} (${Object.keys(this.tables).length} tables)`;
+      },
+    });
+  }
+}
+
 export class SidebarTable extends TreeItem {
   public iconPath = {
-    dark: path.join(__dirname, 'resources', 'icon', 'database-dark.png'),
-    light: path.join(__dirname, 'resources', 'icon', 'database-light.png'),
+    dark: path.join(__dirname, 'resources', 'icon', 'table-dark.png'),
+    light: path.join(__dirname, 'resources', 'icon', 'table-light.png'),
   };
   public contextValue = 'connection.table';
   public value: string;

@@ -1,20 +1,28 @@
+import { Logger } from './api';
 import * as ConfigManager from './api/config-manager';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
+import Connection from './connection';
 export default class ConnectionManager {
-  public static getConnections(): ConnectionCredentials[] {
+  public static getConnections(logger: Logger): Connection[];
+  public static getConnections(logger: Logger, serialized: boolean = false): any[] {
     const connectionsConfig = ConfigManager.get('connections', []) as any[];
-    ConnectionManager.connections = connectionsConfig.map((credentials): ConnectionCredentials => {
-      return credentials as ConnectionCredentials;
+    ConnectionManager.connections = connectionsConfig.map((credentials): Connection => {
+      return new Connection(credentials, logger);
     });
-    return ConnectionManager.connections;
+
+    if (!serialized) return ConnectionManager.connections;
+
+    return ConnectionManager.connections.map((c) => c.serialize());
   }
 
-  public static getConnection(connection: string|number) {
-    ConnectionManager.getConnections();
+  public static getConnection(connection: string|number, serialized: boolean = false) {
     if (typeof connection === 'number') {
       return ConnectionManager.connections[connection];
     }
-    return ConnectionManager.connections.find((conn) => connection === conn.name);
+    const conn =  ConnectionManager.connections.find((c) => connection === c.getName());
+    if (!serialized) return conn;
+
+    return conn.serialize();
   }
-  private static connections: ConnectionCredentials[] = [];
+  private static connections: Connection[] = [];
 }

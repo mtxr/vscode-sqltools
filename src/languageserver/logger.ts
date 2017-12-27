@@ -1,1 +1,5 @@
-export default console;
+import { Logger } from '../api';
+
+const logger = new Logger(console);
+
+export default logger;

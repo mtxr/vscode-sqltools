@@ -17,7 +17,7 @@ class App extends React.Component {
           return col
         })
         return <ReactTable
-          data={queryResult.data}
+          data={queryResult.results}
           columns={queryResult.cols}
           className='-striped'
           style={{

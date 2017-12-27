@@ -8,7 +8,11 @@
             "name": "Attach",
             "port": 6009,
             "restart": true,
-            "sourceMaps": true
+            "sourceMaps": true,
+            "outFiles": [
+                "${workspaceRoot}/dist/*/*.js",
+                "${workspaceRoot}/dist/**/*.js"
+            ],
         },
         {
             "name": "Launch Extension",
@@ -18,6 +22,7 @@
             "args": ["--extensionDevelopmentPath=${workspaceRoot}"],
             "stopOnEntry": false,
             "sourceMaps": true,
+            "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
             "preLaunchTask": "compile"
         },
         {
@@ -29,7 +34,8 @@
                 "--extensionDevelopmentPath=${workspaceRoot}"
             ],
             "stopOnEntry": false,
-            "sourceMaps": true
+            "sourceMaps": true,
+            "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
         },
 
         {

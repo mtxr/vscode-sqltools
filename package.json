@@ -291,6 +291,7 @@
                             },
                             "database": {
                                 "type": "string",
+                                "required": false,
                                 "description": "Database name"
                             },
                             "username": {
@@ -431,12 +432,12 @@
     "dependencies": {
         "electron-google-analytics": "0.0.24",
         "mssql": "^4.0.4",
-        "mysql": "^2.15.0",
+        "mysql2": "^1.5.1",
         "opn": "^5.1.0",
         "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",
         "uuid": "^3.1.0",
-        "vscode-languageserver": "^3.5.0",
-        "vscode-languageclient": "^3.5.0"
+        "vscode-languageclient": "^3.5.0",
+        "vscode-languageserver": "^3.5.0"
     }
 }
