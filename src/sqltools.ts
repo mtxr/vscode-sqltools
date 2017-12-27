@@ -387,8 +387,8 @@ export default class SQLTools {
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
-  private autoConnectIfActive() {
-    const defaultConnection: string = ConfigManager.get('autoConnectTo', null) as string;
+  private autoConnectIfActive(currentConnection?: string) {
+    const defaultConnection: string = currentConnection || ConfigManager.get('autoConnectTo', null) as string;
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
     if (defaultConnection) {
       this.setConnection(new Connection(ConnectionManager.getConnection(defaultConnection), this.logger));
@@ -509,10 +509,11 @@ export default class SQLTools {
   }
 
   private reloadConfig() {
+    const currentConnection = this.activeConnection ? this.activeConnection.getName() : null;
     ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.logger.debug('Config reloaded!');
     this.loadConfigs();
-    this.autoConnectIfActive();
+    this.autoConnectIfActive(currentConnection);
     this.updateStatusBar();
   }
 
