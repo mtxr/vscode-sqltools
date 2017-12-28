@@ -40,7 +40,7 @@ export class SidebarTable extends TreeItem {
 
   public columns: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
-    super(table.name, TreeItemCollapsibleState.Collapsed);
+    super(table.name, TreeItemCollapsibleState.Expanded);
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
   }

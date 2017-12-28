@@ -102,7 +102,7 @@
             {
                 "title": "Describe table",
                 "command": "SQLTools.describeTable",
-                "category": "SQLTools"
+                "category": "SQLTools Connection"
             },
             {
                 "title": "Format SQL",
@@ -112,37 +112,46 @@
             {
                 "title": "Run selected query",
                 "command": "SQLTools.executeQuery",
-                "category": "SQLTools"
+                "category": "SQLTools Connection"
             },
             {
                 "title": "Show output channel (Logs)",
                 "command": "SQLTools.showOutputChannel",
-                "category": "SQLTools"
+                "category": "SQLTools Management"
             },
             {
                 "title": "Show table records",
                 "command": "SQLTools.showRecords",
-                "category": "SQLTools"
+                "category": "SQLTools Connection"
             },
             {
                 "title": "Version",
                 "command": "SQLTools.aboutVersion",
-                "category": "SQLTools"
+                "category": "SQLTools Management"
             },
             {
                 "title": "Add name to cursor",
                 "command": "SQLTools.appendToCursor",
-                "category": "SQLTools"
+                "category": "SQLTools Sidebar"
             },
             {
                 "title": "Generate Insert Query",
                 "command": "SQLTools.generateInsertQuery",
-                "category": "SQLTools"
+                "category": "SQLTools Sidebar"
+            },
+            {
+                "title": "Refresh Sidebar",
+                "command": "SQLTools.refreshSidebar",
+                "category": "SQLToolds Sidebar",
+                "icon": {
+                    "light": "dist/resources/icon/refresh-light.svg",
+                    "dark": "dist/resources/icon/refresh-dark.svg"
+                }
             },
             {
                 "title": "Show user statistics",
                 "command": "SQLTools.showStatistics",
-                "category": "SQLTools"
+                "category": "SQLTools Management"
             }
         ],
         "keybindings": [
@@ -363,6 +372,13 @@
                 {
                     "command": "SQLTools.bookmarkSelection",
                     "when": "editorHasSelection"
+                }
+            ],
+            "view/title": [
+                {
+                    "command": "SQLTools.refreshSidebar",
+                    "when": "view == SQLTools.connectionExplorer",
+                    "group": "navigation"
                 }
             ],
             "view/item/context": [

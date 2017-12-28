@@ -23,7 +23,7 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatab
     this.setConnection(connection);
   }
 
-  public refresh(): void {
+  public fireUpdate(): void {
     this.onDidChange.fire();
   }
 
@@ -43,9 +43,13 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatab
   }
   public setConnection(connection: Connection) {
     this.connection = connection;
+    this.refresh();
+  }
+
+  public refresh() {
     this.tree = {};
-    if (!connection) {
-      this.refresh();
+    if (!this.connection) {
+      this.fireUpdate();
       return;
     }
     this.connection.getTables()
@@ -63,12 +67,13 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatab
             columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
               this.tree[column.tableDatabase].tables[column.tableName].columns.push(new SidebarColumn(column));
             });
-            this.refresh();
+            this.fireUpdate();
           });
       })
       .catch((e) => { this.logger.error('Failed to prepare sidebar itens', e); });
-    }
-    private toArray(obj: any) {
-      return Object.keys(obj).map((k) => obj[k]);
-    }
+  }
+
+  private toArray(obj: any) {
+    return Object.keys(obj).map((k) => obj[k]);
+  }
 }

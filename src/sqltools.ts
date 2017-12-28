@@ -370,6 +370,10 @@ export default class SQLTools {
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
+  public refreshSidebar() {
+    this.sqlconnectionTreeProvider.refresh();
+  }
+
   /**
    * Management functions
    */
@@ -438,6 +442,7 @@ export default class SQLTools {
     this.registerCommand('appendToCursor', registerCommand);
     this.registerCommand('generateInsertQuery', registerCommand);
     this.registerCommand('showStatistics', registerCommand);
+    this.registerCommand('refreshSidebar', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
