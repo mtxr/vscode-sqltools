@@ -1,3 +1,11 @@
+$tabsHeight: 30px;
+$collapseHeight: 29px;
+
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
 body,
 html,
 #root {
@@ -7,16 +15,145 @@ html,
   overflow-x: hidden;
 }
 
-body, #root {
+body, #root, .fix-height {
   min-height: 100%;
+  max-height: 100%;
+  height: 100%;
 }
 
-.vscode-light {
-  @import 'lib/react-table';
+.results {
+  position: absolute;
+  top: $tabsHeight;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  overflow: hidden;
 }
 
-.vscode-dark {
+.results .result {
+  display: none;
+  position: relative;
+  .results-table {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 60px;
+  }
+  .query-extras {
+    width: 100%;
+    background: white;
+    position: absolute;
+    bottom: 0px;
+  }
+
+  &.active {
+    display: block;
+  }
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.tabs {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  clear: both;
+  height: $tabsHeight;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+
+  li {
+    overflow: hidden;
+    height: $tabsHeight;
+    line-height: $tabsHeight;
+    vertical-align: middle;
+    float: left;
+    padding: 0px 4px;
+    width: 100px;
+    list-style: none;
+    margin-right: 1px;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
+    font-size: 0.8em;
+    cursor: pointer;
+  }
+}
+
+.collapse {
+  border-width: 1px;
+  border-style: solid;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-color: rgba(0, 0, 0, 0.15);
+  background-color: #e6e6e6;
+  .collapse-toggle {
+    cursor: pointer;
+    background-color: rgba(0, 0, 0, 0.05);
+    text-transform: uppercase;
+    height: $collapseHeight;
+    line-height: $collapseHeight;
+    vertical-align: middle;
+    padding: 0px 4px;
+    font-size: 0.7em;
+    cursor: pointer;
+  }
+
+  .collapsible {
+    display: none;
+    max-height: 100px;
+    width: 100%;
+  }
+
+  &.open {
+    .collapsible {
+      display: block;
+    }
+  }
+}
+
+body, body.vscode-light {
   @import 'lib/react-table';
+
+  .tabs {
+    border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+    li {
+      border-color: rgba(0, 0, 0, 0.05) !important;
+
+      &:hover, &.active {
+        background: rgba(0, 0, 0, 0.05) !important;
+      }
+      &.active {
+        font-weight: bold;
+      }
+    }
+  }
+  .results .result.active {
+    background: rgba(0, 0, 0, 0.05) !important;
+  }
+}
+
+body.vscode-dark {
+  @import 'lib/react-table';
+
+  .tabs {
+    border-bottom-color: rgba(255, 255, 255, 0.05) !important;
+    li {
+      border-color: rgba(255, 255, 255, 0.05) !important;
+    }
+  }
+  .results .result.active {
+    background: rgba(255, 255, 255, 0.05) !important;
+  }
 
   .ReactTable {
     &.-striped .rt-tr.-odd {
@@ -43,5 +180,23 @@ body, #root {
       border-color: rgba(255, 255, 255, 0.05) !important;
     }
   }
-}
 
+  .collapse {
+    border-color: rgba(255, 255, 255, 0.15) !important;
+    color: #ccc;
+    background-color: #191919;
+    .collapse-toggle {
+      background-color: rgba(255, 255, 255, 0.05) !important;
+    }
+
+    .collapsible {
+      color: #ccc;
+    }
+
+    &.open {
+      .collapsible {
+        display: block;
+      }
+    }
+  }
+}
