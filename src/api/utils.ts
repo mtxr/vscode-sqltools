@@ -1,8 +1,10 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
 import formatter = require('sql-formatter');
+import Constants from '../constants';
 import { SidebarColumn } from '../sidebar-tree-items';
 import { EnvironmentException } from './exception';
+import fs = require('fs');
 
 export default class Utils {
   /**
@@ -40,4 +42,45 @@ export default class Utils {
     });
     return Utils.formatSql(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, indentSize).concat('$0');
   }
+
+  public static async localSetupInfo() {
+    if (Utils.localSetupData) {
+      return Utils.localSetupData;
+    }
+    const file = require('path').join(Utils.getHome(), '.sqltools-setup');
+    const localConfig = {
+      current: {
+        numericVersion: Utils.numericVersion(Constants.version),
+        // tslint:disable-next-line:max-line-length
+        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/static/release-notes/${Constants.version.replace(/\.([\da-z\-_]+)$/, '.x')}.md`,
+        run: new Date().getTime(),
+        updated: false,
+        version: Constants.version,
+      },
+      installed: {
+        numericVersion: 0,
+        run: 0,
+        version: '',
+      },
+    };
+    try {
+      localConfig.installed = JSON.parse(fs.readFileSync(file, 'utf-8'));
+      localConfig.current.updated = localConfig.current.numericVersion > localConfig.installed.numericVersion;
+    } catch (e) { /**/ }
+
+    Utils.localSetupData = localConfig;
+    fs.writeFileSync(file, JSON.stringify(localConfig.current, null, 2), 'utf-8');
+
+    return localConfig;
+  }
+
+  public static numericVersion(v: string) {
+    const n: number[] = v.replace(/^v/, '').split('.')
+      .map((a) => parseInt(a.replace(/\D+/, ''), 10));
+    if (n.length >= 3) return n[0] * 10000 + n[1] * 100 + n[2];
+    if (n.length === 2) return n[0] * 10000 + n[1] * 100;
+    return n[0] * 10000;
+  }
+
+  private static localSetupData: any;
 }

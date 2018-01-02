@@ -73,10 +73,11 @@ export default class MySQL implements ConnectionDialect {
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     return this.open().then((conn): Promise<DatabaseInterface.QueryResults[]> => {
       return new Promise((resolve, reject) => {
-        let queries = conn.query(query, (error, results) => {
+        conn.query(query, (error, results) => {
           if (error) return reject(error);
+          const queries = query.split(';');
           if (results && !Array.isArray(results[0])) {
-            queries = [queries];
+            results = [results];
             results = [results];
           }
           if (results.length === 0) {
@@ -93,7 +94,7 @@ export default class MySQL implements ConnectionDialect {
             return {
               cols: Array.isArray(r) ? Object.keys(r[0]) : [],
               messages,
-              query: queries[i].sql,
+              query: queries[i],
               results: Array.isArray(r) ? r : [],
             };
           }));

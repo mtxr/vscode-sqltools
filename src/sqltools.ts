@@ -570,37 +570,6 @@ export default class SQLTools {
     return this.selectConnection();
   }
 
-  private help(): void {
-    const moreInfo = 'More Info';
-    const supportProject = 'Support This Project';
-    const message = 'Do you like SQLTools? Help us to keep making it better.';
-    const file = require('path').join(Utils.getHome(), '.sqltools-lasrun');
-    fs.readFile(file, (err, data) => {
-      let last = new Date(0);
-      if (!err) {
-        try {
-          last = new Date(parseInt(data.toString(), 10));
-          if (isNaN(last.getTime())) last = new Date(0);
-        } catch (e) {
-          last = new Date(0);
-        }
-      }
-      if (new Date().getTime() - last.getTime() <= 604800000) {
-        return;
-      }
-      fs.writeFile(file, `${new Date().getTime()}`);
-      Window.showInformationMessage(message, moreInfo, supportProject)
-        .then((value) => {
-          Telemetry.infoMessage(message, value);
-          if (value === moreInfo) {
-            openurl('https://github.com/mtxr/vscode-sqltools#donate');
-          } else if (value === supportProject) {
-            openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
-          }
-        });
-    });
-  }
-
   private registerTelemetry(): void {
     Telemetry.register(this.logger);
   }
@@ -641,5 +610,40 @@ export default class SQLTools {
       await VsCommands.executeCommand('workbench.action.files.newUntitledFile');
     }
     return Promise.resolve(Window.activeTextEditor);
+  }
+
+  private async help() {
+    const moreInfo = 'More Info';
+    const supportProject = 'Support This Project';
+    const releaseNotes = 'Release Notes';
+    const localConfig = await Utils.localSetupInfo();
+
+    let message = 'Do you like SQLTools? Help us to keep making it better.';
+
+    if (localConfig.current.numericVersion <= localConfig.installed.numericVersion) {
+      return;
+    }
+    const options = [ moreInfo, supportProject ];
+    if (localConfig.installed.numericVersion !== 0) {
+      message = `SQLTools updated! Check out the release notes for more information.`;
+      options.push(releaseNotes);
+    }
+    Window.showInformationMessage(message, ...options)
+      .then((value) => {
+        Telemetry.infoMessage(message, value);
+        switch (value) {
+          case moreInfo:
+            openurl('https://github.com/mtxr/vscode-sqltools#donate');
+            break;
+          case releaseNotes:
+            openurl(localConfig.current.releaseNotes);
+            break;
+          case supportProject:
+            openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+            break;
+          default:
+            break;
+        }
+      });
   }
 }

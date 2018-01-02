@@ -193,6 +193,9 @@ body.vscode-dark {
     border-bottom-color: rgba(255, 255, 255, 0.05) !important;
     li {
       border-color: rgba(255, 255, 255, 0.05) !important;
+      &:hover, &.active {
+        background: rgba(255, 255, 255, 0.05) !important;
+      }
     }
   }
   .results .result.active {
