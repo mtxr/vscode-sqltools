@@ -18,7 +18,7 @@ export default class Connection {
   }
 
   public connect() {
-    return this.query('SELECT 1;')
+    return this.query('SELECT 1;', false)
       .then(() => {
         this.connected = true;
         return true;
@@ -69,9 +69,10 @@ export default class Connection {
     return this.connection.showRecords(tableName, limit);
   }
 
-  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, handleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
     return this.connection.query(query)
       .catch((e) => {
+        if (!handleError) throw e;
         this.logger.error('Query error:', e);
         let message = '';
         if (typeof e === 'string') {
