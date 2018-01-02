@@ -17,7 +17,7 @@ class Query extends React.Component {
   render () {
     return (
       <div className={'collapse ' + (this.state.open ? 'open' : '')}>
-        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>View Query</div>
+        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>View Query <i className='icon'></i></div>
         <div className='collapsible'>
           <pre>
             {this.props.value}
@@ -32,7 +32,7 @@ class Messages extends React.Component {
   constructor(props) {
     super(props)
     this.state = { open: false }
-
+    this.size = props.value.length
     this.messages = props.value
     if (this.messages.length === 0) {
       this.messages.push('No messages to show.')
@@ -47,11 +47,13 @@ class Messages extends React.Component {
   render () {
     return (
       <div className={'collapse ' + (this.state.open ? 'open' : '')}>
-        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>Query Result Messages</div>
+        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>Query Messages <small>({this.size} messages)</small><i className='icon'></i></div>
         <div className='collapsible'>
-          {this.messages.map((m, i) => {
-            return (<div key={i}>{m}</div>)
-          })}
+          <div className='messages'>
+            {this.messages.map((m, i) => {
+              return (<div key={i} className='message'>{m}</div>)
+            })}
+          </div>
         </div>
       </div>
     )
@@ -67,11 +69,15 @@ class ResultsTable extends React.Component {
     return (
       <div className='results-table'>
         <ReactTable
+          noDataText="Query didn't return any results."
           data={this.props.value.data}
           columns={cols}
+          filterable
+          defaultFilterMethod={(filter, row) =>
+            String(row[filter.id]) === filter.value}
           className='-striped'
           style={{
-            height: '100%' // This will force the table body to overflow and scroll, since there is not enough room
+            height: '98%' // This will force the table body to overflow and scroll, since there is not enough room
           }}
         />
       </div>

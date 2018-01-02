@@ -1,5 +1,13 @@
+@import 'lib/react-table';
+
 $tabsHeight: 30px;
 $collapseHeight: 29px;
+$collapseIconSize: 20px;
+
+$collapseOpenDark: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAC+klEQVR42u1aW0uUQRjePK6huWpRBHprsRDhL+gIHdA2rC666CYSKqEiuhQU6kLoorCugv5DZVQUIeRFRxIqKiWT6iI6QVCpGLs+bzxfvGyf6+fu7LffTL7wMAvvzDPzzOGd+WY2Fls0Ry2TyTQCe4ELwG1gAvimkU6n39I3AOwBGqLS+CpgHxp4A+nvzMJNylxnB1SWQsBS4CQEvFeNmgGGgV5gN9AqPZ6FVvr6mHfGKwyud0hOADVhiUhx2nh2HzgkUysPriagCyIeKL5xoKPYo3A5S8AGg/ybgEeK/5Lx0QHhKvTaCKfADyRHgLIidFYZ0A38pJgnwEpT5C3AGEU8R7I2hOmbRF0vWedrJM0Fi+AiFLsD1IYYUOpR9z3W/QZYnS9RnEPrrYe6EkTHOuAh2yDrpzofkoscWhniphLuVSuAUYo5v9DC21hQFl0yAhvvOuCX9CuwJWihGs5JsaMGGvHHDPAcI5WMTjxIgVNqTpZHSEg58JR0x+fLXIs18YWZNxqaFkaEkGsr6T7KBp0r4wFmfGxwfpsUskSNyv5cGe8y08EoCiFfF6PprVzfE3KsngISERYiB81pnpyX+WXo9HZww6HTqBByDpF2l5/zLJ09FgjpJW3/P05+5Ym1WyAkRdpBP+cYnWssEJIk7Ss/51c6Gy0QspyR67Ofc5p1VgVtXLEs4MlcbDKXkEoLhFQz65QrU+uT04t9kM6UBUI6OSJX3N0Q5VKMziELhAyTdqe7h0YeU26y3sMRFtJNymv/xYeVbDQfmHF7BIW0k25i3o3bicsHp66DnLmgU4XtvzJVR2X7L7HV5vNCvY00hyiiRdU9UvAmrR96GATWhyCijU/ZZh56FPHfpzcuOtldK4ogoILRadL401tWWB5g5BB7ZurGhTt2hzeVWMe5wGE2z0o3q6nmLcKCnqflSKT4Rk1doAcdnSB/GEioMomAfxiIx0oQHu3+C8ccourlQwc4A2FXJeoA31WPy+9x8SE9DeyY83ti0RywWQLBsp3QUNTrAAAAAElFTkSuQmCC';
+$collapseOpenLight: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANwSURBVGiB7drdi1VVGAbw3+joNOIXY1qEzpXSF0Z0E0lQNgV6oeiFgl54EwWmkBHd119QEUIQ9F9EBRZpUfmF47eOWmJdRKWl+FHM4HSx1pqzZzhn5ux91pzJgw9sFuy91vM+714fe6333dzH/wtdGbn6MIAX8ChWYeGEOtdxEeewH1/hr4waKmMutuJzjGC05DWCz7AFc1oRUrVH5mEn9mB5vDeCg9iH4ziD3ye0W4Yn8LTQe8+iOz77Be/jY9ypqKsUNuGy2lv9Ea8JQ6ssluB14QUkvp+wMYfQRpiHT4134MWM/C/hcIH/E/Rm5AcPYzAauIk3MCu3kci5G7eiraN4KBd5Py5E4lN4PBfxJHgSZ6PN81jRKmE/rkTCfZjfKmEJLMK30fYlPFKV6AGha9N8WJBDXUkswKGo4TB6qpDsjQRnhdVlprAUQ1HLh2Ubr4sNbwnjdabxFG7jLl5utlGvMCZHsSuDiLSctoo3I8+QMOynxDtqY3J2BgG5HJmNY5Frz1SV5+PPWHltBuPkcwReiVy/CR/ohtgRKx7JZJi8jnSp9cr2ySp+HSu9mskweR0h7M1G8WWjCn3CDvYfLM5oOLcjS/AvhhXOO8X90lphQn2HvzMazo2r+EHY/o/N46Ijz8VyfxtFVcU3sVyTbhQdSR++wXapaQFJ49jHuujIylheaJuc6kgaV9Z7eFWYlFVOepMh92SHByPnH+lGd+Fh2qLfbIKoirAybaaKJSSNY8eKeqe83G9vOpA0jjlcdCR52cy5o6vE1UqbRkgab9Rz5FoslzVBNNNI5/ikeZwj52P5WNvkVEfSmDSPc+RcLFe3TU51JI1J8zhHDsRyoG1yqiOdEg/Ue9gxm8ZrQsinB9syGs6NbULw/AuFVWsiOuZg1YNfY8X1mYzndGRD5LqsiTRERwQf6KBwEB0SoEvoiJApHRTEJvTEabXcSMt5ihLoL9gelOEjXUz0XBISmdONZ/CzjImehGLq7baQHuuetEU1dAur0x3TkHpL6MVHwsoxipPCByoHuoRMbhpKd/GBEstsFQyoDbU0CVtNTx8p8A3JF0CfEr14W0jyJwHDQpTyXWwWfuMoTtDF8d5mvBfrDhfaX8FbprkXGuGe/4WjHhbheSGMuTpefWpnhhtC7OwUTuB7oVcabsXv417GfxeiENO2cND/AAAAAElFTkSuQmCC';
+$collapseDark: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAC8UlEQVR42u1aW0tUURSevI6hOd4oAn21GAjxF2QlVKJNWD300EskVEJF+Cgo1EPQQ2E9Cf2HSskoQsiHriRUVEom1UN0g6BSMWb8FnwnFtNxPM6cObP3yQUfZ2Dtvfb69mWtfZlIZE1CKqlUqhY4CFwB7gCzwHeNZDL5jroh4ABQY4rzZcAhOHgL3z+p1YvUGWUHlBaCwHrgLAh8UE4tAhPAALAfaJYeT0MzdYMsu+hUhq33+JwBKoIikeC0ceQBcEymVha26oAekHio7M0AXfkehWtpBLb7aH8H8FjZH/Z9dGBwE3ptklPgJz4ngKI8dFYR0Av8IpmnwEa/jDcB0yTxAp+tAUzfONp6xTbf4NOYMwkuQpG7QGWAAaUabd9n22+BzdkainJonfVQVYDoWAU8og+yfsqzMXKVQytDXFfAXNUATJHM5dVW3s2KsujiBiTebcBv6Vdgl9dKFZyTIicN2gKdok8yOlEvFfrUnCw2iEgx8Iy+nV6pcCXWxFcWbjNwY9pO3z5Jgs5U8AgLPjF0h71OjcrhTAXvsdBRg48LPYymtzOdJ2RbPQ/EDCYiG80F7pw3uBXodjK4BYe4cfq6z015kcp+C4gM0NcL/yh5yhPptIBIgr6OuCmnqdxiAZE4fX3tpvxGZa0FROoZub64KRdIpMyDobyKx525yFwmIqUWECln0Xnbp1YDp9bnUC/2ESoTFhDp5ohcD29ClEsxKsctIDJBXzvCu2nkNmWMTI8bTKSXPt78Lw5Wkmg+suAeA4l00rfZFRN3KC4fQnUdFJoLOlXZ/itTtVW2/xJbJZ+X6m2kMUASTartyZyTtH7oYRBoCYBEK5+y/XnoUYb/Pr1x0Ul2LckDgRJGpznfn97SwvIQI4fIc79uXJixu5ypxDYueQ6zWTa6U001ZxHm9DwtWyJlbyqwC3SOjpc/DMRUnZjHPwxEIwUIj3b/hWMZUtVy0AHOg9gNiTrAD9Xj8ntGdPieA/Yue55YkxDIEhnjA05aewj1AAAAAElFTkSuQmCC';
+$collapseLight: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADIAAAAyCAYAAAAeP4ixAAAABHNCSVQICAgIfAhkiAAAAAlwSFlzAAAN1wAADdcBQiibeAAAABl0RVh0U29mdHdhcmUAd3d3Lmlua3NjYXBlLm9yZ5vuPBoAAANeSURBVGiB7drdi1VVGMfxz+TUOKIpo1lEzZXRG0Z0I0VQNgV1UeRFgV10Ewm9QEZ0X39BhQRC0H8RFVikRW8aTa/qmCXWRVSjKb4UMzhdrLXm7DOcM3P2OnvvyYNf2CzYe61n/dZZ789zuMT/i6EKbY1hAvfgRtyAKxfkOYWfcAh78QFOVqghmyvwON7FLOZKPrN4B4/h8n6E5PbIKjyDnbguvpvFF9iDb/Aj/lhQbiNuwe1C723BcPz2K17DbpzP1FWKR3FM61f9HE8LQ6ss67FD+AGSvZ/xSBVCu7EKb2tvwL0V2r8P+wv238JohfbBNZiMFZzBs7is6kqizedxNtb1Fa6uyvg4jkTD3+Pmqgwvwq04GOs8jOv7NTiO49HgHqzu12AJ1uLjWPdRXJtraKXQtWk+rKlCXUnW4MuoYT9Gcoy8GQ0cFFaX5eIqTEUtb5Qt/GAseFYYr8vNbTiHC7i/10Kjwpicw3P16MriBUHTlDDsl+RlrTG5oj5dpVmBrwVtO5fKvBp/xcxb69WVxQOCtt+FDborT8aMBxoQlcOQVq88sVjGD2OmpxoQlcsOQeP73TKMCSfYf7CuIVE5rMe/mFG47xTPS1uFCfUJ/m5UWjmm8Zlw/J+fx8WG3BnTvQ2KyuWjmN6VXhQbkja+yabU9EHSOL9ZFxuyKaZHGpOTT9K4qdPHaWE1yLnpNc0GQeuf6cVw4WM6op/pwdBchaI6sZQvIWmcv1Z0uuXVLbIKksb5BhcbklrZy71jqOZnKdL+cbpTQ07EdGMPhpabpDFpbmvI4Zje1JicfJLGpLmtIYdiurkxOfkkjUlzW0P2xXSiMTn5pFvivk4fB+bQeEJw+Yxge6PSyrFdcJ6/p7BqLWRgLlYj+C1mfKh+XaV5WNB2TA9hiIFwPjBA7iAGxEGXGAiXKQPkxCb0xA9asZG+4xQlGC/UPamCTboY6DkqBDLr5g78osJAT6IYejsnhMeGFy2Rx7CwOp1XQ+gtMYpdwsoxh++EDaoKhoRIbhpKF/C6EstsDhNaQy1Nwn7D0wcK9qY06EAfxUtCkD8JmBG8lK9gm/A3juIEXRffbcOrMe9MofxxvKjmXujGRf8Xjk6sxd2CG3NzfMa0OwqmhWX8W3wq9ErXo/glLmb+AwTq998URjZ+AAAAAElFTkSuQmCC';
 
 pre {
   margin: 0;
@@ -60,6 +68,19 @@ body, #root, .fix-height {
   overflow-x: auto;
 }
 
+.messages {
+  .message {
+    padding: 2px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: rgba(0, 0, 0, 0.15);
+
+    &:last-child {
+      border-bottom-color: transparent !important;
+    }
+  }
+}
+
 .tabs {
   width: 100%;
   padding: 0;
@@ -106,6 +127,18 @@ body, #root, .fix-height {
     padding: 0px 4px;
     font-size: 0.7em;
     cursor: pointer;
+
+    .icon {
+      padding: ($collapseHeight - $collapseIconSize) / 2;
+      display: block;
+      width: $collapseIconSize;
+      height: $collapseIconSize;
+      float: right;
+      background-image: url($collapseOpenLight) !important;
+      background-size: $collapseIconSize !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+    }
   }
 
   .collapsible {
@@ -118,33 +151,41 @@ body, #root, .fix-height {
     .collapsible {
       display: block;
     }
+    .collapse-toggle .icon {
+      background-image: url($collapseLight) !important;
+    }
   }
 }
 
-body, body.vscode-light {
-  @import 'lib/react-table';
+.ReactTable .rt-thead.-filters input, .ReactTable .rt-thead.-filters select{
+  background: rgba(0, 0, 0, 0.05);
+}
 
-  .tabs {
-    border-bottom-color: rgba(0, 0, 0, 0.05) !important;
-    li {
-      border-color: rgba(0, 0, 0, 0.05) !important;
+.tabs {
+  border-bottom-color: rgba(0, 0, 0, 0.05) !important;
+  li {
+    border-color: rgba(0, 0, 0, 0.05) !important;
 
-      &:hover, &.active {
-        background: rgba(0, 0, 0, 0.05) !important;
-      }
-      &.active {
-        font-weight: bold;
-      }
+    &:hover, &.active {
+      background: rgba(0, 0, 0, 0.05) !important;
+    }
+    &.active {
+      font-weight: bold;
     }
   }
-  .results .result.active {
-    background: rgba(0, 0, 0, 0.05) !important;
-  }
+}
+.results .result.active {
+  background: rgba(0, 0, 0, 0.05) !important;
 }
 
 body.vscode-dark {
-  @import 'lib/react-table';
-
+  .ReactTable .rt-thead.-filters input,
+  .ReactTable .rt-thead.-filters select,
+  .ReactTable .-pagination input,
+  .ReactTable .-pagination select {
+    background: rgba(255, 255, 255, 0.05);
+    color: #e6e6e6;
+  }
   .tabs {
     border-bottom-color: rgba(255, 255, 255, 0.05) !important;
     li {
@@ -187,6 +228,9 @@ body.vscode-dark {
     background-color: #191919;
     .collapse-toggle {
       background-color: rgba(255, 255, 255, 0.05) !important;
+      .icon {
+        background-image: url($collapseOpenDark) !important;
+      }
     }
 
     .collapsible {
@@ -196,6 +240,18 @@ body.vscode-dark {
     &.open {
       .collapsible {
         display: block;
+      }
+      .collapse-toggle .icon {
+        background-image: url($collapseDark) !important;
+      }
+    }
+  }
+  .messages {
+    .message {
+      border-bottom-color: rgba(255, 255, 255, 0.15);
+
+      &:last-child {
+        border-bottom-color: transparent !important;
       }
     }
   }
