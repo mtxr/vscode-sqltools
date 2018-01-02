@@ -24,6 +24,8 @@ CHANGELOG.md
 **/*example*/**
 static/**
 **/static/**
+.test-database/**
+**/.test-database/**
 package-lock.json
 **/package-lock.json
 jest.json
