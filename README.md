@@ -51,11 +51,11 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 
 ## To-do
 
-- [ ] :running: Show query execution messages
 - [ ] Allow switch databases
 - [ ] Create connection profile tour
 - [ ] Show explain plan for queries
 - [ ] SQLite Support
+- [x] Show query execution messages
 - [x] Sidebar explorer with Table Description, query generator, table records
 - [x] Auto complete for columns and tables
 - [x] List and Run bookmarked queries
@@ -68,7 +68,7 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 - [x] PostgreSQL Support
 
 
-## Migrating from v0.*.* to v1.*.*
+## Migrating from v0.0*.* to v0.1*.* or newer
 
 Some settings were changed to keep SQLTools naming standards.
 
