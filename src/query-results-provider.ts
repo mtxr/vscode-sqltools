@@ -40,7 +40,7 @@ export default class QueryResultsProvider implements TextDocumentContentProvider
   private prepareResults(resultSet: DatabaseInterface.QueryResults) {
     const data: object[] = resultSet.results;
 
-    resultSet.cols = resultSet.cols.map((colName, index) => {
+    resultSet.cols = resultSet.cols.map((colName) => {
       return {
         Header: colName,
         accessor: colName,

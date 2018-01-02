@@ -78,7 +78,6 @@ export default class MySQL implements ConnectionDialect {
           const queries = query.split(';');
           if (results && !Array.isArray(results[0])) {
             results = [results];
-            results = [results];
           }
           if (results.length === 0) {
             return [];
