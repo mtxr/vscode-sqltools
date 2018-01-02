@@ -78,6 +78,9 @@ body, #root, .fix-height {
     &:last-child {
       border-bottom-color: transparent !important;
     }
+    &.error {
+      background: rgba(255, 0, 0, 0.2)
+    }
   }
 }
 

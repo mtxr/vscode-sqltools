@@ -70,7 +70,25 @@ export default class Connection {
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
-    return this.connection.query(query);
+    return this.connection.query(query)
+      .catch((e) => {
+        this.logger.error('Query error:', e);
+        let message = '';
+        if (typeof e === 'string') {
+          message = e;
+        } else if (e.message) {
+          message = e.message;
+        } else {
+          message = JSON.stringify(e);
+        }
+        return [ {
+          cols: [],
+          error: true,
+          messages: [ message ],
+          query,
+          results: [],
+        } ];
+      });
   }
   public getName() {
     return this.credentials.name;

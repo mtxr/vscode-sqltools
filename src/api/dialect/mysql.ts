@@ -52,8 +52,7 @@ export default class MySQL implements ConnectionDialect {
     return new Promise((resolve, reject) => {
       connection.connect((err) => {
         if (err) {
-          reject('error connecting: ' + err.stack);
-          return;
+          return reject(err);
         }
         self.connection = Promise.resolve(connection);
         resolve(self.connection);

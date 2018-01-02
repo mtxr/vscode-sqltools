@@ -29,6 +29,7 @@ namespace DatabaseInterface {
     name: string;
   }
   export interface QueryResults {
+    error?: boolean;
     results: any[];
     cols: string[];
     query: string;

@@ -31,7 +31,7 @@ class Query extends React.Component {
 class Messages extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { open: false }
+    this.state = { open: props.value.length > 0 }
     this.size = props.value.length
     this.messages = props.value
     if (this.messages.length === 0) {
@@ -51,7 +51,7 @@ class Messages extends React.Component {
         <div className='collapsible'>
           <div className='messages'>
             {this.messages.map((m, i) => {
-              return (<div key={i} className='message'>{m}</div>)
+              return (<div key={i} className={'message ' + (this.props.error ? 'error' : '')}>{m}</div>)
             })}
           </div>
         </div>
@@ -77,7 +77,7 @@ class ResultsTable extends React.Component {
             String(row[filter.id]) === filter.value}
           className='-striped'
           style={{
-            height: '98%' // This will force the table body to overflow and scroll, since there is not enough room
+            height: '98%'
           }}
         />
       </div>
@@ -87,12 +87,16 @@ class ResultsTable extends React.Component {
 
 class QueryResult extends React.Component {
   render () {
+    let table = 'Query with errors. Please, check the error below.'
+    if (this.props.value.error !== true) {
+      table = <ResultsTable value={{ cols: this.props.value.cols, data: this.props.value.results}} />
+    }
     return (
       <div className={'result fix-height ' + this.props.className}>
-        <ResultsTable value={{ cols: this.props.value.cols, data: this.props.value.results}} />
+        {table}
         <div className='query-extras'>
           <Query value={this.props.value.query} />
-          <Messages value={this.props.value.messages} />
+          <Messages value={this.props.value.messages} error={this.props.value.error || false} />
         </div>
       </div>
     )
@@ -127,6 +131,7 @@ class QueryResults extends React.Component {
       return <QueryResult
         value={res}
         key={i}
+        error={res.error}
         className={this.state.active === i ? 'active' : ''}
       />
     })
