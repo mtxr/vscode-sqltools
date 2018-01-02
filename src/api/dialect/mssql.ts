@@ -38,6 +38,7 @@ export default class MSSQL implements ConnectionDialect {
       return Promise.resolve(this.connection);
     }
     const options = {
+      connectionTimeout: this.credentials.connectionTimeout,
       database: this.credentials.database,
       password: this.credentials.password,
       port: this.credentials.port,
@@ -63,19 +64,33 @@ export default class MSSQL implements ConnectionDialect {
       .then((pool) => Promise.resolve(pool.close()));
   }
 
-  public query(query: string): Promise<any> {
-    return this.open().then((pool) => pool.request().query(query)).then((results) => {
-      if (results.recordsets.lenght === 0) {
+  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+    return this.open()
+    .then((pool) => pool.request().query(query))
+    .then((results) => {
+      const queries = query.split(';');
+      if (results.recordsets.length === 0) {
         return [];
       }
-      return results.recordsets;
+      return results.recordsets.map((r, i) => {
+        const messages = [];
+        if (r.rowsAffected) {
+          messages.push(`${r.rowsAffected} rows were affected.`);
+        }
+        return {
+          cols: Array.isArray(r) ? Object.keys(r[0]) : [],
+          messages,
+          query: queries[i],
+          results: r,
+        };
+      });
     });
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
     return this.query(this.queries.fetchTables)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
@@ -92,8 +107,8 @@ export default class MSSQL implements ConnectionDialect {
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
     return this.query(this.queries.fetchColumns)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;

@@ -46,6 +46,7 @@ export default class PostgreSQL implements ConnectionDialect {
       host: this.credentials.server,
       password: this.credentials.password,
       port: this.credentials.port,
+      statement_timeout: this.credentials.connectionTimeout,
       user: this.credentials.username,
     };
     const self = this;
@@ -63,23 +64,34 @@ export default class PostgreSQL implements ConnectionDialect {
     return this.connection.then((client) => client.end());
   }
 
-  public query(query: string): Promise<any> {
+  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
+        const queries = query.split(';');
+        const messages = [];
         if (!Array.isArray(results)) {
           results = [ results ];
         }
-        return results.map((r) => {
-          return r.rows.length === 0 && r.rowCount > 0 ? [ { affectedRows: r.rowCount } ] : r.rows;
+
+        return results.map((r, i) => {
+          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select') {
+            messages.push(`${r.rowCount} rows were affected.`);
+          }
+          return {
+            cols: r.rows.length > 0 ? Object.keys(r.rows[0]) : [],
+            messages,
+            query: queries[i],
+            results: r.rows,
+          };
         });
       });
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
     return this.query(this.queries.fetchTables)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
@@ -96,8 +108,8 @@ export default class PostgreSQL implements ConnectionDialect {
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
     return this.query(this.queries.fetchColumns)
-      .then((results) => {
-        return results
+      .then(([queryRes]) => {
+        return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {

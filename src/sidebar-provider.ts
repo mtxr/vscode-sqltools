@@ -1,5 +1,5 @@
-import * as fs from 'fs';
-import * as path from 'path';
+import fs = require('fs');
+import path = require('path');
 import {
   Event,
   EventEmitter,
@@ -7,54 +7,73 @@ import {
   TreeDataProvider,
   TreeItemCollapsibleState,
 } from 'vscode';
+import { Logger } from './api';
 import Connection from './connection';
-import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
+import { SidebarColumn, SidebarDatabase, SidebarTable } from './sidebar-tree-items';
 
-export class SidebarTableColumnProvider implements TreeDataProvider<SidebarTable | SidebarColumn> {
-  public onDidChange: EventEmitter<SidebarTable | undefined> = new EventEmitter<SidebarTable | undefined>();
-  public readonly onDidChangeTreeData: Event<SidebarTable | undefined> = this.onDidChange.event;
-  private tree: SidebarTable[] = [];
-  private tableIndex: any = {};
+export type SidebarDatabaseItem = SidebarDatabase | SidebarTable | SidebarColumn;
 
-  constructor(private connection: Connection) {
+export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatabaseItem> {
+  public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
+  public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
+    this.onDidChange.event;
+  private tree: any = {};
+
+  constructor(private connection: Connection, private logger: Logger) {
     this.setConnection(connection);
   }
 
-  public refresh(): void {
+  public fireUpdate(): void {
     this.onDidChange.fire();
   }
 
-  public getTreeItem(element: SidebarTable | SidebarColumn): SidebarTable | SidebarColumn {
+  public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
     return element;
   }
 
-  public getChildren(element?: SidebarTable): ProviderResult<SidebarTable[] | SidebarColumn[]> {
-    if (element) {
-      return Promise.resolve(this.tree[this.tableIndex[element.value]].columns);
+  public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
+    if (!element) {
+      return Promise.resolve(this.toArray(this.tree));
+    } else if (element instanceof SidebarDatabase) {
+      return Promise.resolve(this.toArray(element.tables));
+    } else if (element instanceof SidebarTable) {
+      return Promise.resolve(this.toArray(element.columns));
     }
-    return Promise.resolve(this.tree);
+    return [];
   }
   public setConnection(connection: Connection) {
     this.connection = connection;
-    this.tree = [];
-    if (!connection) {
-      this.refresh();
+    this.refresh();
+  }
+
+  public refresh() {
+    this.tree = {};
+    if (!this.connection) {
+      this.fireUpdate();
       return;
     }
     this.connection.getTables()
       .then((tables) => {
-        this.tree = tables.sort((a, b) => a.name.localeCompare(b.name)).map((table, index) => {
-          this.tableIndex[table.name] = index;
-          return new SidebarTable(table);
+        tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((table, index) => {
+          if (!this.tree[table.tableDatabase]) {
+            this.tree[table.tableDatabase] = new SidebarDatabase({ name: table.tableDatabase });
+          }
+          if (!this.tree[table.tableDatabase].tables[table.name]) {
+            this.tree[table.tableDatabase].tables[table.name] = new SidebarTable(table);
+          }
         });
-        this.refresh();
         return this.connection.getColumns()
           .then((columns) => {
             columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
-              this.tree[this.tableIndex[column.tableName]].columns.push(new SidebarColumn(column));
+              this.tree[column.tableDatabase].tables[column.tableName].columns.push(new SidebarColumn(column));
             });
-            this.refresh();
+            this.fireUpdate();
           });
-      });
+      })
+      .catch((e) => { this.logger.error('Failed to prepare sidebar itens', e); });
+  }
+
+  private toArray(obj: any) {
+    return Object.keys(obj).map((k) => obj[k]);
   }
 }

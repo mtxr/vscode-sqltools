@@ -10,22 +10,23 @@ import Constants from './constants';
 
 // tslint:disable-next-line:no-var-requires
 const uuidv4 = require('uuid/v4');
+import ConfigManager = require('./api/config-manager');
 
 export default class Telemetry {
-  public static register(config: WorkspaceConfiguration, logger: any): any {
+  public static register(logger: any): any {
     Telemetry.setLogger(logger);
-    Telemetry.config = config;
-    if (Telemetry.config.get('telemetry', true)) {
+    if (ConfigManager.get('telemetry', true)) {
       Telemetry.enable();
     } else {
       Telemetry.disable();
     }
     Telemetry.analytics = new Analytics(Telemetry.uaCode);
-    Telemetry.extensionUUID = Telemetry.extensionUUID || Telemetry.config.get('telemetryUUID', null);
+    Telemetry.extensionUUID = Telemetry.extensionUUID || ConfigManager.get('telemetryUUID', null) as string;
     Telemetry.logger.info(`Telemetry UUID: ${Telemetry.extensionUUID}`);
     if (Telemetry.extensionUUID === null) {
       Telemetry.extensionUUID = uuidv4();
-      Telemetry.config.update('telemetryUUID', Telemetry.extensionUUID, true)
+      Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase())
+        .update('telemetryUUID', Telemetry.extensionUUID, true)
         .then(
           (ok) => {
             Telemetry.registerEvent('install', Constants.version, 'installed');

@@ -1,6 +1,6 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
-import * as fs from 'fs';
+import fs = require('fs');
 import { StorageInterface } from './interface';
 
 export default class BaseStorage implements StorageInterface {

@@ -1,12 +1,13 @@
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
 import { EventEmitter } from 'events';
-import * as Path from 'path';
+import Path = require('path');
 import {
   commands as VSCode,
   commands as VsCommands,
   Disposable,
   ExtensionContext,
+  FormattingOptions,
   languages as Languages,
   OutputChannel,
   Position,
@@ -18,6 +19,7 @@ import {
   StatusBarItem,
   TextDocument,
   TextDocumentChangeEvent,
+  TextEdit,
   TextEditor,
   TextEditorEdit,
   TextEditorSelectionChangeEvent,
@@ -27,17 +29,32 @@ import {
   workspace as Workspace,
   WorkspaceConfiguration,
 } from 'vscode';
+import {
+  DocumentRangeFormattingParams,
+  DocumentRangeFormattingRequest,
+  LanguageClient,
+  LanguageClientOptions,
+  RequestType,
+  RequestType0,
+  ServerOptions,
+  TextDocumentIdentifier,
+  TransportKind,
+} from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
+import ConfigManager = require('./api/config-manager');
 import { ConnectionCredentials } from './api/interface/connection-credentials';
+import DatabaseInterface from './api/interface/database-interface';
 import Connection from './connection';
 import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
+import { Settings } from './interface/settings';
 import LogWriter from './log-writer';
-import OutputProvider from './output-provider';
+import QueryResultsProvider from './query-results-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
+import StatisticsProvider from './statistics-provider';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
 
@@ -64,16 +81,17 @@ export default class SQLTools {
   private bookmarks: BookmarksStorage;
   private history: History;
   private outputLogs: LogWriter;
-  private config: WorkspaceConfiguration;
-  private connectionsManager: ConnectionManager;
   private activeConnection: Connection;
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
   private events: EventEmitter;
-  private outputProvider: OutputProvider;
+  private outputProvider: QueryResultsProvider;
+  private statisticsProvider: StatisticsProvider;
   private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
-  private previewUri = Uri.parse('sqltools://results');
+  private previewUri = Uri.parse('sqltools-query://results');
+  private statisticsUri = Uri.parse('sqltools-reports://statistics');
+  private languageClient: LanguageClient;
 
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
@@ -85,6 +103,7 @@ export default class SQLTools {
     this.registerStatusBar();
     this.autoConnectIfActive();
     this.help();
+    this.registerLanguageServer();
   }
 
   /**
@@ -160,15 +179,8 @@ export default class SQLTools {
   /**
    * Utils commands
    */
-  public formatSql(editor: TextEditor, edit: TextEditorEdit): void {
-    try {
-      const indentSize: number = this.config.get('format.indent_size', 2);
-      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
-      VsCommands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
-      this.logger.debug('Query formatted!');
-    } catch (error) {
-      errorHandler(this.logger, 'Error formatting query.', error);
-    }
+  public formatSql(editor: TextEditor, edit: TextEditorEdit) {
+    VsCommands.executeCommand('editor.action.formatSelection');
   }
 
   /**
@@ -191,8 +203,10 @@ export default class SQLTools {
   public generateInsertQuery(node: SidebarTable): void {
     this.getOrCreateEditor()
     .then((editor) => {
-      const indentSize = this.config.get('format.indent_size', 2);
-      return editor.insertSnippet(new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)));
+      const indentSize = ConfigManager.get('format.indentSize', 2) as number;
+      return editor.insertSnippet(
+        new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize)),
+      );
     }, (error) => {
       errorHandler(this.logger, 'Error adding table/column to editor.', error);
     });
@@ -218,11 +232,10 @@ export default class SQLTools {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
       if (!selection || !selection.label) return;
       this.history.clear();
-      return this.setConnection(new Connection(this.connectionsManager.getConnection(selection.label), this.logger));
+      return this.setConnection(ConnectionManager.getConnection(selection.label));
     }, (reason) => {
       this.setConnection(null);
-      errorHandler(this.logger, 'Error while selecting the connection.', reason, this.showOutputChannel);
-      // throw reason;
+      throw reason;
     });
   }
 
@@ -231,10 +244,12 @@ export default class SQLTools {
   }
 
   public showConnectionMenu(): Thenable<QuickPickItem> {
-    const options: QuickPickItem[] = this.connectionsManager.getConnections().map((connection) => {
+    const options: QuickPickItem[] = ConnectionManager.getConnections(this.logger).map((connection: Connection) => {
       return {
-        detail: `${connection.username}@${connection.server}:${connection.port}`,
-        label: connection.name,
+        description: (this.activeConnection && connection.getName() === this.activeConnection.getName())
+          ? 'Currently connected' : '',
+        detail: `${connection.getUsername()}@${connection.getServer()}:${connection.getPort()}`,
+        label: connection.getName(),
       } as QuickPickItem;
     });
     return Window.showQuickPick(options);
@@ -255,7 +270,7 @@ export default class SQLTools {
 
   public showRecords(node?: SidebarTable) {
     let tablePromise: PromiseLike<string>;
-    if (node) {
+    if (node && node.value) {
       tablePromise = Promise.resolve(node.value);
     } else {
       tablePromise = this.showTableMenu().then((selected) => selected.label);
@@ -270,7 +285,7 @@ export default class SQLTools {
 
   public describeTable(node?: SidebarTable): void {
     let tablePromise: PromiseLike<string>;
-    if (node) {
+    if (node && node.value) {
       tablePromise = Promise.resolve(node.value);
     } else {
       tablePromise = this.showTableMenu().then((selected) => selected.label);
@@ -343,12 +358,27 @@ export default class SQLTools {
     });
   }
 
+  public showStatistics() {
+    this.statisticsProvider.update(this.statisticsUri);
+    let viewColumn: ViewColumn = ViewColumn.One;
+    const editor = Window.activeTextEditor;
+    if (editor && editor.viewColumn) {
+      viewColumn = editor.viewColumn;
+    }
+
+    return VsCommands.executeCommand('vscode.previewHtml', this.statisticsUri, viewColumn, 'SQLTools')
+      .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
+  }
+
+  public refreshSidebar() {
+    this.sqlconnectionTreeProvider.refresh();
+  }
+
   /**
    * Management functions
    */
-  private printOutput(results, outputName: string = 'SQLTools Results') {
+  private printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
     this.outputProvider.setResults(results);
-    this.outputProvider.update(this.previewUri);
 
     let viewColumn: ViewColumn = ViewColumn.One;
     const editor = Window.activeTextEditor;
@@ -360,23 +390,25 @@ export default class SQLTools {
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
-  private autoConnectIfActive() {
-    const defaultConnection: string = this.config.get('autoConnectTo', null);
+  private autoConnectIfActive(currConn?: string) {
+    const defaultConnection: string = currConn || ConfigManager.get('autoConnectTo', null) as string;
     this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
-    if (defaultConnection) {
-      this.setConnection(new Connection(this.connectionsManager.getConnection(defaultConnection), this.logger));
-    } else {
-      this.setConnection();
+    if (!defaultConnection) {
+      return this.setConnection();
     }
+    const c = ConnectionManager.getConnection(defaultConnection);
+    if (!c) {
+      return this.setConnection();
+    }
+    this.setConnection(new Connection(c, this.logger));
   }
   private loadConfigs() {
-    this.config = Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase());
+    ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.bookmarks = new BookmarksStorage();
-    this.connectionsManager = new ConnectionManager(this.config);
     if (this.history) {
-      this.history.setMaxSize(this.config.get('history_size', 100));
+      this.history.setMaxSize(ConfigManager.get('historySize', 100) as number);
     } else {
-      this.history = new History(this.config.get('history_size', 100));
+      this.history = new History(ConfigManager.get('historySize', 100) as number);
     }
     this.setupLogger();
     this.registerTelemetry();
@@ -384,8 +416,8 @@ export default class SQLTools {
   private setupLogger() {
     this.outputLogs = new LogWriter();
     this.logger = (new Logger(this.outputLogs))
-      .setLevel(Logger.levels[this.config.get('log_level', 'DEBUG')])
-      .setLogging(this.config.get('logging', false));
+      .setLevel(Logger.levels[ConfigManager.get('logLevel', 'DEBUG') as string])
+      .setLogging(ConfigManager.get('logging', false) as boolean);
   }
 
   private registerCommands(): void {
@@ -409,6 +441,8 @@ export default class SQLTools {
     this.registerCommand('showRecords', registerCommand);
     this.registerCommand('appendToCursor', registerCommand);
     this.registerCommand('generateInsertQuery', registerCommand);
+    this.registerCommand('showStatistics', registerCommand);
+    this.registerCommand('refreshSidebar', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
@@ -442,7 +476,7 @@ export default class SQLTools {
     if (this.activeConnection) {
       this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
     }
-    if (this.config.get('show_statusbar', true)) {
+    if (ConfigManager.get('showStatusbar', true)) {
       this.extStatus.show();
       this.extDatabaseStatus.show();
     } else {
@@ -452,22 +486,28 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.outputProvider = new OutputProvider();
-    this.context.subscriptions.push(Workspace.registerTextDocumentContentProvider('sqltools', this.outputProvider));
-    this.suggestionsProvider = new SuggestionsProvider(this.logger);
-    const completionTriggers = ['.', ' '];
+    this.outputProvider = new QueryResultsProvider(this.context.extensionPath, this.previewUri);
     this.context.subscriptions.push(
-      Languages.registerCompletionItemProvider(['sql', 'plaintext'],
-      this.suggestionsProvider, ...completionTriggers));
+      Workspace.registerTextDocumentContentProvider(this.previewUri.scheme, this.outputProvider),
+    );
+    this.statisticsProvider = new StatisticsProvider(this.context.extensionPath);
+    this.context.subscriptions.push(
+      Workspace.registerTextDocumentContentProvider(this.statisticsUri.scheme, this.statisticsProvider),
+    );
 
     if (typeof Window.registerTreeDataProvider !== 'function') {
       return;
     }
-    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection);
+    this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection, this.logger);
     Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
-
-    const formattingProvider = new SelectionFormatter();
-    Languages.registerDocumentRangeFormattingEditProvider('sql', formattingProvider);
+    this.suggestionsProvider = new SuggestionsProvider(this.logger);
+    const completionTriggers = ['.', ' '];
+    this.context.subscriptions.push(
+      Languages.registerCompletionItemProvider(
+        ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
+        this.suggestionsProvider, ...completionTriggers,
+      ),
+    );
   }
 
   private registerEvents() {
@@ -476,9 +516,11 @@ export default class SQLTools {
   }
 
   private reloadConfig() {
+    const currentConnection = this.activeConnection ? this.activeConnection.getName() : null;
+    ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
     this.logger.debug('Config reloaded!');
     this.loadConfigs();
-    this.autoConnectIfActive();
+    this.autoConnectIfActive(currentConnection);
     this.updateStatusBar();
   }
 
@@ -528,39 +570,39 @@ export default class SQLTools {
     return this.selectConnection();
   }
 
-  private help(): void {
-    const moreInfo = 'More Info';
-    const supportProject = 'Support This Project';
-    const message = 'Do you like SQLTools? Help us to keep making it better.';
-    const file = require('path').join(Utils.getHome(), '.sqltools-lasrun');
-    fs.readFile(file, (err, data) => {
-      let last = new Date(0);
-      if (!err) {
-        try {
-          last = new Date(parseInt(data.toString(), 10));
-          if (isNaN(last.getTime())) last = new Date(0);
-        } catch (e) {
-          last = new Date(0);
-        }
-      }
-      if (last.getTime() >= new Date().setHours(0, 0, 0, 0)) {
-        return;
-      }
-      fs.writeFile(file, `${new Date().getTime()}`);
-      Window.showInformationMessage(message, moreInfo, supportProject)
-        .then((value) => {
-          Telemetry.infoMessage(message, value);
-          if (value === moreInfo) {
-            openurl('https://github.com/mtxr/vscode-sqltools#donate');
-          } else if (value === supportProject) {
-            openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
-          }
-        });
-    });
+  private registerTelemetry(): void {
+    Telemetry.register(this.logger);
   }
 
-  private registerTelemetry(): void {
-    Telemetry.register(this.config, this.logger);
+  private registerLanguageServer() {
+    const serverModule = this.context.asAbsolutePath(Path.join('dist', 'languageserver', 'server.js'));
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+
+    const serverOptions: ServerOptions = {
+      debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+      run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+    };
+
+    const clientOptions: LanguageClientOptions = {
+      documentSelector: ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
+      synchronize: {
+        configurationSection: 'sqltools',
+        fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),
+      },
+    };
+
+    const languageClient = new LanguageClient(
+      'sqltools.language-server',
+      'SQLTools Language Server',
+      serverOptions,
+      clientOptions,
+    );
+
+    languageClient.onReady().then(() => {
+      this.logger.debug('Language server started!');
+      this.languageClient = languageClient;
+    }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
+    this.context.subscriptions.push(languageClient.start());
   }
 
   private async getOrCreateEditor(): Promise<TextEditor> {
@@ -568,5 +610,40 @@ export default class SQLTools {
       await VsCommands.executeCommand('workbench.action.files.newUntitledFile');
     }
     return Promise.resolve(Window.activeTextEditor);
+  }
+
+  private async help() {
+    const moreInfo = 'More Info';
+    const supportProject = 'Support This Project';
+    const releaseNotes = 'Release Notes';
+    const localConfig = await Utils.localSetupInfo();
+
+    let message = 'Do you like SQLTools? Help us to keep making it better.';
+
+    if (localConfig.current.numericVersion <= localConfig.installed.numericVersion) {
+      return;
+    }
+    const options = [ moreInfo, supportProject ];
+    if (localConfig.installed.numericVersion !== 0) {
+      message = `SQLTools updated! Check out the release notes for more information.`;
+      options.push(releaseNotes);
+    }
+    Window.showInformationMessage(message, ...options)
+      .then((value) => {
+        Telemetry.infoMessage(message, value);
+        switch (value) {
+          case moreInfo:
+            openurl('https://github.com/mtxr/vscode-sqltools#donate');
+            break;
+          case releaseNotes:
+            openurl(localConfig.current.releaseNotes);
+            break;
+          case supportProject:
+            openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+            break;
+          default:
+            break;
+        }
+      });
   }
 }

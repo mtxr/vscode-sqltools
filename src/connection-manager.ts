@@ -1,27 +1,28 @@
-import {
-  WorkspaceConfiguration,
-} from 'vscode';
+import { Logger } from './api';
+import ConfigManager = require('./api/config-manager');
 import { ConnectionCredentials } from './api/interface/connection-credentials';
+import Connection from './connection';
 export default class ConnectionManager {
-  private connections: ConnectionCredentials[] = [];
-  constructor(public extConfig: WorkspaceConfiguration) {
-    this.loadConnections();
-  }
-  public getConnections(): ConnectionCredentials[] {
-    return this.connections;
-  }
-  public loadConnections(): this {
-    const connectionsConfig = this.extConfig.get('connections', []);
-    this.connections = connectionsConfig.map((credentials): ConnectionCredentials => {
-      return credentials as ConnectionCredentials;
+  public static getConnections(logger: Logger): Connection[];
+  public static getConnections(logger: Logger, serialized: boolean = false): any[] {
+    const connectionsConfig = ConfigManager.get('connections', []) as any[];
+    ConnectionManager.connections = connectionsConfig.map((credentials): Connection => {
+      return new Connection(credentials, logger);
     });
-    return this;
+
+    if (!serialized) return ConnectionManager.connections;
+
+    return ConnectionManager.connections.map((c) => c.serialize());
   }
 
-  public getConnection(connection: string|number) {
+  public static getConnection(connection: string|number, serialized: boolean = false) {
     if (typeof connection === 'number') {
-      return this.connections[connection];
+      return ConnectionManager.connections[connection];
     }
-    return this.connections.find((conn) => connection === conn.name);
+    const conn =  ConnectionManager.connections.find((c) => connection === c.getName());
+    if (!serialized) return conn;
+
+    return conn.serialize();
   }
+  private static connections: Connection[] = [];
 }

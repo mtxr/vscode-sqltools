@@ -68,6 +68,18 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 - [x] PostgreSQL Support
 
 
+## Migrating from v0.*.* to v1.*.*
+
+Some settings were changed to keep SQLTools naming standards.
+
+* `sqltools.format.indent_size` was renamed to `sqltools.format.indentSize`
+* `sqltools.format.show_statusbar` was renamed to `sqltools.format.showStatusbar`
+* `sqltools.format.log_level` was renamed to `sqltools.format.logLevel`
+* `sqltools.format.query_timeout` was renamed to `sqltools.format.queryTimeout`
+* `sqltools.format.history_size` was renamed to `sqltools.format.historySize`
+* `sqltools.format.show_result_on_tab` was renamed to `sqltools.format.showResultOnTab`
+* `sqltools.format.clear_output` was renamed to `sqltools.format.clearOutput`
+
 ## Known Issues
 
 None for now.

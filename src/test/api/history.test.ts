@@ -1,8 +1,7 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
+/// <reference path="./../../../node_modules/@types/node/index.d.ts" />
 
-import * as vscode from 'vscode';
-import { History } from './../../src/api';
-import { NotFoundException, SizeException } from './../../src/api/exception';
+import { History } from './../../api';
+import { NotFoundException, SizeException } from './../../api/exception';
 
 describe('History', () => {
   it('create history using default size', () => {

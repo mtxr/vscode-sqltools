@@ -2,14 +2,13 @@
     "compilerOptions": {
         "module": "commonjs",
         "target": "es6",
-        "outDir": "out",
+        "outDir": "dist",
         "sourceMap": true,
-        "lib": [
-            "es6"
-        ],
-        "rootDir": "."
+        "lib": [ "es6" ],
+        "rootDir": "src"
     },
     "exclude": [
+        "src/test",
         "node_modules",
         ".vscode-test",
         "__mocks__"

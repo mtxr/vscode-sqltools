@@ -1,39 +1,18 @@
-import {
-  commands as VSCode,
-  commands as VsCommands,
-  Disposable,
-  DocumentFormattingEditProvider,
-  DocumentRangeFormattingEditProvider,
-  ExtensionContext,
-  FormattingOptions,
-  languages as Languages,
-  OutputChannel,
-  Position,
-  QuickPickItem,
-  Range,
-  Selection,
-  StatusBarAlignment,
-  StatusBarItem,
-  TextDocument,
-  TextDocumentChangeEvent,
-  TextEdit,
-  TextEditor,
-  TextEditorEdit,
-  TextEditorSelectionChangeEvent,
-  Uri,
-  ViewColumn,
-  window as Window,
-  workspace as Workspace,
-  WorkspaceConfiguration,
-} from 'vscode';
-import { BookmarksStorage, History, Logger, Utils } from './api';
-import errorHandler from './error-handler';
+import { FormattingOptions, Range, TextDocument, TextEdit } from 'vscode-languageserver';
+import { Utils } from './api';
 
-export class SelectionFormatter implements DocumentRangeFormattingEditProvider {
-  public provideDocumentRangeFormattingEdits(
-    document: TextDocument, range: Range, formattingOptions: FormattingOptions,
+export class SelectionFormatter {
+  public static handler(
+    document: TextDocument, formattingOptions: FormattingOptions, range?: Range,
   ): TextEdit[] {
-    const text = document.getText(range);
+    let text;
+    if (range) {
+      text = document.getText().substring(document.offsetAt(range.start), document.offsetAt(range.end));
+    } else {
+      text = document.getText();
+      range = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
+    }
+
     return [ TextEdit.replace(range, Utils.formatSql(text, formattingOptions.tabSize)) ];
   }
 }
