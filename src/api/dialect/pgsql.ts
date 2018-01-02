@@ -75,8 +75,8 @@ export default class PostgreSQL implements ConnectionDialect {
         }
 
         return results.map((r, i) => {
-          if (r.rows.length === 0 && r.command.toLowerCase() === 'update') {
-            messages.push(`${r.rowCount} were affected.`);
+          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select') {
+            messages.push(`${r.rowCount} rows were affected.`);
           }
           return {
             cols: r.rows.length > 0 ? Object.keys(r.rows[0]) : [],

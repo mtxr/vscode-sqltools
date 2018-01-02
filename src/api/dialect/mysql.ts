@@ -85,16 +85,16 @@ export default class MySQL implements ConnectionDialect {
           return resolve(results.map((r, i) => {
             const messages = [];
             if (r.affectedRows) {
-              messages.push(`${r.affectedRows} were affected.`);
+              messages.push(`${r.affectedRows} rows were affected.`);
             }
             if (r.changedRows) {
-              messages.push(`${r.changedRows} were changed.`);
+              messages.push(`${r.changedRows} rows were changed.`);
             }
             return {
               cols: Array.isArray(r) ? Object.keys(r[0]) : [],
               messages,
               query: queries[i].sql,
-              results: r,
+              results: Array.isArray(r) ? r : [],
             };
           }));
         });

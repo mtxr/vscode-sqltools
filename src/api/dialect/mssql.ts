@@ -75,7 +75,7 @@ export default class MSSQL implements ConnectionDialect {
       return results.recordsets.map((r, i) => {
         const messages = [];
         if (r.rowsAffected) {
-          messages.push(`${r.rowsAffected} were affected.`);
+          messages.push(`${r.rowsAffected} rows were affected.`);
         }
         return {
           cols: Array.isArray(r) ? Object.keys(r[0]) : [],
