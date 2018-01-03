@@ -29,26 +29,29 @@ export default class Telemetry {
         .update('telemetryUUID', Telemetry.extensionUUID, true)
         .then(
           (ok) => {
-            Telemetry.registerEvent('install', Constants.version, 'installed');
+            Telemetry.registerEvent('evt:install', Constants.version, 'installed');
             Telemetry.logger.info('New install registerd', ok);
           },
           (err) => Telemetry.logger.error('Register pageview error', err),
         );
       Telemetry.logger.info(`Telemetry random UUID generated: ${Telemetry.extensionUUID}`);
     }
-    Telemetry.analytics.pageview('vscode', '/', 'Started', Telemetry.extensionUUID)
+    Telemetry.analytics.pageview('vscode', '/session-started', 'Started', Telemetry.extensionUUID)
       .catch((err) => Telemetry.logger.error('Register pageview error', err));
   }
 
   public static registerCommandUsage(command: string) {
-    Telemetry.registerEvent(command, Constants.version);
+    Telemetry.registerEvent(`cmd:${command}`, Constants.version);
   }
   public static infoMessage(message, value = 'Dismissed') {
-    Telemetry.registerEvent('info-message', message, value);
+    Telemetry.registerEvent('msg:info', message, value);
   }
 
-  public static errorMessage(message, value = 'Dismissed') {
-    Telemetry.registerEvent('error-message', message, value);
+  public static errorMessage(message, error?: Error) {
+    Telemetry.registerEvent('msg:error', message, 'Dismissed');
+    if (error) {
+      Telemetry.analytics.exception(error.message ? error.message : error, 0);
+    }
   }
 
   public static enable(): void {
@@ -68,14 +71,13 @@ export default class Telemetry {
   private static config: WorkspaceConfiguration;
   private static extensionUUID: string;
   private static analytics: Analytics;
-  private static uaCode: string = 'UA-110380775-2';
+  private static uaCode: string = Constants.gaCode;
 
   private static registerEvent(category: string, event: string, label?: string): void {
     if (!Telemetry.isEnabled) return;
-    // tslint:disable:object-literal-sort-keys
     const params = {
-      ec: category,
       ea: event,
+      ec: category,
       el: label || event,
     };
     Telemetry.analytics.send('event', params, Telemetry.extensionUUID)

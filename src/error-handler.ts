@@ -5,7 +5,7 @@ import { Logger } from './api';
 import Telemetry from './telemetry';
 
 function errorHandler(logger: Logger, message: string, error ?: Error, yesCallback?: Function): null {
-  Telemetry.errorMessage(message);
+  Telemetry.errorMessage(message, error);
   if (error) {
     logger.error(`${message}: `, error.stack);
     message = `${message} ${error.toString().substr(0, 60)}${error.toString().length > 60 ? '...' : '.'}`;
