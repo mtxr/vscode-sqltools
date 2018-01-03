@@ -20,7 +20,8 @@
             "stopOnEntry": false,
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
-            "preLaunchTask": "compile"
+            "preLaunchTask": "compile",
+            "env": { "NODE_ENV": "development" },
         },
         {
             "name": "Launch Extension - No compiling",
@@ -30,6 +31,7 @@
             "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}"],
             "stopOnEntry": false,
             "sourceMaps": true,
+            "env": { "NODE_ENV": "development" },
             "outFiles": [ "${workspaceRoot}/dist/**/*.js" ],
         },
 
@@ -40,6 +42,7 @@
             "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
             "cwd": "${workspaceRoot}/.test-database/.",
             "preLaunchTask": "compile",
+            "env": { "NODE_ENV": "development" },
             "args": [
                 "--i",
                 "--coverage",

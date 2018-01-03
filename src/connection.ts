@@ -3,6 +3,7 @@ import Dialects from './api/dialect';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import { ConnectionDialect } from './api/interface/connection-dialect';
 import DatabaseInterface from './api/interface/database-interface';
+import Telemetry from './telemetry';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
@@ -74,6 +75,7 @@ export default class Connection {
       .catch((e) => {
         if (!handleError) throw e;
         this.logger.error('Query error:', e);
+        Telemetry.registerException(e);
         let message = '';
         if (typeof e === 'string') {
           message = e;

@@ -12,6 +12,7 @@ import { Logger } from './api';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import DatabaseInterface from './api/interface/database-interface';
 import Connection from './connection';
+import Telemetry from './telemetry';
 
 class TableCompletionItem extends CompletionItem {
   constructor(table: DatabaseInterface.Table) {
@@ -105,6 +106,7 @@ export class SuggestionsProvider implements CompletionItemProvider {
         this.completionItems.push(...columns.map((col) => new TableColumnCompletionItem(col)));
       }).catch((e) => {
         this.logger.error('Error while preparing columns completions', e);
+        Telemetry.registerException(e);
       });
   }
 }

@@ -37,7 +37,7 @@ connection.onDidChangeConfiguration((change) => {
   ConfigManager.setSettings(change.settings.sqltools);
   if (!formatterRegistration) {
     formatterRegistration = connection.client.register(DocumentRangeFormattingRequest.type, {
-      documentSelector: [ 'sql' ],
+      documentSelector: ConfigManager.get('completionLanguages', [ 'sql' ]),
     });
   }
 });
