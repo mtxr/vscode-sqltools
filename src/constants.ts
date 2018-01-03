@@ -7,8 +7,8 @@ import { Utils } from './api';
 const  pkg = require('./../package.json');
 
 export default class Constants {
-  public static gaCode = 'UA-110380775-2';
-  public static version      = `v${pkg.version}`;
+  public static gaCode = process.env.NODE_ENV !== 'development' ? 'UA-110380775-2' : 'UA-110380775-1';
+  public static version  = `v${pkg.version}`;
   public static extName = pkg.displayName;
   public static extNamespace = Constants.extName;
   public static outputChannelName = Constants.extName;

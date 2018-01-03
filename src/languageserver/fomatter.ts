@@ -1,5 +1,9 @@
-import { DocumentFormattingParams, DocumentRangeFormattingParams, TextEdit } from 'vscode-languageclient';
-import { TextDocuments } from 'vscode-languageserver';
+import {
+  DocumentFormattingParams,
+  DocumentRangeFormattingParams,
+  TextDocuments,
+  TextEdit,
+} from 'vscode-languageserver';
 import { SelectionFormatter } from './../formatting-provider';
 import Logger from './logger';
 

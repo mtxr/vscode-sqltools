@@ -1,6 +1,6 @@
-/// <reference path="./../node_modules/@types/node/index.d.ts" />
+/// <reference path="../node_modules/@types/universal-analytics/index.d.ts" />
 
-import Analytics from 'electron-google-analytics';
+import Analytics = require('universal-analytics');
 import {
   workspace as Workspace,
   WorkspaceConfiguration,
@@ -20,37 +20,37 @@ export default class Telemetry {
     } else {
       Telemetry.disable();
     }
-    Telemetry.analytics = new Analytics(Telemetry.uaCode);
     Telemetry.extensionUUID = Telemetry.extensionUUID || ConfigManager.get('telemetryUUID', null) as string;
-    Telemetry.logger.info(`Telemetry UUID: ${Telemetry.extensionUUID}`);
+    Telemetry.logger.debug(`Telemetry UUID: ${Telemetry.extensionUUID}`);
     if (Telemetry.extensionUUID === null) {
       Telemetry.extensionUUID = uuidv4();
+      Telemetry.start();
       Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase())
         .update('telemetryUUID', Telemetry.extensionUUID, true)
         .then(
           (ok) => {
             Telemetry.registerEvent('evt:install', Constants.version, 'installed');
-            Telemetry.logger.info('New install registerd', ok);
-          },
-          (err) => Telemetry.logger.error('Register pageview error', err),
+            Telemetry.logger.debug('New install registerd', ok);
+          }, Telemetry.errorHandler('save UUID'),
         );
-      Telemetry.logger.info(`Telemetry random UUID generated: ${Telemetry.extensionUUID}`);
+      Telemetry.logger.debug(`Telemetry random UUID generated: ${Telemetry.extensionUUID}`);
+    } else {
+      Telemetry.start();
     }
-    Telemetry.analytics.pageview('vscode', '/session-started', 'Started', Telemetry.extensionUUID)
-      .catch((err) => Telemetry.logger.error('Register pageview error', err));
+    Telemetry.registerSession('started');
   }
 
-  public static registerCommandUsage(command: string) {
+  public static registerCommand(command: string) {
     Telemetry.registerEvent(`cmd:${command}`, Constants.version);
   }
-  public static infoMessage(message, value = 'Dismissed') {
-    Telemetry.registerEvent('msg:info', message, value);
+  public static registerInfoMessage(message, value = 'Dismissed') {
+    Telemetry.registerMessage('info', message, value);
   }
 
-  public static errorMessage(message, error?: Error) {
-    Telemetry.registerEvent('msg:error', message, 'Dismissed');
+  public static registerErrorMessage(message, error?: Error) {
+    Telemetry.registerMessage('error', message, 'Dismissed');
     if (error) {
-      Telemetry.analytics.exception(error.message ? error.message : error, 0);
+      Telemetry.registerException(error);
     }
   }
 
@@ -65,22 +65,43 @@ export default class Telemetry {
   public static setLogger(logger: any = Logger) {
     Telemetry.logger = logger;
   }
+  public static registerSession(evt: string) {
+    if (!Telemetry.isEnabled) return;
+    Telemetry.analytics.screenview(evt, `vscode-sqltools`, Constants.version, Telemetry.errorHandler('screenview'));
+  }
+  public static registerMessage(type: string, message: string, value: string = 'Dismissed'): void {
+    Telemetry.registerEvent(`msg:${type}`, message, value);
+  }
+  public static registerEvent(category: string, event: string, label?: string): void {
+    if (!Telemetry.isEnabled) return;
+    Telemetry.analytics.event(category, event, label || event, Telemetry.errorHandler('event'));
+  }
+
+  public static registerException(error: Error | string) {
+    if (!Telemetry.isEnabled) return;
+    Telemetry.analytics.exception(
+      ((error as Error).message || error) as string,
+      false,
+      Telemetry.errorHandler('exception'),
+    );
+  }
 
   private static isEnabled: Boolean = true;
   private static logger: any = console;
   private static config: WorkspaceConfiguration;
   private static extensionUUID: string;
-  private static analytics: Analytics;
+  private static analytics: Analytics.Visitor;
   private static uaCode: string = Constants.gaCode;
 
-  private static registerEvent(category: string, event: string, label?: string): void {
-    if (!Telemetry.isEnabled) return;
-    const params = {
-      ea: event,
-      ec: category,
-      el: label || event,
+  private static start() {
+    Telemetry.analytics = Analytics(Telemetry.uaCode, Telemetry.extensionUUID, { strictCidFormat: false });
+    Telemetry.analytics.set('uid', Telemetry.extensionUUID);
+  }
+
+  private static errorHandler(type: string) {
+    return (error?: Error) => {
+      if (!error) return;
+      Telemetry.logger.error(`Telemetry:${type} error`, error);
     };
-    Telemetry.analytics.send('event', params, Telemetry.extensionUUID)
-      .catch((err) => Telemetry.logger.error('Register event error', err));
   }
 }

@@ -96,7 +96,6 @@ export default class SQLTools {
   private constructor(private context: ExtensionContext) {
     this.events = new EventEmitter();
     this.loadConfigs();
-    this.setupLogger();
     this.registerProviders();
     this.registerEvents();
     this.registerCommands();
@@ -392,7 +391,7 @@ export default class SQLTools {
 
   private autoConnectIfActive(currConn?: string) {
     const defaultConnection: string = currConn || ConfigManager.get('autoConnectTo', null) as string;
-    this.logger.debug(`Configuration set to auto connect to: ${defaultConnection}`);
+    this.logger.info(`Configuration set to auto connect to: ${defaultConnection}`);
     if (!defaultConnection) {
       return this.setConnection();
     }
@@ -412,6 +411,7 @@ export default class SQLTools {
     }
     this.setupLogger();
     this.registerTelemetry();
+    this.logger.debug(`Env: ${process.env.NODE_ENV}`);
   }
   private setupLogger() {
     this.outputLogs = new LogWriter();
@@ -448,12 +448,11 @@ export default class SQLTools {
   private registerCommand(command: string, registerFunction: Function) {
     this.logger.debug(`Registering command ${Constants.extNamespace}.${command}`);
     this.events.on(command, (...event) => {
-      this.logger.debug(`Event received: ${command}`);
       this[command](...event);
     });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
-      this.logger.debug(`Triggering command: ${command}`);
-      Telemetry.registerCommandUsage(command);
+      this.logger.debug(`Command triggered: ${command}`, args);
+      Telemetry.registerCommand(command);
       this.events.emit(command, ...args);
     }));
   }
@@ -518,7 +517,7 @@ export default class SQLTools {
   private reloadConfig() {
     const currentConnection = this.activeConnection ? this.activeConnection.getName() : null;
     ConfigManager.setSettings(Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase()) as Settings);
-    this.logger.debug('Config reloaded!');
+    this.logger.info('Config reloaded!');
     this.loadConfigs();
     this.autoConnectIfActive(currentConnection);
     this.updateStatusBar();
@@ -599,7 +598,7 @@ export default class SQLTools {
     );
 
     languageClient.onReady().then(() => {
-      this.logger.debug('Language server started!');
+      this.logger.info('Language server started!');
       this.languageClient = languageClient;
     }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
     this.context.subscriptions.push(languageClient.start());
@@ -630,7 +629,7 @@ export default class SQLTools {
     }
     Window.showInformationMessage(message, ...options)
       .then((value) => {
-        Telemetry.infoMessage(message, value);
+        Telemetry.registerInfoMessage(message, value);
         switch (value) {
           case moreInfo:
             openurl('https://github.com/mtxr/vscode-sqltools#donate');
