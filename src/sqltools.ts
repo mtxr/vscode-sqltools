@@ -1,6 +1,5 @@
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
-import { EventEmitter } from 'events';
 import Path = require('path');
 import {
   commands as VSCode,
@@ -23,6 +22,7 @@ import {
   TextEditor,
   TextEditorEdit,
   TextEditorSelectionChangeEvent,
+  ThemeColor,
   Uri,
   ViewColumn,
   window as Window,
@@ -54,7 +54,6 @@ import LogWriter from './log-writer';
 import QueryResultsProvider from './query-results-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
-import StatisticsProvider from './statistics-provider';
 import { SuggestionsProvider } from './suggestions-provider';
 import Telemetry from './telemetry';
 
@@ -84,17 +83,17 @@ export default class SQLTools {
   private activeConnection: Connection;
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
-  private events: EventEmitter;
   private outputProvider: QueryResultsProvider;
-  private statisticsProvider: StatisticsProvider;
   private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
-  private previewUri = Uri.parse('sqltools-query://results');
+  private resultsUri = Uri.parse('sqltools-query://results');
   private statisticsUri = Uri.parse('sqltools-reports://statistics');
+
+  private setupUri: Uri;
   private languageClient: LanguageClient;
 
   private constructor(private context: ExtensionContext) {
-    this.events = new EventEmitter();
+    this.setupUri = Uri.file(this.context.asAbsolutePath('./dist/views/setup.html'));
     this.loadConfigs();
     this.registerProviders();
     this.registerEvents();
@@ -357,16 +356,15 @@ export default class SQLTools {
     });
   }
 
-  public showStatistics() {
-    this.statisticsProvider.update(this.statisticsUri);
+  public setupSQLTools() {
     let viewColumn: ViewColumn = ViewColumn.One;
     const editor = Window.activeTextEditor;
     if (editor && editor.viewColumn) {
       viewColumn = editor.viewColumn;
     }
 
-    return VsCommands.executeCommand('vscode.previewHtml', this.statisticsUri, viewColumn, 'SQLTools')
-      .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
+    return VsCommands.executeCommand('vscode.previewHtml', this.setupUri, viewColumn, 'SQLTools Setup')
+      .then(null, (reason) => errorHandler(this.logger, 'Failed to open setup', reason, this.showOutputChannel));
   }
 
   public refreshSidebar() {
@@ -384,8 +382,7 @@ export default class SQLTools {
     if (editor && editor.viewColumn) {
       viewColumn = editor.viewColumn;
     }
-
-    return VsCommands.executeCommand('vscode.previewHtml', this.previewUri, viewColumn, outputName)
+    return VsCommands.executeCommand('vscode.previewHtml', this.resultsUri, viewColumn, outputName)
       .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
   }
 
@@ -441,19 +438,16 @@ export default class SQLTools {
     this.registerCommand('showRecords', registerCommand);
     this.registerCommand('appendToCursor', registerCommand);
     this.registerCommand('generateInsertQuery', registerCommand);
-    this.registerCommand('showStatistics', registerCommand);
     this.registerCommand('refreshSidebar', registerCommand);
+    this.registerCommand('setupSQLTools', registerCommand);
   }
 
   private registerCommand(command: string, registerFunction: Function) {
     this.logger.debug(`Registering command ${Constants.extNamespace}.${command}`);
-    this.events.on(command, (...event) => {
-      this[command](...event);
-    });
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
       this.logger.debug(`Command triggered: ${command}`, args);
       Telemetry.registerCommand(command);
-      this.events.emit(command, ...args);
+      this[command](...args);
     }));
   }
 
@@ -485,13 +479,9 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.outputProvider = new QueryResultsProvider(this.context.extensionPath, this.previewUri);
+    this.outputProvider = new QueryResultsProvider(this.context.extensionPath, this.resultsUri);
     this.context.subscriptions.push(
-      Workspace.registerTextDocumentContentProvider(this.previewUri.scheme, this.outputProvider),
-    );
-    this.statisticsProvider = new StatisticsProvider(this.context.extensionPath);
-    this.context.subscriptions.push(
-      Workspace.registerTextDocumentContentProvider(this.statisticsUri.scheme, this.statisticsProvider),
+      Workspace.registerTextDocumentContentProvider(this.resultsUri.scheme, this.outputProvider),
     );
 
     if (typeof Window.registerTreeDataProvider !== 'function') {

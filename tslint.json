@@ -15,7 +15,7 @@
     "only-arrow-functions": [ "allow-declarations" ],
     "interface-name": [ false ],
     "linebreak-style": [ true, "LF" ],
-    "quotemark": [ true, "single", "jsx-double" ],
+    "quotemark": [ true, "single", "js-double" ],
     "no-reference": false,
     "max-classes-per-file": false
   },

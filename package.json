@@ -1,460 +1,449 @@
 {
-    "name": "sqltools",
-    "displayName": "SQLTools",
-    "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.11.3",
-    "publisher": "mtxr",
-    "license": "GPL-3.0",
-    "repository": {
-        "url": "https://github.com/mtxr/vscode-sqltools",
-        "type": "git"
+  "name": "sqltools",
+  "displayName": "SQLTools",
+  "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
+  "version": "0.11.3",
+  "publisher": "mtxr",
+  "license": "GPL-3.0",
+  "repository": {
+    "url": "https://github.com/mtxr/vscode-sqltools",
+    "type": "git"
+  },
+  "engines": {
+    "vscode": "^1.18.0"
+  },
+  "categories": [
+    "Languages",
+    "Snippets",
+    "Formatters",
+    "Other"
+  ],
+  "keywords": [
+    "SQLTools",
+    "SQL",
+    "sgdb",
+    "formatter"
+  ],
+  "galleryBanner": {
+    "theme": "dark",
+    "color": "#555555"
+  },
+  "icon": "static/icon.png",
+  "badges": [
+    {
+      "description": "PayPal Donate",
+      "url": "https://img.shields.io/badge/paypal-donate-yellow.svg",
+      "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
     },
-    "engines": {
-        "vscode": "^1.18.0"
-    },
-    "categories": [
-        "Languages",
-        "Snippets",
-        "Formatters",
-        "Other"
-    ],
-    "keywords": [
-        "SQLTools",
-        "SQL",
-        "sgdb",
-        "formatter"
-    ],
-    "galleryBanner": {
-        "theme": "dark",
-        "color": "#555555"
-    },
-    "icon": "static/icon.png",
-    "badges": [
-        {
-            "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-yellow.svg",
-            "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
-        },
-        {
-            "description": "Build Status",
-            "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
-            "href": "https://travis-ci.org/mtxr/vscode-sqltools"
-        },
-        {
-            "description": "Codacy Badge",
-            "url": "https://api.codacy.com/project/badge/Grade/5d888832ec9645f3bdd1214fefcb88e2",
-            "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=mtxr/vscode-sqltools&amp;utm_campaign=Badge_Grade"
-        },
-        {
-            "description": "Codacy Badge",
-            "url": "https://api.codacy.com/project/badge/Coverage/5d888832ec9645f3bdd1214fefcb88e2",
-            "href": "https://www.codacy.com/app/matheus-mtxr/vscode-sqltools?utm_source=github.com&utm_medium=referral&utm_content=mtxr/vscode-sqltools&utm_campaign=Badge_Coverage"
-        }
-    ],
-    "activationEvents": [
-        "*",
-        "onLanguage:sql",
-        "onCommand:SQLTools.selectConnection"
-    ],
-    "main": "./dist/extension",
-    "contributes": {
-        "commands": [
-            {
-                "title": "Create from selection",
-                "command": "SQLTools.bookmarkSelection",
-                "category": "SQLTools Bookmarks"
-            },
-            {
-                "title": "Delete all",
-                "command": "SQLTools.clearBookmarks",
-                "category": "SQLTools Bookmarks"
-            },
-            {
-                "title": "Delete",
-                "command": "SQLTools.deleteBookmark",
-                "category": "SQLTools Bookmarks"
-            },
-            {
-                "title": "Edit",
-                "command": "SQLTools.editBookmark",
-                "category": "SQLTools Bookmarks"
-            },
-            {
-                "title": "Run",
-                "command": "SQLTools.runFromBookmarks",
-                "category": "SQLTools Bookmarks"
-            },
-            {
-                "title": "Run",
-                "command": "SQLTools.runFromHistory",
-                "category": "SQLTools History"
-            },
-            {
-                "title": "Connect",
-                "command": "SQLTools.selectConnection",
-                "category": "SQLTools"
-            },
-            {
-                "title": "Disconnect",
-                "command": "SQLTools.closeConnection",
-                "category": "SQLTools"
-            },
-            {
-                "title": "Describe table",
-                "command": "SQLTools.describeTable",
-                "category": "SQLTools Connection"
-            },
-            {
-                "title": "Format SQL",
-                "command": "SQLTools.formatSql",
-                "category": "SQLTools"
-            },
-            {
-                "title": "Run selected query",
-                "command": "SQLTools.executeQuery",
-                "category": "SQLTools Connection"
-            },
-            {
-                "title": "Show output channel (Logs)",
-                "command": "SQLTools.showOutputChannel",
-                "category": "SQLTools Management"
-            },
-            {
-                "title": "Show table records",
-                "command": "SQLTools.showRecords",
-                "category": "SQLTools Connection"
-            },
-            {
-                "title": "Version",
-                "command": "SQLTools.aboutVersion",
-                "category": "SQLTools Management"
-            },
-            {
-                "title": "Add name to cursor",
-                "command": "SQLTools.appendToCursor",
-                "category": "SQLTools Sidebar"
-            },
-            {
-                "title": "Generate Insert Query",
-                "command": "SQLTools.generateInsertQuery",
-                "category": "SQLTools Sidebar"
-            },
-            {
-                "title": "Refresh Sidebar",
-                "command": "SQLTools.refreshSidebar",
-                "category": "SQLToolds Sidebar",
-                "icon": {
-                    "light": "dist/resources/icon/refresh-light.svg",
-                    "dark": "dist/resources/icon/refresh-dark.svg"
-                }
-            },
-            {
-                "title": "Show user statistics",
-                "command": "SQLTools.showStatistics",
-                "category": "SQLTools Management"
-            }
-        ],
-        "keybindings": [
-            {
-                "command": "SQLTools.formatSql",
-                "key": "ctrl+e ctrl+b",
-                "mac": "cmd+e cmd+b",
-                "when": "editorTextFocus && !editorReadonly"
-            },
-            {
-                "command": "SQLTools.executeQuery",
-                "key": "ctrl+e ctrl+e",
-                "mac": "cmd+e cmd+e",
-                "when": "editorTextFocus"
-            },
-            {
-                "command": "SQLTools.describeTable",
-                "key": "ctrl+e ctrl+d",
-                "mac": "cmd+e cmd+d"
-            },
-            {
-                "command": "SQLTools.runFromHistory",
-                "key": "ctrl+e ctrl+h",
-                "mac": "cmd+e cmd+h"
-            },
-            {
-                "command": "SQLTools.runFromBookmarks",
-                "key": "ctrl+e ctrl+a",
-                "mac": "cmd+e cmd+a"
-            },
-            {
-                "command": "SQLTools.showRecords",
-                "key": "ctrl+e ctrl+s",
-                "mac": "cmd+e cmd+s"
-            },
-            {
-                "command": "SQLTools.deleteBookmark",
-                "key": "ctrl+e ctrl+r",
-                "mac": "cmd+e cmd+r"
-            },
-            {
-                "command": "SQLTools.bookmarkSelection",
-                "key": "ctrl+e ctrl+q",
-                "mac": "cmd+e q",
-                "when": "editorTextFocus && !editorReadonly"
-            }
-        ],
-        "configuration": {
-            "type": "object",
-            "title": "SQLTools Settings",
-            "properties": {
-                "sqltools.autoConnectTo": {
-                    "type": "string",
-                    "default": null,
-                    "required": false,
-                    "description": "Name of the connection to auto connect on start"
-                },
-                "sqltools.logging": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Show debugging messages on console."
-                },
-                "sqltools.telemetry": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Help SQLTools development."
-                },
-                "sqltools.telemetryUUID": {
-                    "type": "string",
-                    "default": null,
-                    "description": "Extension ID"
-                },
-                "sqltools.showStatusbar": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Toggle statusbar visibility."
-                },
-                "sqltools.logLevel": {
-                    "type": "string",
-                    "enum": [
-                        "DEBUG",
-                        "INFO",
-                        "WARN",
-                        "ERROR"
-                    ],
-                    "default": "INFO",
-                    "description": "Show debugging messages on console."
-                },
-                "sqltools.queryTimeout": {
-                    "type": "number",
-                    "default": 300000,
-                    "description": "Timeout in seconds for killing query process after the timeout."
-                },
-                "sqltools.historySize": {
-                    "type": "number",
-                    "default": 100,
-                    "description": "Number of queries to keep on History."
-                },
-                "sqltools.showResultOnTab": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Show results using new tab."
-                },
-                "sqltools.clearOutput": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Clear output for new commands."
-                },
-                "sqltools.completionLanguages": {
-                    "type": "array",
-                    "default": [
-                        "sql",
-                        "plaintext"
-                    ],
-                    "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
-                },
-                "sqltools.format": {
-                    "type": "object",
-                    "properties": {
-                        "indentSize": {
-                            "type": "number",
-                            "default": 2,
-                            "description": "Indent size"
-                        }
-                    }
-                },
-                "sqltools.connections": {
-                    "type": "array",
-                    "title": "Connections",
-                    "default": [],
-                    "items": {
-                        "type": "object",
-                        "properties": {
-                            "name": {
-                                "type": "string",
-                                "description": "Connection name"
-                            },
-                            "server": {
-                                "type": "string",
-                                "description": "Server address",
-                                "default": "127.0.0.1"
-                            },
-                            "port": {
-                                "type": "number",
-                                "description": "Port for connection"
-                            },
-                            "database": {
-                                "type": "string",
-                                "required": false,
-                                "description": "Database name"
-                            },
-                            "username": {
-                                "type": "string",
-                                "description": "Database username"
-                            },
-                            "password": {
-                                "type": "string",
-                                "description": "Connection password",
-                                "required": false
-                            },
-                            "askForPassword": {
-                                "type": "boolean",
-                                "description": "Ask for password instead of set it in your settings",
-                                "required": false,
-                                "default": false
-                            },
-                            "dialect": {
-                                "type": "string",
-                                "enum": [
-                                    "MSSQL",
-                                    "MySQL",
-                                    "PostgreSQL"
-                                ],
-                                "description": "Connection Dialect",
-                                "required": false
-                            },
-                            "connectionTimeout": {
-                                "type": "number",
-                                "description": "Connection timeout in seconds",
-                                "required": false,
-                                "default": 15
-                            }
-                        }
-                    }
-                }
-            }
-        },
-        "views": {
-            "explorer": [
-                {
-                    "id": "SQLTools.connectionExplorer",
-                    "name": "SQL Connection"
-                }
-            ]
-        },
-        "menus": {
-            "commandPalette": [
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "false"
-                },
-                {
-                    "command": "SQLTools.generateInsertQuery",
-                    "when": "false"
-                },
-                {
-                    "command": "SQLTools.showStatistics",
-                    "when": "false"
-                },
-                {
-                    "command": "SQLTools.formatSql",
-                    "when": "editorHasSelection"
-                },
-                {
-                    "command": "SQLTools.executeQuery",
-                    "when": "editorHasSelection"
-                },
-                {
-                    "command": "SQLTools.bookmarkSelection",
-                    "when": "editorHasSelection"
-                }
-            ],
-            "view/title": [
-                {
-                    "command": "SQLTools.refreshSidebar",
-                    "when": "view == SQLTools.connectionExplorer",
-                    "group": "navigation"
-                }
-            ],
-            "view/item/context": [
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.column",
-                    "group": "sqltools.dbExplorer@1"
-                },
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
-                    "group": "sqltools.dbExplorer@2"
-                },
-                {
-                    "command": "SQLTools.describeTable",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
-                    "group": "sqltools.dbExplorer@3"
-                },
-                {
-                    "command": "SQLTools.showRecords",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
-                    "group": "sqltools.dbExplorer@4"
-                },
-                {
-                    "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
-                    "group": "sqltools.dbExplorer@5"
-                }
-            ]
-        }
-    },
-    "scripts": {
-        "vscode:prepublish": "npm run compile && npm test",
-        "gulp": "./node_modules/.bin/gulp",
-        "compile": "npm run gulp -- compile",
-        "watch": "npm run gulp -- watch",
-        "postinstall": "node ./node_modules/vscode/bin/install",
-        "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
-        "test": "npm run test:lint && npm run test:unit",
-        "postversion": "vsce publish && git push && git push --tags"
-    },
-    "devDependencies": {
-        "@types/jest": "^20.0.0",
-        "@types/node": "^8.0.13",
-        "@types/universal-analytics": "^0.4.2",
-        "babel-preset-es2015": "^6.24.1",
-        "babel-preset-react": "^6.24.1",
-        "babelify": "^8.0.0",
-        "gulp": "^3.9.1",
-        "gulp-bro": "^1.0.2",
-        "gulp-concat": "^2.6.1",
-        "gulp-sass": "^3.1.0",
-        "gulp-sourcemaps": "^2.6.0",
-        "gulp-streamify": "^1.0.2",
-        "gulp-typescript": "^3.1.6",
-        "gulp-uglify": "^3.0.0",
-        "jest": "^20.0.4",
-        "jest-cli": "^20.0.4",
-        "react": "^16.2.0",
-        "react-dom": "^16.2.0",
-        "ts-jest": "^20.0.6",
-        "tslint": "^5.4.3",
-        "typescript": "^2.3.2",
-        "uglifyify": "^4.0.5",
-        "vscode": "^1.1.0"
-    },
-    "dependencies": {
-        "mssql": "^4.0.4",
-        "mysql2": "^1.5.1",
-        "opn": "^5.1.0",
-        "pg": "^7.4.0",
-        "sql-formatter": "^2.1.0",
-        "universal-analytics": "^0.4.16",
-        "uuid": "^3.1.0",
-        "vscode-languageclient": "^3.5.0",
-        "vscode-languageserver": "^3.5.0"
+    {
+      "description": "Build Status",
+      "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
+      "href": "https://travis-ci.org/mtxr/vscode-sqltools"
     }
+  ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onCommand:SQLTools.selectConnection"
+  ],
+  "main": "./dist/extension",
+  "contributes": {
+    "commands": [
+      {
+        "title": "Create from selection",
+        "command": "SQLTools.bookmarkSelection",
+        "category": "SQLTools Bookmarks"
+      },
+      {
+        "title": "Delete all",
+        "command": "SQLTools.clearBookmarks",
+        "category": "SQLTools Bookmarks"
+      },
+      {
+        "title": "Delete",
+        "command": "SQLTools.deleteBookmark",
+        "category": "SQLTools Bookmarks"
+      },
+      {
+        "title": "Edit",
+        "command": "SQLTools.editBookmark",
+        "category": "SQLTools Bookmarks"
+      },
+      {
+        "title": "Run",
+        "command": "SQLTools.runFromBookmarks",
+        "category": "SQLTools Bookmarks"
+      },
+      {
+        "title": "Run",
+        "command": "SQLTools.runFromHistory",
+        "category": "SQLTools History"
+      },
+      {
+        "title": "Connect",
+        "command": "SQLTools.selectConnection",
+        "category": "SQLTools"
+      },
+      {
+        "title": "Disconnect",
+        "command": "SQLTools.closeConnection",
+        "category": "SQLTools"
+      },
+      {
+        "title": "Describe table",
+        "command": "SQLTools.describeTable",
+        "category": "SQLTools Connection"
+      },
+      {
+        "title": "Format SQL",
+        "command": "SQLTools.formatSql",
+        "category": "SQLTools"
+      },
+      {
+        "title": "Run selected query",
+        "command": "SQLTools.executeQuery",
+        "category": "SQLTools Connection"
+      },
+      {
+        "title": "Show output channel (Logs)",
+        "command": "SQLTools.showOutputChannel",
+        "category": "SQLTools Management"
+      },
+      {
+        "title": "Show table records",
+        "command": "SQLTools.showRecords",
+        "category": "SQLTools Connection"
+      },
+      {
+        "title": "Version",
+        "command": "SQLTools.aboutVersion",
+        "category": "SQLTools Management"
+      },
+      {
+        "title": "Setup a Connection",
+        "command": "SQLTools.setupSQLTools",
+        "category": "SQLTools Management"
+      },
+      {
+        "title": "Add name to cursor",
+        "command": "SQLTools.appendToCursor",
+        "category": "SQLTools Sidebar"
+      },
+      {
+        "title": "Generate Insert Query",
+        "command": "SQLTools.generateInsertQuery",
+        "category": "SQLTools Sidebar"
+      },
+      {
+        "title": "Refresh Sidebar",
+        "command": "SQLTools.refreshSidebar",
+        "category": "SQLToolds Sidebar",
+        "icon": {
+          "light": "dist/resources/icon/refresh-light.svg",
+          "dark": "dist/resources/icon/refresh-dark.svg"
+        }
+      }
+    ],
+    "keybindings": [
+      {
+        "command": "SQLTools.formatSql",
+        "key": "ctrl+e ctrl+b",
+        "mac": "cmd+e cmd+b",
+        "when": "editorTextFocus && !editorReadonly"
+      },
+      {
+        "command": "SQLTools.executeQuery",
+        "key": "ctrl+e ctrl+e",
+        "mac": "cmd+e cmd+e",
+        "when": "editorTextFocus"
+      },
+      {
+        "command": "SQLTools.describeTable",
+        "key": "ctrl+e ctrl+d",
+        "mac": "cmd+e cmd+d"
+      },
+      {
+        "command": "SQLTools.runFromHistory",
+        "key": "ctrl+e ctrl+h",
+        "mac": "cmd+e cmd+h"
+      },
+      {
+        "command": "SQLTools.runFromBookmarks",
+        "key": "ctrl+e ctrl+a",
+        "mac": "cmd+e cmd+a"
+      },
+      {
+        "command": "SQLTools.showRecords",
+        "key": "ctrl+e ctrl+s",
+        "mac": "cmd+e cmd+s"
+      },
+      {
+        "command": "SQLTools.deleteBookmark",
+        "key": "ctrl+e ctrl+r",
+        "mac": "cmd+e cmd+r"
+      },
+      {
+        "command": "SQLTools.bookmarkSelection",
+        "key": "ctrl+e ctrl+q",
+        "mac": "cmd+e q",
+        "when": "editorTextFocus && !editorReadonly"
+      }
+    ],
+    "configuration": {
+      "type": "object",
+      "title": "SQLTools Settings",
+      "properties": {
+        "sqltools.autoConnectTo": {
+          "type": "string",
+          "default": null,
+          "required": false,
+          "description": "Name of the connection to auto connect on start"
+        },
+        "sqltools.logging": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show debugging messages on console."
+        },
+        "sqltools.telemetry": {
+          "type": "boolean",
+          "default": true,
+          "description": "Help SQLTools development."
+        },
+        "sqltools.telemetryUUID": {
+          "type": "string",
+          "default": null,
+          "description": "Extension ID"
+        },
+        "sqltools.showStatusbar": {
+          "type": "boolean",
+          "default": true,
+          "description": "Toggle statusbar visibility."
+        },
+        "sqltools.logLevel": {
+          "type": "string",
+          "enum": [
+            "DEBUG",
+            "INFO",
+            "WARN",
+            "ERROR"
+          ],
+          "default": "INFO",
+          "description": "Show debugging messages on console."
+        },
+        "sqltools.queryTimeout": {
+          "type": "number",
+          "default": 300000,
+          "description": "Timeout in seconds for killing query process after the timeout."
+        },
+        "sqltools.historySize": {
+          "type": "number",
+          "default": 100,
+          "description": "Number of queries to keep on History."
+        },
+        "sqltools.showResultOnTab": {
+          "type": "boolean",
+          "default": false,
+          "description": "Show results using new tab."
+        },
+        "sqltools.clearOutput": {
+          "type": "boolean",
+          "default": false,
+          "description": "Clear output for new commands."
+        },
+        "sqltools.completionLanguages": {
+          "type": "array",
+          "default": [
+            "sql",
+            "plaintext"
+          ],
+          "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+        },
+        "sqltools.format": {
+          "type": "object",
+          "properties": {
+            "indentSize": {
+              "type": "number",
+              "default": 2,
+              "description": "Indent size"
+            }
+          }
+        },
+        "sqltools.connections": {
+          "type": "array",
+          "title": "Connections",
+          "default": [],
+          "items": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "Connection name"
+              },
+              "server": {
+                "type": "string",
+                "description": "Server address",
+                "default": "127.0.0.1"
+              },
+              "port": {
+                "type": "number",
+                "description": "Port for connection"
+              },
+              "database": {
+                "type": "string",
+                "required": false,
+                "description": "Database name"
+              },
+              "username": {
+                "type": "string",
+                "description": "Database username"
+              },
+              "password": {
+                "type": "string",
+                "description": "Connection password",
+                "required": false
+              },
+              "askForPassword": {
+                "type": "boolean",
+                "description": "Ask for password instead of set it in your settings",
+                "required": false,
+                "default": false
+              },
+              "dialect": {
+                "type": "string",
+                "enum": [
+                  "MSSQL",
+                  "MySQL",
+                  "PostgreSQL"
+                ],
+                "description": "Connection Dialect",
+                "required": false
+              },
+              "connectionTimeout": {
+                "type": "number",
+                "description": "Connection timeout in seconds",
+                "required": false,
+                "default": 15
+              }
+            }
+          }
+        }
+      }
+    },
+    "views": {
+      "explorer": [
+        {
+          "id": "SQLTools.connectionExplorer",
+          "name": "SQL Connection"
+        }
+      ]
+    },
+    "menus": {
+      "commandPalette": [
+        {
+          "command": "SQLTools.appendToCursor",
+          "when": "false"
+        },
+        {
+          "command": "SQLTools.generateInsertQuery",
+          "when": "false"
+        },
+        {
+          "command": "SQLTools.formatSql",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "SQLTools.executeQuery",
+          "when": "editorHasSelection"
+        },
+        {
+          "command": "SQLTools.bookmarkSelection",
+          "when": "editorHasSelection"
+        }
+      ],
+      "view/title": [
+        {
+          "command": "SQLTools.refreshSidebar",
+          "when": "view == SQLTools.connectionExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "SQLTools.appendToCursor",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.column",
+          "group": "sqltools.dbExplorer@1"
+        },
+        {
+          "command": "SQLTools.appendToCursor",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "sqltools.dbExplorer@2"
+        },
+        {
+          "command": "SQLTools.describeTable",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "sqltools.dbExplorer@3"
+        },
+        {
+          "command": "SQLTools.showRecords",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "sqltools.dbExplorer@4"
+        },
+        {
+          "command": "SQLTools.generateInsertQuery",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "sqltools.dbExplorer@5"
+        }
+      ]
+    }
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile && npm test",
+    "gulp": "./node_modules/.bin/gulp",
+    "compile": "npm run gulp -- compile",
+    "watch": "npm run gulp -- watch",
+    "postinstall": "node ./node_modules/vscode/bin/install",
+    "test:unit": "./node_modules/.bin/jest --config jest.json",
+    "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
+    "test": "npm run test:lint && npm run test:unit",
+    "postversion": "vsce publish && git push && git push --tags"
+  },
+  "devDependencies": {
+    "@types/jest": "^20.0.0",
+    "@types/node": "^8.0.13",
+    "@types/react": "^16.0.34",
+    "@types/universal-analytics": "^0.4.2",
+    "babel-preset-es2015": "^6.24.1",
+    "babel-preset-react": "^6.24.1",
+    "babelify": "^8.0.0",
+    "browserify": "^15.0.0",
+    "browserify-incremental": "^3.1.1",
+    "gulp": "^3.9.1",
+    "gulp-sass": "^3.1.0",
+    "gulp-sourcemaps": "^2.6.0",
+    "gulp-streamify": "^1.0.2",
+    "gulp-typescript": "^3.1.6",
+    "gulp-uglify": "^3.0.0",
+    "jest": "^20.0.4",
+    "jest-cli": "^20.0.4",
+    "react": "^16.2.0",
+    "react-dom": "^16.2.0",
+    "react-router-dom": "^4.2.2",
+    "ts-jest": "^20.0.6",
+    "tslint": "^5.4.3",
+    "typescript": "^2.3.2",
+    "uglifyify": "^4.0.5",
+    "vinyl-source-stream": "^2.0.0",
+    "vscode": "^1.1.0"
+  },
+  "dependencies": {
+    "mssql": "^4.0.4",
+    "mysql2": "^1.5.1",
+    "opn": "^5.1.0",
+    "pg": "^7.4.0",
+    "sql-formatter": "^2.1.0",
+    "universal-analytics": "^0.4.16",
+    "uuid": "^3.1.0",
+    "vscode-languageclient": "^3.5.0",
+    "vscode-languageserver": "^3.5.0"
+  }
 }

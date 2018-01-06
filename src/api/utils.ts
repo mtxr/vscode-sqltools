@@ -1,10 +1,10 @@
 /// <reference path="./../../node_modules/@types/node/index.d.ts" />
 
+import fs = require('fs');
 import formatter = require('sql-formatter');
 import Constants from '../constants';
 import { SidebarColumn } from '../sidebar-tree-items';
 import { EnvironmentException } from './exception';
-import fs = require('fs');
 
 export default class Utils {
   /**

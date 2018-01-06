@@ -2,50 +2,69 @@ const gulp = require('gulp')
 const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
-const concat = require('gulp-concat')
 const uglifyify = require('uglifyify')
 const uglifyjs = require('gulp-uglify')
-const bro = require('gulp-bro')
 const babelify = require('babelify')
 const streamify = require('gulp-streamify')
 const sass = require('gulp-sass')
+const browserify = require('browserify')
+const source = require('vinyl-source-stream')
+const browserifyInc = require('browserify-incremental')
 
 const dest = 'dist'
 
+const dependencies = [ 'react', 'react-dom' ]
+
 function buildReactFile (file) {
-  return gulp.src([`src/views/js/${file}.jsx`])
-    .pipe(bro({
-      transform: [
-        [babelify, { presets: ['es2015', 'react'] }],
-        [uglifyify]
-      ]
-    }))
-    .pipe(streamify(concat(`${file}.js`)))
+  const bundler = browserify(Object.assign({}, browserifyInc.args, {
+    entries: `src/views/js/${file}.jsx`,
+    debug: true,
+    transform: [
+      babelify.configure({ presets: ['es2015', 'react'] }),
+      [uglifyify]
+    ]
+  }))
+
+  browserifyInc(bundler, { cacheFile: `cache/browserify-cache-${file}.json` })
+
+  dependencies.forEach((dep) => {
+    bundler.external(dep)
+  })
+  return bundler.bundle()
+    .on('error', console.error)
+    .pipe(source(`${file}.js`))
     .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
     .pipe(gulp.dest(`${dest}/views/js`))
 }
 
-gulp.task('compile:copy', (done) => {
+gulp.task('compile:vendor', () => {
+  return browserify({
+    require: dependencies,
+    debug: true,
+    transform: [
+      [uglifyify]
+    ]
+  })
+    .bundle()
+    .on('error', console.error)
+    .pipe(source('vendors.js'))
+    .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
+    .pipe(gulp.dest(`${dest}/views/js`))
+})
+
+gulp.task('compile:copy', () => {
   let count = 0
   gulp.src([
     'package.json'
   ])
     .pipe(gulp.dest(dest))
-    .on('finish', () => {
-      if (count === 1) return done()
-      count++
-    })
 
-  gulp.src([
+  return gulp.src([
     './src/resources/**/*',
     './src/views/*.*',
     './src/views/css/*.*'
   ], { base: './src' })
     .pipe(gulp.dest(dest))
-    .on('finish', () => {
-      if (count === 1) return done()
-      count++
-    })
 })
 
 gulp.task('compile:ts', () => {
@@ -56,26 +75,6 @@ gulp.task('compile:ts', () => {
   return tsResult.js
     .pipe(sourcemaps.write('', { includeContent: false, sourceRoot: '' }))
     .pipe(gulp.dest(dest))
-})
-
-gulp.task('compile:react:statistics', () => {
-  return buildReactFile('statistics')
-})
-
-gulp.task('compile:react:query-results', () => {
-  return buildReactFile('query-results')
-})
-
-gulp.task('compile:sass:statistics', () => {
-  return gulp.src('./src/views/sass/statistics.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(`${dest}/views/css`))
-})
-
-gulp.task('compile:sass:query-results', () => {
-  return gulp.src('./src/views/sass/query-results.scss')
-    .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(`${dest}/views/css`))
 })
 
 gulp.task('watch:ts', () => {
@@ -129,11 +128,18 @@ gulp.task('clean', (done) => {
   }
   deleteFolderRecursive(`${__dirname}/dist`, done)
 })
+gulp.task('compile:sass', () => {
+  return gulp.src('./src/views/sass/*.scss')
+    .pipe(sass().on('error', sass.logError))
+    .pipe(gulp.dest(`${dest}/views/css`))
+})
 
-gulp.task('compile:react', ['compile:react:query-results', 'compile:react:statistics'])
-gulp.task('compile:sass', ['compile:sass:query-results', 'compile:sass:statistics'])
+gulp.task('compile:react', () => {
+  buildReactFile('setup')
+  return buildReactFile('query-results')
+})
 
-gulp.task('compile', ['compile:sass', 'compile:ts', 'compile:copy', 'compile:react'])
+gulp.task('compile', ['clean', 'compile:vendor', 'compile:sass', 'compile:ts', 'compile:copy', 'compile:react'])
 gulp.task('watch', ['watch:sass', 'watch:ts', 'watch:copy', 'watch:react'])
 
 gulp.task('default', ['compile', 'watch'])

@@ -9,3 +9,4 @@ yarn.lock
 npm-shrinkwrap.json
 *.log
 *.vsix
+cache/

@@ -1,9 +1,9 @@
-import Utils from './../utils';
 import mysql = require('mysql2');
 import { ConnectionCredentials } from './../interface/connection-credentials';
 import { ConnectionDialect } from './../interface/connection-dialect';
 import DatabaseInterface from './../interface/database-interface';
 import { DialectQueries } from './../interface/dialect-queries';
+import Utils from './../utils';
 
 export default class MySQL implements ConnectionDialect {
   public connection: Promise<any>;

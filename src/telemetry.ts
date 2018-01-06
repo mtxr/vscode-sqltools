@@ -47,8 +47,8 @@ export default class Telemetry {
     Telemetry.registerMessage('info', message, value);
   }
 
-  public static registerErrorMessage(message, error?: Error) {
-    Telemetry.registerMessage('error', message, 'Dismissed');
+  public static registerErrorMessage(message, error?: Error, value: string = 'Dismissed') {
+    Telemetry.registerMessage('error', message, value);
     if (error) {
       Telemetry.registerException(error);
     }
@@ -77,11 +77,17 @@ export default class Telemetry {
     Telemetry.analytics.event(category, event, label || event, Telemetry.errorHandler('event'));
   }
 
-  public static registerException(error: Error | string) {
+  public static registerException(error: Error) {
     if (!Telemetry.isEnabled) return;
+    let exceptionDescription = error.toString();
+    if (error.message) {
+      exceptionDescription = `${error.name}:${error.message}`;
+    }
     Telemetry.analytics.exception(
-      ((error as Error).message || error) as string,
-      false,
+      {
+        exceptionDescription,
+        isExceptionFatal: false,
+      },
       Telemetry.errorHandler('exception'),
     );
   }
@@ -96,6 +102,8 @@ export default class Telemetry {
   private static start() {
     Telemetry.analytics = Analytics(Telemetry.uaCode, Telemetry.extensionUUID, { strictCidFormat: false });
     Telemetry.analytics.set('uid', Telemetry.extensionUUID);
+    Telemetry.analytics.set('cid', Telemetry.extensionUUID);
+    Telemetry.analytics.set('applicationVersion', Constants.version);
   }
 
   private static errorHandler(type: string) {
