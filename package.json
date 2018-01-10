@@ -298,7 +298,10 @@
                 "description": "Database username"
               },
               "password": {
-                "type": "string",
+                "type": [
+                  "string",
+                  "null"
+                ],
                 "description": "Connection password",
                 "required": false
               },
@@ -417,6 +420,8 @@
     "babelify": "^8.0.0",
     "browserify": "^15.0.0",
     "browserify-incremental": "^3.1.1",
+    "eslint": "^4.15.0",
+    "eslint-plugin-react": "^7.5.1",
     "gulp": "^3.9.1",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.6.0",
@@ -436,6 +441,7 @@
     "vscode": "^1.1.0"
   },
   "dependencies": {
+    "get-port": "^3.2.0",
     "mssql": "^4.0.4",
     "mysql2": "^1.5.1",
     "opn": "^5.1.0",

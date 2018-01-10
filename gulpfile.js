@@ -15,10 +15,14 @@ const dest = 'dist'
 
 const dependencies = [ 'react', 'react-dom' ]
 
+function errorHandler (err) {
+  console.error(err.stack || err)
+  this.emit('end')
+}
+
 function buildReactFile (file) {
   const bundler = browserify(Object.assign({}, browserifyInc.args, {
     entries: `src/views/js/${file}.jsx`,
-    debug: true,
     transform: [
       babelify.configure({ presets: ['es2015', 'react'] }),
       [uglifyify]
@@ -31,7 +35,7 @@ function buildReactFile (file) {
     bundler.external(dep)
   })
   return bundler.bundle()
-    .on('error', console.error)
+    .on('error', errorHandler)
     .pipe(source(`${file}.js`))
     .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
     .pipe(gulp.dest(`${dest}/views/js`))
@@ -46,7 +50,7 @@ gulp.task('compile:vendor', () => {
     ]
   })
     .bundle()
-    .on('error', console.error)
+    .on('error', errorHandler)
     .pipe(source('vendors.js'))
     .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
     .pipe(gulp.dest(`${dest}/views/js`))
@@ -135,8 +139,7 @@ gulp.task('compile:sass', () => {
 })
 
 gulp.task('compile:react', () => {
-  buildReactFile('setup')
-  return buildReactFile('query-results')
+  return buildReactFile('app')
 })
 
 gulp.task('compile', ['clean', 'compile:vendor', 'compile:sass', 'compile:ts', 'compile:copy', 'compile:react'])

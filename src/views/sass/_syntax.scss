@@ -1,0 +1,24 @@
+.vscode-dark .syntax {
+  background: #111;
+  border-radius: 4px;
+  padding: 10px;
+  &, * {
+    line-height: 1.2;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+  &.json {
+    .key {
+      color: #00bcd4;
+    }
+    .number {
+      color: #cddc39;
+    }
+    .string {
+      color: #ffc107;
+    }
+    .bool, .null {
+      color: #2196f3;
+    }
+  }
+}

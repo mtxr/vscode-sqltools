@@ -1,3 +1,5 @@
+@import './mixins';
+
 $color: var(--color);
 $backgroundColor: var(--background-color);
 $fontFamily: var(--font-family);
@@ -69,23 +71,20 @@ input, select {
 
 .capitalize {
   text-transform: capitalize;
+
+  small {
+    margin-left: 10px;
+    text-transform: none;
+  }
 }
 
-::-webkit-input-placeholder,
-:-moz-placeholder,
-::-moz-placeholder,
-:-ms-input-placeholder {
+::-webkit-input-placeholder {
   color: $lightThemeGray4;
   text-transform: capitalize;
 }
 
 .vscode-dark {
-  ::-webkit-input-placeholder,
-  :-moz-placeholder,
-  ::-moz-placeholder,
-  :-ms-input-placeholder {
-    color: $darkThemeWhite4;
-  }
+  color: $darkThemeWhite4;
 }
 
 .btn {
@@ -100,4 +99,70 @@ input, select {
   .btn {
     color: $darkThemeWhite16;
   }
+}
+
+.loading {
+  @include full-screen();
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+
+  .backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: $darkThemeWhite10;
+    overflow: hidden;
+  }
+
+  div.spinner,
+  div.spinner:after {
+    border-radius: 50%;
+    width: 10em;
+    height: 10em;
+  }
+  div.spinner {
+    margin: auto;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    font-size: 10px;
+    position: absolute;
+    text-indent: -9999em;
+    border-top: 1.1em solid $lightThemeGray4;
+    border-right: 1.1em solid $lightThemeGray4;
+    border-bottom: 1.1em solid $lightThemeGray4;
+    border-left: 1.1em solid #ffffff;
+    transform: translate3d(0, -50%, 0);
+    animation: load8 1.1s infinite linear;
+  }
+
+}
+.vscode-dark .loading {
+  .backdrop {
+    background: $lightThemeGray10;
+  }
+  div.spinner {
+    border-top: 1.1em solid $darkThemeWhite4;
+    border-right: 1.1em solid $darkThemeWhite4;
+    border-bottom: 1.1em solid $darkThemeWhite4;
+  }
+}
+
+@keyframes load8 {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.fix-height {
+  @include full-screen();
 }

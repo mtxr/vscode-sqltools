@@ -43,11 +43,27 @@ export default class Utils {
     return Utils.formatSql(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, indentSize).concat('$0');
   }
 
-  public static async localSetupInfo() {
+  public static localSetupInfo() {
+    try {
+      const file = require('path').join(Utils.getHome(), '.sqltools-setup');
+      return JSON.parse(fs.readFileSync(file, 'utf-8'));
+    } catch (e) { /**/ }
+    return {};
+  }
+
+  public static writeLocalSetupInfo(data) {
+    const actualData = Utils.localSetupInfo();
+    const file = require('path').join(Utils.getHome(), '.sqltools-setup');
+    Object.keys(data).forEach((k) => {
+      actualData[k] = data[k];
+    });
+    fs.writeFileSync(file, JSON.stringify(actualData, null, 2), 'utf-8');
+  }
+
+  public static async getlastRunInfo() {
     if (Utils.localSetupData) {
       return Utils.localSetupData;
     }
-    const file = require('path').join(Utils.getHome(), '.sqltools-setup');
     const localConfig = {
       current: {
         numericVersion: Utils.numericVersion(Constants.version),
@@ -64,12 +80,12 @@ export default class Utils {
       },
     };
     try {
-      localConfig.installed = JSON.parse(fs.readFileSync(file, 'utf-8'));
+      localConfig.installed = Utils.localSetupInfo();
       localConfig.current.updated = localConfig.current.numericVersion > localConfig.installed.numericVersion;
     } catch (e) { /**/ }
 
     Utils.localSetupData = localConfig;
-    fs.writeFileSync(file, JSON.stringify(localConfig.current, null, 2), 'utf-8');
+    Utils.writeLocalSetupInfo(localConfig.current);
 
     return localConfig;
   }

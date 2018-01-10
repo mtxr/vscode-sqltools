@@ -1,8 +1,8 @@
 import React from 'react'
 import { render } from 'react-dom'
-import ReactTable from './lib/react-table'
+import ReactTable from './../lib/react-table'
 
-class Query extends React.Component {
+export class Query extends React.Component {
   constructor(props) {
     super(props)
     this.state = { open: false }
@@ -28,7 +28,7 @@ class Query extends React.Component {
   }
 }
 
-class Messages extends React.Component {
+export class Messages extends React.Component {
   constructor(props) {
     super(props)
     this.state = { open: props.value.length > 0 }
@@ -60,7 +60,7 @@ class Messages extends React.Component {
   }
 }
 
-class ResultsTable extends React.Component {
+export class ResultsTable extends React.Component {
   render() {
     const cols = this.props.value.cols.map((c) => {
       c.Cell = (r) => (r.value === null ? <small>(NULL)</small> : r.value)
@@ -85,7 +85,7 @@ class ResultsTable extends React.Component {
   }
 }
 
-class QueryResult extends React.Component {
+export class QueryResult extends React.Component {
   render () {
     let table = 'Query with errors. Please, check the error below.'
     if (this.props.value.error !== true) {
@@ -103,10 +103,10 @@ class QueryResult extends React.Component {
   }
 }
 
-class QueryResults extends React.Component {
+export default class QueryResults extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { active: 0 }
+    this.state = { isLoaded: false, active: 0, data: [] }
   }
 
   toggle(i) {
@@ -115,9 +115,21 @@ class QueryResults extends React.Component {
     }));
   }
 
+  componentDidMount() {
+    fetch(`${window.origin}/api/query-results`)
+      .then((res) => res.json())
+      .then((res) => {
+        this.setState({ isLoaded: true, data: res }, () => console.log('state', this.state))
+      }, (e) => console.error(e))
+  }
+
   render () {
+    if (!this.state.isLoaded) {
+      return (<h2>loading...</h2>)
+    }
+
     const tabs = []
-    const results = this.props.value.map((res, i) => {
+    const results = this.state.data.map((res, i) => {
       tabs.push(
         <li
           title={res.query}
@@ -135,6 +147,7 @@ class QueryResults extends React.Component {
         className={this.state.active === i ? 'active' : ''}
       />
     })
+
     return (
       <div className='fix-height'>
         <ul className='tabs'>{tabs}</ul>
@@ -143,13 +156,3 @@ class QueryResults extends React.Component {
     )
   }
 }
-
-class App extends React.Component {
-  render () {
-    return (
-      <QueryResults value={(window.content || [])} />
-    )
-  }
-}
-
-render(<App />, document.getElementById('root'))

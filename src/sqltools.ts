@@ -1,5 +1,6 @@
 /// <reference path="./../node_modules/@types/node/index.d.ts" />
 
+import getPort = require('get-port');
 import Path = require('path');
 import {
   commands as VSCode,
@@ -49,9 +50,10 @@ import ConnectionManager from './connection-manager';
 import Constants from './constants';
 import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
+import HttpContentProvider from './http-provider';
 import { Settings } from './interface/settings';
+import { createNewConnection } from './languageserver/requests/connection-requests';
 import LogWriter from './log-writer';
-import QueryResultsProvider from './query-results-provider';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
 import { SuggestionsProvider } from './suggestions-provider';
@@ -83,25 +85,39 @@ export default class SQLTools {
   private activeConnection: Connection;
   private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
-  private outputProvider: QueryResultsProvider;
   private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
-  private resultsUri = Uri.parse('sqltools-query://results');
-  private statisticsUri = Uri.parse('sqltools-reports://statistics');
+  private previewProvider: HttpContentProvider;
+  private get previewUri(): Uri {
+    return Uri.parse(`sqltools://html`);
+  }
 
-  private setupUri: Uri;
+  private get setupUri(): Uri {
+    const base = this.previewUri;
+    return base.with({ fragment: '/setup' });
+  }
+
+  private get resultsUri(): Uri {
+    const base = this.previewUri;
+    return base.with({ fragment: '/query-results' });
+  }
   private languageClient: LanguageClient;
+  private httpServerPort: number;
 
   private constructor(private context: ExtensionContext) {
-    this.setupUri = Uri.file(this.context.asAbsolutePath('./dist/views/setup.html'));
+    const localData = Utils.localSetupInfo();
     this.loadConfigs();
-    this.registerProviders();
-    this.registerEvents();
-    this.registerCommands();
-    this.registerStatusBar();
-    this.autoConnectIfActive();
-    this.help();
-    this.registerLanguageServer();
+    getPort({port: localData.httpServerPort || 5123}).then((port) => {
+      this.httpServerPort = port;
+      Utils.writeLocalSetupInfo({ httpServerPort: this.httpServerPort });
+      this.registerProviders();
+      this.registerEvents();
+      this.registerCommands();
+      this.registerStatusBar();
+      this.autoConnectIfActive();
+      this.help();
+      this.registerLanguageServer();
+    });
   }
 
   /**
@@ -357,14 +373,7 @@ export default class SQLTools {
   }
 
   public setupSQLTools() {
-    let viewColumn: ViewColumn = ViewColumn.One;
-    const editor = Window.activeTextEditor;
-    if (editor && editor.viewColumn) {
-      viewColumn = editor.viewColumn;
-    }
-
-    return VsCommands.executeCommand('vscode.previewHtml', this.setupUri, viewColumn, 'SQLTools Setup')
-      .then(null, (reason) => errorHandler(this.logger, 'Failed to open setup', reason, this.showOutputChannel));
+    return this.openHtml(this.setupUri, 'SQLTools Setup Connection');
   }
 
   public refreshSidebar() {
@@ -375,15 +384,7 @@ export default class SQLTools {
    * Management functions
    */
   private printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
-    this.outputProvider.setResults(results);
-
-    let viewColumn: ViewColumn = ViewColumn.One;
-    const editor = Window.activeTextEditor;
-    if (editor && editor.viewColumn) {
-      viewColumn = editor.viewColumn;
-    }
-    return VsCommands.executeCommand('vscode.previewHtml', this.resultsUri, viewColumn, outputName)
-      .then(undefined, (reason) => errorHandler(this.logger, 'Failed to show results', reason, this.showOutputChannel));
+    return this.openHtml(this.resultsUri, outputName);
   }
 
   private autoConnectIfActive(currConn?: string) {
@@ -479,14 +480,10 @@ export default class SQLTools {
   }
 
   private registerProviders() {
-    this.outputProvider = new QueryResultsProvider(this.context.extensionPath, this.resultsUri);
+    this.previewProvider = new HttpContentProvider(this.httpServerPort, this.previewUri);
     this.context.subscriptions.push(
-      Workspace.registerTextDocumentContentProvider(this.resultsUri.scheme, this.outputProvider),
+      Workspace.registerTextDocumentContentProvider(this.previewUri.scheme, this.previewProvider),
     );
-
-    if (typeof Window.registerTreeDataProvider !== 'function') {
-      return;
-    }
     this.sqlconnectionTreeProvider = new SidebarTableColumnProvider(this.activeConnection, this.logger);
     Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, this.sqlconnectionTreeProvider);
     this.suggestionsProvider = new SuggestionsProvider(this.logger);
@@ -564,8 +561,8 @@ export default class SQLTools {
   }
 
   private registerLanguageServer() {
-    const serverModule = this.context.asAbsolutePath(Path.join('dist', 'languageserver', 'server.js'));
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6009'] };
+    const serverModule = this.context.asAbsolutePath(Path.join('dist', 'languageserver', 'index.js'));
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
 
     const serverOptions: ServerOptions = {
       debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
@@ -590,6 +587,11 @@ export default class SQLTools {
     languageClient.onReady().then(() => {
       this.logger.info('Language server started!');
       this.languageClient = languageClient;
+      this.languageClient.onRequest(createNewConnection.method, (newConnPostData) => {
+        const connList = ConfigManager.get('connections', []) as any[];
+        connList.push(newConnPostData.connInfo);
+        return this.setSettings('connections', connList);
+      });
     }, (error) => errorHandler(this.logger, 'Ops, we\'ve got an error!', error, this.showOutputChannel));
     this.context.subscriptions.push(languageClient.start());
   }
@@ -605,7 +607,7 @@ export default class SQLTools {
     const moreInfo = 'More Info';
     const supportProject = 'Support This Project';
     const releaseNotes = 'Release Notes';
-    const localConfig = await Utils.localSetupInfo();
+    const localConfig = await Utils.getlastRunInfo();
 
     let message = 'Do you like SQLTools? Help us to keep making it better.';
 
@@ -634,5 +636,31 @@ export default class SQLTools {
             break;
         }
       });
+  }
+
+  private openHtml(htmlUri: Uri, outputName: string) {
+    let viewColumn: ViewColumn = ViewColumn.One;
+    const editor = Window.activeTextEditor;
+    if (editor && editor.viewColumn) {
+      viewColumn = editor.viewColumn;
+    }
+
+    return VsCommands.executeCommand('vscode.previewHtml', htmlUri, viewColumn, outputName)
+      .then(null, (reason) => errorHandler(
+        this.logger, `Failed to open ${outputName}`, reason, this.showOutputChannel,
+      ));
+  }
+
+  private setSettings(key: string, value: any) {
+    return Workspace.getConfiguration(Constants.extNamespace.toLocaleLowerCase())
+      .update(key, value)
+      .then(() => {
+        this.logger.info(`Settings for ${Constants.extNamespace.toLocaleLowerCase()}.${key} updated!`);
+        return true;
+      }, (e) => errorHandler(
+        this.logger,
+        `Error while saving settings for ${Constants.extNamespace.toLocaleLowerCase()}${key}`,
+      e,
+    ));
   }
 }
