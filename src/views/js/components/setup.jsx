@@ -195,7 +195,7 @@ export default class Setup extends React.Component {
         <div className='row' key={i}>
           <div className='col-4 capitalize'>{field.label}</div>
           <div className='col-8 capitalize'>
-            <input type={field.type || 'text'} name={f} placeholder={field.label} value={this.state.data[f]} onChange={this.handleChange} disabled={this.state.loading}/>
+            <input type={field.type || 'text'} name={f} placeholder={field.label} value={this.state.data[f]} onChange={this.handleChange} disabled={this.state.loading} min="1" max="65535"/>
             {info}
           </div>
         </div>
@@ -216,6 +216,11 @@ export default class Setup extends React.Component {
           </div>
           <div className="row">
             <div className="col-6">
+              <div className="row">
+                <div className="col-12">
+                  <h5 className="no-margin">Connection Information</h5>
+                </div>
+              </div>
               {formFields}
               <div className="row">
                 <div className="col-4">&nbsp;</div>
@@ -225,13 +230,21 @@ export default class Setup extends React.Component {
               </div>
             </div>
             <div className="col-6">
+              <div><h5 className="no-margin">Preview</h5></div>
               <div
                 className="syntax json"
                 dangerouslySetInnerHTML={{ __html: connInfo }}
               >
               </div>
-              <div>
-                {JSON.stringify(this.state.errors)}
+              <div style={{
+                display: Object.keys(this.state.errors).length === 0 ? 'none' : 'initial',
+              }}>
+                <h5 className="no-margin-bottom">Validations</h5>
+                <div className="messages radius">
+                  {(Object.keys(this.state.errors).map((f, k) => {
+                    return (<div key={k} className='message error'>{this.state.errors[f].replace('{0}', this.state.fields[f].label)}</div>)
+                  }))}
+                </div>
               </div>
             </div>
           </div>

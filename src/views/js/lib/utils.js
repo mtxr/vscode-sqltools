@@ -22,4 +22,3 @@ export function inRange(max, min) {
     return value >= min && value <= max
   }
 }
-inRange.errorMessage = '{0} should be in range ({1}, {2})'
