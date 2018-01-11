@@ -2,10 +2,12 @@ import {
   window as Window,
 } from 'vscode';
 import { Logger } from './api';
+import { SQLToolsException } from './api/exception';
 import Telemetry from './telemetry';
 
-function errorHandler(logger: Logger, message: string, error ?: Error, yesCallback?: Function): null {
+function errorHandler(logger: Logger, message: string, error?: SQLToolsException, yesCallback?: Function): null {
   if (error) {
+    if (error.swallowError) return void logger.debug(`${message}`);
     logger.error(`${message}: `, error.stack);
     message = `${message} ${error.toString().substr(0, 60)}${error.toString().length > 60 ? '...' : '.'}`;
   }

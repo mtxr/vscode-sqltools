@@ -253,8 +253,7 @@
         "sqltools.completionLanguages": {
           "type": "array",
           "default": [
-            "sql",
-            "plaintext"
+            "sql"
           ],
           "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
         },

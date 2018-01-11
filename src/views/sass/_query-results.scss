@@ -274,3 +274,16 @@ body.vscode-dark {
     }
   }
 }
+
+.filter-highlight {
+  border-radius: 2px;
+  color: #333;
+}
+div mark {
+  &:nth-child(even) {
+    background: cyan;
+  }
+  &:nth-child(odd) {
+    background: yellow;
+  }
+}

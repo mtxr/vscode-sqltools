@@ -29,7 +29,6 @@ const apiData = {
   'POST /api/create-connection': (req: any, res: any) => {
     languageServerInstance.sendRequest(createNewConnection.method, req.body)
       .then((result) => {
-        Logger.log('result', result);
         return res.sendJson({ data: req.body, success: true });
       }, (err) => {
         Logger.error('err', err);
@@ -101,6 +100,7 @@ function getContentType(ext: string): string {
 }
 
 function setData(url: string, data: any | any[]) {
+  Logger.log(`Defining data for ${url}`);
   apiData[url] = data;
 }
 

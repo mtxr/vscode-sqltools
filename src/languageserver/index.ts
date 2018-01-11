@@ -10,8 +10,9 @@ import { Utils } from '../api';
 import ConfigManager = require('../api/config-manager');
 import { Settings } from '../interface/settings';
 import Formatter = require('./formatter');
+import DatabaseInterface from '../api/interface/database-interface';
 import httpServer from './http-server';
-import { createNewConnection } from './requests/connection-requests';
+import { createNewConnection, SetQueryResults } from './requests/connection-requests';
 import Logger from './utils/logger';
 
 let formatterRegistration: Thenable<Disposable> | null = null;
@@ -47,6 +48,11 @@ connection.onDidChangeConfiguration((change) => {
       documentSelector: ConfigManager.get('completionLanguages', [ 'sql' ]),
     });
   }
+});
+
+connection.onRequest(SetQueryResults.method, (req: { data: DatabaseInterface.QueryResults[] }): boolean => {
+  httpServerInstance.setData('GET /api/query-results', req.data);
+  return true;
 });
 
 connection.listen();

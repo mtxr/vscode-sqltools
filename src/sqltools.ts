@@ -43,6 +43,7 @@ import {
 } from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
 import ConfigManager = require('./api/config-manager');
+import { DismissedException } from './api/exception';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import DatabaseInterface from './api/interface/database-interface';
 import Connection from './connection';
@@ -52,7 +53,7 @@ import errorHandler from './error-handler';
 import { SelectionFormatter } from './formatting-provider';
 import HttpContentProvider from './http-provider';
 import { Settings } from './interface/settings';
-import { createNewConnection } from './languageserver/requests/connection-requests';
+import { createNewConnection, SetQueryResults } from './languageserver/requests/connection-requests';
 import LogWriter from './log-writer';
 import { SidebarTableColumnProvider } from './sidebar-provider';
 import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
@@ -243,7 +244,7 @@ export default class SQLTools {
 
   public selectConnection(): Thenable<Connection> {
     return this.showConnectionMenu().then((selection: QuickPickItem) => {
-      if (!selection || !selection.label) return;
+      if (!selection || !selection.label) throw new DismissedException();
       this.history.clear();
       return this.setConnection(ConnectionManager.getConnection(selection.label));
     }, (reason) => {
@@ -383,7 +384,10 @@ export default class SQLTools {
    * Management functions
    */
   private printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
-    return this.openHtml(this.resultsUri, outputName);
+    this.languageClient.sendRequest(SetQueryResults.method, { data: results })
+      .then((result) => {
+        return this.openHtml(this.resultsUri, outputName);
+      }, (reason) => errorHandler(this.logger, 'Error during connection.', reason, this.showOutputChannel));
   }
 
   private autoConnectIfActive(currConn?: string) {
@@ -445,7 +449,7 @@ export default class SQLTools {
   private registerCommand(command: string, registerFunction: Function) {
     this.logger.debug(`Registering command ${Constants.extNamespace}.${command}`);
     this.context.subscriptions.push(registerFunction(`${Constants.extNamespace}.${command}`, (...args) => {
-      this.logger.debug(`Command triggered: ${command}`, args);
+      this.logger.debug(`Command triggered: ${command}`);
       Telemetry.registerCommand(command);
       this[command](...args);
     }));
@@ -484,7 +488,7 @@ export default class SQLTools {
     const completionTriggers = ['.', ' '];
     this.context.subscriptions.push(
       Languages.registerCompletionItemProvider(
-        ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
+        ConfigManager.get('completionLanguages', ['sql']) as string[],
         this.suggestionsProvider, ...completionTriggers,
       ),
     );
@@ -564,7 +568,7 @@ export default class SQLTools {
     };
 
     const clientOptions: LanguageClientOptions = {
-      documentSelector: ConfigManager.get('completionLanguages', ['sql', 'plaintext']) as string[],
+      documentSelector: ConfigManager.get('completionLanguages', ['sql']) as string[],
       synchronize: {
         configurationSection: 'sqltools',
         fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),

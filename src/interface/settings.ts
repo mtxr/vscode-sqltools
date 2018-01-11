@@ -158,7 +158,7 @@ export interface Settings {
   /**
    * Languages with SQL completion activated.
    * @type {array}
-   * @default ["sql","plaintext"]
+   * @default ["sql"]
    * @memberof Settings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */

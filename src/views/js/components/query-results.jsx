@@ -1,5 +1,5 @@
+import PropTypes from 'prop-types'
 import React from 'react'
-import { render } from 'react-dom'
 import ReactTable from './../lib/react-table'
 
 export class Query extends React.Component {
@@ -26,6 +26,9 @@ export class Query extends React.Component {
       </div>
     )
   }
+}
+Query.propTypes = {
+  value: PropTypes.string.isRequired
 }
 
 export class Messages extends React.Component {
@@ -59,12 +62,38 @@ export class Messages extends React.Component {
     )
   }
 }
+Messages.propTypes = {
+  value: PropTypes.any.isRequired,
+  error: PropTypes.any
+}
 
 export class ResultsTable extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      filtered: {}
+    }
+    this.filters = {}
+  }
   render() {
     const cols = this.props.value.cols.map((c) => {
-      c.Cell = (r) => (r.value === null ? <small>(NULL)</small> : r.value)
-      return c
+      return {
+        Header: c,
+        accessor: c,
+        Cell: (r) => {
+          const v = String(r.original[r.column.id])
+          if (v === null) return <small>(NULL)</small>
+          if (!this.state.filtered[r.column.id]) return String(v)
+          return (
+            String(v).replace(this.state.filtered[r.column.id], '<###>$1<###>').split('<###>')
+              .map((str, i) => {
+                if (i % 2 === 1) return <mark key={i} className='filter-highlight'>{str}</mark>
+                if (str.trim().length === 0) return null
+                return <span key={i}>{str}</span>
+              })
+          )
+        }
+      };
     })
     return (
       <div className='results-table'>
@@ -73,8 +102,27 @@ export class ResultsTable extends React.Component {
           data={this.props.value.data}
           columns={cols}
           filterable
-          defaultFilterMethod={(filter, row) =>
-            String(row[filter.id]) === filter.value}
+          onFilteredChange={(filtered) => {
+            console.log(filtered)
+            this.setState({ filtered: filtered.reduce((p, c) => {
+              let exp = String(c.value)
+              try {
+                exp = new RegExp(`(${exp})`, 'g');
+              } catch (e) { /***/
+              }
+              p[c.id] = exp
+              return p
+            }, {}) })
+          }}
+          defaultFilterMethod={(filter, row) => {
+            let exp = String(filter.value)
+            try {
+              exp = new RegExp(`(${exp})`, 'g');
+              return exp.test(String(row[filter.id]))
+            } catch (e) {
+              return String(row[filter.id]) === exp
+            }
+          }}
           className='-striped'
           style={{
             height: '98%'
@@ -83,6 +131,9 @@ export class ResultsTable extends React.Component {
       </div>
     )
   }
+}
+ResultsTable.propTypes = {
+  value: PropTypes.any.isRequired
 }
 
 export class QueryResult extends React.Component {
@@ -102,6 +153,10 @@ export class QueryResult extends React.Component {
     )
   }
 }
+QueryResult.propTypes = {
+  value: PropTypes.any.isRequired,
+  className: PropTypes.string,
+}
 
 export default class QueryResults extends React.Component {
   constructor(props) {
@@ -116,10 +171,10 @@ export default class QueryResults extends React.Component {
   }
 
   componentDidMount() {
-    fetch(`${window.origin}/api/query-results`)
+    fetch(`${window.location.origin}/api/query-results`)
       .then((res) => res.json())
       .then((res) => {
-        this.setState({ isLoaded: true, data: res }, () => console.log('state', this.state))
+        this.setState({ isLoaded: true, data: res })
       }, (e) => console.error(e))
   }
 

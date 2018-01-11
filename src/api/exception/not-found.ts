@@ -1,1 +1,2 @@
-export default class NotFoundException extends Error { }
+import SQLToolsException from './sqltools';
+export default class NotFoundException extends SQLToolsException { }
