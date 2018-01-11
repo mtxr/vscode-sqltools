@@ -79,6 +79,9 @@ body, #root {
     &.error {
       background: rgba(255, 0, 0, 0.2)
     }
+    &.success {
+      background: rgba(0, 255, 0, 0.4)
+    }
   }
   &.radius {
     .message:first-child {

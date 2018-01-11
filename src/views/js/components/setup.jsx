@@ -160,7 +160,7 @@ export default class Setup extends React.Component {
     const newData = Object.assign({}, this.state.data, {
       [name]: value
     });
-    this.setState({ data: newData }, () => {
+    this.setState({ data: newData, saved: null, onSaveError: null }, () => {
       const errors = this.validateField(name)
       Setup.saveLocal(this.state.data)
       this.setState({ errors: errors }, () => {
@@ -204,7 +204,7 @@ export default class Setup extends React.Component {
       .then((res) => {
         const newState = { loading: false }
         if (res.success) {
-          newState.saved = true
+          newState.saved = `<strong>${res.data.connInfo.name}</strong> added to your settings!`
           localStorage.removeItem(Setup.localStorageKey)
           newState.data = Setup.generateConnData(this.state.fields)
         } else {
@@ -291,6 +291,17 @@ export default class Setup extends React.Component {
               <h3>Setup a new connection</h3>
             </div>
           </div>
+          {((this.state.saved || this.state.onSaveError) ?
+            (
+              <div className="row">
+                <div className="col-12 messages radius">
+                  <div className={`message ${this.state.saved ? 'success' : 'error'}`}
+                  dangerouslySetInnerHTML={{__html: this.state.saved || this.state.onSaveError}}></div>
+                </div>
+              </div>
+            )
+            : null
+          )}
           <div className="row">
             <div className="col-6">
               <div className="row">

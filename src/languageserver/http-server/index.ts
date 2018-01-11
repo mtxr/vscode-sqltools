@@ -33,7 +33,7 @@ const apiData = {
         return res.sendJson({ data: req.body, success: true });
       }, (err) => {
         Logger.error('err', err);
-        return res.sendJson({ data: req.body, success: false });
+        return res.sendJson({ data: req.body, success: false, error: err.message || err.toString() });
       });
   },
 };
