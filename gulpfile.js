@@ -13,7 +13,7 @@ const browserifyInc = require('browserify-incremental')
 
 const dest = 'dist'
 
-const dependencies = [ 'react', 'react-dom' ]
+const dependencies = [ 'react', 'react-dom', 'prop-types' ]
 
 function errorHandler (err) {
   console.error(err.stack || err)

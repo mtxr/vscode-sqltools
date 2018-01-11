@@ -1,3 +1,4 @@
+import PropTypes from 'prop-types'
 import React from 'react'
 import {
   inRange,
@@ -7,6 +8,78 @@ import {
   int
 } from './../lib/utils'
 import Loading from './loading.jsx'
+
+class Syntax extends React.Component {
+  constructor(props) {
+    super(props)
+    this.id = `syntax-${(Math.random() * 1000).toFixed(0)}`
+    this.state = {
+      copyMsg: 'Copy'
+    }
+    this.interval = null
+  }
+  copyCode (e) {
+    e.preventDefault()
+    e.stopPropagation()
+    let msg = 'Copied!'
+    const range = document.createRange()
+    try {
+      range.selectNode(document.getElementById(this.id))
+      window.getSelection().addRange(range)
+      if(!document.execCommand('copy')) {
+        throw 'Failed!'
+      }
+    } catch (err) {
+      msg = 'Failed :('
+    }
+    window.getSelection().removeRange(range)
+    this.setState({ copyMsg: msg }, () => {
+      clearTimeout(this.interval)
+      this.interval = setTimeout(() => {
+        this.setState({ copyMsg: 'Copy' })
+      }, 1000);
+    })
+    return false
+  }
+  render () {
+    return (
+      <div className="relative">
+        <div
+          id={this.id}
+          className={`syntax ${this.props.language}`}
+          dangerouslySetInnerHTML={{ __html: this.props.code }}
+        ></div>
+        <button className="btn copy-code" type="button" onClick={this.copyCode.bind(this)}>{this.state.copyMsg}</button>
+      </div>
+    )
+  }
+}
+
+Syntax.propTypes = {
+  language: PropTypes.string,
+  code: PropTypes.string.isRequired
+}
+class FieldWrapper extends React.Component {
+  render () {
+    const field = this.props.field
+    const info = field.info ? <small>({field.info})</small> : null
+    const html = this.props.component
+    return (
+      <div className={'row ' + (this.props.i === 0 ? 'no-margin-first-top' : '')}>
+        <div className='col-4 no-margin-left capitalize'>{field.label}</div>
+        <div className='col-8 capitalize no-margin-right'>
+          {html}
+          {info}
+        </div>
+      </div>
+    )
+  }
+}
+FieldWrapper.propTypes = {
+  field: PropTypes.any.isRequired,
+  component: PropTypes.element.isRequired,
+  i: PropTypes.number.isRequired
+};
 
 export default class Setup extends React.Component {
   constructor(props) {
@@ -55,7 +128,7 @@ export default class Setup extends React.Component {
           const parse = this.state.fields.askForPassword.parse
           const newState = Object.assign({}, this.state)
           newState.fields.password.show = parse(this.state.data.askForPassword) ? 'hidden' : undefined
-          this.setState(newState)
+          this.setState(newState, this.validateFields)
         }
       },
       password: {
@@ -71,10 +144,7 @@ export default class Setup extends React.Component {
         parse: int
       },
     }
-    const data = Object.keys(fields).reduce((obj, f) => {
-      obj[f] = typeof fields[f].default !== 'undefined' ? fields[f].default : ''
-      return obj
-    }, {})
+    const data = Setup.loadLocal() || Setup.generateConnData(fields)
     this.state = {
       loading: true,
       data: data,
@@ -92,6 +162,7 @@ export default class Setup extends React.Component {
     });
     this.setState({ data: newData }, () => {
       const errors = this.validateField(name)
+      Setup.saveLocal(this.state.data)
       this.setState({ errors: errors }, () => {
         if (!this.state.fields[name].cb) return
         this.state.fields[name].cb()
@@ -134,28 +205,42 @@ export default class Setup extends React.Component {
         const newState = { loading: false }
         if (res.success) {
           newState.saved = true
+          localStorage.removeItem(Setup.localStorageKey)
+          newState.data = Setup.generateConnData(this.state.fields)
         } else {
           newState.onSaveError = res.error
         }
-        this.setState(newState)
+        this.setState(newState, this.validateFields)
       })
 
     return false;
   }
-  componentDidMount() {
-    this.setState({loading: false }, () => {
-      let errors = {}
-      Object.keys(this.state.fields).forEach((f) => {
-        errors = Object.assign({}, errors, this.validateField(f))
-      })
-      this.setState({ errors: Object.keys(errors).reduce((p, f) => {
+  validateFields(cb = (() => { })) {
+    let errors = {}
+    Object.keys(this.state.fields).forEach((f) => {
+      errors = Object.assign({}, errors, this.validateField(f))
+    })
+    this.setState({
+      errors: Object.keys(errors).reduce((p, f) => {
         if (errors[f] === null || typeof errors[f] === 'undefined') return p
         p[f] = errors[f]
         return p
-      }, {}) }, () => {
+      }, {})
+    }, cb)
+  }
+
+  componentDidMount() {
+    this.setState({loading: false }, () => {
+      this.validateFields(() => {
         document.getElementsByTagName('input')[0].focus();
       })
     })
+  }
+
+  focusField(field) {
+    try {
+      document.getElementById(field).focus();
+    } catch (e) { /**/ }
   }
 
   getParsedFormData() {
@@ -174,31 +259,23 @@ export default class Setup extends React.Component {
     const formFields = Object.keys(this.state.fields).map((f, i) => {
       const field = this.state.fields[f]
       if (field.show === 'hidden') return null
-      const info = field.info ? <small>({field.info})</small> : null
+      let formField;
       if (Array.isArray(field.values)) {
         const options = field.values.map((o, k) => {
           return (<option value={typeof o.value !== 'undefined' ? o.value : o} key={k}>{typeof o.text !== 'undefined' ? o.text : o}</option>)
         })
-        return (
-          <div className='row' key={i}>
-            <div className='col-4 capitalize'>{field.label}</div>
-            <div className='col-8 capitalize'>
-              <select name={f} value={this.state.data[f]} onChange={this.handleChange} disabled={this.state.loading}>
-                {options}
-              </select>
-              {info}
-            </div>
-          </div>
+        formField = (
+          <select name={f} value={this.state.data[f]}  id={`input-${f}`} onChange={this.handleChange} disabled={this.state.loading}>
+            {options}
+          </select>
+        )
+      } else {
+        formField = (
+          <input type={field.type || 'text'} id={`input-${f}`} name={f} placeholder={field.label} value={this.state.data[f]} onChange={this.handleChange} disabled={this.state.loading} min="1" max="65535"/>
         )
       }
       return (
-        <div className='row' key={i}>
-          <div className='col-4 capitalize'>{field.label}</div>
-          <div className='col-8 capitalize'>
-            <input type={field.type || 'text'} name={f} placeholder={field.label} value={this.state.data[f]} onChange={this.handleChange} disabled={this.state.loading} min="1" max="65535"/>
-            {info}
-          </div>
-        </div>
+        <FieldWrapper field={field} key={i} i={i} component={formField} />
       )
     })
     const connInfo = JSON.stringify(this.getParsedFormData(), null, 2 )
@@ -217,32 +294,33 @@ export default class Setup extends React.Component {
           <div className="row">
             <div className="col-6">
               <div className="row">
-                <div className="col-12">
-                  <h5 className="no-margin">Connection Information</h5>
+                <div className="col-12 no-margin">
+                  <h5 className="no-margin-top">Connection Information</h5>
                 </div>
               </div>
               {formFields}
               <div className="row">
-                <div className="col-4">&nbsp;</div>
+                <div className="col-4 no-margin-left">&nbsp;</div>
                 <div className="col-8">
-                  <button className='btn capitalize' type="submit">Create</button>
+                  <button className='btn capitalize' type="submit" disabled={Object.keys(this.state.errors).length > 0}>Create</button>
                 </div>
               </div>
             </div>
             <div className="col-6">
-              <div><h5 className="no-margin">Preview</h5></div>
-              <div
-                className="syntax json"
-                dangerouslySetInnerHTML={{ __html: connInfo }}
-              >
-              </div>
+              <div><h5 className="no-margin-top">Preview</h5></div>
+              <Syntax code={connInfo} language='json'/>
               <div style={{
                 display: Object.keys(this.state.errors).length === 0 ? 'none' : 'initial',
               }}>
-                <h5 className="no-margin-bottom">Validations</h5>
+                <h5>Validations</h5>
                 <div className="messages radius">
                   {(Object.keys(this.state.errors).map((f, k) => {
-                    return (<div key={k} className='message error'>{this.state.errors[f].replace('{0}', this.state.fields[f].label)}</div>)
+                    return (<div
+                      key={k}
+                      onClick={this.focusField.bind(this, `input-${f}`)}
+                      className='message error pointer'
+                      dangerouslySetInnerHTML={{ __html: this.state.errors[f].replace('{0}', `<strong>${this.state.fields[f].label}</strong>`) }}
+                    ></div>)
                   }))}
                 </div>
               </div>
@@ -253,4 +331,23 @@ export default class Setup extends React.Component {
       </div>
     )
   }
+}
+
+Setup.localStorageKey = 'sqltools.setupConnection'
+
+Setup.saveLocal = (data) => {
+  localStorage.setItem(Setup.localStorageKey, JSON.stringify(data))
+}
+
+Setup.loadLocal = () => {
+  const local = localStorage.getItem(Setup.localStorageKey)
+  if (!local) return null
+  return JSON.parse(local)
+}
+
+Setup.generateConnData = (fields) => {
+  return Object.keys(fields).reduce((obj, f) => {
+    obj[f] = typeof fields[f].default !== 'undefined' ? fields[f].default : ''
+    return obj
+  }, {})
 }

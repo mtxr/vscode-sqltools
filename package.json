@@ -430,6 +430,7 @@
     "gulp-uglify": "^3.0.0",
     "jest": "^20.0.4",
     "jest-cli": "^20.0.4",
+    "prop-types": "^15.6.0",
     "react": "^16.2.0",
     "react-dom": "^16.2.0",
     "react-router-dom": "^4.2.2",

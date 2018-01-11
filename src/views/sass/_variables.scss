@@ -87,12 +87,22 @@ input, select {
   color: $darkThemeWhite4;
 }
 
+.pointer {
+  cursor: pointer;
+}
+
 .btn {
   background: $linkColor;
   padding: 4px 8px;
   color: $lightThemeGray16;
   border: none;
   text-transform: uppercase;
+  cursor: pointer;
+  &:disabled,
+  &[disabled] {
+    opacity: 0.3;
+    cursor: not-allowed;
+  }
 }
 
 .vscode-dark {
@@ -167,10 +177,23 @@ input, select {
   @include full-screen();
 }
 
-.no-margin {
-  margin: 0 !important;
+
+.no-margin { margin: 0 !important; }
+.no-margin-top { margin-top: 0 !important; }
+.no-margin-bottom { margin-bottom: 0 !important; }
+.no-margin-left { margin-left: 0 !important; }
+.no-margin-right { margin-right: 0 !important; }
+
+.no-padding { padding: 0 !important; }
+.no-padding-top { padding-top: 0 !important; }
+.no-padding-bottom { padding-bottom: 0 !important; }
+.no-padding-left { padding-left: 0 !important; }
+.no-padding-right { padding-right: 0 !important; }
+
+.row.no-margin-first-top .col-* {
+  margin-top: 0 !important;
 }
 
-.no-margin-bottom {
-  margin-bottom: 0 !important;
+.relative {
+  position: relative !important;
 }
