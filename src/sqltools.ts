@@ -83,7 +83,6 @@ export default class SQLTools {
   private history: History;
   private outputLogs: LogWriter;
   private activeConnection: Connection;
-  private extStatus: StatusBarItem;
   private extDatabaseStatus: StatusBarItem;
   private sqlconnectionTreeProvider: SidebarTableColumnProvider;
   private suggestionsProvider: SuggestionsProvider;
@@ -454,27 +453,22 @@ export default class SQLTools {
 
   private registerStatusBar(): void {
     this.logger.debug('Registering status bar');
-    this.extStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 10);
-    this.context.subscriptions.push(this.extStatus);
-    this.extStatus.command = `${Constants.extNamespace}.showOutputChannel`;
-    this.extStatus.text = `${Constants.extName}`;
 
-    this.extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 9);
+    this.extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 10);
     this.context.subscriptions.push(this.extDatabaseStatus);
     this.extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
+    this.extDatabaseStatus.tooltip = 'Select a connection';
     this.updateStatusBar();
   }
 
   private updateStatusBar() {
-    this.extDatabaseStatus.text = '$(database) Connect to database';
+    this.extDatabaseStatus.text = '$(database) Connect';
     if (this.activeConnection) {
       this.extDatabaseStatus.text = `$(database) ${this.activeConnection.getName()}`;
     }
     if (ConfigManager.get('showStatusbar', true)) {
-      this.extStatus.show();
       this.extDatabaseStatus.show();
     } else {
-      this.extStatus.hide();
       this.extDatabaseStatus.hide();
     }
   }
