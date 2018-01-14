@@ -426,7 +426,7 @@
     "browserify-incremental": "^3.1.1",
     "eslint": "^4.15.0",
     "eslint-plugin-react": "^7.5.1",
-    "gulp": "^3.9.1",
+    "gulp": "^4.0.0",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-streamify": "^1.0.2",
@@ -442,6 +442,7 @@
     "tslint": "^5.4.3",
     "typescript": "^2.3.2",
     "uglifyify": "^4.0.5",
+    "vinyl-buffer": "^1.0.1",
     "vinyl-source-stream": "^2.0.0",
     "vscode": "^1.1.0"
   },
