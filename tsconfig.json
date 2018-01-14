@@ -5,7 +5,8 @@
         "outDir": "dist",
         "sourceMap": true,
         "lib": [ "es6" ],
-        "rootDir": "src"
+        "rootDir": "src",
+        "removeComments": true
     },
     "exclude": [
         "src/test",

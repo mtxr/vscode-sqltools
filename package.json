@@ -46,9 +46,19 @@
     "onLanguage:sql",
     "onCommand:SQLTools.selectConnection"
   ],
-  "main": "./dist/extension",
+  "main": "./dist/sqltools",
   "contributes": {
     "commands": [
+      {
+        "title": "Connect",
+        "command": "SQLTools.selectConnection",
+        "category": "SQLTools"
+      },
+      {
+        "title": "Disconnect",
+        "command": "SQLTools.closeConnection",
+        "category": "SQLTools"
+      },
       {
         "title": "Create from selection",
         "command": "SQLTools.bookmarkSelection",
@@ -80,16 +90,6 @@
         "category": "SQLTools History"
       },
       {
-        "title": "Connect",
-        "command": "SQLTools.selectConnection",
-        "category": "SQLTools"
-      },
-      {
-        "title": "Disconnect",
-        "command": "SQLTools.closeConnection",
-        "category": "SQLTools"
-      },
-      {
         "title": "Describe table",
         "command": "SQLTools.describeTable",
         "category": "SQLTools Connection"
@@ -102,6 +102,11 @@
       {
         "title": "Run selected query",
         "command": "SQLTools.executeQuery",
+        "category": "SQLTools Connection"
+      },
+      {
+        "title": "Run query",
+        "command": "SQLTools.runFromInput",
         "category": "SQLTools Connection"
       },
       {
@@ -137,7 +142,7 @@
       {
         "title": "Refresh Sidebar",
         "command": "SQLTools.refreshSidebar",
-        "category": "SQLToolds Sidebar",
+        "category": "SQLTools Sidebar",
         "icon": {
           "light": "dist/resources/icon/refresh-light.svg",
           "dark": "dist/resources/icon/refresh-dark.svg"

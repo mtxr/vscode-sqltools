@@ -35,6 +35,7 @@ export default class Connection {
   }
 
   public close() {
+    if (this.needsPassword()) this.credentials.password = null;
     this.connected = false;
     return this.connection.close();
   }

@@ -72,11 +72,12 @@ gulp.task('compile:copy', () => {
 })
 
 gulp.task('compile:ts', () => {
-  const tsResult = tsProject.src()
-    .pipe(sourcemaps.init())
-    .pipe(tsProject())
-
-  return tsResult.js
+  return gulp.src([
+    './src/*.ts',
+    './src/**/*.ts',
+  ])
+  .pipe(sourcemaps.init())
+    .pipe(tsProject()).js
     .pipe(sourcemaps.write('', { includeContent: false, sourceRoot: '' }))
     .pipe(gulp.dest(dest))
 })

@@ -6,6 +6,7 @@ import {
   WorkspaceConfiguration,
 } from 'vscode';
 import { Logger } from './api';
+import Utils from './api/utils';
 import Constants from './constants';
 
 // tslint:disable-next-line:no-var-requires
@@ -90,6 +91,10 @@ export default class Telemetry {
       },
       Telemetry.errorHandler('exception'),
     );
+  }
+
+  public static registerTime(timeKey: string, timer: Utils.Timer) {
+    Telemetry.analytics.timing(timeKey, timer.elapsed().toString(), Telemetry.errorHandler('timer'));
   }
 
   private static isEnabled: Boolean = true;

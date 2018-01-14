@@ -15,7 +15,8 @@ export default class ConnectionManager {
     return ConnectionManager.connections.map((c) => c.serialize());
   }
 
-  public static getConnection(connection: string|number, serialized: boolean = false) {
+  public static getConnection(connection: string|number, logger: Logger, serialized: boolean = false): Connection {
+    ConnectionManager.getConnections(logger);
     if (typeof connection === 'number') {
       return ConnectionManager.connections[connection];
     }
