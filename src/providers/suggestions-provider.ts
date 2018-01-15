@@ -8,11 +8,11 @@ import {
   TextDocument,
   workspace as workspace,
 } from 'vscode';
-import { Logger } from './api';
-import { ConnectionCredentials } from './api/interface/connection-credentials';
-import DatabaseInterface from './api/interface/database-interface';
-import Connection from './connection';
-import Telemetry from './telemetry';
+import { Logger } from './../api';
+import Connection from './../api/connection';
+import { ConnectionCredentials } from './../api/interface/connection-credentials';
+import DatabaseInterface from './../api/interface/database-interface';
+import Telemetry from './../api/telemetry';
 
 class TableCompletionItem extends CompletionItem {
   constructor(table: DatabaseInterface.Table) {

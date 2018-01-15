@@ -4,7 +4,7 @@ import fs = require('fs');
 import path = require('path');
 import BaseStorage from './base-storage';
 import { NotFoundException } from './exception';
-import { LoggerInterface } from './interface';
+import LoggerInterface from './interface/storage';
 import Utils from './utils';
 
 export default class BookmarksStorage extends BaseStorage {

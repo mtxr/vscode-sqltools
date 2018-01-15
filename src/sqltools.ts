@@ -43,22 +43,25 @@ import {
 } from 'vscode-languageclient';
 import { BookmarksStorage, History, Logger, Utils } from './api';
 import ConfigManager from './api/config-manager';
+import Connection from './api/connection';
+import ConnectionManager from './api/connection-manager';
 import ErrorHandler from './api/error-handler';
 import { DismissedException } from './api/exception';
 import { ConnectionCredentials } from './api/interface/connection-credentials';
 import DatabaseInterface from './api/interface/database-interface';
-import Connection from './connection';
-import ConnectionManager from './connection-manager';
+import Settings from './api/interface/settings';
+import Telemetry from './api/telemetry';
 import Constants from './constants';
-import { SelectionFormatter } from './formatting-provider';
-import HttpContentProvider from './http-provider';
-import { Settings } from './interface/settings';
-import { createNewConnection, SetQueryResults } from './languageserver/requests/connection-requests';
+import {
+  CreateNewConnectionRequest,
+  GetConnectionListRequest,
+  SetQueryResultsRequest,
+} from './contracts/connection-requests';
 import LogWriter from './log-writer';
-import { SidebarTableColumnProvider } from './sidebar-provider';
-import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
-import { SuggestionsProvider } from './suggestions-provider';
-import Telemetry from './telemetry';
+import HttpContentProvider from './providers/http-provider';
+import { SidebarTableColumnProvider } from './providers/sidebar-provider';
+import { SidebarColumn, SidebarTable } from './providers/sidebar-provider/sidebar-tree-items';
+import { SuggestionsProvider } from './providers/suggestions-provider';
 
 const {
   registerCommand,
@@ -75,6 +78,7 @@ namespace SQLTools {
   let bookmarks: BookmarksStorage;
   let history: History;
   let outputLogs: LogWriter;
+  // let connection: { name: string, isConnected: boolean } = { isConnected: false };
   let activeConnection: Connection;
   let extDatabaseStatus: StatusBarItem;
   let sqlconnectionTreeProvider: SidebarTableColumnProvider;
@@ -303,6 +307,7 @@ namespace SQLTools {
   }
 
   export function setupSQLTools() {
+    // test language server
     return openHtml(setupUri, 'SQLTools Setup Connection');
   }
 
@@ -340,7 +345,7 @@ namespace SQLTools {
   }
 
   async function printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
-    await languageClient.sendRequest(SetQueryResults.method, { data: results });
+    await languageClient.sendRequest(SetQueryResultsRequest.method, { data: results });
     openHtml(resultsUri, outputName);
   }
 
@@ -370,6 +375,7 @@ namespace SQLTools {
     .setLevel(Logger.levels[ConfigManager.get('logLevel', 'DEBUG') as string])
     .setLogging(ConfigManager.get('logging', false) as boolean);
     ErrorHandler.setLogger(logger);
+    ErrorHandler.setOutputFn(Window.showErrorMessage);
     Telemetry.register(logger);
   }
 
@@ -482,7 +488,7 @@ namespace SQLTools {
     return connection;
   }
   async function connect(): Promise<Connection> {
-    if (activeConnection && activeConnection.isConnected()) {
+    if (activeConnection && activeConnection.isConnected) {
       return activeConnection;
     }
     const connName: string = await showConnectionMenu();
@@ -518,7 +524,7 @@ namespace SQLTools {
     );
     ctx.subscriptions.push(languageClient.start());
     await languageClient.onReady();
-    languageClient.onRequest(createNewConnection.method, (newConnPostData) => {
+    languageClient.onRequest(CreateNewConnectionRequest.method, (newConnPostData) => {
       const connList = ConfigManager.get('connections', []) as any[];
       connList.push(newConnPostData.connInfo);
       return setSettings('connections', connList);

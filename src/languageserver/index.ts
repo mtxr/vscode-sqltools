@@ -8,11 +8,16 @@ import {
 } from 'vscode-languageserver';
 import { Utils } from '../api';
 import ConfigManager = require('../api/config-manager');
-import { Settings } from '../interface/settings';
-import Formatter = require('./formatter');
+import Settings from '../api/interface/settings';
+import Formatter = require('./requests/format');
 import DatabaseInterface from '../api/interface/database-interface';
+import {
+  CreateNewConnectionRequest,
+  GetConnectionListRequest,
+  SetQueryResultsRequest,
+} from '../contracts/connection-requests';
+import Connection from './../api/connection';
 import httpServer from './http-server';
-import { createNewConnection, SetQueryResults } from './requests/connection-requests';
 import Logger from './utils/logger';
 
 let formatterRegistration: Thenable<Disposable> | null = null;
@@ -23,6 +28,7 @@ const docManager: TextDocuments = new TextDocuments();
 const localSetup = Utils.localSetupInfo();
 const httpPort: number = localSetup.httpServerPort || 5123;
 const httpServerInstance: any = httpServer(httpPort, connection);
+const sgdbConnections: Connection[] = [];
 
 docManager.listen(connection);
 connection.onInitialize((params): InitializeResult => {
@@ -62,9 +68,13 @@ connection.onDidChangeConfiguration(async (change) => {
   }
 });
 
-connection.onRequest(SetQueryResults.method, (req: { data: DatabaseInterface.QueryResults[] }): boolean => {
+connection.onRequest(SetQueryResultsRequest.method, (req: { data: DatabaseInterface.QueryResults[] }): boolean => {
   httpServerInstance.setData('GET /api/query-results', req.data);
   return true;
+});
+
+connection.onRequest(GetConnectionListRequest.method, () => {
+  return sgdbConnections;
 });
 
 connection.listen();

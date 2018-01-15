@@ -16,19 +16,25 @@ const { series, parallel } = gulp
 const dest = 'dist'
 const dependencies = [ 'react', 'react-dom', 'prop-types' ]
 
+const srcViewPath = 'src/languageserver/http-server/views'
 const cfg = {
   ts: {
-    src: ['src/*.ts', 'src/**/*.ts']
+    src: ['src/*.ts', 'src/**/*.ts', '!src/test/*', '!src/test/**/*'],
+    dest: () => gulp.dest(dest)
   },
   sass: {
-    src: ['src/views/sass/*.scss', 'src/views/sass/**/*.scss']
+    src: [`${srcViewPath}/sass/*.scss`, `${srcViewPath}/sass/**/*.scss`],
+    dest: () => gulp.dest(`${srcViewPath.replace(/^src/, 'dist')}/css`)
   },
   react: {
-    src: ['src/views/*.jsx','src/views/**/*.jsx']
+    src: [`${srcViewPath}/*.jsx`,`${srcViewPath}/**/*.jsx`],
+    entry: (file) => `${srcViewPath}/js/${file}.jsx`,
+    dest: () => gulp.dest(`${srcViewPath.replace(/^src/, 'dist')}/js`)
   },
   copy: {
     static: ['package.json'],
-    src: ['src/resources/**/*','src/views/*.*','src/views/css/*.*']
+    src: ['src/resources/**/*',`${srcViewPath}/*.*`,`${srcViewPath}/css/*.*`, '!src/test'],
+    dest: () => gulp.dest(dest)
   }
 }
 
@@ -55,7 +61,7 @@ const _deleteFolderRecursive = function (path, cb = () => { }) {
 
 function _buildReactFile (file) {
   const bundler = browserify(Object.assign({}, browserifyInc.args, {
-    entries: `src/views/js/${file}.jsx`,
+    entries: cfg.react.entry(file),
     transform: [
       babelify.configure({ presets: ['es2015', 'react'] }),
       [uglifyify]
@@ -71,7 +77,7 @@ function _buildReactFile (file) {
     .on('error', errorHandler)
     .pipe(source(`${file}.js`))
     .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
-    .pipe(gulp.dest(`${dest}/views/js`))
+    .pipe(cfg.react.dest())
 }
 
 function clean(done) {
@@ -81,15 +87,15 @@ function clean(done) {
 function compileSass() {
   return gulp.src(cfg.sass.src)
     .pipe(sass().on('error', sass.logError))
-    .pipe(gulp.dest(`${dest}/views/css`))
+    .pipe(cfg.sass.dest())
 }
 
-function compileJs() {
+function compileTs() {
   return gulp.src(cfg.ts.src)
     .pipe(sourcemaps.init())
     .pipe(tsProject()).js
     .pipe(sourcemaps.write('', { includeContent: false, sourceRoot: '' }))
-    .pipe(gulp.dest(dest))
+    .pipe(cfg.ts.dest())
 }
 
 function compileVendor() {
@@ -104,22 +110,22 @@ function compileVendor() {
     .on('error', errorHandler)
     .pipe(source('vendors.js'))
     .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
-    .pipe(gulp.dest(`${dest}/views/js`))
+    .pipe(cfg.react.dest())
 }
 
 function copy() {
     let count = 0
     gulp.src(cfg.copy.static)
-      .pipe(gulp.dest(dest))
+      .pipe(cfg.copy.dest())
 
     return gulp.src(cfg.copy.src, { base: 'src' })
-      .pipe(gulp.dest(dest))
+      .pipe(cfg.copy.dest())
 }
 
 // tasks
 gulp.task('clean', clean)
 gulp.task('compile:sass', compileSass)
-gulp.task('compile:ts', compileJs)
+gulp.task('compile:ts', compileTs)
 gulp.task('compile:vendor', compileVendor)
 gulp.task('compile:react', compileReact = () => _buildReactFile('app'))
 gulp.task('compile:copy', copy)

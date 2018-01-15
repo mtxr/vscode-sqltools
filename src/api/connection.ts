@@ -1,8 +1,8 @@
-import { History, Logger } from './api';
-import Dialects from './api/dialect';
-import { ConnectionCredentials } from './api/interface/connection-credentials';
-import { ConnectionDialect } from './api/interface/connection-dialect';
-import DatabaseInterface from './api/interface/database-interface';
+import { History, Logger } from './';
+import Dialects from './dialect';
+import { ConnectionCredentials } from './interface/connection-credentials';
+import { ConnectionDialect } from './interface/connection-dialect';
+import DatabaseInterface from './interface/database-interface';
 import Telemetry from './telemetry';
 
 export default class Connection {

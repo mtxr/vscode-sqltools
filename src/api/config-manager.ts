@@ -1,4 +1,4 @@
-import { Settings } from '../interface/settings';
+import Settings from './interface/settings';
 
 let settings: Settings = {};
 

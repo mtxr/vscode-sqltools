@@ -7,9 +7,9 @@ import {
   TreeDataProvider,
   TreeItemCollapsibleState,
 } from 'vscode';
-import { Logger } from './api';
-import Connection from './connection';
-import { SidebarColumn, SidebarDatabase, SidebarTable } from './sidebar-tree-items';
+import { Logger } from './../api';
+import Connection from './../api/connection';
+import { SidebarColumn, SidebarDatabase, SidebarTable } from './sidebar-provider/sidebar-tree-items';
 
 export type SidebarDatabaseItem = SidebarDatabase | SidebarTable | SidebarColumn;
 

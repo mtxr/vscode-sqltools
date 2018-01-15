@@ -2,11 +2,11 @@ import fs = require('fs');
 import http = require('http');
 import path = require('path');
 import { IConnection } from 'vscode-languageserver';
-import { createNewConnection } from '../requests/connection-requests';
+import { CreateNewConnectionRequest } from '../../contracts/connection-requests';
 import Logger from '../utils/logger';
 
 let languageServerInstance: IConnection = null;
-const viewsPath = path.join(__dirname, '..', '..', 'views');
+const viewsPath = path.join(__dirname, 'views');
 
 function bodyParse(req, res, next) {
   req.body = '';
@@ -27,7 +27,7 @@ const apiData = {
   'GET /api/query-results': [],
   'GET /api/statistics': {},
   'POST /api/create-connection': (req: any, res: any) => {
-    languageServerInstance.sendRequest(createNewConnection.method, req.body)
+    languageServerInstance.sendRequest(CreateNewConnectionRequest.method, req.body)
       .then((result) => {
         return res.sendJson({ data: req.body, success: true });
       }, (err) => {

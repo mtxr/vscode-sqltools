@@ -85,7 +85,7 @@ export interface ConnectionSettings {
   /**
    */
 }
-export interface Settings {
+export default interface Settings {
   /**
    * Name of the connection to auto connect on start
    * @type {string}

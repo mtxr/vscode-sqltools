@@ -3,8 +3,8 @@
 import fs = require('fs');
 import formatter = require('sql-formatter');
 import Constants from '../constants';
-import { SidebarColumn } from '../sidebar-tree-items';
 import { EnvironmentException } from './exception';
+import DatabaseInterface from './interface/database-interface';
 
 let localSetupData: any;
 
@@ -37,7 +37,11 @@ namespace Utils {
     }, source);
   }
 
-  export function generateInsertQuery(table: string, cols: SidebarColumn[], indentSize?: number): string {
+  export function generateInsertQuery(
+    table: string,
+    cols: Array<{ value: string, column: DatabaseInterface.TableColumn }>,
+    indentSize?: number,
+  ): string {
     let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.value).join(', ')}) VALUES (`;
     cols.forEach((col, index) => {
       insertQuery = insertQuery.concat(`'\${${index + 1}:${col.column.type}}', `);

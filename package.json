@@ -214,11 +214,6 @@
           "default": true,
           "description": "Help SQLTools development."
         },
-        "sqltools.telemetryUUID": {
-          "type": "string",
-          "default": null,
-          "description": "Extension ID"
-        },
         "sqltools.showStatusbar": {
           "type": "boolean",
           "default": true,

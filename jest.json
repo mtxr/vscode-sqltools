@@ -21,7 +21,10 @@
     "^.+\\.ts$": "<rootDir>/node_modules/ts-jest/preprocessor.js"
   },
   "testEnvironment": "node",
+  "roots": [
+    "<rootDir>/src/test"
+  ],
   "testMatch": [
-    "<rootDir>/src/test/**/*.test.ts"
+    "**/*.test.ts"
   ]
 }

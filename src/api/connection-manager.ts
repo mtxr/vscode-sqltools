@@ -1,7 +1,7 @@
-import { Logger } from './api';
-import ConfigManager = require('./api/config-manager');
-import { ConnectionCredentials } from './api/interface/connection-credentials';
+import Logger from './logger';
+import ConfigManager = require('./config-manager');
 import Connection from './connection';
+import { ConnectionCredentials } from './interface/connection-credentials';
 export default class ConnectionManager {
   public static getConnections(logger: Logger): Connection[];
   public static getConnections(logger: Logger, serialized: boolean = false): any[] {
