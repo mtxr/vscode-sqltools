@@ -1,0 +1,36 @@
+.syntax {
+  background: #111;
+  border-radius: $radius;
+  padding: 10px;
+  &, * {
+    line-height: 1.2;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+  &.json {
+    .key {
+      color: #00bcd4;
+    }
+    .number {
+      color: #cddc39;
+    }
+    .string {
+      color: #ffc107;
+    }
+    .bool, .null {
+      color: #2196f3;
+    }
+  }
+}
+
+.btn.copy-code {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-top-right-radius: $radius;
+  border-bottom-left-radius: $radius;
+  background: $darkThemeWhite4;
+  font-size: 0.6em;
+  padding: 2px 4px;
+  cursor: copy;
+}

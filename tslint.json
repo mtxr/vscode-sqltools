@@ -5,6 +5,7 @@
   ],
   "jsRules": {},
   "rules": {
+    "no-namespace": false,
     "align": [ true, "parameters", "statements" ],
     "arrow-parens": true,
     "arrow-return-shorthand": [ true ],
@@ -12,10 +13,10 @@
     "comment-format": [ true, "check-space", { "ignore-words": [ "TODO", "HACK" ] } ],
     "curly": false,
     "indent": [ true, "spaces" ],
-    "only-arrow-functions": [ "allow-declarations" ],
+    "only-arrow-functions": false,
     "interface-name": [ false ],
     "linebreak-style": [ true, "LF" ],
-    "quotemark": [ true, "single", "jsx-double" ],
+    "quotemark": [ true, "single", "js-double" ],
     "no-reference": false,
     "max-classes-per-file": false
   },

@@ -6,6 +6,7 @@ import {
   WorkspaceConfiguration,
 } from 'vscode';
 import { Logger } from './api';
+import Utils from './api/utils';
 import Constants from './constants';
 
 // tslint:disable-next-line:no-var-requires
@@ -47,8 +48,8 @@ export default class Telemetry {
     Telemetry.registerMessage('info', message, value);
   }
 
-  public static registerErrorMessage(message, error?: Error) {
-    Telemetry.registerMessage('error', message, 'Dismissed');
+  public static registerErrorMessage(message, error?: Error, value: string = 'Dismissed') {
+    Telemetry.registerMessage('error', message, value);
     if (error) {
       Telemetry.registerException(error);
     }
@@ -77,13 +78,23 @@ export default class Telemetry {
     Telemetry.analytics.event(category, event, label || event, Telemetry.errorHandler('event'));
   }
 
-  public static registerException(error: Error | string) {
+  public static registerException(error: Error) {
     if (!Telemetry.isEnabled) return;
+    let exceptionDescription = error.toString();
+    if (error.message) {
+      exceptionDescription = `${error.name}:${error.message}`;
+    }
     Telemetry.analytics.exception(
-      ((error as Error).message || error) as string,
-      false,
+      {
+        exceptionDescription,
+        isExceptionFatal: false,
+      },
       Telemetry.errorHandler('exception'),
     );
+  }
+
+  public static registerTime(timeKey: string, timer: Utils.Timer) {
+    Telemetry.analytics.timing(timeKey, timer.elapsed().toString(), Telemetry.errorHandler('timer'));
   }
 
   private static isEnabled: Boolean = true;
@@ -96,6 +107,8 @@ export default class Telemetry {
   private static start() {
     Telemetry.analytics = Analytics(Telemetry.uaCode, Telemetry.extensionUUID, { strictCidFormat: false });
     Telemetry.analytics.set('uid', Telemetry.extensionUUID);
+    Telemetry.analytics.set('cid', Telemetry.extensionUUID);
+    Telemetry.analytics.set('applicationVersion', Constants.version);
   }
 
   private static errorHandler(type: string) {

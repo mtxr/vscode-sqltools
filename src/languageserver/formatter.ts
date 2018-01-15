@@ -5,7 +5,7 @@ import {
   TextEdit,
 } from 'vscode-languageserver';
 import { SelectionFormatter } from './../formatting-provider';
-import Logger from './logger';
+import Logger from './utils/logger';
 
 export function handler(
   docManager: TextDocuments,

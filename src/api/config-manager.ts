@@ -18,3 +18,8 @@ export function get(configKey: string, defaultValue: any = null): any[] | string
 export function setSettings(newSettings: Settings) {
   settings = newSettings;
 }
+
+export default {
+  get,
+  setSettings,
+};
