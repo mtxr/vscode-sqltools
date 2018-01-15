@@ -12,6 +12,7 @@ export enum DatabaseDialect {
 }
 
 export type CompletionLanguages = string[];
+export type FormatLanguages = string[];
 
 export interface FormatOptions {
   /**
@@ -157,12 +158,20 @@ export interface Settings {
    clearOutput?: boolean;
   /**
    * Languages with SQL completion activated.
-   * @type {array}
-   * @default ["sql"]
+   * @type {CompletionLanguages}
+   * @default ["sql", "plaintext"]
    * @memberof Settings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
   completionLanguages?: CompletionLanguages;
+  /**
+   * Languages with SQL formatting activated.
+   * @type {FormatLanguages}
+   * @default ["sql"]
+   * @memberof Settings
+   * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
+   */
+  formatLanguages?: FormatLanguages;
   /**
    * Format document/selection options
    * @type {FormatOptions}

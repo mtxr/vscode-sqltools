@@ -499,8 +499,11 @@ namespace SQLTools {
       run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
     };
 
+    const selector = (ConfigManager.get('completionLanguages', ['sql']) as string[])
+      .concat(ConfigManager.get('formatLanguages', ['sql']) as string[]);
+
     const clientOptions: LanguageClientOptions = {
-      documentSelector: ConfigManager.get('completionLanguages', ['sql']) as string[],
+      documentSelector: selector,
       synchronize: {
         configurationSection: 'sqltools',
         fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),

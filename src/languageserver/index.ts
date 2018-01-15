@@ -16,6 +16,7 @@ import { createNewConnection, SetQueryResults } from './requests/connection-requ
 import Logger from './utils/logger';
 
 let formatterRegistration: Thenable<Disposable> | null = null;
+let formatterLanguages: string[] = [];
 let workspaceRoot: string;
 const connection: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
 const docManager: TextDocuments = new TextDocuments();
@@ -31,8 +32,8 @@ connection.onInitialize((params): InitializeResult => {
       // completionProvider: {
       //   resolveProvider: true,
       // },
-      documentFormattingProvider: true,
-      documentRangeFormattingProvider: true,
+      documentFormattingProvider: false,
+      documentRangeFormattingProvider: false,
       textDocumentSync: docManager.syncKind,
     },
   };
@@ -41,12 +42,23 @@ connection.onInitialize((params): InitializeResult => {
 connection.onDocumentFormatting((params) => Formatter.handler(docManager, params));
 connection.onDocumentRangeFormatting((params) => Formatter.handler(docManager, params));
 
-connection.onDidChangeConfiguration((change) => {
+function sortLangs(a, b) {
+  return a.toString().localeCompare(b.toString());
+}
+
+connection.onDidChangeConfiguration(async (change) => {
   ConfigManager.setSettings(change.settings.sqltools);
-  if (!formatterRegistration) {
+  const oldLang = formatterLanguages.sort(sortLangs);
+  const newLang = (ConfigManager.get('formatLanguages', ['sql']) as string[]).sort(sortLangs);
+  const register = newLang.length > 0 && (!formatterRegistration || oldLang.join() !== newLang.join());
+  if (register) {
+    formatterLanguages = newLang;
+    if (formatterRegistration) (await formatterRegistration).dispose();
     formatterRegistration = connection.client.register(DocumentRangeFormattingRequest.type, {
-      documentSelector: ConfigManager.get('completionLanguages', [ 'sql' ]),
-    });
+      documentSelector: formatterLanguages,
+    }).then((a) => a, console.error);
+  } else if (formatterRegistration) {
+    (await formatterRegistration).dispose();
   }
 });
 

@@ -257,10 +257,13 @@
         },
         "sqltools.completionLanguages": {
           "type": "array",
-          "default": [
-            "sql"
-          ],
+          "default": [ "sql", "plaintext" ],
           "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+        },
+        "sqltools.formatLanguages": {
+          "type": "array",
+          "default": [ "sql" ],
+          "description": "Languages with SQL formatting activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
         },
         "sqltools.format": {
           "type": "object",
