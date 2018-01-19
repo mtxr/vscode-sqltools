@@ -5,9 +5,10 @@ import {
   Uri,
 } from 'vscode';
 
-export default class HttpContentProvider implements TextDocumentContentProvider {
+export class HTMLPreview implements TextDocumentContentProvider {
   public html: string = '';
-  public constructor(public port: number, public uri: Uri = Uri.parse('sqltools://')) {
+  private port: number;
+  public constructor(public uri: Uri = Uri.parse('sqltools://')) {
   }
   public provideTextDocumentContent(uri: Uri): string {
     return `<!DOCTYPE html>
@@ -53,5 +54,9 @@ export default class HttpContentProvider implements TextDocumentContentProvider 
 </body>
 </html>
 `;
+  }
+
+  public setPort(port: number) {
+    this.port = port;
   }
 }

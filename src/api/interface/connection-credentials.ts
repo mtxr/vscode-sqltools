@@ -1,4 +1,4 @@
-export interface ConnectionCredentials {
+export default interface ConnectionCredentials {
   name: string;
   server: string;
   port: number;

@@ -1,6 +1,7 @@
-import DatabaseInterface from './../interface/database-interface';
-import { ConnectionCredentials } from './connection-credentials';
-export interface ConnectionDialect {
+import ConnectionCredentials from './connection-credentials';
+import DatabaseInterface from './database-interface';
+
+export default interface ConnectionDialect {
   connection: any;
   credentials: ConnectionCredentials;
   open(): Promise<any>;

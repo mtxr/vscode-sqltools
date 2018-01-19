@@ -1,10 +1,10 @@
 import Logger from './logger';
 import ConfigManager = require('./config-manager');
-import Connection from './connection';
-import { ConnectionCredentials } from './interface/connection-credentials';
+import Connection, { SerializedConnection } from './connection';
+import { ConnectionCredentials, LoggerInterface } from './interface';
 export default class ConnectionManager {
-  public static getConnections(logger: Logger): Connection[];
-  public static getConnections(logger: Logger, serialized: boolean = false): any[] {
+  public static getConnections(logger: LoggerInterface): Connection[];
+  public static getConnections(logger: LoggerInterface, serialized: boolean = false): any[] {
     const connectionsConfig = ConfigManager.get('connections', []) as any[];
     ConnectionManager.connections = connectionsConfig.map((credentials): Connection => {
       return new Connection(credentials, logger);
@@ -15,7 +15,11 @@ export default class ConnectionManager {
     return ConnectionManager.connections.map((c) => c.serialize());
   }
 
-  public static getConnection(connection: string|number, logger: Logger, serialized: boolean = false): Connection {
+  public static getConnection(
+    connection: string|number,
+    logger: LoggerInterface,
+    serialized: boolean = false,
+  ): Connection | SerializedConnection {
     ConnectionManager.getConnections(logger);
     if (typeof connection === 'number') {
       return ConnectionManager.connections[connection];

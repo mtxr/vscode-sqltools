@@ -1,9 +1,11 @@
 import Utils from './../utils';
 import mssql = require('mssql');
-import { ConnectionCredentials } from './../interface/connection-credentials';
-import { ConnectionDialect } from './../interface/connection-dialect';
-import DatabaseInterface from './../interface/database-interface';
-import { DialectQueries } from './../interface/dialect-queries';
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  DialectQueries,
+} from './../interface';
 
 export default class MSSQL implements ConnectionDialect {
   public connection: Promise<any>;

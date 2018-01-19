@@ -63,7 +63,7 @@ namespace Utils {
     Object.keys(data).forEach((k) => {
       actualData[k] = data[k];
     });
-    fs.writeFileSync(file, JSON.stringify(actualData, null, 2), 'utf-8');
+    fs.writeFileSync(file, JSON.stringify(actualData, null, 2));
   }
 
   export async function getlastRunInfo() {

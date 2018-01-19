@@ -1,4 +1,4 @@
-export interface DialectQueries {
+export default interface DialectQueries {
   fetchTables: string;
   describeTable: string;
   fetchColumns: string;

@@ -7,21 +7,20 @@ import {
   TreeDataProvider,
   TreeItemCollapsibleState,
 } from 'vscode';
+import LoggerInterface from '../api/interface/logger';
 import { Logger } from './../api';
 import Connection from './../api/connection';
 import { SidebarColumn, SidebarDatabase, SidebarTable } from './sidebar-provider/sidebar-tree-items';
 
 export type SidebarDatabaseItem = SidebarDatabase | SidebarTable | SidebarColumn;
 
-export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatabaseItem> {
+export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
   private tree: any = {};
-
-  constructor(private connection: Connection, private logger: Logger) {
-    this.setConnection(connection);
-  }
+  private connection: Connection;
+  private logger: LoggerInterface = console;
 
   public fireUpdate(): void {
     this.onDidChange.fire();
@@ -46,6 +45,9 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatab
     this.refresh();
   }
 
+  public setLogger(logger) {
+    this.logger = logger;
+  }
   public refresh() {
     this.tree = {};
     if (!this.connection) {
@@ -77,3 +79,5 @@ export class SidebarTableColumnProvider implements TreeDataProvider<SidebarDatab
     return Object.keys(obj).map((k) => obj[k]);
   }
 }
+
+export { SidebarColumn, SidebarDatabase, SidebarTable };

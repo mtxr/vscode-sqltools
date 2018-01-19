@@ -14,7 +14,7 @@ export default class Logger implements LoggerInterface {
   public static levels = Levels;
   public logging: boolean = false;
   public level: Levels = Levels.DEBUG;
-  private writer: any;
+  public writer: any;
 
   public constructor(writer?: any) {
     if (!writer) {
@@ -26,19 +26,22 @@ export default class Logger implements LoggerInterface {
   public setLogging(param: boolean): this {
     this.logging = param;
     const level: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
-    this.debug(this.logging ? `Logger is active for >= ${level}` : 'Logger deactivated');
+    this.log(this.logging ? `Logger is active for >= ${level}` : 'Logger deactivated');
     return this;
   }
   public setLevel(level: Levels): this {
     this.level = level;
     const levelString: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
-    this.debug(`Log level set to '${levelString}'`);
+    this.log(`Log level set to '${levelString}'`);
     return this;
   }
   public isLogging(): boolean {
     return this.logging;
   }
   public debug(message: string, ...data: any[]): this {
+    return this.emitMessage('debug', message, ...data);
+  }
+  public log(message: string, ...data: any[]): this {
     return this.emitMessage('debug', message, ...data);
   }
   public error(message: string, ...data: any[]): this {

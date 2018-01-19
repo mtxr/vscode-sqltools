@@ -1,8 +1,10 @@
 import mysql = require('mysql2');
-import { ConnectionCredentials } from './../interface/connection-credentials';
-import { ConnectionDialect } from './../interface/connection-dialect';
-import DatabaseInterface from './../interface/database-interface';
-import { DialectQueries } from './../interface/dialect-queries';
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  DialectQueries,
+} from './../interface';
 import Utils from './../utils';
 
 export default class MySQL implements ConnectionDialect {

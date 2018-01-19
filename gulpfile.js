@@ -4,7 +4,7 @@ const ts = require('gulp-typescript')
 const sourcemaps = require('gulp-sourcemaps')
 const tsProject = ts.createProject('tsconfig.json')
 const uglifyify = require('uglifyify')
-const uglifyjs = require('gulp-uglify')
+const uglify = require('gulp-uglifyes')
 const babelify = require('babelify')
 const streamify = require('gulp-streamify')
 const sass = require('gulp-sass')
@@ -13,14 +13,14 @@ const source = require('vinyl-source-stream')
 const browserifyInc = require('browserify-incremental')
 const { series, parallel } = gulp
 
-const dest = 'dist'
+const outputDir = 'dist'
 const dependencies = [ 'react', 'react-dom', 'prop-types' ]
 
 const srcViewPath = 'src/languageserver/http-server/views'
 const cfg = {
   ts: {
-    src: ['src/*.ts', 'src/**/*.ts', '!src/test/*', '!src/test/**/*'],
-    dest: () => gulp.dest(dest)
+    src: ['src/*.ts', 'src/**/*.ts'],
+    dest: () => gulp.dest(outputDir)
   },
   sass: {
     src: [`${srcViewPath}/sass/*.scss`, `${srcViewPath}/sass/**/*.scss`],
@@ -34,7 +34,11 @@ const cfg = {
   copy: {
     static: ['package.json'],
     src: ['src/resources/**/*',`${srcViewPath}/*.*`,`${srcViewPath}/css/*.*`, '!src/test'],
-    dest: () => gulp.dest(dest)
+    dest: () => gulp.dest(outputDir)
+  },
+  minify: {
+    src: [`${outputDir}/*.js`, `${outputDir}/**/*.js`, `!${outputDir}/languageserver/http-server/views/*`, `!${outputDir}/languageserver/http-server/views/**/*`],
+    dest: () => gulp.dest(outputDir)
   }
 }
 
@@ -45,8 +49,8 @@ function errorHandler (err) {
 
 const _deleteFolderRecursive = function (path, cb = () => { }) {
   if (fs.existsSync(path)) {
-    fs.readdirSync(path).forEach(function (file, index) {
-      var curPath = path + '/' + file
+    fs.readdirSync(path).forEach((file) => {
+      const curPath = path + '/' + file
       if (fs.lstatSync(curPath).isDirectory()) { // recurse
         _deleteFolderRecursive(curPath)
       } else { // delete file
@@ -76,7 +80,7 @@ function _buildReactFile (file) {
   return bundler.bundle()
     .on('error', errorHandler)
     .pipe(source(`${file}.js`))
-    .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
+    .pipe(streamify(uglify({ mangle: true, compress: true })))
     .pipe(cfg.react.dest())
 }
 
@@ -92,8 +96,9 @@ function compileSass() {
 
 function compileTs() {
   return gulp.src(cfg.ts.src)
-    .pipe(sourcemaps.init())
-    .pipe(tsProject()).js
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(tsProject())
+    // .pipe(uglify({ mangle: false, ecma: 6, compress: true }))
     .pipe(sourcemaps.write('', { includeContent: false, sourceRoot: '' }))
     .pipe(cfg.ts.dest())
 }
@@ -109,12 +114,11 @@ function compileVendor() {
     .bundle()
     .on('error', errorHandler)
     .pipe(source('vendors.js'))
-    .pipe(streamify(uglifyjs({ mangle: true, compress: true })))
+    .pipe(streamify(uglify({ mangle: true, compress: true })))
     .pipe(cfg.react.dest())
 }
 
 function copy() {
-    let count = 0
     gulp.src(cfg.copy.static)
       .pipe(cfg.copy.dest())
 
@@ -122,10 +126,21 @@ function copy() {
       .pipe(cfg.copy.dest())
 }
 
+function minify() {
+  const { src, dest } = cfg.minify
+  return gulp.src(src)
+    .pipe(sourcemaps.init({ loadMaps: true }))
+    .pipe(uglify({ mangle: false, ecma: 6, compress: true }))
+    .pipe(sourcemaps.write('', { includeContent: false, sourceRoot: '' }))
+    .pipe(dest())
+}
+
 // tasks
+/* eslint-disable no-undef */
 gulp.task('clean', clean)
 gulp.task('compile:sass', compileSass)
 gulp.task('compile:ts', compileTs)
+gulp.task('compile:minify', minify)
 gulp.task('compile:vendor', compileVendor)
 gulp.task('compile:react', compileReact = () => _buildReactFile('app'))
 gulp.task('compile:copy', copy)

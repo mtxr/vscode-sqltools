@@ -51,14 +51,16 @@ describe('Logger', () => {
     o.appendLine.mockClear(); // clear for setLogging message
     logger.debug('teste');
     expect(o.appendLine.mock.calls).toHaveLength(0);
-    logger.error('teste');
+    logger.log('teste');
     expect(o.appendLine.mock.calls).toHaveLength(1);
-    logger.info('teste');
+    logger.error('teste');
     expect(o.appendLine.mock.calls).toHaveLength(2);
+    logger.info('teste');
+    expect(o.appendLine.mock.calls).toHaveLength(3);
     logger.warn('teste');
     logger.warn('teste');
     logger.warn('teste');
-    expect(o.appendLine.mock.calls).toHaveLength(5);
+    expect(o.appendLine.mock.calls).toHaveLength(6);
     o.appendLine.mockReset();
   });
 });

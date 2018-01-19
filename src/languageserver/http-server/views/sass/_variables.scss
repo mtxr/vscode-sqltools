@@ -85,6 +85,10 @@ input, select {
 
 .vscode-dark {
   color: $darkThemeWhite4;
+  ::-webkit-input-placeholder {
+    color: $darkThemeWhite4;
+    text-transform: capitalize;
+  }
 }
 
 .pointer {

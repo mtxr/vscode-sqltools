@@ -1,21 +1,32 @@
-import { History, Logger } from './';
+import { History, Logger, Telemetry } from './';
 import Dialects from './dialect';
-import { ConnectionCredentials } from './interface/connection-credentials';
-import { ConnectionDialect } from './interface/connection-dialect';
-import DatabaseInterface from './interface/database-interface';
-import Telemetry from './telemetry';
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  LoggerInterface,
+} from './interface';
+
+export interface SerializedConnection {
+  isConnected: boolean;
+  needsPassword: boolean;
+  name: string;
+  port: number | string;
+  server: string;
+  username: string;
+}
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
-  private connection: ConnectionDialect;
-  constructor(private credentials: ConnectionCredentials, private logger: Logger) {
-    this.connection = new Dialects[this.credentials.dialect](credentials);
+  private conn: ConnectionDialect;
+  constructor(credentials: ConnectionCredentials, private logger: LoggerInterface) {
+    this.conn = new Dialects[credentials.dialect](credentials);
   }
 
   public needsPassword() {
-    return this.connection.credentials.askForPassword;
+    return this.conn.credentials.askForPassword;
   }
 
   public connect() {
@@ -27,7 +38,7 @@ export default class Connection {
   }
 
   public setPassword(password: string) {
-    this.connection.credentials.password = password;
+    this.conn.credentials.password = password;
   }
 
   public isConnected() {
@@ -35,20 +46,20 @@ export default class Connection {
   }
 
   public close() {
-    if (this.needsPassword()) this.credentials.password = null;
+    if (this.needsPassword()) this.conn.credentials.password = null;
     this.connected = false;
-    return this.connection.close();
+    return this.conn.close();
   }
 
   public open() {
-    return this.connection.open();
+    return this.conn.open();
   }
 
   public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {
     if (cached && this.tables.length > 0) {
       return Promise.resolve(this.tables);
     }
-    return this.connection.getTables().then((tables: DatabaseInterface.Table[]) => {
+    return this.conn.getTables().then((tables: DatabaseInterface.Table[]) => {
       this.tables = tables;
       return this.tables;
     });
@@ -58,21 +69,21 @@ export default class Connection {
     if (cached && this.columns.length > 0) {
       return Promise.resolve(this.columns);
     }
-    return this.connection.getColumns().then((columns: DatabaseInterface.TableColumn[]) => {
+    return this.conn.getColumns().then((columns: DatabaseInterface.TableColumn[]) => {
       this.columns = columns;
       return this.columns;
     });
   }
 
   public describeTable(tableName: string): Promise<any> {
-    return this.connection.describeTable(tableName);
+    return this.conn.describeTable(tableName);
   }
   public showRecords(tableName: string, limit: number = 10): Promise<any> {
-    return this.connection.showRecords(tableName, limit);
+    return this.conn.showRecords(tableName, limit);
   }
 
   public query(query: string, handleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
-    return this.connection.query(query)
+    return this.conn.query(query)
       .catch((e) => {
         if (!handleError) throw e;
         this.logger.error('Query error:', e);
@@ -95,23 +106,24 @@ export default class Connection {
       });
   }
   public getName() {
-    return this.credentials.name;
+    return this.conn.credentials.name;
   }
   public getServer() {
-    return this.credentials.server;
+    return this.conn.credentials.server;
   }
 
   public getPort() {
-    return this.credentials.port;
+    return this.conn.credentials.port;
   }
   public getUsername() {
-    return this.credentials.username;
+    return this.conn.credentials.username;
   }
 
-  public serialize(): any {
+  public serialize(): SerializedConnection {
     return {
       isConnected: this.isConnected(),
       name: this.getName(),
+      needsPassword: this.needsPassword(),
       port: this.getPort(),
       server: this.getServer(),
       username: this.getUsername(),

@@ -6,15 +6,16 @@ import Logger from './logger';
 import Utils from './utils';
 import uuidv4 = require('uuid/v4');
 import ConfigManager = require('./config-manager');
+import LoggerInterface from './interface/logger';
 
 namespace Telemetry {
   let isEnabled: Boolean = true;
-  let logger: any = console;
+  let logger: LoggerInterface = console;
   let extensionUUID: string;
   let analytics: Analytics.Visitor;
   const uaCode: string = Constants.gaCode;
 
-  export function register(useLogger: any): any {
+  export function register(useLogger?: LoggerInterface): any {
     setLogger(useLogger);
     if (ConfigManager.get('telemetry', true)) {
       enable();
@@ -23,14 +24,13 @@ namespace Telemetry {
     }
     const localInfo = Utils.localSetupInfo();
     extensionUUID = extensionUUID || localInfo.telemetryUUID;
-    logger.debug(`Telemetry UUID: ${extensionUUID}`);
     if (!extensionUUID) {
       extensionUUID = uuidv4();
       start();
       localInfo.telemetryUUID = extensionUUID;
       Utils.writeLocalSetupInfo(localInfo);
       registerEvent('evt:install', Constants.version, 'installed');
-      logger.debug(`Telemetry random UUID generated: ${extensionUUID}`);
+      logger.log(`Telemetry random UUID generated: ${extensionUUID}`);
     } else {
       start();
     }
@@ -59,7 +59,7 @@ namespace Telemetry {
     isEnabled = false;
     logger.info('Telemetry disabled!');
   }
-  export function setLogger(useLogger: any = Logger) {
+  export function setLogger(useLogger: LoggerInterface = console) {
     logger = useLogger;
   }
   export function registerSession(evt: string) {
