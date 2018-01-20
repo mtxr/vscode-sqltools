@@ -19,7 +19,7 @@ const dependencies = [ 'react', 'react-dom', 'prop-types' ]
 const srcViewPath = 'src/languageserver/http-server/views'
 const cfg = {
   ts: {
-    src: ['src/*.ts', 'src/**/*.ts'],
+    src: ['src/*.ts', 'src/**/*.ts', '!src/test/*', '!src/test/**/*'],
     dest: () => gulp.dest(outputDir)
   },
   sass: {

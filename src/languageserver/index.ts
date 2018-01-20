@@ -4,7 +4,7 @@ import {
   createConnection,
   Disposable,
   DocumentRangeFormattingRequest, IConnection, InitializeResult,
-  IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, TextEdit,
+  IPCMessageReader, IPCMessageWriter, Position, TextDocumentPositionParams, TextDocuments, TextEdit,
 } from 'vscode-languageserver';
 import {
   ConfigManager,
@@ -21,8 +21,13 @@ import {
 import {
   CreateNewConnectionRequest,
   GetConnectionListRequest,
+  GetTablesAndColumnsRequest,
   OpenConnectionRequest,
+  RefreshDataRequest,
+  RunCommandRequest,
+  RunQueryRequest,
   SetQueryResultsRequest,
+  UpdateTableAndColumnsRequest,
 } from '../contracts/connection-requests';
 import HTTPServer from './http-server';
 import { TableColumnCompletionItem, TableCompletionItem } from './requests/completion/models';
@@ -56,19 +61,31 @@ namespace SQLToolsLanguageServer {
 
   function sortLangs(a, b) { return a.toString().localeCompare(b.toString()); }
 
-  function loadCompletions(conn: Connection) {
+  function loadCompletionItens(tables, columns) {
+    completionItems = [];
+    completionItems.push(...tables.map((table) => TableCompletionItem(table)));
+    completionItems.push(...columns.map((col) => TableColumnCompletionItem(col)));
+  }
+
+  function loadConnectionData(conn: Connection) {
     completionItems = [];
     Promise.all([
       conn.getTables(),
       conn.getColumns(),
     ])
       .then(([tables, columns]) => {
-        completionItems.push(...tables.map((table) => TableCompletionItem(table)));
-        completionItems.push(...columns.map((col) => TableColumnCompletionItem(col)));
+        tables = tables;
+        columns = columns;
+        updateSidebar(tables, columns);
+        loadCompletionItens(tables, columns);
       }).catch((e) => {
         Logger.error('Error while preparing columns completions', e);
       });
     return completionItems;
+  }
+
+  function updateSidebar(tables, columns) {
+    server.client.connection.sendRequest(UpdateTableAndColumnsRequest, { tables, columns });
   }
 
   /* server events */
@@ -89,7 +106,7 @@ namespace SQLToolsLanguageServer {
   server.onDidChangeConfiguration(async (change) => {
     ConfigManager.setSettings(change.settings.sqltools);
     const oldLang = formatterLanguages.sort(sortLangs);
-    const newLang = (ConfigManager.get('formatLanguages', ['sql']) as string[]).sort(sortLangs);
+    const newLang = ConfigManager.formatLanguages.sort(sortLangs);
     const register = newLang.length > 0 && (!formatterRegistration || oldLang.join() !== newLang.join());
     if (register) {
       formatterLanguages = newLang;
@@ -110,6 +127,15 @@ namespace SQLToolsLanguageServer {
   server.onDocumentRangeFormatting((params) => Formatter.handler(docManager, params));
 
   server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
+    const { textDocument, position } = pos;
+    const doc = docManager.get(textDocument.uri);
+    const prev = doc.getText()
+      .substring(doc.offsetAt(Position.create(position.line, 0)), doc.offsetAt(Position.create(
+        position.character++,
+        position.line,
+      )))
+      .replace(/\.([^\[\] ])/g, '');
+    console.log((prev));
     if (!activeConnection) return [];
     return completionItems;
   });
@@ -128,13 +154,46 @@ namespace SQLToolsLanguageServer {
     return sgdbConnections.map((c) => c.serialize());
   });
 
-  server.onRequest(OpenConnectionRequest.method, async (req: { conn: SerializedConnection, password?: string }) => {
+  server.onRequest(
+    OpenConnectionRequest.method,
+    async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
+
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
     const result = await c.connect();
     activeConnection = c;
-    loadCompletions(activeConnection);
-    return result;
+    loadConnectionData(activeConnection);
+    return activeConnection.serialize();
+  });
+
+  server.onRequest(RefreshDataRequest.method, () => {
+    loadConnectionData(activeConnection);
+  });
+
+  server.onRequest(GetTablesAndColumnsRequest.method, async () => {
+    return { tables: await activeConnection.getTables(true), columns: await activeConnection.getColumns(true) };
+  });
+
+  server.onRequest(RunQueryRequest.method, async (req: {
+    conn: SerializedConnection,
+    query: string,
+    handleQuery: boolean,
+  }) => {
+    const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
+    activeConnection = conn;
+    HTTPServer.set('GET /api/query-results', (await activeConnection.query(req.query)));
+    return true;
+  });
+
+  server.onRequest(RunCommandRequest.method, async (req: {
+    conn: SerializedConnection,
+    command: string,
+    args: any[],
+  }) => {
+    const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
+    activeConnection = conn;
+    HTTPServer.set('GET /api/query-results', (await activeConnection[req.command](...req.args)));
+    return true;
   });
 }
 

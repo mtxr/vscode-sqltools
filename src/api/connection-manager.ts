@@ -1,4 +1,3 @@
-import Logger from './logger';
 import ConfigManager = require('./config-manager');
 import Connection, { SerializedConnection } from './connection';
 import { ConnectionCredentials, LoggerInterface } from './interface';

@@ -19,9 +19,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
   private tree: any = {};
-  private connection: Connection;
-  private logger: LoggerInterface = console;
-
   public fireUpdate(): void {
     this.onDidChange.fire();
   }
@@ -40,39 +37,24 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     }
     return [];
   }
-  public setConnection(connection: Connection) {
-    this.connection = connection;
-    this.refresh();
+  public refresh() {
+    this.fireUpdate();
   }
 
-  public setLogger(logger) {
-    this.logger = logger;
-  }
-  public refresh() {
+  public setTreeData(tables, columns) {
     this.tree = {};
-    if (!this.connection) {
-      this.fireUpdate();
-      return;
-    }
-    this.connection.getTables()
-      .then((tables) => {
-        tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((table, index) => {
-          if (!this.tree[table.tableDatabase]) {
-            this.tree[table.tableDatabase] = new SidebarDatabase({ name: table.tableDatabase });
-          }
-          if (!this.tree[table.tableDatabase].tables[table.name]) {
-            this.tree[table.tableDatabase].tables[table.name] = new SidebarTable(table);
-          }
-        });
-        return this.connection.getColumns()
-          .then((columns) => {
-            columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
-              this.tree[column.tableDatabase].tables[column.tableName].columns.push(new SidebarColumn(column));
-            });
-            this.fireUpdate();
-          });
-      })
-      .catch((e) => { this.logger.error('Failed to prepare sidebar itens', e); });
+    tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((table, index) => {
+      if (!this.tree[table.tableDatabase]) {
+        this.tree[table.tableDatabase] = new SidebarDatabase({ name: table.tableDatabase });
+      }
+      if (!this.tree[table.tableDatabase].tables[table.name]) {
+        this.tree[table.tableDatabase].tables[table.name] = new SidebarTable(table);
+      }
+    });
+    columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
+      this.tree[column.tableDatabase].tables[column.tableName].columns.push(new SidebarColumn(column));
+    });
+    this.fireUpdate();
   }
 
   private toArray(obj: any) {

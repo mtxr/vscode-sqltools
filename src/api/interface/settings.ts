@@ -1,8 +1,8 @@
 export enum LogLevel {
-  DEBUG,
-  INFO,
-  WARN,
-  ERROR,
+  DEBUG = 'DEBUG',
+  INFO = 'INFO',
+  WARN = 'WARN',
+  ERROR = 'ERROR',
 }
 
 export enum DatabaseDialect {

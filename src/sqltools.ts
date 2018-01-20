@@ -25,8 +25,6 @@ import {
 import {
   BookmarksStorage,
   ConfigManager,
-  Connection,
-  ConnectionCredentials,
   DatabaseInterface,
   DismissedException,
   ErrorHandler,
@@ -42,11 +40,15 @@ import Constants from './constants';
 import {
   CreateNewConnectionRequest,
   GetConnectionListRequest,
+  GetTablesAndColumnsRequest,
   OpenConnectionRequest,
+  RefreshDataRequest,
+  RunCommandRequest,
+  RunQueryRequest,
+  UpdateTableAndColumnsRequest,
 } from './contracts/connection-requests';
 import LogWriter from './log-writer';
 import {
-  // CompletionProvider,
   ConnectionExplorer,
   HTMLPreview,
   SidebarDatabaseItem,
@@ -57,14 +59,12 @@ namespace SQLTools {
   const cfgKey: string = Constants.extNamespace.toLowerCase();
   const preview = new HTMLPreview(Uri.parse(`sqltools://html`));
   const connectionExplorer = new ConnectionExplorer();
-  // const completions = new CompletionProvider();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const editingBufferName = `${Constants.bufferName}`;
+  const logger = new Logger(LogWriter);
   let ctx: ExtensionContext;
-  let logger: LoggerInterface;
   let bookmarks: BookmarksStorage;
   let history: History;
-  let outputLogs: LogWriter;
   let lastUsedConn: SerializedConnection;
   let languageClient: LanguageClient;
   let activationTimer: Utils.Timer;
@@ -92,18 +92,18 @@ namespace SQLTools {
   }
 
   export async function cmdEditBookmark(): Promise<void> {
-    const query = (await bookmarksMenu()) as QuickPickItem;
-    const headerText = ''.replace('{queryName}', query.label);
-    insertText(`${headerText}${query.detail}`, true);
+    try {
+      const query = (await bookmarksMenu()) as QuickPickItem;
+      const headerText = ''.replace('{queryName}', query.label);
+      insertText(`${headerText}${query.detail}`, true);
+    } catch (e) {
+      ErrorHandler.create('Could not edit bookmarked query')(e);
+    }
   }
   export async function cmdBookmarkSelection() {
     try {
       const query = await getSelectedText();
-      const name = await Win.showInputBox({ prompt: 'Query name' });
-      if (!name || name.length === 0) {
-        return Win.showInformationMessage('Can\'t bookmark. Name not provided.');
-      }
-      bookmarks.add(name, query);
+      bookmarks.add(await readInput('Query name'), query);
     } catch (e) {
       ErrorHandler.create('Error bookmarking query.')(e);
     }
@@ -111,8 +111,7 @@ namespace SQLTools {
 
   export async function cmdDeleteBookmark(): Promise<void> {
     try {
-      const toDelete = (await bookmarksMenu('label')) as string;
-      bookmarks.delete(toDelete);
+      bookmarks.delete((await bookmarksMenu('label')));
     } catch (e) {
       ErrorHandler.create('Error deleting bookmark.')(e);
     }
@@ -121,7 +120,7 @@ namespace SQLTools {
   export function cmdClearBookmarks(): void {
     bookmarks.clear();
   }
-  export function editorFormatSql(editor: TextEditor, edit: TextEditorEdit) {
+  export function cmdFormatSql() {
     VSCode.executeCommand('editor.action.formatSelection');
   }
 
@@ -130,12 +129,11 @@ namespace SQLTools {
   }
 
   export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
-    const indentSize = ConfigManager.get('format.indentSize', 2) as number;
-    return insertSnippet(Utils.generateInsertQuery(node.value, node.columns, indentSize));
+    return insertSnippet(Utils.generateInsertQuery(node.value, node.columns, ConfigManager.format.indentSize));
   }
 
   export function cmdShowOutputChannel(): void {
-    outputLogs.showOutput();
+    LogWriter.showOutput();
   }
   export function cmdAboutVersion(): void {
     const message = `Using SQLTools ${Constants.version}`;
@@ -150,91 +148,71 @@ namespace SQLTools {
     setConnection(null);
   }
 
-  // export async function cmdShowRecords(node?: SidebarTable) {
-    // try {
-    //   const table = await getTableName(node);
-    //   printOutput(await lastUsedConn.showRecords(table), `Some records of ${table} : SQLTools`);
-    // } catch (e) {
-    //   ErrorHandler.create('Error while showing table records', showOutputChannel)(e);
-    // }
-  // }
+  export async function cmdShowRecords(node?: SidebarTable) {
+    try {
+      const table = await getTableName(node);
+      await runConnectionCommand('showRecords', table);
+      printOutput(`Some records of ${table} : SQLTools`);
+    } catch (e) {
+      ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
+    }
+  }
 
-  export async function cmdDescribeTable(node?: SidebarDatabaseItem): Promise<void> {
-    // try {
-    //   const table = await getTableName(node);
-    //   printOutput(await lastUsedConn.describeTable(table), `Describing table ${table} : SQLTools`);
-    // } catch (e) {
-    //   ErrorHandler.create('Error while describing table records', showOutputChannel)(e);
-    // }
+  export async function cmdDescribeTable(node?: SidebarTable): Promise<void> {
+    try {
+      const table = await getTableName(node);
+      await runConnectionCommand('describeTable', table);
+      printOutput(`Describing table ${table} : SQLTools`);
+    } catch (e) {
+      ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
+    }
   }
 
   export function cmdDescribeFunction() {
     Win.showInformationMessage('Not implemented yet.');
   }
 
-  export async function editorExecuteQuery(editor: TextEditor, edit: TextEditorEdit): Promise<void> {
-    // let range: Range;
-    // if (!editor.selection.isEmpty) {
-    //   range = editor.selection;
-    // }
-    // const query: string = editor.document.getText(range);
-    // if (!query || query.length === 0) {
-    //   Window.showInformationMessage('You should select a query first.');
-    //   return;
-    // }
-    // try {
-    //   await connect();
-    //   const result = await lastUsedConn.query(query);
-    //   history.add(query);
-    //   printOutput(result);
-    // } catch (e) {
-    //   ErrorHandler.create('Error fetching records.', showOutputChannel)(e);
-    // }
+  export async function cmdExecuteQuery(): Promise<void> {
+    try {
+      const query: string = await getSelectedText();
+      await connect();
+      await runQuery(query);
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
+    }
   }
 
   export async function cmdRunFromInput(): Promise<void> {
-    // await connect();
-    // const selectedQuery = await Window.showInputBox({
-    //   placeHolder: `Type the query to run on ${lastUsedConn.getName()}`,
-    // });
 
-    // if (!selectedQuery || selectedQuery.trim().length === 0) {
-    //   return;
-    // }
-    // try {
-    //   const result = await lastUsedConn.query(selectedQuery);
-    //   history.add(selectedQuery);
-    //   printOutput(result);
-    // } catch (e) {
-    //   ErrorHandler.create('Error running query.', showOutputChannel)(e);
-    // }
+    try {
+      await connect();
+      const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
+      await runQuery(query);
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error running query.', cmdShowOutputChannel)(e);
+    }
   }
 
-  // export async function cmdShowHistory(): Promise<string> {
-    // const options = history.all().map((query) => {
-    //   return {
-    //     description: '',
-    //     label: query,
-    //   } as QuickPickItem;
-    // });
-    // const h = await Window.showQuickPick(options);
-    // return h.label;
-  // }
-
   export async function cmdRunFromHistory(): Promise<void> {
-    // try {
-    //   await connect();
-    //   const query = await showHistory();
-    //   await printOutput(await lastUsedConn.query(query));
-    // } catch (e) {
-    //   ErrorHandler.create('Error while running query.', showOutputChannel)(e);
-    // }
+    try {
+      await connect();
+      await runQuery(await historyMenu(), false);
+      await printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
+    }
   }
 
   export async function cmdRunFromBookmarks(): Promise<void> {
-    // await connect();
-    // const bookmark = await showBookmarks();
-    // printOutput(await lastUsedConn.query(bookmark.detail));
+    try {
+      await connect();
+      await runQuery(await bookmarksMenu('detail'));
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
+    }
   }
 
   export async function cmdSetupSQLTools() {
@@ -242,7 +220,7 @@ namespace SQLTools {
   }
 
   export function cmdRefreshSidebar() {
-    connectionExplorer.refresh();
+    languageClient.sendRequest(RefreshDataRequest);
   }
 
   /**
@@ -274,42 +252,68 @@ namespace SQLTools {
     }), prop);
   }
 
-  // async function showTableMenu(): Promise<string> {
-  //   await connect();
-  //   return await quickPick((await lastUsedConn.getTables(true))
-  //     .map((table) => {
-  //       return { label: table.name } as QuickPickItem;
-  //     }));
-  // }
+  async function runConnectionCommand(command, ...args) {
+    return await languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
+  }
 
-  // async function printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
-  //   await languageClient.sendRequest(SetQueryResultsRequest, { data: results });
-  //   openHtml(previewUri.with({ fragment: '/query-results' }), outputName);
-  // }
+  async function runQuery(query, addHistory = true, handleError: boolean = false) {
+    const res = await languageClient.sendRequest(RunQueryRequest.method, { conn: lastUsedConn, query, handleError });
+    if (addHistory) history.add(query);
+    return res;
+  }
 
-  // function autoConnectIfActive(currConn?: string) {
-  //   const defaultConnection: string = currConn || ConfigManager.get('autoConnectTo', null) as string;
-  //   logger.info(`Configuration set to auto connect to: ${defaultConnection}`);
-  //   if (!defaultConnection) {
-  //     return setConnection();
-  //   }
-  //   const c = ConnectionManager.getConnection(defaultConnection, logger);
-  //   if (!c) {
-  //     return setConnection();
-  //   }
-  //   setConnection(c);
-  // }
+  async function tableMenu(prop?: string): Promise<string> {
+    const { tables } = await getConnData();
+    return await quickPick(tables
+      .map((table) => {
+        return { label: table.name } as QuickPickItem;
+      }), prop);
+  }
+
+  async function historyMenu(prop: string = 'label'): Promise<string> {
+    return await quickPick(history.all().map((query) => {
+      return {
+        description: '',
+        label: query,
+      } as QuickPickItem;
+    }), prop);
+  }
+  async function printOutput(outputName: string = 'SQLTools Results') {
+    openHtml(preview.uri.with({ fragment: '/query-results' }), outputName);
+  }
+
+  async function getConnData() {
+    return await languageClient.sendRequest(GetTablesAndColumnsRequest.method) as {
+      tables: DatabaseInterface.Table[],
+      coluuns: DatabaseInterface.TableColumn[],
+    };
+  }
+
+  function autoConnectIfActive(currConn?: SerializedConnection) {
+    let defaultConnection = currConn || null;
+    const a = ConfigManager.autoConnectTo;
+    if (!defaultConnection && ConfigManager.autoConnectTo) {
+      defaultConnection = {
+        name: ConfigManager.connections
+          .find((conn) => conn.name === ConfigManager.autoConnectTo).name,
+      } as SerializedConnection;
+    }
+    if (!defaultConnection) {
+      return setConnection();
+    }
+    logger.info(`Configuration set to auto connect to: ${defaultConnection.name}`);
+    setConnection(defaultConnection);
+  }
   function loadConfigs() {
     ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
-    bookmarks = new BookmarksStorage();
-    history = (history || new History(ConfigManager.get('historySize', 100) as number));
     setupLogger();
+    bookmarks = new BookmarksStorage();
+    history = (history || new History(ConfigManager.historySize));
     logger.log(`Env: ${process.env.NODE_ENV}`);
   }
   function setupLogger() {
-    logger = new Logger(outputLogs = outputLogs || new LogWriter())
-      .setLevel(Logger.levels[ConfigManager.get('logLevel', 'DEBUG') as string])
-      .setLogging(ConfigManager.get('logging', false) as boolean);
+    logger.setLevel(Logger.levels[ConfigManager.logLevel])
+      .setLogging(ConfigManager.logging);
     ErrorHandler.setLogger(logger);
     ErrorHandler.setOutputFn(Win.showErrorMessage);
     Telemetry.setLogger(logger);
@@ -317,13 +321,10 @@ namespace SQLTools {
 
   function getExtCommands() {
     return Object.keys(SQLTools).reduce((list, extFn) => {
-      let regFn = null;
-      if (extFn.startsWith('cmd')) regFn = VSCode.registerCommand;
-      if (extFn.startsWith('editor')) regFn = VSCode.registerTextEditorCommand;
-      if (!regFn) return list;
+      if (!extFn.startsWith('cmd')) return list;
       let extCmd = extFn.replace(/^(editor|cmd)/, '');
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
-      list.push(regFn(`${Constants.extNamespace}.${extCmd}`, (...args) => {
+      list.push(VSCode.registerCommand(`${Constants.extNamespace}.${extCmd}`, (...args) => {
         logger.log(`Command triggered: ${extCmd}`);
         Telemetry.registerCommand(extCmd);
         SQLTools[extFn](...args);
@@ -340,7 +341,7 @@ namespace SQLTools {
     if (lastUsedConn) {
       extDatabaseStatus.text = `$(database) ${lastUsedConn.name}`;
     }
-    if (ConfigManager.get('showStatusbar', true)) {
+    if (ConfigManager.showStatusbar) {
       extDatabaseStatus.show();
     } else {
       extDatabaseStatus.hide();
@@ -350,13 +351,10 @@ namespace SQLTools {
   async function registerExtension() {
     Win.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, connectionExplorer);
     ctx.subscriptions.push(
+      LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
       await getLanguageServerDisposable(),
       Wspc.registerTextDocumentContentProvider(preview.uri.scheme, preview),
-      // Languages.registerCompletionItemProvider(
-      //   ConfigManager.get('completionLanguages', ['sql']) as string[],
-      //   completions, ...ConfigManager.get('completionTriggers', ['.', ' ']) as string[],
-      // ),
       ...getExtCommands(),
       extDatabaseStatus,
     );
@@ -367,18 +365,20 @@ namespace SQLTools {
   async function registerLanguageServerRequests() {
     languageClient.onReady().then(() => {
       languageClient.onRequest(CreateNewConnectionRequest.method, (newConnPostData) => {
-        const connList = ConfigManager.get('connections', []) as any[];
+        const connList = ConfigManager.connections;
         connList.push(newConnPostData.connInfo);
         return setSettings('connections', connList);
       });
+      languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ tables, columns }) => {
+        connectionExplorer.setTreeData(tables, columns);
+      });
+      autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
   function reloadConfig() {
-    const currentConnection = lastUsedConn ? lastUsedConn.name : null;
-    ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
-    logger.info('Config reloaded!');
     loadConfigs();
-    // autoConnectIfActive(currentConnection);
+    logger.info('Config reloaded!');
+    autoConnectIfActive(lastUsedConn);
     updateStatusBar();
   }
 
@@ -387,10 +387,10 @@ namespace SQLTools {
     if (c && c.needsPassword) password = await askForPassword(c);
     lastUsedConn = c;
     updateStatusBar();
-    // suggestionsProvider.setConnection(lastUsedConn);
-    // sqlconnectionTreeProvider.setConnection(lastUsedConn);
-    if (!lastUsedConn) return null;
-    await languageClient.sendRequest(OpenConnectionRequest.method, { conn: c, password });
+    lastUsedConn = (await languageClient.sendRequest(
+      OpenConnectionRequest.method,
+      { conn: c, password },
+    )) as SerializedConnection;
     return lastUsedConn;
   }
 
@@ -419,8 +419,7 @@ namespace SQLTools {
       run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
     };
 
-    const selector = (ConfigManager.get('completionLanguages', ['sql']) as string[])
-      .concat(ConfigManager.get('formatLanguages', ['sql']) as string[]);
+    const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages);
 
     const clientOptions: LanguageClientOptions = {
       documentSelector: selector,
@@ -512,19 +511,24 @@ namespace SQLTools {
 
   async function setSettings(key: string, value: any) {
     await Wspc.getConfiguration(cfgKey).update(key, value);
+    ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
   }
 
-  // async function getTableName(node?: SidebarTable): Promise<string> {
-  //   if (node && node.value) {
-  //     return node.value;
-  //   }
-  //   return await showTableMenu();
-  // }
+  async function getTableName(node?: SidebarTable): Promise<string> {
+    if (node && node.value) {
+      return node.value;
+    }
+    return await tableMenu('label');
+  }
   async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
     const sel: QuickPickItem = await Win.showQuickPick(options);
-    if (!sel) throw new DismissedException();
-    if (prop && !sel[prop]) throw new DismissedException();
+    if (!sel || (prop && !sel[prop])) throw new DismissedException();
     return prop ? sel[prop] : sel;
+  }
+  async function readInput(prompt: string, placeholder?: string) {
+    const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
+    if (!data || data.length === 0) throw new DismissedException();
+    return data;
   }
 }
 

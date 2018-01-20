@@ -7,26 +7,47 @@ import {
   LoggerInterface,
 } from './../../../api/interface';
 
+class MarkdownString {
+  public value: string = '';
+  constructor() {
+    this.value = '';
+  }
+
+  public appendCodeblock(value: string, language: string = '') {
+    this.value += `\n\`\`\`${language}
+${value}
+\`\`\`\n`;
+    return this;
+  }
+
+  public append(value: string) {
+    this.value += value;
+    return this;
+  }
+}
+
 export function TableCompletionItem(table: DatabaseInterface.Table) {
 
-  let documentation = '';
+  let yml = '';
   if (table.tableDatabase) {
-    documentation += `__Database__: ${table.tableDatabase}\n\n`;
+    yml += `Database: ${table.tableDatabase}\n`;
   }
   if (table.tableCatalog) {
-    documentation += `__Table Catalog__: ${table.tableCatalog}\n\n`;
+    yml += `Table Catalog: ${table.tableCatalog}\n`;
   }
   if (table.tableSchema) {
-    documentation += `__Table Schema__: ${table.tableSchema}\n\n`;
+    yml += `Table Schema: ${table.tableSchema}\n`;
   }
-  documentation += `__Table__: ${table.name}\n\n`;
+  yml += `Table: ${table.name}\n`;
   if (table.numberOfColumns !== null && typeof table.numberOfColumns !== 'undefined') {
-    documentation += `__Number of Columns__: ${table.numberOfColumns}\n\n`;
+    yml += `Number of Columns: ${table.numberOfColumns}\n`;
   }
-
   return {
-    detail: 'Table',
-    documentation: { value: documentation } as any,
+    detail: 'Column',
+    documentation: (
+      (new MarkdownString())
+        .appendCodeblock(yml, 'yaml') as any
+    ),
     kind: 21 as CompletionItemKind,
     label: table.name,
   } as CompletionItem;
@@ -46,21 +67,25 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn) {
     colInfo.push('DEFAULT');
     colInfo.push(col.defaultValue);
   }
-  let documentation = `\`\`\`sql\n${colInfo.join(' ')}\`\`\`\n\n`;
+  let yml = '';
   if (col.tableDatabase) {
-    documentation += `__Database__: ${col.tableDatabase}\n\n`;
+    yml += `Database: ${col.tableDatabase}\n`;
   }
   if (col.tableCatalog) {
-    documentation += `__Table Catalog__: ${col.tableCatalog}\n\n`;
+    yml += `Table Catalog: ${col.tableCatalog}\n`;
   }
   if (col.tableSchema) {
-    documentation += `__Table Schema__: ${col.tableSchema}\n\n`;
+    yml += `Table Schema: ${col.tableSchema}\n`;
   }
-  documentation += `__Table__: ${col.tableName}\n`;
+  yml += `Table: ${col.tableName}`;
 
   return {
     detail: 'Table',
-    documentation: { value: documentation } as any,
+    documentation: (
+      (new MarkdownString())
+        .appendCodeblock(colInfo.join(' '), 'sql')
+        .appendCodeblock(yml, 'yaml') as any
+    ),
     kind: CompletionItemKind.Property,
     label: col.columnName,
   } as CompletionItem;

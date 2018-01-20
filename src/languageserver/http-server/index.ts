@@ -128,9 +128,8 @@ namespace HTTPServer {
   }
 
   export function set(url, data) {
-    const key = `${url}`;
-    endPoints[key] = endPoints[key] || { data: null, handler: null };
-    endPoints[key].data = data;
+    endPoints[url] = endPoints[url] || { data: null, handler: null };
+    endPoints[url].data = data;
   }
 
   const httpServer: http.Server = http.createServer(reqHandler);

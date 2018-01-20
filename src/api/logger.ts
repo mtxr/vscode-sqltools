@@ -12,7 +12,7 @@ export enum Levels {
 
 export default class Logger implements LoggerInterface {
   public static levels = Levels;
-  public logging: boolean = false;
+  public logging: boolean = true;
   public level: Levels = Levels.DEBUG;
   public writer: any;
 
@@ -31,8 +31,6 @@ export default class Logger implements LoggerInterface {
   }
   public setLevel(level: Levels): this {
     this.level = level;
-    const levelString: string = Object.keys(Levels).find((key) => Levels[key] === this.level);
-    this.log(`Log level set to '${levelString}'`);
     return this;
   }
   public isLogging(): boolean {
@@ -54,6 +52,8 @@ export default class Logger implements LoggerInterface {
     return this.emitMessage('warn', message, ...data);
   }
   private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]): this {
+    const a = Levels[type.toUpperCase()];
+    const b =  this.level;
     if (!this.isLogging() || Levels[type.toUpperCase()] < this.level) {
       return this;
     }
