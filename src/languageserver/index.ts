@@ -65,19 +65,19 @@ namespace SQLToolsLanguageServer {
     completionItems = [];
     completionItems.push(...tables.map((table) => TableCompletionItem(table)));
     completionItems.push(...columns.map((col) => TableColumnCompletionItem(col)));
+    return completionItems;
   }
 
-  function loadConnectionData(conn: Connection) {
+  async function loadConnectionData(conn: Connection) {
     completionItems = [];
-    conn.getTables()
+    return conn.getTables()
       .then((t) => Promise.all([t, conn.getColumns()]))
       .then(([t, c]) => {
         updateSidebar(t, c);
-        loadCompletionItens(t, c);
+        return loadCompletionItens(t, c);
       }).catch((e) => {
         Logger.error('Error while preparing columns completions', e);
       });
-    return completionItems;
   }
 
   function updateSidebar(tables, columns) {
@@ -163,7 +163,7 @@ namespace SQLToolsLanguageServer {
     if (req.password) c.setPassword(req.password);
     const result = await c.connect();
     activeConnection = c;
-    loadConnectionData(activeConnection);
+    await loadConnectionData(activeConnection);
     return activeConnection.serialize();
   });
 

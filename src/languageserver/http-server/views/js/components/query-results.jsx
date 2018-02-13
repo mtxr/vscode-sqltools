@@ -108,7 +108,6 @@ export class ResultsTable extends React.Component {
           getTdProps={(state, rowInfo, column) => {
             try {
               const v = rowInfo.original[column.id]
-              console.log(v, typeof v)
               const props = {}
               if (v === true) props.className = 'td-icon green'
               if (v === false) props.className = 'td-icon red'

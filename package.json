@@ -342,6 +342,12 @@
                 "description": "Connection Dialect",
                 "required": false
               },
+              "dialectOptions": {
+                "type": [ "null", "object" ],
+                "description": "Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options",
+                "required": false,
+                "default": {}
+              },
               "connectionTimeout": {
                 "type": "number",
                 "description": "Connection timeout in seconds",
