@@ -287,3 +287,24 @@ div mark {
     background: yellow;
   }
 }
+
+.rt-td.td-icon.green:before, .rt-td.td-icon.red:before {
+  content: '\00a0 ';
+  opacity: .5;
+  border-radius: 50%;
+  height: $fontSize;
+  width: $fontSize;
+  display: inline-block;
+  margin-right: 3px;
+  margin-left: 2px;
+  line-height: $fontSize;
+}
+
+.rt-td.td-icon {
+  &.green:before {
+    background: green;
+  }
+  &.red:before {
+    background: red;
+  }
+}

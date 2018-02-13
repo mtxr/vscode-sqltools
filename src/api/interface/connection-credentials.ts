@@ -7,5 +7,6 @@ export default interface ConnectionCredentials {
   password?: string;
   askForPassword?: boolean;
   dialect: string;
-  connectionTimeout: string;
+  dialectOptions?: { encrypt: boolean };
+  connectionTimeout?: number;
 }

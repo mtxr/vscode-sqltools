@@ -44,7 +44,6 @@ import {
   OpenConnectionRequest,
   RefreshDataRequest,
   RunCommandRequest,
-  RunQueryRequest,
   UpdateTableAndColumnsRequest,
 } from './contracts/connection-requests';
 import LogWriter from './log-writer';
@@ -176,7 +175,7 @@ namespace SQLTools {
     try {
       const query: string = await getSelectedText();
       await connect();
-      await runQuery(query);
+      runQuery(query);
       printOutput();
     } catch (e) {
       ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
@@ -188,7 +187,7 @@ namespace SQLTools {
     try {
       await connect();
       const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
-      await runQuery(query);
+      runQuery(query);
       printOutput();
     } catch (e) {
       ErrorHandler.create('Error running query.', cmdShowOutputChannel)(e);
@@ -198,7 +197,7 @@ namespace SQLTools {
   export async function cmdRunFromHistory(): Promise<void> {
     try {
       await connect();
-      await runQuery(await historyMenu(), false);
+      runQuery(await historyMenu(), false);
       await printOutput();
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
@@ -208,7 +207,7 @@ namespace SQLTools {
   export async function cmdRunFromBookmarks(): Promise<void> {
     try {
       await connect();
-      await runQuery(await bookmarksMenu('detail'));
+      runQuery(await bookmarksMenu('detail'));
       printOutput();
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
@@ -257,7 +256,11 @@ namespace SQLTools {
   }
 
   async function runQuery(query, addHistory = true, handleError: boolean = false) {
-    const res = await languageClient.sendRequest(RunQueryRequest.method, { conn: lastUsedConn, query, handleError });
+    const res = await languageClient.sendRequest(RunCommandRequest.method, {
+      conn: lastUsedConn,
+      command: 'query',
+      args: [query],
+    });
     if (addHistory) history.add(query);
     return res;
   }

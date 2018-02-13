@@ -9,6 +9,12 @@ import {
 } from './../lib/utils'
 import Loading from './loading.jsx'
 
+const dialectDefaultPorts = {
+  'MySQL': 3306,
+  'MSSQL': 1433,
+  'PostgreSQL': 5432
+}
+
 class Syntax extends React.Component {
   constructor(props) {
     super(props)
@@ -99,11 +105,14 @@ export default class Setup extends React.Component {
       },
       dialect: {
         label: 'Dialects',
-        values: [
-          'MySQL', 'MSSQL', 'PostgreSQL'
-        ],
-        default: 'MySQL',
-        check: [notEmpty]
+        values: Object.keys(dialectDefaultPorts),
+        default: Object.keys(dialectDefaultPorts)[0],
+        check: [notEmpty],
+        cb: () => {
+          const newState = Object.assign({}, this.state)
+          newState.data.port = dialectDefaultPorts[this.state.data.dialect] || 3306
+          this.setState(newState, this.validateFields)
+        }
       },
       port: {
         label: 'Port', type: 'number',
@@ -120,7 +129,7 @@ export default class Setup extends React.Component {
         check: [notEmpty]
       },
       askForPassword: {
-        label: 'Save Password?',
+        label: 'Prompt for password?',
         values: [{ text: 'No', value: 'false' }, { text: 'Yes', value: 'true' }],
         default: 'false',
         parse: bool,
@@ -335,6 +344,7 @@ export default class Setup extends React.Component {
                   }))}
                 </div>
               </div>
+              <pre>{JSON.stringify(this.state, null, 2)}</pre>
             </div>
           </div>
         </form>

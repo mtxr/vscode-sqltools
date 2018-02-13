@@ -48,7 +48,7 @@ export default class PostgreSQL implements ConnectionDialect {
       host: this.credentials.server,
       password: this.credentials.password,
       port: this.credentials.port,
-      statement_timeout: this.credentials.connectionTimeout,
+      statement_timeout: this.credentials.connectionTimeout * 1000,
       user: this.credentials.username,
     };
     const self = this;
@@ -70,7 +70,7 @@ export default class PostgreSQL implements ConnectionDialect {
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
-        const queries = query.split(';');
+        const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
         const messages = [];
         if (!Array.isArray(results)) {
           results = [ results ];

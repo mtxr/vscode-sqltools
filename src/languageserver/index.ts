@@ -11,6 +11,7 @@ import {
   Connection,
   ConnectionManager,
   SerializedConnection,
+  Telemetry,
   Utils,
 } from '../api';
 import Formatter = require('./requests/format');
@@ -25,8 +26,6 @@ import {
   OpenConnectionRequest,
   RefreshDataRequest,
   RunCommandRequest,
-  RunQueryRequest,
-  SetQueryResultsRequest,
   UpdateTableAndColumnsRequest,
 } from '../contracts/connection-requests';
 import HTTPServer from './http-server';
@@ -37,6 +36,7 @@ namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
   const docManager: TextDocuments = new TextDocuments();
   const localSetup = Utils.localSetupInfo();
+  Telemetry.register();
   const httpPort: number = localSetup.httpServerPort || 5123;
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
@@ -69,15 +69,11 @@ namespace SQLToolsLanguageServer {
 
   function loadConnectionData(conn: Connection) {
     completionItems = [];
-    Promise.all([
-      conn.getTables(),
-      conn.getColumns(),
-    ])
-      .then(([tables, columns]) => {
-        tables = tables;
-        columns = columns;
-        updateSidebar(tables, columns);
-        loadCompletionItens(tables, columns);
+    conn.getTables()
+      .then((t) => Promise.all([t, conn.getColumns()]))
+      .then(([t, c]) => {
+        updateSidebar(t, c);
+        loadCompletionItens(t, c);
       }).catch((e) => {
         Logger.error('Error while preparing columns completions', e);
       });
@@ -135,7 +131,6 @@ namespace SQLToolsLanguageServer {
         position.line,
       )))
       .replace(/\.([^\[\] ])/g, '');
-    console.log((prev));
     if (!activeConnection) return [];
     return completionItems;
   });
@@ -145,11 +140,6 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
-  server.onRequest(SetQueryResultsRequest.method, (req: { data: DatabaseInterface.QueryResults[] }): boolean => {
-    HTTPServer.set('GET /api/query-results', req.data);
-    return true;
-  });
-
   server.onRequest(GetConnectionListRequest.method, () => {
     return sgdbConnections.map((c) => c.serialize());
   });
@@ -157,7 +147,18 @@ namespace SQLToolsLanguageServer {
   server.onRequest(
     OpenConnectionRequest.method,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
-
+    if (!req.conn) {
+      completionItems = [];
+      activeConnection = null;
+      return {
+        isConnected: false,
+        name: null,
+        needsPassword: true,
+        port: null,
+        server: null,
+        username: null,
+      };
+    }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
     const result = await c.connect();
@@ -166,23 +167,10 @@ namespace SQLToolsLanguageServer {
     return activeConnection.serialize();
   });
 
-  server.onRequest(RefreshDataRequest.method, () => {
-    loadConnectionData(activeConnection);
-  });
+  server.onRequest(RefreshDataRequest.method, () => loadConnectionData(activeConnection));
 
   server.onRequest(GetTablesAndColumnsRequest.method, async () => {
     return { tables: await activeConnection.getTables(true), columns: await activeConnection.getColumns(true) };
-  });
-
-  server.onRequest(RunQueryRequest.method, async (req: {
-    conn: SerializedConnection,
-    query: string,
-    handleQuery: boolean,
-  }) => {
-    const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
-    activeConnection = conn;
-    HTTPServer.set('GET /api/query-results', (await activeConnection.query(req.query)));
-    return true;
   });
 
   server.onRequest(RunCommandRequest.method, async (req: {
@@ -190,10 +178,25 @@ namespace SQLToolsLanguageServer {
     command: string,
     args: any[],
   }) => {
-    const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
-    activeConnection = conn;
-    HTTPServer.set('GET /api/query-results', (await activeConnection[req.command](...req.args)));
-    return true;
+    try {
+      HTTPServer.set('GET /api/query-results', { waiting: true, success: false, results: [] });
+      const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
+      activeConnection = conn;
+      HTTPServer.set('GET /api/query-results', {
+        waiting: false,
+        success: true,
+        results: (await activeConnection[req.command](...req.args)),
+      });
+      return true;
+    } catch (e) {
+      HTTPServer.set('GET /api/query-results', {
+        waiting: false,
+        success: false,
+        results: [],
+        message: e.message ? e.message : e,
+      });
+      throw e;
+    }
   });
 }
 

@@ -30,11 +30,12 @@ export default class Connection {
   }
 
   public connect() {
-    return this.query('SELECT 1;', false)
+    return this.query('SELECT 1;', true)
       .then(() => {
         this.connected = true;
         return true;
-      });
+      })
+      .catch((e) => Promise.reject(e));
   }
 
   public setPassword(password: string) {

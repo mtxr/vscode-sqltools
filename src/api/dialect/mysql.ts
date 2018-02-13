@@ -41,7 +41,7 @@ export default class MySQL implements ConnectionDialect {
       return this.connection;
     }
     const options = {
-      connectionTimeout: this.credentials.connectionTimeout,
+      connectionTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       host: this.credentials.server,
       multipleStatements: true,
@@ -77,7 +77,7 @@ export default class MySQL implements ConnectionDialect {
       return new Promise((resolve, reject) => {
         conn.query(query, (error, results) => {
           if (error) return reject(error);
-          const queries = query.split(';');
+          const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
           if (results && !Array.isArray(results[0])) {
             results = [results];
           }
@@ -93,7 +93,7 @@ export default class MySQL implements ConnectionDialect {
               messages.push(`${r.changedRows} rows were changed.`);
             }
             return {
-              cols: Array.isArray(r) ? Object.keys(r[0]) : [],
+              cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
               messages,
               query: queries[i],
               results: Array.isArray(r) ? r : [],

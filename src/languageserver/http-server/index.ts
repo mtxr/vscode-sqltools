@@ -145,7 +145,7 @@ namespace HTTPServer {
 
 export default HTTPServer;
 
-HTTPServer.set('GET /api/query-results', []);
+HTTPServer.set('GET /api/query-results', { waiting: true, success: false, results: [] });
 HTTPServer.set('GET /api/statistics', {});
 HTTPServer.get('/api/status', (req, res) => void res.sendJson(SQLToolsLanguageServer.getStatus()));
 HTTPServer.post('/api/create-connection', (req, res) => {

@@ -7,12 +7,6 @@ export const GetConnectionListRequest = new RequestType0
 
 export const RefreshDataRequest = new RequestType0
   <boolean, Error, void>('connection/refreshData');
-export const SetQueryResultsRequest = new RequestType
-  <{ data: DatabaseInterface.QueryResults[] }, boolean, Error, void>('connection/setQueryResults');
-
-export const RunQueryRequest = new RequestType
-  <{ conn: SerializedConnection, query: string }, boolean, Error, void>('connection/runQuery');
-
 export const RunCommandRequest = new RequestType
   <{ conn: SerializedConnection, command: string }, boolean, Error, void>('connection/runCommand');
 export const OpenConnectionRequest = new RequestType

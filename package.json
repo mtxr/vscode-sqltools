@@ -465,11 +465,11 @@
   },
   "dependencies": {
     "get-port": "^3.2.0",
-    "mssql": "^4.0.4",
     "mysql2": "^1.5.1",
     "opn": "^5.1.0",
     "pg": "^7.4.0",
     "sql-formatter": "^2.1.0",
+    "tedious": "^2.3.1",
     "universal-analytics": "^0.4.16",
     "uuid": "^3.1.0",
     "vscode-languageclient": "^3.5.0",

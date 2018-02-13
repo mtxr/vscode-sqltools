@@ -81,11 +81,14 @@ export class ResultsTable extends React.Component {
         Header: c,
         accessor: c,
         Cell: (r) => {
-          const v = String(r.original[r.column.id])
+          let v = r.original[r.column.id]
           if (v === null) return <small>(NULL)</small>
-          if (!this.state.filtered[r.column.id]) return String(v)
+          if (v === true) return <span>TRUE</span>
+          if (v === false) return <span>FALSE</span>
+          v = String(v)
+          if (!this.state.filtered[r.column.id]) return v
           return (
-            String(v).replace(this.state.filtered[r.column.id], '<###>$1<###>').split('<###>')
+            v.replace(this.state.filtered[r.column.id], '<###>$1<###>').split('<###>')
               .map((str, i) => {
                 if (i % 2 === 1) return <mark key={i} className='filter-highlight'>{str}</mark>
                 if (str.trim().length === 0) return null
@@ -102,12 +105,22 @@ export class ResultsTable extends React.Component {
           data={this.props.value.data}
           columns={cols}
           filterable
+          getTdProps={(state, rowInfo, column) => {
+            try {
+              const v = rowInfo.original[column.id]
+              console.log(v, typeof v)
+              const props = {}
+              if (v === true) props.className = 'td-icon green'
+              if (v === false) props.className = 'td-icon red'
+              return props;
+            } catch (e) { /**/ }
+            return {}
+          }}
           onFilteredChange={(filtered) => {
-            console.log(filtered)
             this.setState({ filtered: filtered.reduce((p, c) => {
               let exp = String(c.value)
               try {
-                exp = new RegExp(`(${exp})`, 'g');
+                exp = new RegExp(`(${exp})`, 'gi');
               } catch (e) { /***/
               }
               p[c.id] = exp
@@ -117,7 +130,7 @@ export class ResultsTable extends React.Component {
           defaultFilterMethod={(filter, row) => {
             let exp = String(filter.value)
             try {
-              exp = new RegExp(`(${exp})`, 'g');
+              exp = new RegExp(`(${exp})`, 'gi');
               return exp.test(String(row[filter.id]))
             } catch (e) {
               return String(row[filter.id]) === exp
@@ -161,7 +174,7 @@ QueryResult.propTypes = {
 export default class QueryResults extends React.Component {
   constructor(props) {
     super(props)
-    this.state = { isLoaded: false, active: 0, data: [] }
+    this.state = { isLoaded: false, active: 0, data: [], messages: [], waiting: true, success: true }
   }
 
   toggle(i) {
@@ -171,16 +184,33 @@ export default class QueryResults extends React.Component {
   }
 
   componentDidMount() {
-    fetch(`${window.location.origin}/api/query-results`)
-      .then((res) => res.json())
-      .then((res) => {
-        this.setState({ isLoaded: true, data: res })
-      }, (e) => console.error(e))
+    let interval = setInterval(() => {
+      fetch(`${window.location.origin}/api/query-results`)
+        .then((res) => res.json())
+        .then((res) => {
+          if (res.waiting === false && res.success === true) {
+            clearInterval(interval);
+            interval = null;
+          }
+          this.setState({ isLoaded: true, data: res.results, waiting: res.waiting, messages: res.messages || [], success: res.success })
+        }, (e) => console.error(e))
+    }, 500);
   }
 
   render () {
-    if (!this.state.isLoaded) {
+    if (!this.state.isLoaded && this.state.waiting) {
       return (<h2>loading...</h2>)
+    } else if (this.state.isLoaded && this.state.waiting) {
+      return (<h2>Waiting query results...</h2>)
+    } else if (this.state.isLoaded && !this.state.waiting && !this.state.success) {
+      return (<div>
+        <h2>Query errored. Check the logs.</h2>
+        (
+          {this.state.messages.map((m, i) => {
+            return (<h4 key={i}>{m}</h4>)
+          })}
+        )
+      </div>)
     }
 
     const tabs = []
