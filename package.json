@@ -117,7 +117,11 @@
       {
         "title": "Show table records",
         "command": "SQLTools.showRecords",
-        "category": "SQLTools Connection"
+        "category": "SQLTools Connection",
+        "icon": {
+          "light": "dist/resources/icon/show-light.svg",
+          "dark": "dist/resources/icon/show-dark.svg"
+        }
       },
       {
         "title": "Version",
@@ -132,12 +136,20 @@
       {
         "title": "Add name to cursor",
         "command": "SQLTools.appendToCursor",
-        "category": "SQLTools Sidebar"
+        "category": "SQLTools Sidebar",
+        "icon": {
+          "light": "dist/resources/icon/add-cursor-light.svg",
+          "dark": "dist/resources/icon/add-cursor-dark.svg"
+        }
       },
       {
         "title": "Generate Insert Query",
         "command": "SQLTools.generateInsertQuery",
-        "category": "SQLTools Sidebar"
+        "category": "SQLTools Sidebar",
+        "icon": {
+          "light": "dist/resources/icon/insert-into-light.svg",
+          "dark": "dist/resources/icon/insert-into-dark.svg"
+        }
       },
       {
         "title": "Refresh Sidebar",
@@ -400,13 +412,13 @@
       "view/item/context": [
         {
           "command": "SQLTools.appendToCursor",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.column",
+          "when": "view == SQLTools.connectionExplorer",
           "group": "sqltools.dbExplorer@1"
         },
         {
           "command": "SQLTools.appendToCursor",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
-          "group": "sqltools.dbExplorer@2"
+          "when": "view == SQLTools.connectionExplorer",
+          "group": "inline@3"
         },
         {
           "command": "SQLTools.describeTable",
@@ -419,9 +431,19 @@
           "group": "sqltools.dbExplorer@4"
         },
         {
+          "command": "SQLTools.showRecords",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "inline@1"
+        },
+        {
           "command": "SQLTools.generateInsertQuery",
           "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
           "group": "sqltools.dbExplorer@5"
+        },
+        {
+          "command": "SQLTools.generateInsertQuery",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "group": "inline@2"
         }
       ]
     }
