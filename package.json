@@ -427,14 +427,14 @@
     }
   },
   "scripts": {
-    "vscode:prepublish": "npm run compile && npm test",
+    "vscode:prepublish": "yarn run compile && yarn test",
     "gulp": "./node_modules/.bin/gulp",
-    "compile": "npm run gulp -- compile",
-    "watch": "npm run gulp -- watch",
+    "compile": "yarn run gulp -- compile",
+    "watch": "yarn run gulp -- watch",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test:unit": "./node_modules/.bin/jest --config jest.json",
     "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
-    "test": "npm run test:lint && npm run test:unit",
+    "test": "yarn run test:lint && yarn run test:unit",
     "postversion": "vsce publish && git push && git push --tags"
   },
   "devDependencies": {
