@@ -398,10 +398,11 @@ namespace SQLTools {
   }
 
   async function askForPassword(c: SerializedConnection): Promise<string | null> {
-    const password = await Win.showInputBox({ prompt: `${c.name} password`, password: true });
-    if (!password || password.length === 0) {
-      throw new Error('Password not provided.');
-    }
+    const password = await Win.showInputBox({
+      prompt: `${c.name} password`,
+      password: true,
+      validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
+    });
     return password;
   }
   async function connect(force = false): Promise<SerializedConnection> {
@@ -461,7 +462,7 @@ namespace SQLTools {
   async function getSelectedText() {
     const editor = await getOrCreateEditor();
     const query = editor.document.getText(editor.selection);
-    if (!query || query.length === 0) {
+    if (isEmpty(query)) {
       Win.showInformationMessage('Can\'t bookmark. You have selected nothing.');
       throw new DismissedException();
     }
@@ -530,8 +531,12 @@ namespace SQLTools {
   }
   async function readInput(prompt: string, placeholder?: string) {
     const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
-    if (!data || data.length === 0) throw new DismissedException();
+    if (isEmpty(data)) throw new DismissedException();
     return data;
+  }
+
+  function isEmpty(v) {
+    return !v || v.length === 0;
   }
 }
 
