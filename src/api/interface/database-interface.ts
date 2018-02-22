@@ -9,6 +9,7 @@ namespace DatabaseInterface {
     tableCatalog?: string;
     tableDatabase?: string;
     name: string;
+    isView: boolean;
     numberOfColumns?: number;
   }
   export interface TableColumn {

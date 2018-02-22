@@ -95,7 +95,7 @@
         "category": "SQLTools Connection"
       },
       {
-        "title": "Format SQL",
+        "title": "Format SQL (for any doc)",
         "command": "SQLTools.formatSql",
         "category": "SQLTools"
       },
@@ -119,8 +119,8 @@
         "command": "SQLTools.showRecords",
         "category": "SQLTools Connection",
         "icon": {
-          "light": "dist/resources/icon/show-light.svg",
-          "dark": "dist/resources/icon/show-dark.svg"
+          "light": "dist/resources/icon/list-light.svg",
+          "dark": "dist/resources/icon/list-dark.svg"
         }
       },
       {
@@ -138,8 +138,8 @@
         "command": "SQLTools.appendToCursor",
         "category": "SQLTools Sidebar",
         "icon": {
-          "light": "dist/resources/icon/add-cursor-light.svg",
-          "dark": "dist/resources/icon/add-cursor-dark.svg"
+          "light": "dist/resources/icon/pencil-light.svg",
+          "dark": "dist/resources/icon/pencil-dark.svg"
         }
       },
       {
@@ -147,8 +147,8 @@
         "command": "SQLTools.generateInsertQuery",
         "category": "SQLTools Sidebar",
         "icon": {
-          "light": "dist/resources/icon/insert-into-light.svg",
-          "dark": "dist/resources/icon/insert-into-dark.svg"
+          "light": "dist/resources/icon/insert-light.svg",
+          "dark": "dist/resources/icon/insert-dark.svg"
         }
       },
       {
@@ -165,8 +165,8 @@
         "command": "SQLTools.newSqlFile",
         "category": "SQLTools",
         "icon": {
-          "light": "dist/resources/icon/new-sql-light.svg",
-          "dark": "dist/resources/icon/new-sql-dark.svg"
+          "light": "dist/resources/icon/file-light.svg",
+          "dark": "dist/resources/icon/file-dark.svg"
         }
       }
     ],
@@ -426,37 +426,37 @@
       "view/item/context": [
         {
           "command": "SQLTools.appendToCursor",
-          "when": "view == SQLTools.connectionExplorer",
+          "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
           "group": "sqltools.dbExplorer@1"
         },
         {
           "command": "SQLTools.appendToCursor",
-          "when": "view == SQLTools.connectionExplorer",
+          "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
           "group": "inline@3"
         },
         {
           "command": "SQLTools.describeTable",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
           "group": "sqltools.dbExplorer@3"
         },
         {
           "command": "SQLTools.showRecords",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
           "group": "sqltools.dbExplorer@4"
         },
         {
           "command": "SQLTools.showRecords",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
           "group": "inline@1"
         },
         {
           "command": "SQLTools.generateInsertQuery",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
           "group": "sqltools.dbExplorer@5"
         },
         {
           "command": "SQLTools.generateInsertQuery",
-          "when": "view == SQLTools.connectionExplorer && viewItem == connection.table",
+          "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
           "group": "inline@2"
         }
       ]

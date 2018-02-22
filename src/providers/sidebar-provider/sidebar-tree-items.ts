@@ -12,38 +12,69 @@ import DatabaseInterface from './../../api/interface/database-interface';
 
 export class SidebarDatabase extends TreeItem {
   public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'db-dark.png'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'db-light.png'),
+    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-dark.svg'),
+    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-light.svg'),
   };
   public contextValue = 'connection.database';
   public value: string;
 
-  public tables: any = {};
-  constructor(private db: DatabaseInterface.Database) {
-    super(db.name, TreeItemCollapsibleState.Expanded);
-    this.value = db.name;
+  public tables: SidebarDatabaseStructure = new SidebarDatabaseStructure('Tables');
+  public views: SidebarDatabaseStructure = new SidebarDatabaseStructure('Views');
+  constructor(private name: string) {
+    super(name, TreeItemCollapsibleState.Expanded);
+    this.value = name;
+    this.label = name;
+  }
+
+  public addItem(item) {
+    const key = item.isView ? 'views' : 'tables';
+    this[key].addItem(item.isView ? new SidebarView(item) : new SidebarTable(item));
+  }
+}
+
+export class SidebarDatabaseStructure extends TreeItem {
+  public iconPath = {
+    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'folder-open-dark.svg'),
+    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'folder-open-light.svg'),
+  };
+  public contextValue = 'connection.structure';
+  public items: { [name: string]: SidebarTable | SidebarView} = {};
+  constructor(private name) {
+    super(name, TreeItemCollapsibleState.Collapsed);
+    this.label = name;
     Object.defineProperty(this, 'label', {
       get() {
-        return `${this.db.name} (${Object.keys(this.tables).length} tables)`;
+        return `${this.name} (${Object.keys(this.items).length} ${name.toLowerCase()})`;
       },
     });
+  }
+
+  public addItem(item) {
+    this.items[item.value] = this.items[item.value] || item;
   }
 }
 
 export class SidebarTable extends TreeItem {
   public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-dark.png'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-light.png'),
+    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-dark.svg'),
+    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-light.svg'),
   };
-  public contextValue = 'connection.table';
+  public contextValue = 'connection.tableOrView';
   public value: string;
 
-  public columns: SidebarColumn[] = [];
+  public items: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
     super(table.name, TreeItemCollapsibleState.Collapsed);
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
   }
+
+  public addItem(item) {
+    this.items.push(item);
+  }
+}
+
+export class SidebarView extends SidebarTable {
 }
 
 export class SidebarColumn extends TreeItem {

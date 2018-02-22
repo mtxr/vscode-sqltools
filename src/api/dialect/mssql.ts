@@ -23,14 +23,25 @@ export default class MSSQL implements ConnectionDialect {
         IS_NULLABLE as isNullable
       FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG= DB_NAME()`,
     fetchRecords: 'SELECT TOP :limit * FROM :table',
-    fetchTables: `SELECT TABLE_NAME AS tableName,
-        TABLE_SCHEMA AS tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DB_NAME() as dbName,
-        COUNT(1) as numberOfColumns
-      FROM INFORMATION_SCHEMA.COLUMNS
-      GROUP by TABLE_NAME, table_Schema, table_Catalog
-      ORDER BY TABLE_NAME;`,
+    fetchTables: `SELECT
+        C.TABLE_NAME AS tableName,
+        C.TABLE_SCHEMA AS tableSchema,
+        C.TABLE_CATALOG AS tableCatalog,
+        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
+        DB_NAME() AS dbName,
+        COUNT(1) AS numberOfColumns
+      FROM
+        INFORMATION_SCHEMA.COLUMNS AS C
+        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+        AND C.TABLE_CATALOG = T.TABLE_CATALOG
+      GROUP by
+        C.TABLE_NAME,
+        C.TABLE_SCHEMA,
+        C.TABLE_CATALOG,
+        T.TABLE_TYPE
+      ORDER BY
+        C.TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -118,6 +129,7 @@ export default class MSSQL implements ConnectionDialect {
           .map((obj) => {
             return {
               name: obj.tableName,
+              isView: !!obj.isView,
               numberOfColumns: parseInt(obj.numberOfColumns, 10),
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,

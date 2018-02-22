@@ -52,6 +52,7 @@ import {
   HTMLPreview,
   SidebarDatabaseItem,
   SidebarTable,
+  SidebarView,
  } from './providers';
 
 namespace SQLTools {
@@ -137,7 +138,7 @@ namespace SQLTools {
   }
 
   export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
-    return insertSnippet(Utils.generateInsertQuery(node.value, node.columns, ConfigManager.format.indentSize));
+    return insertSnippet(Utils.generateInsertQuery(node.value, node.items, ConfigManager.format.indentSize));
   }
 
   export function cmdShowOutputChannel(): void {
@@ -158,7 +159,7 @@ namespace SQLTools {
       .catch(ErrorHandler.create('Error closing connection'));
   }
 
-  export async function cmdShowRecords(node?: SidebarTable) {
+  export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
     try {
       const table = await getTableName(node);
       await runConnectionCommand('showRecords', table);
@@ -168,7 +169,7 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdDescribeTable(node?: SidebarTable): Promise<void> {
+  export async function cmdDescribeTable(node?: SidebarTable | SidebarView): Promise<void> {
     try {
       const table = await getTableName(node);
       await runConnectionCommand('describeTable', table);
@@ -535,7 +536,7 @@ namespace SQLTools {
     ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
   }
 
-  async function getTableName(node?: SidebarTable): Promise<string> {
+  async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
       return node.value;
     }

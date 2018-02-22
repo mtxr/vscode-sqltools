@@ -5,20 +5,27 @@ import {
   EventEmitter,
   ProviderResult,
   TreeDataProvider,
+  TreeItem,
   TreeItemCollapsibleState,
 } from 'vscode';
 import LoggerInterface from '../api/interface/logger';
 import { Logger } from './../api';
 import Connection from './../api/connection';
-import { SidebarColumn, SidebarDatabase, SidebarTable } from './sidebar-provider/sidebar-tree-items';
+import {
+  SidebarColumn,
+  SidebarDatabase,
+  SidebarDatabaseStructure,
+  SidebarTable,
+  SidebarView,
+} from './sidebar-provider/sidebar-tree-items';
 
-export type SidebarDatabaseItem = SidebarDatabase | SidebarTable | SidebarColumn;
+export type SidebarDatabaseItem = SidebarDatabase | SidebarTable | SidebarColumn | SidebarView;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
-  private tree: any = {};
+  private tree: { [database: string]: SidebarDatabase} = {};
   public fireUpdate(): void {
     this.onDidChange.fire();
   }
@@ -31,9 +38,16 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     if (!element) {
       return Promise.resolve(this.toArray(this.tree));
     } else if (element instanceof SidebarDatabase) {
-      return Promise.resolve(this.toArray(element.tables));
-    } else if (element instanceof SidebarTable) {
-      return Promise.resolve(this.toArray(element.columns));
+      const result = [];
+      if (Object.keys(element.tables.items).length > 0) result.push(element.tables);
+      if (Object.keys(element.views.items).length > 0) result.push(element.views);
+      return Promise.resolve(result);
+    } else if (
+      element instanceof SidebarTable
+      || element instanceof SidebarView
+      || element instanceof SidebarDatabaseStructure
+    ) {
+      return Promise.resolve(this.toArray(element.items));
     }
     return [];
   }
@@ -43,23 +57,25 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public setTreeData(tables, columns) {
     this.tree = {};
-    tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((table, index) => {
-      if (!this.tree[table.tableDatabase]) {
-        this.tree[table.tableDatabase] = new SidebarDatabase({ name: table.tableDatabase });
+    tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item, index) => {
+      if (!this.tree[item.tableDatabase]) {
+        this.tree[item.tableDatabase] = new SidebarDatabase(item.tableDatabase);
       }
-      if (!this.tree[table.tableDatabase].tables[table.name]) {
-        this.tree[table.tableDatabase].tables[table.name] = new SidebarTable(table);
-      }
+      this.tree[item.tableDatabase].addItem(item);
     });
     columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
-      this.tree[column.tableDatabase].tables[column.tableName].columns.push(new SidebarColumn(column));
+      const key = this.tree[column.tableDatabase].views.items[column.tableName] ? 'views' : 'tables';
+      this.tree[column.tableDatabase][key].items[column.tableName].addItem(new SidebarColumn(column));
     });
     this.fireUpdate();
   }
 
   private toArray(obj: any) {
+    if (Array.isArray(obj)) {
+      return obj;
+    }
     return Object.keys(obj).map((k) => obj[k]);
   }
 }
 
-export { SidebarColumn, SidebarDatabase, SidebarTable };
+export { SidebarColumn, SidebarDatabase, SidebarTable, SidebarView };
