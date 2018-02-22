@@ -119,8 +119,17 @@ namespace SQLTools {
   export function cmdClearBookmarks(): void {
     bookmarks.clear();
   }
-  export function cmdFormatSql() {
-    VSCode.executeCommand('editor.action.formatSelection');
+
+  // inplace format for any lang
+  export function editorFormatSql(editor: TextEditor, edit: TextEditorEdit): void {
+    try {
+      const indentSize: number = ConfigManager.format.indentSize;
+      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
+      VSCode.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
+      logger.debug('Query formatted!');
+    } catch (error) {
+      ErrorHandler.create('Error formatting query.')(error);
+    }
   }
 
   export async function cmdAppendToCursor(node: SidebarDatabaseItem): Promise<void> {
@@ -330,10 +339,12 @@ namespace SQLTools {
 
   function getExtCommands() {
     return Object.keys(SQLTools).reduce((list, extFn) => {
-      if (!extFn.startsWith('cmd')) return list;
+      if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
       let extCmd = extFn.replace(/^(editor|cmd)/, '');
+      logger.log(`Registering SQLTools.${extCmd}`);
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
-      list.push(VSCode.registerCommand(`${Constants.extNamespace}.${extCmd}`, (...args) => {
+      const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
+      list.push(regFn(`${Constants.extNamespace}.${extCmd}`, (...args) => {
         logger.log(`Command triggered: ${extCmd}`);
         Telemetry.registerCommand(extCmd);
         SQLTools[extFn](...args);
