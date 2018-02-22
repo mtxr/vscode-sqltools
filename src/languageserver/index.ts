@@ -70,6 +70,10 @@ namespace SQLToolsLanguageServer {
 
   async function loadConnectionData(conn: Connection) {
     completionItems = [];
+    if (!conn) {
+      updateSidebar([], []);
+      return completionItems;
+    }
     return conn.getTables()
       .then((t) => Promise.all([t, conn.getColumns()]))
       .then(([t, c]) => {
@@ -148,6 +152,7 @@ namespace SQLToolsLanguageServer {
     OpenConnectionRequest.method,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
     if (!req.conn) {
+      if (activeConnection) activeConnection.close();
       completionItems = [];
       activeConnection = null;
       return {
@@ -170,6 +175,7 @@ namespace SQLToolsLanguageServer {
   server.onRequest(RefreshDataRequest.method, () => loadConnectionData(activeConnection));
 
   server.onRequest(GetTablesAndColumnsRequest.method, async () => {
+    if (!activeConnection) return { tables: [], columns: [] };
     return { tables: await activeConnection.getTables(true), columns: await activeConnection.getColumns(true) };
   });
 

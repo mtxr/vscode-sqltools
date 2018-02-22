@@ -101,7 +101,7 @@ namespace SQLTools {
   }
   export async function cmdBookmarkSelection() {
     try {
-      const query = await getSelectedText();
+      const query = await getSelectedText('bookmark');
       bookmarks.add(await readInput('Query name'), query);
     } catch (e) {
       ErrorHandler.create('Error bookmarking query.')(e);
@@ -144,7 +144,9 @@ namespace SQLTools {
   }
 
   export function cmdCloseConnection(): void {
-    setConnection(null);
+    setConnection(null)
+      .then(() => languageClient.sendRequest(RefreshDataRequest))
+      .catch(ErrorHandler.create('Error closing connection'));
   }
 
   export async function cmdShowRecords(node?: SidebarTable) {
@@ -173,7 +175,7 @@ namespace SQLTools {
 
   export async function cmdExecuteQuery(): Promise<void> {
     try {
-      const query: string = await getSelectedText();
+      const query: string = await getSelectedText('execute query');
       await connect();
       runQuery(query);
       printOutput();
@@ -463,11 +465,11 @@ namespace SQLTools {
     return viewColumn;
   }
 
-  async function getSelectedText() {
+  async function getSelectedText(action = 'proceed') {
     const editor = await getOrCreateEditor();
     const query = editor.document.getText(editor.selection);
     if (isEmpty(query)) {
-      Win.showInformationMessage('Can\'t bookmark. You have selected nothing.');
+      Win.showInformationMessage(`Can't ${action}. You have selected nothing.`);
       throw new DismissedException();
     }
     return query;
