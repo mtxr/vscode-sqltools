@@ -85,6 +85,9 @@ export class ResultsTable extends React.Component {
           if (v === null) return <small>(NULL)</small>
           if (v === true) return <span>TRUE</span>
           if (v === false) return <span>FALSE</span>
+          if (typeof v === 'object' || Array.isArray(v)) {
+            return (<div className='syntax json'><pre>{JSON.stringify(v)}</pre></div>)
+          }
           v = String(v)
           if (!this.state.filtered[r.column.id]) return v
           return (
@@ -105,6 +108,16 @@ export class ResultsTable extends React.Component {
           data={this.props.value.data}
           columns={cols}
           filterable
+          FilterComponent={({ filter, column, onChange }) => {
+            return (
+            <input
+              type="text"
+              placeholder={`Filter by ${column.id}`}
+              style={{ width: '100%' }}
+              value={filter ? filter.value : ''}
+              onChange={event => onChange(event.target.value)}
+            />
+          )}}
           getTdProps={(state, rowInfo, column) => {
             try {
               const v = rowInfo.original[column.id]

@@ -159,6 +159,15 @@
           "light": "dist/resources/icon/refresh-light.svg",
           "dark": "dist/resources/icon/refresh-dark.svg"
         }
+      },
+      {
+        "title": "New SQL File",
+        "command": "SQLTools.newSqlFile",
+        "category": "SQLTools",
+        "icon": {
+          "light": "dist/resources/icon/new-sql-light.svg",
+          "dark": "dist/resources/icon/new-sql-dark.svg"
+        }
       }
     ],
     "keybindings": [
@@ -406,7 +415,12 @@
         {
           "command": "SQLTools.refreshSidebar",
           "when": "view == SQLTools.connectionExplorer",
-          "group": "navigation"
+          "group": "navigation@2"
+        },
+        {
+          "command": "SQLTools.newSqlFile",
+          "when": "view == SQLTools.connectionExplorer",
+          "group": "navigation@1"
         }
       ],
       "view/item/context": [

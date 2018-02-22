@@ -182,6 +182,10 @@ namespace SQLTools {
     }
   }
 
+  export async function cmdNewSqlFile() {
+    return await getOrCreateEditor(true);
+  }
+
   export async function cmdRunFromInput(): Promise<void> {
 
     try {
@@ -445,7 +449,7 @@ namespace SQLTools {
 
   async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
     if (forceCreate || !Win.activeTextEditor) {
-      const doc = await Wspc.openTextDocument(Uri.parse(`untitled:${editingBufferName}`));
+      const doc = await Wspc.openTextDocument({ language: 'sql' });
       await Win.showTextDocument(doc, 1, false);
     }
     return Win.activeTextEditor;
