@@ -1,12 +1,15 @@
 import Utils from './../utils';
-import mssql = require('mssql');
-import { ConnectionCredentials } from './../interface/connection-credentials';
-import { ConnectionDialect } from './../interface/connection-dialect';
-import DatabaseInterface from './../interface/database-interface';
-import { DialectQueries } from './../interface/dialect-queries';
+import tds = require('tedious');
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  DialectQueries,
+} from './../interface';
 
 export default class MSSQL implements ConnectionDialect {
   public connection: Promise<any>;
+  private connectionInstance: tds.Connection;
   private queries: DialectQueries = {
     describeTable: 'SP_COLUMNS :table',
     fetchColumns: `SELECT TABLE_NAME AS tableName,
@@ -20,71 +23,102 @@ export default class MSSQL implements ConnectionDialect {
         IS_NULLABLE as isNullable
       FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG= DB_NAME()`,
     fetchRecords: 'SELECT TOP :limit * FROM :table',
-    fetchTables: `SELECT TABLE_NAME AS tableName,
-        TABLE_SCHEMA AS tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DB_NAME() as dbName,
-        COUNT(1) as numberOfColumns
-      FROM INFORMATION_SCHEMA.COLUMNS
-      GROUP by TABLE_NAME, table_Schema, table_Catalog
-      ORDER BY TABLE_NAME;`,
+    fetchTables: `SELECT
+        C.TABLE_NAME AS tableName,
+        C.TABLE_SCHEMA AS tableSchema,
+        C.TABLE_CATALOG AS tableCatalog,
+        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
+        DB_NAME() AS dbName,
+        COUNT(1) AS numberOfColumns
+      FROM
+        INFORMATION_SCHEMA.COLUMNS AS C
+        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+        AND C.TABLE_CATALOG = T.TABLE_CATALOG
+      GROUP by
+        C.TABLE_NAME,
+        C.TABLE_SCHEMA,
+        C.TABLE_CATALOG,
+        T.TABLE_TYPE
+      ORDER BY
+        C.TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
   }
 
   public open() {
-    if (this.connection) {
-      return Promise.resolve(this.connection);
-    }
-    const options = {
-      connectionTimeout: this.credentials.connectionTimeout,
-      database: this.credentials.database,
+    const config: any = {
       password: this.credentials.password,
-      port: this.credentials.port,
       server: this.credentials.server,
-      user: this.credentials.username,
+      userName: this.credentials.username,
     };
+    config.options = {
+      connectTimeout: this.credentials.connectionTimeout * 1000,
+      database: this.credentials.database,
+      port: this.credentials.port,
+      // return on done
+      useColumnNames: true,
+      rowCollectionOnDone: true,
+      rowCollectionOnRequestCompletion: true,
+    };
+    if (this.credentials.dialectOptions) {
+      config.options = Object.assign({}, config.options, this.credentials.dialectOptions);
+    }
 
-    const self = this;
-    const pool = new mssql.ConnectionPool(options);
     return new Promise((resolve, reject) => {
-      pool.connect((err) => {
+      this.connectionInstance = new tds.Connection(config);
+      this.connectionInstance.on('error', (err) => {
+        return reject(err);
+      });
+      this.connectionInstance.on('connect', (err) => {
         if (err) return reject(err);
-        self.connection = Promise.resolve(pool);
-        return resolve(self.connection);
+        this.connection = Promise.resolve(this.connectionInstance);
+        resolve(this.connectionInstance);
       });
     });
   }
 
   public close() {
     if (!this.connection) return Promise.resolve();
-
-    return this.connection
-      .then((pool) => Promise.resolve(pool.close()));
+    this.connectionInstance.on('end', () => {
+      this.connectionInstance = null;
+      this.connection = null;
+    });
+    return this.connection.then(() => {
+      try {
+        this.connectionInstance.cancel();
+      } catch (e) { /**/ }
+      this.connectionInstance.close();
+    });
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+    const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((a) => a && `${a.trim()}`.length > 0);
     return this.open()
-    .then((pool) => pool.request().query(query))
-    .then((results) => {
-      const queries = query.split(';');
-      if (results.recordsets.length === 0) {
-        return [];
-      }
-      return results.recordsets.map((r, i) => {
-        const messages = [];
-        if (r.rowsAffected) {
-          messages.push(`${r.rowsAffected} rows were affected.`);
-        }
-        return {
-          cols: Array.isArray(r) ? Object.keys(r[0]) : [],
-          messages,
-          query: queries[i],
-          results: r,
-        };
+      .then(() => {
+        return new Promise((resolve, reject) => {
+          const results = [];
+          let error = null;
+          const request = new tds.Request(query, (err) => error = err);
+          let count = 0;
+          const cb = (rowCount) => {
+            if (typeof rowCount !== 'undefined' && queries[count].toLowerCase().indexOf('SELECT') === -1) {
+              results[count].messages.push(`${rowCount} rows were affected.`);
+            }
+            ++count;
+          };
+          request.on('row', (row) => this.prepareRow(results, queries, count, row));
+          request.on('done', cb);
+          request.on('doneInProc', cb);
+          request.on('doneProc', cb);
+          request.on('requestCompleted', () => {
+            if (error) return reject(error);
+            return resolve(results);
+          });
+          this.connectionInstance.execSql(request);
+        }) as Promise<DatabaseInterface.QueryResults[]>;
       });
-    });
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
@@ -95,6 +129,7 @@ export default class MSSQL implements ConnectionDialect {
           .map((obj) => {
             return {
               name: obj.tableName,
+              isView: !!obj.isView,
               numberOfColumns: parseInt(obj.numberOfColumns, 10),
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,
@@ -126,5 +161,17 @@ export default class MSSQL implements ConnectionDialect {
 
   public showRecords(table: string, limit: number = 10) {
     return this.query(Utils.replacer(this.queries.fetchRecords, {limit, table }));
+  }
+  private prepareRow(results: any[], queries: string [], count: number, row: any): any {
+    results[count] = results[count] || {
+      cols: row ? Object.keys(row) : [],
+      messages: [],
+      query: queries[count],
+      results: [],
+    };
+    results[count].results.push(Object.keys(row).reduce((p, c) => {
+      p[c] = row[c].value;
+      return p;
+    }, {}));
   }
 }

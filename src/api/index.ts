@@ -1,6 +1,11 @@
-import BookmarksStorage from './bookmarks-storage';
-import History from './history';
-import Logger from './logger';
-import Utils from './utils';
-
-export { Utils, BookmarksStorage, Logger, History };
+export { default as BookmarksStorage } from './bookmarks-storage';
+export { default as Logger } from './logger';
+export { default as History } from './history';
+export { default as Utils } from './utils';
+export { default as Telemetry } from './telemetry';
+export { default as Connection, SerializedConnection } from './connection';
+export { default as ConfigManager } from './config-manager';
+export { default as ErrorHandler } from './error-handler';
+export { default as ConnectionManager } from './connection-manager';
+export * from './exception';
+export * from './interface';

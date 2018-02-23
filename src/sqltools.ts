@@ -1,497 +1,439 @@
-/// <reference path="./../node_modules/@types/node/index.d.ts" />
-
-import getPort = require('get-port');
-import Path = require('path');
 import {
   commands as VSCode,
-  commands as VsCommands,
-  Disposable,
   ExtensionContext,
-  FormattingOptions,
   languages as Languages,
-  OutputChannel,
+  MarkdownString,
   Position,
   QuickPickItem,
   Range,
-  Selection,
   SnippetString,
   StatusBarAlignment,
   StatusBarItem,
-  TextDocument,
-  TextDocumentChangeEvent,
-  TextEdit,
   TextEditor,
   TextEditorEdit,
-  TextEditorSelectionChangeEvent,
-  ThemeColor,
   Uri,
   ViewColumn,
-  window as Window,
-  workspace as Workspace,
-  WorkspaceConfiguration,
+  window as Win,
+  workspace as Wspc,
 } from 'vscode';
 import {
-  DocumentRangeFormattingParams,
-  DocumentRangeFormattingRequest,
   LanguageClient,
   LanguageClientOptions,
-  RequestType,
-  RequestType0,
   ServerOptions,
-  TextDocumentIdentifier,
   TransportKind,
 } from 'vscode-languageclient';
-import { BookmarksStorage, History, Logger, Utils } from './api';
-import ConfigManager from './api/config-manager';
-import ErrorHandler from './api/error-handler';
-import { DismissedException } from './api/exception';
-import { ConnectionCredentials } from './api/interface/connection-credentials';
-import DatabaseInterface from './api/interface/database-interface';
-import Connection from './connection';
-import ConnectionManager from './connection-manager';
+import {
+  BookmarksStorage,
+  ConfigManager,
+  DatabaseInterface,
+  DismissedException,
+  ErrorHandler,
+  History,
+  Logger,
+  LoggerInterface,
+  SerializedConnection,
+  SettingsInterface,
+  Telemetry,
+  Utils,
+} from './api';
 import Constants from './constants';
-import { SelectionFormatter } from './formatting-provider';
-import HttpContentProvider from './http-provider';
-import { Settings } from './interface/settings';
-import { createNewConnection, SetQueryResults } from './languageserver/requests/connection-requests';
+import {
+  CreateNewConnectionRequest,
+  GetConnectionListRequest,
+  GetTablesAndColumnsRequest,
+  OpenConnectionRequest,
+  RefreshDataRequest,
+  RunCommandRequest,
+  UpdateTableAndColumnsRequest,
+} from './contracts/connection-requests';
 import LogWriter from './log-writer';
-import { SidebarTableColumnProvider } from './sidebar-provider';
-import { SidebarColumn, SidebarTable } from './sidebar-tree-items';
-import { SuggestionsProvider } from './suggestions-provider';
-import Telemetry from './telemetry';
-
-const {
-  registerCommand,
-  registerTextEditorCommand,
-} = VSCode;
-
-/* tslint:disable: no-var-requires */
-const openurl = require('opn');
-const fs = require('fs');
+import {
+  ConnectionExplorer,
+  HTMLPreview,
+  SidebarDatabaseItem,
+  SidebarTable,
+  SidebarView,
+ } from './providers';
 
 namespace SQLTools {
+  const cfgKey: string = Constants.extNamespace.toLowerCase();
+  const preview = new HTMLPreview(Uri.parse(`sqltools://html`));
+  const connectionExplorer = new ConnectionExplorer();
+  const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
+  const editingBufferName = `${Constants.bufferName}`;
+  const logger = new Logger(LogWriter);
   let ctx: ExtensionContext;
-  let logger: Logger;
   let bookmarks: BookmarksStorage;
   let history: History;
-  let outputLogs: LogWriter;
-  let activeConnection: Connection;
-  let extDatabaseStatus: StatusBarItem;
-  let sqlconnectionTreeProvider: SidebarTableColumnProvider;
-  let suggestionsProvider: SuggestionsProvider;
-  let previewProvider: HttpContentProvider;
+  let lastUsedConn: SerializedConnection;
   let languageClient: LanguageClient;
-  let httpServerPort: number;
   let activationTimer: Utils.Timer;
-  let languageServerTimer: Utils.Timer;
-  const previewUri: Uri = Uri.parse(`sqltools://html`);
-  const setupUri: Uri = previewUri.with({ fragment: '/setup' });
-  const resultsUri: Uri = previewUri.with({ fragment: '/query-results' });
-  const cfgKey: string = Constants.extNamespace.toLowerCase();
 
   export async function start(context: ExtensionContext): Promise<void> {
     activationTimer = new Utils.Timer();
-    languageServerTimer = new Utils.Timer();
     if (ctx) return;
     ctx = context;
     const localData = Utils.localSetupInfo();
+    Telemetry.register();
     loadConfigs();
-    httpServerPort = await getPort({ port: localData.httpServerPort || 5123 });
+    const httpServerPort: number = await require('get-port')({ port: localData.httpServerPort || 5123 });
     Utils.writeLocalSetupInfo({ httpServerPort });
-    registerProviders();
-    registerEvents();
-    registerCommands();
-    registerStatusBar();
-    help();
-    registerLanguageServer();
-    autoConnectIfActive();
+    preview.setPort(httpServerPort);
+    await registerExtension();
+    updateStatusBar();
     activationTimer.end();
-    logger.debug(`Activation Time: ${activationTimer.elapsed()}ms`);
+    logger.log(`Activation Time: ${activationTimer.elapsed()}ms`);
     Telemetry.registerTime('activation', activationTimer);
+    help();
   }
 
   export function stop(): void {
     return ctx.subscriptions.forEach((sub) => void sub.dispose());
   }
 
-  /**
-   * Bookmark commands
-   */
-  export async function editBookmark(): Promise<void> {
-    const query = await showBookmarks();
-    if (!query) return;
-    const editingBufferName = `${Constants.bufferName}`;
-    const doc = await Workspace.openTextDocument(Uri.parse(`untitled:${editingBufferName}`));
-    const editor = await Window.showTextDocument(doc, 1, false);
-    editor.edit((edit) => {
-      const headerText = ''.replace('{queryName}', query.label);
-      edit.insert(new Position(0, 0), `${headerText}${query.detail}`);
-    });
-  }
-  export async function bookmarkSelection(editor: TextEditor, edit: TextEditorEdit) {
+  export async function cmdEditBookmark(): Promise<void> {
     try {
-      const query = editor.document.getText(editor.selection);
-      if (!query || query.length === 0) {
-        return Window.showInformationMessage('Can\'t bookmark. You have selected nothing.');
-      }
-      const name = await Window.showInputBox({ prompt: 'Query name' });
-      if (!name || name.length === 0) {
-        return Window.showInformationMessage('Can\'t bookmark. Name not provided.');
-      }
-      bookmarks.add(name, query);
-      logger.debug(`Bookmarked query named '${name}'`);
+      const query = (await bookmarksMenu()) as QuickPickItem;
+      const headerText = ''.replace('{queryName}', query.label);
+      insertText(`${headerText}${query.detail}`, true);
+    } catch (e) {
+      ErrorHandler.create('Could not edit bookmarked query')(e);
+    }
+  }
+  export async function cmdBookmarkSelection() {
+    try {
+      const query = await getSelectedText('bookmark');
+      bookmarks.add(await readInput('Query name'), query);
     } catch (e) {
       ErrorHandler.create('Error bookmarking query.')(e);
     }
   }
 
-  export async function showBookmarks(): Promise<QuickPickItem> {
-    const all = bookmarks.all();
-
-    const options = Object.keys(all).map((key) => {
-      return {
-        description: '',
-        detail: all[key],
-        label: key,
-      };
-    });
-    const res = await Window.showQuickPick(options);
-    if (!res || !res.detail) throw new DismissedException();
-    return res;
+  export async function cmdDeleteBookmark(): Promise<void> {
+    try {
+      bookmarks.delete((await bookmarksMenu('label')));
+    } catch (e) {
+      ErrorHandler.create('Error deleting bookmark.')(e);
+    }
   }
 
-  export async function deleteBookmark(): Promise<void> {
-    const toDelete = await showBookmarks();
-    if (!toDelete) return;
-    bookmarks.delete(toDelete.label);
-    logger.debug(`Bookmarked query '${toDelete.label}' deleted!`);
-  }
-
-  export function clearBookmarks(): void {
+  export function cmdClearBookmarks(): void {
     bookmarks.clear();
   }
-  /**
-   * End of Bookmark commands
-   */
 
-  /**
-   * Utils commands
-   */
-  export function formatSql(editor: TextEditor, edit: TextEditorEdit) {
-    VsCommands.executeCommand('editor.action.formatSelection');
+  // inplace format for any lang
+  export function editorFormatSql(editor: TextEditor, edit: TextEditorEdit): void {
+    try {
+      const indentSize: number = ConfigManager.format.indentSize;
+      edit.replace(editor.selection, Utils.formatSql(editor.document.getText(editor.selection), indentSize));
+      VSCode.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
+      logger.debug('Query formatted!');
+    } catch (error) {
+      ErrorHandler.create('Error formatting query.')(error);
+    }
   }
 
-  /**
-   * Utils commands
-   */
-  export async function appendToCursor(node: SidebarColumn | SidebarTable): Promise<void> {
-    const editor = await getOrCreateEditor();
-    editor.edit((edit) => {
-      const cursors: Selection[] = editor.selections;
-      cursors.forEach((cursor) => edit.insert(cursor.active, node.value));
-    });
+  export async function cmdAppendToCursor(node: SidebarDatabaseItem): Promise<void> {
+    insertText(node.value);
   }
 
-  export async function generateInsertQuery(node: SidebarTable): Promise<boolean> {
-    const indentSize = ConfigManager.get('format.indentSize', 2) as number;
-    const snippet = new SnippetString(Utils.generateInsertQuery(node.value, node.columns, indentSize));
-    const editor = await getOrCreateEditor();
-    return await editor.insertSnippet(snippet);
+  export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
+    return insertSnippet(Utils.generateInsertQuery(node.value, node.items, ConfigManager.format.indentSize));
   }
 
-  export function showOutputChannel(): void {
-    outputLogs.showOutput();
+  export function cmdShowOutputChannel(): void {
+    LogWriter.showOutput();
   }
-  export function aboutVersion(): void {
+  export function cmdAboutVersion(): void {
     const message = `Using SQLTools ${Constants.version}`;
     logger.info(message);
-    Window.showInformationMessage(message, { modal: true });
+    Win.showInformationMessage(message, { modal: true });
   }
-  export async function selectConnection(): Promise<void> {
-    connect().catch(ErrorHandler.create('Error selecting connection'));
-  }
-
-  export function closeConnection(): void {
-    setConnection(null);
+  export async function cmdSelectConnection(): Promise<void> {
+    connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
-  export async function showRecords(node?: SidebarTable) {
+  export function cmdCloseConnection(): void {
+    setConnection(null)
+      .then(() => languageClient.sendRequest(RefreshDataRequest))
+      .catch(ErrorHandler.create('Error closing connection'));
+  }
+
+  export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
     try {
       const table = await getTableName(node);
-      printOutput(await activeConnection.showRecords(table), `Some records of ${table} : SQLTools`);
+      await runConnectionCommand('showRecords', table);
+      printOutput(`Some records of ${table} : SQLTools`);
     } catch (e) {
-      ErrorHandler.create('Error while showing table records', showOutputChannel)(e);
+      ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
     }
   }
 
-  export async function describeTable(node?: SidebarTable): Promise<void> {
+  export async function cmdDescribeTable(node?: SidebarTable | SidebarView): Promise<void> {
     try {
       const table = await getTableName(node);
-      printOutput(await activeConnection.describeTable(table), `Describing table ${table} : SQLTools`);
+      await runConnectionCommand('describeTable', table);
+      printOutput(`Describing table ${table} : SQLTools`);
     } catch (e) {
-      ErrorHandler.create('Error while describing table records', showOutputChannel)(e);
+      ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
     }
   }
 
-  export function describeFunction() {
-    Window.showInformationMessage('Not implemented yet.');
+  export function cmdDescribeFunction() {
+    Win.showInformationMessage('Not implemented yet.');
   }
 
-  export async function executeQuery(editor: TextEditor, edit: TextEditorEdit): Promise<void> {
-    let range: Range;
-    if (!editor.selection.isEmpty) {
-      range = editor.selection;
+  export async function cmdExecuteQuery(): Promise<void> {
+    try {
+      const query: string = await getSelectedText('execute query');
+      await connect();
+      runQuery(query);
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
     }
-    const query: string = editor.document.getText(range);
-    if (!query || query.length === 0) {
-      Window.showInformationMessage('You should select a query first.');
-      return;
-    }
+  }
+
+  export async function cmdNewSqlFile() {
+    return await getOrCreateEditor(true);
+  }
+
+  export async function cmdRunFromInput(): Promise<void> {
+
     try {
       await connect();
-      const result = await activeConnection.query(query);
-      history.add(query);
-      printOutput(result);
+      const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
+      runQuery(query);
+      printOutput();
     } catch (e) {
-      ErrorHandler.create('Error fetching records.', showOutputChannel)(e);
+      ErrorHandler.create('Error running query.', cmdShowOutputChannel)(e);
     }
   }
 
-  export async function runFromInput(): Promise<void> {
-    await connect();
-    const selectedQuery = await Window.showInputBox({
-      placeHolder: `Type the query to run on ${activeConnection.getName()}`,
-    });
-
-    if (!selectedQuery || selectedQuery.trim().length === 0) {
-      return;
-    }
-    try {
-      const result = await activeConnection.query(selectedQuery);
-      history.add(selectedQuery);
-      printOutput(result);
-    } catch (e) {
-      ErrorHandler.create('Error running query.', showOutputChannel)(e);
-    }
-  }
-
-  export async function showHistory(): Promise<string> {
-    const options = history.all().map((query) => {
-      return {
-        description: '',
-        label: query,
-      } as QuickPickItem;
-    });
-    const h = await Window.showQuickPick(options);
-    return h.label;
-  }
-
-  export async function runFromHistory(): Promise<void> {
+  export async function cmdRunFromHistory(): Promise<void> {
     try {
       await connect();
-      const query = await showHistory();
-      await printOutput(await activeConnection.query(query));
+      runQuery(await historyMenu(), false);
+      await printOutput();
     } catch (e) {
-      ErrorHandler.create('Error while running query.', showOutputChannel)(e);
+      ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
     }
   }
 
-  export async function runFromBookmarks(): Promise<void> {
-    await connect();
-    const bookmark = await showBookmarks();
-    printOutput(await activeConnection.query(bookmark.detail));
+  export async function cmdRunFromBookmarks(): Promise<void> {
+    try {
+      await connect();
+      runQuery(await bookmarksMenu('detail'));
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
+    }
   }
 
-  export function setupSQLTools() {
-    return openHtml(setupUri, 'SQLTools Setup Connection');
+  export async function cmdSetupSQLTools() {
+    return openHtml(preview.uri.with({ fragment: '/setup' }), 'SQLTools Setup Connection');
   }
 
-  export function refreshSidebar() {
-    sqlconnectionTreeProvider.refresh();
+  export function cmdRefreshSidebar() {
+    languageClient.sendRequest(RefreshDataRequest);
   }
 
   /**
    * Management functions
    */
 
-  async function showConnectionMenu(): Promise<string> {
-    const options: QuickPickItem[] = ConnectionManager.getConnections(logger).map((connection: Connection) => {
+  async function connectionMenu(): Promise<SerializedConnection> {
+    const connections: SerializedConnection[] = await languageClient.sendRequest(GetConnectionListRequest);
+
+    const sel = (await quickPick(connections.map((c) => {
       return {
-        description: (activeConnection && connection.getName() === activeConnection.getName())
-          ? 'Currently connected' : '',
-        detail: `${connection.getUsername()}@${connection.getServer()}:${connection.getPort()}`,
-        label: connection.getName(),
+        description: c.isConnected ? 'Currently connected' : '',
+        detail: `${c.username}@${c.server}:${c.port}`,
+        label: c.name,
       } as QuickPickItem;
-    });
-    const sel: QuickPickItem = await Window.showQuickPick(options);
-    if (!sel || !sel.label) throw new DismissedException();
-    return sel.label;
+    }), 'label')) as string;
+    return connections.find((c) => c.name === sel);
   }
 
-  async function showTableMenu(): Promise<string> {
-    await connect();
-    const tables = await activeConnection.getTables(true);
-    const sel: QuickPickItem = await Window.showQuickPick(tables
+  async function bookmarksMenu(prop?: string): Promise<QuickPickItem | string> {
+    const all = bookmarks.all();
+
+    return await quickPick(Object.keys(all).map((key) => {
+      return {
+        description: '',
+        detail: all[key],
+        label: key,
+      };
+    }), prop);
+  }
+
+  async function runConnectionCommand(command, ...args) {
+    return await languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
+  }
+
+  async function runQuery(query, addHistory = true, handleError: boolean = false) {
+    const res = await languageClient.sendRequest(RunCommandRequest.method, {
+      conn: lastUsedConn,
+      command: 'query',
+      args: [query],
+    });
+    if (addHistory) history.add(query);
+    return res;
+  }
+
+  async function tableMenu(prop?: string): Promise<string> {
+    const { tables } = await getConnData();
+    return await quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
-      }));
-    if (!sel || !sel.label) throw new DismissedException();
-    return sel.label;
+      }), prop);
   }
 
-  async function printOutput(results: DatabaseInterface.QueryResults[], outputName: string = 'SQLTools Results') {
-    await languageClient.sendRequest(SetQueryResults.method, { data: results });
-    openHtml(resultsUri, outputName);
+  async function historyMenu(prop: string = 'label'): Promise<string> {
+    return await quickPick(history.all().map((query) => {
+      return {
+        description: '',
+        label: query,
+      } as QuickPickItem;
+    }), prop);
+  }
+  async function printOutput(outputName: string = 'SQLTools Results') {
+    openHtml(preview.uri.with({ fragment: '/query-results' }), outputName);
   }
 
-  function autoConnectIfActive(currConn?: string) {
-    const defaultConnection: string = currConn || ConfigManager.get('autoConnectTo', null) as string;
-    logger.info(`Configuration set to auto connect to: ${defaultConnection}`);
+  async function getConnData() {
+    return await languageClient.sendRequest(GetTablesAndColumnsRequest.method) as {
+      tables: DatabaseInterface.Table[],
+      coluuns: DatabaseInterface.TableColumn[],
+    };
+  }
+
+  function autoConnectIfActive(currConn?: SerializedConnection) {
+    let defaultConnection = currConn || null;
+    const a = ConfigManager.autoConnectTo;
+    if (!defaultConnection && ConfigManager.autoConnectTo) {
+      defaultConnection = {
+        name: ConfigManager.connections
+          .find((conn) => conn.name === ConfigManager.autoConnectTo).name,
+      } as SerializedConnection;
+    }
     if (!defaultConnection) {
       return setConnection();
     }
-    const c = ConnectionManager.getConnection(defaultConnection, logger);
-    if (!c) {
-      return setConnection();
-    }
-    setConnection(c);
+    logger.info(`Configuration set to auto connect to: ${defaultConnection.name}`);
+    setConnection(defaultConnection);
   }
   function loadConfigs() {
-    ConfigManager.setSettings(Workspace.getConfiguration(cfgKey) as Settings);
-    bookmarks = new BookmarksStorage();
-    const size = ConfigManager.get('historySize', 100) as number;
-    history = (history || new History(size));
+    ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
     setupLogger();
-    logger.debug(`Env: ${process.env.NODE_ENV}`);
+    bookmarks = new BookmarksStorage();
+    history = (history || new History(ConfigManager.historySize));
+    logger.log(`Env: ${process.env.NODE_ENV}`);
   }
   function setupLogger() {
-    outputLogs = new LogWriter();
-    logger = (new Logger(outputLogs))
-    .setLevel(Logger.levels[ConfigManager.get('logLevel', 'DEBUG') as string])
-    .setLogging(ConfigManager.get('logging', false) as boolean);
+    logger.setLevel(Logger.levels[ConfigManager.logLevel])
+      .setLogging(ConfigManager.logging);
     ErrorHandler.setLogger(logger);
-    Telemetry.register(logger);
+    ErrorHandler.setOutputFn(Win.showErrorMessage);
+    Telemetry.setLogger(logger);
   }
 
-  function registerCommands(): void {
-    [
-      'bookmarkSelection',
-      'executeQuery',
-      'formatSql',
-    ].forEach((c) => registerExtCmd(c, registerTextEditorCommand));
-
-    [
-      'aboutVersion',
-      'appendToCursor',
-      'clearBookmarks',
-      'closeConnection',
-      'deleteBookmark',
-      'describeFunction',
-      'describeTable',
-      'editBookmark',
-      'generateInsertQuery',
-      'refreshSidebar',
-      'runFromBookmarks',
-      'runFromHistory',
-      'runFromInput',
-      'selectConnection',
-      'setupSQLTools',
-      'showHistory',
-      'showOutputChannel',
-      'showRecords',
-    ].forEach((c) => registerExtCmd(c, registerCommand));
-  }
-
-  function registerExtCmd(cmd: string, regFn: Function) {
-    ctx.subscriptions.push(regFn(`${Constants.extNamespace}.${cmd}`, (...args) => {
-      logger.debug(`Command triggered: ${cmd}`);
-      Telemetry.registerCommand(cmd);
-      SQLTools[cmd](...args);
-    }));
-  }
-
-  function registerStatusBar(): void {
-    extDatabaseStatus = Window.createStatusBarItem(StatusBarAlignment.Left, 10);
-    ctx.subscriptions.push(extDatabaseStatus);
-    extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
-    extDatabaseStatus.tooltip = 'Select a connection';
-    updateStatusBar();
+  function getExtCommands() {
+    return Object.keys(SQLTools).reduce((list, extFn) => {
+      if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
+      let extCmd = extFn.replace(/^(editor|cmd)/, '');
+      logger.log(`Registering SQLTools.${extCmd}`);
+      extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
+      const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
+      list.push(regFn(`${Constants.extNamespace}.${extCmd}`, (...args) => {
+        logger.log(`Command triggered: ${extCmd}`);
+        Telemetry.registerCommand(extCmd);
+        SQLTools[extFn](...args);
+      }));
+      logger.log(`Command ${Constants.extNamespace}.${extCmd} registered.`);
+      return list;
+    }, []);
   }
 
   function updateStatusBar() {
+    extDatabaseStatus.tooltip = 'Select a connection';
+    extDatabaseStatus.command = `${Constants.extNamespace}.selectConnection`;
     extDatabaseStatus.text = '$(database) Connect';
-    if (activeConnection) {
-      extDatabaseStatus.text = `$(database) ${activeConnection.getName()}`;
+    if (lastUsedConn) {
+      extDatabaseStatus.text = `$(database) ${lastUsedConn.name}`;
     }
-    if (ConfigManager.get('showStatusbar', true)) {
+    if (ConfigManager.showStatusbar) {
       extDatabaseStatus.show();
     } else {
       extDatabaseStatus.hide();
     }
   }
 
-  function registerProviders() {
-    previewProvider = new HttpContentProvider(httpServerPort, previewUri);
+  async function registerExtension() {
+    Win.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, connectionExplorer);
     ctx.subscriptions.push(
-      Workspace.registerTextDocumentContentProvider(previewUri.scheme, previewProvider),
+      LogWriter.getOutputChannel(),
+      Wspc.onDidChangeConfiguration(reloadConfig),
+      await getLanguageServerDisposable(),
+      Wspc.registerTextDocumentContentProvider(preview.uri.scheme, preview),
+      ...getExtCommands(),
+      extDatabaseStatus,
     );
-    sqlconnectionTreeProvider = new SidebarTableColumnProvider(activeConnection, logger);
-    Window.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, sqlconnectionTreeProvider);
-    suggestionsProvider = new SuggestionsProvider(logger);
-    const completionTriggers = ['.', ' '];
-    ctx.subscriptions.push(
-      Languages.registerCompletionItemProvider(
-        ConfigManager.get('completionLanguages', ['sql']) as string[],
-        suggestionsProvider, ...completionTriggers,
-      ),
-    );
+
+    registerLanguageServerRequests();
   }
 
-  function registerEvents() {
-    const event: Disposable = Workspace.onDidChangeConfiguration(reloadConfig);
-    ctx.subscriptions.push(event);
+  async function registerLanguageServerRequests() {
+    languageClient.onReady().then(() => {
+      languageClient.onRequest(CreateNewConnectionRequest.method, (newConnPostData) => {
+        const connList = ConfigManager.connections;
+        connList.push(newConnPostData.connInfo);
+        return setSettings('connections', connList);
+      });
+      languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ tables, columns }) => {
+        connectionExplorer.setTreeData(tables, columns);
+      });
+      autoConnectIfActive(lastUsedConn);
+    }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
-
   function reloadConfig() {
-    const currentConnection = activeConnection ? activeConnection.getName() : null;
-    ConfigManager.setSettings(Workspace.getConfiguration(cfgKey) as Settings);
-    logger.info('Config reloaded!');
     loadConfigs();
-    autoConnectIfActive(currentConnection);
+    logger.info('Config reloaded!');
+    autoConnectIfActive(lastUsedConn);
     updateStatusBar();
   }
 
-  async function setConnection(connection?: Connection): Promise<Connection> {
-    if (activeConnection) activeConnection.close();
-    if (connection && connection.needsPassword()) await askForPassword(connection);
-    activeConnection = connection;
+  async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
+    let password = null;
+    if (c && c.needsPassword) password = await askForPassword(c);
+    lastUsedConn = c;
     updateStatusBar();
-    suggestionsProvider.setConnection(activeConnection);
-    sqlconnectionTreeProvider.setConnection(activeConnection);
-    if (!activeConnection) return null;
-    await activeConnection.connect();
-    return activeConnection;
+    lastUsedConn = (await languageClient.sendRequest(
+      OpenConnectionRequest.method,
+      { conn: c, password },
+    )) as SerializedConnection;
+    return lastUsedConn;
   }
 
-  async function askForPassword(connection): Promise<Connection> {
-    const password = await Window.showInputBox({ prompt: `${connection.getName()} password`, password: true });
-    if (!password || password.length === 0) {
-      throw new Error('Password not provided.');
-    }
-    connection.setPassword(password);
-    return connection;
+  async function askForPassword(c: SerializedConnection): Promise<string | null> {
+    const password = await Win.showInputBox({
+      prompt: `${c.name} password`,
+      password: true,
+      validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
+    });
+    return password;
   }
-  async function connect(): Promise<Connection> {
-    if (activeConnection && activeConnection.isConnected()) {
-      return activeConnection;
+  async function connect(force = false): Promise<SerializedConnection> {
+    if (!force && lastUsedConn) {
+      return lastUsedConn;
     }
-    const connName: string = await showConnectionMenu();
+    const c: SerializedConnection = await connectionMenu();
     history.clear();
-    return setConnection(ConnectionManager.getConnection(connName, logger));
+    return setConnection(c);
   }
 
-  async function registerLanguageServer() {
-    const serverModule = ctx.asAbsolutePath(Path.join('dist', 'languageserver', 'index.js'));
+  async function getLanguageServerDisposable() {
+    const serverModule = ctx.asAbsolutePath(require('path').join('dist', 'languageserver', 'index.js'));
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
 
     const serverOptions: ServerOptions = {
@@ -499,90 +441,120 @@ namespace SQLTools {
       run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
     };
 
-    const selector = (ConfigManager.get('completionLanguages', ['sql']) as string[])
-      .concat(ConfigManager.get('formatLanguages', ['sql']) as string[]);
+    const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages);
 
     const clientOptions: LanguageClientOptions = {
       documentSelector: selector,
       synchronize: {
         configurationSection: 'sqltools',
-        fileEvents: Workspace.createFileSystemWatcher('**/.sqltoolsrc'),
+        fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
     };
 
     languageClient = new LanguageClient(
-      'language-server',
+      'sqltools-language-server',
       'SQLTools Language Server',
       serverOptions,
       clientOptions,
     );
-    ctx.subscriptions.push(languageClient.start());
-    await languageClient.onReady();
-    languageClient.onRequest(createNewConnection.method, (newConnPostData) => {
-      const connList = ConfigManager.get('connections', []) as any[];
-      connList.push(newConnPostData.connInfo);
-      return setSettings('connections', connList);
-    });
-    languageServerTimer.end();
-    logger.info(`Language server started in ${languageServerTimer.elapsed()}ms`);
+
+    return await languageClient.start();
   }
 
-  async function getOrCreateEditor(): Promise<TextEditor> {
-    if (!Window.activeTextEditor) {
-      await VsCommands.executeCommand('workbench.action.files.newUntitledFile');
+  async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
+    if (forceCreate || !Win.activeTextEditor) {
+      const doc = await Wspc.openTextDocument({ language: 'sql' });
+      await Win.showTextDocument(doc, 1, false);
     }
-    return Window.activeTextEditor;
+    return Win.activeTextEditor;
+  }
+
+  function getCurrentViewColumn() {
+    let viewColumn: ViewColumn = ViewColumn.One;
+    if (Win.activeTextEditor && Win.activeTextEditor.viewColumn) {
+      viewColumn = Win.activeTextEditor.viewColumn;
+    }
+    return viewColumn;
+  }
+
+  async function getSelectedText(action = 'proceed') {
+    const editor = await getOrCreateEditor();
+    const query = editor.document.getText(editor.selection);
+    if (isEmpty(query)) {
+      Win.showInformationMessage(`Can't ${action}. You have selected nothing.`);
+      throw new DismissedException();
+    }
+    return query;
+  }
+  async function insertText(text: string, forceCreate = false) {
+    const editor = await getOrCreateEditor(forceCreate);
+    editor.edit((edit) => {
+      editor.selections.forEach((cursor) => edit.insert(cursor.active, text));
+    });
+  }
+
+  async function insertSnippet(text: string, forceCreate = false) {
+    const editor = await getOrCreateEditor(forceCreate);
+    return editor.insertSnippet(new SnippetString(text));
   }
 
   async function help() {
-    const moreInfo = 'More Info';
-    const supportProject = 'Support This Project';
-    const releaseNotes = 'Release Notes';
     const localConfig = await Utils.getlastRunInfo();
-
-    let message = 'Do you like SQLTools? Help us to keep making it better.';
-
     if (localConfig.current.numericVersion <= localConfig.installed.numericVersion) {
       return;
     }
-    const options = [ moreInfo, supportProject ];
-    if (localConfig.installed.numericVersion !== 0) {
-      message = `SQLTools updated! Check out the release notes for more information.`;
-      options.push(releaseNotes);
-    }
-    const res: string = await Window.showInformationMessage(message, ...options);
+    const moreInfo = 'More Info';
+    const supportProject = 'Support This Project';
+    const releaseNotes = 'Release Notes';
+    const message = `SQLTools updated! Check out the release notes for more information.`;
+    const options = [ moreInfo, supportProject, releaseNotes ];
+    const res: string = await Win.showInformationMessage(message, ...options);
     Telemetry.registerInfoMessage(message, res);
     switch (res) {
       case moreInfo:
-        openurl('https://github.com/mtxr/vscode-sqltools#donate');
+        require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
         break;
       case releaseNotes:
-        openurl(localConfig.current.releaseNotes);
+        require('opn')(localConfig.current.releaseNotes);
         break;
       case supportProject:
-        openurl('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+        require('opn')('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
         break;
     }
   }
 
   async function openHtml(htmlUri: Uri, outputName: string) {
     let viewColumn: ViewColumn = ViewColumn.One;
-    const editor = Window.activeTextEditor;
-    if (editor && editor.viewColumn) {
-      viewColumn = editor.viewColumn;
+    if (Win.activeTextEditor && Win.activeTextEditor.viewColumn) {
+      viewColumn = Win.activeTextEditor.viewColumn;
     }
-    await VsCommands.executeCommand('vscode.previewHtml', htmlUri, viewColumn, outputName);
+    await VSCode.executeCommand('vscode.previewHtml', htmlUri, viewColumn, outputName);
   }
 
   async function setSettings(key: string, value: any) {
-    await Workspace.getConfiguration(cfgKey).update(key, value);
+    await Wspc.getConfiguration(cfgKey).update(key, value);
+    ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
   }
 
-  async function getTableName(node?: SidebarTable): Promise<string> {
+  async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
       return node.value;
     }
-    return await showTableMenu();
+    return await tableMenu('label');
+  }
+  async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
+    const sel: QuickPickItem = await Win.showQuickPick(options);
+    if (!sel || (prop && !sel[prop])) throw new DismissedException();
+    return prop ? sel[prop] : sel;
+  }
+  async function readInput(prompt: string, placeholder?: string) {
+    const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
+    if (isEmpty(data)) throw new DismissedException();
+    return data;
+  }
+
+  function isEmpty(v) {
+    return !v || v.length === 0;
   }
 }
 

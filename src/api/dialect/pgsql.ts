@@ -1,8 +1,10 @@
 import { Client } from 'pg';
-import { ConnectionCredentials } from './../interface/connection-credentials';
-import { ConnectionDialect } from './../interface/connection-dialect';
-import DatabaseInterface from './../interface/database-interface';
-import { DialectQueries } from './../interface/dialect-queries';
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  DialectQueries,
+} from './../interface';
 import Utils from './../utils';
 
 export default class PostgreSQL implements ConnectionDialect {
@@ -23,15 +25,26 @@ export default class PostgreSQL implements ConnectionDialect {
       FROM INFORMATION_SCHEMA.COLUMNS
       WHERE TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')`,
     fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-    fetchTables: `SELECT TABLE_NAME AS tableName,
-        TABLE_SCHEMA AS tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        current_database() as dbName,
-        COUNT(1) as numberOfColumns
-      FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')
-      GROUP by tableName, tableSchema, tableCatalog, dbName
-      ORDER BY TABLE_NAME;`,
+    fetchTables: `SELECT
+        C.TABLE_NAME AS tableName,
+        C.TABLE_SCHEMA AS tableSchema,
+        C.TABLE_CATALOG AS tableCatalog,
+        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
+        CURRENT_DATABASE() AS dbName,
+        COUNT(1) AS numberOfColumns
+      FROM
+        INFORMATION_SCHEMA.COLUMNS AS C
+        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+        AND C.TABLE_CATALOG = T.TABLE_CATALOG
+      WHERE C.TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')
+      GROUP by
+        C.TABLE_NAME,
+        C.TABLE_SCHEMA,
+        C.TABLE_CATALOG,
+        T.TABLE_TYPE
+      ORDER BY
+        C.TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -46,7 +59,7 @@ export default class PostgreSQL implements ConnectionDialect {
       host: this.credentials.server,
       password: this.credentials.password,
       port: this.credentials.port,
-      statement_timeout: this.credentials.connectionTimeout,
+      statement_timeout: this.credentials.connectionTimeout * 1000,
       user: this.credentials.username,
     };
     const self = this;
@@ -68,7 +81,7 @@ export default class PostgreSQL implements ConnectionDialect {
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
-        const queries = query.split(';');
+        const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
         const messages = [];
         if (!Array.isArray(results)) {
           results = [ results ];
@@ -96,6 +109,7 @@ export default class PostgreSQL implements ConnectionDialect {
           .map((obj) => {
             return {
               name: obj.tablename,
+              isView: !!obj.isview,
               numberOfColumns: parseInt(obj.numberofcolumns, 10),
               tableCatalog: obj.tablecatalog,
               tableDatabase: obj.dbname,

@@ -10,6 +10,5 @@
     "**/.vscode-test/": true,
     "**/.nyc_output/": true
   },
-  "eslint.enable": true,
-  "standard.enable": false
+  "eslint.enable": true
 }

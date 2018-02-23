@@ -1,11 +1,9 @@
-import {
-  window as Window,
-} from 'vscode';
-import Telemetry from './../telemetry';
 import { SQLToolsException } from './exception';
+import Telemetry from './telemetry';
 
 namespace ErrorHandler {
   let logger = console;
+  let outputFn = async (...args): Promise<string | void> => Promise.resolve();
   export function create(message: string, yesCallback?: Function): (reason: any) => void {
     return async (error: any): Promise<void> => {
       if (error) {
@@ -15,10 +13,10 @@ namespace ErrorHandler {
       }
       if (typeof yesCallback !== 'function') {
         Telemetry.registerErrorMessage(message, error, 'No callback');
-        Window.showErrorMessage(message);
+        outputFn(message);
         return;
       }
-      const res = await Window.showErrorMessage(`${message} Would you like to see the logs?`, 'Yes', 'No');
+      const res = await outputFn(`${message} Would you like to see the logs?`, 'Yes', 'No');
       Telemetry.registerErrorMessage(message, error, res === 'Yes' ? 'View Log' : 'Dismissed');
       if (res === 'Yes') {
         yesCallback();
@@ -27,6 +25,10 @@ namespace ErrorHandler {
   }
   export function setLogger(newLogger) {
     logger = newLogger;
+  }
+
+  export function setOutputFn(newOutputFn) {
+    outputFn = newOutputFn;
   }
 }
 

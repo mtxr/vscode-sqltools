@@ -1,8 +1,10 @@
 import mysql = require('mysql2');
-import { ConnectionCredentials } from './../interface/connection-credentials';
-import { ConnectionDialect } from './../interface/connection-dialect';
-import DatabaseInterface from './../interface/database-interface';
-import { DialectQueries } from './../interface/dialect-queries';
+import {
+  ConnectionCredentials,
+  ConnectionDialect,
+  DatabaseInterface,
+  DialectQueries,
+} from './../interface';
 import Utils from './../utils';
 
 export default class MySQL implements ConnectionDialect {
@@ -20,15 +22,26 @@ export default class MySQL implements ConnectionDialect {
         IS_NULLABLE as isNullable
       FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()`,
     fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-    fetchTables: `SELECT TABLE_NAME AS tableName,
-        TABLE_SCHEMA AS tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DATABASE() as dbName,
-        COUNT(1) as numberOfColumns
-      FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE TABLE_SCHEMA = DATABASE()
-      GROUP by tableName, tableSchema, tableCatalog, dbName
-      ORDER BY TABLE_NAME`,
+    fetchTables: `SELECT
+        C.TABLE_NAME AS tableName,
+        C.TABLE_SCHEMA AS tableSchema,
+        C.TABLE_CATALOG AS tableCatalog,
+        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
+        DATABASE() AS dbName,
+        COUNT(1) AS numberOfColumns
+      FROM
+        INFORMATION_SCHEMA.COLUMNS AS C
+        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+        AND C.TABLE_CATALOG = T.TABLE_CATALOG
+      WHERE T.TABLE_SCHEMA = DATABASE()
+      GROUP by
+        C.TABLE_NAME,
+        C.TABLE_SCHEMA,
+        C.TABLE_CATALOG,
+        T.TABLE_TYPE
+      ORDER BY
+        C.TABLE_NAME;`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
 
@@ -39,7 +52,7 @@ export default class MySQL implements ConnectionDialect {
       return this.connection;
     }
     const options = {
-      connectionTimeout: this.credentials.connectionTimeout,
+      connectionTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       host: this.credentials.server,
       multipleStatements: true,
@@ -75,7 +88,7 @@ export default class MySQL implements ConnectionDialect {
       return new Promise((resolve, reject) => {
         conn.query(query, (error, results) => {
           if (error) return reject(error);
-          const queries = query.split(';');
+          const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
           if (results && !Array.isArray(results[0])) {
             results = [results];
           }
@@ -91,7 +104,7 @@ export default class MySQL implements ConnectionDialect {
               messages.push(`${r.changedRows} rows were changed.`);
             }
             return {
-              cols: Array.isArray(r) ? Object.keys(r[0]) : [],
+              cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
               messages,
               query: queries[i],
               results: Array.isArray(r) ? r : [],
@@ -110,6 +123,7 @@ export default class MySQL implements ConnectionDialect {
           .map((obj) => {
             return {
               name: obj.tableName,
+              isView: !!obj.isView,
               numberOfColumns: parseInt(obj.numberOfColumns, 10),
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,

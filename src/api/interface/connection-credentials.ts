@@ -1,4 +1,4 @@
-export interface ConnectionCredentials {
+export default interface ConnectionCredentials {
   name: string;
   server: string;
   port: number;
@@ -7,5 +7,6 @@ export interface ConnectionCredentials {
   password?: string;
   askForPassword?: boolean;
   dialect: string;
-  connectionTimeout: string;
+  dialectOptions?: { encrypt: boolean };
+  connectionTimeout?: number;
 }
