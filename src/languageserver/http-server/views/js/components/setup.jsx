@@ -111,6 +111,7 @@ export default class Setup extends React.Component {
         cb: () => {
           const newState = Object.assign({}, this.state)
           newState.data.port = dialectDefaultPorts[this.state.data.dialect] || 3306
+          newState.fields.domain.show = this.state.data.dialect !== 'MSSQL' ? 'hidden' : undefined
           this.setState(newState, this.validateFields)
         }
       },
@@ -143,6 +144,11 @@ export default class Setup extends React.Component {
       password: {
         show: undefined,
         label: 'Password',
+      },
+      domain: {
+        show: 'hidden',
+        label: 'Domain',
+        info: 'For MSSQL/Azure only'
       },
       connectionTimeout: {
         label: 'Connection Timeout',
@@ -344,7 +350,6 @@ export default class Setup extends React.Component {
                   }))}
                 </div>
               </div>
-              <pre>{JSON.stringify(this.state, null, 2)}</pre>
             </div>
           </div>
         </form>

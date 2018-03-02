@@ -335,6 +335,14 @@
                                 "required": false,
                                 "description": "Database name"
                             },
+                            "domain": {
+                                "type": [
+                                    "string",
+                                    "null"
+                                ],
+                                "description": "Connection domain (for MSSQL/Azure only)",
+                                "required": false
+                            },
                             "username": {
                                 "type": "string",
                                 "description": "Database username"

@@ -51,6 +51,7 @@ export default class MSSQL implements ConnectionDialect {
     const config: any = {
       password: this.credentials.password,
       server: this.credentials.server,
+      domain: this.credentials.domain,
       userName: this.credentials.username,
     };
     config.options = {
