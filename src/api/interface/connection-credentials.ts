@@ -3,6 +3,7 @@ export default interface ConnectionCredentials {
   server: string;
   port: number;
   database?: string;
+  domain?: string;
   username: string;
   password?: string;
   askForPassword?: boolean;
