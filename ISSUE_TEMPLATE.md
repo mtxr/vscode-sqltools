@@ -4,9 +4,10 @@
 
 ### Issue Type
 
+* [ ] Bug
+* [ ] Enhancement 
 * [ ] Feature Request
-* [ ] Bugfix/Errors
-* [ ] Questions
+* [ ] Question
 * [ ] Other
 
 ### Prerequisites (For bugfixes)
