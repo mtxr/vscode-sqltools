@@ -366,7 +366,8 @@
                 "enum": [
                   "MSSQL",
                   "MySQL",
-                  "PostgreSQL"
+                  "PostgreSQL",
+                  "Oracle"
                 ],
                 "description": "Connection Dialect",
                 "required": false
@@ -489,6 +490,7 @@
     "@types/node": "^8.0.13",
     "@types/react": "^16.0.34",
     "@types/universal-analytics": "^0.4.2",
+    "@types/oracledb": "^1.11.34",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babelify": "^8.0.0",
@@ -521,6 +523,7 @@
     "mysql2": "^1.5.1",
     "opn": "^5.1.0",
     "pg": "^7.4.0",
+    "oracledb": "github:oracle/node-oracledb#v2.1.2",
     "sql-formatter": "^2.1.0",
     "tedious": "^2.3.1",
     "universal-analytics": "^0.4.16",
