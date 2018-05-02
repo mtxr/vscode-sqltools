@@ -366,7 +366,8 @@
                 "enum": [
                   "MSSQL",
                   "MySQL",
-                  "PostgreSQL"
+                  "PostgreSQL",
+                  "Oracle"
                 ],
                 "description": "Connection Dialect",
                 "required": false
