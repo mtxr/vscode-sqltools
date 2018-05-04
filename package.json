@@ -13,7 +13,7 @@
     "vscode": "^1.18.0"
   },
   "categories": [
-    "Languages",
+    "Programming Languages",
     "Snippets",
     "Formatters",
     "Other"
@@ -476,7 +476,7 @@
   "scripts": {
     "vscode:prepublish": "yarn run compile && yarn test",
     "gulp": "./node_modules/.bin/gulp",
-    "compile": "yarn run gulp -- compile",
+    "compile": "yarn run gulp -- clean && yarn run gulp -- compile",
     "watch": "yarn run gulp -- watch",
     "postinstall": "node ./node_modules/vscode/bin/install",
     "test:unit": "./node_modules/.bin/jest --config jest.json",
@@ -494,9 +494,9 @@
     "babelify": "^8.0.0",
     "browserify": "^15.0.0",
     "browserify-incremental": "^3.1.1",
-    "eslint": "^4.15.0",
+    "eslint": "^4.19.1",
     "eslint-plugin-react": "^7.5.1",
-    "gulp": "^4.0.0",
+    "gulp": "^3.9.1",
     "gulp-sass": "^3.1.0",
     "gulp-sourcemaps": "^2.6.0",
     "gulp-streamify": "^1.0.2",

@@ -5,9 +5,13 @@ services:
 
   db:
     image: postgres
-    restart: always
+    restart: unless-stopped
     ports:
       - '5432:5432'
+    volumes:
+        - ./pg_hba.conf:/etc/postgresql/pg_hba.conf
+        - ./postgresql.conf:/etc/postgresql/postgresql.conf
+    command: postgres -c 'config_file=/etc/postgresql/postgresql.conf'
     environment:
       POSTGRES_PASSWORD: root
       POSTGRES_USER: root
