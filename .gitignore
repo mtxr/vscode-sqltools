@@ -10,3 +10,4 @@ npm-shrinkwrap.json
 *.log
 *.vsix
 cache/
+!**/.vscode
