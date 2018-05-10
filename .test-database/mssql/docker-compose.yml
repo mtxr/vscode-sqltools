@@ -1,0 +1,12 @@
+version: '3.1'
+
+services:
+  db:
+    image: microsoft/mssql-server-linux
+    restart: unless-stopped
+    ports:
+      - '1433:1433'
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: root
+      # USER: sa

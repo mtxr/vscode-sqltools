@@ -10,7 +10,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.18.0"
+        "vscode": "^1.23.0"
     },
     "categories": [
         "Programming Languages",
@@ -514,7 +514,7 @@
         "uglifyify": "^4.0.5",
         "vinyl-buffer": "^1.0.1",
         "vinyl-source-stream": "^2.0.0",
-        "vscode": "^1.1.0"
+        "vscode": "^1.1.17"
     },
     "dependencies": {
         "get-port": "^3.2.0",
@@ -525,7 +525,7 @@
         "tedious": "^2.3.1",
         "universal-analytics": "^0.4.16",
         "uuid": "^3.1.0",
-        "vscode-languageclient": "^3.5.0",
-        "vscode-languageserver": "^3.5.0"
+        "vscode-languageclient": "^3.5.1",
+        "vscode-languageserver": "^3.5.1"
     }
 }
