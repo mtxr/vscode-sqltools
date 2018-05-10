@@ -11,7 +11,6 @@ const sass = require('gulp-sass')
 const browserify = require('browserify')
 const source = require('vinyl-source-stream')
 const browserifyInc = require('browserify-incremental')
-const { series, parallel } = gulp
 
 const outputDir = 'dist'
 const dependencies = [ 'react', 'react-dom', 'prop-types' ]
@@ -146,12 +145,12 @@ gulp.task('compile:react', compileReact = () => _buildReactFile('app'))
 gulp.task('compile:copy', copy)
 
 // watchers
-gulp.task('watch:sass', watchSass = () => gulp.watch(cfg.sass.src, parallel('compile:sass')))
-gulp.task('watch:ts', watchTs = () => gulp.watch(cfg.ts.src, parallel('compile:ts')))
-gulp.task('watch:react', watchReact = () => gulp.watch(cfg.react.src, parallel('compile:react')))
-gulp.task('watch:copy', watchStatic = () => gulp.watch(cfg.copy.static.concat(cfg.copy.src), parallel('compile:copy')))
+gulp.task('watch:sass', watchSass = () => gulp.watch(cfg.sass.src, ['compile:sass']))
+gulp.task('watch:ts', watchTs = () => gulp.watch(cfg.ts.src, ['compile:ts']))
+gulp.task('watch:react', watchReact = () => gulp.watch(cfg.react.src, ['compile:react']))
+gulp.task('watch:copy', watchStatic = () => gulp.watch(cfg.copy.static.concat(cfg.copy.src), ['compile:copy']))
 
 // aliases
-gulp.task('compile', series('clean', parallel('compile:vendor', 'compile:sass', 'compile:ts', 'compile:react', 'compile:copy')))
-gulp.task('watch', parallel('watch:sass', 'watch:ts', 'watch:react', 'watch:copy'))
-gulp.task('default', parallel('compile', 'watch'))
+gulp.task('compile', ['compile:vendor', 'compile:sass', 'compile:ts', 'compile:react', 'compile:copy'])
+gulp.task('watch', ['watch:sass', 'watch:ts', 'watch:react', 'watch:copy'])
+gulp.task('default', ['compile', 'watch'])

@@ -155,14 +155,7 @@ namespace SQLToolsLanguageServer {
       if (activeConnection) activeConnection.close();
       completionItems = [];
       activeConnection = null;
-      return {
-        isConnected: false,
-        name: null,
-        needsPassword: true,
-        port: null,
-        server: null,
-        username: null,
-      };
+      return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
