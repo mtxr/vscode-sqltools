@@ -6,7 +6,12 @@ services:
     restart: unless-stopped
     ports:
       - '1433:1433'
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh
+      - ./import-data.sh:/import-data.sh
+      - ./setup.sql:/setup.sql
+    command: bash /entrypoint.sh
     environment:
       ACCEPT_EULA: Y
-      SA_PASSWORD: root
+      SA_PASSWORD: root(!)Password
       # USER: sa

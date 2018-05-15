@@ -19,7 +19,7 @@
       "database": "test_db",
       "username": "root",
       "askForPassword": false,
-      "password": "root",
+      "password": "root(!)Password",
       "connectionTimeout": 15
     }
   ]
