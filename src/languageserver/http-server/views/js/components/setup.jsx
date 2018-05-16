@@ -12,7 +12,8 @@ import Loading from './loading.jsx'
 const dialectDefaultPorts = {
   'MySQL': 3306,
   'MSSQL': 1433,
-  'PostgreSQL': 5432
+  'PostgreSQL': 5432,
+  'OracleDB': 1521
 }
 
 class Syntax extends React.Component {
