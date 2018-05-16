@@ -366,7 +366,8 @@
                                 "enum": [
                                     "MSSQL",
                                     "MySQL",
-                                    "PostgreSQL"
+                                    "PostgreSQL",
+                                    "OracleDB"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -487,6 +488,7 @@
     "devDependencies": {
         "@types/jest": "^20.0.0",
         "@types/node": "^8.0.13",
+        "@types/oracledb": "^1.11.34",
         "@types/react": "^16.0.34",
         "@types/universal-analytics": "^0.4.2",
         "babel-preset-es2015": "^6.24.1",
@@ -496,6 +498,7 @@
         "browserify-incremental": "^3.1.1",
         "eslint": "^4.19.1",
         "eslint-plugin-react": "^7.5.1",
+        "electron-rebuild": "^1.7.3",
         "gulp": "^3.9.1",
         "gulp-sass": "^3.1.0",
         "gulp-sourcemaps": "^2.6.0",
@@ -520,6 +523,7 @@
         "get-port": "^3.2.0",
         "mysql2": "^1.5.1",
         "opn": "^5.1.0",
+        "oracledb": "github:oracle/node-oracledb#v2.1.2",
         "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",
         "tedious": "^2.3.1",
