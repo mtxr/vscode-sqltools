@@ -1,13 +1,13 @@
 import MSSQL from './mssql';
 import MySQL from './mysql';
-import OracleDB from './oracledb';
+import OracleDB from './oracledb.module';
 import PostgreSQL from './pgsql';
 
 const dialects = {
   MSSQL,
   MySQL,
   PostgreSQL,
-  OracleDB,
+  ...OracleDB,
 };
 
 export default dialects;

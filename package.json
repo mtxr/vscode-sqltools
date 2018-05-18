@@ -497,8 +497,7 @@
         "browserify": "^15.0.0",
         "browserify-incremental": "^3.1.1",
         "eslint": "^4.19.1",
-        "eslint-plugin-react": "^7.5.1",
-        "electron-rebuild": "^1.7.3",
+        "eslint-plugin-react": "^7.5.1",        
         "gulp": "^3.9.1",
         "gulp-sass": "^3.1.0",
         "gulp-sourcemaps": "^2.6.0",
@@ -522,8 +521,7 @@
     "dependencies": {
         "get-port": "^3.2.0",
         "mysql2": "^1.5.1",
-        "opn": "^5.1.0",
-        "oracledb": "github:oracle/node-oracledb#v2.1.2",
+        "opn": "^5.1.0",        
         "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",
         "tedious": "^2.3.1",
@@ -531,5 +529,9 @@
         "uuid": "^3.1.0",
         "vscode-languageclient": "^3.5.0",
         "vscode-languageserver": "^3.5.0"
-    }
+    },
+    "optionalDependencies": {
+        "electron-rebuild": "^1.7.3",
+        "oracledb": "github:oracle/node-oracledb#v2.1.2"        
+    }    
 }
