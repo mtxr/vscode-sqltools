@@ -1,5 +1,4 @@
-// Set to true to include OracleDB dialect
-const INCLUDE_ORACLEDB = false;
+const INCLUDE_ORACLEDB = require('./../../../package.json').module.oracledb;
 
 let OracleDB;
 if (INCLUDE_ORACLEDB) {
