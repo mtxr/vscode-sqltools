@@ -1,0 +1,15 @@
+{
+  "sqltools.connections": [
+    {
+      "name": "PGSQL",
+      "server": "127.0.0.1",
+      "dialect": "PostgreSQL",
+      "port": 5432,
+      "database": "test_db",
+      "username": "root",
+      "askForPassword": false,
+      "password": "root",
+      "connectionTimeout": 15
+    }
+  ]
+}
