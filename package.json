@@ -366,7 +366,8 @@
                                 "enum": [
                                     "MSSQL",
                                     "MySQL",
-                                    "PostgreSQL"
+                                    "PostgreSQL",
+                                    "Firebird"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -519,6 +520,7 @@
     "dependencies": {
         "get-port": "^3.2.0",
         "mysql2": "^1.5.1",
+        "node-firebird": "^0.8.6",
         "opn": "^5.1.0",
         "pg": "^7.4.0",
         "sql-formatter": "^2.1.0",

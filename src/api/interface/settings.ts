@@ -9,6 +9,7 @@ export enum DatabaseDialect {
   MSSQL,
   MySQL,
   PostgreSQL,
+  Firebird,
 }
 
 export type CompletionLanguages = string[];

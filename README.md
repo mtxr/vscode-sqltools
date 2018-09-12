@@ -64,6 +64,7 @@ You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vsco
 - [x] MySQL/MariaDB Support
 - [x] MsSQL Support
 - [x] PostgreSQL Support
+- [x] Firebird 3.0 Support
 
 
 ## Migrating from v0.0*.* to v0.1*.* or newer
