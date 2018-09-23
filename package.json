@@ -236,7 +236,7 @@
                 },
                 "sqltools.telemetry": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "Help SQLTools development."
                 },
                 "sqltools.showStatusbar": {
