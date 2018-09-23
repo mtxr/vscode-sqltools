@@ -52,7 +52,11 @@
             {
                 "title": "Connect",
                 "command": "SQLTools.selectConnection",
-                "category": "SQLTools"
+                "category": "SQLTools",
+                "icon": {
+                    "light": "dist/resources/icon/database-light.svg",
+                    "dark": "dist/resources/icon/database-dark.svg"
+                }
             },
             {
                 "title": "Disconnect",
@@ -433,14 +437,19 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.refreshSidebar",
+                    "command": "SQLTools.selectConnection",
                     "when": "view == SQLTools.tableExplorer",
-                    "group": "navigation@2"
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.newSqlFile",
                     "when": "view == SQLTools.tableExplorer",
-                    "group": "navigation@1"
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "SQLTools.refreshSidebar",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [

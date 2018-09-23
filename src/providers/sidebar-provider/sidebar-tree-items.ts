@@ -40,7 +40,7 @@ export class SidebarDatabaseStructure extends TreeItem {
   public contextValue = 'connection.structure';
   public items: { [name: string]: SidebarTable | SidebarView} = {};
   constructor(private name) {
-    super(name, TreeItemCollapsibleState.Collapsed);
+    super(name, TreeItemCollapsibleState.Expanded);
     this.label = name;
     Object.defineProperty(this, 'label', {
       get() {
@@ -64,7 +64,7 @@ export class SidebarTable extends TreeItem {
 
   public items: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
-    super(table.name, TreeItemCollapsibleState.Collapsed);
+    super(table.name, TreeItemCollapsibleState.Expanded);
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
   }
