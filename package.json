@@ -10,7 +10,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.18.0"
+        "vscode": "^1.23.0"
     },
     "categories": [
         "Programming Languages",
@@ -52,7 +52,11 @@
             {
                 "title": "Connect",
                 "command": "SQLTools.selectConnection",
-                "category": "SQLTools"
+                "category": "SQLTools",
+                "icon": {
+                    "light": "dist/resources/icon/database-light.svg",
+                    "dark": "dist/resources/icon/database-dark.svg"
+                }
             },
             {
                 "title": "Disconnect",
@@ -392,10 +396,19 @@
             }
         },
         "views": {
-            "explorer": [
+            "SQLTools-connectionExplorer": [
                 {
-                    "id": "SQLTools.connectionExplorer",
+                    "id": "SQLTools.tableExplorer",
                     "name": "SQL Connection"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "SQLTools-connectionExplorer",
+                    "icon": "dist/resources/icon/database-sidebar.svg",
+                    "title": "SQLTools"
                 }
             ]
         },
@@ -424,50 +437,55 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.refreshSidebar",
-                    "when": "view == SQLTools.connectionExplorer",
-                    "group": "navigation@2"
+                    "command": "SQLTools.selectConnection",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.newSqlFile",
-                    "when": "view == SQLTools.connectionExplorer",
-                    "group": "navigation@1"
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "SQLTools.refreshSidebar",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
                     "group": "sqltools.dbExplorer@1"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
                     "group": "inline@3"
                 },
                 {
                     "command": "SQLTools.describeTable",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@3"
                 },
                 {
                     "command": "SQLTools.showRecords",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@4"
                 },
                 {
                     "command": "SQLTools.showRecords",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@1"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@5"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@2"
                 }
             ]
@@ -514,7 +532,7 @@
         "uglifyify": "^4.0.5",
         "vinyl-buffer": "^1.0.1",
         "vinyl-source-stream": "^2.0.0",
-        "vscode": "^1.1.0"
+        "vscode": "^1.1.17"
     },
     "dependencies": {
         "get-port": "^3.2.0",
@@ -525,7 +543,7 @@
         "tedious": "^2.3.1",
         "universal-analytics": "^0.4.16",
         "uuid": "^3.1.0",
-        "vscode-languageclient": "^3.5.0",
-        "vscode-languageserver": "^3.5.0"
+        "vscode-languageclient": "^3.5.1",
+        "vscode-languageserver": "^3.5.1"
     }
 }

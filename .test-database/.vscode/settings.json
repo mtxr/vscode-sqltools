@@ -10,6 +10,17 @@
       "askForPassword": false,
       "password": "root",
       "connectionTimeout": 15
+    },
+    {
+      "name": "MSSQL",
+      "server": "127.0.0.1",
+      "dialect": "MSSQL",
+      "port": 1433,
+      "database": "test_db",
+      "username": "root",
+      "askForPassword": false,
+      "password": "root(!)Password",
+      "connectionTimeout": 15
     }
   ]
 }

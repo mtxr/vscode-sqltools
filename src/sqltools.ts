@@ -370,7 +370,7 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    Win.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, connectionExplorer);
+    Win.registerTreeDataProvider(`${Constants.extNamespace}.tableExplorer`, connectionExplorer);
     ctx.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
