@@ -153,7 +153,7 @@ export default class MySQL implements ConnectionDialect {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
 
-  public showRecords(table: string, limit: number = 10) {
+  public showRecords(table: string, limit: number) {
     return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
   }
 }

@@ -1,4 +1,3 @@
-import Utils from './../utils';
 import tds = require('tedious');
 import {
   ConnectionCredentials,
@@ -6,6 +5,7 @@ import {
   DatabaseInterface,
   DialectQueries,
 } from './../interface';
+import Utils from './../utils';
 
 export default class MSSQL implements ConnectionDialect {
   public connection: Promise<any>;
@@ -160,7 +160,7 @@ export default class MSSQL implements ConnectionDialect {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
 
-  public showRecords(table: string, limit: number = 10) {
+  public showRecords(table: string, limit: number) {
     return this.query(Utils.replacer(this.queries.fetchRecords, {limit, table }));
   }
   private prepareRow(results: any[], queries: string [], count: number, row: any): any {

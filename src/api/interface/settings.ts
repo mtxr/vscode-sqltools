@@ -83,7 +83,23 @@ export interface ConnectionSettings {
    */
    connectionTimeout?: number;
   /**
+   * Connection show records limit
+   * @type {string}
+   * @memberof ConnectionSettings
    */
+  previewLimit?: number;
+  /**
+   * Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options
+   * @type {any}
+   * @memberof ConnectionSettings
+   */
+  dialectOptions?: { encrypt: boolean };
+  /**
+   * Connection domain (for MSSQL/Azure only)
+   * @type {string}
+   * @memberof ConnectionSettings
+   */
+  domain?: string;
 }
 export default interface Settings {
   /**
@@ -185,4 +201,11 @@ export default interface Settings {
    * @memberof Settings
    */
   connections?: ConnectionSettings[];
+
+  /**
+   * Global show records limit
+   * @type {string}
+   * @memberof Settings
+   */
+  previewLimit?: number;
 }

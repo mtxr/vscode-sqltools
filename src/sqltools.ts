@@ -162,7 +162,7 @@ namespace SQLTools {
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
     try {
       const table = await getTableName(node);
-      await runConnectionCommand('showRecords', table);
+      await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
       printOutput(`Some records of ${table} : SQLTools`);
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);

@@ -389,9 +389,19 @@
                                 "description": "Connection timeout in seconds",
                                 "required": false,
                                 "default": 15
+                            },
+                            "previewLimit": {
+                                "type": "number",
+                                "description": "Global show records limit",
+                                "default": 10
                             }
                         }
                     }
+                },
+                "sqltools.previewLimit": {
+                    "type": "number",
+                    "description": "Global show records limit",
+                    "default": 10
                 }
             }
         },
