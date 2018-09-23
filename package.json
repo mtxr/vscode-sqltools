@@ -539,7 +539,7 @@
         "mysql2": "^1.5.1",
         "opn": "^5.1.0",
         "pg": "^7.4.0",
-        "sql-formatter": "^2.1.0",
+        "sql-formatter": "^2.3.1",
         "tedious": "^2.3.1",
         "universal-analytics": "^0.4.16",
         "uuid": "^3.1.0",
