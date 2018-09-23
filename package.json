@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.13.0",
+    "version": "0.15.0",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "repository": {
@@ -10,7 +10,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.23.0"
+        "vscode": "^1.26.0"
     },
     "categories": [
         "Programming Languages",
@@ -532,7 +532,7 @@
         "uglifyify": "^4.0.5",
         "vinyl-buffer": "^1.0.1",
         "vinyl-source-stream": "^2.0.0",
-        "vscode": "^1.1.17"
+        "vscode": "^1.1.21"
     },
     "dependencies": {
         "get-port": "^3.2.0",
