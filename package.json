@@ -109,6 +109,11 @@
                 "category": "SQLTools Connection"
             },
             {
+                "title": "Run this file",
+                "command": "SQLTools.executeQueryFromFile",
+                "category": "SQLTools Connection"
+            },
+            {
                 "title": "Run query",
                 "command": "SQLTools.runFromInput",
                 "category": "SQLTools Connection"

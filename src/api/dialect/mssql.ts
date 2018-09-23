@@ -95,7 +95,7 @@ export default class MSSQL implements ConnectionDialect {
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
-    const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((a) => a && `${a.trim()}`.length > 0);
+    const queries = Utils.parseQueries(query);
     return this.open()
       .then(() => {
         return new Promise((resolve, reject) => {

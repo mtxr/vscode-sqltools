@@ -194,6 +194,17 @@ namespace SQLTools {
     }
   }
 
+  export async function cmdExecuteQueryFromFile(): Promise<void> {
+    try {
+      const query: string = await getSelectedText('execute file', true);
+      await connect();
+      runQuery(query);
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
+    }
+  }
+
   export async function cmdNewSqlFile() {
     return await getOrCreateEditor(true);
   }
@@ -477,9 +488,9 @@ namespace SQLTools {
     return viewColumn;
   }
 
-  async function getSelectedText(action = 'proceed') {
+  async function getSelectedText(action = 'proceed', fullText = false) {
     const editor = await getOrCreateEditor();
-    const query = editor.document.getText(editor.selection);
+    const query = editor.document.getText(fullText ? undefined : editor.selection);
     if (isEmpty(query)) {
       Win.showInformationMessage(`Can't ${action}. You have selected nothing.`);
       throw new DismissedException();

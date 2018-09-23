@@ -104,6 +104,10 @@ namespace Utils {
     return n[0] * 10000;
   }
 
+  export function parseQueries(query = '') {
+    return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
+  }
+
   // ref from https://github.com/Microsoft/vscode-mssql/blob/master/src/models/utils.ts
   export class Timer {
     private s: [number, number];
