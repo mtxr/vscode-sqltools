@@ -407,6 +407,11 @@
                     "type": "number",
                     "description": "Global show records limit",
                     "default": 10
+                },
+                "sqltools.tableTreeItemsExpanded": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Table columns should be expanded on load ?"
                 }
             }
         },

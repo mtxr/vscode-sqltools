@@ -9,6 +9,7 @@ import {
   window,
 } from 'vscode';
 import DatabaseInterface from './../../api/interface/database-interface';
+import ConfigManager = require('./../../api/config-manager');
 
 export class SidebarDatabase extends TreeItem {
   public iconPath = {
@@ -31,6 +32,8 @@ export class SidebarDatabase extends TreeItem {
     this[key].addItem(item.isView ? new SidebarView(item) : new SidebarTable(item));
   }
 }
+
+const tableTreeItemsExpanded = ConfigManager.get('tableTreeItemsExpanded', true);
 
 export class SidebarDatabaseStructure extends TreeItem {
   public iconPath = {
@@ -64,7 +67,7 @@ export class SidebarTable extends TreeItem {
 
   public items: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
-    super(table.name, TreeItemCollapsibleState.Expanded);
+    super(table.name, tableTreeItemsExpanded === true ? TreeItemCollapsibleState.Expanded : TreeItemCollapsibleState.Collapsed);
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
   }
