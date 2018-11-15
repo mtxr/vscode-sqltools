@@ -9,7 +9,7 @@ import {
   window,
 } from 'vscode';
 import DatabaseInterface from './../../api/interface/database-interface';
-import ConfigManager = require('./../../api/config-manager');
+import ConfigManager from './../../api/config-manager';
 
 export class SidebarDatabase extends TreeItem {
   public iconPath = {
