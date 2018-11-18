@@ -10,7 +10,7 @@ import {
 import Utils from './../../../api/utils';
 import Logger from './../../utils/logger';
 
-export function handler(
+export default function handler(
   docManager: TextDocuments,
   params: DocumentRangeFormattingParams | DocumentFormattingParams | DocumentRangeFormattingParams[],
 ): TextEdit[] {

@@ -1,14 +1,9 @@
 import {
   commands as VSCode,
   ExtensionContext,
-  languages as Languages,
-  MarkdownString,
-  Position,
   QuickPickItem,
-  Range,
   SnippetString,
   StatusBarAlignment,
-  StatusBarItem,
   TextEditor,
   TextEditorEdit,
   Uri,
@@ -30,13 +25,14 @@ import {
   ErrorHandler,
   History,
   Logger,
-  LoggerInterface,
   SerializedConnection,
   SettingsInterface,
   Telemetry,
   Utils,
 } from './api';
 import Constants from './constants';
+import ContextManager from './context';
+
 import {
   CreateNewConnectionRequest,
   GetConnectionListRequest,
@@ -49,20 +45,21 @@ import {
 import LogWriter from './log-writer';
 import {
   ConnectionExplorer,
-  HTMLPreview,
   SidebarDatabaseItem,
   SidebarTable,
   SidebarView,
  } from './providers';
+import QueryResultsPreviewer from './providers/webview/query-results-previewer';
+import SettingsEditor from './providers/webview/settings-editor';
 
 namespace SQLTools {
   const cfgKey: string = Constants.extNamespace.toLowerCase();
-  const preview = new HTMLPreview(Uri.parse(`sqltools://html`));
   const connectionExplorer = new ConnectionExplorer();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
-  const editingBufferName = `${Constants.bufferName}`;
   const logger = new Logger(LogWriter);
-  let ctx: ExtensionContext;
+  const queryResults = new QueryResultsPreviewer();
+  const settingsEditor = new SettingsEditor();
+
   let bookmarks: BookmarksStorage;
   let history: History;
   let lastUsedConn: SerializedConnection;
@@ -71,14 +68,13 @@ namespace SQLTools {
 
   export async function start(context: ExtensionContext): Promise<void> {
     activationTimer = new Utils.Timer();
-    if (ctx) return;
-    ctx = context;
+    if (ContextManager.context) return;
+    ContextManager.context = context;
     const localData = Utils.localSetupInfo();
     Telemetry.register();
     loadConfigs();
     const httpServerPort: number = await require('get-port')({ port: localData.httpServerPort || 5123 });
     Utils.writeLocalSetupInfo({ httpServerPort });
-    preview.setPort(httpServerPort);
     await registerExtension();
     updateStatusBar();
     activationTimer.end();
@@ -88,7 +84,7 @@ namespace SQLTools {
   }
 
   export function stop(): void {
-    return ctx.subscriptions.forEach((sub) => void sub.dispose());
+    return ContextManager.context.subscriptions.forEach((sub) => void sub.dispose());
   }
 
   export async function cmdEditBookmark(): Promise<void> {
@@ -242,7 +238,7 @@ namespace SQLTools {
   }
 
   export async function cmdSetupSQLTools() {
-    return openHtml(preview.uri.with({ fragment: '/setup' }), 'SQLTools Setup Connection');
+    settingsEditor.show();
   }
 
   export function cmdRefreshSidebar() {
@@ -282,7 +278,7 @@ namespace SQLTools {
     return await languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
   }
 
-  async function runQuery(query, addHistory = true, handleError: boolean = false) {
+  async function runQuery(query, addHistory = true) {
     const res = await languageClient.sendRequest(RunCommandRequest.method, {
       conn: lastUsedConn,
       command: 'query',
@@ -308,8 +304,9 @@ namespace SQLTools {
       } as QuickPickItem;
     }), prop);
   }
+
   async function printOutput(outputName: string = 'SQLTools Results') {
-    openHtml(preview.uri.with({ fragment: '/query-results' }), outputName);
+    queryResults.show(outputName);
   }
 
   async function getConnData() {
@@ -321,7 +318,6 @@ namespace SQLTools {
 
   function autoConnectIfActive(currConn?: SerializedConnection) {
     let defaultConnection = currConn || null;
-    const a = ConfigManager.autoConnectTo;
     if (!defaultConnection && ConfigManager.autoConnectTo) {
       defaultConnection = {
         name: ConfigManager.connections
@@ -382,11 +378,12 @@ namespace SQLTools {
 
   async function registerExtension() {
     Win.registerTreeDataProvider(`${Constants.extNamespace}.tableExplorer`, connectionExplorer);
-    ctx.subscriptions.push(
+    ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
       await getLanguageServerDisposable(),
-      Wspc.registerTextDocumentContentProvider(preview.uri.scheme, preview),
+      settingsEditor,
+      queryResults,
       ...getExtCommands(),
       extDatabaseStatus,
     );
@@ -444,7 +441,7 @@ namespace SQLTools {
   }
 
   async function getLanguageServerDisposable() {
-    const serverModule = ctx.asAbsolutePath(require('path').join('dist', 'languageserver', 'index.js'));
+    const serverModule = ContextManager.context.asAbsolutePath('dist/languageserver.js');
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
 
     const serverOptions: ServerOptions = {
@@ -478,14 +475,6 @@ namespace SQLTools {
       await Win.showTextDocument(doc, 1, false);
     }
     return Win.activeTextEditor;
-  }
-
-  function getCurrentViewColumn() {
-    let viewColumn: ViewColumn = ViewColumn.One;
-    if (Win.activeTextEditor && Win.activeTextEditor.viewColumn) {
-      viewColumn = Win.activeTextEditor.viewColumn;
-    }
-    return viewColumn;
   }
 
   async function getSelectedText(action = 'proceed', fullText = false) {

@@ -1,12 +1,7 @@
-import fs = require('fs');
-import http = require('http');
-import path = require('path');
-import { IConnection } from 'vscode-languageserver';
+import http from 'http';
 import SQLToolsLanguageServer from '..';
 import { CreateNewConnectionRequest } from '../../contracts/connection-requests';
 import Logger from '../utils/logger';
-
-const viewsPath = path.join(__dirname, 'views');
 
 interface ExtendedIncommingMessage extends http.IncomingMessage {
   body?: string;
@@ -39,11 +34,6 @@ namespace HTTPServer {
 
   function reqHandler(req: http.IncomingMessage, res: ExtendedServerResponse) {
     Logger.log(`Request came: ${req.method.toUpperCase()} ${req.url}`);
-    const ext = path.extname(req.url);
-    // serve static
-    if (ext !== '') return sendStatic(req.url, getContentType(ext), res);
-    // serve home
-    if (req.url === '/') return sendStatic('index.html', 'text/html', res);
     return handleRoute(req, res);
   }
 
@@ -76,39 +66,6 @@ namespace HTTPServer {
       handlersArray[0](req, res, next);
     } catch (error) {
       res.json({ error });
-    }
-  }
-
-  function sendStatic(url, contentType, res) {
-    const file = path.join(viewsPath, url);
-    fs.readFile(file, (err, content) => {
-      if (err) {
-        res.writeHead(404);
-        res.write(`File '${url}' Not Found!`);
-        res.end();
-        Logger.error(`Response: 404 ${url}`, err);
-      } else {
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.write(content);
-        res.end();
-        Logger.log(`Response: 200 ${url}`);
-      }
-    });
-  }
-
-  function getContentType(ext: string): string {
-    switch (ext) {
-      case '':
-      case '.json':
-        return 'application/json';
-      case '.html':
-        return 'text/html';
-      case '.css':
-        return 'text/css';
-      case '.js':
-        return 'text/javascript';
-      default:
-        return 'application/octate-stream';
     }
   }
 

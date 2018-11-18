@@ -1,16 +1,11 @@
-import fs = require('fs');
-import path = require('path');
+import fs from 'fs';
+import path from 'path';
 import {
   Event,
   EventEmitter,
   ProviderResult,
   TreeDataProvider,
-  TreeItem,
-  TreeItemCollapsibleState,
 } from 'vscode';
-import LoggerInterface from '../api/interface/logger';
-import { Logger } from './../api';
-import Connection from './../api/connection';
 import {
   SidebarColumn,
   SidebarDatabase,

@@ -1,12 +1,10 @@
-/// <reference path="../../node_modules/@types/universal-analytics/index.d.ts" />
-
 import Analytics = require('universal-analytics');
+import uuidv4 from 'uuid/v4';
 import Constants from './../constants';
-import Logger from './logger';
-import Utils from './utils';
-import uuidv4 = require('uuid/v4');
 import ConfigManager = require('./config-manager');
 import LoggerInterface from './interface/logger';
+import Logger from './logger';
+import Utils from './utils';
 
 namespace Telemetry {
   let isEnabled: Boolean = true;

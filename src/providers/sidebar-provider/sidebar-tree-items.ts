@@ -1,20 +1,12 @@
-import path = require('path');
 import {
-  Command,
-  Event,
-  EventEmitter,
-  TreeDataProvider,
+  ThemeIcon,
   TreeItem,
   TreeItemCollapsibleState,
-  window,
 } from 'vscode';
+import ContextManager from '../../context';
 import DatabaseInterface from './../../api/interface/database-interface';
 
 export class SidebarDatabase extends TreeItem {
-  public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-dark.svg'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'database-light.svg'),
-  };
   public contextValue = 'connection.database';
   public value: string;
 
@@ -24,6 +16,10 @@ export class SidebarDatabase extends TreeItem {
     super(name, TreeItemCollapsibleState.Expanded);
     this.value = name;
     this.label = name;
+    this.iconPath = {
+      dark: ContextManager.context.asAbsolutePath('dist/icon/database-dark.svg'),
+      light: ContextManager.context.asAbsolutePath('dist/icon/database-light.svg'),
+    };
   }
 
   public addItem(item) {
@@ -33,10 +29,7 @@ export class SidebarDatabase extends TreeItem {
 }
 
 export class SidebarDatabaseStructure extends TreeItem {
-  public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'folder-open-dark.svg'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'folder-open-light.svg'),
-  };
+  public iconPath = ThemeIcon.Folder;
   public contextValue = 'connection.structure';
   public items: { [name: string]: SidebarTable | SidebarView} = {};
   constructor(private name) {
@@ -55,10 +48,6 @@ export class SidebarDatabaseStructure extends TreeItem {
 }
 
 export class SidebarTable extends TreeItem {
-  public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-dark.svg'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'table-light.svg'),
-  };
   public contextValue = 'connection.tableOrView';
   public value: string;
 
@@ -67,6 +56,10 @@ export class SidebarTable extends TreeItem {
     super(table.name, TreeItemCollapsibleState.Expanded);
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
+    this.iconPath = {
+      dark: ContextManager.context.asAbsolutePath('dist/icon/table-dark.svg'),
+      light: ContextManager.context.asAbsolutePath('dist/icon/table-light.svg'),
+    };
   }
 
   public addItem(item) {
@@ -78,10 +71,6 @@ export class SidebarView extends SidebarTable {
 }
 
 export class SidebarColumn extends TreeItem {
-  public iconPath = {
-    dark: path.join(__dirname, '..', '..', 'resources', 'icon', 'column-dark.png'),
-    light: path.join(__dirname, '..', '..', 'resources', 'icon', 'column-light.png'),
-  };
   public contextValue = 'connection.column';
   public value: string;
 
@@ -93,5 +82,9 @@ export class SidebarColumn extends TreeItem {
       typeSize = `(${column.size})`;
     }
     this.label = `${column.columnName} (${column.type.toUpperCase()}${typeSize})`;
+    this.iconPath = {
+      dark: ContextManager.context.asAbsolutePath('dist/icon/column-dark.png'),
+      light: ContextManager.context.asAbsolutePath('dist/icon/column-light.png'),
+    };
   }
 }

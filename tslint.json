@@ -5,6 +5,7 @@
   ],
   "jsRules": {},
   "rules": {
+    "member-access": false,
     "object-literal-sort-keys": false,
     "no-namespace": false,
     "align": [ true, "parameters", "statements" ],

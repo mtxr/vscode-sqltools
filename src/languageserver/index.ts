@@ -1,10 +1,8 @@
-import http = require('http');
 import {
-  CompletionItem, CompletionItemKind,
-  createConnection,
+  CompletionItem, createConnection,
   Disposable,
   DocumentRangeFormattingRequest, IConnection, InitializeResult,
-  IPCMessageReader, IPCMessageWriter, Position, TextDocumentPositionParams, TextDocuments, TextEdit,
+  IPCMessageReader, IPCMessageWriter, Position, TextDocumentPositionParams, TextDocuments,
 } from 'vscode-languageserver';
 import {
   ConfigManager,
@@ -14,13 +12,7 @@ import {
   Telemetry,
   Utils,
 } from '../api';
-import Formatter = require('./requests/format');
 import {
-  DatabaseInterface,
-  SettingsInterface,
-} from '../api/interface';
-import {
-  CreateNewConnectionRequest,
   GetConnectionListRequest,
   GetTablesAndColumnsRequest,
   OpenConnectionRequest,
@@ -30,6 +22,7 @@ import {
 } from '../contracts/connection-requests';
 import HTTPServer from './http-server';
 import { TableColumnCompletionItem, TableCompletionItem } from './requests/completion/models';
+import Formatter from './requests/format';
 import Logger from './utils/logger';
 
 namespace SQLToolsLanguageServer {
@@ -123,8 +116,8 @@ namespace SQLToolsLanguageServer {
   server.listen();
 
   /* Requests */
-  server.onDocumentFormatting((params) => Formatter.handler(docManager, params));
-  server.onDocumentRangeFormatting((params) => Formatter.handler(docManager, params));
+  server.onDocumentFormatting((params) => Formatter(docManager, params));
+  server.onDocumentRangeFormatting((params) => Formatter(docManager, params));
 
   server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
     const { textDocument, position } = pos;

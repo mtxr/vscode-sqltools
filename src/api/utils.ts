@@ -1,7 +1,5 @@
-/// <reference path="./../../node_modules/@types/node/index.d.ts" />
-
-import fs = require('fs');
-import formatter = require('sql-formatter');
+import fs from 'fs';
+import formatter from 'sql-formatter';
 import Constants from '../constants';
 import { EnvironmentException } from './exception';
 import DatabaseInterface from './interface/database-interface';
