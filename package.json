@@ -258,7 +258,7 @@
                         "ERROR"
                     ],
                     "default": "INFO",
-                    "description": "Show debugging messages on console."
+                    "description": "Set the severity of logged messages messages on console."
                 },
                 "sqltools.queryTimeout": {
                     "type": "number",

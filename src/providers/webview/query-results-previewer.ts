@@ -6,6 +6,7 @@ export default class QueryResultsPreviewer extends WebviewProvider {
 
   public show(title = 'SQLTools') {
     this.title = title;
+    if (this.visible) this.postMessage({ action: 'refresh' });
     super.show();
   }
 }

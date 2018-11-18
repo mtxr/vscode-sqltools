@@ -138,7 +138,7 @@ export default interface Settings {
    */
    showStatusbar?: boolean;
   /**
-   * Show debugging messages on console.
+   * Severity of logged messages.
    * @type {LogLevel}
    * @default DEBUG
    * @memberof Settings

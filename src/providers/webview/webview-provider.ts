@@ -30,10 +30,13 @@ export default abstract class WebviewProvider implements Disposable {
           enableCommandUris: true,
         },
       );
+      this.panel.onDidDispose(this.dispose.bind(this));
       this.disposablePanel = Disposable.from(
         this.panel,
       );
     }
+
+    this.panel.title = this.title;
     this.panel.webview.html = (this.html || this.baseHtml)
       .replace(/{{id}}/g, this.id)
       .replace(/{{port}}/g, this.port.toString())
@@ -52,6 +55,8 @@ export default abstract class WebviewProvider implements Disposable {
   }
   public dispose() {
     if (this.disposablePanel) this.disposablePanel.dispose();
+    this.disposablePanel = undefined;
+    this.panel = undefined;
   }
 
   private get baseHtml(): string {
@@ -71,5 +76,10 @@ window.apiUrl = 'http://localhost:{{port}}'
   <script src="{{extRoot}}/dist/views/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
+  }
+
+  public postMessage(message: any) {
+    if (!this.panel) return;
+    this.panel.webview.postMessage(message);
   }
 }

@@ -274,8 +274,8 @@ namespace SQLTools {
     }), prop);
   }
 
-  async function runConnectionCommand(command, ...args) {
-    return await languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
+  function runConnectionCommand(command, ...args) {
+    return languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
   }
 
   async function runQuery(query, addHistory = true) {
@@ -305,7 +305,7 @@ namespace SQLTools {
     }), prop);
   }
 
-  async function printOutput(outputName: string = 'SQLTools Results') {
+  function printOutput(outputName: string = 'SQLTools Results') {
     queryResults.show(outputName);
   }
 

@@ -221,9 +221,22 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
       active: i,
     }));
   }
+
   componentDidMount() {
+    this.refreshData();
+    window.addEventListener('message', (message) => {
+      if (!message.data) return;
+      switch (message.data.action) {
+        case 'refresh':
+          this.refreshData();
+          break;
+      }
+    });
+  }
+
+  refreshData() {
     let interval = setInterval(() => {
-      fetch(`${window.location.origin}/api/query-results`)
+      fetch(`${(window as any).apiUrl}/api/query-results`)
         .then((res) => res.json())
         .then(
           (res) => {
