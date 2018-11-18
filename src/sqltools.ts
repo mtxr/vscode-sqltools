@@ -73,8 +73,8 @@ namespace SQLTools {
     const localData = Utils.localSetupInfo();
     Telemetry.register();
     loadConfigs();
-    const httpServerPort: number = await require('get-port')({ port: localData.httpServerPort || 5123 });
-    Utils.writeLocalSetupInfo({ httpServerPort });
+    ContextManager.httpServerPort = await require('get-port')({ port: localData.httpServerPort || 5123 });
+    Utils.writeLocalSetupInfo({ httpServerPort: ContextManager.httpServerPort });
     await registerExtension();
     updateStatusBar();
     activationTimer.end();

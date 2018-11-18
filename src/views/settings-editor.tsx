@@ -1,6 +1,6 @@
 import React from 'react';
 import { render } from 'react-dom';
-import Setup from './components/setup';
+import App from './components/setup';
 import './sass/app.scss';
 
-render(<Setup />, document.getElementById('root'));
+render(<App />, document.getElementById('root'));

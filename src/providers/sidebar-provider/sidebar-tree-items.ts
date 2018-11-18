@@ -4,8 +4,8 @@ import {
   TreeItemCollapsibleState,
 } from 'vscode';
 import ContextManager from '../../context';
-import DatabaseInterface from './../../api/interface/database-interface';
 import ConfigManager from './../../api/config-manager';
+import DatabaseInterface from './../../api/interface/database-interface';
 
 export class SidebarDatabase extends TreeItem {
   public contextValue = 'connection.database';
@@ -56,7 +56,11 @@ export class SidebarTable extends TreeItem {
 
   public items: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
-    super(table.name, tableTreeItemsExpanded === true ? TreeItemCollapsibleState.Expanded : TreeItemCollapsibleState.Collapsed);
+    super(table.name, (
+      tableTreeItemsExpanded === true
+        ? TreeItemCollapsibleState.Expanded
+        : TreeItemCollapsibleState.Collapsed
+    ));
     this.value = table.name;
     this.label = `${table.name} (${table.numberOfColumns} cols)`;
     this.iconPath = {

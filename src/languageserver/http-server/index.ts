@@ -30,9 +30,20 @@ namespace HTTPServer {
     });
   };
 
-  const endPoints: { [s: string]: { data: any, handler: HTTPFunction[] | HTTPFunction } } = {};
+  export const endPoints: { [s: string]: { data: any, handler: HTTPFunction[] | HTTPFunction } } = {};
 
   function reqHandler(req: http.IncomingMessage, res: ExtendedServerResponse) {
+    // tslint:disable-next-line:no-string-literal
+    res.setHeader('Access-Control-Allow-Origin', (req.headers as any)['origin'] || (req.headers as any)['Origin']);
+    res.setHeader('Access-Control-Allow-Methods', '*');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    res.setHeader('Access-Control-Max-Age', 86400000);
+
+    if (req.method.toUpperCase() === 'OPTIONS') {
+      // webview is always sending pre-flight requests
+      res.writeHead(200);
+      return res.end();
+    }
     Logger.log(`Request came: ${req.method.toUpperCase()} ${req.url}`);
     return handleRoute(req, res);
   }
@@ -48,7 +59,7 @@ namespace HTTPServer {
     };
     const handlers = endPoints[`${req.method.toUpperCase()} ${req.url}`];
     if (!handlers) {
-      return res.sendJson({ message: 'Server starting...' });
+      return res.sendJson({ message: 'Invalid request' }, 404);
     }
     if (typeof handlers.handler !== 'function' || handlers.handler.length === 0 && handlers.data) {
       return res.sendJson(handlers.data);
@@ -70,7 +81,7 @@ namespace HTTPServer {
   }
 
   export function use(method: 'GET' | 'POST', url: string, r: HTTPFunction | HTTPFunction[]) {
-    Logger.log(`Defining data for ${url}`);
+    Logger.log(`Defining method ${method} for ${url}`);
     const key = `${method.toUpperCase()} ${url}`;
     endPoints[key] = endPoints[key] || { data: null, handler: null };
     endPoints[key].handler = r;
@@ -101,7 +112,7 @@ namespace HTTPServer {
 }
 
 export default HTTPServer;
-
+HTTPServer.get('/', (req, res) => res.sendJson({ endpoints: Object.keys(HTTPServer.endPoints) }));
 HTTPServer.set('GET /api/query-results', { waiting: true, success: false, results: [] });
 HTTPServer.set('GET /api/statistics', {});
 HTTPServer.get('/api/status', (req, res) => void res.sendJson(SQLToolsLanguageServer.getStatus()));

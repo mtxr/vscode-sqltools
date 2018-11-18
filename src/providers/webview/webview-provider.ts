@@ -14,6 +14,9 @@ export default abstract class WebviewProvider implements Disposable {
   protected abstract title: string;
   private panel: WebviewPanel;
   private disposablePanel: Disposable;
+  private get port() {
+    return ContextManager.httpServerPort;
+  }
 
   public show() {
     if (!this.panel) {
@@ -23,6 +26,8 @@ export default abstract class WebviewProvider implements Disposable {
         ViewColumn.One,
         {
           enableScripts: true,
+          retainContextWhenHidden: true,
+          enableCommandUris: true,
         },
       );
       this.disposablePanel = Disposable.from(
@@ -31,6 +36,7 @@ export default abstract class WebviewProvider implements Disposable {
     }
     this.panel.webview.html = (this.html || this.baseHtml)
       .replace(/{{id}}/g, this.id)
+      .replace(/{{port}}/g, this.port.toString())
       .replace(
         /{{extRoot}}/g,
         Uri.file(ContextManager.context.asAbsolutePath('.'))
@@ -56,6 +62,9 @@ export default abstract class WebviewProvider implements Disposable {
   <title>SQLTools Setup Helper</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
+<script type="text/javascript">
+window.apiUrl = 'http://localhost:{{port}}'
+</script>
 <body>
   <div id="root"></div>
   <script src="{{extRoot}}/dist/views/vendor.js" type="text/javascript" charset="UTF-8"></script>

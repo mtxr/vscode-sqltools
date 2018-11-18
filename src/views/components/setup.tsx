@@ -5,6 +5,7 @@ import {
   inRange,
   int,
   notEmpty,
+  ValidationFunction,
 } from './../lib/utils';
 import Loading from './loading';
 
@@ -91,88 +92,31 @@ class FieldWrapper extends React.Component<FieldWrapperProps> {
     );
   }
 }
-
-const baseFields = {
-  name: {
-    label: 'Connection Name',
-    check: [notEmpty],
-  },
-  server: {
-    label: 'Server',
-    default: '127.0.0.1',
-    check: [notEmpty],
-  },
-  dialect: {
-    label: 'Dialects',
-    values: Object.keys(dialectDefaultPorts),
-    default: Object.keys(dialectDefaultPorts)[0],
-    check: [notEmpty],
-    cb: () => {
-      const newState = Object.assign({}, this.state);
-      newState.data.port = dialectDefaultPorts[this.state.data.dialect] || 3306;
-      newState.fields.domain.show = this.state.data.dialect !== 'MSSQL' ? 'hidden' : undefined;
-      this.setState(newState, this.validateFields);
-    },
-  },
-  port: {
-    label: 'Port', type: 'number',
-    default: 3306,
-    check: [notEmpty, inRange(1, 65535)],
-    parse: int,
-  },
-  database: {
-    label: 'Database',
-    check: [notEmpty],
-  },
-  username: {
-    label: 'Username',
-    check: [notEmpty],
-  },
-  askForPassword: {
-    label: 'Prompt for password?',
-    values: [{ text: 'No', value: 'false' }, { text: 'Yes', value: 'true' }],
-    default: 'false',
-    parse: bool,
-    cb: () => {
-      const parse = this.state.fields.askForPassword.parse;
-      const newState = Object.assign({}, this.state);
-      newState.fields.password.show = parse(this.state.data.askForPassword) ? 'hidden' : undefined;
-      this.setState(newState, this.validateFields);
-    },
-  },
-  password: {
-    show: undefined,
-    label: 'Password',
-  },
-  domain: {
-    show: 'hidden',
-    label: 'Domain',
-    info: 'For MSSQL/Azure only',
-  },
-  connectionTimeout: {
-    label: 'Connection Timeout',
-    info: 'in seconds',
-    type: 'number',
-    default: 15,
-    check: [notEmpty, gtz],
-    parse: int,
-  },
-};
+interface Field {
+  label: string;
+  values?: Array<string | { text: string; value: any }>;
+  default?: any;
+  type?: string;
+  check?: ValidationFunction[];
+  cb?: Function;
+  parse?: Function;
+  show?: string;
+}
 
 interface SetupState {
   loading?: boolean;
   data?: any; // tbd
-  fields: typeof baseFields;
-  errors: { [id in keyof typeof baseFields]?: string };
+  fields: { [id: string]: Field };
+  errors: { [field: string]: string };
   onSaveError?: string;
   saved?: string;
 }
 
 const storage = { data: {}, setItem: undefined, getItem: undefined, removeItem: undefined };
 
-storage.setItem = (key, value) => storage.data[key] = value;
-storage.getItem = (key) => storage.data[key];
-storage.removeItem = (key) => delete storage.data[key];
+storage.setItem = (key: string, value: string) => storage.data[key] = value;
+storage.getItem = (key: string) => storage.data[key];
+storage.removeItem = (key: string) => delete storage.data[key];
 
 export default class Setup extends React.Component<{}, SetupState> {
 
@@ -195,16 +139,82 @@ export default class Setup extends React.Component<{}, SetupState> {
     }, {});
   }
 
+  baseFields = {
+    name: {
+      label: 'Connection Name',
+      check: [notEmpty],
+    },
+    server: {
+      label: 'Server',
+      default: '127.0.0.1',
+      check: [notEmpty],
+    },
+    dialect: {
+      label: 'Dialects',
+      values: Object.keys(dialectDefaultPorts),
+      default: Object.keys(dialectDefaultPorts)[0],
+      check: [notEmpty],
+      cb: () => {
+        const newState = Object.assign({}, this.state);
+        newState.data.port = dialectDefaultPorts[this.state.data.dialect] || 3306;
+        newState.fields.domain.show = this.state.data.dialect !== 'MSSQL' ? 'hidden' : undefined;
+        this.setState(newState, this.validateFields);
+      },
+    },
+    port: {
+      label: 'Port', type: 'number',
+      default: 3306,
+      check: [notEmpty, inRange(1, 65535)],
+      parse: int,
+    },
+    database: {
+      label: 'Database',
+      check: [notEmpty],
+    },
+    username: {
+      label: 'Username',
+      check: [notEmpty],
+    },
+    askForPassword: {
+      label: 'Prompt for password?',
+      values: [{ text: 'No', value: 'false' }, { text: 'Yes', value: 'true' }],
+      default: 'false',
+      parse: bool,
+      cb: () => {
+        const parse = this.state.fields.askForPassword.parse;
+        const newState = Object.assign({}, this.state);
+        newState.fields.password.show = parse(this.state.data.askForPassword) ? 'hidden' : undefined;
+        this.setState(newState, this.validateFields);
+      },
+    },
+    password: {
+      show: undefined,
+      label: 'Password',
+    },
+    domain: {
+      show: 'hidden',
+      label: 'Domain',
+      info: 'For MSSQL/Azure only',
+    },
+    connectionTimeout: {
+      label: 'Connection Timeout',
+      info: 'in seconds',
+      type: 'number',
+      default: 15,
+      check: [notEmpty, gtz],
+      parse: int,
+    },
+  };
   constructor(props) {
     super(props);
     this.handleChange = this.handleChange.bind(this);
     this.handleSubmit = this.handleSubmit.bind(this);
 
-    const data = Setup.loadLocal() || Setup.generateConnData(baseFields);
+    const data = Setup.loadLocal() || Setup.generateConnData(this.baseFields);
     this.state = {
       loading: true,
       data,
-      fields: baseFields,
+      fields: this.baseFields,
       errors: {},
       onSaveError: null,
       saved: null,
@@ -246,7 +256,7 @@ export default class Setup extends React.Component<{}, SetupState> {
   public handleSubmit(e) {
     this.setState({ loading: true });
     e.preventDefault();
-    fetch(`${window.location.origin}/api/create-connection`, {
+    fetch(`${(window as any).apiUrl}/api/create-connection`, {
       method: 'POST',
       headers: {
         'Accept': 'application/json, text/plain, */*',
@@ -267,6 +277,11 @@ export default class Setup extends React.Component<{}, SetupState> {
           newState.onSaveError = res.error;
         }
         this.setState(newState, this.validateFields);
+      })
+      .catch((err) => {
+        this.setState({
+          onSaveError: (err || '').toString(),
+        });
       });
 
     return false;
@@ -320,9 +335,9 @@ export default class Setup extends React.Component<{}, SetupState> {
         const options = field.values.map((o, k) => {
           return (
             <option
-              value={typeof o.value !== 'undefined' ? o.value : o}
+              value={typeof o !== 'string' ? o.value : o}
               key={k}>
-                {typeof o.text !== 'undefined' ? o.text : o}
+                {typeof o !== 'string' ? o.text : o}
             </option>
           );
         });

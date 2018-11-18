@@ -1,4 +1,4 @@
-interface ValidationFunction {
+export interface ValidationFunction {
   (...args: any[]): boolean;
   errorMessage?: string;
 }
