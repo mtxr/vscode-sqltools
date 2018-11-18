@@ -551,6 +551,7 @@
     },
     "dependencies": {
         "get-port": "^3.2.0",
+        "immutability-helper": "^2.8.1",
         "mysql2": "^1.5.1",
         "opn": "^5.1.0",
         "pg": "^7.4.0",

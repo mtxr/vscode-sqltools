@@ -8,6 +8,7 @@ import {
   ConfigManager,
   Connection,
   ConnectionManager,
+  DatabaseInterface,
   SerializedConnection,
   Telemetry,
   Utils,
@@ -102,7 +103,15 @@ namespace SQLToolsLanguageServer {
     const newLang = ConfigManager.formatLanguages.sort(sortLangs);
     const register = newLang.length > 0 && (!formatterRegistration || oldLang.join() !== newLang.join());
     if (register) {
-      formatterLanguages = newLang;
+      formatterLanguages = newLang.reduce((agg, language) => {
+        if (typeof language === 'string') {
+          agg.push({ language, scheme: 'untitled' });
+          agg.push({ language, scheme: 'file' });
+        } else {
+          agg.push(language);
+        }
+        return agg;
+      }, []);
       if (formatterRegistration) (await formatterRegistration).dispose();
       formatterRegistration = server.client.register(DocumentRangeFormattingRequest.type, {
         documentSelector: formatterLanguages,
@@ -122,12 +131,6 @@ namespace SQLToolsLanguageServer {
   server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
     const { textDocument, position } = pos;
     const doc = docManager.get(textDocument.uri);
-    const prev = doc.getText()
-      .substring(doc.offsetAt(Position.create(position.line, 0)), doc.offsetAt(Position.create(
-        position.character++,
-        position.line,
-      )))
-      .replace(/\.([^\[\] ])/g, '');
     if (!activeConnection) return [];
     return completionItems;
   });
@@ -152,7 +155,6 @@ namespace SQLToolsLanguageServer {
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
-    const result = await c.connect();
     activeConnection = c;
     await loadConnectionData(activeConnection);
     return activeConnection.serialize();
@@ -171,23 +173,48 @@ namespace SQLToolsLanguageServer {
     args: any[],
   }) => {
     try {
-      HTTPServer.set('GET /api/query-results', { waiting: true, success: false, results: [] });
-      const conn = sgdbConnections.find((c) => c.getName() === req.conn.name);
-      activeConnection = conn;
-      HTTPServer.set('GET /api/query-results', {
-        waiting: false,
-        success: true,
-        results: (await activeConnection[req.command](...req.args)),
+      HTTPServer.queryResultStatus(true);
+      activeConnection = sgdbConnections.find((c) => c.getName() === req.conn.name);
+      const results = (await activeConnection[req.command](...req.args)) as DatabaseInterface.QueryResults[];
+      results.forEach((r) => {
+        HTTPServer.queryResult(r.query, r);
       });
       return true;
     } catch (e) {
-      HTTPServer.set('GET /api/query-results', {
-        waiting: false,
-        success: false,
-        results: [],
-        message: e.message ? e.message : e,
-      });
+      HTTPServer.queryResultStatus(false, e);
       throw e;
+    }
+  });
+
+  const nodeExit = process.exit;
+  process.exit = ((code?: number): void => {
+    const stack = new Error('stack');
+    server.sendNotification('exitCalled', [code ? code : 0, stack.stack]);
+    setTimeout(() => {
+      nodeExit(code);
+    }, 1000);
+  }) as any;
+  process.on('uncaughtException', (error: any) => {
+    let message: string;
+    if (error) {
+      if (typeof error.stack === 'string') {
+        message = error.stack;
+      } else if (typeof error.message === 'string') {
+        message = error.message;
+      } else if (typeof error === 'string') {
+        message = error;
+      }
+      if (!message) {
+        try {
+          message = JSON.stringify(error, undefined, 4);
+        } catch (e) {
+          // Should not happen.
+        }
+      }
+    }
+    Logger.error('Uncaught exception received.');
+    if (message) {
+      Logger.error(message);
     }
   });
 }

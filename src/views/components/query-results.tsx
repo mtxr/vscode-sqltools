@@ -1,5 +1,6 @@
 import React, { ReactNode } from 'react';
 import ReactTable from 'react-table';
+import { DatabaseInterface } from '../../api';
 interface QueryProps {
   value: string;
 }
@@ -182,7 +183,7 @@ export class ResultsTable extends React.Component<ResultsTableProps, ResultsTabl
   }
 }
 interface QueryResultProps {
-  error: string;
+  error: any;
   value: any;
   className?: string;
 }
@@ -203,23 +204,25 @@ export class QueryResult extends React.Component<QueryResultProps, {}> {
     );
   }
 }
-type QueryResultsState = (() => { active: any }) & {
-  isLoaded: boolean,
-  active: number,
-  data: undefined[],
-  messages: undefined[],
-  waiting: boolean,
-  success: boolean,
-};
+interface QueryResultsState {
+  activeTab?: string;
+  isLoaded: boolean;
+  error?: any;
+  queries: string[];
+  resultMap: {
+    [query: string]: DatabaseInterface.QueryResults;
+  };
+}
+
 export default class QueryResults extends React.Component<{}, QueryResultsState> {
   constructor(props) {
     super(props);
-    this.state = { isLoaded: false, active: 0, data: [], messages: [], waiting: true, success: true };
+    this.state = { isLoaded: false, resultMap: {}, queries: [] };
   }
-  toggle(i) {
-    this.setState(() => ({
-      active: i,
-    }));
+  toggle(query: QueryResultsState['queries'][number]) {
+    this.setState({
+      activeTab: query,
+    });
   }
 
   componentDidMount() {
@@ -240,16 +243,16 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
         .then((res) => res.json())
         .then(
           (res) => {
-            if (res.waiting === false && res.success === true) {
+            if (!res.isLoading) {
               clearInterval(interval);
               interval = null;
             }
             this.setState({
               isLoaded: true,
-              data: res.results,
-              waiting: res.waiting,
-              messages: res.messages || [],
-              success: res.success,
+              queries: res.queries,
+              resultMap: res.resultMap,
+              error: res.error,
+              activeTab: res.queries[0],
             });
           },
           (e) => void 0,
@@ -257,35 +260,37 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
     }, 500);
   }
   render() {
-    if (!this.state.isLoaded && this.state.waiting) {
+    if (!this.state.isLoaded) {
       return <h2>loading...</h2>;
-    } else if (this.state.isLoaded && this.state.waiting) {
-      return <h2>Waiting query results...</h2>;
-    } else if (this.state.isLoaded && !this.state.waiting && !this.state.success) {
+    } else if (this.state.isLoaded && this.state.error) {
       return (
         <div>
           <h2>Query errored. Check the logs.</h2>
-          (
-          {this.state.messages.map((m, i) => {
-            return <h4 key={i}>{m}</h4>;
-          })}
-          )
+          <h4>{this.state.error.toString()}</h4>
         </div>
       );
     }
     const tabs = [];
-    const results = this.state.data.map((res: any, i: number) => {
+    const results = this.state.queries.map((query: string) => {
+      const res = this.state.resultMap[query];
       tabs.push(
         <li
-          title={res.query}
-          key={i}
-          onClick={this.toggle.bind(this, i)}
-          className={'truncate ' + (this.state.active === i ? 'active' : '')}
+          title={query}
+          key={query}
+          onClick={this.toggle.bind(this, query)}
+          className={'truncate ' + (this.state.activeTab === query ? 'active' : '')}
         >
           {res.query}
         </li>,
       );
-      return <QueryResult value={res} key={i} error={res.error} className={this.state.active === i ? 'active' : ''} />;
+      return (
+        <QueryResult
+          value={res}
+          key={query}
+          error={res.error}
+          className={this.state.activeTab === query ? 'active' : ''}
+        />
+      );
     });
     return (
       <div className='fix-height'>

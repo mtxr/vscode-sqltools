@@ -103,6 +103,17 @@ body, #root {
   height: $tabsHeight;
   border-bottom-width: 1px;
   border-bottom-style: solid;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+
+  &::-webkit-scrollbar {
+    height: 2px;
+    transition: all 1s;
+  }
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
 
   li {
     overflow: hidden;
@@ -111,7 +122,7 @@ body, #root {
     vertical-align: middle;
     float: left;
     padding: 0px 4px;
-    width: 100px;
+    min-width: 100px;
     list-style: none;
     margin-right: 1px;
     border-width: 1px;
@@ -120,6 +131,7 @@ body, #root {
     border-bottom-style: solid;
     font-size: 0.8em;
     cursor: pointer;
+    flex-grow: 1;
   }
 }
 

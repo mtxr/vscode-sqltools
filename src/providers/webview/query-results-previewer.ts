@@ -2,10 +2,9 @@ import WebviewProvider from './webview-provider';
 
 export default class QueryResultsPreviewer extends WebviewProvider {
   protected id: string = 'queryResultsPreviewer';
-  protected title: string = 'SQLTools';
+  protected title: string = 'SQLTools Results';
 
-  public show(title = 'SQLTools') {
-    this.title = title;
+  public show() {
     if (this.visible) this.postMessage({ action: 'refresh' });
     super.show();
   }

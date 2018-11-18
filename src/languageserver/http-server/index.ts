@@ -1,8 +1,8 @@
 import http from 'http';
 import SQLToolsLanguageServer from '..';
+import { DatabaseInterface } from '../../api';
 import { CreateNewConnectionRequest } from '../../contracts/connection-requests';
 import Logger from '../utils/logger';
-
 interface ExtendedIncommingMessage extends http.IncomingMessage {
   body?: string;
 }
@@ -11,6 +11,13 @@ interface ExtendedServerResponse extends http.ServerResponse {
   sendJson(data: object | any[] | Buffer, code?: number);
 }
 type HTTPFunction = (req: ExtendedIncommingMessage, res: ExtendedServerResponse, next?: Function) => void;
+
+interface QueryResultsState {
+  isLoading: boolean;
+  error: any;
+  queries: string[];
+  resultMap: { [id: string]: DatabaseInterface.QueryResults };
+}
 
 namespace HTTPServer {
   const bodyParse: HTTPFunction = (req, res, next) => {
@@ -30,11 +37,18 @@ namespace HTTPServer {
     });
   };
 
-  export const endPoints: { [s: string]: { data: any, handler: HTTPFunction[] | HTTPFunction } } = {};
+  const endPoints: { [s: string]: { data: any, handler: HTTPFunction[] | HTTPFunction } } = {};
+  const queryResultsState: QueryResultsState = {
+    isLoading: false,
+    error: null,
+    queries: [],
+    resultMap: {},
+  };
 
   function reqHandler(req: http.IncomingMessage, res: ExtendedServerResponse) {
-    // tslint:disable-next-line:no-string-literal
-    res.setHeader('Access-Control-Allow-Origin', (req.headers as any)['origin'] || (req.headers as any)['Origin']);
+    if ((req.headers as any).origin || (req.headers as any).Origin)
+      res.setHeader('Access-Control-Allow-Origin', (req.headers as any).origin || (req.headers as any).Origin);
+
     res.setHeader('Access-Control-Allow-Methods', '*');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
     res.setHeader('Access-Control-Max-Age', 86400000);
@@ -100,6 +114,28 @@ namespace HTTPServer {
     endPoints[url].data = data;
   }
 
+  export function queryResultStatus(status, error?: any) {
+    queryResultsState.isLoading = status;
+    queryResultsState.error = error;
+  }
+
+  export function queryResult(query: string, data: DatabaseInterface.QueryResults) {
+    queryResultsState.isLoading = false;
+    if (!query) return;
+    const index = queryResultsState.queries.indexOf(query);
+    if (index > -1) {
+      queryResultsState.queries.splice(index, 1);
+    }
+    if (!data) {
+      delete queryResultsState.resultMap[query];
+
+    } else {
+      queryResultsState.resultMap[query] = data;
+      queryResultsState.queries = [query].concat(queryResultsState.queries);
+    }
+    queryResultsState.isLoading = false;
+  }
+
   const httpServer: http.Server = http.createServer(reqHandler);
   export function server(port: number = 5123): http.Server {
     if (!httpServer.listening) {
@@ -109,19 +145,20 @@ namespace HTTPServer {
     }
     return httpServer;
   }
+
+  HTTPServer.get('/', (req, res) => res.sendJson({ endpoints: Object.keys(endPoints) }));
+  HTTPServer.get('/api/query-results', (req, res) => res.sendJson(queryResultsState));
+  HTTPServer.set('GET /api/statistics', {});
+  HTTPServer.get('/api/status', (req, res) => void res.sendJson(SQLToolsLanguageServer.getStatus()));
+  HTTPServer.post('/api/create-connection', (req, res) => {
+    SQLToolsLanguageServer.getServer().sendRequest(CreateNewConnectionRequest.method, req.body)
+      .then((result) => {
+        return res.sendJson({ data: req.body, success: true });
+      }, (err) => {
+        Logger.error('err', err);
+        return res.sendJson({ data: req.body, success: false, error: err.message || err.toString() });
+      });
+  });
 }
 
 export default HTTPServer;
-HTTPServer.get('/', (req, res) => res.sendJson({ endpoints: Object.keys(HTTPServer.endPoints) }));
-HTTPServer.set('GET /api/query-results', { waiting: true, success: false, results: [] });
-HTTPServer.set('GET /api/statistics', {});
-HTTPServer.get('/api/status', (req, res) => void res.sendJson(SQLToolsLanguageServer.getStatus()));
-HTTPServer.post('/api/create-connection', (req, res) => {
-  SQLToolsLanguageServer.getServer().sendRequest(CreateNewConnectionRequest.method, req.body)
-    .then((result) => {
-      return res.sendJson({ data: req.body, success: true });
-    }, (err) => {
-      Logger.error('err', err);
-      return res.sendJson({ data: req.body, success: false, error: err.message || err.toString() });
-    });
-});

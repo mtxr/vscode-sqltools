@@ -12,6 +12,8 @@ import {
   workspace as Wspc,
 } from 'vscode';
 import {
+  CloseAction,
+  ErrorAction,
   LanguageClient,
   LanguageClientOptions,
   ServerOptions,
@@ -159,7 +161,7 @@ namespace SQLTools {
     try {
       const table = await getTableName(node);
       await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
-      printOutput(`Some records of ${table} : SQLTools`);
+      printOutput();
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
     }
@@ -169,7 +171,7 @@ namespace SQLTools {
     try {
       const table = await getTableName(node);
       await runConnectionCommand('describeTable', table);
-      printOutput(`Describing table ${table} : SQLTools`);
+      printOutput();
     } catch (e) {
       ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
     }
@@ -305,8 +307,8 @@ namespace SQLTools {
     }), prop);
   }
 
-  function printOutput(outputName: string = 'SQLTools Results') {
-    queryResults.show(outputName);
+  function printOutput() {
+    queryResults.show();
   }
 
   async function getConnData() {
@@ -449,13 +451,39 @@ namespace SQLTools {
       run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
     };
 
-    const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages);
-
+    const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)
+      .reduce((agg, language) => {
+        if (typeof language === 'string') {
+          agg.push({ language, scheme: 'untitled' });
+          agg.push({ language, scheme: 'file' });
+        } else {
+          agg.push(language);
+        }
+        return agg;
+      }, []);
+    let avoidRestart = false;
     const clientOptions: LanguageClientOptions = {
       documentSelector: selector,
       synchronize: {
         configurationSection: 'sqltools',
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
+      },
+      initializationFailedHandler: (error) => {
+        languageClient.error('Server initialization failed.', error);
+        languageClient.outputChannel.show(true);
+        return false;
+      },
+      errorHandler: {
+        error: (error, message, count): ErrorAction => {
+          logger.error('Language server error', error, message, count);
+          return languageClientErrorHandler.error(error, message, count);
+        },
+        closed: (): CloseAction => {
+          if (avoidRestart) {
+            return CloseAction.DoNotRestart;
+          }
+          return languageClientErrorHandler.closed();
+        },
       },
     };
 
@@ -465,6 +493,12 @@ namespace SQLTools {
       serverOptions,
       clientOptions,
     );
+    languageClient.onReady().then(() => {
+      languageClient.onNotification('exitCalled', () => {
+        avoidRestart = true;
+      });
+    });
+    const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 
     return await languageClient.start();
   }
