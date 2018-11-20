@@ -2,10 +2,7 @@ import {
   CompletionItem,
   CompletionItemKind,
 } from 'vscode-languageserver';
-import {
-  DatabaseInterface,
-  LoggerInterface,
-} from './../../../api/interface';
+import { DatabaseInterface } from '@sqltools/core/interface';
 
 class MarkdownString {
   public value: string = '';

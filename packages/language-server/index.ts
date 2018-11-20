@@ -2,36 +2,39 @@ import {
   CompletionItem, createConnection,
   Disposable,
   DocumentRangeFormattingRequest, IConnection, InitializeResult,
-  IPCMessageReader, IPCMessageWriter, Position, TextDocumentPositionParams, TextDocuments,
+  IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, RemoteConsole,
 } from 'vscode-languageserver';
+import getPort from 'get-port';
+
+import HTTPServer from 'http-server';
+import Formatter from 'requests/format';
+import * as Utils from '@sqltools/core/utils';
+import Connection from '@sqltools/core/connection';
+import ConfigManager from '@sqltools/core/config-manager';
+import { TableCompletionItem, TableColumnCompletionItem } from 'requests/completion/models';
 import {
-  ConfigManager,
-  Connection,
-  ConnectionManager,
-  DatabaseInterface,
-  SerializedConnection,
-  Telemetry,
-  Utils,
-} from '../api';
-import {
+  UpdateTableAndColumnsRequest,
   GetConnectionListRequest,
-  GetTablesAndColumnsRequest,
   OpenConnectionRequest,
   RefreshDataRequest,
-  RunCommandRequest,
-  UpdateTableAndColumnsRequest,
-} from '../contracts/connection-requests';
-import HTTPServer from './http-server';
-import { TableColumnCompletionItem, TableCompletionItem } from './requests/completion/models';
-import Formatter from './requests/format';
-import Logger from './utils/logger';
+  GetTablesAndColumnsRequest,
+  RunCommandRequest
+} from '@sqltools/core/contracts/connection-requests';
+import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
+import ConnectionManager from '@sqltools/core/connection-manager';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
+  let Logger: Console | RemoteConsole = console;
   const docManager: TextDocuments = new TextDocuments();
-  const localSetup = Utils.localSetupInfo();
-  Telemetry.register();
-  const httpPort: number = localSetup.httpServerPort || 5123;
+  let httpPort: number = Utils.persistence.get('httpServerPort');
+  getPort({ port: httpPort || 5123 }).then(port => {
+    httpPort = port;
+    HTTPServer.server(port);
+  }, error => {
+    /* notify user! */
+  });
+
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
   let workspaceRoot: string;
@@ -74,7 +77,7 @@ namespace SQLToolsLanguageServer {
         updateSidebar(t, c);
         return loadCompletionItens(t, c);
       }).catch((e) => {
-        Logger.error('Error while preparing columns completions', e);
+        Logger.error('Error while preparing columns completions' + e.toString());
       });
   }
 
@@ -84,6 +87,7 @@ namespace SQLToolsLanguageServer {
 
   /* server events */
   server.onInitialize((params): InitializeResult => {
+    Logger = server.console;
     workspaceRoot = params.rootPath;
     return {
       capabilities: {
@@ -115,7 +119,7 @@ namespace SQLToolsLanguageServer {
       if (formatterRegistration) (await formatterRegistration).dispose();
       formatterRegistration = server.client.register(DocumentRangeFormattingRequest.type, {
         documentSelector: formatterLanguages,
-      }).then((a) => a, Logger.error);
+      }).then((a) => a, error => Logger.error(error.toString()) as any);
     } else if (formatterRegistration) {
       (await formatterRegistration).dispose();
     }
@@ -129,8 +133,8 @@ namespace SQLToolsLanguageServer {
   server.onDocumentRangeFormatting((params) => Formatter(docManager, params));
 
   server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
-    const { textDocument, position } = pos;
-    const doc = docManager.get(textDocument.uri);
+    // const { textDocument, position } = pos;
+    // const doc = docManager.get(textDocument.uri);
     if (!activeConnection) return [];
     return completionItems;
   });

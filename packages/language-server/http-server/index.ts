@@ -1,8 +1,9 @@
 import http from 'http';
 import SQLToolsLanguageServer from '..';
-import { DatabaseInterface } from '../../api';
-import { CreateNewConnectionRequest } from '../../contracts/connection-requests';
-import Logger from '../utils/logger';
+import { DatabaseInterface } from '@sqltools/core/interface';
+import { CreateNewConnectionRequest } from '@sqltools/core/contracts/connection-requests';
+import Logger from 'utils/logger';
+
 interface ExtendedIncommingMessage extends http.IncomingMessage {
   body?: string;
 }

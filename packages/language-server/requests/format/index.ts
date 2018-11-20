@@ -7,8 +7,8 @@ import {
   TextDocuments,
   TextEdit,
 } from 'vscode-languageserver';
-import Utils from './../../../api/utils';
-import Logger from './../../utils/logger';
+import Logger from 'utils/logger';
+import * as Utils from '@sqltools/core/utils';
 
 export default function handler(
   docManager: TextDocuments,
@@ -37,5 +37,5 @@ function format(
     range = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
   }
 
-  return [ TextEdit.replace(range, Utils.formatSql(text, formattingOptions.tabSize)) ];
+  return [ TextEdit.replace(range, Utils.query.format(text, formattingOptions.tabSize)) ];
 }
