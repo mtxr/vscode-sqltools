@@ -1,13 +1,13 @@
 import {
-  DocumentFormattingParams,
-  DocumentRangeFormattingParams,
-  FormattingOptions,
-  Range,
-  TextDocument,
   TextDocuments,
+  DocumentRangeFormattingParams,
+  DocumentFormattingParams,
   TextEdit,
+  TextDocument,
+  FormattingOptions,
+  Range
 } from 'vscode-languageserver';
-import * as Utils from '@sqltools/core/utils';
+import { query as QueryUtils } from '@sqltools/core/utils';
 
 const Logger = console;
 export default function handler(
@@ -37,5 +37,5 @@ function format(
     range = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
   }
 
-  return [ TextEdit.replace(range, Utils.query.format(text, formattingOptions.tabSize)) ];
+  return [ TextEdit.replace(range, QueryUtils.format(text, formattingOptions.tabSize)) ];
 }

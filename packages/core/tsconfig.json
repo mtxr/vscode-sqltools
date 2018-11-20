@@ -9,9 +9,6 @@
     "outDir": "../../dist/core",
     "sourceMap": true,
     "lib": ["es6"],
-    "removeComments": true,
-    "paths": {
-      "@extension/*": [ "../extension/*"]
-    }
-  },
+    "removeComments": true
+  }
 }

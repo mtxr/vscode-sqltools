@@ -1,5 +1,5 @@
 {
-    "name": "sqltools",
+    "name": "@sqltools/extension",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
     "version": "0.15.1",
@@ -9,8 +9,10 @@
         "url": "https://github.com/mtxr/vscode-sqltools",
         "type": "git"
     },
+    "main": "./extension.js",
+    "private": true,
     "engines": {
-        "vscode": "^1.26.0"
+        "vscode": "^1.28.0"
     },
     "categories": [
         "Programming Languages",
@@ -46,7 +48,6 @@
         "onLanguage:sql",
         "onCommand:SQLTools.selectConnection"
     ],
-    "main": "./dist/sqltools",
     "contributes": {
         "commands": [
             {
@@ -54,8 +55,8 @@
                 "command": "SQLTools.selectConnection",
                 "category": "SQLTools",
                 "icon": {
-                    "light": "dist/icon/database-light.svg",
-                    "dark": "dist/icon/database-dark.svg"
+                    "light": "icons/database-light.svg",
+                    "dark": "icons/database-dark.svg"
                 }
             },
             {
@@ -128,8 +129,8 @@
                 "command": "SQLTools.showRecords",
                 "category": "SQLTools Connection",
                 "icon": {
-                    "light": "dist/icon/list-light.svg",
-                    "dark": "dist/icon/list-dark.svg"
+                    "light": "icons/list-light.svg",
+                    "dark": "icons/list-dark.svg"
                 }
             },
             {
@@ -147,8 +148,8 @@
                 "command": "SQLTools.appendToCursor",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "dist/icon/pencil-light.svg",
-                    "dark": "dist/icon/pencil-dark.svg"
+                    "light": "icons/pencil-light.svg",
+                    "dark": "icons/pencil-dark.svg"
                 }
             },
             {
@@ -156,8 +157,8 @@
                 "command": "SQLTools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "dist/icon/insert-light.svg",
-                    "dark": "dist/icon/insert-dark.svg"
+                    "light": "icons/insert-light.svg",
+                    "dark": "icons/insert-dark.svg"
                 }
             },
             {
@@ -165,8 +166,8 @@
                 "command": "SQLTools.refreshSidebar",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "dist/icon/refresh-light.svg",
-                    "dark": "dist/icon/refresh-dark.svg"
+                    "light": "icons/refresh-light.svg",
+                    "dark": "icons/refresh-dark.svg"
                 }
             },
             {
@@ -174,8 +175,8 @@
                 "command": "SQLTools.newSqlFile",
                 "category": "SQLTools",
                 "icon": {
-                    "light": "dist/icon/file-light.svg",
-                    "dark": "dist/icon/file-dark.svg"
+                    "light": "icons/file-light.svg",
+                    "dark": "icons/file-dark.svg"
                 }
             }
         ],
@@ -427,7 +428,7 @@
             "activitybar": [
                 {
                     "id": "SQLTools-connectionExplorer",
-                    "icon": "dist/icon/database-sidebar.svg",
+                    "icon": "icons/database-sidebar.svg",
                     "title": "SQLTools"
                 }
             ]
@@ -515,7 +516,7 @@
         "vscode:prepublish": "webpack --env.production",
         "compile": "tsc -p ./",
         "watch": "webpack --watch --env.development",
-        "postinstall": "node ./node_modules/vscode/bin/install",
+        "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
         "test": "yarn run test:lint && yarn run test:unit",
@@ -523,46 +524,31 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
-        "@babel/core": "^7.1.2",
-        "@babel/preset-env": "^7.1.0",
-        "@babel/preset-react": "^7.0.0",
-        "@types/jest": "^20.0.0",
-        "@types/node": "^8.0.13",
-        "@types/react": "^16.7.3",
-        "@types/react-dom": "^16.0.9",
-        "@types/universal-analytics": "^0.4.2",
+        "@types/jest": "^23.3.9",
+        "@types/node": "^10.12.9",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^4.5.3",
         "css-loader": "^1.0.0",
-        "jest": "^20.0.4",
-        "jest-cli": "^20.0.4",
+        "jest": "^23.6.0",
+        "jest-cli": "^23.6.0",
         "node-sass": "^4.10.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
-        "ts-jest": "^20.0.6",
+        "ts-jest": "^23.10.4",
         "ts-loader": "^5.2.1",
         "tslint": "^5.4.3",
         "tslint-webpack-plugin": "^1.2.2",
-        "typescript": "^2.3.2",
+        "typescript": "^3.1.6",
         "uglifyjs-webpack-plugin": "^2.0.1",
         "vscode": "^1.1.21",
         "webpack": "^4.20.2",
         "webpack-cli": "^3.1.2"
     },
     "dependencies": {
-        "get-port": "^3.2.0",
-        "immutability-helper": "^2.8.1",
-        "mysql2": "^1.5.1",
+        "@sqltools/core": "*",
+        "@sqltools/language-server": "*",
+        "@sqltools/ui": "*",
         "opn": "^5.1.0",
-        "pg": "^7.4.0",
-        "react": "^16.6.1",
-        "react-dom": "^16.6.1",
-        "react-table": "^6.8.6",
-        "sql-formatter": "^2.3.1",
-        "tedious": "^2.3.1",
-        "universal-analytics": "^0.4.16",
-        "uuid": "^3.1.0",
-        "vscode-languageclient": "^3.5.1",
-        "vscode-languageserver": "^3.5.1"
+        "vscode-languageclient": "^5.1.1"
     }
 }

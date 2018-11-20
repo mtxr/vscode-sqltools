@@ -1,0 +1,21 @@
+{
+    "compilerOptions": {
+        "module": "commonjs",
+        "resolveJsonModule": true,
+        "target": "es6",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": true,
+        "outDir": "../../dist/extension",
+        "sourceMap": true,
+        "lib": [ "es6" ],
+        "baseUrl": "src",
+        "removeComments": true,
+        "paths": {}
+    },
+    "exclude": [
+        "./test",
+        "./node_modules",
+        "./__mocks__",
+        "./*.js"
+    ]
+}

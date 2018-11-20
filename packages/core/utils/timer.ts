@@ -1,4 +1,4 @@
-export default class Timer {
+export class Timer {
   private s: [number, number];
   private e: [number, number];
 
@@ -33,3 +33,5 @@ export default class Timer {
     }
   }
 }
+
+export default Timer;

@@ -1,4 +1,4 @@
-import { Telemetry } from '../extension/api';
+import { Telemetry } from './utils';
 import Dialects from './dialect';
 import {
   ConnectionCredentials,

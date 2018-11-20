@@ -14,7 +14,7 @@ export interface FormatOptions {
   indentSize: number;
 }
 
-export default interface Settings {
+export interface Settings {
   /**
    * Name of the connection to auto connect on start
    * @type {string}

@@ -1,0 +1,20 @@
+{
+  "name": "sqltools",
+  "displayName": "SQLTools",
+  "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
+  "version": "0.15.1",
+  "publisher": "mtxr",
+  "license": "GPL-3.0",
+  "main": "dist/extension.js",
+  "repository": {
+    "url": "https://github.com/mtxr/vscode-sqltools",
+    "type": "git"
+  },
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "watch": "yarn workspace @sqltools/extension watch"
+   }
+}

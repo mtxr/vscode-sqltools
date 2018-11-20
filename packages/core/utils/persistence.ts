@@ -6,14 +6,14 @@ const filename = '.sqltools-setup';
 
 const filepath = path.join(getHome(), filename);
 
-function read() {
+export function read() {
   try {
     return JSON.parse(fs.readFileSync(filepath, 'utf-8'));
   } catch (e) { /**/ }
   return {};
 }
 
-function write(content = {}) {
+export function write(content = {}) {
   try {
     fs.writeFileSync(filepath, JSON.stringify(content));
   } catch(e) { /** */ }

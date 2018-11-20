@@ -5,6 +5,7 @@
     "target": "es6",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
+    "resolveJsonModule": true,
     "outDir": "../../dist/language-server",
     "sourceMap": true,
     "lib": [

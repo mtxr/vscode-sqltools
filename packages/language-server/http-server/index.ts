@@ -2,9 +2,8 @@ import http from 'http';
 import SQLToolsLanguageServer from '..';
 import { DatabaseInterface } from '@sqltools/core/interface';
 import { CreateNewConnectionRequest } from '@sqltools/core/contracts/connection-requests';
-import { RemoteConsole } from 'vscode-languageserver';
 
-let Logger: Console | RemoteConsole = console;
+let Logger = console;
 interface ExtendedIncommingMessage extends http.IncomingMessage {
   body?: string;
 }
@@ -139,7 +138,7 @@ namespace HTTPServer {
   }
 
   const httpServer: http.Server = http.createServer(reqHandler);
-  export function server(logger: typeof Logger, port: number = 5123): http.Server {
+  export function server(logger: any, port: number = 5123): http.Server {
     Logger = logger;
     if (!httpServer.listening) {
       httpServer.listen(port, () => {

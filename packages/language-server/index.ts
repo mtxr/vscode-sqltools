@@ -25,7 +25,7 @@ import ConnectionManager from '@sqltools/core/connection-manager';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
-  let Logger: Console | RemoteConsole = console;
+  let Logger = console;
   const docManager: TextDocuments = new TextDocuments();
   let httpPort: number = Utils.persistence.get('httpServerPort');
   const portFuture = getPort({ port: httpPort || 5123 });
@@ -80,7 +80,7 @@ namespace SQLToolsLanguageServer {
 
   /* server events */
   server.onInitialize((params: InitializeParams) => {
-    Logger = server.console;
+    // Logger = server.console;
     workspaceRoot = params.rootPath;
     return {
       capabilities: {

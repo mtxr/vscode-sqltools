@@ -1,5 +1,5 @@
-import Settings from './interface/settings';
-import packageJson from '@extension/package.json';
+import { Settings } from './interface';
+import packageJson from '../extension/package.json';
 const { contributes: { configuration: { properties: defaults } } } = packageJson;
 
 let settings: Settings = {};
@@ -34,6 +34,7 @@ const handler = {
   },
 };
 
-const settingsProxy = new Proxy(settings, handler);
+type ExtendedSettings = Settings & { get?(...args): any, setSettings?(...args): void };
+const settingsProxy = new Proxy<ExtendedSettings>(settings, handler);
 
-export default settingsProxy as Settings & { get(...args): any, setSettings(...args): void};
+export default settingsProxy;
