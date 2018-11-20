@@ -1,0 +1,10 @@
+@import './variables';
+@import './lib/simple-grid';
+@import './query-results';
+@import './syntax';
+
+.setup {
+  input, select {
+    width: 200px;
+  }
+}
