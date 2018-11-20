@@ -2,16 +2,16 @@ import {
   CompletionItem, createConnection,
   Disposable,
   DocumentRangeFormattingRequest, IConnection, InitializeResult,
-  IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, RemoteConsole,
+  IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, RemoteConsole, InitializeParams,
 } from 'vscode-languageserver';
 import getPort from 'get-port';
 
-import HTTPServer from 'http-server';
-import Formatter from 'requests/format';
+import HTTPServer from './http-server';
+import Formatter from './requests/format';
 import * as Utils from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { TableCompletionItem, TableColumnCompletionItem } from 'requests/completion/models';
+import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
 import {
   UpdateTableAndColumnsRequest,
   GetConnectionListRequest,
@@ -28,13 +28,7 @@ namespace SQLToolsLanguageServer {
   let Logger: Console | RemoteConsole = console;
   const docManager: TextDocuments = new TextDocuments();
   let httpPort: number = Utils.persistence.get('httpServerPort');
-  getPort({ port: httpPort || 5123 }).then(port => {
-    httpPort = port;
-    HTTPServer.server(port);
-  }, error => {
-    /* notify user! */
-  });
-
+  const portFuture = getPort({ port: httpPort || 5123 });
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
   let workspaceRoot: string;
@@ -42,7 +36,6 @@ namespace SQLToolsLanguageServer {
   let activeConnection: Connection = null;
   let completionItems: CompletionItem[] = [];
 
-  HTTPServer.server(httpPort);
   docManager.listen(server);
 
   export function getServer() { return server; }
@@ -86,7 +79,7 @@ namespace SQLToolsLanguageServer {
   }
 
   /* server events */
-  server.onInitialize((params): InitializeResult => {
+  server.onInitialize((params: InitializeParams) => {
     Logger = server.console;
     workspaceRoot = params.rootPath;
     return {
@@ -99,6 +92,11 @@ namespace SQLToolsLanguageServer {
         textDocumentSync: docManager.syncKind,
       },
     };
+  });
+
+  server.onInitialized(async () => {
+    httpPort = await portFuture;
+    HTTPServer.server(server.console, httpPort);
   });
 
   server.onDidChangeConfiguration(async (change) => {

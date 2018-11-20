@@ -7,9 +7,9 @@ import {
   TextDocuments,
   TextEdit,
 } from 'vscode-languageserver';
-import Logger from 'utils/logger';
 import * as Utils from '@sqltools/core/utils';
 
+const Logger = console;
 export default function handler(
   docManager: TextDocuments,
   params: DocumentRangeFormattingParams | DocumentFormattingParams | DocumentRangeFormattingParams[],

@@ -8,9 +8,11 @@
   "private": true,
   "dependencies": {
     "@sqltools/core": "*",
-    "vscode-languageserver": "^3.5.1"
+    "get-port": "^4.0.0",
+    "vscode-languageserver": "^5.1.0"
   },
   "devDependencies": {
-
+    "@types/get-port": "4.0.0",
+    "typescript": "^3.1.6"
   }
 }
