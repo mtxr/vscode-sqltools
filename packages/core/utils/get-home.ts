@@ -1,4 +1,4 @@
-import EnvironmentException from 'exception/environment';
+import EnvironmentException from './../exception/environment';
 
 let home: string;
 

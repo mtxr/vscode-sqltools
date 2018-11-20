@@ -1,5 +1,5 @@
 import formatter from 'sql-formatter';
-import { DatabaseInterface } from 'interface';
+import { DatabaseInterface } from '../interface';
 export function format(query, indentSize: number = 2) {
   return formatter.format(query, { indent: ' '.repeat(indentSize) });
 }

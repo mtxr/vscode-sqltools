@@ -2,7 +2,7 @@ import Analytics from 'universal-analytics';
 import uuidv4 from 'uuid/v4';
 import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
-import { GA_CODE, VERSION } from 'contants';
+import { GA_CODE, VERSION } from './../constants';
 import Timer from './timer';
 
 namespace Telemetry {
@@ -103,3 +103,4 @@ namespace Telemetry {
 }
 
 export default Telemetry;
+export { Telemetry };
