@@ -1,0 +1,20 @@
+{
+  "name": "@sqltools/core",
+  "version": "1.0.0",
+  "description": "SQLTools Core Files",
+  "main": "index.ts",
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "GPL-3.0",
+  "private": true,
+  "dependencies": {
+    "mysql2": "^1.5.1",
+    "pg": "^7.4.0",
+    "sql-formatter": "^2.3.1",
+    "tedious": "^2.3.1",
+    "uuid": "^3.1.0",
+    "vscode-languageserver": "^3.5.1"
+  },
+  "devDependencies": {
+    "typescript": "^3.1.6"
+  }
+}
