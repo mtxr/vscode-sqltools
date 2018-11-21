@@ -10,6 +10,9 @@
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"
   },
+  "engines": {
+    "vscode": "^1.28.0"
+  },
   "private": true,
   "workspaces": [
     "packages/*"

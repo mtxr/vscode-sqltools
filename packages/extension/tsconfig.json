@@ -9,6 +9,7 @@
         "sourceMap": true,
         "lib": [ "es6" ],
         "baseUrl": "src",
+        "noEmit": true,
         "removeComments": true,
         "paths": {}
     },

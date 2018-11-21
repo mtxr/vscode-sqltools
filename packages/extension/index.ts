@@ -20,19 +20,7 @@ import {
   TransportKind,
 } from 'vscode-languageclient';
 import ConfigManager from '@sqltools/core/config-manager';
-// import {
-//   BookmarksStorage,
-//   ConfigManager,
-//   DatabaseInterface,
-//   DismissedException,
-//   ErrorHandler,
-//   History,
-//   Logger,
-//   SerializedConnection,
-//   SettingsInterface,
-//   Telemetry,
-//   Utils,
-// } from '../../src/api';
+
 import { DISPLAY_NAME, VERSION } from '@sqltools/core/constants';
 import ContextManager from './context';
 
@@ -78,8 +66,7 @@ namespace SQLTools {
     if (ContextManager.context) return;
     ContextManager.context = context;
     loadConfigs();
-    Telemetry.register(ConfigManager.telemetry);
-    // ContextManager.httpServerPort = await require('get-port')({ port: localData.httpServerPort || 5123 });
+    Telemetry.register('extension', ConfigManager.telemetry, logger);
     await registerExtension();
     updateStatusBar();
     activationTimer.end();

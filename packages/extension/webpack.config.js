@@ -4,6 +4,10 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getWebviewConfig = require('../ui/webpack.config');
 const pkgJson = require('./package.json');
 
+// defintions
+pkgJson.name = 'sqltools'; // vscode marketplace name
+const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
+
 const outdir = path.resolve(__dirname, '..', '..', 'dist');
 
 /**
@@ -26,7 +30,7 @@ function getExtensionConfig(env) {
         {
           test: /\.tsx?$/,
           loaders: [
-            'ts-loader'
+            { loader: 'ts-loader', options: { transpileOnly: true } }
           ],
           exclude: /node_modules/
         }
@@ -34,7 +38,13 @@ function getExtensionConfig(env) {
     },
     plugins: [
       new CopyWebpackPlugin([
-        { from: path.join(__dirname, 'package.json'), to: path.join(outdir, 'package.json') },
+        {
+          from: path.join(__dirname, 'package.json'),
+          to: path.join(outdir, 'package.json'),
+          transform: (content, filepath) => {
+            return content.toString('utf8').replace(/\n */g, '').replace('"name": "@sqltools/extension"', `"name": "${pkgJson.name}"`);
+          }
+        },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') }
       ])
     ],
@@ -70,10 +80,12 @@ module.exports = function (env = {}) {
     config.plugins = [
       // new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
-        'process.env.GA_CODE': process.env.NODE_ENV !== 'development' ? 'UA-110380775-2' : 'UA-110380775-1',
-        'process.env.VERSION': pkgJson.version,
-        'process.env.DISPLAY_NAME': pkgJson.displayName,
-        'process.env.AUTHOR': pkgJson.author,
+        'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
+        'process.env.VERSION': JSON.stringify(pkgJson.version),
+        'process.env.DISPLAY_NAME': JSON.stringify(pkgJson.displayName),
+        'process.env.AUTHOR': JSON.stringify(pkgJson.author),
+        'process.env.BUGSNAG_API_KEY': JSON.stringify(BUGSNAG_API_KEY),
+        'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
     return config;

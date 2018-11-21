@@ -513,8 +513,8 @@
         }
     },
     "scripts": {
-        "vscode:prepublish": "webpack --env.production",
-        "compile": "tsc -p ./",
+        "vscode:prepublish": "yarn run compile",
+        "compile": "webpack --env.production",
         "watch": "webpack --watch --env.development",
         "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",

@@ -1,5 +1,6 @@
 {
   "compilerOptions": {
+    "noEmit": true,
     "resolveJsonModule": true,
     "baseUrl": ".",
     "module": "commonjs",

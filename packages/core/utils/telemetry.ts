@@ -2,8 +2,21 @@ import Analytics from 'universal-analytics';
 import uuidv4 from 'uuid/v4';
 import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
-import { GA_CODE, VERSION } from './../constants';
+import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
 import Timer from './timer';
+import bugsnag from 'bugsnag-js';
+
+const bugsnagClient = bugsnag({
+  apiKey: BUGSNAG_API_KEY,
+  appVersion: VERSION,
+  autoBreadcrumbs: false,
+  autoCaptureSessions: false,
+  autoNotify: false,
+  collectUserIp: false,
+  releaseStage: ENV,
+});
+
+type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
 namespace Telemetry {
   let isEnabled: Boolean = true;
@@ -11,7 +24,7 @@ namespace Telemetry {
   let extensionUUID: string;
   let analytics: Analytics.Visitor;
 
-  export function register(enableTelemetry: boolean, useLogger?: LoggerInterface): any {
+  export function register(product: Product, enableTelemetry: boolean, useLogger?: LoggerInterface): any {
     setLogger(useLogger);
     if (enableTelemetry) {
       enable();
@@ -47,13 +60,16 @@ namespace Telemetry {
 
   export function enable(): void {
     isEnabled = true;
+    bugsnagClient.config.autoNotify = true;
     logger.info('Telemetry enabled!');
   }
   export function disable(): void {
     isEnabled = false;
+    bugsnagClient.config.autoNotify = false;
     logger.info('Telemetry disabled!');
   }
   export function setLogger(useLogger: LoggerInterface = console) {
+    bugsnagClient.logger(logger);
     logger = useLogger;
   }
   export function registerSession(evt: string) {
@@ -97,6 +113,7 @@ namespace Telemetry {
   function errorHandler(type: string) {
     return (error?: Error) => {
       if (!error) return;
+      bugsnagClient.notify(error);
       logger.error(`Telemetry:${type} error`, error);
     };
   }
