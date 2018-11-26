@@ -5,18 +5,18 @@ import {
 } from 'vscode';
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DatabaseInterface } from '@sqltools/core/interface';
+import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
 
-export class SidebarDatabase extends TreeItem {
-  public contextValue = 'connection.database';
+export class SidebarConnection extends TreeItem {
+  public contextValue = 'connection';
   public value: string;
 
   public tables: SidebarDatabaseStructure = new SidebarDatabaseStructure('Tables');
   public views: SidebarDatabaseStructure = new SidebarDatabaseStructure('Views');
-  constructor(private name: string) {
-    super(name, TreeItemCollapsibleState.Expanded);
-    this.value = name;
-    this.label = name;
+  constructor(public conn: ConnectionCredentials) {
+    super(conn.database, TreeItemCollapsibleState.None);
+    this.value = conn.database;
+    this.label = `${conn.database}@${conn.name}`;
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
       light: ContextManager.context.asAbsolutePath('icons/database-light.svg'),
@@ -26,10 +26,15 @@ export class SidebarDatabase extends TreeItem {
   public addItem(item) {
     const key = item.isView ? 'views' : 'tables';
     this[key].addItem(item.isView ? new SidebarView(item) : new SidebarTable(item));
+    this.collapsibleState = TreeItemCollapsibleState.Expanded;
+  }
+
+  public reset() {
+    if (this.views) this.views.reset();
+    if (this.tables) this.tables.reset();
+    this.collapsibleState = TreeItemCollapsibleState.None;
   }
 }
-
-const tableTreeItemsExpanded = ConfigManager.get('tableTreeItemsExpanded', true);
 
 export class SidebarDatabaseStructure extends TreeItem {
   public iconPath = ThemeIcon.Folder;
@@ -48,6 +53,10 @@ export class SidebarDatabaseStructure extends TreeItem {
   public addItem(item) {
     this.items[item.value] = this.items[item.value] || item;
   }
+
+  public reset() {
+    this.items = {};
+  }
 }
 
 export class SidebarTable extends TreeItem {
@@ -57,7 +66,7 @@ export class SidebarTable extends TreeItem {
   public items: SidebarColumn[] = [];
   constructor(table: DatabaseInterface.Table) {
     super(table.name, (
-      tableTreeItemsExpanded === true
+      ConfigManager.get('tableTreeItemsExpanded', true)
         ? TreeItemCollapsibleState.Expanded
         : TreeItemCollapsibleState.Collapsed
     ));

@@ -33,7 +33,7 @@ namespace SQLToolsLanguageServer {
   let formatterLanguages: string[] = [];
   let workspaceRoot: string;
   let sgdbConnections: Connection[] = [];
-  let activeConnection: Connection = null;
+  let activeConnection: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
   docManager.listen(server);
@@ -61,21 +61,20 @@ namespace SQLToolsLanguageServer {
   async function loadConnectionData(conn: Connection) {
     completionItems = [];
     if (!conn) {
-      updateSidebar([], []);
+      updateSidebar(null, [], []);
       return completionItems;
     }
-    return conn.getTables()
-      .then((t) => Promise.all([t, conn.getColumns()]))
+    return Promise.all([conn.getTables(), conn.getColumns()])
       .then(([t, c]) => {
-        updateSidebar(t, c);
+        updateSidebar(conn.serialize(), t, c);
         return loadCompletionItens(t, c);
       }).catch((e) => {
         Logger.error('Error while preparing columns completions' + e.toString());
       });
   }
 
-  function updateSidebar(tables, columns) {
-    server.client.connection.sendRequest(UpdateTableAndColumnsRequest, { tables, columns });
+  function updateSidebar(conn, tables, columns) {
+    server.client.connection.sendRequest(UpdateTableAndColumnsRequest, { conn, tables, columns }).then(console.log, console.error);
   }
 
   /* server events */
@@ -150,23 +149,24 @@ namespace SQLToolsLanguageServer {
     OpenConnectionRequest.method,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
     if (!req.conn) {
-      if (activeConnection) activeConnection.close();
+      activeConnection.forEach(c => c.close());
       completionItems = [];
-      activeConnection = null;
+      activeConnection = []
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
-    activeConnection = c;
-    await loadConnectionData(activeConnection);
-    return activeConnection.serialize();
+    activeConnection[0] = c;
+    c.connect();
+    await loadConnectionData(c);
+    return c.serialize();
   });
 
-  server.onRequest(RefreshDataRequest.method, () => loadConnectionData(activeConnection));
+  server.onRequest(RefreshDataRequest.method, () => activeConnection.forEach(c => loadConnectionData(c)));
 
   server.onRequest(GetTablesAndColumnsRequest.method, async () => {
-    if (!activeConnection) return { tables: [], columns: [] };
-    return { tables: await activeConnection.getTables(true), columns: await activeConnection.getColumns(true) };
+    if (activeConnection.length === 0) return { tables: [], columns: [] };
+    return { tables: await activeConnection[0].getTables(true), columns: await activeConnection[0].getColumns(true) };
   });
 
   server.onRequest(RunCommandRequest.method, async (req: {
@@ -176,8 +176,9 @@ namespace SQLToolsLanguageServer {
   }) => {
     try {
       HTTPServer.queryResultStatus(true);
-      activeConnection = sgdbConnections.find((c) => c.getName() === req.conn.name);
-      const results = (await activeConnection[req.command](...req.args)) as DatabaseInterface.QueryResults[];
+      const c = sgdbConnections.find((c) => c.getName() === req.conn.name);
+      if (!c) throw 'Connection not found';
+      const results = (await c[req.command](...req.args)) as DatabaseInterface.QueryResults[];
       results.forEach((r) => {
         HTTPServer.queryResult(r.query, r);
       });

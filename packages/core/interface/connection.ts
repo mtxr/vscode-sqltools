@@ -1,14 +1,9 @@
 import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
 
-export interface SerializedConnection {
+export type SerializedConnection =  {
   isConnected: boolean;
-  needsPassword: boolean;
-  name: string;
-  port: number | string;
-  server: string;
-  username: string;
-}
+} & ConnectionCredentials;
 
 export interface ConnectionCredentials {
   /**

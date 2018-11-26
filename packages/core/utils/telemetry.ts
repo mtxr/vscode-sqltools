@@ -4,17 +4,17 @@ import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
 import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
 import Timer from './timer';
-import bugsnag from 'bugsnag-js';
+import bugsnag from 'bugsnag';
 
-const bugsnagClient = bugsnag({
-  apiKey: BUGSNAG_API_KEY,
+const bugsnagOpts = {
   appVersion: VERSION,
   autoBreadcrumbs: false,
   autoCaptureSessions: false,
   autoNotify: false,
   collectUserIp: false,
   releaseStage: ENV,
-});
+};
+bugsnag.register(BUGSNAG_API_KEY, bugsnagOpts);
 
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
@@ -60,17 +60,17 @@ namespace Telemetry {
 
   export function enable(): void {
     isEnabled = true;
-    bugsnagClient.config.autoNotify = true;
+    bugsnag.configure({ ...bugsnagOpts, autoNotify: true });
     logger.info('Telemetry enabled!');
   }
   export function disable(): void {
     isEnabled = false;
-    bugsnagClient.config.autoNotify = false;
+    bugsnag.configure({ ...bugsnagOpts, autoNotify: false });
     logger.info('Telemetry disabled!');
   }
   export function setLogger(useLogger: LoggerInterface = console) {
-    bugsnagClient.logger(logger);
     logger = useLogger;
+    bugsnag.configure({ ...bugsnagOpts, logger: logger as any }) ;
   }
   export function registerSession(evt: string) {
     if (!isEnabled) return;
@@ -113,7 +113,7 @@ namespace Telemetry {
   function errorHandler(type: string) {
     return (error?: Error) => {
       if (!error) return;
-      bugsnagClient.notify(error);
+      bugsnag.notify(error);
       logger.error(`Telemetry:${type} error`, error);
     };
   }

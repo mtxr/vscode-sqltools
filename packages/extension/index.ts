@@ -39,6 +39,7 @@ import {
   SidebarDatabaseItem,
   SidebarTable,
   SidebarView,
+  SidebarConnection,
  } from './providers';
 import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
@@ -137,7 +138,11 @@ namespace SQLTools {
     logger.info(message);
     Win.showInformationMessage(message, { modal: true });
   }
-  export async function cmdSelectConnection(): Promise<void> {
+  export async function cmdSelectConnection(node?: SidebarConnection): Promise<void> {
+    if (node) {
+      await setConnection(node.conn as SerializedConnection).catch(ErrorHandler.create('Error opening connection'));
+      return;
+    }
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
@@ -381,6 +386,7 @@ namespace SQLTools {
     );
 
     registerLanguageServerRequests();
+    connectionExplorer.setConnections(ConfigManager.connections);
   }
 
   async function registerLanguageServerRequests() {
@@ -390,8 +396,8 @@ namespace SQLTools {
         connList.push(newConnPostData.connInfo);
         return setSettings('connections', connList);
       });
-      languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ tables, columns }) => {
-        connectionExplorer.setTreeData(tables, columns);
+      languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ conn, tables, columns }) => {
+        connectionExplorer.setTreeData(conn, tables, columns);
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
@@ -405,13 +411,13 @@ namespace SQLTools {
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
     let password = null;
-    if (c && c.needsPassword) password = await askForPassword(c);
+    if (c && c.askForPassword) password = await askForPassword(c);
     lastUsedConn = c;
     updateStatusBar();
     lastUsedConn = (await languageClient.sendRequest(
       OpenConnectionRequest.method,
       { conn: c, password },
-    )) as SerializedConnection;
+    ));
     return lastUsedConn;
   }
 

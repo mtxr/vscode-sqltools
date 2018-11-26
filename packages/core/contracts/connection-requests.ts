@@ -11,7 +11,7 @@ export const RunCommandRequest = new RequestType
 export const OpenConnectionRequest = new RequestType
   <{ conn: SerializedConnection, password?: string }, SerializedConnection, Error, void>('connection/openConnection');
 export const UpdateTableAndColumnsRequest = new RequestType
-  <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
+  <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
   ('connection/updateTableAndColumns');
 
 export const GetTablesAndColumnsRequest = new RequestType

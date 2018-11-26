@@ -112,14 +112,18 @@ export default class Connection {
     return this.conn.credentials.username;
   }
 
+  public getDatabase() {
+    return this.conn.credentials.database;
+  }
+
+  public getDialect() {
+    return this.conn.credentials.dialect;
+  }
+
   public serialize(): SerializedConnection {
     return {
+      ...this.conn.credentials,
       isConnected: this.isConnected(),
-      name: this.getName(),
-      needsPassword: this.needsPassword(),
-      port: this.getPort(),
-      server: this.getServer(),
-      username: this.getUsername(),
     };
   }
 }

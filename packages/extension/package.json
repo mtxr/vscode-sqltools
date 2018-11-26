@@ -458,22 +458,27 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.selectConnection",
+                    "command": "SQLTools.newSqlFile",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                 },
                 {
-                    "command": "SQLTools.newSqlFile",
-                    "when": "view == SQLTools.tableExplorer",
-                    "group": "navigation@2"
-                },
-                {
                     "command": "SQLTools.refreshSidebar",
                     "when": "view == SQLTools.tableExplorer",
-                    "group": "navigation@3"
+                    "group": "navigation@2"
                 }
             ],
             "view/item/context": [
+                {
+                    "command": "SQLTools.selectConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection",
+                    "group": "sqltools.dbExplorer@0"
+                },
+                {
+                    "command": "SQLTools.selectConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection",
+                    "group": "inline@0"
+                },
                 {
                     "command": "SQLTools.appendToCursor",
                     "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
