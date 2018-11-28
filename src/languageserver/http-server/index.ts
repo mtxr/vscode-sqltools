@@ -1,6 +1,7 @@
 import fs = require('fs');
 import http = require('http');
 import path = require('path');
+import he = require('he');
 import { IConnection } from 'vscode-languageserver';
 import SQLToolsLanguageServer from '..';
 import { CreateNewConnectionRequest } from '../../contracts/connection-requests';
@@ -84,7 +85,7 @@ namespace HTTPServer {
     fs.readFile(file, (err, content) => {
       if (err) {
         res.writeHead(404);
-        res.write(`File '${url}' Not Found!`);
+        res.write(`File '${he.encode(url)}' Not Found!`);
         res.end();
         Logger.error(`Response: 404 ${url}`, err);
       } else {

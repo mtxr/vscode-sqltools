@@ -563,6 +563,7 @@
         "tedious": "^2.3.1",
         "universal-analytics": "^0.4.16",
         "uuid": "^3.1.0",
+        "he": "^1.2.0",
         "vscode-languageclient": "^3.5.1",
         "vscode-languageserver": "^3.5.1"
     }
