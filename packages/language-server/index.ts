@@ -20,10 +20,9 @@ import {
   GetTablesAndColumnsRequest,
   RunCommandRequest
 } from '@sqltools/core/contracts/connection-requests';
+import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
-import { BehaviorSubject, Subject } from 'rxjs';
-import { skipUntil } from 'rxjs/operators';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -38,16 +37,6 @@ namespace SQLToolsLanguageServer {
   let activeConnection: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
-  const logQueue$ = new BehaviorSubject<any>(undefined);
-  const ready$ = new BehaviorSubject<boolean>(false);
-
-  logQueue$.subscribe((params) => {
-    if (!ready$.getValue()) return;
-    server.sendNotification('log', params);
-  })
-
-
-
   docManager.listen(server);
 
   export function getServer() { return server; }
@@ -61,8 +50,11 @@ namespace SQLToolsLanguageServer {
   }
   /* internal functions */
 
-  function onConnectError(err) {
-    logQueue$.next(err);
+  function notifyError(message) {
+    return (err: any = '') => {
+      Logger.error(message, err);
+      server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
+    }
   }
 
   function loadCompletionItens(tables, columns) {
@@ -82,10 +74,7 @@ namespace SQLToolsLanguageServer {
       .then(([t, c]) => {
         updateSidebar(conn.serialize(), t, c);
         return loadCompletionItens(t, c);
-      }).catch((e) => {
-        Logger.error('Error while preparing columns completions' + e.toString());
-        logQueue$.next('Error while preparing columns completions' + e.toString());
-      });
+      }).catch(notifyError('Error while preparing columns completions'));
   }
 
   function updateSidebar(conn, tables, columns) {
@@ -109,7 +98,6 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onInitialized(async () => {
-    ready$.next(true);
     httpPort = await portFuture;
     HTTPServer.server(server.console, httpPort);
   });
@@ -159,10 +147,6 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
-  server.onNotification('teste', (...params) => {
-    console.log('>> teste', ...params);
-    logQueue$.next({ t: 'PONG', params })
-  })
   server.onRequest(GetConnectionListRequest.method, () => {
     return sgdbConnections.map((c) => c.serialize());
   });
@@ -179,9 +163,11 @@ namespace SQLToolsLanguageServer {
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
     activeConnection[0] = c;
-    await c.connect().catch(onConnectError);
-    await loadConnectionData(c);
-    return c.serialize();
+    if (await c.connect().catch(notifyError('Connection Error'))) {
+      await loadConnectionData(c);
+      return c.serialize();
+    }
+    return null;
   });
 
   server.onRequest(RefreshDataRequest.method, () => activeConnection.forEach(c => loadConnectionData(c)));
@@ -214,7 +200,7 @@ namespace SQLToolsLanguageServer {
   const nodeExit = process.exit;
   process.exit = ((code?: number): void => {
     const stack = new Error('stack');
-    server.sendNotification('exitCalled', [code ? code : 0, stack.stack]);
+    server.sendNotification(Notification.ExitCalled, [code ? code : 0, stack.stack]);
     setTimeout(() => {
       nodeExit(code);
     }, 1000);

@@ -15,7 +15,7 @@ namespace ErrorHandler {
         outputFn(message);
         return;
       }
-      const res = await outputFn(`${message} Would you like to see the logs?`, 'Yes', 'No');
+      const res = await outputFn(`${message}\nWould you like to see the logs?`, 'Yes', 'No');
       Telemetry.registerErrorMessage(message, error, res === 'Yes' ? 'View Log' : 'Dismissed');
       if (res === 'Yes') {
         yesCallback();

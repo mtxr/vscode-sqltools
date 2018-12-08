@@ -34,6 +34,7 @@ import {
   RunCommandRequest,
   UpdateTableAndColumnsRequest,
 } from '@sqltools/core/contracts/connection-requests';
+import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
 import {
   ConnectionExplorer,
@@ -492,15 +493,13 @@ namespace SQLTools {
       clientOptions,
     );
     languageClient.onReady().then(() => {
-      languageClient.onNotification('exitCalled', () => {
+      languageClient.onNotification(Notification.ExitCalled, () => {
         avoidRestart = true;
       });
-
-      languageClient.onNotification('log', (...args) => {
-        debugger;
-        logger.log('received', ...args);
-      });
-      languageClient.sendNotification('teste', { teste: true });
+      languageClient.onNotification(Notification.OnError, ({ err = '', errMessage, message }) => {
+        ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString())
+      }
+      );
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 
