@@ -141,7 +141,7 @@ namespace HTTPServer {
   export function server(logger: any, port: number = 5123): http.Server {
     Logger = logger;
     if (!httpServer.listening) {
-      httpServer.listen(port, () => {
+      httpServer.listen(port, 'localhost', () => {
         Logger.log(`SQLTools http server is listening on port ${port}`);
       });
     }
