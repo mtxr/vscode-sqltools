@@ -78,7 +78,7 @@ module.exports = function (env = {}) {
   env.production = !!env.production;
   return [getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
     config.plugins = [
-      // new webpack.ProgressPlugin(),
+      new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
         'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
         'process.env.VERSION': JSON.stringify(pkgJson.version),

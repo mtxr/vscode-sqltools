@@ -1,3 +1,4 @@
+import { fromEvent } from 'rxjs';
 import {
   commands as VSCode,
   ExtensionContext,
@@ -478,6 +479,7 @@ namespace SQLTools {
           if (avoidRestart) {
             return CloseAction.DoNotRestart;
           }
+
           return languageClientErrorHandler.closed();
         },
       },
@@ -493,6 +495,12 @@ namespace SQLTools {
       languageClient.onNotification('exitCalled', () => {
         avoidRestart = true;
       });
+
+      languageClient.onNotification('log', (...args) => {
+        debugger;
+        logger.log('received', ...args);
+      });
+      languageClient.sendNotification('teste', { teste: true });
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 

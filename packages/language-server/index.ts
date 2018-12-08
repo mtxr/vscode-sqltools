@@ -22,6 +22,8 @@ import {
 } from '@sqltools/core/contracts/connection-requests';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
+import { BehaviorSubject, Subject } from 'rxjs';
+import { skipUntil } from 'rxjs/operators';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -36,6 +38,16 @@ namespace SQLToolsLanguageServer {
   let activeConnection: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
+  const logQueue$ = new BehaviorSubject<any>(undefined);
+  const ready$ = new BehaviorSubject<boolean>(false);
+
+  logQueue$.subscribe((params) => {
+    if (!ready$.getValue()) return;
+    server.sendNotification('log', params);
+  })
+
+
+
   docManager.listen(server);
 
   export function getServer() { return server; }
@@ -49,7 +61,9 @@ namespace SQLToolsLanguageServer {
   }
   /* internal functions */
 
-  function sortLangs(a, b) { return a.toString().localeCompare(b.toString()); }
+  function onConnectError(err) {
+    logQueue$.next(err);
+  }
 
   function loadCompletionItens(tables, columns) {
     completionItems = [];
@@ -70,6 +84,7 @@ namespace SQLToolsLanguageServer {
         return loadCompletionItens(t, c);
       }).catch((e) => {
         Logger.error('Error while preparing columns completions' + e.toString());
+        logQueue$.next('Error while preparing columns completions' + e.toString());
       });
   }
 
@@ -94,14 +109,17 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onInitialized(async () => {
+    ready$.next(true);
     httpPort = await portFuture;
     HTTPServer.server(server.console, httpPort);
   });
 
   server.onDidChangeConfiguration(async (change) => {
     ConfigManager.setSettings(change.settings.sqltools);
-    const oldLang = formatterLanguages.sort(sortLangs);
-    const newLang = ConfigManager.formatLanguages.sort(sortLangs);
+    Utils.Telemetry.register('language-server', ConfigManager.telemetry);
+
+    const oldLang = formatterLanguages.sort(Utils.sortText);
+    const newLang = ConfigManager.formatLanguages.sort(Utils.sortText);
     const register = newLang.length > 0 && (!formatterRegistration || oldLang.join() !== newLang.join());
     if (register) {
       formatterLanguages = newLang.reduce((agg, language) => {
@@ -141,6 +159,10 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
+  server.onNotification('teste', (...params) => {
+    console.log('>> teste', ...params);
+    logQueue$.next({ t: 'PONG', params })
+  })
   server.onRequest(GetConnectionListRequest.method, () => {
     return sgdbConnections.map((c) => c.serialize());
   });
@@ -157,7 +179,7 @@ namespace SQLToolsLanguageServer {
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
     activeConnection[0] = c;
-    c.connect();
+    await c.connect().catch(onConnectError);
     await loadConnectionData(c);
     return c.serialize();
   });

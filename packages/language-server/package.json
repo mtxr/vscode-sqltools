@@ -9,6 +9,7 @@
   "dependencies": {
     "@sqltools/core": "*",
     "get-port": "^4.0.0",
+    "rxjs": "^6.3.3",
     "vscode-languageserver": "^5.1.0"
   },
   "devDependencies": {
