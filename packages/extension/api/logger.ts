@@ -42,8 +42,6 @@ export default class Logger implements LoggerInterface {
     return this.emitMessage('warn', message, ...data);
   }
   private emitMessage(type: 'debug' | 'warn' | 'info' | 'error', message: string, ...data: any[]): this {
-    const a = LogLevel[type.toUpperCase()];
-    const b =  this.level;
     if (!this.isLogging() || LogLevel[type.toUpperCase()] < this.level) {
       return this;
     }

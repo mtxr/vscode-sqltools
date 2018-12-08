@@ -498,8 +498,10 @@ namespace SQLTools {
       });
       languageClient.onNotification(Notification.OnError, ({ err = '', errMessage, message }) => {
         ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString())
-      }
-      );
+      })
+      languageClient.onNotification(Notification.LanguageServerReady, ({ httpPort }) => {
+        ContextManager.httpServerPort = httpPort;
+      });
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 

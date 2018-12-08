@@ -52,11 +52,11 @@ export interface Settings {
    showStatusbar?: boolean;
   /**
    * Severity of logged messages.
-   * @type {LogLevel}
+   * @type {keyof LogLevel}
    * @default DEBUG
    * @memberof Settings
    */
-   logLevel?: LogLevel;
+   logLevel?: keyof LogLevel;
   /**
    * Timeout in seconds for killing query process after the timeout.
    * @type {number}

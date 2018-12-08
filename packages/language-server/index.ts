@@ -50,11 +50,13 @@ namespace SQLToolsLanguageServer {
   }
   /* internal functions */
 
-  function notifyError(message) {
-    return (err: any = '') => {
+  function notifyError(message: string, error?: any): any {
+    const cb = (err: any = '') => {
       Logger.error(message, err);
       server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
+    if (typeof error !== 'undefined') return cb(error);
+    return cb;
   }
 
   function loadCompletionItens(tables, columns) {
@@ -100,6 +102,7 @@ namespace SQLToolsLanguageServer {
   server.onInitialized(async () => {
     httpPort = await portFuture;
     HTTPServer.server(server.console, httpPort);
+    server.sendNotification(Notification.LanguageServerReady, { httpPort });
   });
 
   server.onDidChangeConfiguration(async (change) => {
@@ -193,6 +196,7 @@ namespace SQLToolsLanguageServer {
       return true;
     } catch (e) {
       HTTPServer.queryResultStatus(false, e);
+      notifyError('Execute query error', e);
       throw e;
     }
   });
