@@ -2,6 +2,7 @@ import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
 
 export type SerializedConnection =  {
+  id: string;
   isConnected: boolean;
 } & ConnectionCredentials;
 

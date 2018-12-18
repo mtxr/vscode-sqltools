@@ -23,6 +23,8 @@ import {
 import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
+import store from './store';
+import * as actions from './store/actions';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
@@ -34,7 +36,7 @@ namespace SQLToolsLanguageServer {
   let formatterLanguages: string[] = [];
   let workspaceRoot: string;
   let sgdbConnections: Connection[] = [];
-  let activeConnection: Connection[] = [];
+  // let activeConnection: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
   docManager.listen(server);
@@ -141,7 +143,7 @@ namespace SQLToolsLanguageServer {
   server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
     // const { textDocument, position } = pos;
     // const doc = docManager.get(textDocument.uri);
-    if (!activeConnection) return [];
+    if (!store.getState().activeConnections) return [];
     return completionItems;
   });
 
@@ -158,14 +160,15 @@ namespace SQLToolsLanguageServer {
     OpenConnectionRequest.method,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
     if (!req.conn) {
-      activeConnection.forEach(c => c.close());
-      completionItems = [];
-      activeConnection = []
+      // store.getState().activeConnections
+      // activeConnection.forEach(c => c.close());
+      // completionItems = [];
+      // activeConnection = []
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     if (req.password) c.setPassword(req.password);
-    activeConnection[0] = c;
+    store.dispatch(actions.Connect(c));
     if (await c.connect().catch(notifyError('Connection Error'))) {
       await loadConnectionData(c);
       return c.serialize();
@@ -173,11 +176,18 @@ namespace SQLToolsLanguageServer {
     return null;
   });
 
-  server.onRequest(RefreshDataRequest.method, () => activeConnection.forEach(c => loadConnectionData(c)));
+  server.onRequest(RefreshDataRequest.method, () => {
+    const activeConnections = store.getState().activeConnections;
+    Object.keys(activeConnections).forEach(c => {
+      loadConnectionData(activeConnections[c]);
+    });
+  });
 
   server.onRequest(GetTablesAndColumnsRequest.method, async () => {
-    if (activeConnection.length === 0) return { tables: [], columns: [] };
-    return { tables: await activeConnection[0].getTables(true), columns: await activeConnection[0].getColumns(true) };
+    const activeConnections = store.getState().activeConnections;
+    if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
+    const c = activeConnections[Object.keys(activeConnections)[0]];
+    return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   });
 
   server.onRequest(RunCommandRequest.method, async (req: {

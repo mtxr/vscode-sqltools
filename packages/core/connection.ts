@@ -120,8 +120,13 @@ export default class Connection {
     return this.conn.credentials.dialect;
   }
 
+  public getId() {
+    return `${this.getName()}#${this.getDatabase()}#${this.getDialect()}`;
+  }
+
   public serialize(): SerializedConnection {
     return {
+      id: this.getId(),
       ...this.conn.credentials,
       isConnected: this.isConnected(),
     };

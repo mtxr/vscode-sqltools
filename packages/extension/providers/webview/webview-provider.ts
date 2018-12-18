@@ -13,7 +13,7 @@ export default abstract class WebviewProvider implements Disposable {
   protected abstract id: string;
   protected abstract title: string;
   private panel: WebviewPanel;
-  private disposablePanel: Disposable;
+  private disposables: Disposable[] = [];
   private get port() {
     return ContextManager.httpServerPort;
   }
@@ -31,9 +31,11 @@ export default abstract class WebviewProvider implements Disposable {
         },
       );
       this.panel.onDidDispose(this.dispose.bind(this));
-      this.disposablePanel = Disposable.from(
-        this.panel,
-      );
+      this.disposables.push(Disposable.from(this.panel));
+
+      if (this.messageCb) {
+        this.panel.webview.onDidReceiveMessage(this.messageCb, undefined, this.disposables);
+      }
     }
 
     this.panel.title = this.title;
@@ -54,8 +56,8 @@ export default abstract class WebviewProvider implements Disposable {
     this.panel.dispose();
   }
   public dispose() {
-    if (this.disposablePanel) this.disposablePanel.dispose();
-    this.disposablePanel = undefined;
+    if (this.disposables.length) this.disposables.forEach(d => d.dispose());
+    this.disposables = [];
     this.panel = undefined;
   }
 
@@ -81,5 +83,10 @@ window.apiUrl = 'http://localhost:{{port}}'
   public postMessage(message: any) {
     if (!this.panel) return;
     this.panel.webview.postMessage(message);
+  }
+
+  private messageCb;
+  public setMessageCallback(cb) {
+    this.messageCb = cb;
   }
 }

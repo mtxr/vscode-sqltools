@@ -9,6 +9,15 @@ import {
 } from './../lib/utils';
 import Loading from './loading';
 
+let vscode;
+
+declare var acquireVsCodeApi: any;
+
+function getVscode() {
+  vscode = vscode || acquireVsCodeApi();
+  return vscode;
+}
+
 const dialectDefaultPorts = {
   MySQL: 3306,
   MSSQL: 1433,
@@ -256,33 +265,37 @@ export default class Setup extends React.Component<{}, SetupState> {
   public handleSubmit(e) {
     this.setState({ loading: true });
     e.preventDefault();
-    fetch(`${(window as any).apiUrl}/api/create-connection`, {
-      method: 'POST',
-      headers: {
-        'Accept': 'application/json, text/plain, */*',
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({ connInfo: this.getParsedFormData() }),
-    })
-      .then((res) => {
-        return res.json();
-      })
-      .then((res) => {
-        const newState = { loading: false } as SetupState;
-        if (res.success) {
-          newState.saved = `<strong>${res.data.connInfo.name}</strong> added to your settings!`;
-          storage.removeItem(Setup.storageKey);
-          newState.data = Setup.generateConnData(this.state.fields);
-        } else {
-          newState.onSaveError = res.error;
-        }
-        this.setState(newState, this.validateFields);
-      })
-      .catch((err) => {
-        this.setState({
-          onSaveError: (err || '').toString(),
-        });
-      });
+    getVscode().postMessage({
+      action: 'bla',
+      data: { a: 1 }
+    });
+    // fetch(`${(window as any).apiUrl}/api/create-connection`, {
+    //   method: 'POST',
+    //   headers: {
+    //     'Accept': 'application/json, text/plain, */*',
+    //     'Content-Type': 'application/json',
+    //   },
+    //   body: JSON.stringify({ connInfo: this.getParsedFormData() }),
+    // })
+    //   .then((res) => {
+    //     return res.json();
+    //   })
+    //   .then((res) => {
+    //     const newState = { loading: false } as SetupState;
+    //     if (res.success) {
+    //       newState.saved = `<strong>${res.data.connInfo.name}</strong> added to your settings!`;
+    //       storage.removeItem(Setup.storageKey);
+    //       newState.data = Setup.generateConnData(this.state.fields);
+    //     } else {
+    //       newState.onSaveError = res.error;
+    //     }
+    //     this.setState(newState, this.validateFields);
+    //   })
+    //   .catch((err) => {
+    //     this.setState({
+    //       onSaveError: (err || '').toString(),
+    //     });
+    //   });
 
     return false;
   }

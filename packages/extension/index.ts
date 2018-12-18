@@ -1,4 +1,3 @@
-import { fromEvent } from 'rxjs';
 import {
   commands as VSCode,
   ExtensionContext,
