@@ -162,7 +162,7 @@ namespace SQLTools {
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
     try {
       const table = await getTableName(node);
-      await runConnectionCommand('showRecords', table);
+      await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
       printOutput(`Some records of ${table} : SQLTools`);
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
@@ -186,6 +186,17 @@ namespace SQLTools {
   export async function cmdExecuteQuery(): Promise<void> {
     try {
       const query: string = await getSelectedText('execute query');
+      await connect();
+      runQuery(query);
+      printOutput();
+    } catch (e) {
+      ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
+    }
+  }
+
+  export async function cmdExecuteQueryFromFile(): Promise<void> {
+    try {
+      const query: string = await getSelectedText('execute file', true);
       await connect();
       runQuery(query);
       printOutput();
@@ -370,7 +381,7 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    Win.registerTreeDataProvider(`${Constants.extNamespace}.connectionExplorer`, connectionExplorer);
+    Win.registerTreeDataProvider(`${Constants.extNamespace}.tableExplorer`, connectionExplorer);
     ctx.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
@@ -477,9 +488,9 @@ namespace SQLTools {
     return viewColumn;
   }
 
-  async function getSelectedText(action = 'proceed') {
+  async function getSelectedText(action = 'proceed', fullText = false) {
     const editor = await getOrCreateEditor();
-    const query = editor.document.getText(editor.selection);
+    const query = editor.document.getText(fullText ? undefined : editor.selection);
     if (isEmpty(query)) {
       Win.showInformationMessage(`Can't ${action}. You have selected nothing.`);
       throw new DismissedException();

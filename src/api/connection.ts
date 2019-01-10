@@ -79,8 +79,8 @@ export default class Connection {
   public describeTable(tableName: string): Promise<any> {
     return this.conn.describeTable(tableName);
   }
-  public showRecords(tableName: string, limit: number = 10): Promise<any> {
-    return this.conn.showRecords(tableName, limit);
+  public showRecords(tableName: string, globalLimit: number): Promise<any> {
+    return this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
   }
 
   public query(query: string, handleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {

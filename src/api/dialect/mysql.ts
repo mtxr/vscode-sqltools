@@ -88,7 +88,7 @@ export default class MySQL implements ConnectionDialect {
       return new Promise((resolve, reject) => {
         conn.query(query, (error, results) => {
           if (error) return reject(error);
-          const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
+          const queries = Utils.parseQueries(query);
           if (results && !Array.isArray(results[0])) {
             results = [results];
           }
@@ -153,7 +153,7 @@ export default class MySQL implements ConnectionDialect {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
 
-  public showRecords(table: string, limit: number = 10) {
+  public showRecords(table: string, limit: number) {
     return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
   }
 }

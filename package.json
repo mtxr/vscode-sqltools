@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.13.0",
+    "version": "0.15.1",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "repository": {
@@ -10,7 +10,7 @@
         "type": "git"
     },
     "engines": {
-        "vscode": "^1.18.0"
+        "vscode": "^1.26.0"
     },
     "categories": [
         "Programming Languages",
@@ -52,7 +52,11 @@
             {
                 "title": "Connect",
                 "command": "SQLTools.selectConnection",
-                "category": "SQLTools"
+                "category": "SQLTools",
+                "icon": {
+                    "light": "dist/resources/icon/database-light.svg",
+                    "dark": "dist/resources/icon/database-dark.svg"
+                }
             },
             {
                 "title": "Disconnect",
@@ -102,6 +106,11 @@
             {
                 "title": "Run selected query",
                 "command": "SQLTools.executeQuery",
+                "category": "SQLTools Connection"
+            },
+            {
+                "title": "Run this file",
+                "command": "SQLTools.executeQueryFromFile",
                 "category": "SQLTools Connection"
             },
             {
@@ -386,17 +395,41 @@
                                 "description": "Connection timeout in seconds",
                                 "required": false,
                                 "default": 15
+                            },
+                            "previewLimit": {
+                                "type": "number",
+                                "description": "Global show records limit",
+                                "default": 10
                             }
                         }
                     }
+                },
+                "sqltools.previewLimit": {
+                    "type": "number",
+                    "description": "Global show records limit",
+                    "default": 10
+                },
+                "sqltools.tableTreeItemsExpanded": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Table columns should be expanded on load ?"
                 }
             }
         },
         "views": {
-            "explorer": [
+            "SQLTools-connectionExplorer": [
                 {
-                    "id": "SQLTools.connectionExplorer",
+                    "id": "SQLTools.tableExplorer",
                     "name": "SQL Connection"
+                }
+            ]
+        },
+        "viewsContainers": {
+            "activitybar": [
+                {
+                    "id": "SQLTools-connectionExplorer",
+                    "icon": "dist/resources/icon/database-sidebar.svg",
+                    "title": "SQLTools"
                 }
             ]
         },
@@ -425,50 +458,55 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.refreshSidebar",
-                    "when": "view == SQLTools.connectionExplorer",
-                    "group": "navigation@2"
+                    "command": "SQLTools.selectConnection",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.newSqlFile",
-                    "when": "view == SQLTools.connectionExplorer",
-                    "group": "navigation@1"
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@2"
+                },
+                {
+                    "command": "SQLTools.refreshSidebar",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
                     "group": "sqltools.dbExplorer@1"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.connectionExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
                     "group": "inline@3"
                 },
                 {
                     "command": "SQLTools.describeTable",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@3"
                 },
                 {
                     "command": "SQLTools.showRecords",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@4"
                 },
                 {
                     "command": "SQLTools.showRecords",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@1"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@5"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@2"
                 }
             ]
@@ -508,7 +546,7 @@
         "jest-cli": "^20.0.4",
         "prop-types": "^15.6.0",
         "react": "^16.2.0",
-        "react-dom": "^16.2.0",
+        "react-dom": "^16.3.3",
         "react-router-dom": "^4.2.2",
         "ts-jest": "^20.0.6",
         "tslint": "^5.4.3",
@@ -516,19 +554,19 @@
         "uglifyify": "^4.0.5",
         "vinyl-buffer": "^1.0.1",
         "vinyl-source-stream": "^2.0.0",
-        "vscode": "^1.1.0"
+        "vscode": "^1.1.21"
     },
     "dependencies": {
         "get-port": "^3.2.0",
         "mysql2": "^1.5.1",
         "opn": "^5.1.0",
         "pg": "^7.4.0",
-        "sql-formatter": "^2.1.0",
+        "sql-formatter": "^2.3.1",
         "tedious": "^2.3.1",
         "universal-analytics": "^0.4.16",
         "uuid": "^3.1.0",
-        "vscode-languageclient": "^3.5.0",
-        "vscode-languageserver": "^3.5.0"
+        "vscode-languageclient": "^3.5.1",
+        "vscode-languageserver": "^3.5.1"
     },
     "optionalDependencies": {
         "electron-rebuild": "^1.7.3",

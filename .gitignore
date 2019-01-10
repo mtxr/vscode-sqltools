@@ -5,9 +5,9 @@ node_modules/
 coverage/
 .nyc_output/
 coverage.enabled
-yarn.lock
 npm-shrinkwrap.json
 *.log
 *.vsix
 cache/
 !**/.vscode
+**/package-lock.json
