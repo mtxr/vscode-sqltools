@@ -25,7 +25,6 @@ import { DISPLAY_NAME, VERSION } from '@sqltools/core/constants';
 import ContextManager from './context';
 
 import {
-  CreateNewConnectionRequest,
   GetConnectionListRequest,
   GetTablesAndColumnsRequest,
   OpenConnectionRequest,
@@ -392,11 +391,6 @@ namespace SQLTools {
 
   async function registerLanguageServerRequests() {
     languageClient.onReady().then(() => {
-      languageClient.onRequest(CreateNewConnectionRequest.method, (newConnPostData) => {
-        const connList = ConfigManager.connections;
-        connList.push(newConnPostData.connInfo);
-        return setSettings('connections', connList);
-      });
       languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns);
       });
@@ -496,8 +490,8 @@ namespace SQLTools {
         avoidRestart = true;
       });
       languageClient.onNotification(Notification.OnError, ({ err = '', errMessage, message }) => {
-        ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString())
-      })
+        ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString());
+      });
       languageClient.onNotification(Notification.LanguageServerReady, ({ httpPort }) => {
         ContextManager.httpServerPort = httpPort;
       });
@@ -563,7 +557,6 @@ namespace SQLTools {
 
   async function setSettings(key: string, value: any) {
     await Wspc.getConfiguration(cfgKey).update(key, value);
-    ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
   }
 
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {

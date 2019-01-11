@@ -1,7 +1,6 @@
 import http from 'http';
 import SQLToolsLanguageServer from '..';
 import { DatabaseInterface } from '@sqltools/core/interface';
-import { CreateNewConnectionRequest } from '@sqltools/core/contracts/connection-requests';
 
 let Logger = console;
 interface ExtendedIncommingMessage extends http.IncomingMessage {
@@ -152,15 +151,6 @@ namespace HTTPServer {
   HTTPServer.get('/api/query-results', (req, res) => res.sendJson(queryResultsState));
   HTTPServer.set('GET /api/statistics', {});
   HTTPServer.get('/api/status', (req, res) => void res.sendJson(SQLToolsLanguageServer.getStatus()));
-  HTTPServer.post('/api/create-connection', (req, res) => {
-    SQLToolsLanguageServer.getServer().sendRequest(CreateNewConnectionRequest.method, req.body)
-      .then((result) => {
-        return res.sendJson({ data: req.body, success: true });
-      }, (err) => {
-        Logger.error('LS: Create connection error: ' + err.toString());
-        return res.sendJson({ data: req.body, success: false, error: err.message || err.toString() });
-      });
-  });
 }
 
 export default HTTPServer;

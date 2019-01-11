@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode } from 'react';
+import React, { ReactElement, ReactNode, FormEvent, ChangeEventHandler } from 'react';
 import {
   bool,
   gtz,
@@ -8,14 +8,14 @@ import {
   ValidationFunction,
 } from './../lib/utils';
 import Loading from './loading';
+import { VSCodeWebviewAPI, WebviewMessageType } from 'lib/interfaces';
+let vscode: VSCodeWebviewAPI;
 
-let vscode;
-
-declare var acquireVsCodeApi: any;
+declare var acquireVsCodeApi: () => VSCodeWebviewAPI;
 
 function getVscode() {
   vscode = vscode || acquireVsCodeApi();
-  return vscode;
+  return vscode as VSCodeWebviewAPI;
 }
 
 const dialectDefaultPorts = {
@@ -214,11 +214,29 @@ export default class Setup extends React.Component<{}, SetupState> {
       parse: int,
     },
   };
+
+  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    switch(action) {
+      case 'createConnectionSuccess':
+        const newState = { loading: false } as SetupState;
+        newState.saved = `<strong>${payload.connInfo.name}</strong> added to your settings!`;
+        newState.data = Setup.generateConnData(this.state.fields);
+        this.setState(newState, this.validateFields);
+        break;
+
+      case 'createConnectionError':
+        this.setState({
+          onSaveError: (payload || '').toString(),
+        });
+        break;
+
+      default:
+        break;
+    }
+  }
+
   constructor(props) {
     super(props);
-    this.handleChange = this.handleChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
-
     const data = Setup.loadLocal() || Setup.generateConnData(this.baseFields);
     this.state = {
       loading: true,
@@ -228,10 +246,13 @@ export default class Setup extends React.Component<{}, SetupState> {
       onSaveError: null,
       saved: null,
     };
+    window.addEventListener('message', (ev) => {
+      return this.messagesHandler(ev.data as WebviewMessageType);
+    });
   }
 
-  public handleChange(e) {
-    const { name, value } = e.target;
+  public handleChange: ChangeEventHandler = (e) => {
+    const { name, value } = e.target as HTMLInputElement;
     const newData = Object.assign({}, this.state.data, {
       [name]: value,
     });
@@ -262,41 +283,13 @@ export default class Setup extends React.Component<{}, SetupState> {
     }, {});
   }
 
-  public handleSubmit(e) {
+  public handleSubmit = (e: FormEvent) => {
     this.setState({ loading: true });
     e.preventDefault();
     getVscode().postMessage({
-      action: 'bla',
-      data: { a: 1 }
+      action: 'createConnection',
+      payload: { connInfo: this.getParsedFormData(), isGlobal: false }
     });
-    // fetch(`${(window as any).apiUrl}/api/create-connection`, {
-    //   method: 'POST',
-    //   headers: {
-    //     'Accept': 'application/json, text/plain, */*',
-    //     'Content-Type': 'application/json',
-    //   },
-    //   body: JSON.stringify({ connInfo: this.getParsedFormData() }),
-    // })
-    //   .then((res) => {
-    //     return res.json();
-    //   })
-    //   .then((res) => {
-    //     const newState = { loading: false } as SetupState;
-    //     if (res.success) {
-    //       newState.saved = `<strong>${res.data.connInfo.name}</strong> added to your settings!`;
-    //       storage.removeItem(Setup.storageKey);
-    //       newState.data = Setup.generateConnData(this.state.fields);
-    //     } else {
-    //       newState.onSaveError = res.error;
-    //     }
-    //     this.setState(newState, this.validateFields);
-    //   })
-    //   .catch((err) => {
-    //     this.setState({
-    //       onSaveError: (err || '').toString(),
-    //     });
-    //   });
-
     return false;
   }
   public validateFields(cb = (() => void 0)) {

@@ -17,4 +17,3 @@ export const UpdateTableAndColumnsRequest = new RequestType
 export const GetTablesAndColumnsRequest = new RequestType
   <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
   ('connection/getTableAndColumns');
-export const CreateNewConnectionRequest = new RequestType<any, any, Error, void>('connection/createNewConnection');
