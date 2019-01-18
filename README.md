@@ -2,7 +2,7 @@
 
 <!--[![Build Status](https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master)](https://travis-ci.org/mtxr/vscode-sqltools)-->
 
-[![Patreon](https://img.shields.io/badge/patreon-donate-blue.svg)](https://www.patreon.com/mteixeira)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
 Your swiss knife SQL for VSCode.
@@ -20,7 +20,7 @@ SQLTools was developed with ♥ to save us time during our programming journey. 
 
 SQLTools will save you (for sure) a lot of time and help you to increase your productivity so, I hope you can donate and help SQLTools to become more awesome than ever.
 
-[![Patreon](https://img.shields.io/badge/patreon-donate-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
 ## Features
