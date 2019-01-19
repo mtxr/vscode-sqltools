@@ -1,0 +1,24 @@
+{
+  "name": "@sqltools/core",
+  "version": "1.0.0",
+  "description": "SQLTools Core Files",
+  "main": "index.ts",
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "GPL-3.0",
+  "private": true,
+  "dependencies": {
+    "bugsnag": "^2.4.3",
+    "bugsnag-js": "^4.7.3",
+    "mysql2": "^1.5.1",
+    "pg": "^7.4.0",
+    "sql-formatter": "^2.3.1",
+    "tedious": "^2.3.1",
+    "universal-analytics": "^0.4.16",
+    "uuid": "^3.1.0",
+    "vscode-languageserver": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/universal-analytics": "^0.4.2",
+    "typescript": "^3.1.6"
+  }
+}
