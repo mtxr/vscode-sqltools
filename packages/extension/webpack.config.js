@@ -2,10 +2,17 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getWebviewConfig = require('../ui/webpack.config');
-const pkgJson = require('./package.json');
+
+const extPkgJson = require('./package.json');
+const corePkgJson = require('./../core/package.json');
+const lsPkgJson = require('./../language-server/package.json');
+const uiPkgJson = require('./../ui/package.json');
+
+const dependencies = Object.assign({}, uiPkgJson.dependencies || {}, lsPkgJson.dependencies || {}, corePkgJson.dependencies || {}, extPkgJson.dependencies || {});
+const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkgJson.devDependencies || {}, corePkgJson.devDependencies || {}, extPkgJson.devDependencies || {});
 
 // defintions
-pkgJson.name = 'sqltools'; // vscode marketplace name
+extPkgJson.name = 'sqltools'; // vscode marketplace name
 const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
 
 const outdir = path.resolve(__dirname, '..', '..', 'dist');
@@ -42,10 +49,29 @@ function getExtensionConfig(env) {
           from: path.join(__dirname, 'package.json'),
           to: path.join(outdir, 'package.json'),
           transform: (content, filepath) => {
-            return content.toString('utf8').replace(/\n */g, '').replace('"name": "@sqltools/extension"', `"name": "${pkgJson.name}"`);
+            content = JSON.parse(content.toString('utf8'));
+            if (process.env.PREVIEW) {
+              content.name = `${extPkgJson.name}-preview`
+              content.preview = true;
+              content.displayName = 'SQLTools - Preview';
+            } else {
+              content.name = extPkgJson.name;
+            }
+            content.scripts = {};
+            content.dependencies = dependencies;
+            content.devDependencies = devDependencies;
+
+            delete content.dependencies['@sqltools/core'];
+            delete content.dependencies['@sqltools/language-server'];
+            delete content.dependencies['@sqltools/ui'];
+
+            return JSON.stringify(content);
           }
         },
-        { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') }
+        { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
+        { from: path.join(__dirname, '..', '..', 'static/icon.png'), to: path.join(outdir, 'static/icon.png') },
+        { from: path.join(__dirname, '..', '..', 'README.md'), to: path.join(outdir, 'README.md') },
+        { from: path.join(__dirname, '..', '..', 'LICENSE.md'), to: path.join(outdir, 'LICENSE.md') }
       ])
     ],
     resolve: {
@@ -81,9 +107,9 @@ module.exports = function (env = {}) {
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
         'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
-        'process.env.VERSION': JSON.stringify(pkgJson.version),
-        'process.env.DISPLAY_NAME': JSON.stringify(pkgJson.displayName),
-        'process.env.AUTHOR': JSON.stringify(pkgJson.author),
+        'process.env.VERSION': JSON.stringify(extPkgJson.version),
+        'process.env.DISPLAY_NAME': JSON.stringify(extPkgJson.displayName),
+        'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.BUGSNAG_API_KEY': JSON.stringify(BUGSNAG_API_KEY),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })

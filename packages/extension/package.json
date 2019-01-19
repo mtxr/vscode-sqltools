@@ -2,9 +2,10 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools",
     "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.15.1",
+    "version": "0.16.0",
     "publisher": "mtxr",
     "license": "GPL-3.0",
+    "preview": false,
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools",
         "type": "git"
@@ -33,14 +34,14 @@
     "icon": "static/icon.png",
     "badges": [
         {
-            "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-yellow.svg",
-            "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
+            "description": "Patreon Support",
+            "url": "https://img.shields.io/badge/patreon-support-blue.svg",
+            "href": "https://www.patreon.com/mteixeira"
         },
         {
-            "description": "Build Status",
-            "url": "https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master",
-            "href": "https://travis-ci.org/mtxr/vscode-sqltools"
+            "description": "PayPal Donate",
+            "url": "https://img.shields.io/badge/paypal-donate-blue.svg",
+            "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
         }
     ],
     "activationEvents": [
@@ -524,6 +525,7 @@
     "scripts": {
         "vscode:prepublish": "yarn run compile",
         "compile": "webpack --env.production",
+        "compile:preview": "env PREVIEW=1 yarn run compile",
         "watch": "webpack --watch --env.development",
         "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",

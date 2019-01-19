@@ -1,7 +1,5 @@
 # SQLTools for VSCode
 
-<!--[![Build Status](https://travis-ci.org/mtxr/vscode-sqltools.svg?branch=master)](https://travis-ci.org/mtxr/vscode-sqltools)-->
-
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
