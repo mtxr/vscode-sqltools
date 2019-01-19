@@ -149,7 +149,7 @@ namespace SQLTools {
 
   export function cmdCloseConnection(): void {
     setConnection(null)
-      .then(() => languageClient.sendRequest(RefreshDataRequest))
+      .then(() => languageClient.sendRequest(RefreshDataRequest.method))
       .catch(ErrorHandler.create('Error closing connection'));
   }
 
@@ -240,7 +240,7 @@ namespace SQLTools {
   }
 
   export function cmdRefreshSidebar() {
-    languageClient.sendRequest(RefreshDataRequest);
+    languageClient.sendRequest(RefreshDataRequest.method);
   }
 
   /**
@@ -248,7 +248,7 @@ namespace SQLTools {
    */
 
   async function connectionMenu(): Promise<SerializedConnection> {
-    const connections: SerializedConnection[] = await languageClient.sendRequest(GetConnectionListRequest);
+    const connections: SerializedConnection[] = await languageClient.sendRequest(GetConnectionListRequest.method);
 
     const sel = (await quickPick(connections.map((c) => {
       return {
@@ -406,6 +406,7 @@ namespace SQLTools {
     logger.info('Config reloaded!');
     autoConnectIfActive(lastUsedConn);
     updateStatusBar();
+    connectionExplorer.setConnections(ConfigManager.connections);
   }
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {

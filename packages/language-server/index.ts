@@ -1,8 +1,7 @@
 import {
   CompletionItem, createConnection,
   Disposable,
-  DocumentRangeFormattingRequest, IConnection, InitializeResult,
-  IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, RemoteConsole, InitializeParams,
+  DocumentRangeFormattingRequest, IConnection, TextDocumentPositionParams, TextDocuments, InitializeParams, ProposedFeatures,
 } from 'vscode-languageserver';
 
 import Formatter from './requests/format';
@@ -27,12 +26,11 @@ import store from './store';
 import * as actions from './store/actions';
 
 namespace SQLToolsLanguageServer {
-  const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
+  const server: IConnection = createConnection(ProposedFeatures.all);
   let Logger = console;
   const docManager: TextDocuments = new TextDocuments();
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
-  let workspaceRoot: string;
   let sgdbConnections: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
@@ -79,12 +77,11 @@ namespace SQLToolsLanguageServer {
   }
 
   function updateSidebar(conn, tables, columns) {
-    server.client.connection.sendRequest(UpdateTableAndColumnsRequest, { conn, tables, columns }).then(console.log, console.error);
+    server.client.connection.sendRequest(UpdateTableAndColumnsRequest.method, { conn, tables, columns }).then(console.log, console.error);
   }
 
   /* server events */
   server.onInitialize((params: InitializeParams) => {
-    workspaceRoot = params.rootPath;
     return {
       capabilities: {
         completionProvider: {
