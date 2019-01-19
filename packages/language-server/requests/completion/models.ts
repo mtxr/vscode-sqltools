@@ -40,7 +40,7 @@ export function TableCompletionItem(table: DatabaseInterface.Table) {
     yml += `Number of Columns: ${table.numberOfColumns}\n`;
   }
   return {
-    detail: 'Column',
+    detail: 'Table',
     documentation: (
       (new MarkdownString())
         .appendCodeblock(yml, 'yaml') as any
@@ -77,7 +77,7 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn) {
   yml += `Table: ${col.tableName}`;
 
   return {
-    detail: 'Table',
+    detail: 'Column',
     documentation: (
       (new MarkdownString())
         .appendCodeblock(colInfo.join(' '), 'sql')

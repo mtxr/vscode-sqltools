@@ -31,6 +31,7 @@ import {
   RefreshDataRequest,
   RunCommandRequest,
   UpdateTableAndColumnsRequest,
+  QueryResults,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
@@ -155,8 +156,8 @@ namespace SQLTools {
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
     try {
       const table = await getTableName(node);
-      await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
       printOutput();
+      await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
     }
@@ -165,8 +166,8 @@ namespace SQLTools {
   export async function cmdDescribeTable(node?: SidebarTable | SidebarView): Promise<void> {
     try {
       const table = await getTableName(node);
-      await runConnectionCommand('describeTable', table);
       printOutput();
+      await runConnectionCommand('describeTable', table);
     } catch (e) {
       ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
     }
@@ -180,8 +181,8 @@ namespace SQLTools {
     try {
       const query: string = await getSelectedText('execute query');
       await connect();
-      runQuery(query);
       printOutput();
+      runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
     }
@@ -191,8 +192,8 @@ namespace SQLTools {
     try {
       const query: string = await getSelectedText('execute file', true);
       await connect();
-      runQuery(query);
       printOutput();
+      runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
     }
@@ -207,8 +208,8 @@ namespace SQLTools {
     try {
       await connect();
       const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
-      runQuery(query);
       printOutput();
+      runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error running query.', cmdShowOutputChannel)(e);
     }
@@ -217,8 +218,8 @@ namespace SQLTools {
   export async function cmdRunFromHistory(): Promise<void> {
     try {
       await connect();
-      runQuery(await historyMenu(), false);
       await printOutput();
+      runQuery(await historyMenu(), false);
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
     }
@@ -227,14 +228,14 @@ namespace SQLTools {
   export async function cmdRunFromBookmarks(): Promise<void> {
     try {
       await connect();
-      runQuery(await bookmarksMenu('detail'));
       printOutput();
+      runQuery(await bookmarksMenu('detail'));
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
     }
   }
 
-  export async function cmdSetupSQLTools() {
+  export async function cmdAddNewServer() {
     settingsEditor.show();
   }
 
@@ -394,6 +395,9 @@ namespace SQLTools {
       languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns);
       });
+      languageClient.onRequest(QueryResults.method, (payload) => {
+        queryResults.postMessage({action: 'queryResults', payload });
+      });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
@@ -492,8 +496,8 @@ namespace SQLTools {
       languageClient.onNotification(Notification.OnError, ({ err = '', errMessage, message }) => {
         ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString());
       });
-      languageClient.onNotification(Notification.LanguageServerReady, ({ httpPort }) => {
-        ContextManager.httpServerPort = httpPort;
+      languageClient.onNotification(Notification.LanguageServerReady, () => {
+        logger.debug('Language server is ready!');
       });
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
@@ -550,7 +554,7 @@ namespace SQLTools {
         require('opn')(localConfig.current.releaseNotes);
         break;
       case supportProject:
-        require('opn')('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8');
+        require('opn')('https://www.patreon.com/mteixeira');
         break;
     }
   }

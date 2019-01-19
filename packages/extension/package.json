@@ -139,9 +139,13 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Setup a Connection",
-                "command": "SQLTools.setupSQLTools",
-                "category": "SQLTools Management"
+                "title": "Add new server",
+                "command": "SQLTools.addNewServer",
+                "category": "SQLTools Management",
+                "icon": {
+                    "light": "icons/database-light.svg",
+                    "dark": "icons/database-dark.svg"
+                }
             },
             {
                 "title": "Add name to cursor",
@@ -411,8 +415,8 @@
                 },
                 "sqltools.tableTreeItemsExpanded": {
                     "type": "boolean",
-                    "default": true,
-                    "description": "Table columns should be expanded on load ?"
+                    "default": false,
+                    "description": "Table columns should be expanded on load?"
                 }
             }
         },
@@ -458,14 +462,14 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.newSqlFile",
+                    "command": "SQLTools.addNewServer",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.refreshSidebar",
                     "when": "view == SQLTools.tableExplorer",
-                    "group": "navigation@2"
+                    "group": "navigation@3"
                 }
             ],
             "view/item/context": [

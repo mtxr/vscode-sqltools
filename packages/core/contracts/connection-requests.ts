@@ -10,10 +10,14 @@ export const RunCommandRequest = new RequestType
   <{ conn: SerializedConnection, command: string }, boolean, Error, void>('connection/runCommand');
 export const OpenConnectionRequest = new RequestType
   <{ conn: SerializedConnection, password?: string }, SerializedConnection, Error, void>('connection/openConnection');
+export const CloseConnectionRequest = new RequestType0
+  <{ conn: SerializedConnection }, Error, void>('connection/closeConnection');
 export const UpdateTableAndColumnsRequest = new RequestType
   <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
   ('connection/updateTableAndColumns');
-
 export const GetTablesAndColumnsRequest = new RequestType
   <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
   ('connection/getTableAndColumns');
+export const QueryResults = new RequestType0
+  <DatabaseInterface.QueryResults[], Error, void>
+  ('connection/queryResults');

@@ -4,9 +4,7 @@ import {
   DocumentRangeFormattingRequest, IConnection, InitializeResult,
   IPCMessageReader, IPCMessageWriter, TextDocumentPositionParams, TextDocuments, RemoteConsole, InitializeParams,
 } from 'vscode-languageserver';
-import getPort from 'get-port';
 
-import HTTPServer from './http-server';
 import Formatter from './requests/format';
 import * as Utils from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
@@ -18,7 +16,9 @@ import {
   OpenConnectionRequest,
   RefreshDataRequest,
   GetTablesAndColumnsRequest,
-  RunCommandRequest
+  RunCommandRequest,
+  CloseConnectionRequest,
+  QueryResults
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
@@ -30,13 +30,10 @@ namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(new IPCMessageReader(process), new IPCMessageWriter(process));
   let Logger = console;
   const docManager: TextDocuments = new TextDocuments();
-  let httpPort: number = Utils.persistence.get('httpServerPort');
-  const portFuture = getPort({ port: httpPort || 5123 });
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
   let workspaceRoot: string;
   let sgdbConnections: Connection[] = [];
-  // let activeConnection: Connection[] = [];
   let completionItems: CompletionItem[] = [];
 
   docManager.listen(server);
@@ -87,7 +84,6 @@ namespace SQLToolsLanguageServer {
 
   /* server events */
   server.onInitialize((params: InitializeParams) => {
-    // Logger = server.console;
     workspaceRoot = params.rootPath;
     return {
       capabilities: {
@@ -102,9 +98,7 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onInitialized(async () => {
-    httpPort = await portFuture;
-    HTTPServer.server(server.console, httpPort);
-    server.sendNotification(Notification.LanguageServerReady, { httpPort });
+    server.sendNotification(Notification.LanguageServerReady, { });
   });
 
   server.onDidChangeConfiguration(async (change) => {
@@ -160,10 +154,6 @@ namespace SQLToolsLanguageServer {
     OpenConnectionRequest.method,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
     if (!req.conn) {
-      // store.getState().activeConnections
-      // activeConnection.forEach(c => c.close());
-      // completionItems = [];
-      // activeConnection = []
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
@@ -174,6 +164,17 @@ namespace SQLToolsLanguageServer {
       return c.serialize();
     }
     return null;
+  });
+
+  server.onRequest(
+    CloseConnectionRequest.method,
+    async (req: { conn: SerializedConnection }): Promise<void> => {
+    if (!req.conn) {
+      return undefined;
+    }
+    const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
+    await c.close().catch(notifyError('Connection Error'))
+    store.dispatch(actions.Disconnect(c));
   });
 
   server.onRequest(RefreshDataRequest.method, () => {
@@ -196,16 +197,15 @@ namespace SQLToolsLanguageServer {
     args: any[],
   }) => {
     try {
-      HTTPServer.queryResultStatus(true);
       const c = sgdbConnections.find((c) => c.getName() === req.conn.name);
       if (!c) throw 'Connection not found';
-      const results = (await c[req.command](...req.args)) as DatabaseInterface.QueryResults[];
+      const results: DatabaseInterface.QueryResults[] = (await c[req.command](...req.args));
       results.forEach((r) => {
-        HTTPServer.queryResult(r.query, r);
+        store.dispatch(actions.QuerySuccess(c, r.query, r));
       });
+      server.sendRequest(QueryResults.method, results);
       return true;
     } catch (e) {
-      HTTPServer.queryResultStatus(false, e);
       notifyError('Execute query error', e);
       throw e;
     }

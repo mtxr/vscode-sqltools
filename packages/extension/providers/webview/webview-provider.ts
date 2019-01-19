@@ -9,14 +9,28 @@ import ContextManager from '../../context';
 
 export default abstract class WebviewProvider implements Disposable {
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
+
+  private get baseHtml(): string {
+    return `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>SQLTools Setup Helper</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+</head>
+<body>
+  <div id="root"></div>
+  <script src="{{extRoot}}/views/vendor.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="{{extRoot}}/views/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
+</body>
+</html>`;
+  }
   protected html: string;
   protected abstract id: string;
   protected abstract title: string;
   private panel: WebviewPanel;
   private disposables: Disposable[] = [];
-  private get port() {
-    return ContextManager.httpServerPort;
-  }
+  private messageCb;
 
   public show() {
     if (!this.panel) {
@@ -41,7 +55,6 @@ export default abstract class WebviewProvider implements Disposable {
     this.panel.title = this.title;
     this.panel.webview.html = (this.html || this.baseHtml)
       .replace(/{{id}}/g, this.id)
-      .replace(/{{port}}/g, this.port.toString())
       .replace(
         /{{extRoot}}/g,
         Uri.file(ContextManager.context.asAbsolutePath('.'))
@@ -56,36 +69,15 @@ export default abstract class WebviewProvider implements Disposable {
     this.panel.dispose();
   }
   public dispose() {
-    if (this.disposables.length) this.disposables.forEach(d => d.dispose());
+    if (this.disposables.length) this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
     this.panel = undefined;
-  }
-
-  private get baseHtml(): string {
-    return `<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <title>SQLTools Setup Helper</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-</head>
-<script type="text/javascript">
-window.apiUrl = 'http://localhost:{{port}}'
-</script>
-<body>
-  <div id="root"></div>
-  <script src="{{extRoot}}/views/vendor.js" type="text/javascript" charset="UTF-8"></script>
-  <script src="{{extRoot}}/views/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
-</body>
-</html>`;
   }
 
   public postMessage(message: any) {
     if (!this.panel) return;
     this.panel.webview.postMessage(message);
   }
-
-  private messageCb;
   public setMessageCallback(cb) {
     this.messageCb = cb;
   }

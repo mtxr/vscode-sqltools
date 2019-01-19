@@ -1,6 +1,7 @@
 import React, { ReactNode } from 'react';
 import ReactTable from 'react-table';
 import { DatabaseInterface } from '@sqltools/core/interface';
+import { WebviewMessageType } from 'lib/interfaces';
 
 interface QueryProps {
   value: string;
@@ -219,6 +220,9 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
   constructor(props) {
     super(props);
     this.state = { isLoaded: false, resultMap: {}, queries: [] };
+    window.addEventListener('message', (ev) => {
+      return this.messagesHandler(ev.data as WebviewMessageType);
+    });
   }
   toggle(query: QueryResultsState['queries'][number]) {
     this.setState({
@@ -226,40 +230,31 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
     });
   }
 
-  componentDidMount() {
-    this.refreshData();
-    window.addEventListener('message', (message) => {
-      if (!message.data) return;
-      switch (message.data.action) {
-        case 'refresh':
-          this.refreshData();
-          break;
-      }
-    });
+  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    debugger;
+    console.log('queryResults', { payload, action });
+    switch (action) {
+      case 'queryResults':
+        const queries = [];
+        const resultMap = {};
+        (Array.isArray(payload) ? payload : [payload]).forEach((r) => {
+          queries.push(r.query);
+          resultMap[r.query] = r;
+        });
+        this.setState({
+          isLoaded: true,
+          queries,
+          resultMap,
+          error: null,
+          activeTab: queries[0],
+        });
+        break;
+
+      default:
+        break;
+    }
   }
 
-  refreshData() {
-    let interval = setInterval(() => {
-      fetch(`${(window as any).apiUrl}/api/query-results`)
-        .then((res) => res.json())
-        .then(
-          (res) => {
-            if (!res.isLoading) {
-              clearInterval(interval);
-              interval = null;
-            }
-            this.setState({
-              isLoaded: true,
-              queries: res.queries,
-              resultMap: res.resultMap,
-              error: res.error,
-              activeTab: res.queries[0],
-            });
-          },
-          (e) => void 0,
-        );
-    }, 500);
-  }
   render() {
     if (!this.state.isLoaded) {
       return <h2>loading...</h2>;
