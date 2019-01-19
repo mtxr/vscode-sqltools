@@ -10,7 +10,6 @@
     "object-literal-sort-keys": false,
     "no-namespace": false,
     "align": [ true, "parameters", "statements" ],
-    "arrow-parens": true,
     "arrow-return-shorthand": [ true ],
     "ban-types": [ false ],
     "comment-format": [ true, "check-space", { "ignore-words": [ "TODO", "HACK" ] } ],

@@ -21,6 +21,17 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "studykik",
+      "dialect": "PostgreSQL",
+      "name": "kik",
+      "password": "senhapadrao",
+      "port": 5432,
+      "server": "127.0.0.1",
+      "username": "mteixeira"
     }
   ]
 }

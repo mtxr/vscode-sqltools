@@ -52,9 +52,18 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 
   public setConnections(connections: ConnectionCredentials[]) {
+    const keys = [];
     connections.forEach((conn) => {
-      this.tree[this.getDbKey(conn)] = new SidebarConnection(conn);
+      this.tree[this.getDbKey(conn)] = this.tree[this.getDbKey(conn)] || new SidebarConnection(conn);
+      keys.push(this.getDbKey(conn));
     });
+
+    if (Object.keys(this.tree).length !== keys.length) {
+      Object.keys(this.tree).forEach(k => {
+        if (keys.indexOf(k) >= 0) return;
+        delete this.tree[k];
+      });
+    }
     this.refresh();
   }
 
