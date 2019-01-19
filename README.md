@@ -22,9 +22,9 @@ Your swiss knife SQL for VSCode.
 
 ![static/autocomplete.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/autocomplete.png)
 
-* Sidebar database explorer
+* Sidebar database explorer and setup GUI
 
-![static/sidebar.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar.png)
+![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
 
 ## Docs
 
