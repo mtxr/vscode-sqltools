@@ -231,8 +231,6 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    debugger;
-    console.log('queryResults', { payload, action });
     switch (action) {
       case 'queryResults':
         const queries = [];
