@@ -9,7 +9,7 @@ import {
 import {
   SidebarColumn,
   SidebarConnection,
-  SidebarDatabaseStructure,
+  SidebarDatabaseSchemaGroup,
   SidebarTable,
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
@@ -20,7 +20,7 @@ export type SidebarDatabaseItem = SidebarConnection | SidebarTable | SidebarColu
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
-    this.onDidChange.event;
+  this.onDidChange.event;
   private tree: { [database: string]: SidebarConnection} = {};
   public fireUpdate(): void {
     this.onDidChange.fire();
@@ -41,7 +41,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     } else if (
       element instanceof SidebarTable
       || element instanceof SidebarView
-      || element instanceof SidebarDatabaseStructure
+      || element instanceof SidebarDatabaseSchemaGroup
     ) {
       return Promise.resolve(this.toArray(element.items));
     }
@@ -54,8 +54,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public setConnections(connections: ConnectionCredentials[]) {
     const keys = [];
     connections.forEach((conn) => {
-      this.tree[this.getDbKey(conn)] = this.tree[this.getDbKey(conn)] || new SidebarConnection(conn);
-      keys.push(this.getDbKey(conn));
+      this.tree[this.getDbId(conn)] = this.tree[this.getDbId(conn)] || new SidebarConnection(conn);
+      keys.push(this.getDbId(conn));
     });
 
     if (Object.keys(this.tree).length !== keys.length) {
@@ -69,7 +69,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public setTreeData(conn: SerializedConnection, tables, columns) {
     if (!conn) return;
-    const treeKey = this.getDbKey(conn);
+    const treeKey = this.getDbId(conn);
 
     if (this.tree[treeKey]) this.tree[treeKey].reset();
 
@@ -84,8 +84,18 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.refresh();
   }
 
-  private getDbKey(c: SerializedConnection | ConnectionCredentials) {
-    return `${c.name}:${c.database}`;
+  public setActiveConnection(c?: SerializedConnection) {
+    const idActive = c ? this.getDbId(c) : null;
+    Object.keys(this.tree).forEach(id => {
+      if (id === idActive) {
+        return this.tree[id].activate();
+      }
+      return this.tree[id].deactivate();
+    });
+  }
+
+  private getDbId(c: SerializedConnection | ConnectionCredentials) {
+    return `${c.name}#${c.database}#${c.dialect}`;
   }
 
   private toArray(obj: any) {

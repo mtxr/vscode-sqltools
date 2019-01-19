@@ -6,21 +6,44 @@ import {
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
+import { DISPLAY_NAME } from '@sqltools/core/constants';
 
 export class SidebarConnection extends TreeItem {
   public contextValue = 'connection';
-  public value: string;
+  public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables');
+  public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views');
+  public get description() {
+    return this.isActive ? 'active' : '';
+  }
 
-  public tables: SidebarDatabaseStructure = new SidebarDatabaseStructure('Tables');
-  public views: SidebarDatabaseStructure = new SidebarDatabaseStructure('Views');
+  private isActive = false;
+  public get id() {
+    return this.getId();
+  }
+  public get value() {
+    return this.conn.database;
+  }
+
+  public get tooltip() {
+    if (this.isActive) return `Active Connection - Queries will run for this connection`;
+    return undefined;
+  }
+
   constructor(public conn: ConnectionCredentials) {
-    super(conn.database, TreeItemCollapsibleState.None);
-    this.value = conn.database;
-    this.label = `${conn.database}@${conn.name}`;
+    super(`${conn.database}@${conn.name}`, TreeItemCollapsibleState.None);
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
       light: ContextManager.context.asAbsolutePath('icons/database-light.svg'),
     };
+    this.command = {
+      title: '',
+      command: `${DISPLAY_NAME}.selectConnection`,
+      arguments: [this],
+    };
+  }
+
+  public getId() {
+    return `${this.conn.name}#${this.conn.database}#${this.conn.dialect}`;
   }
 
   public addItem(item) {
@@ -34,11 +57,19 @@ export class SidebarConnection extends TreeItem {
     if (this.tables) this.tables.reset();
     this.collapsibleState = TreeItemCollapsibleState.None;
   }
+
+  public activate() {
+    this.isActive = true;
+  }
+
+  public deactivate() {
+    this.isActive = false;
+  }
 }
 
-export class SidebarDatabaseStructure extends TreeItem {
+export class SidebarDatabaseSchemaGroup extends TreeItem {
   public iconPath = ThemeIcon.Folder;
-  public contextValue = 'connection.structure';
+  public contextValue = 'connection.schema_group';
   public items: { [name: string]: SidebarTable | SidebarView} = {};
   constructor(private name) {
     super(name, TreeItemCollapsibleState.Expanded);

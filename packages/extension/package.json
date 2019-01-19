@@ -486,12 +486,12 @@
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.schema_group",
                     "group": "sqltools.dbExplorer@1"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.tableExplorer && viewItem != connection.structure",
+                    "when": "view == SQLTools.tableExplorer && viewItem != connection.schema_group",
                     "group": "inline@3"
                 },
                 {

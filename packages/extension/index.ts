@@ -413,6 +413,7 @@ namespace SQLTools {
     let password = null;
     if (c && c.askForPassword) password = await askForPassword(c);
     lastUsedConn = c;
+    connectionExplorer.setActiveConnection(lastUsedConn);
     updateStatusBar();
     lastUsedConn = (await languageClient.sendRequest(
       OpenConnectionRequest.method,
