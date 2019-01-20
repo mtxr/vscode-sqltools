@@ -16,8 +16,6 @@ coverage/**
 **/coverage/**
 __mocks__/**
 **/__mocks__/**
-CHANGELOG.md
-**/CHANGELOG.md
 *example*
 **/*example*
 *example*/**
@@ -53,3 +51,4 @@ tslint.json
 !static/icon.png
 !README.md
 !LICENSE.md
+!CHANGELOG.md

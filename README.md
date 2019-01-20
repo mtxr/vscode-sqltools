@@ -68,7 +68,7 @@ Our donators:
 
 ## Changelog
 
-See changelog [here](https://github.com/mtxr/vscode-sqltools/tree/master/static/release-notes)
+See changelog [here](https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md)
 
 ## Feedback
 
