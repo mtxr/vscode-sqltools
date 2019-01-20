@@ -122,6 +122,7 @@ input, select {
   bottom: 0;
   left: 0;
   right: 0;
+  display: block;
 
   .backdrop {
     position: absolute;
@@ -177,7 +178,7 @@ input, select {
   }
 }
 
-.fix-height {
+.fullscreen-container {
   @include full-screen();
 }
 

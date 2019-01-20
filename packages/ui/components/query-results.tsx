@@ -5,6 +5,8 @@ import { WebviewMessageType } from 'lib/interfaces';
 
 interface QueryProps {
   value: string;
+  expanded: boolean;
+  toggle: () => void;
 }
 type QueryState = ((prev: any) => { open: boolean }) & { open: boolean };
 export class Query extends React.Component<QueryProps, QueryState> {
@@ -19,13 +21,15 @@ export class Query extends React.Component<QueryProps, QueryState> {
   }
   render() {
     return (
-      <div className={'collapse ' + (this.state.open ? 'open' : '')}>
-        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>
+      <div className={'collapse ' + (this.props.expanded ? 'open' : '')}>
+        <div className='collapse-toggle' onClick={this.props.toggle}>
           View Query <i className='icon' />
         </div>
+        { this.props.expanded && (
         <div className='collapsible'>
           <pre>{this.props.value}</pre>
         </div>
+        )}
       </div>
     );
   }
@@ -33,44 +37,42 @@ export class Query extends React.Component<QueryProps, QueryState> {
 interface MessagesProps {
   value: any;
   error?: any;
+  expanded: boolean;
+  toggle: () => void;
 }
 
-type MessagesState = ((prev: any) => { open: boolean }) & { open: boolean };
-export class Messages extends React.Component<MessagesProps, MessagesState> {
+export class Messages extends React.Component<MessagesProps> {
   private size: number = 0;
   private messages: string[] = [];
   constructor(props) {
     super(props);
-    this.state = { open: props.value.length > 0 };
     this.size = props.value.length;
     this.messages = props.value;
     if (this.messages.length === 0) {
       this.messages.push('No messages to show.');
     }
   }
-  toggle() {
-    this.setState((prev) => ({
-      open: !prev.open,
-    }));
-  }
+
   render() {
     return (
-      <div className={'collapse ' + (this.state.open ? 'open' : '')}>
-        <div className='collapse-toggle' onClick={this.toggle.bind(this)}>
+      <div className={'collapse ' + (this.props.expanded ? 'open' : '')}>
+        <div className='collapse-toggle' onClick={this.props.toggle}>
           Query Messages <small>({this.size} messages)</small>
           <i className='icon' />
         </div>
-        <div className='collapsible'>
-          <div className='messages'>
-            {this.messages.map((m, i) => {
-              return (
-                <div key={i} className={'message ' + (this.props.error ? 'error' : '')}>
-                  {m}
-                </div>
-              );
-            })}
+        {this.props.expanded && (
+          <div className='collapsible'>
+            <div className='messages'>
+              {this.messages.map((m, i) => {
+                return (
+                  <div key={i} className={'message ' + (this.props.error ? 'error' : '')}>
+                    {m}
+                  </div>
+                );
+              })}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     );
   }
@@ -126,81 +128,107 @@ export class ResultsTable extends React.Component<ResultsTableProps, ResultsTabl
       };
     });
     return (
-      <div className='results-table'>
-        <ReactTable
-          // tslint:disable-next-line:quotemark
-          noDataText="Query didn't return any results."
-          data={this.props.value.data}
-          columns={cols}
-          filterable
-          FilterComponent={({ filter, column, onChange }) => {
-            return (
-              <input
-                type='text'
-                placeholder={`Filter by ${column.id}`}
-                style={{ width: '100%' }}
-                value={filter ? filter.value : ''}
-                onChange={(event) => onChange(event.target.value)}
-              />
-            );
-          }}
-          getTdProps={(state, rowInfo, column) => {
-            try {
-              const v = rowInfo.original[column.id];
-              const props = {} as any;
-              if (v === true) props.className = 'td-icon green';
-              if (v === false) props.className = 'td-icon red';
-              return props;
-            } catch (e) { /** */}
-            return {};
-          }}
-          onFilteredChange={(filtered) => {
-            this.setState({
-              filtered: filtered.reduce((p, c) => {
-                let exp: string | RegExp = String(c.value);
-                try {
-                  exp = new RegExp(`(${exp})`, 'gi');
-                } catch (e) { /** */ }
-                p[c.id] = exp;
-                return p;
-              }, {}),
-            });
-          }}
-          defaultFilterMethod={(filter, row) => {
-            let exp: string | RegExp = String(filter.value);
-            try {
-              exp = new RegExp(`(${exp})`, 'gi');
-              return exp.test(String(row[filter.id]));
-            } catch (e) {
-              return String(row[filter.id]) === exp;
-            }
-          }}
-          className='-striped'
-          style={{
-            height: '98%',
-          }}
-        />
-      </div>
+      <ReactTable
+        // tslint:disable-next-line:quotemark
+        noDataText="Query didn't return any results."
+        data={this.props.value.data}
+        columns={cols}
+        filterable
+        FilterComponent={({ filter, column, onChange }) => {
+          return (
+            <input
+              type='text'
+              placeholder={`Filter by ${column.id}`}
+              style={{ width: '100%' }}
+              value={filter ? filter.value : ''}
+              onChange={(event) => onChange(event.target.value)}
+            />
+          );
+        }}
+        getTdProps={(state, rowInfo, column) => {
+          try {
+            const v = rowInfo.original[column.id];
+            const props = {} as any;
+            if (v === true) props.className = 'td-icon green';
+            if (v === false) props.className = 'td-icon red';
+            return props;
+          } catch (e) { /** */}
+          return {};
+        }}
+        onFilteredChange={(filtered) => {
+          this.setState({
+            filtered: filtered.reduce((p, c) => {
+              let exp: string | RegExp = String(c.value);
+              try {
+                exp = new RegExp(`(${exp})`, 'gi');
+              } catch (e) { /** */ }
+              p[c.id] = exp;
+              return p;
+            }, {}),
+          });
+        }}
+        defaultFilterMethod={(filter, row) => {
+          let exp: string | RegExp = String(filter.value);
+          try {
+            exp = new RegExp(`(${exp})`, 'gi');
+            return exp.test(String(row[filter.id]));
+          } catch (e) {
+            return String(row[filter.id]) === exp;
+          }
+        }}
+        className='-striped'
+      />
     );
   }
 }
 interface QueryResultProps {
-  error: any;
   value: any;
   className?: string;
+  expandViewQuery: boolean;
+  expandMessages: boolean;
+  toggleQuery: () => void;
+  toggleMessages: () => void;
 }
-export class QueryResult extends React.Component<QueryResultProps, {}> {
+export class QueryResult extends React.Component<QueryResultProps> {
+  errorIcon = (
+    <div style={{ width: '50px', height: '50px', marginBottom: '30px' }} dangerouslySetInnerHTML={{
+      __html: `
+<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
+	 viewBox="0 0 426.667 426.667" style="enable-background:new 0 0 426.667 426.667; width: 100%; height: 100%;" xml:space="preserve">
+  <path style="fill:#F05228;" d="M213.333,0C95.514,0,0,95.514,0,213.333s95.514,213.333,213.333,213.333
+    s213.333-95.514,213.333-213.333S331.153,0,213.333,0z M330.995,276.689l-54.302,54.306l-63.36-63.356l-63.36,63.36l-54.302-54.31
+    l63.356-63.356l-63.356-63.36l54.302-54.302l63.36,63.356l63.36-63.356l54.302,54.302l-63.356,63.36L330.995,276.689z"/>
+</svg>
+` }}></div>
+  )
   render() {
-    let table: string | ReactNode = 'Query with errors. Please, check the error below.';
+    let table: string | ReactNode = (
+      <div style={{
+
+        flexGrow: 1,
+        textAlign: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+        display: 'flex',
+        justifyContent: 'center',
+      }}>
+        <div>
+          {this.errorIcon}
+        </div>
+        <div>Query with errors. Please, check the error below.</div>
+      </div>
+    );
     if (this.props.value.error !== true) {
       table = <ResultsTable value={{ cols: this.props.value.cols, data: this.props.value.results }} />;
     }
     return (
-      <div className={'result fix-height ' + this.props.className}>
-        {table}
+      <div className={'result'}>
+        <div className='results-table'>
+          {table}
+        </div>
         <div className='query-extras'>
-          <Query value={this.props.value.query} />
-          <Messages value={this.props.value.messages} error={this.props.value.error || false} />
+          <Query value={this.props.value.query} expanded={this.props.expandViewQuery} toggle={this.props.toggleQuery}/>
+          <Messages value={this.props.value.messages} error={this.props.value.error || false} expanded={this.props.value.error || this.props.expandMessages} toggle={this.props.toggleMessages}/>
         </div>
       </div>
     );
@@ -214,12 +242,14 @@ interface QueryResultsState {
   resultMap: {
     [query: string]: DatabaseInterface.QueryResults;
   };
+  expandViewQuery: boolean;
+  expandMessages: boolean;
 }
 
 export default class QueryResults extends React.Component<{}, QueryResultsState> {
   constructor(props) {
     super(props);
-    this.state = { isLoaded: false, resultMap: {}, queries: [] };
+    this.state = { isLoaded: false, resultMap: {}, queries: [], expandViewQuery: false, expandMessages: false };
     window.addEventListener('message', (ev) => {
       return this.messagesHandler(ev.data as WebviewMessageType);
     });
@@ -253,6 +283,18 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
     }
   }
 
+  toggleQuery = () => {
+    this.setState({
+      expandViewQuery: !this.state.expandViewQuery
+    });
+  }
+
+  toggleMessages = () => {
+    this.setState({
+      expandMessages: !this.state.expandMessages
+    });
+  }
+
   render() {
     if (!this.state.isLoaded) {
       return <h2>loading...</h2>;
@@ -281,15 +323,24 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
         <QueryResult
           value={res}
           key={query}
-          error={res.error}
-          className={this.state.activeTab === query ? 'active' : ''}
+          expandViewQuery={this.state.expandViewQuery}
+          toggleQuery={this.toggleQuery}
+          expandMessages={this.state.expandMessages}
+          toggleMessages={this.toggleMessages}
         />
       );
     });
     return (
-      <div className='fix-height'>
+      <div className='query-results-container fullscreen-container'>
         <ul className='tabs'>{tabs}</ul>
-        <div className='results'>{results}</div>
+        <QueryResult
+          value={this.state.resultMap[this.state.activeTab]}
+          key={this.state.activeTab}
+          expandViewQuery={this.state.expandViewQuery}
+          toggleQuery={this.toggleQuery}
+          expandMessages={this.state.expandMessages}
+          toggleMessages={this.toggleMessages}
+        />
       </div>
     );
   }

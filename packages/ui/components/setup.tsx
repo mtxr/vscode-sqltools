@@ -383,7 +383,7 @@ export default class Setup extends React.Component<{}, SetupState> {
       .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
       .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
     return (
-      <div className='fix-height'>
+      <div className='fullscreen-container'>
         <form onSubmit={this.handleSubmit} className='container'>
           <div className='row'>
             <div className='col-12'>

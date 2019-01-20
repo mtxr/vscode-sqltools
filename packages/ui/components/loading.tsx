@@ -8,7 +8,7 @@ export default class Loading extends React.Component<Props> {
   render() {
     return (
       <div className={this.props.toggle ? 'loading' : ''}>
-        <div className='fix-height backdrop'>
+        <div className='fullscreen-container backdrop'>
           <div className='spinner'></div>
         </div>
       </div>

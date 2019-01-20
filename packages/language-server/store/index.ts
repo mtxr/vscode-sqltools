@@ -51,6 +51,4 @@ function connectionsReducer(state = initialState, action) {
 
 const store = createStore(connectionsReducer);
 
-store.subscribe(() => console.log('State =>> ', store.getState()));
-
 export default store;

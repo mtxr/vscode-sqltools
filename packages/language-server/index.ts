@@ -10,14 +10,13 @@ import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
 import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
 import {
-  UpdateTableAndColumnsRequest,
-  GetConnectionListRequest,
+  UpdateConnectionExplorerRequest,
+  ClientRequestConnections,
   OpenConnectionRequest,
-  RefreshDataRequest,
+  RefreshConnectionData,
   GetTablesAndColumnsRequest,
   RunCommandRequest,
   CloseConnectionRequest,
-  QueryResults
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
@@ -77,7 +76,7 @@ namespace SQLToolsLanguageServer {
   }
 
   function updateSidebar(conn, tables, columns) {
-    server.client.connection.sendRequest(UpdateTableAndColumnsRequest.method, { conn, tables, columns }).then(console.log, console.error);
+    return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
   }
 
   /* server events */
@@ -143,7 +142,7 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
-  server.onRequest(GetConnectionListRequest.method, () => {
+  server.onRequest(ClientRequestConnections.method, () => {
     return sgdbConnections.map((c) => c.serialize());
   });
 
@@ -174,11 +173,9 @@ namespace SQLToolsLanguageServer {
     store.dispatch(actions.Disconnect(c));
   });
 
-  server.onRequest(RefreshDataRequest.method, () => {
+  server.onRequest(RefreshConnectionData, async () => {
     const activeConnections = store.getState().activeConnections;
-    Object.keys(activeConnections).forEach(c => {
-      loadConnectionData(activeConnections[c]);
-    });
+    await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
   });
 
   server.onRequest(GetTablesAndColumnsRequest.method, async () => {
@@ -188,7 +185,7 @@ namespace SQLToolsLanguageServer {
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   });
 
-  server.onRequest(RunCommandRequest.method, async (req: {
+  server.onRequest(RunCommandRequest, async (req: {
     conn: SerializedConnection,
     command: string,
     args: any[],
@@ -200,8 +197,7 @@ namespace SQLToolsLanguageServer {
       results.forEach((r) => {
         store.dispatch(actions.QuerySuccess(c, r.query, r));
       });
-      server.sendRequest(QueryResults.method, results);
-      return true;
+      return results;
     } catch (e) {
       notifyError('Execute query error', e);
       throw e;

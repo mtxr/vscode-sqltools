@@ -4,7 +4,7 @@
       "name": "PGSQL",
       "server": "127.0.0.1",
       "dialect": "PostgreSQL",
-      "port": 5432,
+      "port": 5433,
       "database": "test_db",
       "username": "root",
       "askForPassword": false,

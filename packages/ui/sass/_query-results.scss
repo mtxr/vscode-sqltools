@@ -6,10 +6,16 @@ body {
   font-family: $fontFamily;
   color: $color;
   background: $backgroundColor;
+  @include full-screen();
 }
 pre {
   margin: 0;
   padding: 4px;
+}
+
+.query-results-container {
+  display: flex;
+  flex-direction: column
 }
 
 body,
@@ -27,34 +33,23 @@ body, #root {
   height: 100%;
 }
 
-.results {
-  position: absolute;
-  top: $tabsHeight;
-  bottom: 0;
-  left: 0;
-  right: 0;
+.result {
   overflow: hidden;
-}
-
-.results .result {
-  display: none;
-  position: relative;
+  display: flex;
+  flex-grow: 1;
+  min-height: 0;
+  flex-direction: column;
+  background: $lightThemeGray1 !important;
   .results-table {
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 60px;
+    flex-grow: 1;
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
   }
   .query-extras {
     width: 100%;
     background-color: $backgroundColor;
-    position: absolute;
-    bottom: 0px;
-  }
-
-  &.active {
-    display: block;
+    flex-grow: 0;
   }
 }
 
@@ -100,12 +95,14 @@ body, #root {
   padding: 0;
   margin: 0;
   clear: both;
-  height: $tabsHeight;
+  min-height: $tabsHeight;
+  max-height: $tabsHeight;
   border-bottom-width: 1px;
   border-bottom-style: solid;
   display: flex;
   overflow-x: auto;
   overflow-y: hidden;
+  flex-grow: 0;
 
   &::-webkit-scrollbar {
     height: 2px;
@@ -167,15 +164,11 @@ body, #root {
   }
 
   .collapsible {
-    display: none;
     max-height: 100px;
     width: 100%;
   }
 
   &.open {
-    .collapsible {
-      display: block;
-    }
     .collapse-toggle .icon {
       background-image: url($collapseLight) !important;
     }
@@ -204,9 +197,6 @@ body, #root {
     }
   }
 }
-.results .result.active {
-  background: $lightThemeGray1 !important;
-}
 
 body.vscode-dark {
   .ReactTable .rt-thead.-filters input,
@@ -226,11 +216,17 @@ body.vscode-dark {
       }
     }
   }
-  .results .result.active {
+  .result {
     background: $darkThemeWhite1 !important;
   }
 
   .ReactTable {
+    display: flex;
+    max-height: 100%;
+    overflow: hidden;
+    width: 100vw;
+    flex-direction: column;
+
     &.-striped .rt-tr.-odd {
       background: rgba(255, 255, 255, 0.03);
     }
@@ -268,9 +264,6 @@ body.vscode-dark {
     }
 
     &.open {
-      .collapsible {
-        display: block;
-      }
       .collapse-toggle .icon {
         background-image: url($collapseDark) !important;
       }

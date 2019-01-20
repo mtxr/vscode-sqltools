@@ -15,7 +15,7 @@ export default abstract class WebviewProvider implements Disposable {
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>SQLTools Setup Helper</title>
+  <title>${this.title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
 </head>
 <body>
@@ -42,6 +42,7 @@ export default abstract class WebviewProvider implements Disposable {
           enableScripts: true,
           retainContextWhenHidden: true,
           enableCommandUris: true,
+          localResourceRoots: [ContextManager.iconsPath, ContextManager.viewsPath],
         },
       );
       this.panel.onDidDispose(this.dispose.bind(this));

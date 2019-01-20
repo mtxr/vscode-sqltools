@@ -1,23 +1,19 @@
 import { RequestType, RequestType0 } from 'vscode-languageserver';
 import { DatabaseInterface, SerializedConnection } from '../interface';
 
-export const GetConnectionListRequest = new RequestType0
+export const ClientRequestConnections = new RequestType0
   <SerializedConnection[], Error, void>('connection/getConnections');
-
-export const RefreshDataRequest = new RequestType0
-  <boolean, Error, void>('connection/refreshData');
+export const RefreshConnectionData = new RequestType0
+  <void, Error, void>('connection/refreshData');
 export const RunCommandRequest = new RequestType
-  <{ conn: SerializedConnection, command: string }, boolean, Error, void>('connection/runCommand');
+  <{ conn: SerializedConnection, command: string, args: any[] }, DatabaseInterface.QueryResults[] | boolean, Error, void>('connection/runCommand');
 export const OpenConnectionRequest = new RequestType
   <{ conn: SerializedConnection, password?: string }, SerializedConnection, Error, void>('connection/openConnection');
-export const CloseConnectionRequest = new RequestType0
-  <{ conn: SerializedConnection }, Error, void>('connection/closeConnection');
-export const UpdateTableAndColumnsRequest = new RequestType
-  <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
+export const CloseConnectionRequest = new RequestType
+  <{ conn: SerializedConnection }, void, Error, void>('connection/closeConnection');
+export const UpdateConnectionExplorerRequest = new RequestType
+  <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, void, Error, void>
   ('connection/updateTableAndColumns');
 export const GetTablesAndColumnsRequest = new RequestType
   <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
   ('connection/getTableAndColumns');
-export const QueryResults = new RequestType0
-  <DatabaseInterface.QueryResults[], Error, void>
-  ('connection/queryResults');

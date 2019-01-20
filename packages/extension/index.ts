@@ -25,13 +25,12 @@ import { DISPLAY_NAME, VERSION } from '@sqltools/core/constants';
 import ContextManager from './context';
 
 import {
-  GetConnectionListRequest,
+  ClientRequestConnections,
   GetTablesAndColumnsRequest,
   OpenConnectionRequest,
-  RefreshDataRequest,
+  RefreshConnectionData,
   RunCommandRequest,
-  UpdateTableAndColumnsRequest,
-  QueryResults,
+  UpdateConnectionExplorerRequest,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
@@ -48,6 +47,7 @@ import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, DatabaseInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
+import { any } from 'prop-types';
 
 namespace SQLTools {
   const cfgKey: string = DISPLAY_NAME.toLowerCase();
@@ -149,7 +149,7 @@ namespace SQLTools {
 
   export function cmdCloseConnection(): void {
     setConnection(null)
-      .then(() => languageClient.sendRequest(RefreshDataRequest.method))
+      .then(() => languageClient.sendRequest(RefreshConnectionData))
       .catch(ErrorHandler.create('Error closing connection'));
   }
 
@@ -182,7 +182,7 @@ namespace SQLTools {
       const query: string = await getSelectedText('execute query');
       await connect();
       printOutput();
-      runQuery(query);
+      await runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
     }
@@ -193,7 +193,7 @@ namespace SQLTools {
       const query: string = await getSelectedText('execute file', true);
       await connect();
       printOutput();
-      runQuery(query);
+      await runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error fetching records.', cmdShowOutputChannel)(e);
     }
@@ -209,7 +209,7 @@ namespace SQLTools {
       await connect();
       const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
       printOutput();
-      runQuery(query);
+      await runQuery(query);
     } catch (e) {
       ErrorHandler.create('Error running query.', cmdShowOutputChannel)(e);
     }
@@ -219,7 +219,7 @@ namespace SQLTools {
     try {
       await connect();
       await printOutput();
-      runQuery(await historyMenu(), false);
+      await runQuery(await historyMenu(), false);
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
     }
@@ -229,7 +229,7 @@ namespace SQLTools {
     try {
       await connect();
       printOutput();
-      runQuery(await bookmarksMenu('detail'));
+      await runQuery(await bookmarksMenu('detail'));
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
     }
@@ -240,7 +240,7 @@ namespace SQLTools {
   }
 
   export function cmdRefreshSidebar() {
-    languageClient.sendRequest(RefreshDataRequest.method);
+    languageClient.sendRequest(RefreshConnectionData);
   }
 
   /**
@@ -248,7 +248,7 @@ namespace SQLTools {
    */
 
   async function connectionMenu(): Promise<SerializedConnection> {
-    const connections: SerializedConnection[] = await languageClient.sendRequest(GetConnectionListRequest.method);
+    const connections: SerializedConnection[] = await languageClient.sendRequest(ClientRequestConnections);
 
     const sel = (await quickPick(connections.map((c) => {
       return {
@@ -273,17 +273,14 @@ namespace SQLTools {
   }
 
   function runConnectionCommand(command, ...args) {
-    return languageClient.sendRequest(RunCommandRequest.method, { conn: lastUsedConn, command, args });
+    return languageClient.sendRequest(RunCommandRequest, { conn: lastUsedConn, command, args });
   }
 
   async function runQuery(query, addHistory = true) {
-    const res = await languageClient.sendRequest(RunCommandRequest.method, {
-      conn: lastUsedConn,
-      command: 'query',
-      args: [query],
-    });
+    const payload = await runConnectionCommand('query', query);
+
     if (addHistory) history.add(query);
-    return res;
+    queryResults.postMessage({ action: 'queryResults', payload });
   }
 
   async function tableMenu(prop?: string): Promise<string> {
@@ -392,11 +389,8 @@ namespace SQLTools {
 
   async function registerLanguageServerRequests() {
     languageClient.onReady().then(() => {
-      languageClient.onRequest(UpdateTableAndColumnsRequest.method, ({ conn, tables, columns }) => {
+      languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns);
-      });
-      languageClient.onRequest(QueryResults.method, (payload) => {
-        queryResults.postMessage({action: 'queryResults', payload });
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
