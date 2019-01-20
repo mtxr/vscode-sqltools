@@ -2,6 +2,7 @@ import React, { ReactNode } from 'react';
 import ReactTable from 'react-table';
 import { DatabaseInterface } from '@sqltools/core/interface';
 import { WebviewMessageType } from 'lib/interfaces';
+import Loading from './loading';
 
 interface QueryProps {
   value: string;
@@ -297,7 +298,7 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
 
   render() {
     if (!this.state.isLoaded) {
-      return <h2>loading...</h2>;
+      return <Loading toggle={true}/>;
     } else if (this.state.isLoaded && this.state.error) {
       return (
         <div>
