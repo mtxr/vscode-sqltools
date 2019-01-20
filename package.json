@@ -24,6 +24,7 @@
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
-    "package:preview": "yarn run compile:preview && (cd dist && npm i && vsce package)"
+    "package:preview": "yarn run compile:preview && (cd dist && npm i && vsce package && mv *.vsix ../.)",
+    "package": "yarn run compile && (cd dist && npm i && vsce package && mv *.vsix ../.)"
    }
 }

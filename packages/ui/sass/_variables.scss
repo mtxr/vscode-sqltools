@@ -68,6 +68,9 @@ input, select {
   }
 }
 
+.fullscreen-container {
+  @include full-screen();
+}
 
 .capitalize {
   text-transform: capitalize;
@@ -114,6 +117,16 @@ input, select {
     color: $darkThemeWhite16;
   }
 }
+.backdrop {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: $darkThemeWhite10;
+    overflow: hidden;
+    display: none;
+}
 
 .loading {
   @include full-screen();
@@ -125,13 +138,7 @@ input, select {
   display: block;
 
   .backdrop {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background: $darkThemeWhite10;
-    overflow: hidden;
+    display: block;
   }
 
   div.spinner,
@@ -177,11 +184,6 @@ input, select {
     transform: rotate(360deg);
   }
 }
-
-.fullscreen-container {
-  @include full-screen();
-}
-
 
 .no-margin { margin: 0 !important; }
 .no-margin-top { margin-top: 0 !important; }
