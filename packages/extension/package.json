@@ -22,10 +22,21 @@
         "Other"
     ],
     "keywords": [
-        "SQLTools",
-        "SQL",
+        "database",
+        "db",
+        "dba",
+        "formatter",
+        "mssql",
+        "mysql",
+        "oracle",
+        "postgres",
+        "postgresql",
         "sgdb",
-        "formatter"
+        "sql server",
+        "sql",
+        "sqlite",
+        "sqlplus",
+        "sqltools"
     ],
     "galleryBanner": {
         "theme": "dark",
