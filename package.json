@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools",
   "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-  "version": "0.16.1",
+  "version": "0.16.2",
   "publisher": "mtxr",
   "license": "GPL-3.0",
   "main": "dist/extension.js",

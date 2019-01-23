@@ -278,6 +278,9 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
           activeTab: queries[0],
         });
         break;
+      case 'reset':
+        this.setState({ isLoaded: false, resultMap: {}, queries: [], expandViewQuery: false, expandMessages: false });
+        break;
 
       default:
         break;

@@ -157,7 +157,9 @@ namespace SQLTools {
     try {
       const table = await getTableName(node);
       printOutput();
-      await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
+      const payload = await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
+      queryResults.postMessage({ action: 'queryResults', payload });
+
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
     }
@@ -167,7 +169,8 @@ namespace SQLTools {
     try {
       const table = await getTableName(node);
       printOutput();
-      await runConnectionCommand('describeTable', table);
+      const payload = await runConnectionCommand('describeTable', table);
+      queryResults.postMessage({ action: 'queryResults', payload });
     } catch (e) {
       ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
     }
@@ -302,6 +305,7 @@ namespace SQLTools {
 
   function printOutput() {
     queryResults.show();
+    queryResults.postMessage({ action: 'reset' });
   }
 
   async function getConnData() {
