@@ -17,8 +17,7 @@ namespace Utils {
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),
-        // tslint:disable-next-line:max-line-length
-        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/static/release-notes/${VERSION.replace(/\.([\da-z\-_]+)$/, '.x')}.md`,
+        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md#${VERSION.replace(/\./, '')}`,
         run: new Date().getTime(),
         updated: false,
         version: VERSION,

@@ -17,6 +17,7 @@ import {
   GetTablesAndColumnsRequest,
   RunCommandRequest,
   CloseConnectionRequest,
+  GetCachedPassword,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
@@ -142,12 +143,12 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
-  server.onRequest(ClientRequestConnections.method, () => {
+  server.onRequest(ClientRequestConnections, () => {
     return sgdbConnections.map((c) => c.serialize());
   });
 
   server.onRequest(
-    OpenConnectionRequest.method,
+    OpenConnectionRequest,
     async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
     if (!req.conn) {
       return undefined;
@@ -158,6 +159,19 @@ namespace SQLToolsLanguageServer {
     if (await c.connect().catch(notifyError('Connection Error'))) {
       await loadConnectionData(c);
       return c.serialize();
+    }
+    return null;
+  });
+
+  server.onRequest(
+    GetCachedPassword,
+    async (req: { conn: SerializedConnection }): Promise<string> => {
+    if (!req.conn) {
+      return undefined;
+    }
+    const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
+    if (c && store.getState().activeConnections[c.getId()]) {
+      return store.getState().activeConnections[c.getId()].getPassword();
     }
     return null;
   });
@@ -178,7 +192,7 @@ namespace SQLToolsLanguageServer {
     await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
   });
 
-  server.onRequest(GetTablesAndColumnsRequest.method, async () => {
+  server.onRequest(GetTablesAndColumnsRequest, async () => {
     const activeConnections = store.getState().activeConnections;
     if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
     const c = activeConnections[Object.keys(activeConnections)[0]];

@@ -2,6 +2,15 @@
 
 ## v0.16
 
+### v0.16.3
+
+- Show records and describe tables when using multiple connections. #119
+- Avoid asking password for already open connection
+
+### v0.16.2
+
+- Minor fix. Show records infinity loop.
+
 ### v0.16.0 and v0.16.1
 
 See [v0.16.x](https://github.com/mtxr/vscode-sqltools/blob/master/static/release-notes/v0.16.x.md)

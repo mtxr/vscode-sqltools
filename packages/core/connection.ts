@@ -34,6 +34,9 @@ export default class Connection {
     this.conn.credentials.password = password;
   }
 
+  public getPassword() {
+    return this.conn.credentials.password;
+  }
   public isConnected() {
     return this.connected;
   }

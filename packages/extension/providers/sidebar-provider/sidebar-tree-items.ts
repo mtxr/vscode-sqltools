@@ -48,7 +48,7 @@ export class SidebarConnection extends TreeItem {
 
   public addItem(item) {
     const key = item.isView ? 'views' : 'tables';
-    this[key].addItem(item.isView ? new SidebarView(item) : new SidebarTable(item));
+    this[key].addItem(item.isView ? new SidebarView(item, this.conn) : new SidebarTable(item, this.conn));
     this.collapsibleState = TreeItemCollapsibleState.Expanded;
   }
 
@@ -60,10 +60,15 @@ export class SidebarConnection extends TreeItem {
 
   public activate() {
     this.isActive = true;
+    this.expand();
   }
 
   public deactivate() {
     this.isActive = false;
+  }
+
+  public expand() {
+    this.collapsibleState = TreeItemCollapsibleState.Expanded;
   }
 }
 
@@ -95,7 +100,7 @@ export class SidebarTable extends TreeItem {
   public value: string;
 
   public items: SidebarColumn[] = [];
-  constructor(table: DatabaseInterface.Table) {
+  constructor(public table: DatabaseInterface.Table, public conn: ConnectionCredentials) {
     super(table.name, (
       ConfigManager.get('tableTreeItemsExpanded', true)
         ? TreeItemCollapsibleState.Expanded
@@ -121,7 +126,7 @@ export class SidebarColumn extends TreeItem {
   public contextValue = 'connection.column';
   public value: string;
 
-  constructor(public column: DatabaseInterface.TableColumn) {
+  constructor(public column: DatabaseInterface.TableColumn, public conn: ConnectionCredentials) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
     let typeSize = '';

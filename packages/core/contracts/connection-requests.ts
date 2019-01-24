@@ -5,6 +5,8 @@ export const ClientRequestConnections = new RequestType0
   <SerializedConnection[], Error, void>('connection/getConnections');
 export const RefreshConnectionData = new RequestType0
   <void, Error, void>('connection/refreshData');
+export const GetCachedPassword = new RequestType
+  <{ conn: SerializedConnection }, string, Error, void>('connection/getCachedPassword');
 export const RunCommandRequest = new RequestType
   <{ conn: SerializedConnection, command: string, args: any[] }, DatabaseInterface.QueryResults[] | boolean, Error, void>('connection/runCommand');
 export const OpenConnectionRequest = new RequestType
@@ -14,6 +16,6 @@ export const CloseConnectionRequest = new RequestType
 export const UpdateConnectionExplorerRequest = new RequestType
   <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, void, Error, void>
   ('connection/updateTableAndColumns');
-export const GetTablesAndColumnsRequest = new RequestType
-  <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, boolean, Error, void>
+export const GetTablesAndColumnsRequest = new RequestType0
+  <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, Error, void>
   ('connection/getTableAndColumns');

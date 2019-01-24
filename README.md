@@ -63,6 +63,7 @@ Our donators:
 - Alexander Krylkov
 - Oleksandr Akhtyrskiy
 - Justin Webber
+- Alejandro Dunogent
 
 > Want to donate? [Click here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8).
 

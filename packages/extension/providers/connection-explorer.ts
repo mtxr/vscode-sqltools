@@ -79,7 +79,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     });
     columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
       const key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
-      this.tree[treeKey][key].items[column.tableName].addItem(new SidebarColumn(column));
+      this.tree[treeKey][key].items[column.tableName].addItem(new SidebarColumn(column, conn));
     });
     this.refresh();
   }

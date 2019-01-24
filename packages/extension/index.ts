@@ -31,6 +31,7 @@ import {
   RefreshConnectionData,
   RunCommandRequest,
   UpdateConnectionExplorerRequest,
+  GetCachedPassword,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
@@ -410,6 +411,7 @@ namespace SQLTools {
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
     let password = null;
     if (c && c.askForPassword) password = await askForPassword(c);
+    if (c.askForPassword && password === null) return;
     lastUsedConn = c;
     connectionExplorer.setActiveConnection(lastUsedConn);
     updateStatusBar();
@@ -421,12 +423,12 @@ namespace SQLTools {
   }
 
   async function askForPassword(c: SerializedConnection): Promise<string | null> {
-    const password = await Win.showInputBox({
+    const cachedPass = await languageClient.sendRequest(GetCachedPassword, { conn: c });
+    return cachedPass || await Win.showInputBox({
       prompt: `${c.name} password`,
       password: true,
       validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
     });
-    return password;
   }
   async function connect(force = false): Promise<SerializedConnection> {
     if (!force && lastUsedConn) {
@@ -565,6 +567,7 @@ namespace SQLTools {
 
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
+      await setConnection(node.conn as SerializedConnection);
       return node.value;
     }
     return await tableMenu('label');
