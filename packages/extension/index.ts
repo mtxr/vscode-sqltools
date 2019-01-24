@@ -319,10 +319,8 @@ namespace SQLTools {
   function autoConnectIfActive(currConn?: SerializedConnection) {
     let defaultConnection = currConn || null;
     if (!defaultConnection && ConfigManager.autoConnectTo) {
-      defaultConnection = {
-        name: ConfigManager.connections
-          .find((conn) => conn.name === ConfigManager.autoConnectTo).name,
-      } as SerializedConnection;
+      defaultConnection = ConfigManager.connections
+        .find((conn) => conn.name === ConfigManager.autoConnectTo) as SerializedConnection;
     }
     if (!defaultConnection) {
       return setConnection();
