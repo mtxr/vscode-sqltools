@@ -5,26 +5,27 @@
   "version": "0.16.3",
   "publisher": "mtxr",
   "license": "GPL-3.0",
-  "main": "dist/extension.js",
+  "main": "../dist/extension.js",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"
   },
   "engines": {
-    "vscode": "^1.28.0"
+    "vscode": "^1.30.0"
   },
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "clean": "rm -rf dist &> /dev/null",
+    "clean": "rm -rf ../dist &> /dev/null",
     "precompile": "yarn run clean",
-    "prewatch": "yarn run clean",
+    "prewatch": "yarn run clean && mkdir -p ../dist && cp -R node_modules ../dist/. && rm -rf ../dist/node_modules/@sqltools",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
-    "package:preview": "yarn run compile:preview && (cd dist && npm i && vsce package)",
-    "package": "yarn run compile && (cd dist && npm i && vsce package)"
-   }
+    "package:preview": "yarn run compile:preview && (cd ../dist && npm i && vsce package)",
+    "package": "yarn run compile && (cd ../dist && npm i && vsce package)",
+    "publish": "yarn run package && (cd ../dist && vsce publish)"
+  }
 }

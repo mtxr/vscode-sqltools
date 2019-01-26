@@ -1,5 +1,3 @@
-import * as oracledb from 'oracledb';
-
 import {
   ConnectionCredentials,
   ConnectionDialect,
@@ -7,10 +5,11 @@ import {
   DialectQueries,
 } from './../interface';
 import * as Utils from '../utils';
+import USQL from '../utils/usql';
 
 export default class OracleDB implements ConnectionDialect {
-  public connection: oracledb.IConnection;
-  private pool: oracledb.IConnectionPool;
+  public connection: Promise<any>;
+  private connectString: string;
   private queries: DialectQueries = {
     describeTable: `select * from all_tab_columns
       where table_name = ':table'
@@ -54,57 +53,28 @@ export default class OracleDB implements ConnectionDialect {
     where owner not like '%SYS%'`,
   } as DialectQueries;
   constructor(public credentials: ConnectionCredentials) {
+    this.connectString = `oracle://${this.credentials.username}:${this.credentials.password}@${this.credentials.server}:${this.credentials.port}/${this.credentials.database}`;
 
   }
 
-  public async open() {
-    if (this.connection) {
-      return this.connection;
-    }
-    // oracleConnectString = host_name + ":" + port + "/" + service_name;
-    const connectString = (this.credentials.server && this.credentials.port) ?
-      `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}` :
-      this.credentials.database;
-
-    const options = {
-      connectString,
-      password: this.credentials.password,
-      user: this.credentials.username,
-    };
-    this.pool = await oracledb.createPool(options);
-    this.connection = await this.pool.getConnection();
+  public open() {
+    this.connection = this.connection || USQL.checkAndInstall()
+      .then(() => Promise.resolve(true));
     return this.connection;
   }
 
-  public async close() {
-    if (!this.connection) return Promise.resolve();
-
-    const closed = await this.connection.close();
-    await this.pool.close();
-    this.connection = null;
-    return closed;
+  public close() {
+    return Promise.resolve();
   }
 
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
-    return this.open()
-      .then(async (conn) => await conn.execute(query, [], {outFormat: oracledb.OBJECT}))
-      .then((results: any[] | any) => {
-        const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g);
-        const messages = [];
-        results = [ results ];
-
-        return results.map((r, i) => {
-          if (r.rowsAffected) {
-            messages.push(`${r.rowsAffected} rows were affected.`);
-          }
-          return {
-            cols: (r.rows && r.rows.length) > 0 ? Object.keys(r.rows[0]) : [],
-            messages,
-            query: queries[i],
-            results: r.rows,
-          };
-        });
-      });
+    await this.open()
+    const results = await USQL.runQuery({ query, connectString: this.connectString });
+    const queries = Utils.query.parse(query).filter(Boolean);
+    return queries.map((query: any, index: number) => {
+      const res = JSON.parse(results[index] || '{}');
+      return this.prepareResults(query, res.cols, res.values, res.count);
+    });
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
@@ -155,5 +125,18 @@ export default class OracleDB implements ConnectionDialect {
 
   public showRecords(table: string, limit: number = 10) {
     return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
+  }
+
+  private prepareResults(query: string, cols: string[] = [], rowsValues: any[][] = [], count = 0): DatabaseInterface.QueryResults {
+    return {
+      query,
+      cols,
+      results: rowsValues.map(v => this.prepareRow(cols, v)),
+      messages: [`${count} rows`]
+    }
+  }
+
+  private prepareRow(cols: string[], results: any[]) {
+    return cols.reduce((agg, c, i) => ({ ...agg, [c]: results[i] }), {});
   }
 }

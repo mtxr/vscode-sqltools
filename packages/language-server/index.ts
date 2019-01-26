@@ -7,6 +7,7 @@ import {
 import Formatter from './requests/format';
 import * as Utils from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
+import USQL from '@sqltools/core/utils/usql';
 import ConfigManager from '@sqltools/core/config-manager';
 import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
 import {
@@ -24,10 +25,10 @@ import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interfac
 import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
+import Logger from '@sqltools/core/utils/logger';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
-  let Logger = console;
   const docManager: TextDocuments = new TextDocuments();
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
@@ -97,6 +98,8 @@ namespace SQLToolsLanguageServer {
   server.onInitialized(async () => {
     server.sendNotification(Notification.LanguageServerReady, { });
   });
+
+  server.onNotification('setExtData', USQL.setExtensionData);
 
   server.onDidChangeConfiguration(async (change) => {
     ConfigManager.setSettings(change.settings.sqltools);

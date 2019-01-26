@@ -7,7 +7,7 @@
     "target": "es6",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "outDir": "../../dist/core",
+    "outDir": "../../../dist/core",
     "sourceMap": true,
     "lib": ["es6"],
     "removeComments": true

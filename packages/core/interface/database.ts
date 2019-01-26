@@ -17,7 +17,7 @@ export namespace DatabaseInterface {
     columnName: string;
     type: string;
     size?: number;
-    tableSchema: string;
+    tableSchema?: string;
     tableDatabase?: string;
     tableCatalog?: string;
     defaultValue: string;

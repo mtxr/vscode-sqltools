@@ -9,29 +9,26 @@
             "port": 6009,
             "restart": true,
             "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/dist/*.js" ],
+            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
         },
         {
             "type": "node",
             "request": "attach",
             "name": "Attach Language Server",
-            "port": 6010,
+            "port": 6011,
             "restart": true,
             "sourceMaps": true,
-            "outFiles": [
-                "${workspaceRoot}/dist/*.js"
-            ],
+            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
         },
         {
             "name": "Launch Extension",
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}/dist", "-p"],
+            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}/../dist", "-p"],
             "stopOnEntry": false,
             "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/dist/*.js" ],
-            // "preLaunchTask": "compile",
+            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
             "env": { "NODE_ENV": "development" },
         },
         {
@@ -39,11 +36,11 @@
             "type": "extensionHost",
             "request": "launch",
             "runtimeExecutable": "${execPath}",
-            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}/dist", "-p"],
+            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}/../dist", "-p"],
             "stopOnEntry": false,
             "sourceMaps": true,
             "env": { "NODE_ENV": "development" },
-            "outFiles": [ "${workspaceRoot}/dist/*.js" ],
+            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
         },
 
         {
@@ -52,7 +49,6 @@
             "name": "Run Client Tests",
             "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
             "cwd": "${workspaceRoot}/.test-database/.",
-            // "preLaunchTask": "compile",
             "env": { "NODE_ENV": "development" },
             "args": [
                 "--i",

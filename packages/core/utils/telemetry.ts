@@ -5,6 +5,7 @@ import { get, set } from './persistence';
 import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
 import Timer from './timer';
 import bugsnag from 'bugsnag';
+import Logger from './logger';
 
 const bugsnagOpts = {
   appVersion: VERSION,
@@ -20,7 +21,7 @@ type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
 namespace Telemetry {
   let isEnabled: Boolean = true;
-  let logger: LoggerInterface = console;
+  let logger: LoggerInterface = Logger;
   let extensionUUID: string;
   let analytics: Analytics.Visitor;
 
@@ -68,7 +69,7 @@ namespace Telemetry {
     bugsnag.configure({ ...bugsnagOpts, autoNotify: false });
     logger.info('Telemetry disabled!');
   }
-  export function setLogger(useLogger: LoggerInterface = console) {
+  export function setLogger(useLogger: LoggerInterface = Logger) {
     logger = useLogger;
     bugsnag.configure({ ...bugsnagOpts, logger: logger as any }) ;
   }

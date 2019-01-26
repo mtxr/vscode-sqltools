@@ -1,6 +1,6 @@
 const path = require('path');
 
-const outdir = path.resolve(__dirname, '..', '..', 'dist');
+const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 module.exports = exports = function getWebviewConfig(env) {
   return {

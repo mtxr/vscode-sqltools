@@ -107,7 +107,11 @@ export class SidebarTable extends TreeItem {
         : TreeItemCollapsibleState.Collapsed
     ));
     this.value = table.name;
-    this.label = `${table.name} (${table.numberOfColumns} cols)`;
+    this.label = table.name;
+
+    if (typeof table.numberOfColumns !== 'undefined') {
+      this.label += ` (${table.numberOfColumns} cols)`;
+    }
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/table-dark.svg'),
       light: ContextManager.context.asAbsolutePath('icons/table-light.svg'),

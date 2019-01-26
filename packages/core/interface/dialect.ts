@@ -9,4 +9,5 @@ export enum DatabaseDialect {
   MSSQL,
   MySQL,
   PostgreSQL,
+  SQLite
 }
