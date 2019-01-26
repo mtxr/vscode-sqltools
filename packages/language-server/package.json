@@ -1,0 +1,18 @@
+{
+  "name": "@sqltools/language-server",
+  "version": "1.0.0",
+  "description": "SQLTools Language Server",
+  "main": "index.ts",
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "GPL-3.0",
+  "private": true,
+  "dependencies": {
+    "@sqltools/core": "*",
+    "redux": "^4.0.1",
+    "rxjs": "^6.3.3",
+    "vscode-languageserver": "^5.2.1"
+  },
+  "devDependencies": {
+    "typescript": "^3.1.6"
+  }
+}

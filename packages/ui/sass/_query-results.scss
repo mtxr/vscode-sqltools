@@ -1,0 +1,315 @@
+@import 'variables';
+@import './../../../node_modules/react-table/react-table';
+
+body {
+  font-size: $fontSize;
+  font-family: $fontFamily;
+  color: $color;
+  background: $backgroundColor;
+  @include full-screen();
+}
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
+.query-results-container {
+  display: flex;
+  flex-direction: column
+}
+
+body,
+html,
+#root {
+  padding: 0;
+  margin: 0;
+  height: 100%;
+  overflow-x: hidden;
+}
+
+body, #root {
+  min-height: 100%;
+  max-height: 100%;
+  height: 100%;
+}
+
+.result {
+  overflow: hidden;
+  display: flex;
+  flex-grow: 1;
+  min-height: 0;
+  flex-direction: column;
+  background: $lightThemeGray1 !important;
+  .results-table {
+    flex-grow: 1;
+    overflow: hidden;
+    min-height: 0;
+    display: flex;
+  }
+  .query-extras {
+    width: 100%;
+    background-color: $backgroundColor;
+    flex-grow: 0;
+  }
+}
+
+.truncate {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  overflow-x: auto;
+}
+
+.messages {
+  .message {
+    padding: 4px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: $lightThemeGray3;
+
+    &:last-child {
+      border-bottom-color: transparent !important;
+    }
+    &.error {
+      background: rgba(255, 0, 0, 0.2)
+    }
+    &.success {
+      background: rgba(0, 255, 0, 0.4)
+    }
+  }
+  &.radius {
+    .message:first-child {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    .message:last-child {
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
+    }
+  }
+}
+
+.tabs {
+  width: 100%;
+  padding: 0;
+  margin: 0;
+  clear: both;
+  min-height: $tabsHeight;
+  max-height: $tabsHeight;
+  border-bottom-width: 1px;
+  border-bottom-style: solid;
+  display: flex;
+  overflow-x: auto;
+  overflow-y: hidden;
+  flex-grow: 0;
+
+  &::-webkit-scrollbar {
+    height: 2px;
+    transition: all 1s;
+  }
+  &::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  li {
+    overflow: hidden;
+    height: $tabsHeight;
+    line-height: $tabsHeight;
+    vertical-align: middle;
+    float: left;
+    padding: 0px 4px;
+    min-width: 100px;
+    list-style: none;
+    margin-right: 1px;
+    border-width: 1px;
+    border-style: solid;
+    border-bottom-width: 0px;
+    border-bottom-style: solid;
+    font-size: 0.8em;
+    cursor: pointer;
+    flex-grow: 1;
+  }
+}
+
+.collapse {
+  border-width: 1px;
+  border-style: solid;
+  border-bottom-width: 0;
+  border-left-width: 0;
+  border-right-width: 0;
+  border-color: $lightThemeGray3;
+  .collapse-toggle {
+    cursor: pointer;
+    background-color: $lightThemeGray2;
+    text-transform: uppercase;
+    height: $collapseHeight;
+    line-height: $collapseHeight;
+    vertical-align: middle;
+    padding: 0px 4px;
+    font-size: 0.7em;
+    cursor: pointer;
+
+    .icon {
+      padding: ($collapseHeight - $collapseIconSize) / 2;
+      display: block;
+      width: $collapseIconSize;
+      height: $collapseIconSize;
+      float: right;
+      background-image: url($collapseOpenLight) !important;
+      background-size: $collapseIconSize !important;
+      background-position: center center !important;
+      background-repeat: no-repeat !important;
+    }
+  }
+
+  .collapsible {
+    max-height: 100px;
+    width: 100%;
+  }
+
+  &.open {
+    .collapse-toggle .icon {
+      background-image: url($collapseLight) !important;
+    }
+  }
+}
+
+.ReactTable .rt-thead.-filters input,
+.ReactTable .rt-thead.-filters select,
+.ReactTable .-pagination input,
+.ReactTable .-pagination select {
+  border-radius: 0;
+  background: $lightThemeGray1;
+  border-color: $lightThemeGray2;
+}
+
+.tabs {
+  border-bottom-color: $lightThemeGray1 !important;
+  li {
+    border-color: $lightThemeGray1 !important;
+
+    &:hover, &.active {
+      background: $lightThemeGray1 !important;
+    }
+    &.active {
+      font-weight: bold;
+    }
+  }
+}
+
+body.vscode-dark {
+  .ReactTable .rt-thead.-filters input,
+  .ReactTable .rt-thead.-filters select,
+  .ReactTable .-pagination input,
+  .ReactTable .-pagination select {
+    background: $backgroundColor;
+    color: $color;
+    border-color: $darkThemeWhite2 !important;
+  }
+  .tabs {
+    border-bottom-color: $darkThemeWhite1 !important;
+    li {
+      border-color: $darkThemeWhite1 !important;
+      &:hover, &.active {
+        background: $darkThemeWhite1 !important;
+      }
+    }
+  }
+  .result {
+    background: $darkThemeWhite1 !important;
+  }
+
+  .ReactTable {
+    display: flex;
+    max-height: 100%;
+    overflow: hidden;
+    width: 100vw;
+    flex-direction: column;
+
+    &.-striped .rt-tr.-odd {
+      background: rgba(255, 255, 255, 0.03);
+    }
+    .-pagination .-btn {
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      appearance: none;
+      display: block;
+      width: 100%;
+      height: 100%;
+      border: 0;
+      border-radius: 0px;
+      padding: 6px;
+      font-size: 1em;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.1);
+      transition: all .1s ease;
+      cursor: pointer;
+      outline: none;
+    }
+  }
+
+  .collapse {
+    border-color: $darkThemeWhite3 !important;
+    color: $color;
+    .collapse-toggle {
+      background-color: $darkThemeWhite2 !important;
+      .icon {
+        background-image: url($collapseOpenDark) !important;
+      }
+    }
+
+    .collapsible {
+      color: $color;
+    }
+
+    &.open {
+      .collapse-toggle .icon {
+        background-image: url($collapseDark) !important;
+      }
+    }
+  }
+  .messages {
+    .message {
+      border-bottom-color: $darkThemeWhite3;
+
+      &:last-child {
+        border-bottom-color: transparent !important;
+      }
+    }
+  }
+}
+
+.filter-highlight {
+  border-radius: 2px;
+  color: #333;
+}
+div mark {
+  &:nth-child(even) {
+    background: cyan;
+  }
+  &:nth-child(odd) {
+    background: yellow;
+  }
+}
+
+.rt-td.td-icon.green:before, .rt-td.td-icon.red:before {
+  content: '\00a0 ';
+  opacity: .5;
+  border-radius: 50%;
+  height: $fontSize;
+  width: $fontSize;
+  display: inline-block;
+  margin-right: 3px;
+  margin-left: 2px;
+  line-height: $fontSize;
+}
+
+.rt-td.td-icon {
+  &.green:before {
+    background: green;
+  }
+  &.red:before {
+    background: red;
+  }
+}

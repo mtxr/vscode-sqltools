@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "jsx": "react",
+    "baseUrl": ".",
+    "module": "commonjs",
+    "target": "es6",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "outDir": "../dist/ui",
+    "sourceMap": true,
+    "lib": [
+      "es6", "dom"
+    ],
+    "removeComments": true
+  },
+}

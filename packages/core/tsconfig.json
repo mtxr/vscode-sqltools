@@ -1,0 +1,15 @@
+{
+  "compilerOptions": {
+    "noEmit": true,
+    "resolveJsonModule": true,
+    "baseUrl": ".",
+    "module": "commonjs",
+    "target": "es6",
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "outDir": "../../dist/core",
+    "sourceMap": true,
+    "lib": ["es6"],
+    "removeComments": true
+  }
+}

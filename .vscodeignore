@@ -16,8 +16,6 @@ coverage/**
 **/coverage/**
 __mocks__/**
 **/__mocks__/**
-CHANGELOG.md
-**/CHANGELOG.md
 *example*
 **/*example*
 *example*/**
@@ -26,6 +24,8 @@ static/**
 **/static/**
 .test-database/**
 **/.test-database/**
+packages/**
+**/packages/**
 package-lock.json
 **/package-lock.json
 jest.json
@@ -44,9 +44,11 @@ tslint.json
 **/.travis.yml
 *.md
 **/*.md
+*.vsix
+**/*.vsix
 
 # exceptions
 !static/icon.png
 !README.md
 !LICENSE.md
-.test-database
+!CHANGELOG.md
