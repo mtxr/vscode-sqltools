@@ -396,7 +396,8 @@
                                 "enum": [
                                     "MSSQL",
                                     "MySQL",
-                                    "PostgreSQL"
+                                    "PostgreSQL",
+                                    "SQLite"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false

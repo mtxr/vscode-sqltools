@@ -15,7 +15,7 @@ const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkg
 extPkgJson.name = 'sqltools'; // vscode marketplace name
 const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
 
-const outdir = path.resolve(__dirname, '..', '..', 'dist');
+const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 /**
  *

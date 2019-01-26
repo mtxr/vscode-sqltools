@@ -21,6 +21,12 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15
+    },
+    {
+      "name": "SQLite",
+      "dialect": "SQLite",
+      "database": "test_db.db",
+      "connectionTimeout": 15
     }
   ]
 }

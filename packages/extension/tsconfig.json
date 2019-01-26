@@ -5,7 +5,7 @@
         "target": "es6",
         "allowSyntheticDefaultImports": true,
         "esModuleInterop": true,
-        "outDir": "../../dist/extension",
+        "outDir": "../../../dist/extension",
         "sourceMap": true,
         "lib": [ "es6" ],
         "baseUrl": "src",

@@ -10,6 +10,7 @@ import {
   ViewColumn,
   window as Win,
   workspace as Wspc,
+  version as vsCodeVersion,
 } from 'vscode';
 import {
   CloseAction,
@@ -439,7 +440,7 @@ namespace SQLTools {
 
   async function getLanguageServerDisposable() {
     const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6011'] };
 
     const serverOptions: ServerOptions = {
       debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
@@ -490,6 +491,10 @@ namespace SQLTools {
       clientOptions,
     );
     languageClient.onReady().then(() => {
+      languageClient.sendNotification('setExtData', {
+        extPath: ContextManager.context.extensionPath,
+        vsCodeVersion,
+      });
       languageClient.onNotification(Notification.ExitCalled, () => {
         avoidRestart = true;
       });

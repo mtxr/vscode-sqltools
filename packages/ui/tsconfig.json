@@ -8,7 +8,7 @@
     "target": "es6",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "outDir": "../dist/ui",
+    "outDir": "../../../dist/ui",
     "sourceMap": true,
     "lib": [
       "es6", "dom"
