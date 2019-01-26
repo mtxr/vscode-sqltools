@@ -240,7 +240,7 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdAddNewServer() {
+  export async function cmdAddConnection() {
     settingsEditor.show();
   }
 

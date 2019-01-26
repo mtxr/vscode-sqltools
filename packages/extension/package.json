@@ -155,8 +155,8 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add new server",
-                "command": "SQLTools.addNewServer",
+                "title": "Add connection",
+                "command": "SQLTools.addConnection",
                 "category": "SQLTools Management",
                 "icon": {
                     "light": "icons/database-light.svg",
@@ -479,7 +479,7 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.addNewServer",
+                    "command": "SQLTools.addConnection",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                 },
