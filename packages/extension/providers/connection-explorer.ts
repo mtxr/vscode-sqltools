@@ -1,5 +1,3 @@
-import fs from 'fs';
-import path from 'path';
 import {
   Event,
   EventEmitter,
@@ -14,7 +12,7 @@ import {
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
 import { ConnectionCredentials, SerializedConnection } from '@sqltools/core/interface';
-
+import { Logger } from '../api';
 export type SidebarDatabaseItem = SidebarConnection | SidebarTable | SidebarColumn | SidebarView;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
@@ -22,6 +20,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
   this.onDidChange.event;
   private tree: { [database: string]: SidebarConnection} = {};
+  constructor(private logger: Logger) { }
   public fireUpdate(): void {
     this.onDidChange.fire();
   }
@@ -78,6 +77,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       this.tree[treeKey].addItem(item);
     });
     columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
+      if (!column || !this.tree[treeKey] || this.tree[treeKey].views) {
+        this.logger.warn('didnt find a place in three for column', column);
+        return;
+      }
       const key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
       this.tree[treeKey][key].items[column.tableName].addItem(new SidebarColumn(column, conn));
     });

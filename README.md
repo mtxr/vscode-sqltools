@@ -75,3 +75,4 @@ See changelog [here](https://github.com/mtxr/vscode-sqltools/blob/master/CHANGEL
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 
+By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.

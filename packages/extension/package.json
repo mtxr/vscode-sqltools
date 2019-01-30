@@ -155,8 +155,8 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add new server",
-                "command": "SQLTools.addNewServer",
+                "title": "Add new connection",
+                "command": "SQLTools.addNewConnection",
                 "category": "SQLTools Management",
                 "icon": {
                     "light": "icons/database-light.svg",
@@ -262,8 +262,8 @@
                 },
                 "sqltools.telemetry": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Help SQLTools development."
+                    "default": true,
+                    "description": "Help SQLTools development. You can opt-out any time."
                 },
                 "sqltools.showStatusbar": {
                     "type": "boolean",
@@ -478,7 +478,7 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.addNewServer",
+                    "command": "SQLTools.addNewConnection",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                 },

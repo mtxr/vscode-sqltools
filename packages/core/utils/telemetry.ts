@@ -4,17 +4,33 @@ import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
 import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
 import Timer from './timer';
-import bugsnag from 'bugsnag';
+import Bugsnag from '@bugsnag/js';
 
-const bugsnagOpts = {
-  appVersion: VERSION,
-  autoBreadcrumbs: false,
-  autoCaptureSessions: false,
-  autoNotify: false,
-  collectUserIp: false,
-  releaseStage: ENV,
+const metaData = {
+  platform: {
+    os: process.platform,
+    arch: process.arch,
+  }
 };
-bugsnag.register(BUGSNAG_API_KEY, bugsnagOpts);
+
+const bsClient = Bugsnag({
+  appVersion: VERSION,
+  apiKey: BUGSNAG_API_KEY,
+  releaseStage: ENV,
+  collectUserIp: false,
+  autoCaptureSessions: false,
+  autoBreadcrumbs: false,
+  autoNotify: false,
+  logger: null,
+  filters: [
+    'access_token', // exact match: "access_token"
+    /^password$/i,  // case-insensitive: "password", "PASSWORD", "PaSsWoRd"
+  ],
+  beforeSend: (report) => {
+    if (!Telemetry.shouldSend()) return report.ignore();
+  },
+  metaData
+})
 
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
@@ -60,17 +76,14 @@ namespace Telemetry {
 
   export function enable(): void {
     isEnabled = true;
-    bugsnag.configure({ ...bugsnagOpts, autoNotify: true });
     logger.info('Telemetry enabled!');
   }
   export function disable(): void {
     isEnabled = false;
-    bugsnag.configure({ ...bugsnagOpts, autoNotify: false });
     logger.info('Telemetry disabled!');
   }
   export function setLogger(useLogger: LoggerInterface = console) {
     logger = useLogger;
-    bugsnag.configure({ ...bugsnagOpts, logger: logger as any }) ;
   }
   export function registerSession(evt: string) {
     if (!isEnabled) return;
@@ -113,9 +126,21 @@ namespace Telemetry {
   function errorHandler(type: string) {
     return (error?: Error) => {
       if (!error) return;
-      bugsnag.notify(error);
+      bsClient.notify(error, {
+        beforeSend: (report) => {
+          if (!Telemetry.shouldSend()) return report.ignore();
+
+          report.updateMetaData('details', {
+            definedType: type,
+            from: 'errorHandler',
+          })
+        },
+      });
       logger.error(`Telemetry:${type} error`, error);
     };
+  }
+  export function shouldSend() {
+    return !!isEnabled;
   }
 }
 

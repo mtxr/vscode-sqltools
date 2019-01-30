@@ -52,9 +52,9 @@ import { any } from 'prop-types';
 
 namespace SQLTools {
   const cfgKey: string = DISPLAY_NAME.toLowerCase();
-  const connectionExplorer = new ConnectionExplorer();
-  const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const logger = new Logger(LogWriter);
+  const connectionExplorer = new ConnectionExplorer(logger);
+  const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
 
@@ -239,7 +239,7 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdAddNewServer() {
+  export async function cmdAddNewConnection() {
     settingsEditor.show();
   }
 
