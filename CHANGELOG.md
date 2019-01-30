@@ -7,6 +7,7 @@
 - Fixes disconnect not working. #122.
 - Auto connecting if have just one connection
 - 'Add new Server' changed to 'Add new connection'
+- Fixes show records when not connected
 
 ### v0.16.3
 

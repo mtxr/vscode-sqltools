@@ -152,7 +152,7 @@ namespace SQLTools {
   export async function cmdCloseConnection(node?: SidebarConnection): Promise<void> {
     let conn = node ? node.conn : null;
     if (!conn) {
-      conn = await connectionMenu(true, true);
+      conn = await connectionMenu(true);
     }
     languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
@@ -255,12 +255,12 @@ namespace SQLTools {
    * Management functions
    */
 
-  async function connectionMenu(skipIfJustOne = false, onlyActive = false): Promise<SerializedConnection> {
+  async function connectionMenu(onlyActive = false): Promise<SerializedConnection> {
     const connections: SerializedConnection[] = await languageClient.sendRequest(ClientRequestConnections);
 
     const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
 
-    if (skipIfJustOne && availableConns.length === 1) return availableConns[0];
+    if (availableConns.length === 1) return availableConns[0];
 
     const sel = (await quickPick(availableConns.map((c) => {
       return {
@@ -295,8 +295,8 @@ namespace SQLTools {
     queryResults.postMessage({ action: 'queryResults', payload });
   }
 
-  async function tableMenu(prop?: string): Promise<string> {
-    const { tables } = await getConnData();
+  async function tableMenu(conn: SerializedConnection, prop?: string): Promise<string> {
+    const { tables } = await getConnData(conn);
     return await quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
@@ -317,11 +317,8 @@ namespace SQLTools {
     queryResults.postMessage({ action: 'reset' });
   }
 
-  async function getConnData() {
-    return await languageClient.sendRequest(GetTablesAndColumnsRequest.method) as {
-      tables: DatabaseInterface.Table[],
-      coluuns: DatabaseInterface.TableColumn[],
-    };
+  async function getConnData(conn: SerializedConnection) {
+    return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
   function autoConnectIfActive(currConn?: SerializedConnection) {
@@ -576,7 +573,10 @@ namespace SQLTools {
       await setConnection(node.conn as SerializedConnection);
       return node.value;
     }
-    return await tableMenu('label');
+
+    const conn = await connect(true);
+
+    return await tableMenu(conn, 'label');
   }
   async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
     const sel: QuickPickItem = await Win.showQuickPick(options);

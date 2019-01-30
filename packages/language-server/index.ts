@@ -144,7 +144,12 @@ namespace SQLToolsLanguageServer {
 
   /* Custom Requests */
   server.onRequest(ClientRequestConnections, () => {
-    return sgdbConnections.map((c) => c.serialize());
+    return sgdbConnections.map((c) => c.serialize())
+      .sort((a, b) => {
+        if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
+        if (a.isConnected && !b.isConnected) return -1;
+        if (!a.isConnected && b.isConnected) return 1;
+      });
   });
 
   server.onRequest(
@@ -194,10 +199,13 @@ namespace SQLToolsLanguageServer {
     await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
   });
 
-  server.onRequest(GetTablesAndColumnsRequest, async () => {
-    const activeConnections = store.getState().activeConnections;
+  server.onRequest(GetTablesAndColumnsRequest, async ({ conn }) => {
+    if (!conn) {
+      return undefined;
+    }
+    const c = sgdbConnections.find((c) => c.getName() === conn.name);
+    const { activeConnections } = store.getState();
     if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
-    const c = activeConnections[Object.keys(activeConnections)[0]];
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   });
 
