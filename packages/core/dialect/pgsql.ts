@@ -71,10 +71,12 @@ export default class PostgreSQL implements ConnectionDialect {
       });
   }
 
-  public close() {
+  public async close() {
     if (!this.connection) return Promise.resolve();
 
-    return this.connection.then((client) => client.end());
+    const client = await this.connection;
+    client.end();
+    this.connection = null;
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {

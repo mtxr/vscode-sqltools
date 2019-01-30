@@ -72,6 +72,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
     if (this.tree[treeKey]) this.tree[treeKey].reset();
 
+    if (!tables && !columns) {
+      this.tree[treeKey].deactivate();
+      return this.refresh();
+    }
+
     tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
       if (!this.tree[treeKey]) return;
       this.tree[treeKey].addItem(item);

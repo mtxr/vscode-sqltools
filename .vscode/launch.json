@@ -15,7 +15,7 @@
             "type": "node",
             "request": "attach",
             "name": "Attach Language Server",
-            "port": 6010,
+            "port": 6011,
             "restart": true,
             "sourceMaps": true,
             "outFiles": [

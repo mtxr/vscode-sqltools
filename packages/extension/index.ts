@@ -32,6 +32,7 @@ import {
   RunCommandRequest,
   UpdateConnectionExplorerRequest,
   GetCachedPassword,
+  CloseConnectionRequest,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
@@ -148,10 +149,13 @@ namespace SQLTools {
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
-  export function cmdCloseConnection(): void {
-    setConnection(null)
-      .then(() => languageClient.sendRequest(RefreshConnectionData))
-      .catch(ErrorHandler.create('Error closing connection'));
+  export async function cmdCloseConnection(node?: SidebarConnection): Promise<void> {
+    let conn = node ? node.conn : null;
+    if (!conn) {
+      conn = await connectionMenu(true, true);
+    }
+    languageClient.sendRequest(CloseConnectionRequest, { conn })
+      .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
   }
 
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
@@ -251,10 +255,14 @@ namespace SQLTools {
    * Management functions
    */
 
-  async function connectionMenu(): Promise<SerializedConnection> {
+  async function connectionMenu(skipIfJustOne = false, onlyActive = false): Promise<SerializedConnection> {
     const connections: SerializedConnection[] = await languageClient.sendRequest(ClientRequestConnections);
 
-    const sel = (await quickPick(connections.map((c) => {
+    const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
+
+    if (skipIfJustOne && availableConns.length === 1) return availableConns[0];
+
+    const sel = (await quickPick(availableConns.map((c) => {
       return {
         description: c.isConnected ? 'Currently connected' : '',
         detail: `${c.username}@${c.server}:${c.port}`,
@@ -432,14 +440,14 @@ namespace SQLTools {
     if (!force && lastUsedConn) {
       return lastUsedConn;
     }
-    const c: SerializedConnection = await connectionMenu();
+    const c: SerializedConnection = await connectionMenu(true);
     history.clear();
     return setConnection(c);
   }
 
   async function getLanguageServerDisposable() {
     const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6011'] };
 
     const serverOptions: ServerOptions = {
       debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },

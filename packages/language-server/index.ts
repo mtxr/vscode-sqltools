@@ -177,14 +177,16 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(
-    CloseConnectionRequest.method,
+    CloseConnectionRequest,
     async (req: { conn: SerializedConnection }): Promise<void> => {
     if (!req.conn) {
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
-    await c.close().catch(notifyError('Connection Error'))
+    await c.close().catch(notifyError('Connection Error'));
     store.dispatch(actions.Disconnect(c));
+    const state = store.getState();
+    updateSidebar(req.conn, null, null);
   });
 
   server.onRequest(RefreshConnectionData, async () => {
