@@ -1,4 +1,8 @@
-# SQLTools for VSCode
+<p align="center">
+<img src="static/banner.png" />
+</p>
+
+<hr />
 
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
@@ -69,10 +73,14 @@ Our donators:
 
 ## Changelog
 
-See changelog [here](https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md)
+See changelog [here](CHANGELOG.md)
 
 ## Feedback
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 
 By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
+
+<hr />
+
+Icon made by [Freepik](https://www.freepik.com/) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
