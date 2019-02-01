@@ -16,6 +16,6 @@ export const CloseConnectionRequest = new RequestType
 export const UpdateConnectionExplorerRequest = new RequestType
   <{ conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, void, Error, void>
   ('connection/updateTableAndColumns');
-export const GetTablesAndColumnsRequest = new RequestType0
-  <{ tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, Error, void>
+export const GetTablesAndColumnsRequest = new RequestType
+  <{ conn: SerializedConnection }, { tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }, Error, void>
   ('connection/getTableAndColumns');

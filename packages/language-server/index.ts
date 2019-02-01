@@ -26,6 +26,7 @@ import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
+import { Telemetry } from '@sqltools/core/utils';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -51,6 +52,7 @@ namespace SQLToolsLanguageServer {
   function notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       Logger.error(message, err);
+      Telemetry.registerException(error, { message });
       server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
     if (typeof error !== 'undefined') return cb(error);
@@ -121,7 +123,7 @@ namespace SQLToolsLanguageServer {
       if (formatterRegistration) (await formatterRegistration).dispose();
       formatterRegistration = server.client.register(DocumentRangeFormattingRequest.type, {
         documentSelector: formatterLanguages,
-      }).then((a) => a, error => Logger.error(error.toString()) as any);
+      }).then((a) => a, error => notifyError('formatterRegistration error', error));
     } else if (formatterRegistration) {
       (await formatterRegistration).dispose();
     }
@@ -147,7 +149,12 @@ namespace SQLToolsLanguageServer {
 
   /* Custom Requests */
   server.onRequest(ClientRequestConnections, () => {
-    return sgdbConnections.map((c) => c.serialize());
+    return sgdbConnections.map((c) => c.serialize())
+      .sort((a, b) => {
+        if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
+        if (a.isConnected && !b.isConnected) return -1;
+        if (!a.isConnected && b.isConnected) return 1;
+      });
   });
 
   server.onRequest(
@@ -180,14 +187,16 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(
-    CloseConnectionRequest.method,
+    CloseConnectionRequest,
     async (req: { conn: SerializedConnection }): Promise<void> => {
     if (!req.conn) {
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
-    await c.close().catch(notifyError('Connection Error'))
+    await c.close().catch(notifyError('Connection Error'));
     store.dispatch(actions.Disconnect(c));
+    const state = store.getState();
+    updateSidebar(req.conn, null, null);
   });
 
   server.onRequest(RefreshConnectionData, async () => {
@@ -195,10 +204,13 @@ namespace SQLToolsLanguageServer {
     await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
   });
 
-  server.onRequest(GetTablesAndColumnsRequest, async () => {
-    const activeConnections = store.getState().activeConnections;
+  server.onRequest(GetTablesAndColumnsRequest, async ({ conn }) => {
+    if (!conn) {
+      return undefined;
+    }
+    const c = sgdbConnections.find((c) => c.getName() === conn.name);
+    const { activeConnections } = store.getState();
     if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
-    const c = activeConnections[Object.keys(activeConnections)[0]];
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   });
 
@@ -232,6 +244,7 @@ namespace SQLToolsLanguageServer {
   process.on('uncaughtException', (error: any) => {
     let message: string;
     if (error) {
+      Telemetry.registerException(error, { type: 'uncaughtException' })
       if (typeof error.stack === 'string') {
         message = error.stack;
       } else if (typeof error.message === 'string') {

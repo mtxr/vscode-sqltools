@@ -8,8 +8,7 @@
   "private": true,
   "dependencies": {
     "axios": "^0.18.0",
-    "bugsnag": "^2.4.3",
-    "bugsnag-js": "^4.7.3",
+    "@bugsnag/js": "^6.0.0-alpha.1",
     "mysql2": "^1.5.1",
     "pg": "^7.4.0",
     "sql-formatter": "^2.3.1",

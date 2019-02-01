@@ -3,7 +3,7 @@
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
-Your swiss knife SQL for VSCode.
+Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
 ## Features
 
@@ -75,3 +75,4 @@ See changelog [here](https://github.com/mtxr/vscode-sqltools/blob/master/CHANGEL
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 
+By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.

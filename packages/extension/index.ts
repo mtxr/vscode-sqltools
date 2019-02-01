@@ -33,6 +33,7 @@ import {
   RunCommandRequest,
   UpdateConnectionExplorerRequest,
   GetCachedPassword,
+  CloseConnectionRequest,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
@@ -53,9 +54,9 @@ import { any } from 'prop-types';
 
 namespace SQLTools {
   const cfgKey: string = DISPLAY_NAME.toLowerCase();
-  const connectionExplorer = new ConnectionExplorer();
-  const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const logger = new Logger(LogWriter);
+  const connectionExplorer = new ConnectionExplorer(logger);
+  const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
 
@@ -149,10 +150,13 @@ namespace SQLTools {
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
-  export function cmdCloseConnection(): void {
-    setConnection(null)
-      .then(() => languageClient.sendRequest(RefreshConnectionData))
-      .catch(ErrorHandler.create('Error closing connection'));
+  export async function cmdCloseConnection(node?: SidebarConnection): Promise<void> {
+    let conn = node ? node.conn : null;
+    if (!conn) {
+      conn = await connectionMenu(true);
+    }
+    languageClient.sendRequest(CloseConnectionRequest, { conn })
+      .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
   }
 
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
@@ -240,7 +244,7 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdAddConnection() {
+  export async function cmdAddNewConnection() {
     settingsEditor.show();
   }
 
@@ -252,10 +256,14 @@ namespace SQLTools {
    * Management functions
    */
 
-  async function connectionMenu(): Promise<SerializedConnection> {
+  async function connectionMenu(onlyActive = false): Promise<SerializedConnection> {
     const connections: SerializedConnection[] = await languageClient.sendRequest(ClientRequestConnections);
 
-    const sel = (await quickPick(connections.map((c) => {
+    const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
+
+    if (availableConns.length === 1) return availableConns[0];
+
+    const sel = (await quickPick(availableConns.map((c) => {
       return {
         description: c.isConnected ? 'Currently connected' : '',
         detail: `${c.username}@${c.server}:${c.port}`,
@@ -288,8 +296,8 @@ namespace SQLTools {
     queryResults.postMessage({ action: 'queryResults', payload });
   }
 
-  async function tableMenu(prop?: string): Promise<string> {
-    const { tables } = await getConnData();
+  async function tableMenu(conn: SerializedConnection, prop?: string): Promise<string> {
+    const { tables } = await getConnData(conn);
     return await quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
@@ -310,11 +318,8 @@ namespace SQLTools {
     queryResults.postMessage({ action: 'reset' });
   }
 
-  async function getConnData() {
-    return await languageClient.sendRequest(GetTablesAndColumnsRequest.method) as {
-      tables: DatabaseInterface.Table[],
-      coluuns: DatabaseInterface.TableColumn[],
-    };
+  async function getConnData(conn: SerializedConnection) {
+    return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
   function autoConnectIfActive(currConn?: SerializedConnection) {
@@ -433,7 +438,7 @@ namespace SQLTools {
     if (!force && lastUsedConn) {
       return lastUsedConn;
     }
-    const c: SerializedConnection = await connectionMenu();
+    const c: SerializedConnection = await connectionMenu(true);
     history.clear();
     return setConnection(c);
   }
@@ -465,6 +470,7 @@ namespace SQLTools {
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: (error) => {
+        Telemetry.registerException(error, { message: 'Server initialization failed.' });
         languageClient.error('Server initialization failed.', error);
         languageClient.outputChannel.show(true);
         return false;
@@ -472,6 +478,7 @@ namespace SQLTools {
       errorHandler: {
         error: (error, message, count): ErrorAction => {
           logger.error('Language server error', error, message, count);
+          Telemetry.registerException(error, { message: 'Language Server error.', givenMessage: message, count });
           return languageClientErrorHandler.error(error, message, count);
         },
         closed: (): CloseAction => {
@@ -573,7 +580,10 @@ namespace SQLTools {
       await setConnection(node.conn as SerializedConnection);
       return node.value;
     }
-    return await tableMenu('label');
+
+    const conn = await connect(true);
+
+    return await tableMenu(conn, 'label');
   }
   async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
     const sel: QuickPickItem = await Win.showQuickPick(options);

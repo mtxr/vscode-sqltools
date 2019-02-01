@@ -1,8 +1,8 @@
 {
     "name": "@sqltools/extension",
-    "displayName": "SQLTools",
-    "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
-    "version": "0.16.3",
+    "displayName": "SQLTools - Database tools",
+    "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
+    "version": "0.16.4",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -156,8 +156,8 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add connection",
-                "command": "SQLTools.addConnection",
+                "title": "Add new connection",
+                "command": "SQLTools.addNewConnection",
                 "category": "SQLTools Management",
                 "icon": {
                     "light": "icons/database-light.svg",
@@ -263,8 +263,8 @@
                 },
                 "sqltools.telemetry": {
                     "type": "boolean",
-                    "default": false,
-                    "description": "Help SQLTools development."
+                    "default": true,
+                    "description": "Help SQLTools development. You can opt-out any time."
                 },
                 "sqltools.showStatusbar": {
                     "type": "boolean",
@@ -481,7 +481,7 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.addConnection",
+                    "command": "SQLTools.addNewConnection",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                 },

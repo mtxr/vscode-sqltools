@@ -4,18 +4,34 @@ import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
 import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
 import Timer from './timer';
-import bugsnag from 'bugsnag';
 import Logger from './logger';
+import Bugsnag from '@bugsnag/js';
 
-const bugsnagOpts = {
-  appVersion: VERSION,
-  autoBreadcrumbs: false,
-  autoCaptureSessions: false,
-  autoNotify: false,
-  collectUserIp: false,
-  releaseStage: ENV,
+const metaData = {
+  platform: {
+    os: process.platform,
+    arch: process.arch,
+  }
 };
-bugsnag.register(BUGSNAG_API_KEY, bugsnagOpts);
+
+const bsClient = Bugsnag({
+  appVersion: VERSION,
+  apiKey: BUGSNAG_API_KEY,
+  releaseStage: ENV,
+  collectUserIp: false,
+  autoCaptureSessions: false,
+  autoBreadcrumbs: false,
+  autoNotify: false,
+  logger: null,
+  filters: [
+    'access_token', // exact match: "access_token"
+    /^password$/i,  // case-insensitive: "password", "PASSWORD", "PaSsWoRd"
+  ],
+  beforeSend: (report) => {
+    if (!Telemetry.shouldSend()) return report.ignore();
+  },
+  metaData
+})
 
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
@@ -55,38 +71,36 @@ namespace Telemetry {
   export function registerErrorMessage(message, error?: Error, value: string = 'Dismissed') {
     registerMessage('error', message, value);
     if (error) {
-      registerException(error);
+      registerException(error, { message });
     }
   }
 
   export function enable(): void {
     isEnabled = true;
-    bugsnag.configure({ ...bugsnagOpts, autoNotify: true });
     logger.info('Telemetry enabled!');
   }
   export function disable(): void {
     isEnabled = false;
-    bugsnag.configure({ ...bugsnagOpts, autoNotify: false });
     logger.info('Telemetry disabled!');
   }
   export function setLogger(useLogger: LoggerInterface = Logger) {
     logger = useLogger;
-    bugsnag.configure({ ...bugsnagOpts, logger: logger as any }) ;
   }
   export function registerSession(evt: string) {
     if (!isEnabled) return;
-    analytics.screenview(evt, `vscode-sqltools`, VERSION, errorHandler('screenview'));
+    analytics.screenview(evt, `vscode-sqltools`, VERSION, errorHandler('screenview', { evt }));
   }
   export function registerMessage(type: string, message: string, value: string = 'Dismissed'): void {
     registerEvent(`msg:${type}`, message, value);
   }
   export function registerEvent(category: string, event: string, label?: string): void {
     if (!isEnabled) return;
-    analytics.event(category, event, label || event, errorHandler('event'));
+    analytics.event(category, event, label || event, errorHandler('event', { category, event, label }));
   }
 
-  export function registerException(error: Error) {
+  export function registerException(error: Error, meta: { [key: string]: any } = {}) {
     if (!isEnabled) return;
+    errorHandler('registeredException', meta)(error);
     let exceptionDescription = error.toString();
     if (error.message) {
       exceptionDescription = `${error.name}:${error.message}`;
@@ -96,12 +110,12 @@ namespace Telemetry {
         exceptionDescription,
         isExceptionFatal: false,
       },
-      errorHandler('exception'),
+      errorHandler('analyticsException', meta),
     );
   }
 
   export function registerTime(timeKey: string, timer: Timer) {
-    analytics.timing(timeKey, timer.elapsed().toString(), errorHandler('timer'));
+    analytics.timing(timeKey, timer.elapsed().toString(), errorHandler('timer', { timeKey }));
   }
 
   function start() {
@@ -111,12 +125,25 @@ namespace Telemetry {
     analytics.set('applicationVersion', VERSION);
   }
 
-  function errorHandler(type: string) {
+  function errorHandler(type: string, meta: { [key: string]: any } = {}) {
     return (error?: Error) => {
       if (!error) return;
-      bugsnag.notify(error);
+      bsClient.notify(error, {
+        beforeSend: (report) => {
+          if (!Telemetry.shouldSend()) return report.ignore();
+
+          report.updateMetaData('details', {
+            definedType: type,
+            from: 'errorHandler',
+            ...meta,
+          })
+        },
+      });
       logger.error(`Telemetry:${type} error`, error);
     };
+  }
+  export function shouldSend() {
+    return !!isEnabled;
   }
 }
 
