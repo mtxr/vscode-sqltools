@@ -46,7 +46,6 @@ module.exports = exports = function getWebviewConfig(env) {
         }
       }
     },
-    devtool: !env.production ? 'inline-source-map' : undefined,
     output: {
       filename: 'views/[name].js',
       path: outdir

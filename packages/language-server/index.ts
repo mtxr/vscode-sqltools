@@ -51,7 +51,7 @@ namespace SQLToolsLanguageServer {
   function notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       Logger.error(message, err);
-      Telemetry.registerException(error, { message });
+      Telemetry.registerException(err, { message, languageServer: true });
       server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
     if (typeof error !== 'undefined') return cb(error);
@@ -75,7 +75,10 @@ namespace SQLToolsLanguageServer {
       .then(([t, c]) => {
         updateSidebar(conn.serialize(), t, c);
         return loadCompletionItens(t, c);
-      }).catch(notifyError('Error while preparing columns completions'));
+      }).catch(e => {
+        notifyError('Error while preparing columns completions')(e);
+        throw e;
+      });
   }
 
   function updateSidebar(conn, tables, columns) {
@@ -156,14 +159,15 @@ namespace SQLToolsLanguageServer {
 
   server.onRequest(
     OpenConnectionRequest,
-    async (req: { conn: SerializedConnection, password?: string }): Promise<SerializedConnection> => {
+    async (req: { conn: SerializedConnection, password?: string }
+  ): Promise<SerializedConnection> => {
     if (!req.conn) {
       return undefined;
     }
-    const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
+    const c = sgdbConnections.find((conn) => conn.getId() === Utils.getDbId(req.conn));
     if (req.password) c.setPassword(req.password);
-    store.dispatch(actions.Connect(c));
-    if (await c.connect().catch(notifyError('Connection Error'))) {
+    if (await c.connect()) {
+      store.dispatch(actions.Connect(c));
       await loadConnectionData(c);
       return c.serialize();
     }
@@ -176,7 +180,7 @@ namespace SQLToolsLanguageServer {
     if (!req.conn) {
       return undefined;
     }
-    const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
+    const c = sgdbConnections.find((conn) => conn.getId() === Utils.getDbId(req.conn));
     if (c && store.getState().activeConnections[c.getId()]) {
       return store.getState().activeConnections[c.getId()].getPassword();
     }
@@ -205,7 +209,7 @@ namespace SQLToolsLanguageServer {
     if (!conn) {
       return undefined;
     }
-    const c = sgdbConnections.find((c) => c.getName() === conn.name);
+    const c = sgdbConnections.find((c) => c.getId() === Utils.getDbId(conn));
     const { activeConnections } = store.getState();
     if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };

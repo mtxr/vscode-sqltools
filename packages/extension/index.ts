@@ -414,20 +414,19 @@ namespace SQLTools {
     logger.info('Config reloaded!');
     autoConnectIfActive(lastUsedConn);
     updateStatusBar();
-    connectionExplorer.setConnections(ConfigManager.connections);
+    if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
     let password = null;
     if (c && c.askForPassword) password = await askForPassword(c);
     if (c.askForPassword && password === null) return;
-    lastUsedConn = c;
-    connectionExplorer.setActiveConnection(lastUsedConn);
-    updateStatusBar();
     lastUsedConn = (await languageClient.sendRequest(
-      OpenConnectionRequest.method,
+      OpenConnectionRequest,
       { conn: c, password },
     ));
+    updateStatusBar();
+    connectionExplorer.setActiveConnection(lastUsedConn);
     return lastUsedConn;
   }
 
@@ -450,11 +449,11 @@ namespace SQLTools {
 
   async function getLanguageServerDisposable() {
     const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6011'] };
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
 
     const serverOptions: ServerOptions = {
       debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
-      run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+      run: { module: serverModule, transport: TransportKind.ipc },
     };
 
     const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)

@@ -22,6 +22,7 @@ const bsClient = Bugsnag({
   autoBreadcrumbs: false,
   autoNotify: false,
   logger: null,
+  projectRoot: __dirname,
   filters: [
     'access_token', // exact match: "access_token"
     /^password$/i,  // case-insensitive: "password", "PASSWORD", "PaSsWoRd"

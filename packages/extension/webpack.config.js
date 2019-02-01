@@ -76,7 +76,6 @@ function getExtensionConfig(env) {
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json'],
     },
-    devtool: !env.production ? 'source-map' : false,
     output: {
       filename: '[name].js',
       path: outdir,
@@ -113,6 +112,12 @@ module.exports = function (env = {}) {
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
+    config.node = {
+      ...(config.node || {}),
+      __dirname: false
+    };
+    config.devtool = !env.production ? 'cheap-module-eval-source-map' : 'source-map';
+
     return config;
   });
 };

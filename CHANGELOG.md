@@ -2,6 +2,10 @@
 
 ## v0.16
 
+### v0.16.6
+- **Fixes**
+  - ***Connections***: Error while connecting => `toString() of undefined`
+
 ### v0.16.5
 
 - **Enhancements**

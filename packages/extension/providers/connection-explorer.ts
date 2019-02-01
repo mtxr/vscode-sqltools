@@ -14,7 +14,8 @@ import {
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
 import { ConnectionCredentials, SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
-import { Logger } from '../api';
+import { Logger, Utils } from '../api';
+import { getDbId } from '@sqltools/core/utils';
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
 | SidebarColumn
@@ -62,8 +63,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public setConnections(connections: ConnectionCredentials[]) {
     const keys = [];
+    let shouldUpdate = false;
     connections.forEach((conn) => {
-      this.tree[this.getDbId(conn)] = this.tree[this.getDbId(conn)] || new SidebarConnection(conn);
+      if (this.tree[this.getDbId(conn)] && this.tree[this.getDbId(conn)].updateCreds(conn)) {
+        shouldUpdate = true;
+      } else {
+        this.tree[this.getDbId(conn)] = new SidebarConnection(conn);
+      }
       keys.push(this.getDbId(conn));
     });
 
@@ -74,6 +80,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       });
     }
     this.refresh();
+    return shouldUpdate;
   }
 
   public setTreeData(
@@ -121,7 +128,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 
   private getDbId(c: SerializedConnection | ConnectionCredentials) {
-    return `${c.name}#${c.database}#${c.dialect}`;
+    return getDbId(c);
   }
 
   private toArray(obj: any) {
