@@ -1,5 +1,5 @@
 <p align="center">
-<img src="static/banner.png" />
+<img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/banner.png" />
 </p>
 
 <hr />
