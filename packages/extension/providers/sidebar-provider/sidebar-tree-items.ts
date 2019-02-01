@@ -6,7 +6,7 @@ import {
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
-import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { EXT_NAME } from '@sqltools/core/constants';
 
 export class SidebarConnection extends TreeItem {
   public contextValue = 'connection';
@@ -37,7 +37,7 @@ export class SidebarConnection extends TreeItem {
     };
     this.command = {
       title: '',
-      command: `${DISPLAY_NAME}.selectConnection`,
+      command: `${EXT_NAME}.selectConnection`,
       arguments: [this],
     };
   }

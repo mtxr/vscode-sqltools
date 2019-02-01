@@ -396,7 +396,8 @@
                                 "enum": [
                                     "MSSQL",
                                     "MySQL",
-                                    "PostgreSQL"
+                                    "PostgreSQL",
+                                    "Firebird"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -408,7 +409,32 @@
                                 ],
                                 "description": "Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options",
                                 "required": false,
-                                "default": {}
+                                "default": {},
+                                "properties": {
+                                    "encrypt": {
+                                        "type": ["boolean", "null"],
+                                        "default": null,
+                                        "description": "Encrypt connection"
+                                    },
+                                    "firebase": {
+                                        "type": ["null", "object"],
+                                        "default": {},
+                                        "properties": {
+                                            "lowercaseKeys": {
+                                                "type": ["boolean", "null"],
+                                                "default": null
+                                            },
+                                            "role": {
+                                                "type": ["string", "null"],
+                                                "default": null
+                                            },
+                                            "pageSize": {
+                                                "type": "number",
+                                                "default": 4096
+                                            }
+                                        }
+                                    }
+                                }
                             },
                             "connectionTimeout": {
                                 "type": "number",

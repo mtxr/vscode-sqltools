@@ -76,7 +76,15 @@ export interface ConnectionCredentials {
    * @type {any}
    * @memberof ConnectionSettings
    */
-  dialectOptions?: { encrypt: boolean };
+  dialectOptions?: {
+    encrypt?: boolean;
+    // Firebase specific options
+    firebase?: {
+      lowercaseKeys?: boolean;
+      role?: string;
+      pageSize?: number;
+    }
+  };
   /**
    * Connection domain (for MSSQL/Azure only)
    * @type {string}

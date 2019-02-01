@@ -70,7 +70,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     if (!conn) return;
     const treeKey = this.getDbId(conn);
 
-    if (this.tree[treeKey]) this.tree[treeKey].reset();
+    this.tree[treeKey] = this.tree[treeKey] || new SidebarConnection(conn);
+
+    this.tree[treeKey].reset();
 
     if (!tables && !columns) {
       this.tree[treeKey].deactivate();
@@ -82,10 +84,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       this.tree[treeKey].addItem(item);
     });
     columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
-      if (!column || !this.tree[treeKey] || this.tree[treeKey].views) {
-        this.logger.warn('didnt find a place in three for column', column);
-        return;
-      }
       const key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
       this.tree[treeKey][key].items[column.tableName].addItem(new SidebarColumn(column, conn));
     });
