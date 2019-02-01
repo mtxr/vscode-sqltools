@@ -1,26 +1,23 @@
-<p align="center">
-<img src="static/banner.png" />
-</p>
+# Home Page
 
-<hr />
+![](.gitbook/assets/banner.png)
 
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira) [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
 ## Features
 
-* SQL Format (Beautifier)
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+b</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+b</kbd>
+* SQL Format \(Beautifier\)
+  * **Win/Linux**: ctrl+e ctrl+b
+  * **OSX**: cmd+e cmd+b
   * or using the standard VSCode Format Document/selection
 * Bookmark query
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+q</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>q</kbd>
+  * **Win/Linux**: ctrl+e ctrl+q
+  * **OSX**: cmd+e q
 * Delete Bookmarked query
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+r</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+r</kbd>
+  * **Win/Linux**: ctrl+e ctrl+r
+  * **OSX**: cmd+e cmd+r
 * Edit Bookmarked query
 * Auto complete for Table names and columns
 
@@ -28,7 +25,7 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 * Sidebar database explorer and setup GUI
 
-![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
+![static/add\_new\_connection\_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
 
 ## Docs
 
@@ -36,16 +33,13 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vscode-sqltools/wiki)
 
-
 ## Donate and Support
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
-SQLTools will save you (for sure) a lot of time and help you to increase your productivity so, please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools to become more awesome than ever.
+SQLTools will save you \(for sure\) a lot of time and help you to increase your productivity so, please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools to become more awesome than ever.
 
-
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira) [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
 ## Special Thanks
 
@@ -53,21 +47,20 @@ All the amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/co
 
 Our supporters:
 
-- @benyaminl Benyamin Limanto
+* @benyaminl Benyamin Limanto
 
 > Want to support? [Click here](https://www.patreon.com/mteixeira).
 
-
 Our donators:
 
-- Hector Bentancor
-- Trung Nguyen
-- Bogdan Bursuc
-- Meirion Morris
-- Alexander Krylkov
-- Oleksandr Akhtyrskiy
-- Justin Webber
-- Alejandro Dunogent
+* Hector Bentancor
+* Trung Nguyen
+* Bogdan Bursuc
+* Meirion Morris
+* Alexander Krylkov
+* Oleksandr Akhtyrskiy
+* Justin Webber
+* Alejandro Dunogent
 
 > Want to donate? [Click here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8).
 
@@ -81,6 +74,5 @@ Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscod
 
 By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
 
-<hr />
-
 Icon made by [Freepik](https://www.freepik.com/) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
+
