@@ -6,12 +6,13 @@ import {
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
-import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { EXT_NAME } from '@sqltools/core/constants';
 
 export class SidebarConnection extends TreeItem {
+  public parent = null;
   public contextValue = 'connection';
-  public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables');
-  public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views');
+  public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables', this);
+  public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views', this);
   public get description() {
     return this.isActive ? 'active' : '';
   }
@@ -37,7 +38,7 @@ export class SidebarConnection extends TreeItem {
     };
     this.command = {
       title: '',
-      command: `${DISPLAY_NAME}.selectConnection`,
+      command: `${EXT_NAME}.selectConnection`,
       arguments: [this],
     };
   }
@@ -48,8 +49,12 @@ export class SidebarConnection extends TreeItem {
 
   public addItem(item) {
     const key = item.isView ? 'views' : 'tables';
-    this[key].addItem(item.isView ? new SidebarView(item, this.conn) : new SidebarTable(item, this.conn));
-    this.collapsibleState = TreeItemCollapsibleState.Expanded;
+    const element = item.isView ? new SidebarView(item, this[key]) : new SidebarTable(item, this[key]);
+    this[key].addItem(element);
+    this.collapsibleState = this.collapsibleState === TreeItemCollapsibleState.None
+      ? TreeItemCollapsibleState.Collapsed
+      : this.collapsibleState;
+    return element;
   }
 
   public reset() {
@@ -61,10 +66,16 @@ export class SidebarConnection extends TreeItem {
   public activate() {
     this.isActive = true;
     this.expand();
+    return this;
   }
 
   public deactivate() {
     this.isActive = false;
+    return this;
+  }
+
+  public get active() {
+    return this.isActive;
   }
 
   public expand() {
@@ -75,9 +86,11 @@ export class SidebarConnection extends TreeItem {
 export class SidebarDatabaseSchemaGroup extends TreeItem {
   public iconPath = ThemeIcon.Folder;
   public contextValue = 'connection.schema_group';
+  public value = this.contextValue;
   public items: { [name: string]: SidebarTable | SidebarView} = {};
-  constructor(private name) {
-    super(name, TreeItemCollapsibleState.Expanded);
+  public get conn() { return this.parent.conn; }
+  constructor(private name, public parent: SidebarConnection) {
+    super(name, TreeItemCollapsibleState.Collapsed);
     this.label = name;
     Object.defineProperty(this, 'label', {
       get() {
@@ -98,11 +111,12 @@ export class SidebarDatabaseSchemaGroup extends TreeItem {
 export class SidebarTable extends TreeItem {
   public contextValue = 'connection.tableOrView';
   public value: string;
-
   public items: SidebarColumn[] = [];
-  constructor(public table: DatabaseInterface.Table, public conn: ConnectionCredentials) {
+  public get conn() { return this.parent.conn; }
+
+  constructor(public table: DatabaseInterface.Table, public parent: SidebarDatabaseSchemaGroup) {
     super(table.name, (
-      ConfigManager.get('tableTreeItemsExpanded', true)
+      ConfigManager.get('tableTreeItemsExpanded', false)
         ? TreeItemCollapsibleState.Expanded
         : TreeItemCollapsibleState.Collapsed
     ));
@@ -118,19 +132,20 @@ export class SidebarTable extends TreeItem {
     };
   }
 
-  public addItem(item) {
-    this.items.push(item);
+  public addItem(item: DatabaseInterface.TableColumn) {
+    this.items.push(new SidebarColumn(item, this));
   }
 }
 
-export class SidebarView extends SidebarTable {
-}
+export class SidebarView extends SidebarTable { }
 
 export class SidebarColumn extends TreeItem {
   public contextValue = 'connection.column';
   public value: string;
 
-  constructor(public column: DatabaseInterface.TableColumn, public conn: ConnectionCredentials) {
+  public get conn() { return this.parent.conn; }
+
+  constructor(public column: DatabaseInterface.TableColumn, public parent: SidebarTable) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
     let typeSize = '';

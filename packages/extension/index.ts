@@ -11,6 +11,8 @@ import {
   window as Win,
   workspace as Wspc,
   version as vsCodeVersion,
+  TreeDataProvider,
+  TreeView,
 } from 'vscode';
 import {
   CloseAction,
@@ -22,7 +24,7 @@ import {
 } from 'vscode-languageclient';
 import ConfigManager from '@sqltools/core/config-manager';
 
-import { DISPLAY_NAME, VERSION } from '@sqltools/core/constants';
+import { EXT_NAME, VERSION } from '@sqltools/core/constants';
 import ContextManager from './context';
 
 import {
@@ -53,9 +55,10 @@ import { DismissedException } from '@sqltools/core/exception';
 import { any } from 'prop-types';
 
 namespace SQLTools {
-  const cfgKey: string = DISPLAY_NAME.toLowerCase();
+  const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer(logger);
+  let connectionExplorerView: TreeView<any>;
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
@@ -353,22 +356,22 @@ namespace SQLTools {
     return Object.keys(SQLTools).reduce((list, extFn) => {
       if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
       let extCmd = extFn.replace(/^(editor|cmd)/, '');
-      logger.log(`Registering SQLTools.${extCmd}`);
+      logger.log(`Registering ${EXT_NAME}.${extCmd}`);
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
       const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
-      list.push(regFn(`${DISPLAY_NAME}.${extCmd}`, (...args) => {
+      list.push(regFn(`${EXT_NAME}.${extCmd}`, (...args) => {
         logger.log(`Command triggered: ${extCmd}`);
         Telemetry.registerCommand(extCmd);
         SQLTools[extFn](...args);
       }));
-      logger.log(`Command ${DISPLAY_NAME}.${extCmd} registered.`);
+      logger.log(`Command ${EXT_NAME}.${extCmd} registered.`);
       return list;
     }, []);
   }
 
   function updateStatusBar() {
     extDatabaseStatus.tooltip = 'Select a connection';
-    extDatabaseStatus.command = `${DISPLAY_NAME}.selectConnection`;
+    extDatabaseStatus.command = `${EXT_NAME}.selectConnection`;
     extDatabaseStatus.text = '$(database) Connect';
     if (lastUsedConn) {
       extDatabaseStatus.text = `$(database) ${lastUsedConn.name}`;
@@ -381,16 +384,19 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    Win.registerTreeDataProvider(`${DISPLAY_NAME}.tableExplorer`, connectionExplorer);
+    connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
+      Wspc.onDidCloseTextDocument(cmdRefreshSidebar),
+      Wspc.onDidOpenTextDocument(cmdRefreshSidebar),
       await getLanguageServerDisposable(),
       settingsEditor,
       queryResults,
       ...getExtCommands(),
       extDatabaseStatus,
     );
+    queryResults.onDidDispose(cmdRefreshSidebar);
 
     registerLanguageServerRequests();
     connectionExplorer.setConnections(ConfigManager.connections);
@@ -399,7 +405,7 @@ namespace SQLTools {
   async function registerLanguageServerRequests() {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-        connectionExplorer.setTreeData(conn, tables, columns);
+        connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));

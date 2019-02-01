@@ -12,7 +12,8 @@ const dependencies = Object.assign({}, uiPkgJson.dependencies || {}, lsPkgJson.d
 const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkgJson.devDependencies || {}, corePkgJson.devDependencies || {}, extPkgJson.devDependencies || {});
 
 // defintions
-extPkgJson.name = 'sqltools'; // vscode marketplace name
+extPkgJson.name = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools'; // vscode marketplace name
+
 const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
 
 const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
@@ -49,13 +50,10 @@ function getExtensionConfig(env) {
           from: path.join(__dirname, 'package.json'),
           to: path.join(outdir, 'package.json'),
           transform: (content, filepath) => {
-            content = JSON.parse(content.toString('utf8'));
+            content = extPkgJson;
             if (process.env.PREVIEW) {
-              content.name = `${extPkgJson.name}-preview`
               content.preview = true;
-              content.displayName = 'SQLTools - Preview';
-            } else {
-              content.name = extPkgJson.name;
+              content.displayName = `${extPkgJson.displayName} - Preview`;
             }
             content.scripts = {};
             content.dependencies = dependencies;
@@ -65,7 +63,7 @@ function getExtensionConfig(env) {
             delete content.dependencies['@sqltools/language-server'];
             delete content.dependencies['@sqltools/ui'];
 
-            return JSON.stringify(content);
+            return JSON.stringify(content).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -109,7 +107,7 @@ module.exports = function (env = {}) {
       new webpack.DefinePlugin({
         'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
-        'process.env.DISPLAY_NAME': JSON.stringify(extPkgJson.displayName),
+        'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.BUGSNAG_API_KEY': JSON.stringify(BUGSNAG_API_KEY),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
