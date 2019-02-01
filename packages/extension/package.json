@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.16.4",
+    "version": "0.16.5",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -527,12 +527,12 @@
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.tableExplorer && viewItem != connection.schema_group",
+                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group",
                     "group": "sqltools.dbExplorer@1"
                 },
                 {
                     "command": "SQLTools.appendToCursor",
-                    "when": "view == SQLTools.tableExplorer && viewItem != connection.schema_group",
+                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group",
                     "group": "inline@3"
                 },
                 {
@@ -552,12 +552,12 @@
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@5"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "when": "editorIsOpen && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@2"
                 }
             ]

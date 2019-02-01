@@ -10,6 +10,8 @@ import {
   ViewColumn,
   window as Win,
   workspace as Wspc,
+  TreeDataProvider,
+  TreeView,
 } from 'vscode';
 import {
   CloseAction,
@@ -55,6 +57,7 @@ namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer(logger);
+  let connectionExplorerView: TreeView<any>;
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
@@ -380,16 +383,19 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    Win.registerTreeDataProvider(`${EXT_NAME}.tableExplorer`, connectionExplorer);
+    connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
+      Wspc.onDidCloseTextDocument(cmdRefreshSidebar),
+      Wspc.onDidOpenTextDocument(cmdRefreshSidebar),
       await getLanguageServerDisposable(),
       settingsEditor,
       queryResults,
       ...getExtCommands(),
       extDatabaseStatus,
     );
+    queryResults.onDidDispose(cmdRefreshSidebar);
 
     registerLanguageServerRequests();
     connectionExplorer.setConnections(ConfigManager.connections);
@@ -398,7 +404,7 @@ namespace SQLTools {
   async function registerLanguageServerRequests() {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-        connectionExplorer.setTreeData(conn, tables, columns);
+        connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));

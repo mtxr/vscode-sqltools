@@ -2,6 +2,17 @@
 
 ## v0.16
 
+### v0.16.5
+
+- **Enhancements**
+  - ***UI***: Updated extension icon and README.
+  - ***Settings***: Added settings defintion for `dialectOptions`.
+  - ***Connection Explorer***
+    - Improved to show  `Generate insert Query` and `Add to cursor` only when an editor is open and editable.
+    - Auto Expand connection on connect.
+- **Fixes**
+  - ***Connection Explorer***: Fixes tables not showing columns.
+
 ### v0.16.4
 
 - Fixes disconnect not working. #122.
