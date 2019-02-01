@@ -3,6 +3,8 @@ import {
   EventEmitter,
   ProviderResult,
   TreeDataProvider,
+  TreeView,
+  TreeItem,
 } from 'vscode';
 import {
   SidebarColumn,
@@ -11,15 +13,19 @@ import {
   SidebarTable,
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
-import { ConnectionCredentials, SerializedConnection } from '@sqltools/core/interface';
+import { ConnectionCredentials, SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
 import { Logger } from '../api';
-export type SidebarDatabaseItem = SidebarConnection | SidebarTable | SidebarColumn | SidebarView;
+export type SidebarDatabaseItem = SidebarConnection
+| SidebarTable
+| SidebarColumn
+| SidebarView
+| SidebarDatabaseSchemaGroup;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
-  this.onDidChange.event;
-  private tree: { [database: string]: SidebarConnection} = {};
+    this.onDidChange.event;
+  private tree: { [database: string]: SidebarConnection } = {};
   constructor(private logger: Logger) { }
   public fireUpdate(): void {
     this.onDidChange.fire();
@@ -46,6 +52,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     }
     return [];
   }
+
+  public getParent(element: SidebarDatabaseItem) {
+    return element.parent || null;
+  }
   public refresh() {
     this.fireUpdate();
   }
@@ -66,11 +76,18 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.refresh();
   }
 
-  public setTreeData(conn: SerializedConnection, tables, columns) {
+  public setTreeData(
+    conn: SerializedConnection,
+    tables: DatabaseInterface.Table[],
+    columns: DatabaseInterface.TableColumn[],
+    treeView: TreeView<TreeItem>,
+  ) {
     if (!conn) return;
     const treeKey = this.getDbId(conn);
 
-    if (this.tree[treeKey]) this.tree[treeKey].reset();
+    this.tree[treeKey] = this.tree[treeKey] || new SidebarConnection(conn);
+
+    this.tree[treeKey].reset();
 
     if (!tables && !columns) {
       this.tree[treeKey].deactivate();
@@ -81,25 +98,26 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       if (!this.tree[treeKey]) return;
       this.tree[treeKey].addItem(item);
     });
+    let key;
     columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
-      if (!column || !this.tree[treeKey] || this.tree[treeKey].views) {
-        this.logger.warn('didnt find a place in three for column', column);
-        return;
-      }
-      const key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
-      this.tree[treeKey][key].items[column.tableName].addItem(new SidebarColumn(column, conn));
+      key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
+      this.tree[treeKey][key].items[column.tableName].addItem(column);
     });
     this.refresh();
+    if (this.tree[treeKey].active && key)
+      treeView.reveal(this.tree[treeKey][key], { select: false, focus: false })
+        .then(Promise.resolve, Promise.resolve);
   }
 
-  public setActiveConnection(c?: SerializedConnection) {
+  public setActiveConnection(c: SerializedConnection) {
     const idActive = c ? this.getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
-      if (id === idActive) {
-        return this.tree[id].activate();
+      if (id !== idActive) {
+        return this.tree[id].deactivate();
       }
-      return this.tree[id].deactivate();
+      this.tree[id].activate();
     });
+    this.refresh();
   }
 
   private getDbId(c: SerializedConnection | ConnectionCredentials) {

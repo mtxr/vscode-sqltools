@@ -2,10 +2,10 @@ import {
   OutputChannel,
   window,
 } from 'vscode';
-import { DISPLAY_NAME, VERSION } from '@sqltools/core/constants';
+import { EXT_NAME, VERSION } from '@sqltools/core/constants';
 
 namespace Logwriter {
-  const outputChannel = window.createOutputChannel(`${DISPLAY_NAME} Logs`);
+  const outputChannel = window.createOutputChannel('SQLTools');
   export function debug(message: string, ...data: any[]) {
     writeLog(`DEBUG: ${message}`, ...data);
   }

@@ -4,12 +4,14 @@ import {
   ViewColumn,
   WebviewPanel,
   window,
+  EventEmitter,
 } from 'vscode';
 import ContextManager from '../../context';
 
 export default abstract class WebviewProvider implements Disposable {
+  public disposeEvent: EventEmitter<never> = new EventEmitter();
+  public get onDidDispose() { return this.disposeEvent.event; }
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
-
   private get baseHtml(): string {
     return `<!DOCTYPE html>
 <html>
@@ -73,6 +75,7 @@ export default abstract class WebviewProvider implements Disposable {
     if (this.disposables.length) this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
     this.panel = undefined;
+    this.disposeEvent.fire();
   }
 
   public postMessage(message: any) {

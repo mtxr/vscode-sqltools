@@ -3,9 +3,9 @@ import {
 } from 'vscode';
 import WebviewProvider from './webview-provider';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { EXT_NAME } from '@sqltools/core/constants';
 
-const cfgKey = DISPLAY_NAME.toLowerCase();
+const cfgKey = EXT_NAME.toLowerCase();
 
 export default class SettingsEditor extends WebviewProvider {
   protected id: string = 'settingsEditor';
