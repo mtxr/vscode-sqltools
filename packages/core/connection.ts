@@ -78,12 +78,12 @@ export default class Connection {
     return this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
   }
 
-  public query(query: string, handleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, autoHandleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
     return this.conn.query(query)
       .catch((e) => {
-        if (!handleError) throw e;
+        if (!autoHandleError) throw e;
         this.logger.error('Query error:', e);
-        Telemetry.registerException(e);
+        Telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
         let message = '';
         if (typeof e === 'string') {
           message = e;

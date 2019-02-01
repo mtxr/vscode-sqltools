@@ -469,6 +469,7 @@ namespace SQLTools {
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: (error) => {
+        Telemetry.registerException(error, { message: 'Server initialization failed.' });
         languageClient.error('Server initialization failed.', error);
         languageClient.outputChannel.show(true);
         return false;
@@ -476,6 +477,7 @@ namespace SQLTools {
       errorHandler: {
         error: (error, message, count): ErrorAction => {
           logger.error('Language server error', error, message, count);
+          Telemetry.registerException(error, { message: 'Language Server error.', givenMessage: message, count });
           return languageClientErrorHandler.error(error, message, count);
         },
         closed: (): CloseAction => {

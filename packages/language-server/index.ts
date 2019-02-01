@@ -24,6 +24,7 @@ import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interfac
 import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
+import { Telemetry } from '@sqltools/core/utils';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -50,6 +51,7 @@ namespace SQLToolsLanguageServer {
   function notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       Logger.error(message, err);
+      Telemetry.registerException(error, { message });
       server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
     if (typeof error !== 'undefined') return cb(error);
@@ -118,7 +120,7 @@ namespace SQLToolsLanguageServer {
       if (formatterRegistration) (await formatterRegistration).dispose();
       formatterRegistration = server.client.register(DocumentRangeFormattingRequest.type, {
         documentSelector: formatterLanguages,
-      }).then((a) => a, error => Logger.error(error.toString()) as any);
+      }).then((a) => a, error => notifyError('formatterRegistration error', error));
     } else if (formatterRegistration) {
       (await formatterRegistration).dispose();
     }
@@ -239,6 +241,7 @@ namespace SQLToolsLanguageServer {
   process.on('uncaughtException', (error: any) => {
     let message: string;
     if (error) {
+      Telemetry.registerException(error, { type: 'uncaughtException' })
       if (typeof error.stack === 'string') {
         message = error.stack;
       } else if (typeof error.message === 'string') {

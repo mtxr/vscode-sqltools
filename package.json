@@ -1,7 +1,7 @@
 {
   "name": "sqltools",
-  "displayName": "SQLTools",
-  "description": "Your swiss knife SQL for VScode. Execute queries, auto complete, bookmarks etc.",
+  "displayName": "SQLTools - Database tools",
+  "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
   "version": "0.16.4",
   "publisher": "mtxr",
   "license": "GPL-3.0",
@@ -25,6 +25,7 @@
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
     "package:preview": "yarn run compile:preview && (cd dist && npm i && vsce package)",
-    "package": "yarn run compile && (cd dist && npm i && vsce package)"
+    "package": "yarn run compile && (cd dist && npm i && vsce package)",
+    "publish": "cd dist && vsce publish"
    }
 }

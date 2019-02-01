@@ -70,7 +70,7 @@ namespace Telemetry {
   export function registerErrorMessage(message, error?: Error, value: string = 'Dismissed') {
     registerMessage('error', message, value);
     if (error) {
-      registerException(error);
+      registerException(error, { message });
     }
   }
 
@@ -87,18 +87,19 @@ namespace Telemetry {
   }
   export function registerSession(evt: string) {
     if (!isEnabled) return;
-    analytics.screenview(evt, `vscode-sqltools`, VERSION, errorHandler('screenview'));
+    analytics.screenview(evt, `vscode-sqltools`, VERSION, errorHandler('screenview', { evt }));
   }
   export function registerMessage(type: string, message: string, value: string = 'Dismissed'): void {
     registerEvent(`msg:${type}`, message, value);
   }
   export function registerEvent(category: string, event: string, label?: string): void {
     if (!isEnabled) return;
-    analytics.event(category, event, label || event, errorHandler('event'));
+    analytics.event(category, event, label || event, errorHandler('event', { category, event, label }));
   }
 
-  export function registerException(error: Error) {
+  export function registerException(error: Error, meta: { [key: string]: any } = {}) {
     if (!isEnabled) return;
+    errorHandler('registeredException', meta)(error);
     let exceptionDescription = error.toString();
     if (error.message) {
       exceptionDescription = `${error.name}:${error.message}`;
@@ -108,12 +109,12 @@ namespace Telemetry {
         exceptionDescription,
         isExceptionFatal: false,
       },
-      errorHandler('exception'),
+      errorHandler('analyticsException', meta),
     );
   }
 
   export function registerTime(timeKey: string, timer: Timer) {
-    analytics.timing(timeKey, timer.elapsed().toString(), errorHandler('timer'));
+    analytics.timing(timeKey, timer.elapsed().toString(), errorHandler('timer', { timeKey }));
   }
 
   function start() {
@@ -123,7 +124,7 @@ namespace Telemetry {
     analytics.set('applicationVersion', VERSION);
   }
 
-  function errorHandler(type: string) {
+  function errorHandler(type: string, meta: { [key: string]: any } = {}) {
     return (error?: Error) => {
       if (!error) return;
       bsClient.notify(error, {
@@ -133,6 +134,7 @@ namespace Telemetry {
           report.updateMetaData('details', {
             definedType: type,
             from: 'errorHandler',
+            ...meta,
           })
         },
       });
