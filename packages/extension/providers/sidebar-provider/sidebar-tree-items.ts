@@ -70,12 +70,14 @@ export class SidebarConnection extends TreeItem {
     this.isActive = true;
     this.expand();
     this.label = `* ${this.conn.name}`;
+    this.contextValue = 'connectedConnection';
     return this;
   }
 
   public deactivate() {
     this.isActive = false;
     this.label = this.conn.name;
+    this.contextValue = 'connection';
     return this;
   }
 

@@ -78,7 +78,11 @@
             {
                 "title": "Disconnect",
                 "command": "SQLTools.closeConnection",
-                "category": "SQLTools"
+                "category": "SQLTools",
+                "icon": {
+                    "light": "icons/disconnect-light.svg",
+                    "dark": "icons/disconnect-dark.svg"
+                }
             },
             {
                 "title": "Create from selection",
@@ -512,6 +516,16 @@
                 {
                     "command": "SQLTools.selectConnection",
                     "when": "view == SQLTools.tableExplorer && viewItem == connection",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
+                    "group": "sqltools.dbExplorer@0"
+                },
+                {
+                    "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
                     "group": "inline@0"
                 },
                 {

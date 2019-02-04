@@ -12,6 +12,7 @@
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
+    "@types/node": "^10.12.21",
     "typescript": "^3.3.1"
   }
 }

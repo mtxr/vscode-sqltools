@@ -7,6 +7,7 @@
   - ***UI***:
     - Using Octicons as suggested by VSCode team.
     - Adopeted the new QuickPick API.
+    - Added disconnect icon to connection-explorer
   - ***Connections***:
     - General: quick pick not showing options if no connection active. Issue #124
     - MySQL: Fixes `Can't add new command when connection is in closed state`. Should happen less often at least.
