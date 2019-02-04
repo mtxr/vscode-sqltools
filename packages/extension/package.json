@@ -259,10 +259,13 @@
             "title": "SQLTools Settings",
             "properties": {
                 "sqltools.autoConnectTo": {
-                    "type": "string",
+                    "type": ["string", "array"],
                     "default": null,
                     "required": false,
-                    "description": "Name of the connection to auto connect on start"
+                    "description": "Name of the connection to auto connect on start",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "sqltools.logging": {
                     "type": "boolean",
@@ -287,7 +290,7 @@
                         "WARN",
                         "ERROR"
                     ],
-                    "default": "INFO",
+                    "default": "DEBUG",
                     "description": "Set the severity of logged messages messages on console."
                 },
                 "sqltools.queryTimeout": {

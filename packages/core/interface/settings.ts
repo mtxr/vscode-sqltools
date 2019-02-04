@@ -17,11 +17,11 @@ export interface FormatOptions {
 export interface Settings {
   /**
    * Name of the connection to auto connect on start
-   * @type {string}
+   * @type {string | string[]}
    * @default null
    * @memberof Settings
    */
-  autoConnectTo?: string;
+  autoConnectTo?: string | string[];
   /**
    * Show debugging messages on console.
    * @default true

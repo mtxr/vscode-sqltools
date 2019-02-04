@@ -1,5 +1,5 @@
 {
-  "sqltools.autoConnectTo": "PGSQL",
+  "sqltools.autoConnectTo": ["PGSQL", "MySQL"],
   "sqltools.connections": [
     {
       "name": "PGSQL",
@@ -22,6 +22,17 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQL",
+      "password": "root",
+      "port": 3307,
+      "server": "localhost",
+      "username": "root"
     }
   ]
 }

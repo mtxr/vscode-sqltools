@@ -76,7 +76,7 @@ namespace SQLToolsLanguageServer {
         updateSidebar(conn.serialize(), t, c);
         return loadCompletionItens(t, c);
       }).catch(e => {
-        notifyError('Error while preparing columns completions')(e);
+        notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
         throw e;
       });
   }

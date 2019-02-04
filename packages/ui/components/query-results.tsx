@@ -219,8 +219,9 @@ export class QueryResult extends React.Component<QueryResultProps> {
         <div>Query with errors. Please, check the error below.</div>
       </div>
     );
+    const cols = !this.props.value.cols || this.props.value.cols.length === 0 ? [''] : this.props.value.cols;
     if (this.props.value.error !== true) {
-      table = <ResultsTable value={{ cols: this.props.value.cols, data: this.props.value.results }} />;
+      table = <ResultsTable value={{ cols, data: this.props.value.results || [] }} />;
     }
     return (
       <div className={'result'}>

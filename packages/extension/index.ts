@@ -355,17 +355,41 @@ namespace SQLTools {
     return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
-  function autoConnectIfActive(currConn?: SerializedConnection) {
-    let defaultConnection = currConn || null;
-    if (!defaultConnection && ConfigManager.autoConnectTo) {
-      defaultConnection = ConfigManager.connections
-        .find((conn) => conn.name === ConfigManager.autoConnectTo) as SerializedConnection;
+  async function autoConnectIfActive(currConn?: SerializedConnection) {
+    let defaultConnections: SerializedConnection[] = currConn ? [currConn] : [];
+    if (defaultConnections.length === 0
+      && (
+        typeof ConfigManager.autoConnectTo === 'string'
+        || (
+          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
+          )
+        )
+    ) {
+      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
+      ? ConfigManager.autoConnectTo
+      : [ConfigManager.autoConnectTo];
+
+      defaultConnections = ConfigManager.connections
+        .filter((conn) => autoConnectTo.indexOf(conn.name) >= 0) as SerializedConnection[];
     }
-    if (!defaultConnection) {
+    if (defaultConnections.length === 0) {
       return setConnection();
     }
-    logger.info(`Configuration set to auto connect to: ${defaultConnection.name}`);
-    setConnection(defaultConnection);
+    logger.info(`Configuration set to auto connect to: ${defaultConnections.map(({name}) => name).join(', ')}`);
+    try {
+      await Promise.all(defaultConnections.slice(1).map(c =>
+        setConnection(c)
+          .catch(e => {
+            ErrorHandler.create(`Failed to auto connect to  ${c.name}`)(e);
+            Promise.resolve();
+          }),
+      ));
+
+      await setConnection(defaultConnections[0]);
+      // first should be the active
+    } catch (error) {
+      ErrorHandler.create('Auto connect failed')(error);
+    }
   }
   function loadConfigs() {
     ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
@@ -436,6 +460,7 @@ namespace SQLTools {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
+        connectionExplorer.setActiveConnection(lastUsedConn);
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
