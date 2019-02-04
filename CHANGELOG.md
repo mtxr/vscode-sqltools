@@ -16,7 +16,8 @@
     - Add option to edit item from history.
     - Updated history to show most recenetly used at first position
   - ***Query Format***:
-    - Fixed formatting with comments. Issue #07
+    - Fixed formatting with comments. Issue #97
+    - Fixed formatting with non latin chars. Issue #99
 
 ### v0.16.6
 - **Fixes**
