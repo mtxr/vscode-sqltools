@@ -1,7 +1,13 @@
 import formatter from 'sql-formatter/src/sqlFormatter';
 import { DatabaseInterface } from '../interface';
+
+// Issue #99. Waiting 3rd party
+function nonLatinQuickFix(query: string) {
+  return query.replace(/([^\x00-\x7F]) /gi, '$1');
+}
+
 export function format(query, indentSize: number = 2) {
-  return formatter.format(query, { indent: ' '.repeat(indentSize) });
+  return nonLatinQuickFix(formatter.format(query, { indent: ' '.repeat(indentSize) }));
 }
 
 export function parse(query = '') {
