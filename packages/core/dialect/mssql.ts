@@ -48,6 +48,7 @@ export default class MSSQL implements ConnectionDialect {
 
   }
 
+  private retryCount = 0;
   public open() {
     const config: any = {
       password: this.credentials.password,
@@ -65,7 +66,7 @@ export default class MSSQL implements ConnectionDialect {
       rowCollectionOnRequestCompletion: true,
     };
     if (this.credentials.dialectOptions) {
-      config.options = Object.assign({}, config.options, this.credentials.dialectOptions);
+      config.options.encrypt = this.credentials.dialectOptions.encrypt;
     }
 
     return new Promise((resolve, reject) => {
@@ -78,6 +79,21 @@ export default class MSSQL implements ConnectionDialect {
         this.connection = Promise.resolve(this.connectionInstance);
         resolve(this.connectionInstance);
       });
+    }).catch(error => {
+      if (this.retryCount < 3
+        && (
+          !this.credentials.dialectOptions
+          || !this.credentials.dialectOptions.encrypt
+        )
+      ) {
+        this.credentials.dialectOptions = (this.credentials.dialectOptions || {} as ConnectionCredentials['dialectOptions'])
+        this.credentials.dialectOptions.encrypt = true;
+        this.retryCount++;
+
+        // retry with encryption, but if fails, throws the first error
+        return this.open().catch(() => Promise.reject(error));
+      }
+      return Promise.reject(error);
     });
   }
 
