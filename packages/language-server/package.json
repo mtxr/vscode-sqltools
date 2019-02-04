@@ -9,10 +9,9 @@
   "dependencies": {
     "@sqltools/core": "*",
     "redux": "^4.0.1",
-    "rxjs": "^6.3.3",
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
-    "typescript": "^3.1.6"
+    "typescript": "^3.3.1"
   }
 }

@@ -83,14 +83,15 @@ export default class MSSQL implements ConnectionDialect {
       if (this.retryCount < 3
         && (
           !this.credentials.dialectOptions
-          || !this.credentials.dialectOptions.encrypt
+          || typeof this.credentials.dialectOptions.encrypt === 'undefined'
+          || this.credentials.dialectOptions.encrypt === true
         )
       ) {
         this.credentials.dialectOptions = (this.credentials.dialectOptions || {} as ConnectionCredentials['dialectOptions'])
-        this.credentials.dialectOptions.encrypt = true;
+        this.credentials.dialectOptions.encrypt = false;
         this.retryCount++;
 
-        // retry with encryption, but if fails, throws the first error
+        // retry without encryption, but if fails, throws the first error
         return this.open().catch(() => Promise.reject(error));
       }
       return Promise.reject(error);

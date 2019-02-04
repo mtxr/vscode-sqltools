@@ -8,16 +8,16 @@
   "private": true,
   "dependencies": {
     "@bugsnag/js": "^6.0.0-alpha.1",
-    "mysql2": "^1.5.1",
-    "pg": "^7.4.0",
-    "sql-formatter": "^2.3.1",
-    "tedious": "^2.3.1",
-    "universal-analytics": "^0.4.16",
-    "uuid": "^3.1.0",
+    "mysql2": "^1.6.4",
+    "pg": "^7.8.0",
+    "sql-formatter": "^2.3.2",
+    "tedious": "^3.0.1",
+    "universal-analytics": "^0.4.20",
+    "uuid": "^3.3.2",
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
     "@types/universal-analytics": "^0.4.2",
-    "typescript": "^3.1.6"
+    "typescript": "^3.3.1"
   }
 }

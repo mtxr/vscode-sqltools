@@ -47,7 +47,7 @@ export default class MySQL implements ConnectionDialect {
 
   }
 
-  public open() {
+  public async open() {
     if (this.connection) {
       return this.connection;
     }
@@ -60,24 +60,28 @@ export default class MySQL implements ConnectionDialect {
       port: this.credentials.port,
       user: this.credentials.username,
     };
-    const self = this;
+
     const connection = mysql.createConnection(options);
-    return new Promise((resolve, reject) => {
+    await new Promise((resolve, reject) => {
       connection.connect((err) => {
-        if (err) {
-          return reject(err);
-        }
-        self.connection = Promise.resolve(connection);
-        resolve(self.connection);
+        if (err) return reject(err);
+        resolve();
       });
     });
+
+    this.connection = Promise.resolve(connection);
+
+    return this.connection;
   }
 
   public close() {
     if (!this.connection) return Promise.resolve();
 
-    return this.connection.then((conn) => {
+    return this.connection.then(async (conn) => {
       conn.destroy();
+      await new Promise((resolve, reject) => {
+        conn.end((err) => err ? reject(err) : resolve());
+      })
       this.connection = null;
       return Promise.resolve();
     });
