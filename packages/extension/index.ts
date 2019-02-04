@@ -6,12 +6,11 @@ import {
   StatusBarAlignment,
   TextEditor,
   TextEditorEdit,
-  Uri,
-  ViewColumn,
   window as Win,
   workspace as Wspc,
-  TreeDataProvider,
   TreeView,
+  QuickPickOptions,
+  QuickPick,
 } from 'vscode';
 import {
   CloseAction,
@@ -48,10 +47,9 @@ import {
 import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
-import { SerializedConnection, DatabaseInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
+import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
-import { any } from 'prop-types';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
@@ -273,7 +271,13 @@ namespace SQLTools {
         detail: `${c.username}@${c.server}:${c.port}`,
         label: c.name,
       } as QuickPickItem;
-    }), 'label')) as string;
+    }), 'label', {
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Pick a connection',
+      placeHolderDisabled: 'You have no connections on your settings file.',
+      title: 'Connections',
+    })) as string;
     return connections.find((c) => c.name === sel);
   }
 
@@ -573,10 +577,6 @@ namespace SQLTools {
     }
   }
 
-  async function setSettings(key: string, value: any) {
-    await Wspc.getConfiguration(cfgKey).update(key, value);
-  }
-
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
       await setConnection(node.conn as SerializedConnection);
@@ -587,11 +587,53 @@ namespace SQLTools {
 
     return await tableMenu(conn, 'label');
   }
-  async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
+
+  /**
+   * @deprecated Will be removed in newer versions.
+   */
+  async function quickPickOldApi(
+    options: QuickPickItem[],
+    prop?: string,
+  ): Promise<QuickPickItem | any> {
     const sel: QuickPickItem = await Win.showQuickPick(options);
     if (!sel || (prop && !sel[prop])) throw new DismissedException();
     return prop ? sel[prop] : sel;
   }
+
+  type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<QuickPickOptions & {
+    title: QuickPick<T>['title'];
+    placeHolderDisabled?: QuickPick<T>['placeholder'];
+  }>;
+
+  async function quickPick(
+    options: QuickPickItem[],
+    prop?: string,
+    quickPickOptions?: ExtendedQuickPickOptions,
+  ): Promise<QuickPickItem | any> {
+    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(options, prop);
+
+    const qPick = Win.createQuickPick();
+    const sel = await new Promise<QuickPickItem | any>((resolve) => {
+      qPick.onDidChangeSelection(selection => resolve(selection));
+
+      const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
+
+      Object.keys(qPickOptions).forEach(k => {
+        qPick[k] = qPickOptions[k];
+      });
+      qPick.items = options;
+      qPick.enabled = options.length > 0;
+
+      if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
+
+      qPick.onDidHide(() => qPick.dispose());
+      qPick.show();
+    });
+
+    if (!sel || (prop && !sel[prop])) throw new DismissedException();
+    return prop ? sel[prop] : sel;
+  }
+
   async function readInput(prompt: string, placeholder?: string) {
     const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
     if (isEmpty(data)) throw new DismissedException();

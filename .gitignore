@@ -11,3 +11,5 @@ npm-shrinkwrap.json
 cache/
 !**/.vscode
 **/package-lock.json
+.env
+sourcemaps.sh
