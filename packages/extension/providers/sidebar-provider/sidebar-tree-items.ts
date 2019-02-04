@@ -16,7 +16,7 @@ export class SidebarConnection extends TreeItem {
   public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables', this);
   public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views', this);
   public get description() {
-    return `${this.conn.dialect}://${this.conn.username}@${this.conn.server}:${this.conn.port}`;
+    return `${this.conn.username}@${this.conn.server}:${this.conn.port}/${this.conn.database}`;
   }
 
   private isActive = false;
@@ -33,13 +33,13 @@ export class SidebarConnection extends TreeItem {
   }
 
   constructor(public conn: ConnectionCredentials) {
-    super(conn.database, TreeItemCollapsibleState.None);
+    super(conn.name, TreeItemCollapsibleState.None);
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
       light: ContextManager.context.asAbsolutePath('icons/database-light.svg'),
     };
     this.command = {
-      title: '',
+      title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
       arguments: [this],
     };

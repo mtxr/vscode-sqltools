@@ -615,7 +615,10 @@ namespace SQLTools {
     const qPick = Win.createQuickPick();
     const sel = await new Promise<QuickPickItem | any>((resolve) => {
       qPick.onDidChangeSelection(selection => resolve(selection));
-
+      qPick.onDidTriggerButton((btn: any) => {
+        if (btn.cb) btn.cb();
+        qPick.hide();
+      });
       const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
 
       Object.keys(qPickOptions).forEach(k => {
@@ -623,6 +626,16 @@ namespace SQLTools {
       });
       qPick.items = options;
       qPick.enabled = options.length > 0;
+      qPick.buttons = [
+        {
+          iconPath: {
+            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
+            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
+          },
+          tooltip: ' Add new Connection',
+          cb: cmdAddNewConnection,
+        } as any,
+      ];
 
       if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 

@@ -71,8 +71,8 @@
                 "command": "SQLTools.selectConnection",
                 "category": "SQLTools",
                 "icon": {
-                    "light": "icons/database-light.svg",
-                    "dark": "icons/database-dark.svg"
+                    "light": "icons/connect-light.svg",
+                    "dark": "icons/connect-dark.svg"
                 }
             },
             {
@@ -145,8 +145,8 @@
                 "command": "SQLTools.showRecords",
                 "category": "SQLTools Connection",
                 "icon": {
-                    "light": "icons/list-light.svg",
-                    "dark": "icons/list-dark.svg"
+                    "light": "icons/show-light.svg",
+                    "dark": "icons/show-dark.svg"
                 }
             },
             {
@@ -159,8 +159,8 @@
                 "command": "SQLTools.addNewConnection",
                 "category": "SQLTools Management",
                 "icon": {
-                    "light": "icons/database-light.svg",
-                    "dark": "icons/database-dark.svg"
+                    "light": "icons/add-connection-light.svg",
+                    "dark": "icons/add-connection-dark.svg"
                 }
             },
             {
@@ -177,8 +177,8 @@
                 "command": "SQLTools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "icons/insert-light.svg",
-                    "dark": "icons/insert-dark.svg"
+                    "light": "icons/plus-light.svg",
+                    "dark": "icons/plus-dark.svg"
                 }
             },
             {

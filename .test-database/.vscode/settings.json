@@ -1,4 +1,5 @@
 {
+  "sqltools.autoConnectTo": "PGSQL",
   "sqltools.connections": [
     {
       "name": "PGSQL",

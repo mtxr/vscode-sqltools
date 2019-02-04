@@ -4,6 +4,9 @@
 
 ### v0.16.7
 - **Fixes**
+  - ***UI***:
+    - Using Octicons as suggested by VSCode team.
+    - Adopeted the new QuickPick API.
   - ***Connections***: quick pick not showing options if no connection active. Issue #124
 
 ### v0.16.6
