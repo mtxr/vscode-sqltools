@@ -10,7 +10,7 @@
     "@bugsnag/js": "^6.0.0-alpha.1",
     "mysql2": "^1.6.4",
     "pg": "^7.8.0",
-    "sql-formatter": "^2.3.2",
+    "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b",
     "tedious": "^3.0.1",
     "universal-analytics": "^0.4.20",
     "uuid": "^3.3.2",

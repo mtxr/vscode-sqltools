@@ -6608,10 +6608,9 @@ sprintf-js@~1.0.2:
   resolved "https://registry.yarnpkg.com/sprintf-js/-/sprintf-js-1.0.3.tgz#04e6926f662895354f3dd015203633b857297e2c"
   integrity sha1-BOaSb2YolTVPPdAVIDYzuFcpfiw=
 
-sql-formatter@^2.3.2:
+"sql-formatter@https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b":
   version "2.3.2"
-  resolved "https://registry.yarnpkg.com/sql-formatter/-/sql-formatter-2.3.2.tgz#693acbb1691c805746fc28cd2a1315474a3c03fc"
-  integrity sha512-cffwWdNzQAvzf/JlAv7fnCAR2//ZvmN2e9FWyWI6GCHYvn0U2UrmCOwBr0GO8HPaEm7Bks+a3rQDc+0Z43bhJg==
+  resolved "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b"
   dependencies:
     lodash "^4.16.0"
 
