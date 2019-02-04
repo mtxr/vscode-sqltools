@@ -111,6 +111,11 @@
                 "category": "SQLTools History"
             },
             {
+                "title": "Edit from history",
+                "command": "SQLTools.editFromHistory",
+                "category": "SQLTools History"
+            },
+            {
                 "title": "Describe table",
                 "command": "SQLTools.describeTable",
                 "category": "SQLTools Connection"

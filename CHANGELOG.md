@@ -8,6 +8,9 @@
     - Using Octicons as suggested by VSCode team.
     - Adopeted the new QuickPick API.
   - ***Connections***: quick pick not showing options if no connection active. Issue #124
+  - ***History***:
+    - Add option to edit item from history.
+    - Updated history to show most recenetly used at first position
 
 ### v0.16.6
 - **Fixes**

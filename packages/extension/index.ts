@@ -155,7 +155,7 @@ namespace SQLTools {
     if (!conn) {
       conn = await connectionMenu(true);
     }
-    languageClient.sendRequest(CloseConnectionRequest, { conn })
+    return languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
   }
 
@@ -227,10 +227,20 @@ namespace SQLTools {
   export async function cmdRunFromHistory(): Promise<void> {
     try {
       await connect();
+      const query = await historyMenu();
       await printOutput();
-      await runQuery(await historyMenu(), false);
+      await runQuery(query, false);
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
+    }
+  }
+
+  export async function cmdEditFromHistory(): Promise<void> {
+    try {
+      const query = (await historyMenu());
+      insertText(query, true);
+    } catch (e) {
+      ErrorHandler.create('Could not edit bookmarked query')(e);
     }
   }
 
@@ -275,7 +285,7 @@ namespace SQLTools {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Pick a connection',
-      placeHolderDisabled: 'You have no connections on your settings file.',
+      placeHolderDisabled: 'You don\'t have any connections yet.',
       title: 'Connections',
     })) as string;
     return connections.find((c) => c.name === sel);
@@ -290,7 +300,13 @@ namespace SQLTools {
         detail: all[key],
         label: key,
       };
-    }), prop);
+    }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Pick a bookmarked query',
+        placeHolderDisabled: 'You don\'t have any bookmarks yet.',
+        title: 'Bookmarks',
+      });
   }
 
   function runConnectionCommand(command, ...args) {
@@ -309,7 +325,11 @@ namespace SQLTools {
     return await quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
-      }), prop);
+      }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        title: `Tables in ${conn.database}`,
+      });
   }
 
   async function historyMenu(prop: string = 'label'): Promise<string> {
@@ -318,7 +338,12 @@ namespace SQLTools {
         description: '',
         label: query,
       } as QuickPickItem;
-    }), prop);
+    }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolderDisabled: 'You don\'t have any queries on your history.',
+        title: 'History',
+      });
   }
 
   function printOutput() {
@@ -613,13 +638,17 @@ namespace SQLTools {
     if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(options, prop);
 
     const qPick = Win.createQuickPick();
-    const sel = await new Promise<QuickPickItem | any>((resolve) => {
-      qPick.onDidChangeSelection(selection => resolve(selection));
+    const sel = await (new Promise<QuickPickItem | any>((resolve) => {
+      const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
+      qPick.onDidHide(() => qPick.dispose());
+      qPick.onDidChangeSelection((selection = []) => {
+        qPick.hide();
+        return resolve(qPickOptions.canPickMany ? selection : selection[0]);
+      });
       qPick.onDidTriggerButton((btn: any) => {
         if (btn.cb) btn.cb();
         qPick.hide();
       });
-      const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
 
       Object.keys(qPickOptions).forEach(k => {
         qPick[k] = qPickOptions[k];
@@ -639,10 +668,10 @@ namespace SQLTools {
 
       if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 
-      qPick.onDidHide(() => qPick.dispose());
-      qPick.show();
-    });
+      qPick.title = `${qPick.title || 'Items'} (${options.length})`;
 
+      qPick.show();
+    }));
     if (!sel || (prop && !sel[prop])) throw new DismissedException();
     return prop ? sel[prop] : sel;
   }
