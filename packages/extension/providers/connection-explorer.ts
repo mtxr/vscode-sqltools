@@ -116,7 +116,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
         .then(Promise.resolve, Promise.resolve);
   }
 
-  public setActiveConnection(c: SerializedConnection) {
+  public setActiveConnection(c?: SerializedConnection) {
     const idActive = c ? this.getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
       if (id !== idActive) {

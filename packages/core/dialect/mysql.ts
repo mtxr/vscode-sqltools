@@ -52,7 +52,7 @@ export default class MySQL implements ConnectionDialect {
       return this.connection;
     }
     const options = {
-      connectionTimeout: this.credentials.connectionTimeout * 1000,
+      connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       host: this.credentials.server,
       multipleStatements: true,

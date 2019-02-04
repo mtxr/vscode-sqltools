@@ -9,8 +9,7 @@ import {
 import * as Utils from '../utils';
 
 export default class MSSQL implements ConnectionDialect {
-  public connection: Promise<any>;
-  private connectionInstance: tds.Connection;
+  public connection: Promise<tds.Connection>;
   private queries: DialectQueries = {
     describeTable: 'SP_COLUMNS :table',
     fetchColumns: `SELECT TABLE_NAME AS tableName,
@@ -70,14 +69,15 @@ export default class MSSQL implements ConnectionDialect {
     }
 
     return new Promise((resolve, reject) => {
-      this.connectionInstance = new tds.Connection(config);
-      this.connectionInstance.on('error', (err) => {
+      const connection = new tds.Connection(config);
+      connection.on('error', (err) => {
         return reject(err);
       });
-      this.connectionInstance.on('connect', (err) => {
+      connection.on('connect', (err) => {
         if (err) return reject(err);
-        this.connection = Promise.resolve(this.connectionInstance);
-        resolve(this.connectionInstance);
+        // alway keep one connection
+        this.connection = this.connection || Promise.resolve(connection);
+        resolve(connection);
       });
     }).catch(error => {
       if (this.retryCount < 3
@@ -98,46 +98,56 @@ export default class MSSQL implements ConnectionDialect {
     });
   }
 
-  public close() {
-    if (!this.connection) return Promise.resolve();
-    this.connectionInstance.on('end', () => {
-      this.connectionInstance = null;
-      this.connection = null;
-    });
-    return this.connection.then(() => {
+  private closeConnection(conn) {
+    return new Promise((resolve) => {
+      conn.on('end', () => resolve());
       try {
-        this.connectionInstance.cancel();
+        conn.cancel();
       } catch (e) { /**/ }
-      this.connectionInstance.close();
+      conn.close();
+    })
+  }
+
+  public async close() {
+    if (!this.connection) return Promise.resolve();
+
+    await this.closeConnection(await this.connection);
+    this.connection = null;
+  }
+
+  private runSingleQuery(query, shouldClose = false) {
+    return new Promise<DatabaseInterface.QueryResults>(async (resolve, reject) => {
+      const result = this.prepareRow(null, query);
+      let error = null;
+      const request = new tds.Request(query, (err) => error = err);
+      let count = 0;
+      const cb = (rowCount, ...rest) => {
+        if (typeof rowCount !== 'undefined' && query.toLowerCase().indexOf('select') === -1) {
+          result.messages.push(`${rowCount} rows were affected.`);
+          ++count;
+        }
+      };
+      request.on('row', (row) => this.prepareRow(result, query, row));
+      request.on('done', cb);
+      request.on('doneInProc', cb);
+      request.on('doneProc', cb);
+      request.on('requestCompleted', () => {
+        if (error) {
+          return reject(error);
+        }
+
+        if (shouldClose) this.closeConnection(connection).catch(Promise.resolve);
+
+        return resolve(result);
+      });
+      const connection = await this.open();
+      connection.execSql(request);
     });
   }
 
-  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const queries = Utils.query.parse(query);
-    return this.open()
-      .then(() => {
-        return new Promise((resolve, reject) => {
-          const results = [];
-          let error = null;
-          const request = new tds.Request(query, (err) => error = err);
-          let count = 0;
-          const cb = (rowCount) => {
-            if (typeof rowCount !== 'undefined' && queries[count].toLowerCase().indexOf('SELECT') === -1) {
-              results[count].messages.push(`${rowCount} rows were affected.`);
-            }
-            ++count;
-          };
-          request.on('row', (row) => this.prepareRow(results, queries, count, row));
-          request.on('done', cb);
-          request.on('doneInProc', cb);
-          request.on('doneProc', cb);
-          request.on('requestCompleted', () => {
-            if (error) return reject(error);
-            return resolve(results);
-          });
-          this.connectionInstance.execSql(request);
-        }) as Promise<DatabaseInterface.QueryResults[]>;
-      });
+    return Promise.all(queries.map((q, i) => this.runSingleQuery(q, i > 0)));
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
@@ -181,16 +191,19 @@ export default class MSSQL implements ConnectionDialect {
   public showRecords(table: string, limit: number) {
     return this.query(Utils.replacer(this.queries.fetchRecords, {limit, table }));
   }
-  private prepareRow(results: any[], queries: string [], count: number, row: any): any {
-    results[count] = results[count] || {
-      cols: row ? Object.keys(row) : [],
+  private prepareRow(result: DatabaseInterface.QueryResults, query: string, row?: any) {
+    result = result || {
       messages: [],
-      query: queries[count],
+      query,
       results: [],
-    };
-    results[count].results.push(Object.keys(row).reduce((p, c) => {
-      p[c] = row[c].value;
-      return p;
-    }, {}));
+    } as DatabaseInterface.QueryResults;
+    if (row) {
+      result.cols = row ? Object.keys(row) : (result.cols && result.cols.length > 0 ? result.cols : []),
+      result.results.push(Object.keys(row).reduce((p, c) => {
+        p[c] = row[c].value;
+        return p;
+      }, {}));
+    }
+    return result;
   }
 }

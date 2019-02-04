@@ -2,6 +2,11 @@
 
 ## v0.16
 
+### v0.16.8
+- **Fixes**
+  - ***Connections***:
+    - MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue #126
+
 ### v0.16.7
 - **Fixes**
   - ***UI***:

@@ -197,6 +197,7 @@ namespace SQLToolsLanguageServer {
     await c.close().catch(notifyError('Connection Error'));
     store.dispatch(actions.Disconnect(c));
     const state = store.getState();
+    req.conn.isConnected = false;
     updateSidebar(req.conn, null, null);
   });
 

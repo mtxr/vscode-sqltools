@@ -48,7 +48,7 @@ import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Timer, Telemetry, query as QueryUtils } from '@sqltools/core/utils';
+import { Timer, Telemetry, query as QueryUtils, getDbId } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
 
 namespace SQLTools {
@@ -460,7 +460,11 @@ namespace SQLTools {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
-        connectionExplorer.setActiveConnection(lastUsedConn);
+        if (getDbId(lastUsedConn) === getDbId(conn) && !conn.isConnected) {
+          connectionExplorer.setActiveConnection();
+        } else {
+          connectionExplorer.setActiveConnection(lastUsedConn);
+        }
       });
       autoConnectIfActive(lastUsedConn);
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
