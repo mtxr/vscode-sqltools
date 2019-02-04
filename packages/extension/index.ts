@@ -263,6 +263,8 @@ namespace SQLTools {
 
     const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
 
+    if (availableConns.length === 0 && onlyActive) return connectionMenu();
+
     if (availableConns.length === 1) return availableConns[0];
 
     const sel = (await quickPick(availableConns.map((c) => {

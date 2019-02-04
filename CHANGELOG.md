@@ -2,6 +2,10 @@
 
 ## v0.16
 
+### v0.16.7
+- **Fixes**
+  - ***Connections***: quick pick not showing options if no connection active. Issue #124
+
 ### v0.16.6
 - **Fixes**
   - ***Connections***: Error while connecting => `toString() of undefined`
