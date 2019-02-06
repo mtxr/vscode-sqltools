@@ -14,8 +14,6 @@ const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkg
 // defintions
 extPkgJson.name = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools'; // vscode marketplace name
 
-const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
-
 const outdir = path.resolve(__dirname, '..', '..', 'dist');
 
 /**
@@ -108,7 +106,7 @@ module.exports = function (env = {}) {
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.BUGSNAG_API_KEY': JSON.stringify(BUGSNAG_API_KEY),
+        'process.env.RB': JSON.stringify(process.env.RB || null),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);

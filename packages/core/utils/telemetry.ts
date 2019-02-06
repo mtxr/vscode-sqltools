@@ -2,9 +2,9 @@ import Analytics from 'universal-analytics';
 import uuidv4 from 'uuid/v4';
 import { LoggerInterface } from '../interface';
 import { get, set } from './persistence';
-import { GA_CODE, VERSION, BUGSNAG_API_KEY, ENV } from './../constants';
+import { GA_CODE, VERSION, RB, ENV } from './../constants';
 import Timer from './timer';
-import Bugsnag from '@bugsnag/js';
+import Rollbar from 'rollbar';
 
 const metaData = {
   platform: {
@@ -13,33 +13,36 @@ const metaData = {
   }
 };
 
-const bsClient = Bugsnag({
-  appVersion: VERSION,
-  apiKey: BUGSNAG_API_KEY,
-  releaseStage: ENV,
-  collectUserIp: false,
-  autoCaptureSessions: false,
-  autoBreadcrumbs: false,
-  autoNotify: false,
-  logger: null,
-  projectRoot: __dirname,
-  filters: [
-    'access_token', // exact match: "access_token"
-    /^password$/i,  // case-insensitive: "password", "PASSWORD", "PaSsWoRd"
-  ],
-  beforeSend: (report) => {
-    if (!Telemetry.shouldSend()) return report.ignore();
+const opts: Rollbar.Configuration = {
+  enabled: false,
+  accessToken: RB,
+  captureUncaught: true,
+  captureUnhandledRejections: true,
+  captureIp: false,
+  captureEmail: false,
+  captureUsername: false,
+  captureLambdaTimeouts: false,
+  environment: ENV,
+  codeVersion: VERSION,
+  payload: {
+    ...metaData,
   },
-  metaData
-})
-
+  checkIgnore: () => {
+    return !Telemetry.shouldSend();
+  },
+  transform: (payload: any) => {
+    if (Telemetry.extensionUUID)
+      payload.person = { id: Telemetry.extensionUUID }
+  }
+};
+const rollbar = new Rollbar(opts);
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
 
 namespace Telemetry {
   let isEnabled: Boolean = true;
   let logger: LoggerInterface = console;
-  let extensionUUID: string;
   let analytics: Analytics.Visitor;
+  export let extensionUUID: string;
 
   export function register(product: Product, enableTelemetry: boolean, useLogger?: LoggerInterface): any {
     setLogger(useLogger);
@@ -78,10 +81,20 @@ namespace Telemetry {
   export function enable(): void {
     isEnabled = true;
     logger.info('Telemetry enabled!');
+    if (RB)
+      rollbar.configure({
+        ...opts,
+        enabled: true,
+      });
   }
   export function disable(): void {
     isEnabled = false;
     logger.info('Telemetry disabled!');
+    if (RB)
+      rollbar.configure({
+        ...opts,
+        enabled: false,
+      });
   }
   export function setLogger(useLogger: LoggerInterface = console) {
     logger = useLogger;
@@ -125,21 +138,16 @@ namespace Telemetry {
     analytics.set('applicationVersion', VERSION);
   }
 
-  function errorHandler(type: string, meta: { [key: string]: any } = {}) {
+  function errorHandler(definedType: string, meta: { [key: string]: any } = {}) {
     return (error?: Error) => {
       if (!error) return;
-      bsClient.notify(error, {
-        beforeSend: (report) => {
-          if (!Telemetry.shouldSend()) return report.ignore();
-
-          report.updateMetaData('details', {
-            definedType: type,
-            from: 'errorHandler',
-            ...meta,
-          })
-        },
+      rollbar.error(error, {
+        ...metaData,
+        definedType,
+        from: 'errorHandler',
+        ...meta,
       });
-      logger.error(`Telemetry:${type} error`, error);
+      logger.error(`Telemetry:${definedType} error`, error);
     };
   }
   export function shouldSend() {
