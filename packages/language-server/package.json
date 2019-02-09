@@ -8,6 +8,7 @@
   "private": true,
   "dependencies": {
     "@sqltools/core": "*",
+    "@sqltools/sql-parser": "*",
     "redux": "^4.0.1",
     "vscode-languageserver": "^5.2.1"
   },

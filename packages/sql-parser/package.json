@@ -1,0 +1,15 @@
+{
+  "name": "@sqltools/sql-parser",
+  "version": "1.0.0",
+  "description": "SQLTools Query Parser",
+  "main": "lib/index.js",
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "GPL-3.0",
+  "private": false,
+  "scripts": {
+    "postinstall": "mkdir -p lib; jison -m commonjs generic-grammar.jison -o lib/index.js"
+  },
+  "devDependencies": {
+    "jison": "^0.4.18"
+  }
+}

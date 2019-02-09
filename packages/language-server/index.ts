@@ -1,7 +1,7 @@
 import {
   CompletionItem, createConnection,
   Disposable,
-  DocumentRangeFormattingRequest, IConnection, TextDocumentPositionParams, TextDocuments, InitializeParams, ProposedFeatures,
+  DocumentRangeFormattingRequest, IConnection, TextDocumentPositionParams, TextDocuments, InitializeParams, ProposedFeatures, Range,
 } from 'vscode-languageserver';
 
 import Formatter from './requests/format';
@@ -25,6 +25,9 @@ import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
 import { Telemetry } from '@sqltools/core/utils';
+import Parser from '@sqltools/sql-parser';
+
+type KeyedCompletion = { [name: string]: CompletionItem[] };
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -33,7 +36,10 @@ namespace SQLToolsLanguageServer {
   let formatterRegistration: Thenable<Disposable> | null = null;
   let formatterLanguages: string[] = [];
   let sgdbConnections: Connection[] = [];
-  let completionItems: CompletionItem[] = [];
+  const completionItemsMap: {
+    tables: CompletionItem[],
+    tableCols: KeyedCompletion
+  } = { tables: [], tableCols: {} };
 
   docManager.listen(server);
 
@@ -41,7 +47,7 @@ namespace SQLToolsLanguageServer {
 
   export function getStatus() {
     return {
-      completionItems,
+      completionItemsMap,
       connections: sgdbConnections.map((c) => c.serialize()),
       formatterLanguages,
     };
@@ -58,18 +64,23 @@ namespace SQLToolsLanguageServer {
     return cb;
   }
 
-  function loadCompletionItens(tables, columns) {
-    completionItems = [];
-    completionItems.push(...tables.map((table) => TableCompletionItem(table)));
-    completionItems.push(...columns.map((col) => TableColumnCompletionItem(col)));
-    return completionItems;
+  function loadCompletionItens(tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
+    completionItemsMap.tables = [];
+    completionItemsMap.tableCols = {};
+    completionItemsMap.tables.push(...tables.map((table) => TableCompletionItem(table)));
+    columns.forEach(col => {
+      completionItemsMap.tableCols[col.tableName.toLowerCase()] = completionItemsMap.tableCols[col.tableName.toLowerCase()] || [];
+      completionItemsMap.tableCols[col.tableName.toLowerCase()].push(TableColumnCompletionItem(col));
+    })
+    return completionItemsMap;
   }
 
   async function loadConnectionData(conn: Connection) {
-    completionItems = [];
+    completionItemsMap.tables = [];
+    completionItemsMap.tableCols = {};
     if (!conn) {
       updateSidebar(null, [], []);
-      return completionItems;
+      return completionItemsMap;
     }
     return Promise.all([conn.getTables(), conn.getColumns()])
       .then(([t, c]) => {
@@ -136,11 +147,75 @@ namespace SQLToolsLanguageServer {
   server.onDocumentFormatting((params) => Formatter(docManager, params));
   server.onDocumentRangeFormatting((params) => Formatter(docManager, params));
 
-  server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
-    // const { textDocument, position } = pos;
-    // const doc = docManager.get(textDocument.uri);
+  const findQueryStart = (query) => {
+    if (query.lastIndexOf(';') >= 0) {
+      return query.lastIndexOf(';') + 1;
+    } else if (query.lastIndexOf(';(') >= 0) {
+      return query.lastIndexOf(';(') + 1;
+    } else if (query.indexOf('(') >= 0) {
+      return query.indexOf('(') + 1;
+    } else if (query.indexOf('(') >= 0) {
+      return query.indexOf('(') + 1;
+    }
+    return undefined;
+  }
+
+  function getCompletions(pos: TextDocumentPositionParams): CompletionItem[] {
+    console.log('called!');
     if (!store.getState().activeConnections) return [];
-    return completionItems;
+
+    const { textDocument, position } = pos;
+    const doc = docManager.get(textDocument.uri);
+
+    let currLineNum = position.line;
+    let currLine = doc.getText(Range.create(currLineNum, 0, currLineNum, position.character));
+    let query = currLine;
+    let startIndex = findQueryStart(currLine);
+    let startLine;
+    if (typeof startIndex !== undefined) {
+      startLine = currLineNum;
+    }
+    currLineNum--;
+    while (!(startIndex && startLine) && currLineNum >= 0) {
+      currLine = doc.getText(Range.create(currLineNum, 0, currLineNum + 1, 0));
+      startIndex = findQueryStart(currLine);
+      if (typeof startIndex !== undefined) {
+        startLine = currLineNum;
+        break;
+      }
+      currLineNum--;
+    }
+    query = doc.getText(Range.create(startLine || 0, startIndex || 0, position.line, position.character)).replace('\n', '');
+
+    if (query.trim()) {
+      let parsedValues;
+      try {
+        parsedValues = Parser.parse(query).value || [];
+      } catch (err) {
+        try {
+          parsedValues = Parser.parse(query + ' 1').value || [];
+        } catch(err2) { /**/console.error({ err, err2 }) }
+      }
+      if (parsedValues && parsedValues.length > 0) {
+        let fromTables = [];
+        parsedValues.forEach(({ from = [] }) => {
+          if (from.length > 0)
+            fromTables.push(...from.reduce((agg, { value }) => agg.concat(value.map(({ exprName }) => (exprName || '').toLowerCase())), []).filter(Boolean));
+        });
+        const items = fromTables.reverse().reduce((agg, table) => agg.concat(completionItemsMap.tableCols[table] || []), []);
+
+        if (items.length > 0) return items;
+      }
+    }
+
+    return [
+      ...completionItemsMap.tables,
+      ...(Object.keys(completionItemsMap.tableCols).reduce((agg, table) => agg.concat(completionItemsMap.tableCols[table] || []), []))
+    ];
+  }
+
+  server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
+    return getCompletions(pos);
   });
 
   server.onCompletionResolve((item: CompletionItem): CompletionItem => {
