@@ -3,6 +3,13 @@
 ## v0.16
 
 ### v0.16.8
+- **Enhancements**
+  - **Settings**:
+    - Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
+  - ***Connections***:
+    - MySQL: Updated library to mysql instead of mysql2. Previous was vey buggy.
+
+### v0.16.8
 - **Fixes**
   - ***Connections***:
     - MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue #126
