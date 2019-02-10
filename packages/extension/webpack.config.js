@@ -104,7 +104,7 @@ module.exports = function (env = {}) {
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.RB': JSON.stringify(process.env.RB || null),
+        'process.env.RB': JSON.stringify(process.env.RB || '55024781dd3c4bb5be532842b71153a6'),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
