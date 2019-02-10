@@ -29,8 +29,9 @@ export default class MySQL extends GenericDialect<MySQLLib.Pool> implements Conn
         conn.ping(error => {
           if (error) return reject(error);
           this.connection = Promise.resolve(pool);
+          conn.release();
           return resolve(this.connection);
-        })
+        });
       });
     });
   }
@@ -38,9 +39,9 @@ export default class MySQL extends GenericDialect<MySQLLib.Pool> implements Conn
   public close() {
     if (!this.connection) return Promise.resolve();
 
-    return this.connection.then((conn) => {
+    return this.connection.then((pool) => {
       return new Promise<void>((resolve, reject) => {
-        conn.end((err) => {
+        pool.end((err) => {
           if (err) return reject(err);
           this.connection = null;
           return resolve();

@@ -81,7 +81,7 @@ namespace SQLToolsLanguageServer {
       });
   }
 
-  function updateSidebar(conn, tables, columns) {
+  function updateSidebar(conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
     return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
   }
 

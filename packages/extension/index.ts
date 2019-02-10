@@ -155,6 +155,10 @@ namespace SQLTools {
     if (!conn) {
       conn = await connectionMenu(true);
     }
+    if (!conn) {
+      return;
+    }
+
     return languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
   }

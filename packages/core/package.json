@@ -18,6 +18,7 @@
   },
   "devDependencies": {
     "@types/mysql": "^2.15.5",
+    "@types/pg": "^7.4.11",
     "@types/universal-analytics": "^0.4.2",
     "typescript": "^3.3.1"
   }
