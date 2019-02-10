@@ -17,26 +17,35 @@ namespace Utils {
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),
-        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md#${VERSION.replace(/\./, '')}`,
+        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md#v${VERSION.replace(/\./g, '')}`,
         run: new Date().getTime(),
         updated: false,
         version: VERSION,
       },
-      installed: {
+      onDisk: {
         numericVersion: 0,
         run: 0,
         version: '',
       },
     };
     try {
-      localConfig.installed = readLocalConfig();
-      localConfig.current.updated = localConfig.current.numericVersion > localConfig.installed.numericVersion;
+      localConfig.onDisk = readLocalConfig();
+      localConfig.current.updated = localConfig.current.numericVersion > localConfig.onDisk.numericVersion;
     } catch (e) { /**/ }
 
     localSetupData = localConfig;
     writeLocalConfig(localConfig.current);
 
     return localConfig;
+  }
+
+  export async function updateLastRunInfo(props = {}) {
+    try {
+      const lastRun = await getlastRunInfo();
+      lastRun.current = Object.assign({}, lastRun.current || {}, props);
+      localSetupData = lastRun;
+      writeLocalConfig(lastRun.current);
+    } catch (error) { /***/ }
   }
 
   export function numericVersion(v: string) {

@@ -1,89 +1,51 @@
-import * as mysql from 'mysql2';
+import MySQLLib from 'mysql';
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  DialectQueries,
-} from '../interface';
-import * as Utils from '../utils';
-
-export default class MySQL implements ConnectionDialect {
-  public connection: Promise<any>;
-  private queries: DialectQueries = {
-    describeTable: 'DESCRIBE :table',
-    fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName,
-        DATA_TYPE AS type,
-        CHARACTER_MAXIMUM_LENGTH AS size,
-        TABLE_SCHEMA as tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DATABASE() as dbName,
-        COLUMN_DEFAULT as defaultValue,
-        IS_NULLABLE as isNullable
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()`,
-    fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-    fetchTables: `SELECT
-        C.TABLE_NAME AS tableName,
-        C.TABLE_SCHEMA AS tableSchema,
-        C.TABLE_CATALOG AS tableCatalog,
-        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
-        DATABASE() AS dbName,
-        COUNT(1) AS numberOfColumns
-      FROM
-        INFORMATION_SCHEMA.COLUMNS AS C
-        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
-        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-        AND C.TABLE_CATALOG = T.TABLE_CATALOG
-      WHERE T.TABLE_SCHEMA = DATABASE()
-      GROUP by
-        C.TABLE_NAME,
-        C.TABLE_SCHEMA,
-        C.TABLE_CATALOG,
-        T.TABLE_TYPE
-      ORDER BY
-        C.TABLE_NAME;`,
-  } as DialectQueries;
-  constructor(public credentials: ConnectionCredentials) {
-
-  }
-
-  public async open() {
+} from '@sqltools/core/interface';
+import * as Utils from '@sqltools/core/utils';
+import GenericDialect from '@sqltools/core/dialect/generic';
+import Queries from './queries';
+export default class MySQL extends GenericDialect<MySQLLib.Pool> implements ConnectionDialect {
+  queries = Queries;
+  public open() {
     if (this.connection) {
       return this.connection;
     }
-    const options = {
+
+    const pool = MySQLLib.createPool({
       connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       host: this.credentials.server,
-      multipleStatements: true,
       password: this.credentials.password,
       port: this.credentials.port,
       user: this.credentials.username,
-    };
-
-    const connection = mysql.createConnection(options);
-    await new Promise((resolve, reject) => {
-      connection.connect((err) => {
-        if (err) return reject(err);
-        resolve();
-      });
+      multipleStatements: true
     });
 
-    this.connection = Promise.resolve(connection);
-
-    return this.connection;
+    return new Promise<MySQLLib.Pool>((resolve, reject) => {
+      pool.getConnection((err, conn) => {
+        if (err) return reject(err);
+        conn.ping(error => {
+          if (error) return reject(error);
+          this.connection = Promise.resolve(pool);
+          return resolve(this.connection);
+        })
+      });
+    });
   }
 
   public close() {
     if (!this.connection) return Promise.resolve();
 
-    return this.connection.then(async (conn) => {
-      conn.destroy();
-      await new Promise((resolve, reject) => {
-        conn.end((err) => err ? reject(err) : resolve());
-      })
-      this.connection = null;
-      return Promise.resolve();
+    return this.connection.then((conn) => {
+      return new Promise<void>((resolve, reject) => {
+        conn.end((err) => {
+          if (err) return reject(err);
+          this.connection = null;
+          return resolve();
+        });
+      });
     });
   }
 
@@ -151,13 +113,5 @@ export default class MySQL implements ConnectionDialect {
           })
           .sort();
       });
-  }
-
-  public describeTable(table: string) {
-    return this.query(Utils.replacer(this.queries.describeTable, { table }));
-  }
-
-  public showRecords(table: string, limit: number) {
-    return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
   }
 }

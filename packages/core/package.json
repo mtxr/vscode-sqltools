@@ -7,7 +7,7 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
-    "mysql2": "^1.6.4",
+    "mysql": "^2.16.0",
     "pg": "^7.8.0",
     "rollbar": "^2.5.2",
     "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b",
@@ -17,6 +17,7 @@
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
+    "@types/mysql": "^2.15.5",
     "@types/universal-analytics": "^0.4.2",
     "typescript": "^3.3.1"
   }

@@ -86,7 +86,6 @@ function getExtensionConfig(env) {
       'vscode-languageserver': 'vscode-languageserver',
       'pg': 'commonjs pg',
       'tedious': 'commonjs tedious',
-      'mysql2': 'commonjs mysql2',
     },
     optimization: env.production ? {
       minimize: false,
