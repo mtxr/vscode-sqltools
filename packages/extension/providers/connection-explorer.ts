@@ -31,6 +31,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public fireUpdate(): void {
     this.onDidChange.fire();
   }
+  public getActive(): SerializedConnection | null {
+    const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
+    if (!activeId) return null;
+    return this.tree[activeId].conn as SerializedConnection;
+  }
 
   public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
     return element;
@@ -97,7 +102,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.tree[treeKey].reset();
 
     if (!tables && !columns) {
-      this.tree[treeKey].deactivate();
       return this.refresh();
     }
 
@@ -124,6 +128,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       }
       this.tree[id].activate();
     });
+    this.refresh();
+  }
+
+  public disconnect(c: SerializedConnection) {
+    if (!this.tree[getDbId(c)]) return;
+    this.tree[getDbId(c)].disconnect();
     this.refresh();
   }
 

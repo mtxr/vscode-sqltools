@@ -62,7 +62,6 @@ namespace SQLTools {
 
   let bookmarks: BookmarksStorage;
   let history: History;
-  let lastUsedConn: SerializedConnection;
   let languageClient: LanguageClient;
   let activationTimer: Timer;
 
@@ -151,16 +150,20 @@ namespace SQLTools {
   }
 
   export async function cmdCloseConnection(node?: SidebarConnection): Promise<void> {
-    let conn = node ? node.conn : null;
-    if (!conn) {
-      conn = await connectionMenu(true);
-    }
+    const conn = node ? node.conn : await connectionMenu(true);
     if (!conn) {
       return;
     }
 
     return languageClient.sendRequest(CloseConnectionRequest, { conn })
-      .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
+      .then(async () => {
+        // if (getDbId(connectionExplorer.getActive()) === getDbId(conn)) {
+        //   connectionExplorer.getActive() = null;
+        // }
+        connectionExplorer.disconnect(conn as SerializedConnection);
+        updateStatusBar();
+
+      }, ErrorHandler.create('Error closing connection'));
   }
 
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
@@ -220,7 +223,7 @@ namespace SQLTools {
 
     try {
       await connect();
-      const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
+      const query = await readInput('Query', `Type the query to run on ${connectionExplorer.getActive().name}`);
       printOutput();
       await runQuery(query);
     } catch (e) {
@@ -314,7 +317,7 @@ namespace SQLTools {
   }
 
   function runConnectionCommand(command, ...args) {
-    return languageClient.sendRequest(RunCommandRequest, { conn: lastUsedConn, command, args });
+    return languageClient.sendRequest(RunCommandRequest, { conn: connectionExplorer.getActive(), command, args });
   }
 
   async function runQuery(query, addHistory = true) {
@@ -431,8 +434,8 @@ namespace SQLTools {
     extDatabaseStatus.tooltip = 'Select a connection';
     extDatabaseStatus.command = `${EXT_NAME}.selectConnection`;
     extDatabaseStatus.text = '$(database) Connect';
-    if (lastUsedConn) {
-      extDatabaseStatus.text = `$(database) ${lastUsedConn.name}`;
+    if (connectionExplorer.getActive()) {
+      extDatabaseStatus.text = `$(database) ${connectionExplorer.getActive().name}`;
     }
     if (ConfigManager.showStatusbar) {
       extDatabaseStatus.show();
@@ -464,34 +467,36 @@ namespace SQLTools {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
-        if (getDbId(lastUsedConn) === getDbId(conn) && !conn.isConnected) {
+        if (getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
           connectionExplorer.setActiveConnection();
         } else {
-          connectionExplorer.setActiveConnection(lastUsedConn);
+          connectionExplorer.setActiveConnection(connectionExplorer.getActive());
         }
       });
-      autoConnectIfActive(lastUsedConn);
+      autoConnectIfActive(connectionExplorer.getActive());
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
   function reloadConfig() {
     loadConfigs();
     logger.info('Config reloaded!');
-    autoConnectIfActive(lastUsedConn);
+    autoConnectIfActive(connectionExplorer.getActive());
     updateStatusBar();
     if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
     let password = null;
-    if (c && c.askForPassword) password = await askForPassword(c);
-    if (c.askForPassword && password === null) return;
-    lastUsedConn = (await languageClient.sendRequest(
-      OpenConnectionRequest,
-      { conn: c, password },
-    ));
+    if (c) {
+      if (c.askForPassword) password = await askForPassword(c);
+      if (c.askForPassword && password === null) return;
+      await languageClient.sendRequest(
+        OpenConnectionRequest,
+        { conn: c, password },
+      );
+    }
+    connectionExplorer.setActiveConnection(c);
     updateStatusBar();
-    connectionExplorer.setActiveConnection(lastUsedConn);
-    return lastUsedConn;
+    return connectionExplorer.getActive();
   }
 
   async function askForPassword(c: SerializedConnection): Promise<string | null> {
@@ -503,8 +508,8 @@ namespace SQLTools {
     });
   }
   async function connect(force = false): Promise<SerializedConnection> {
-    if (!force && lastUsedConn) {
-      return lastUsedConn;
+    if (!force && connectionExplorer.getActive()) {
+      return connectionExplorer.getActive();
     }
     const c: SerializedConnection = await connectionMenu(true);
     history.clear();
