@@ -608,18 +608,19 @@ namespace SQLTools {
 
   async function help() {
     try {
-      const { current = { }, installed = { } } = await Utils.getlastRunInfo();
-      const { lastNotificationDate = 0 } = current;
+      const { current = { } } = await Utils.getlastRunInfo();
+      const { lastNotificationDate = 0, updated } = current;
       const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
       const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
       const updatedRecently = (today - lastNDate) < 2;
+
       if (
         ConfigManager.disableReleaseNotifications
-        || current.numericVersion <= installed.numericVersion
+        || !updated
         || updatedRecently
       ) return;
 
-      Utils.updateLastRunInfo({ lastNotificationDate: new Date() });
+      await Utils.updateLastRunInfo({ lastNotificationDate: +new Date() });
 
       const moreInfo = 'More Info';
       const supportProject = 'Support This Project';

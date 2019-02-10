@@ -21,16 +21,19 @@ namespace Utils {
         run: new Date().getTime(),
         updated: false,
         version: VERSION,
+        lastNotificationDate: 0,
       },
       onDisk: {
         numericVersion: 0,
         run: 0,
         version: '',
+        lastNotificationDate: 0,
       },
     };
     try {
       localConfig.onDisk = readLocalConfig();
       localConfig.current.updated = localConfig.current.numericVersion > localConfig.onDisk.numericVersion;
+      localConfig.current.lastNotificationDate = localConfig.onDisk.lastNotificationDate || 0;
     } catch (e) { /**/ }
 
     localSetupData = localConfig;
@@ -44,8 +47,9 @@ namespace Utils {
       const lastRun = await getlastRunInfo();
       lastRun.current = Object.assign({}, lastRun.current || {}, props);
       localSetupData = lastRun;
-      writeLocalConfig(lastRun.current);
-    } catch (error) { /***/ }
+
+      await writeLocalConfig(lastRun.current);
+    } catch (e) { /**/ }
   }
 
   export function numericVersion(v: string) {
