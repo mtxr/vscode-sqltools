@@ -607,28 +607,37 @@ namespace SQLTools {
   }
 
   async function help() {
-    const localConfig = await Utils.getlastRunInfo();
-    if (localConfig.current.numericVersion <= localConfig.installed.numericVersion) {
-      return;
-    }
-    const moreInfo = 'More Info';
-    const supportProject = 'Support This Project';
-    const releaseNotes = 'Release Notes';
-    const message = `SQLTools updated! Check out the release notes for more information.`;
-    const options = [ moreInfo, supportProject, releaseNotes ];
-    const res: string = await Win.showInformationMessage(message, ...options);
-    Telemetry.registerInfoMessage(message, res);
-    switch (res) {
-      case moreInfo:
-        require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
-        break;
-      case releaseNotes:
-        require('opn')(localConfig.current.releaseNotes);
-        break;
-      case supportProject:
-        require('opn')('https://www.patreon.com/mteixeira');
-        break;
-    }
+    try {
+      const { current = { }, installed = { } } = await Utils.getlastRunInfo();
+      const { lastNotificationDate = 0 } = current;
+      const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
+      const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
+      const updatedRecently = (today - lastNDate) < 2;
+      if (current.numericVersion <= installed.numericVersion || updatedRecently) {
+        return;
+      }
+
+      Utils.updateLastRunInfo({ lastNotificationDate: new Date() });
+
+      const moreInfo = 'More Info';
+      const supportProject = 'Support This Project';
+      const releaseNotes = 'Release Notes';
+      const message = `SQLTools updated! Check out the release notes for more information.`;
+      const options = [ moreInfo, supportProject, releaseNotes ];
+      const res: string = await Win.showInformationMessage(message, ...options);
+      Telemetry.registerInfoMessage(message, res);
+      switch (res) {
+        case moreInfo:
+          require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
+          break;
+        case releaseNotes:
+          require('opn')(current.releaseNotes);
+          break;
+        case supportProject:
+          require('opn')('https://www.patreon.com/mteixeira');
+          break;
+      }
+    } catch (e) { /***/ }
   }
 
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
