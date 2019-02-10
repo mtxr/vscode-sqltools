@@ -4,7 +4,8 @@
 
 ### v0.16.9
 - **Enhancements**
-  - **Settings**:
+  - ***General***: Reduced extension size from 9.8MB to ~3MB
+  - ***Settings***:
     - Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
   - ***Connections***:
     - MySQL: Updated library to mysql instead of mysql2. Previous was vey buggy.
