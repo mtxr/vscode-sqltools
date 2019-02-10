@@ -10,6 +10,9 @@
     "outDir": "../../dist/core",
     "sourceMap": true,
     "lib": ["es6"],
-    "removeComments": true
+    "removeComments": true,
+    "paths": {
+      "@sqltools/core/*": ["./*"]
+    }
   }
 }

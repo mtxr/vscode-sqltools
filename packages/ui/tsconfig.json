@@ -13,6 +13,9 @@
     "lib": [
       "es6", "dom"
     ],
-    "removeComments": true
+    "removeComments": true,
+    "paths": {
+      "@sqltools/ui/*": ["./*"]
+    }
   },
 }

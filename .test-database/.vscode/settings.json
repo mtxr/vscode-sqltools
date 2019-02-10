@@ -1,9 +1,10 @@
 {
   "sqltools.autoConnectTo": [
     // "PGSQL",
-    // "MySQL",
-    "MSSQL"
+    "MySQL",
+    // "MSSQL"
   ],
+  "sqltools.telemetry": false,
   "sqltools.connections": [
     {
       "name": "PGSQL",

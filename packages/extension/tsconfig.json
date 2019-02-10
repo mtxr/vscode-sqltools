@@ -8,10 +8,12 @@
         "outDir": "../../dist/extension",
         "sourceMap": true,
         "lib": [ "es6" ],
-        "baseUrl": "src",
+        "baseUrl": ".",
         "noEmit": true,
         "removeComments": true,
-        "paths": {}
+        "paths": {
+            "@sqltools/extension/*":["./*"]
+        }
     },
     "exclude": [
         "./test",
