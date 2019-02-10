@@ -46,6 +46,8 @@ tslint.json
 **/*.md
 *.vsix
 **/*.vsix
+node_modules/**
+**/node_modules/**
 
 # exceptions
 !static/icon.png

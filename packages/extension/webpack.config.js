@@ -54,14 +54,14 @@ function getExtensionConfig(env) {
               content.displayName = `${extPkgJson.displayName} - Preview`;
             }
             content.scripts = {};
-            content.dependencies = dependencies;
-            content.devDependencies = devDependencies;
+            content.dependencies = {};
+            content.devDependencies = { ...devDependencies, ...dependencies };
 
-            delete content.dependencies['@sqltools/core'];
-            delete content.dependencies['@sqltools/language-server'];
-            delete content.dependencies['@sqltools/ui'];
+            Object.keys(content.devDependencies).filter(k => k.includes('@sqltools')).forEach(k => {
+              delete content.devDependencies[k];
+            });
 
-            return JSON.stringify(content).replace(/SQLTools\./g, `${extPkgJson.name}.`);
+            return JSON.stringify(content, null, 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
