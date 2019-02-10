@@ -11,12 +11,13 @@
     "pg": "^7.8.0",
     "rollbar": "^2.5.2",
     "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b",
-    "tedious": "^3.0.1",
+    "mssql": "^4.3.1",
     "universal-analytics": "^0.4.20",
     "uuid": "^3.3.2",
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
+    "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
     "@types/pg": "^7.4.11",
     "@types/universal-analytics": "^0.4.2",

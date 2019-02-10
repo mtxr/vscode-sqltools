@@ -73,6 +73,9 @@ function getExtensionConfig(env) {
     ],
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json'],
+      alias: {
+        'pg-native': path.join(__dirname, '../../' ,'node_modules/pg/lib/native/index.js'),
+      },
     },
     output: {
       filename: '[name].js',
@@ -82,10 +85,6 @@ function getExtensionConfig(env) {
     },
     externals: {
       'vscode': 'commonjs vscode',
-      'vscode-languageclient': 'vscode-languageclient',
-      'vscode-languageserver': 'vscode-languageserver',
-      'pg': 'commonjs pg',
-      'tedious': 'commonjs tedious',
     },
     optimization: env.production ? {
       minimize: false,
