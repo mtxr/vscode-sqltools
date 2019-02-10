@@ -2,12 +2,14 @@
 
 ## v0.16
 
-### v0.16.8
+### v0.16.9
 - **Enhancements**
   - **Settings**:
     - Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
   - ***Connections***:
     - MySQL: Updated library to mysql instead of mysql2. Previous was vey buggy.
+    - PostgreSQL: Updated library and migrated to connection pooling to avoid errors.
+    - MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue #126
 
 ### v0.16.8
 - **Fixes**
