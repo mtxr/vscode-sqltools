@@ -16,6 +16,13 @@ export interface FormatOptions {
 
 export interface Settings {
   /**
+   * Disable new release notifications.
+   * @default false
+   * @type {boolean}
+   * @memberof Settings
+   */
+  disableReleaseNotifications?: boolean;
+  /**
    * Name of the connection to auto connect on start
    * @type {string | string[]}
    * @default null

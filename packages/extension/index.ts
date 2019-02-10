@@ -613,9 +613,11 @@ namespace SQLTools {
       const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
       const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
       const updatedRecently = (today - lastNDate) < 2;
-      if (current.numericVersion <= installed.numericVersion || updatedRecently) {
-        return;
-      }
+      if (
+        ConfigManager.disableReleaseNotifications
+        || current.numericVersion <= installed.numericVersion
+        || updatedRecently
+      ) return;
 
       Utils.updateLastRunInfo({ lastNotificationDate: new Date() });
 
