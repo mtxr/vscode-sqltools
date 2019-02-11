@@ -11,6 +11,8 @@ import {
   TreeView,
   QuickPickOptions,
   QuickPick,
+  env as VSCodeEnv,
+  version as VSCodeVersion,
 } from 'vscode';
 import {
   CloseAction,
@@ -48,18 +50,19 @@ import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Timer, Telemetry, query as QueryUtils, getDbId } from '@sqltools/core/utils';
+import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer(logger);
-  let connectionExplorerView: TreeView<any>;
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
 
+  let connectionExplorerView: TreeView<any>;
+  let telemetry: Telemetry;
   let bookmarks: BookmarksStorage;
   let history: History;
   let languageClient: LanguageClient;
@@ -70,12 +73,20 @@ namespace SQLTools {
     if (ContextManager.context) return;
     ContextManager.context = context;
     loadConfigs();
-    Telemetry.register('extension', ConfigManager.telemetry, logger);
+    telemetry = new Telemetry({
+      product: 'extension',
+      useLogger: logger,
+      vscodeInfo: {
+        sessId: VSCodeEnv.sessionId,
+        uniqId: VSCodeEnv.machineId,
+        version: VSCodeVersion,
+      },
+    });
     await registerExtension();
     updateStatusBar();
     activationTimer.end();
     logger.log(`Activation Time: ${activationTimer.elapsed()}ms`);
-    Telemetry.registerTime('activation', activationTimer);
+    telemetry.registerTime('activation', activationTimer);
     help();
   }
 
@@ -377,7 +388,8 @@ namespace SQLTools {
       : [ConfigManager.autoConnectTo];
 
       defaultConnections = ConfigManager.connections
-        .filter((conn) => autoConnectTo.indexOf(conn.name) >= 0) as SerializedConnection[];
+        .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
+        .filter(Boolean) as SerializedConnection[];
     }
     if (defaultConnections.length === 0) {
       return setConnection();
@@ -410,24 +422,24 @@ namespace SQLTools {
       .setLogging(ConfigManager.logging);
     ErrorHandler.setLogger(logger);
     ErrorHandler.setOutputFn(Win.showErrorMessage);
-    Telemetry.setLogger(logger);
   }
 
   function getExtCommands() {
-    return Object.keys(SQLTools).reduce((list, extFn) => {
+    const commands = Object.keys(SQLTools).reduce((list, extFn) => {
       if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
       let extCmd = extFn.replace(/^(editor|cmd)/, '');
-      logger.log(`Registering ${EXT_NAME}.${extCmd}`);
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
       const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
       list.push(regFn(`${EXT_NAME}.${extCmd}`, (...args) => {
         logger.log(`Command triggered: ${extCmd}`);
-        Telemetry.registerCommand(extCmd);
+        telemetry.registerCommand(extCmd);
         SQLTools[extFn](...args);
       }));
-      logger.log(`Command ${EXT_NAME}.${extCmd} registered.`);
       return list;
     }, []);
+
+    logger.log(`${commands.length} commands to register.`);
+    return commands;
   }
 
   function updateStatusBar() {
@@ -467,13 +479,13 @@ namespace SQLTools {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
-        if (getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
+        if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
           connectionExplorer.setActiveConnection();
         } else {
           connectionExplorer.setActiveConnection(connectionExplorer.getActive());
         }
       });
-      autoConnectIfActive(connectionExplorer.getActive());
+      return autoConnectIfActive(connectionExplorer.getActive());
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
   function reloadConfig() {
@@ -519,10 +531,18 @@ namespace SQLTools {
   async function getLanguageServerDisposable() {
     const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
-
+    const telemetryArgs: TelemetryArgs = {
+      product: 'language-server',
+      enableTelemetry: ConfigManager.telemetry,
+      vscodeInfo: {
+        sessId: VSCodeEnv.sessionId,
+        uniqId: VSCodeEnv.machineId,
+        version: VSCodeVersion,
+      },
+    };
     const serverOptions: ServerOptions = {
-      debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
-      run: { module: serverModule, transport: TransportKind.ipc },
+      debug: { module: serverModule, transport: TransportKind.ipc, telemetry: telemetryArgs, options: debugOptions },
+      run: { module: serverModule, transport: TransportKind.ipc, telemetry: telemetryArgs },
     };
 
     const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)
@@ -538,12 +558,15 @@ namespace SQLTools {
     let avoidRestart = false;
     const clientOptions: LanguageClientOptions = {
       documentSelector: selector,
+      initializationOptions: {
+        telemetry: telemetryArgs,
+      },
       synchronize: {
         configurationSection: 'sqltools',
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: (error) => {
-        Telemetry.registerException(error, { message: 'Server initialization failed.' });
+        telemetry.registerException(error, { message: 'Server initialization failed.' });
         languageClient.error('Server initialization failed.', error);
         languageClient.outputChannel.show(true);
         return false;
@@ -551,7 +574,7 @@ namespace SQLTools {
       errorHandler: {
         error: (error, message, count): ErrorAction => {
           logger.error('Language server error', error, message, count);
-          Telemetry.registerException(error, { message: 'Language Server error.', givenMessage: message, count });
+          telemetry.registerException(error, { message: 'Language Server error.', givenMessage: message, count });
           return languageClientErrorHandler.error(error, message, count);
         },
         closed: (): CloseAction => {
@@ -565,7 +588,6 @@ namespace SQLTools {
     };
 
     languageClient = new LanguageClient(
-      'sqltools-language-server',
       'SQLTools Language Server',
       serverOptions,
       clientOptions,
@@ -637,7 +659,7 @@ namespace SQLTools {
       const message = `SQLTools updated! Check out the release notes for more information.`;
       const options = [ moreInfo, supportProject, releaseNotes ];
       const res: string = await Win.showInformationMessage(message, ...options);
-      Telemetry.registerInfoMessage(message, res);
+      telemetry.registerInfoMessage(message, res);
       switch (res) {
         case moreInfo:
           require('opn')('https://github.com/mtxr/vscode-sqltools#donate');

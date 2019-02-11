@@ -24,7 +24,7 @@ import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interfac
 import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
-import { Telemetry } from '@sqltools/core/utils';
+import { Telemetry, TelemetryArgs } from '@sqltools/core/utils';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -34,6 +34,7 @@ namespace SQLToolsLanguageServer {
   let formatterLanguages: string[] = [];
   let sgdbConnections: Connection[] = [];
   let completionItems: CompletionItem[] = [];
+  let telemetry: Telemetry;
 
   docManager.listen(server);
 
@@ -51,7 +52,7 @@ namespace SQLToolsLanguageServer {
   function notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       Logger.error(message, err);
-      Telemetry.registerException(err, { message, languageServer: true });
+      telemetry.registerException(err, { message, languageServer: true });
       server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
     if (typeof error !== 'undefined') return cb(error);
@@ -68,12 +69,12 @@ namespace SQLToolsLanguageServer {
   async function loadConnectionData(conn: Connection) {
     completionItems = [];
     if (!conn) {
-      updateSidebar(null, [], []);
+      await updateSidebar(null, [], []);
       return completionItems;
     }
     return Promise.all([conn.getTables(), conn.getColumns()])
-      .then(([t, c]) => {
-        updateSidebar(conn.serialize(), t, c);
+      .then(async ([t, c]) => {
+        await updateSidebar(conn.serialize(), t, c);
         return loadCompletionItens(t, c);
       }).catch(e => {
         notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
@@ -82,11 +83,15 @@ namespace SQLToolsLanguageServer {
   }
 
   function updateSidebar(conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
+    if (!conn) return Promise.resolve();
     return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
   }
 
   /* server events */
-  server.onInitialize((params: InitializeParams) => {
+  server.onInitialize((params: InitializeParams ) => {
+    telemetry = new Telemetry((params.initializationOptions || { }).telemetry || {
+      product: 'language-server'
+    });
     return {
       capabilities: {
         completionProvider: {
@@ -105,7 +110,8 @@ namespace SQLToolsLanguageServer {
 
   server.onDidChangeConfiguration(async (change) => {
     ConfigManager.setSettings(change.settings.sqltools);
-    Utils.Telemetry.register('language-server', ConfigManager.telemetry);
+    if (ConfigManager.telemetry) telemetry.enable()
+    else telemetry.disable();
 
     const oldLang = formatterLanguages.sort(Utils.sortText);
     const newLang = ConfigManager.formatLanguages.sort(Utils.sortText);
@@ -198,7 +204,7 @@ namespace SQLToolsLanguageServer {
     store.dispatch(actions.Disconnect(c));
     const state = store.getState();
     req.conn.isConnected = false;
-    updateSidebar(req.conn, null, null);
+    await updateSidebar(req.conn, null, null);
   });
 
   server.onRequest(RefreshConnectionData, async () => {
@@ -246,7 +252,7 @@ namespace SQLToolsLanguageServer {
   process.on('uncaughtException', (error: any) => {
     let message: string;
     if (error) {
-      Telemetry.registerException(error, { type: 'uncaughtException' })
+      telemetry.registerException(error, { type: 'uncaughtException' })
       if (typeof error.stack === 'string') {
         message = error.stack;
       } else if (typeof error.message === 'string') {

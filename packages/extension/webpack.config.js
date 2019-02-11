@@ -61,7 +61,7 @@ function getExtensionConfig(env) {
               delete content.devDependencies[k];
             });
 
-            return JSON.stringify(content, null, 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
+            return JSON.stringify(content, null, env.production ? undefined : 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -104,7 +104,6 @@ module.exports = function (env = {}) {
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.RB': JSON.stringify(process.env.RB || '55024781dd3c4bb5be532842b71153a6'),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
@@ -112,7 +111,7 @@ module.exports = function (env = {}) {
       ...(config.node || {}),
       __dirname: false
     };
-    config.devtool = !env.production ? 'cheap-module-eval-source-map' : 'source-map';
+    config.devtool = !env.production ? 'inline-source-map' : 'source-map';
 
     return config;
   });

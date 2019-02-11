@@ -4,7 +4,7 @@
     "MySQL",
     "MSSQL"
   ],
-  "sqltools.telemetry": false,
+  "sqltools.telemetry": true,
   "sqltools.connections": [
     {
       "name": "PGSQL",
