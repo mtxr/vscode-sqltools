@@ -9,11 +9,16 @@ export default class History {
   }
 
   public add(query: string): this {
-    if (this.getSize() >= this.getMaxSize()) {
-      this.items.length = this.maxSize - 1;
+    if (this.items[this.items.length - 1] && this.items[this.items.length - 1].trim() === query.trim()) {
+      return this;
     }
 
-    this.items.push(query);
+    this.items = [query].concat(this.items);
+
+    if (this.getSize() >= this.getMaxSize()) {
+      this.items.length = this.maxSize;
+    }
+
     return this;
   }
 

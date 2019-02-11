@@ -14,7 +14,8 @@ import {
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
 import { ConnectionCredentials, SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
-import { Logger } from '../api';
+import { Logger, Utils } from '../api';
+import { getDbId } from '@sqltools/core/utils';
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
 | SidebarColumn
@@ -29,6 +30,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   constructor(private logger: Logger) { }
   public fireUpdate(): void {
     this.onDidChange.fire();
+  }
+  public getActive(): SerializedConnection | null {
+    const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
+    if (!activeId) return null;
+    return this.tree[activeId].conn as SerializedConnection;
   }
 
   public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
@@ -62,8 +68,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public setConnections(connections: ConnectionCredentials[]) {
     const keys = [];
+    let shouldUpdate = false;
     connections.forEach((conn) => {
-      this.tree[this.getDbId(conn)] = this.tree[this.getDbId(conn)] || new SidebarConnection(conn);
+      if (this.tree[this.getDbId(conn)] && this.tree[this.getDbId(conn)].updateCreds(conn)) {
+        shouldUpdate = true;
+      } else {
+        this.tree[this.getDbId(conn)] = new SidebarConnection(conn);
+      }
       keys.push(this.getDbId(conn));
     });
 
@@ -74,6 +85,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       });
     }
     this.refresh();
+    return shouldUpdate;
   }
 
   public setTreeData(
@@ -90,7 +102,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.tree[treeKey].reset();
 
     if (!tables && !columns) {
-      this.tree[treeKey].deactivate();
       return this.refresh();
     }
 
@@ -109,7 +120,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
         .then(Promise.resolve, Promise.resolve);
   }
 
-  public setActiveConnection(c: SerializedConnection) {
+  public setActiveConnection(c?: SerializedConnection) {
     const idActive = c ? this.getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
       if (id !== idActive) {
@@ -120,8 +131,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.refresh();
   }
 
+  public disconnect(c: SerializedConnection) {
+    if (!this.tree[getDbId(c)]) return;
+    this.tree[getDbId(c)].disconnect();
+    this.refresh();
+  }
+
   private getDbId(c: SerializedConnection | ConnectionCredentials) {
-    return `${c.name}#${c.database}#${c.dialect}`;
+    return getDbId(c);
   }
 
   private toArray(obj: any) {

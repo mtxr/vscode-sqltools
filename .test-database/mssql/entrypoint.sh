@@ -1,3 +1,2 @@
-/opt/mssql/bin/sqlservr &
-sleep 10
-bash /import-data.sh
+bash /import-data.sh &
+/opt/mssql/bin/sqlservr

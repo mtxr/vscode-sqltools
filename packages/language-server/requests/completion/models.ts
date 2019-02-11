@@ -4,26 +4,7 @@ import {
 } from 'vscode-languageserver';
 import { DatabaseInterface } from '@sqltools/core/interface';
 
-class MarkdownString {
-  public value: string = '';
-  constructor() {
-    this.value = '';
-  }
-
-  public appendCodeblock(value: string, language: string = '') {
-    this.value += `\n\`\`\`${language}
-${value}
-\`\`\`\n`;
-    return this;
-  }
-
-  public append(value: string) {
-    this.value += value;
-    return this;
-  }
-}
-
-export function TableCompletionItem(table: DatabaseInterface.Table) {
+export function TableCompletionItem(table: DatabaseInterface.Table): CompletionItem {
 
   let yml = '';
   if (table.tableDatabase) {
@@ -41,16 +22,16 @@ export function TableCompletionItem(table: DatabaseInterface.Table) {
   }
   return {
     detail: 'Table',
-    documentation: (
-      (new MarkdownString())
-        .appendCodeblock(yml, 'yaml') as any
-    ),
-    kind: 21 as CompletionItemKind,
+    documentation: {
+      value: `\`\`\`yaml\n${yml}\n\`\`\``,
+      kind: 'markdown',
+    },
+    kind: 21,
     label: table.name,
-  } as CompletionItem;
+  };
 }
 
-export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn) {
+export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): CompletionItem {
   const colInfo = [ col.columnName ];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);
@@ -78,12 +59,11 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn) {
 
   return {
     detail: 'Column',
-    documentation: (
-      (new MarkdownString())
-        .appendCodeblock(colInfo.join(' '), 'sql')
-        .appendCodeblock(yml, 'yaml') as any
-    ),
+    documentation: {
+      value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
+      kind: 'markdown',
+    },
     kind: CompletionItemKind.Property,
     label: col.columnName,
-  } as CompletionItem;
+  };
 }

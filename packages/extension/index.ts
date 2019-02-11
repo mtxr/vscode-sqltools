@@ -6,12 +6,11 @@ import {
   StatusBarAlignment,
   TextEditor,
   TextEditorEdit,
-  Uri,
-  ViewColumn,
   window as Win,
   workspace as Wspc,
-  TreeDataProvider,
   TreeView,
+  QuickPickOptions,
+  QuickPick,
 } from 'vscode';
 import {
   CloseAction,
@@ -48,10 +47,9 @@ import {
 import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
-import { SerializedConnection, DatabaseInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Timer, Telemetry, query as QueryUtils } from '@sqltools/core/utils';
+import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
+import { Timer, Telemetry, query as QueryUtils, getDbId } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
-import { any } from 'prop-types';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
@@ -64,7 +62,6 @@ namespace SQLTools {
 
   let bookmarks: BookmarksStorage;
   let history: History;
-  let lastUsedConn: SerializedConnection;
   let languageClient: LanguageClient;
   let activationTimer: Timer;
 
@@ -153,12 +150,20 @@ namespace SQLTools {
   }
 
   export async function cmdCloseConnection(node?: SidebarConnection): Promise<void> {
-    let conn = node ? node.conn : null;
+    const conn = node ? node.conn : await connectionMenu(true);
     if (!conn) {
-      conn = await connectionMenu(true);
+      return;
     }
-    languageClient.sendRequest(CloseConnectionRequest, { conn })
-      .then(() => languageClient.sendRequest(RefreshConnectionData), ErrorHandler.create('Error closing connection'));
+
+    return languageClient.sendRequest(CloseConnectionRequest, { conn })
+      .then(async () => {
+        // if (getDbId(connectionExplorer.getActive()) === getDbId(conn)) {
+        //   connectionExplorer.getActive() = null;
+        // }
+        connectionExplorer.disconnect(conn as SerializedConnection);
+        updateStatusBar();
+
+      }, ErrorHandler.create('Error closing connection'));
   }
 
   export async function cmdShowRecords(node?: SidebarTable | SidebarView) {
@@ -218,7 +223,7 @@ namespace SQLTools {
 
     try {
       await connect();
-      const query = await readInput('Query', `Type the query to run on ${lastUsedConn.name}`);
+      const query = await readInput('Query', `Type the query to run on ${connectionExplorer.getActive().name}`);
       printOutput();
       await runQuery(query);
     } catch (e) {
@@ -229,10 +234,20 @@ namespace SQLTools {
   export async function cmdRunFromHistory(): Promise<void> {
     try {
       await connect();
+      const query = await historyMenu();
       await printOutput();
-      await runQuery(await historyMenu(), false);
+      await runQuery(query, false);
     } catch (e) {
       ErrorHandler.create('Error while running query.', cmdShowOutputChannel)(e);
+    }
+  }
+
+  export async function cmdEditFromHistory(): Promise<void> {
+    try {
+      const query = (await historyMenu());
+      insertText(query, true);
+    } catch (e) {
+      ErrorHandler.create('Could not edit bookmarked query')(e);
     }
   }
 
@@ -263,6 +278,8 @@ namespace SQLTools {
 
     const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
 
+    if (availableConns.length === 0 && onlyActive) return connectionMenu();
+
     if (availableConns.length === 1) return availableConns[0];
 
     const sel = (await quickPick(availableConns.map((c) => {
@@ -271,7 +288,13 @@ namespace SQLTools {
         detail: `${c.username}@${c.server}:${c.port}`,
         label: c.name,
       } as QuickPickItem;
-    }), 'label')) as string;
+    }), 'label', {
+      matchOnDescription: true,
+      matchOnDetail: true,
+      placeHolder: 'Pick a connection',
+      placeHolderDisabled: 'You don\'t have any connections yet.',
+      title: 'Connections',
+    })) as string;
     return connections.find((c) => c.name === sel);
   }
 
@@ -284,11 +307,17 @@ namespace SQLTools {
         detail: all[key],
         label: key,
       };
-    }), prop);
+    }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolder: 'Pick a bookmarked query',
+        placeHolderDisabled: 'You don\'t have any bookmarks yet.',
+        title: 'Bookmarks',
+      });
   }
 
   function runConnectionCommand(command, ...args) {
-    return languageClient.sendRequest(RunCommandRequest, { conn: lastUsedConn, command, args });
+    return languageClient.sendRequest(RunCommandRequest, { conn: connectionExplorer.getActive(), command, args });
   }
 
   async function runQuery(query, addHistory = true) {
@@ -303,7 +332,11 @@ namespace SQLTools {
     return await quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
-      }), prop);
+      }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        title: `Tables in ${conn.database}`,
+      });
   }
 
   async function historyMenu(prop: string = 'label'): Promise<string> {
@@ -312,7 +345,12 @@ namespace SQLTools {
         description: '',
         label: query,
       } as QuickPickItem;
-    }), prop);
+    }), prop, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        placeHolderDisabled: 'You don\'t have any queries on your history.',
+        title: 'History',
+      });
   }
 
   function printOutput() {
@@ -324,17 +362,41 @@ namespace SQLTools {
     return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
-  function autoConnectIfActive(currConn?: SerializedConnection) {
-    let defaultConnection = currConn || null;
-    if (!defaultConnection && ConfigManager.autoConnectTo) {
-      defaultConnection = ConfigManager.connections
-        .find((conn) => conn.name === ConfigManager.autoConnectTo) as SerializedConnection;
+  async function autoConnectIfActive(currConn?: SerializedConnection) {
+    let defaultConnections: SerializedConnection[] = currConn ? [currConn] : [];
+    if (defaultConnections.length === 0
+      && (
+        typeof ConfigManager.autoConnectTo === 'string'
+        || (
+          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
+          )
+        )
+    ) {
+      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
+      ? ConfigManager.autoConnectTo
+      : [ConfigManager.autoConnectTo];
+
+      defaultConnections = ConfigManager.connections
+        .filter((conn) => autoConnectTo.indexOf(conn.name) >= 0) as SerializedConnection[];
     }
-    if (!defaultConnection) {
+    if (defaultConnections.length === 0) {
       return setConnection();
     }
-    logger.info(`Configuration set to auto connect to: ${defaultConnection.name}`);
-    setConnection(defaultConnection);
+    logger.info(`Configuration set to auto connect to: ${defaultConnections.map(({name}) => name).join(', ')}`);
+    try {
+      await Promise.all(defaultConnections.slice(1).map(c =>
+        setConnection(c)
+          .catch(e => {
+            ErrorHandler.create(`Failed to auto connect to  ${c.name}`)(e);
+            Promise.resolve();
+          }),
+      ));
+
+      await setConnection(defaultConnections[0]);
+      // first should be the active
+    } catch (error) {
+      ErrorHandler.create('Auto connect failed')(error);
+    }
   }
   function loadConfigs() {
     ConfigManager.setSettings(Wspc.getConfiguration(cfgKey) as SettingsInterface);
@@ -372,8 +434,8 @@ namespace SQLTools {
     extDatabaseStatus.tooltip = 'Select a connection';
     extDatabaseStatus.command = `${EXT_NAME}.selectConnection`;
     extDatabaseStatus.text = '$(database) Connect';
-    if (lastUsedConn) {
-      extDatabaseStatus.text = `$(database) ${lastUsedConn.name}`;
+    if (connectionExplorer.getActive()) {
+      extDatabaseStatus.text = `$(database) ${connectionExplorer.getActive().name}`;
     }
     if (ConfigManager.showStatusbar) {
       extDatabaseStatus.show();
@@ -405,30 +467,36 @@ namespace SQLTools {
     languageClient.onReady().then(() => {
       languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
         connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
+        if (getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
+          connectionExplorer.setActiveConnection();
+        } else {
+          connectionExplorer.setActiveConnection(connectionExplorer.getActive());
+        }
       });
-      autoConnectIfActive(lastUsedConn);
+      autoConnectIfActive(connectionExplorer.getActive());
     }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
   }
   function reloadConfig() {
     loadConfigs();
     logger.info('Config reloaded!');
-    autoConnectIfActive(lastUsedConn);
+    autoConnectIfActive(connectionExplorer.getActive());
     updateStatusBar();
-    connectionExplorer.setConnections(ConfigManager.connections);
+    if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
     let password = null;
-    if (c && c.askForPassword) password = await askForPassword(c);
-    if (c.askForPassword && password === null) return;
-    lastUsedConn = c;
-    connectionExplorer.setActiveConnection(lastUsedConn);
+    if (c) {
+      if (c.askForPassword) password = await askForPassword(c);
+      if (c.askForPassword && password === null) return;
+      await languageClient.sendRequest(
+        OpenConnectionRequest,
+        { conn: c, password },
+      );
+    }
+    connectionExplorer.setActiveConnection(c);
     updateStatusBar();
-    lastUsedConn = (await languageClient.sendRequest(
-      OpenConnectionRequest.method,
-      { conn: c, password },
-    ));
-    return lastUsedConn;
+    return connectionExplorer.getActive();
   }
 
   async function askForPassword(c: SerializedConnection): Promise<string | null> {
@@ -440,8 +508,8 @@ namespace SQLTools {
     });
   }
   async function connect(force = false): Promise<SerializedConnection> {
-    if (!force && lastUsedConn) {
-      return lastUsedConn;
+    if (!force && connectionExplorer.getActive()) {
+      return connectionExplorer.getActive();
     }
     const c: SerializedConnection = await connectionMenu(true);
     history.clear();
@@ -450,11 +518,11 @@ namespace SQLTools {
 
   async function getLanguageServerDisposable() {
     const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6011'] };
+    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
 
     const serverOptions: ServerOptions = {
       debug: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
-      run: { module: serverModule, transport: TransportKind.ipc, options: debugOptions },
+      run: { module: serverModule, transport: TransportKind.ipc },
     };
 
     const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)
@@ -548,32 +616,40 @@ namespace SQLTools {
   }
 
   async function help() {
-    const localConfig = await Utils.getlastRunInfo();
-    if (localConfig.current.numericVersion <= localConfig.installed.numericVersion) {
-      return;
-    }
-    const moreInfo = 'More Info';
-    const supportProject = 'Support This Project';
-    const releaseNotes = 'Release Notes';
-    const message = `SQLTools updated! Check out the release notes for more information.`;
-    const options = [ moreInfo, supportProject, releaseNotes ];
-    const res: string = await Win.showInformationMessage(message, ...options);
-    Telemetry.registerInfoMessage(message, res);
-    switch (res) {
-      case moreInfo:
-        require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
-        break;
-      case releaseNotes:
-        require('opn')(localConfig.current.releaseNotes);
-        break;
-      case supportProject:
-        require('opn')('https://www.patreon.com/mteixeira');
-        break;
-    }
-  }
+    try {
+      const { current = { } } = await Utils.getlastRunInfo();
+      const { lastNotificationDate = 0, updated } = current;
+      const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
+      const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
+      const updatedRecently = (today - lastNDate) < 2;
 
-  async function setSettings(key: string, value: any) {
-    await Wspc.getConfiguration(cfgKey).update(key, value);
+      if (
+        ConfigManager.disableReleaseNotifications
+        || !updated
+        || updatedRecently
+      ) return;
+
+      await Utils.updateLastRunInfo({ lastNotificationDate: +new Date() });
+
+      const moreInfo = 'More Info';
+      const supportProject = 'Support This Project';
+      const releaseNotes = 'Release Notes';
+      const message = `SQLTools updated! Check out the release notes for more information.`;
+      const options = [ moreInfo, supportProject, releaseNotes ];
+      const res: string = await Win.showInformationMessage(message, ...options);
+      Telemetry.registerInfoMessage(message, res);
+      switch (res) {
+        case moreInfo:
+          require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
+          break;
+        case releaseNotes:
+          require('opn')(current.releaseNotes);
+          break;
+        case supportProject:
+          require('opn')('https://www.patreon.com/mteixeira');
+          break;
+      }
+    } catch (e) { /***/ }
   }
 
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
@@ -586,11 +662,70 @@ namespace SQLTools {
 
     return await tableMenu(conn, 'label');
   }
-  async function quickPick(options: QuickPickItem[], prop: string = null): Promise<QuickPickItem | any> {
+
+  /**
+   * @deprecated Will be removed in newer versions.
+   */
+  async function quickPickOldApi(
+    options: QuickPickItem[],
+    prop?: string,
+  ): Promise<QuickPickItem | any> {
     const sel: QuickPickItem = await Win.showQuickPick(options);
     if (!sel || (prop && !sel[prop])) throw new DismissedException();
     return prop ? sel[prop] : sel;
   }
+
+  type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<QuickPickOptions & {
+    title: QuickPick<T>['title'];
+    placeHolderDisabled?: QuickPick<T>['placeholder'];
+  }>;
+
+  async function quickPick(
+    options: QuickPickItem[],
+    prop?: string,
+    quickPickOptions?: ExtendedQuickPickOptions,
+  ): Promise<QuickPickItem | any> {
+    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(options, prop);
+
+    const qPick = Win.createQuickPick();
+    const sel = await (new Promise<QuickPickItem | any>((resolve) => {
+      const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
+      qPick.onDidHide(() => qPick.dispose());
+      qPick.onDidChangeSelection((selection = []) => {
+        qPick.hide();
+        return resolve(qPickOptions.canPickMany ? selection : selection[0]);
+      });
+      qPick.onDidTriggerButton((btn: any) => {
+        if (btn.cb) btn.cb();
+        qPick.hide();
+      });
+
+      Object.keys(qPickOptions).forEach(k => {
+        qPick[k] = qPickOptions[k];
+      });
+      qPick.items = options;
+      qPick.enabled = options.length > 0;
+      qPick.buttons = [
+        {
+          iconPath: {
+            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
+            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
+          },
+          tooltip: ' Add new Connection',
+          cb: cmdAddNewConnection,
+        } as any,
+      ];
+
+      if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
+
+      qPick.title = `${qPick.title || 'Items'} (${options.length})`;
+
+      qPick.show();
+    }));
+    if (!sel || (prop && !sel[prop])) throw new DismissedException();
+    return prop ? sel[prop] : sel;
+  }
+
   async function readInput(prompt: string, placeholder?: string) {
     const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
     if (isEmpty(data)) throw new DismissedException();

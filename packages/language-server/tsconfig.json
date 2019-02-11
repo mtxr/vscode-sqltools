@@ -12,6 +12,9 @@
     "lib": [
       "es6"
     ],
+    "paths": {
+      "@sqltools/language-server/*": ["./*"]
+    },
     "removeComments": true
   },
 }

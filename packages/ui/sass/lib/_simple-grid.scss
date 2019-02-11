@@ -4,7 +4,6 @@
 
 @import '../variables';
 // fonts
-$font-family: $fontFamily;
 $font-weight-light: 300;
 $font-weight-regular: 400;
 $font-weight-heavy: 700;
@@ -22,7 +21,8 @@ body {
 }
 
 * {
-  font-family: $font-family;
+  font-family: $fallbackFontFamily;
+  font-family: $fontFamily;
   line-height: $font-height;
 }
 

@@ -1,8 +1,14 @@
 {
+  "sqltools.autoConnectTo": [
+    "PGSQL",
+    "MySQL",
+    "MSSQL"
+  ],
+  "sqltools.telemetry": false,
   "sqltools.connections": [
     {
       "name": "PGSQL",
-      "server": "127.0.0.1",
+      "server": "localhost",
       "dialect": "PostgreSQL",
       "port": 5433,
       "database": "test_db",
@@ -13,14 +19,28 @@
     },
     {
       "name": "MSSQL",
-      "server": "127.0.0.1",
+      "server": "localhost",
       "dialect": "MSSQL",
       "port": 1433,
       "database": "test_db",
-      "username": "root",
+      "username": "sa",
       "askForPassword": false,
       "password": "root(!)Password",
-      "connectionTimeout": 15
+      "connectionTimeout": 15,
+      "dialectOptions": {
+        "encrypt": false
+      },
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQL",
+      "password": "root",
+      "port": 3307,
+      "server": "localhost",
+      "username": "root"
     }
   ]
 }

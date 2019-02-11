@@ -8,7 +8,7 @@ namespace ErrorHandler {
       if (error) {
         if (error.swallowError) return;
         logger.error(`${message}: `, error.stack);
-        message = `${message} ${error.toString()}`;
+        message = `${message} ${error.message ? error.message : error.toString()}`;
       }
       if (typeof yesCallback !== 'function') {
         Telemetry.registerErrorMessage(message, error, 'No callback');
