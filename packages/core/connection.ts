@@ -22,12 +22,19 @@ export default class Connection {
   }
 
   public connect() {
-    return this.query('SELECT 1;', true)
-      .then(() => {
-        this.connected = true;
-        return true;
-      })
-      .catch((e) => Promise.reject(e));
+    try {
+      return this.query('SELECT 1;', true)
+        .then(() => {
+          this.connected = true;
+          return true;
+        })
+        .catch((e) => {
+          return Promise.reject(e);
+        });
+
+    } catch (error) {
+      debugger;
+    }
   }
 
   public setPassword(password: string) {

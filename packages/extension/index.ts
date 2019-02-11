@@ -485,18 +485,22 @@ namespace SQLTools {
   }
 
   async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
-    let password = null;
-    if (c) {
-      if (c.askForPassword) password = await askForPassword(c);
-      if (c.askForPassword && password === null) return;
-      await languageClient.sendRequest(
-        OpenConnectionRequest,
-        { conn: c, password },
-      );
+    try {
+      let password = null;
+      if (c) {
+        if (c.askForPassword) password = await askForPassword(c);
+        if (c.askForPassword && password === null) return;
+        await languageClient.sendRequest(
+          OpenConnectionRequest,
+          { conn: c, password },
+        );
+      }
+      connectionExplorer.setActiveConnection(c);
+      updateStatusBar();
+      return connectionExplorer.getActive();
+    } catch (error) {
+
     }
-    connectionExplorer.setActiveConnection(c);
-    updateStatusBar();
-    return connectionExplorer.getActive();
   }
 
   async function askForPassword(c: SerializedConnection): Promise<string | null> {

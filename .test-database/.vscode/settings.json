@@ -1,10 +1,10 @@
 {
   "sqltools.autoConnectTo": [
-    "PGSQL",
-    "MySQL",
-    "MSSQL"
+    // "PGSQL",
+    // "MySQL",
+    // "MSSQL"
   ],
-  "sqltools.telemetry": false,
+  "sqltools.telemetry": true,
   "sqltools.connections": [
     {
       "name": "PGSQL",
@@ -29,7 +29,7 @@
       "connectionTimeout": 15,
       "dialectOptions": {
         "encrypt": false
-      },
+      }
     },
     {
       "askForPassword": false,
@@ -41,6 +41,17 @@
       "port": 3307,
       "server": "localhost",
       "username": "root"
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "Firebird",
+      "name": "Firebird",
+      "password": "user",
+      "port": 3050,
+      "server": "localhost",
+      "username": "user"
     }
   ]
 }

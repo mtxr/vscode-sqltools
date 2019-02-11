@@ -1,0 +1,77 @@
+import { DialectQueries } from '@sqltools/core/interface';
+
+export default {
+  describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+      WHERE table_name = ':table'
+        AND TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')`,
+
+
+  fetchColumns: `SELECT
+    RF.RDB$RELATION_NAME as tableName,
+    RF.RDB$FIELD_NAME as columnName,
+    RF.RDB$FIELD_POSITION FIELD_POSITION,
+    CASE F.RDB$FIELD_TYPE
+      WHEN 7 THEN
+        CASE F.RDB$FIELD_SUB_TYPE
+          WHEN 0 THEN 'SMALLINT'
+          WHEN 1 THEN 'NUMERIC(' || F.RDB$FIELD_PRECISION || ', ' || (-F.RDB$FIELD_SCALE) || ')'
+          WHEN 2 THEN 'DECIMAL'
+        END
+      WHEN 8 THEN
+        CASE F.RDB$FIELD_SUB_TYPE
+          WHEN 0 THEN 'INTEGER'
+          WHEN 1 THEN 'NUMERIC('  || F.RDB$FIELD_PRECISION || ', ' || (-F.RDB$FIELD_SCALE) || ')'
+          WHEN 2 THEN 'DECIMAL'
+        END
+      WHEN 9 THEN 'QUAD'
+      WHEN 10 THEN 'FLOAT'
+      WHEN 12 THEN 'DATE'
+      WHEN 13 THEN 'TIME'
+      WHEN 14 THEN 'CHAR(' || (TRUNC(F.RDB$FIELD_LENGTH / CH.RDB$BYTES_PER_CHARACTER)) || ') '
+      WHEN 16 THEN
+        CASE F.RDB$FIELD_SUB_TYPE
+          WHEN 0 THEN 'BIGINT'
+          WHEN 1 THEN 'NUMERIC(' || F.RDB$FIELD_PRECISION || ', ' || (-F.RDB$FIELD_SCALE) || ')'
+          WHEN 2 THEN 'DECIMAL'
+        END
+      WHEN 27 THEN 'DOUBLE'
+      WHEN 35 THEN 'TIMESTAMP'
+      WHEN 37 THEN
+       IIF (COALESCE(f.RDB$COMPUTED_SOURCE,'')<>'',
+        'COMPUTED BY ' || CAST(f.RDB$COMPUTED_SOURCE AS VARCHAR(250)),
+        'VARCHAR(' || (TRUNC(F.RDB$FIELD_LENGTH / CH.RDB$BYTES_PER_CHARACTER)) || ')')
+      WHEN 40 THEN 'CSTRING' || (TRUNC(F.RDB$FIELD_LENGTH / CH.RDB$BYTES_PER_CHARACTER)) || ')'
+      WHEN 45 THEN 'BLOB_ID'
+      WHEN 261 THEN 'BLOB SUB_TYPE ' || F.RDB$FIELD_SUB_TYPE  ||   IIF (COALESCE(f.RDB$SEGMENT_LENGTH,'')<>'', ' SEGMENT SIZE ' ||f.RDB$SEGMENT_LENGTH ,'')
+      ELSE 'RDB$FIELD_TYPE: ' || F.RDB$FIELD_TYPE || '?'
+    END FIELD_TYPE, (TRUNC(F.RDB$FIELD_LENGTH / CH.RDB$BYTES_PER_CHARACTER)) as SIZE, '' AS tableCatalog, '' AS tableSchema,'' as dbName,
+    IIF(COALESCE(RF.RDB$NULL_FLAG, 0) = 0, NULL, 'NOT NULL') FIELD_NULL,
+    CH.RDB$CHARACTER_SET_NAME FIELD_CHARSET,
+    DCO.RDB$COLLATION_NAME FIELD_COLLATION,
+    CAST(COALESCE(RF.RDB$DEFAULT_SOURCE, F.RDB$DEFAULT_SOURCE) AS VARCHAR(256)) defaultValue,
+    F.RDB$VALIDATION_SOURCE FIELD_CHECK,
+    RF.RDB$DESCRIPTION FIELD_DESCRIPTION
+  FROM RDB$RELATION_FIELDS RF
+  JOIN RDB$FIELDS F ON (F.RDB$FIELD_NAME = RF.RDB$FIELD_SOURCE)
+  LEFT OUTER JOIN RDB$CHARACTER_SETS CH ON (CH.RDB$CHARACTER_SET_ID = F.RDB$CHARACTER_SET_ID)
+  LEFT OUTER JOIN RDB$COLLATIONS DCO ON ((DCO.RDB$COLLATION_ID = F.RDB$COLLATION_ID) AND (DCO.RDB$CHARACTER_SET_ID = F.RDB$CHARACTER_SET_ID))
+  WHERE (COALESCE(RF.RDB$SYSTEM_FLAG, 0) = 0) AND RF.RDB$UPDATE_FLAG=1
+  ORDER BY  RF.RDB$RELATION_NAME,RF.RDB$FIELD_POSITION
+
+    `,
+
+  fetchRecords: 'SELECT FIRST :limit * FROM :table ',
+
+  fetchTables: `select r.rdb$relation_name AS tableName,
+    '' AS tableSchema,
+            '' AS tableCatalog,
+    IIF (r.rdb$view_blr IS NULL, 0,1)    AS isView , '' AS DBNAME
+    , COUNT(1) AS  numberOfColumns
+    from rdb$relation_fields f
+    join rdb$relations r on f.rdb$relation_name = r.rdb$relation_name
+    /*r.rdb$view_blr is  NOT null and*/
+
+    GROUP BY 1,2,3 ,4,5
+
+    order by 1;`,
+} as DialectQueries;
