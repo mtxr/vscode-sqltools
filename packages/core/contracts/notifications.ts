@@ -1,5 +1,6 @@
 export default {
   OnError: 'onError',
   ExitCalled: 'exitCalled',
-  LanguageServerReady: 'languageServerReady'
+  LanguageServerReady: 'languageServerReady',
+  MissingModule: 'missingModule',
 }

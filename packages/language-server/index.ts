@@ -27,6 +27,7 @@ import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
 import { Telemetry } from '@sqltools/core/utils';
 import { MissingModule } from '@sqltools/core/exception';
+import Notifications from '@sqltools/core/contracts/notifications';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -183,6 +184,11 @@ namespace SQLToolsLanguageServer {
     })
     .catch(e => {
       if (e instanceof MissingModule) {
+        server.sendNotification(Notifications.MissingModule, {
+          conn: c.serialize(),
+          moduleName: e.moduleName,
+          moduleVersion: e.moduleVersion,
+        });
         return c.serialize();
       }
       throw e;

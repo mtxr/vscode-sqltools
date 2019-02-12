@@ -1,21 +1,19 @@
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  DialectQueries,
 } from '../../interface';
 import * as Utils from '../../utils';
 import queries from './queries';
-import OracbleDBLib from 'oracledb';
+import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
 import { MissingModule } from '@sqltools/core/exception';
 
 const OracleDBVersion = '3.1.1';
-export default class Oracle extends GenericDialect<OracbleDBLib.IConnection> implements ConnectionDialect {
+export default class Oracle extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
   private poolCreated = false;
   public get connection() {
     if (!this.poolCreated) return;
-    return this.lib.getConnection() as Promise<OracbleDBLib.IConnection>;
+    return this.lib.getConnection() as Promise<OracleDBLib.IConnection>;
   }
 
   static needToInstall() {
@@ -27,7 +25,7 @@ export default class Oracle extends GenericDialect<OracbleDBLib.IConnection> imp
   }
   queries = queries
 
-  private get lib(): typeof OracbleDBLib {
+  private get lib(): typeof OracleDBLib {
     return __non_webpack_require__('oracledb');
   }
 
@@ -43,7 +41,7 @@ export default class Oracle extends GenericDialect<OracbleDBLib.IConnection> imp
     const connectString = (this.credentials.server && this.credentials.port) ?
       `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}` :
       this.credentials.database;
-    await OracbleDBLib.createPool({
+    await this.lib.createPool({
       connectString,
       password: this.credentials.password,
       user: this.credentials.username,
@@ -62,8 +60,6 @@ export default class Oracle extends GenericDialect<OracbleDBLib.IConnection> imp
     const conn = await this.open();
     const results = await conn.execute(query, [], { outFormat: this.lib.OBJECT })
       .then(res => Array.isArray(res) ? res : [res]);
-    const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter(Boolean);
-    const messages = [];
     console.log(results);
     // results.map(() => void 0);
     // return results.map((r, i) => {

@@ -52,6 +52,7 @@ import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
+import AutoInstaller from './api/autoinstaller';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
@@ -66,6 +67,7 @@ namespace SQLTools {
   let bookmarks: BookmarksStorage;
   let history: History;
   let languageClient: LanguageClient;
+  let autoInstaller: AutoInstaller;
   let activationTimer: Timer;
 
   export async function start(context: ExtensionContext): Promise<void> {
@@ -593,6 +595,7 @@ namespace SQLTools {
       serverOptions,
       clientOptions,
     );
+    autoInstaller = new AutoInstaller(languageClient, telemetry);
     languageClient.onReady().then(() => {
       languageClient.onNotification(Notification.ExitCalled, () => {
         avoidRestart = true;
@@ -603,6 +606,9 @@ namespace SQLTools {
       languageClient.onNotification(Notification.LanguageServerReady, () => {
         logger.debug('Language server is ready!');
       });
+      languageClient.onNotification(
+        Notification.MissingModule,
+        autoInstaller.requestToInstall);
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 
