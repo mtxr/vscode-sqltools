@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.16.5",
+    "version": "0.16.9",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -72,14 +72,18 @@
                 "command": "SQLTools.selectConnection",
                 "category": "SQLTools",
                 "icon": {
-                    "light": "icons/database-light.svg",
-                    "dark": "icons/database-dark.svg"
+                    "light": "icons/connect-light.svg",
+                    "dark": "icons/connect-dark.svg"
                 }
             },
             {
                 "title": "Disconnect",
                 "command": "SQLTools.closeConnection",
-                "category": "SQLTools"
+                "category": "SQLTools",
+                "icon": {
+                    "light": "icons/disconnect-light.svg",
+                    "dark": "icons/disconnect-dark.svg"
+                }
             },
             {
                 "title": "Create from selection",
@@ -109,6 +113,11 @@
             {
                 "title": "Run",
                 "command": "SQLTools.runFromHistory",
+                "category": "SQLTools History"
+            },
+            {
+                "title": "Edit from history",
+                "command": "SQLTools.editFromHistory",
                 "category": "SQLTools History"
             },
             {
@@ -146,8 +155,8 @@
                 "command": "SQLTools.showRecords",
                 "category": "SQLTools Connection",
                 "icon": {
-                    "light": "icons/list-light.svg",
-                    "dark": "icons/list-dark.svg"
+                    "light": "icons/show-light.svg",
+                    "dark": "icons/show-dark.svg"
                 }
             },
             {
@@ -160,8 +169,8 @@
                 "command": "SQLTools.addNewConnection",
                 "category": "SQLTools Management",
                 "icon": {
-                    "light": "icons/database-light.svg",
-                    "dark": "icons/database-dark.svg"
+                    "light": "icons/add-connection-light.svg",
+                    "dark": "icons/add-connection-dark.svg"
                 }
             },
             {
@@ -178,8 +187,8 @@
                 "command": "SQLTools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "icons/insert-light.svg",
-                    "dark": "icons/insert-dark.svg"
+                    "light": "icons/plus-light.svg",
+                    "dark": "icons/plus-dark.svg"
                 }
             },
             {
@@ -250,11 +259,19 @@
             "type": "object",
             "title": "SQLTools Settings",
             "properties": {
+                "sqltools.disableReleaseNotifications": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Disable new release notifications."
+                },
                 "sqltools.autoConnectTo": {
-                    "type": "string",
+                    "type": ["string", "array"],
                     "default": null,
                     "required": false,
-                    "description": "Name of the connection to auto connect on start"
+                    "description": "Name of the connection to auto connect on start",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "sqltools.logging": {
                     "type": "boolean",
@@ -279,7 +296,7 @@
                         "WARN",
                         "ERROR"
                     ],
-                    "default": "INFO",
+                    "default": "DEBUG",
                     "description": "Set the severity of logged messages messages on console."
                 },
                 "sqltools.queryTimeout": {
@@ -513,6 +530,16 @@
                     "group": "inline@0"
                 },
                 {
+                    "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
+                    "group": "sqltools.dbExplorer@0"
+                },
+                {
+                    "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
+                    "group": "inline@0"
+                },
+                {
                     "command": "SQLTools.appendToCursor",
                     "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group",
                     "group": "sqltools.dbExplorer@1"
@@ -564,10 +591,9 @@
     "devDependencies": {
         "@babel/cli": "^7.1.2",
         "@types/jest": "^23.3.9",
-        "@types/node": "^10.12.9",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^4.5.3",
-        "css-loader": "^1.0.0",
+        "css-loader": "^2.1.0",
         "jest": "^23.6.0",
         "jest-cli": "^23.6.0",
         "node-sass": "^4.10.0",
@@ -577,10 +603,10 @@
         "ts-loader": "^5.2.1",
         "tslint": "^5.4.3",
         "tslint-webpack-plugin": "^1.2.2",
-        "typescript": "^3.1.6",
+        "typescript": "^3.3.1",
         "uglifyjs-webpack-plugin": "^2.0.1",
-        "vscode": "^1.1.22",
-        "webpack": "^4.20.2",
+        "vscode": "^1.1.28",
+        "webpack": "^4.29.0",
         "webpack-cli": "^3.1.2"
     },
     "dependencies": {

@@ -2,14 +2,14 @@ version: '3.1'
 
 services:
   db:
-    image: microsoft/mssql-server-linux
+    image: mcr.microsoft.com/mssql/server
     restart: unless-stopped
     ports:
       - '1433:1433'
     volumes:
-      - ./entrypoint.sh:/entrypoint.sh
-      - ./import-data.sh:/import-data.sh
-      - ./setup.sql:/setup.sql
+      - ./entrypoint.sh:/entrypoint.sh:Z
+      - ./import-data.sh:/import-data.sh:Z
+      - ./setup.sql:/setup.sql:Z
     command: bash /entrypoint.sh
     environment:
       ACCEPT_EULA: Y

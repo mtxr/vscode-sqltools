@@ -6,8 +6,9 @@ export interface DialectQueries {
 }
 
 export enum DatabaseDialect {
-  MSSQL,
-  MySQL,
-  PostgreSQL,
-  SQLite
+  MSSQL = 'MSSQL',
+  MySQL = 'MySQL',
+  PostgreSQL = 'PostgreSQL',
+  SQLite = 'SQLite',
+  OracleDB = 'OracleDB'
 }

@@ -2,12 +2,18 @@
 {
   "eslint.enable": true,
   "files.exclude": {
-    "**/dist": false
+    "**/dist": false,
+    "docs": true,
+    "packages": true,
   },
   "files.watcherExclude": {
-    "**/dist": true
+    "**/dist": true,
+    "docs": true,
+    "packages": true,
   },
   "search.exclude": {
-    "**/dist": true
+    "**/dist": true,
+    "docs": true,
+    "packages": true,
   }
 }

@@ -6,6 +6,42 @@
 
 ## v0.16
 
+### v0.16.9
+- **Enhancements**
+  - ***General***: Reduced extension size from 9.8MB to ~3MB
+  - ***Settings***:
+    - Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
+  - ***Connections***:
+    - MySQL: Updated library to mysql instead of mysql2. Previous was vey buggy.
+    - PostgreSQL: Updated library and migrated to connection pooling to avoid errors.
+    - MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue #126
+
+### v0.16.8
+- **Fixes**
+  - ***Connections***:
+    - MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue #126
+
+### v0.16.7
+- **Fixes**
+  - ***UI***:
+    - Using Octicons as suggested by VSCode team.
+    - Adopeted the new QuickPick API.
+    - Added disconnect icon to connection-explorer
+  - ***Connections***:
+    - General: quick pick not showing options if no connection active. Issue #124
+    - General: Allow auto connect to multiple connections.
+    - MySQL: Fixes `Can't add new command when connection is in closed state`. Should happen less often at least.
+  - ***History***:
+    - Add option to edit item from history.
+    - Updated history to show most recenetly used at first position
+  - ***Query Format***:
+    - Fixed formatting with comments. Issue #97
+    - Fixed formatting with non latin chars. Issue #99
+
+### v0.16.6
+- **Fixes**
+  - ***Connections***: Error while connecting => `toString() of undefined`
+
 ### v0.16.5
 
 - **Enhancements**

@@ -1,9 +1,10 @@
 <p align="center">
-<img src="static/banner.png" />
+<img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/banner.png" />
 </p>
 
 <hr />
 
+[![Gitter](https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat)](https://gitter.im/vscode-sqltools)
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 

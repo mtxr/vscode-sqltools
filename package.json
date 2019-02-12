@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.16.5",
+  "version": "0.16.9",
   "publisher": "mtxr",
   "license": "GPL-3.0",
   "main": "../dist/extension.js",
@@ -20,12 +20,12 @@
   "scripts": {
     "clean": "rm -rf ../dist &> /dev/null",
     "precompile": "yarn run clean",
-    "prewatch": "yarn run clean && mkdir -p ../dist && cp -R node_modules ../dist/. && rm -rf ../dist/node_modules/@sqltools",
+    "prewatch": "yarn run clean && mkdir -p ../dist",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
-    "package:preview": "yarn run compile:preview && (cd ../dist && npm i && vsce package)",
-    "package": "yarn run compile && (cd ../dist && npm i && vsce package)",
+    "package:preview": "yarn run compile:preview && (cd ../dist vsce package)",
+    "package": "yarn run compile && (cd ../dist vsce package)",
     "publish": "cd ../dist && vsce publish"
   }
 }

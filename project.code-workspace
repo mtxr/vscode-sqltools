@@ -1,0 +1,28 @@
+{
+  "folders": [
+    {
+      "path": ".",
+      "name": "root"
+    },
+    {
+      "path": "./packages/core",
+      "name": "core"
+    },
+    {
+      "path": "./packages/extension",
+      "name": "extension"
+    },
+    {
+      "path": "./packages/language-server",
+      "name": "language-server"
+    },
+    {
+      "path": "./packages/ui",
+      "name": "ui"
+    },
+    {
+      "path": "./docs",
+      "name": "docs"
+    }
+  ]
+}

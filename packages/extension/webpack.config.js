@@ -14,10 +14,7 @@ const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkg
 // defintions
 extPkgJson.name = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools'; // vscode marketplace name
 
-const BUGSNAG_API_KEY = '6a7272d127badffdfd87bec6f1ae5d29';
-
 const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
-
 /**
  *
  * @param {*} env
@@ -56,14 +53,14 @@ function getExtensionConfig(env) {
               content.displayName = `${extPkgJson.displayName} - Preview`;
             }
             content.scripts = {};
-            content.dependencies = dependencies;
-            content.devDependencies = devDependencies;
+            content.dependencies = {};
+            content.devDependencies = { ...devDependencies, ...dependencies };
 
-            delete content.dependencies['@sqltools/core'];
-            delete content.dependencies['@sqltools/language-server'];
-            delete content.dependencies['@sqltools/ui'];
+            Object.keys(content.devDependencies).filter(k => k.includes('@sqltools')).forEach(k => {
+              delete content.devDependencies[k];
+            });
 
-            return JSON.stringify(content).replace(/SQLTools\./g, `${extPkgJson.name}.`);
+            return JSON.stringify(content, null, env.production ? undefined : 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -75,8 +72,10 @@ function getExtensionConfig(env) {
     ],
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json'],
+      alias: {
+        'pg-native': path.join(__dirname, '../../' ,'node_modules/pg/lib/native/index.js'),
+      },
     },
-    devtool: !env.production ? 'source-map' : false,
     output: {
       filename: '[name].js',
       path: outdir,
@@ -85,11 +84,6 @@ function getExtensionConfig(env) {
     },
     externals: {
       'vscode': 'commonjs vscode',
-      'vscode-languageclient': 'vscode-languageclient',
-      'vscode-languageserver': 'vscode-languageserver',
-      'pg': 'commonjs pg',
-      'tedious': 'commonjs tedious',
-      'mysql2': 'commonjs mysql2',
     },
     optimization: env.production ? {
       minimize: false,
@@ -109,10 +103,15 @@ module.exports = function (env = {}) {
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.BUGSNAG_API_KEY': JSON.stringify(BUGSNAG_API_KEY),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
+    config.node = {
+      ...(config.node || {}),
+      __dirname: false
+    };
+    config.devtool = !env.production ? 'inline-source-map' : 'source-map';
+
     return config;
   });
 };

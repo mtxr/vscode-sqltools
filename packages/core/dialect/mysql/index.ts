@@ -1,74 +1,37 @@
-import * as mysql from 'mysql2';
+import MySQLLib from 'mysql';
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  DialectQueries,
-} from '../interface';
-import * as Utils from '../utils';
-
-export default class MySQL implements ConnectionDialect {
-  public connection: Promise<any>;
-  private queries: DialectQueries = {
-    describeTable: 'DESCRIBE :table',
-    fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName,
-        DATA_TYPE AS type,
-        CHARACTER_MAXIMUM_LENGTH AS size,
-        TABLE_SCHEMA as tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DATABASE() as dbName,
-        COLUMN_DEFAULT as defaultValue,
-        IS_NULLABLE as isNullable
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()`,
-    fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-    fetchTables: `SELECT
-        C.TABLE_NAME AS tableName,
-        C.TABLE_SCHEMA AS tableSchema,
-        C.TABLE_CATALOG AS tableCatalog,
-        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
-        DATABASE() AS dbName,
-        COUNT(1) AS numberOfColumns
-      FROM
-        INFORMATION_SCHEMA.COLUMNS AS C
-        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
-        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-        AND C.TABLE_CATALOG = T.TABLE_CATALOG
-      WHERE T.TABLE_SCHEMA = DATABASE()
-      GROUP by
-        C.TABLE_NAME,
-        C.TABLE_SCHEMA,
-        C.TABLE_CATALOG,
-        T.TABLE_TYPE
-      ORDER BY
-        C.TABLE_NAME;`,
-  } as DialectQueries;
-  constructor(public credentials: ConnectionCredentials) {
-
-  }
-
+} from '@sqltools/core/interface';
+import * as Utils from '@sqltools/core/utils';
+import GenericDialect from '@sqltools/core/dialect/generic';
+import Queries from './queries';
+export default class MySQL extends GenericDialect<MySQLLib.Pool> implements ConnectionDialect {
+  queries = Queries;
   public open() {
     if (this.connection) {
       return this.connection;
     }
-    const options = {
-      connectionTimeout: this.credentials.connectionTimeout * 1000,
+
+    const pool = MySQLLib.createPool({
+      connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       host: this.credentials.server,
-      multipleStatements: true,
       password: this.credentials.password,
       port: this.credentials.port,
       user: this.credentials.username,
-    };
-    const self = this;
-    const connection = mysql.createConnection(options);
-    return new Promise((resolve, reject) => {
-      connection.connect((err) => {
-        if (err) {
-          return reject(err);
-        }
-        self.connection = Promise.resolve(connection);
-        resolve(self.connection);
+      multipleStatements: true
+    });
+
+    return new Promise<MySQLLib.Pool>((resolve, reject) => {
+      pool.getConnection((err, conn) => {
+        if (err) return reject(err);
+        conn.ping(error => {
+          if (error) return reject(error);
+          this.connection = Promise.resolve(pool);
+          conn.release();
+          return resolve(this.connection);
+        });
       });
     });
   }
@@ -76,10 +39,14 @@ export default class MySQL implements ConnectionDialect {
   public close() {
     if (!this.connection) return Promise.resolve();
 
-    return this.connection.then((conn) => {
-      conn.destroy();
-      this.connection = null;
-      return Promise.resolve();
+    return this.connection.then((pool) => {
+      return new Promise<void>((resolve, reject) => {
+        pool.end((err) => {
+          if (err) return reject(err);
+          this.connection = null;
+          return resolve();
+        });
+      });
     });
   }
 
@@ -147,13 +114,5 @@ export default class MySQL implements ConnectionDialect {
           })
           .sort();
       });
-  }
-
-  public describeTable(table: string) {
-    return this.query(Utils.replacer(this.queries.describeTable, { table }));
-  }
-
-  public showRecords(table: string, limit: number) {
-    return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
   }
 }

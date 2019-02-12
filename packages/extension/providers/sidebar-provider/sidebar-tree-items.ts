@@ -5,8 +5,10 @@ import {
 } from 'vscode';
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
+import { DatabaseInterface, ConnectionCredentials, DatabaseDialect } from '@sqltools/core/interface';
 import { EXT_NAME } from '@sqltools/core/constants';
+import { getDbId } from '@sqltools/core/utils';
+import { isDeepStrictEqual } from 'util';
 
 export class SidebarConnection extends TreeItem {
   public parent = null;
@@ -14,7 +16,18 @@ export class SidebarConnection extends TreeItem {
   public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables', this);
   public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views', this);
   public get description() {
-    return this.isActive ? 'active' : '';
+    if (this.conn.dialect === DatabaseDialect.SQLite) {
+      return `file://${this.conn.database}`;
+    }
+    return [
+      this.conn.username,
+      this.conn.username ? '@' : '',
+      this.conn.server,
+      this.conn.server && this.conn.port ? ':' : '',
+      this.conn.port,
+      '/',
+      this.conn.database,
+    ].filter(Boolean).join('');
   }
 
   private isActive = false;
@@ -31,20 +44,20 @@ export class SidebarConnection extends TreeItem {
   }
 
   constructor(public conn: ConnectionCredentials) {
-    super(`${conn.database}@${conn.name}`, TreeItemCollapsibleState.None);
+    super(conn.name, TreeItemCollapsibleState.None);
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
       light: ContextManager.context.asAbsolutePath('icons/database-light.svg'),
     };
     this.command = {
-      title: '',
+      title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
       arguments: [this],
     };
   }
 
   public getId() {
-    return `${this.conn.name}#${this.conn.database}#${this.conn.dialect}`;
+    return getDbId(this.conn);
   }
 
   public addItem(item) {
@@ -58,19 +71,33 @@ export class SidebarConnection extends TreeItem {
   }
 
   public reset() {
-    if (this.views) this.views.reset();
-    if (this.tables) this.tables.reset();
+    if (this.views) this.views = new SidebarDatabaseSchemaGroup('Views', this);
+    if (this.tables) this.tables = new SidebarDatabaseSchemaGroup('Tables', this);
+    this.deactivate();
     this.collapsibleState = TreeItemCollapsibleState.None;
   }
 
   public activate() {
     this.isActive = true;
     this.expand();
+    this.label = `* ${this.conn.name}`;
+    this.contextValue = 'connectedConnection';
     return this;
   }
 
   public deactivate() {
     this.isActive = false;
+    this.label = this.conn.name;
+    return this;
+  }
+
+  public connect() {
+    return this.activate();
+  }
+
+  public disconnect() {
+    this.reset();
+    this.contextValue = 'connection';
     return this;
   }
 
@@ -80,6 +107,15 @@ export class SidebarConnection extends TreeItem {
 
   public expand() {
     this.collapsibleState = TreeItemCollapsibleState.Expanded;
+  }
+
+  public updateCreds(creds: ConnectionCredentials) {
+    if (isDeepStrictEqual(this.conn, creds)) {
+      return false;
+    }
+    this.conn = creds;
+    this.reset();
+    return true;
   }
 }
 
