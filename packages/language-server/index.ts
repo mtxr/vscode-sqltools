@@ -7,7 +7,6 @@ import {
 import Formatter from './requests/format';
 import * as Utils from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
-import USQL from '@sqltools/core/utils/usql';
 import ConfigManager from '@sqltools/core/config-manager';
 import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
 import {
@@ -27,6 +26,7 @@ import store from './store';
 import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
 import { Telemetry } from '@sqltools/core/utils';
+import { MissingModule } from '@sqltools/core/exception';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -109,8 +109,6 @@ namespace SQLToolsLanguageServer {
     server.sendNotification(Notification.LanguageServerReady, { });
   });
 
-  server.onNotification('setExtData', USQL.setExtensionData);
-
   server.onDidChangeConfiguration(async (change) => {
     ConfigManager.setSettings(change.settings.sqltools);
     if (ConfigManager.telemetry) telemetry.enable()
@@ -136,7 +134,7 @@ namespace SQLToolsLanguageServer {
     } else if (formatterRegistration) {
       (await formatterRegistration).dispose();
     }
-    sgdbConnections = ConnectionManager.getConnections(Logger);
+    sgdbConnections = ConnectionManager.getConnections(telemetry);
   });
 
   server.listen();
@@ -174,13 +172,21 @@ namespace SQLToolsLanguageServer {
       return undefined;
     }
     const c = sgdbConnections.find((conn) => conn.getId() === Utils.getDbId(req.conn));
+    if (!c) return null;
+
     if (req.password) c.setPassword(req.password);
-    if (await c.connect()) {
-      store.dispatch(actions.Connect(c));
+    return c.connect()
+    .then(async () => {
       await loadConnectionData(c);
+      store.dispatch(actions.Connect(c));
       return c.serialize();
-    }
-    return null;
+    })
+    .catch(e => {
+      if (e instanceof MissingModule) {
+        return c.serialize();
+      }
+      throw e;
+    });
   });
 
   server.onRequest(

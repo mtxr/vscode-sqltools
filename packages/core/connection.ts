@@ -4,7 +4,6 @@ import {
   ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  LoggerInterface,
   SerializedConnection,
 } from './interface';
 
@@ -13,7 +12,7 @@ export default class Connection {
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionCredentials, private logger: LoggerInterface) {
+  constructor(credentials: ConnectionCredentials, private telemetry: Telemetry) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 
@@ -21,13 +20,9 @@ export default class Connection {
     return this.conn.credentials.askForPassword;
   }
 
-  public connect() {
-    return this.query('SELECT 1;', true)
-      .then(() => {
-        this.connected = true;
-        return true;
-      })
-      .catch((e) => Promise.reject(e));
+  public async connect() {
+    await this.query('SELECT 1;', true);
+    this.connected = true;
   }
 
   public setPassword(password: string) {
@@ -78,12 +73,11 @@ export default class Connection {
     return this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
   }
 
-  public query(query: string, autoHandleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
     return this.conn.query(query)
       .catch((e) => {
-        if (!autoHandleError) throw e;
-        this.logger.error('Query error:', e);
-        Telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
+        if (throwIfError) throw e;
+        this.telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
         let message = '';
         if (typeof e === 'string') {
           message = e;

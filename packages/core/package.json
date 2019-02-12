@@ -8,16 +8,18 @@
   "private": true,
   "dependencies": {
     "applicationinsights": "^1.1.0",
+    "mssql": "^4.3.1",
     "mysql": "^2.16.0",
     "pg": "^7.8.0",
     "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b",
-    "mssql": "^4.3.1",
     "vscode-languageserver": "^5.2.1"
   },
   "devDependencies": {
     "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
+    "@types/oracledb": "^1.11.34",
     "@types/pg": "^7.4.11",
+    "@types/sqlite3": "^3.1.3",
     "@types/webpack-env": "^1.13.6",
     "typescript": "^3.3.1"
   }

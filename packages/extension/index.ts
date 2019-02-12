@@ -501,12 +501,13 @@ namespace SQLTools {
     if (c) {
       if (c.askForPassword) password = await askForPassword(c);
       if (c.askForPassword && password === null) return;
-      await languageClient.sendRequest(
+      c = await languageClient.sendRequest(
         OpenConnectionRequest,
         { conn: c, password },
       );
     }
-    connectionExplorer.setActiveConnection(c);
+    if (c && c.isConnected)
+      connectionExplorer.setActiveConnection(c);
     updateStatusBar();
     return connectionExplorer.getActive();
   }
@@ -593,10 +594,6 @@ namespace SQLTools {
       clientOptions,
     );
     languageClient.onReady().then(() => {
-      languageClient.sendNotification('setExtData', {
-        extPath: ContextManager.context.extensionPath,
-        vsCodeVersion,
-      });
       languageClient.onNotification(Notification.ExitCalled, () => {
         avoidRestart = true;
       });

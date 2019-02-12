@@ -84,6 +84,8 @@ function getExtensionConfig(env) {
     },
     externals: {
       'vscode': 'commonjs vscode',
+      'sqlite3': 'commonjs sqlite3',
+      'oracledb': 'commonjs oracledb',
     },
     optimization: env.production ? {
       minimize: false,
