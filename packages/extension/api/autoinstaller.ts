@@ -1,8 +1,10 @@
 import {
   window as Win,
+  env as VSCodeEnv,
 } from 'vscode';
 import { LanguageClient } from 'vscode-languageclient';
 import { Telemetry } from '@sqltools/core/utils';
+import Utils from './utils';
 
 export default class AutoInstaller {
   constructor(public client: LanguageClient, public telemetry: Telemetry) {}
@@ -20,7 +22,7 @@ export default class AutoInstaller {
       break;
       case readMore:
         // @TODO: link to the wiki and create docs
-        require('opn')('https://mtxr.gitbook.io/vscode-sqltools/-----------');
+        Utils.open('https://mtxr.gitbook.io/vscode-sqltools');
         break;
     }
   }

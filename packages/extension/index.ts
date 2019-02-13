@@ -669,13 +669,13 @@ namespace SQLTools {
       telemetry.registerInfoMessage(message, res);
       switch (res) {
         case moreInfo:
-          require('opn')('https://github.com/mtxr/vscode-sqltools#donate');
+          Utils.open('https://github.com/mtxr/vscode-sqltools#donate');
           break;
         case releaseNotes:
-          require('opn')(current.releaseNotes);
+          Utils.open(current.releaseNotes);
           break;
         case supportProject:
-          require('opn')('https://www.patreon.com/mteixeira');
+          Utils.open('https://www.patreon.com/mteixeira');
           break;
       }
     } catch (e) { /***/ }

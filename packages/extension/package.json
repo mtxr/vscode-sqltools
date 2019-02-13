@@ -15,6 +15,7 @@
         "url": "https://github.com/mtxr/vscode-sqltools/issues"
     },
     "main": "./extension.js",
+    "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
         "vscode": "^1.28.0"
@@ -265,7 +266,10 @@
                     "description": "Disable new release notifications."
                 },
                 "sqltools.autoConnectTo": {
-                    "type": ["string", "array"],
+                    "type": [
+                        "string",
+                        "array"
+                    ],
                     "default": null,
                     "required": false,
                     "description": "Name of the connection to auto connect on start",
@@ -590,30 +594,27 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
-        "@types/jest": "^23.3.9",
+        "@types/jest": "^24.0.1",
         "babel-loader": "^8.0.4",
-        "copy-webpack-plugin": "^4.5.3",
+        "copy-webpack-plugin": "^4.6.0",
         "css-loader": "^2.1.0",
         "jest": "^23.6.0",
         "jest-cli": "^23.6.0",
-        "node-sass": "^4.10.0",
+        "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
-        "ts-jest": "^23.10.4",
-        "ts-loader": "^5.2.1",
-        "tslint": "^5.4.3",
-        "tslint-webpack-plugin": "^1.2.2",
-        "typescript": "^3.3.1",
-        "uglifyjs-webpack-plugin": "^2.0.1",
-        "vscode": "^1.1.28",
-        "webpack": "^4.29.0",
-        "webpack-cli": "^3.1.2"
+        "ts-jest": "^23.10.5",
+        "ts-loader": "^5.3.3",
+        "tslint": "^5.12.1",
+        "typescript": "^3.3.3",
+        "vscode": "^1.1.29",
+        "webpack": "^4.29.3",
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/language-server": "*",
         "@sqltools/ui": "*",
-        "opn": "^5.1.0",
-        "vscode-languageclient": "^5.2.1"
+        "vscode-languageclient": "^5.3.0-next.1"
     }
 }

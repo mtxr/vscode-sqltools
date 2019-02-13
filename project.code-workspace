@@ -21,6 +21,10 @@
       "name": "ui"
     },
     {
+      "path": "./packages/dep-installer",
+      "name": "dep-installer"
+    },
+    {
       "path": "./docs",
       "name": "docs"
     }

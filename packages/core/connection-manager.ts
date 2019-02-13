@@ -4,7 +4,7 @@ import ConfigManager from './config-manager';
 import { Telemetry } from './utils';
 export default class ConnectionManager {
   public static getConnections(telemetry: Telemetry): Connection[];
-  public static getConnections(telemetry: Telemetry, serialized: boolean = false): any[] {
+  public static getConnections(telemetry: Telemetry, serialized: boolean = false): (Connection | SerializedConnection)[] {
     const connectionsConfig = ConfigManager.get('connections', []) as any[];
     ConnectionManager.connections = connectionsConfig.map((credentials): Connection => {
       return new Connection(credentials, telemetry);

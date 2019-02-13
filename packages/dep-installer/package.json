@@ -1,0 +1,25 @@
+{
+  "name": "@sqltools/dep-installer",
+  "version": "1.0.0",
+  "description": "Installs and compile dependenies for VSCode extension",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/mtxr/vscode-sqltools",
+    "type": "git"
+  },
+  "homepage": "https://github.com/mtxr/vscode-sqltools",
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/issues"
+  },
+  "bin": {
+    "ngyp": "ngyp.js",
+    "erebuild": "erebuild.js"
+  },
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "MIT",
+  "private": false,
+  "dependencies": {
+    "electron-rebuild": "^1.8.4",
+    "node-gyp": "^3.8.0"
+  }
+}
