@@ -2,6 +2,14 @@
 
 ## v0.16
 
+### v0.16.10
+- **Enhancements**
+  - ***General***:
+    - Removed some dependencies
+    - Reduced startup time
+  - ***Connections***:
+    - Error logging minor fix
+
 ### v0.16.9
 - **Enhancements**
   - ***General***: Reduced extension size from 9.8MB to ~3MB
