@@ -52,7 +52,11 @@ function getExtensionConfig(env) {
               content.preview = true;
               content.displayName = `${extPkgJson.displayName} - Preview`;
             }
-            content.scripts = {};
+            Object.keys(content.scripts || {}).forEach(k => {
+              if (!k.startsWith('tool:')) {
+                delete content.scripts[k];
+              }
+            });
             content.dependencies = {};
             content.devDependencies = { ...devDependencies, ...dependencies };
 

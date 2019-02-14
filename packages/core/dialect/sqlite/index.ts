@@ -14,11 +14,23 @@ const SQLite3Version = '4.0.6';
 
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 
+  public static deps: typeof GenericDialect['deps'] = [{
+    moduleName: 'nan',
+    installArgs: ['nan']
+  }, {
+    moduleName: 'sqlite3',
+    moduleVersion: SQLite3Version,
+    installArgs: ['--build-from-source', 'sqlite3', '--build_v8_with_gn=false', `--target=${process.version.replace(/^v/, '')}`]
+  }];
+
   static needToInstall() {
     try {
-      __non_webpack_require__.resolve('sqlite3');
-      return false;
-    } catch(e) { }
+      __non_webpack_require__('sqlite3');
+      const { version } = __non_webpack_require__('sqlite3/package.json');
+      return version !== SQLite3Version;
+    } catch(e) {
+      console.error(e);
+    }
     return true;
   }
   queries = queries;

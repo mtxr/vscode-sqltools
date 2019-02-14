@@ -590,7 +590,9 @@
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
         "test": "yarn run test:lint && yarn run test:unit",
-        "postversion": "vsce publish && git push && git push --tags"
+        "postversion": "vsce publish && git push && git push --tags",
+        "tool:gyp": "ngyp",
+        "tool:rebuild": "erebuild -f -w"
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",

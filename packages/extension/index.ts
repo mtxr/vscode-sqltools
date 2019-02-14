@@ -170,9 +170,6 @@ namespace SQLTools {
 
     return languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(async () => {
-        // if (getDbId(connectionExplorer.getActive()) === getDbId(conn)) {
-        //   connectionExplorer.getActive() = null;
-        // }
         connectionExplorer.disconnect(conn as SerializedConnection);
         updateStatusBar();
 
@@ -543,9 +540,13 @@ namespace SQLTools {
         version: VSCodeVersion,
       },
     };
+    const runOptions = {
+      module: serverModule,
+      transport: TransportKind.ipc,
+    };
     const serverOptions: ServerOptions = {
-      debug: { module: serverModule, transport: TransportKind.ipc, telemetry: telemetryArgs, options: debugOptions },
-      run: { module: serverModule, transport: TransportKind.ipc, telemetry: telemetryArgs },
+      debug: { ...runOptions, options: debugOptions },
+      run: runOptions,
     };
 
     const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)
@@ -563,6 +564,7 @@ namespace SQLTools {
       documentSelector: selector,
       initializationOptions: {
         telemetry: telemetryArgs,
+        extensionPath: ContextManager.context.extensionPath,
       },
       synchronize: {
         configurationSection: 'sqltools',
@@ -608,7 +610,7 @@ namespace SQLTools {
       });
       languageClient.onNotification(
         Notification.MissingModule,
-        autoInstaller.requestToInstall);
+        param => autoInstaller.requestToInstall(param));
     });
     const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 

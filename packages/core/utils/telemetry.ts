@@ -5,7 +5,7 @@ import Timer from './timer';
 import { ifProp } from './decorators';
 import { LoggerInterface } from '@sqltools/core/interface';
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
-interface VSCodeInfo {
+export interface VSCodeInfo {
   uniqId?: string;
   sessId?: string;
   version?: string;

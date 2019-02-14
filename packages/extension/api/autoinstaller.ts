@@ -5,6 +5,7 @@ import {
 import { LanguageClient } from 'vscode-languageclient';
 import { Telemetry } from '@sqltools/core/utils';
 import Utils from './utils';
+import { InstallDep } from '@sqltools/core/contracts/connection-requests';
 
 export default class AutoInstaller {
   constructor(public client: LanguageClient, public telemetry: Telemetry) {}
@@ -19,7 +20,8 @@ export default class AutoInstaller {
     );
     switch (r) {
       case installNow:
-      break;
+        await this.client.sendRequest(InstallDep, { dialect: conn.dialect });
+        break;
       case readMore:
         // @TODO: link to the wiki and create docs
         Utils.open('https://mtxr.gitbook.io/vscode-sqltools');

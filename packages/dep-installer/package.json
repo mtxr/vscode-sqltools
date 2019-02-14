@@ -2,7 +2,7 @@
   "name": "@sqltools/dep-installer",
   "version": "1.0.0",
   "description": "Installs and compile dependenies for VSCode extension",
-  "main": "index.js",
+  "main": "ngyp.js",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"

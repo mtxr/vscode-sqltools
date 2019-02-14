@@ -25,9 +25,10 @@ import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
-import { Telemetry } from '@sqltools/core/utils';
+import { Telemetry, TelemetryArgs } from '@sqltools/core/utils';
 import { MissingModule } from '@sqltools/core/exception';
 import Notifications from '@sqltools/core/contracts/notifications';
+import { DepInstaller } from './dep-install/service';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -37,6 +38,8 @@ namespace SQLToolsLanguageServer {
   let sgdbConnections: Connection[] = [];
   let completionItems: CompletionItem[] = [];
   let telemetry: Telemetry;
+  let extensionPath: string;
+  let depInstaller = new DepInstaller({ root: __dirname });
 
   docManager.listen(server);
 
@@ -90,10 +93,14 @@ namespace SQLToolsLanguageServer {
   }
 
   /* server events */
-  server.onInitialize((params: InitializeParams ) => {
-    telemetry = new Telemetry((params.initializationOptions || { }).telemetry || {
+  server.onInitialize(({ initializationOptions = {} }: InitializeParams) => {
+    const telemetryArgs: TelemetryArgs = initializationOptions.telemetry || {
       product: 'language-server'
-    });
+    }
+    telemetry = new Telemetry(telemetryArgs);
+
+    extensionPath = initializationOptions.extensionPath;
+    depInstaller.boot({ root: extensionPath, server, vscodeVersion: (telemetryArgs.vscodeInfo || {}).version });
     return {
       capabilities: {
         completionProvider: {

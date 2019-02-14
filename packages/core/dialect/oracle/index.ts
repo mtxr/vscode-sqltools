@@ -8,7 +8,7 @@ import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
 import { MissingModule } from '@sqltools/core/exception';
 
-const OracleDBVersion = '3.1.1';
+const OracleDBLibVersion = '3.1.1';
 export default class Oracle extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
   private poolCreated = false;
   public get connection() {
@@ -18,8 +18,9 @@ export default class Oracle extends GenericDialect<OracleDBLib.IConnection> impl
 
   static needToInstall() {
     try {
-      __non_webpack_require__.resolve('sqlite3');
-      return false;
+      __non_webpack_require__('oaracledb');
+      const { version } = __non_webpack_require__('oaracledb/package.json');
+      return  version !== OracleDBLibVersion;
     } catch(e) { }
     return true;
   }
@@ -35,7 +36,7 @@ export default class Oracle extends GenericDialect<OracleDBLib.IConnection> impl
     }
 
     if (Oracle.needToInstall()) {
-      return Promise.reject(new MissingModule('oracledb', OracleDBVersion));
+      return Promise.reject(new MissingModule('oracledb', OracleDBLibVersion));
     }
 
     const connectString = (this.credentials.server && this.credentials.port) ?
