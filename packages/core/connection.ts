@@ -13,7 +13,7 @@ export default class Connection {
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionCredentials, private logger: LoggerInterface) {
+  constructor(credentials: ConnectionCredentials, private telemetry: Telemetry) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 
@@ -82,8 +82,7 @@ export default class Connection {
     return this.conn.query(query)
       .catch((e) => {
         if (!autoHandleError) throw e;
-        this.logger.error('Query error:', e);
-        Telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
+        this.telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
         let message = '';
         if (typeof e === 'string') {
           message = e;

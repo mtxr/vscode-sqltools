@@ -13,3 +13,4 @@ cache/
 **/package-lock.json
 .env
 sourcemaps.sh
+.vscode/aisettings.json

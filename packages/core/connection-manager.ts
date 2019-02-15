@@ -1,12 +1,13 @@
 import { LoggerInterface, SerializedConnection } from './interface';
 import Connection from './connection';
 import ConfigManager from './config-manager';
+import { Telemetry } from './utils';
 export default class ConnectionManager {
-  public static getConnections(logger: LoggerInterface): Connection[];
-  public static getConnections(logger: LoggerInterface, serialized: boolean = false): any[] {
+  public static getConnections(telemetry: Telemetry): Connection[];
+  public static getConnections(telemetry: Telemetry, serialized: boolean = false): any[] {
     const connectionsConfig = ConfigManager.get('connections', []) as any[];
     ConnectionManager.connections = connectionsConfig.map((credentials): Connection => {
-      return new Connection(credentials, logger);
+      return new Connection(credentials, telemetry);
     });
 
     if (!serialized) return ConnectionManager.connections;
@@ -16,10 +17,10 @@ export default class ConnectionManager {
 
   public static getConnection(
     connection: string|number,
-    logger: LoggerInterface,
+    telemetry: Telemetry,
     serialized: boolean = false,
   ): Connection | SerializedConnection {
-    ConnectionManager.getConnections(logger);
+    ConnectionManager.getConnections(telemetry);
     if (typeof connection === 'number') {
       return ConnectionManager.connections[connection];
     }

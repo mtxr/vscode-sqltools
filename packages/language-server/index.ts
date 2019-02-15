@@ -133,7 +133,7 @@ namespace SQLToolsLanguageServer {
     } else if (formatterRegistration) {
       (await formatterRegistration).dispose();
     }
-    sgdbConnections = ConnectionManager.getConnections(Logger);
+    sgdbConnections = ConnectionManager.getConnections(telemetry);
   });
 
   server.listen();

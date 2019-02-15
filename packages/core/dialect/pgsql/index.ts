@@ -28,10 +28,9 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
 
   public async close() {
     if (!this.connection) return Promise.resolve();
-
     const pool = await this.connection;
-    await pool.end();
     this.connection = null;
+    pool.end();
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
