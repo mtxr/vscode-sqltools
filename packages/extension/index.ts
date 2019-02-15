@@ -74,7 +74,6 @@ namespace SQLTools {
     activationTimer = new Timer();
     if (ContextManager.context) return;
     ContextManager.context = context;
-    loadConfigs();
     telemetry = new Telemetry({
       product: 'extension',
       useLogger: logger,
@@ -84,6 +83,7 @@ namespace SQLTools {
         version: VSCodeVersion,
       },
     });
+    loadConfigs();
     await registerExtension();
     updateStatusBar();
     activationTimer.end();
@@ -170,9 +170,9 @@ namespace SQLTools {
 
     return languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(async () => {
+        logger.info('Connection closed!');
         connectionExplorer.disconnect(conn as SerializedConnection);
         updateStatusBar();
-
       }, ErrorHandler.create('Error closing connection'));
   }
 
@@ -419,7 +419,7 @@ namespace SQLTools {
   function setupLogger() {
     logger.setLevel(Logger.levels[ConfigManager.logLevel])
       .setLogging(ConfigManager.logging);
-    ErrorHandler.setLogger(logger);
+    ErrorHandler.setLogger(telemetry);
     ErrorHandler.setOutputFn(Win.showErrorMessage);
   }
 

@@ -18,8 +18,10 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       return this.connection;
     }
 
-    let encryptAttempt = typeof this.credentials.dialectOptions.encrypt !== 'undefined'
-      ? this.credentials.dialectOptions.encrypt : true;
+    const { dialectOptions = { encrypt: true } } = this.credentials;
+
+    let encryptAttempt = typeof dialectOptions.encrypt !== 'undefined'
+      ? dialectOptions.encrypt : true;
     if (typeof encrypt !== 'undefined') {
       encryptAttempt = encrypt;
     }
