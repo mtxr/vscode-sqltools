@@ -53,7 +53,7 @@ function getExtensionConfig(env) {
               content.displayName = `${extPkgJson.displayName} - Preview`;
             }
             Object.keys(content.scripts || {}).forEach(k => {
-              if (!k.startsWith('tool:')) {
+              if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
                 delete content.scripts[k];
               }
             });

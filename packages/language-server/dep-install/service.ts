@@ -103,16 +103,19 @@ export class DepInstaller {
     }
 
     await this.checkElectronVersion();
-    const modulesToInstall: typeof GenericDialect['deps'] = [];
-    DialectClass.deps.forEach((dep) => {
-      modulesToInstall.push(dep);
-    });
-    for (let dep of modulesToInstall) {
-      console.log('Will install ', dep.moduleName);
-      await this.install(dep.installArgs);
+    const deps: typeof GenericDialect['deps'] = DialectClass.deps;
+
+    for (let dep of deps) {
+      switch(dep.type) {
+        case 'npmscript':
+          console.log(`Will run ${dep.name} script`);
+          await this.runNpmScript(dep.name, { env: dep.env });
+          console.log(`Finished ${dep.name} script`);
+          break;
+      }
 
     }
-    console.log('Modules to installed:', JSON.stringify(modulesToInstall.map(({ moduleName }) => moduleName)));
+    console.log('Finished installing deps');
   }
 
   public boot({ server, vscodeVersion, ...options }: Options = {}): DepInstaller {
@@ -127,6 +130,11 @@ export class DepInstaller {
       this.server = this.server || server;
       this.server.onRequest(InstallDep, this.onRequestToInstall);
     }
+
+    try {
+      fs.mkdirSync(path.join(this.root, 'node_modules'))
+    } catch (error) {}
+
     return this;
   }
 
@@ -226,5 +234,18 @@ export class DepInstaller {
   public async install(args: string | string[]) {
     await this.checkSQLToolsDepInstaller();
     return run('npm', ['install', ...(Array.isArray(args) ? args : [args]) ], { stdio: [ process.stdin, process.stdout, process.stderr ] });
+  }
+
+  public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
+    await this.checkSQLToolsDepInstaller();
+    const { electron } = this.getInfo();
+    const env = {
+      ...process.env,
+      NODE_VERSION: process.versions.node,
+      ELECTRON_URL: electron.disturl,
+      ELECTRON_VERSION: electron.target,
+      ...options.env,
+    }
+    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], env, shell: true });
   }
 }

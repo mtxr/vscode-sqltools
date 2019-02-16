@@ -15,12 +15,11 @@ const SQLite3Version = '4.0.6';
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 
   public static deps: typeof GenericDialect['deps'] = [{
-    moduleName: 'nan',
-    installArgs: ['nan']
-  }, {
-    moduleName: 'sqlite3',
-    moduleVersion: SQLite3Version,
-    installArgs: ['--build-from-source', 'sqlite3', '--build_v8_with_gn=false', `--target=${process.version.replace(/^v/, '')}`]
+    type: 'npmscript',
+    name: 'dep:sqlite3',
+    env: {
+      VERSION: SQLite3Version
+    }
   }];
 
   static needToInstall() {

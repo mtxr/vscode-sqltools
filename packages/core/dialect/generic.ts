@@ -7,10 +7,9 @@ import {
 import * as Utils from '@sqltools/core/utils';
 
 export interface Deps {
-  moduleName: string;
-  moduleVersion?: string;
-  rebuildRequired?: boolean;
-  installArgs?: string[];
+  type: 'npmscript';
+  name: string;
+  env?: { [id: string]: string };
 }
 
 export default abstract class GenericDialect<ConnectionType extends any> implements ConnectionDialect {

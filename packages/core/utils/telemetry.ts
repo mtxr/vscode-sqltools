@@ -81,6 +81,10 @@ export class Telemetry {
     AI.start();
   }
   constructor(opts: TelemetryArgs) {
+    this.updateOpts(opts);
+  }
+
+  public updateOpts(opts: TelemetryArgs) {
     this.product = opts.product;
     this.vscodeInfo = opts.vscodeInfo || {};
     const { enableTelemetry, useLogger } = opts;
