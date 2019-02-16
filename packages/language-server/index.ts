@@ -113,8 +113,8 @@ namespace SQLToolsLanguageServer {
     };
   });
 
-  server.onInitialized(async () => {
-    server.sendNotification(Notification.LanguageServerReady, { });
+  server.onInitialized(() => {
+    Logger.log('Initialized');
   });
 
   server.onDidChangeConfiguration(async (change) => {

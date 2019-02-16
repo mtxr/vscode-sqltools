@@ -1,14 +1,13 @@
 import {
   window as Win,
-  env as VSCodeEnv,
 } from 'vscode';
-import { LanguageClient } from 'vscode-languageclient';
 import { Telemetry } from '@sqltools/core/utils';
-import Utils from './utils';
+import Utils from '../api/utils';
 import { InstallDep } from '@sqltools/core/contracts/connection-requests';
+import { SQLToolsLanguageClient } from '.';
 
 export default class AutoInstaller {
-  constructor(public client: LanguageClient, public telemetry: Telemetry) {}
+  constructor(public client: SQLToolsLanguageClient, public telemetry: Telemetry) {}
 
   async requestToInstall({ moduleName, moduleVersion, conn }) {
     const installNow = 'Install now';

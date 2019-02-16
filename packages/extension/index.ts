@@ -52,7 +52,8 @@ import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
-import AutoInstaller from './api/autoinstaller';
+import AutoInstaller from './language-client/dep-installer';
+import { SQLToolsLanguageClient } from './language-client';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
@@ -66,7 +67,7 @@ namespace SQLTools {
   let telemetry: Telemetry;
   let bookmarks: BookmarksStorage;
   let history: History;
-  let languageClient: LanguageClient;
+  let languageClient: SQLToolsLanguageClient;
   let autoInstaller: AutoInstaller;
   let activationTimer: Timer;
 
@@ -475,17 +476,14 @@ namespace SQLTools {
   }
 
   async function registerLanguageServerRequests() {
-    languageClient.onReady().then(() => {
-      languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-        connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
-        if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
-          connectionExplorer.setActiveConnection();
-        } else {
-          connectionExplorer.setActiveConnection(connectionExplorer.getActive());
-        }
-      });
-      return autoConnectIfActive(connectionExplorer.getActive());
-    }, ErrorHandler.create('Failed to start language server', cmdShowOutputChannel));
+    languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
+      connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
+      if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
+        connectionExplorer.setActiveConnection();
+      } else {
+        connectionExplorer.setActiveConnection(connectionExplorer.getActive());
+      }
+    });
   }
   function reloadConfig() {
     loadConfigs();
@@ -529,90 +527,8 @@ namespace SQLTools {
   }
 
   async function getLanguageServerDisposable() {
-    const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
-    const telemetryArgs: TelemetryArgs = {
-      product: 'language-server',
-      enableTelemetry: ConfigManager.telemetry,
-      vscodeInfo: {
-        sessId: VSCodeEnv.sessionId,
-        uniqId: VSCodeEnv.machineId,
-        version: VSCodeVersion,
-      },
-    };
-    const runOptions = {
-      module: serverModule,
-      transport: TransportKind.ipc,
-    };
-    const serverOptions: ServerOptions = {
-      debug: { ...runOptions, options: debugOptions },
-      run: runOptions,
-    };
-
-    const selector = ConfigManager.completionLanguages.concat(ConfigManager.formatLanguages)
-      .reduce((agg, language) => {
-        if (typeof language === 'string') {
-          agg.push({ language, scheme: 'untitled' });
-          agg.push({ language, scheme: 'file' });
-        } else {
-          agg.push(language);
-        }
-        return agg;
-      }, []);
-    let avoidRestart = false;
-    const clientOptions: LanguageClientOptions = {
-      documentSelector: selector,
-      initializationOptions: {
-        telemetry: telemetryArgs,
-        extensionPath: ContextManager.context.extensionPath,
-      },
-      synchronize: {
-        configurationSection: 'sqltools',
-        fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
-      },
-      initializationFailedHandler: (error) => {
-        telemetry.registerException(error, { message: 'Server initialization failed.' });
-        languageClient.error('Server initialization failed.', error);
-        languageClient.outputChannel.show(true);
-        return false;
-      },
-      errorHandler: {
-        error: (error, message, count): ErrorAction => {
-          logger.error('Language server error', error, message, count);
-          telemetry.registerException(error, { message: 'Language Server error.', givenMessage: message, count });
-          return languageClientErrorHandler.error(error, message, count);
-        },
-        closed: (): CloseAction => {
-          if (avoidRestart) {
-            return CloseAction.DoNotRestart;
-          }
-
-          return languageClientErrorHandler.closed();
-        },
-      },
-    };
-
-    languageClient = new LanguageClient(
-      'SQLTools Language Server',
-      serverOptions,
-      clientOptions,
-    );
+    languageClient = new SQLToolsLanguageClient(ContextManager.context, telemetry);
     autoInstaller = new AutoInstaller(languageClient, telemetry);
-    languageClient.onReady().then(() => {
-      languageClient.onNotification(Notification.ExitCalled, () => {
-        avoidRestart = true;
-      });
-      languageClient.onNotification(Notification.OnError, ({ err = '', errMessage, message }) => {
-        ErrorHandler.create(message, cmdShowOutputChannel)((errMessage || err.message || err).toString());
-      });
-      languageClient.onNotification(Notification.LanguageServerReady, () => {
-        logger.debug('Language server is ready!');
-      });
-      languageClient.onNotification(
-        Notification.MissingModule,
-        param => autoInstaller.requestToInstall(param));
-    });
-    const languageClientErrorHandler = languageClient.createDefaultErrorHandler();
 
     return await languageClient.start();
   }
