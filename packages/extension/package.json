@@ -592,7 +592,9 @@
         "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags",
         "tool:gyp": "ngyp",
-        "tool:rebuild": "erebuild -f -w"
+        "tool:rebuild": "erebuild -f -w",
+
+        "dep:sqlite3": "npm install sqlite3@$VERSION --build-from-source --runtime=electron --target=$ELECTRON_VERSION --dist-url=$ELECTRON_URL"
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
