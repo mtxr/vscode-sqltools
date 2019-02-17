@@ -159,6 +159,7 @@ export class Telemetry {
     name: string,
     properties?: { [key: string]: string }
   ): void {
+    this.logger.info(`Event ${name}`);
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 
