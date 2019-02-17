@@ -14,14 +14,6 @@ import {
   env as VSCodeEnv,
   version as VSCodeVersion,
 } from 'vscode';
-import {
-  CloseAction,
-  ErrorAction,
-  LanguageClient,
-  LanguageClientOptions,
-  ServerOptions,
-  TransportKind,
-} from 'vscode-languageclient';
 import ConfigManager from '@sqltools/core/config-manager';
 
 import { EXT_NAME, VERSION } from '@sqltools/core/constants';
@@ -37,7 +29,6 @@ import {
   GetCachedPassword,
   CloseConnectionRequest,
 } from '@sqltools/core/contracts/connection-requests';
-import Notification from '@sqltools/core/contracts/notifications';
 import LogWriter from './log-writer';
 import {
   ConnectionExplorer,
@@ -54,6 +45,7 @@ import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@
 import { DismissedException } from '@sqltools/core/exception';
 import AutoInstaller from './language-client/dep-installer';
 import { SQLToolsLanguageClient } from './language-client';
+import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
 
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
@@ -140,7 +132,7 @@ namespace SQLTools {
   }
 
   export async function cmdAppendToCursor(node: SidebarDatabaseItem): Promise<void> {
-    insertText(node.value);
+    return insertText(node.value);
   }
 
   export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
@@ -514,7 +506,7 @@ namespace SQLTools {
     return cachedPass || await Win.showInputBox({
       prompt: `${c.name} password`,
       password: true,
-      validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
+      validateInput: (v) => Utils.isEmpty(v) ? 'Password not provided.' : null,
     });
   }
   async function connect(force = false): Promise<SerializedConnection> {
@@ -531,35 +523,6 @@ namespace SQLTools {
     autoInstaller = new AutoInstaller(languageClient, telemetry);
 
     return await languageClient.start();
-  }
-
-  async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
-    if (forceCreate || !Win.activeTextEditor) {
-      const doc = await Wspc.openTextDocument({ language: 'sql' });
-      await Win.showTextDocument(doc, 1, false);
-    }
-    return Win.activeTextEditor;
-  }
-
-  async function getSelectedText(action = 'proceed', fullText = false) {
-    const editor = await getOrCreateEditor();
-    const query = editor.document.getText(fullText ? undefined : editor.selection);
-    if (isEmpty(query)) {
-      Win.showInformationMessage(`Can't ${action}. You have selected nothing.`);
-      throw new DismissedException();
-    }
-    return query;
-  }
-  async function insertText(text: string, forceCreate = false) {
-    const editor = await getOrCreateEditor(forceCreate);
-    editor.edit((edit) => {
-      editor.selections.forEach((cursor) => edit.insert(cursor.active, text));
-    });
-  }
-
-  async function insertSnippet(text: string, forceCreate = false) {
-    const editor = await getOrCreateEditor(forceCreate);
-    return editor.insertSnippet(new SnippetString(text));
   }
 
   async function help() {
@@ -675,12 +638,8 @@ namespace SQLTools {
 
   async function readInput(prompt: string, placeholder?: string) {
     const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
-    if (isEmpty(data)) throw new DismissedException();
+    if (Utils.isEmpty(data)) throw new DismissedException();
     return data;
-  }
-
-  function isEmpty(v) {
-    return !v || v.length === 0;
   }
 }
 

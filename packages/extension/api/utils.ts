@@ -72,6 +72,10 @@ namespace Utils {
 
     return VSCommands.executeCommand('vscode.open', Uri.parse(url));
   }
+
+  export function isEmpty(v) {
+    return !v || v.length === 0;
+  }
 }
 
 export default Utils;

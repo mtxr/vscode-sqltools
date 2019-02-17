@@ -16,6 +16,7 @@
       "label": "watch:compile",
       "type": "npm",
       "script": "watch",
+      "problemMatcher": []
     }
   ]
 }
