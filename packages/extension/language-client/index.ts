@@ -13,6 +13,12 @@ import {
   RequestHandler0,
   RequestHandler,
   GenericRequestHandler,
+  NotificationType0,
+  NotificationType,
+  NotificationHandler0,
+  NotificationHandler,
+  GenericNotificationHandler,
+  NodeModule,
 } from 'vscode-languageclient';
 import {
   ExtensionContext,
@@ -65,11 +71,28 @@ export class SQLToolsLanguageClient {
     return this.client.onRequest.apply(this.client, arguments);
   }
 
+  public sendNotification<RO>(type: NotificationType0<RO>): void;
+  public sendNotification<P, RO>(type: NotificationType<P, RO>, params?: P): void;
+  public sendNotification(method: string): void;
+  public sendNotification<T = any>(method: string, params: T): void;
+  public async sendNotification() {
+    await this.client.onReady();
+    return this.client.sendNotification.apply(this.client, arguments);
+  }
+  public onNotification<RO>(type: NotificationType0<RO>, handler: NotificationHandler0): void;
+  public onNotification<P, RO>(type: NotificationType<P, RO>, handler: NotificationHandler<P>): void;
+  public onNotification(method: string, handler: GenericNotificationHandler): void;
+  public async onNotification() {
+    await this.client.onReady();
+    return this.client.onNotification.apply(this.client, arguments);
+  }
+
   private getServerOptions(): ServerOptions {
     const serverModule = this.context.asAbsolutePath('languageserver.js');
-    const runOptions = {
+    const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
+      runtime: process.platform !== 'win32' ? 'node' : 'node.cmd',
     };
 
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
@@ -152,9 +175,6 @@ export class SQLToolsLanguageClient {
     this.client.onNotification(Notification.ExitCalled, () => {
       this.avoidRestart = true;
     });
-    this.client.onNotification(
-      Notification.MissingModule,
-      param => this.depInstaller.requestToInstall(param));
     this.client.onNotification(
       Notification.OnError,
       onError,

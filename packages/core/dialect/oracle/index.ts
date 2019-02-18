@@ -6,24 +6,21 @@ import * as Utils from '../../utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
-import { MissingModule } from '@sqltools/core/exception';
 
 const OracleDBLibVersion = '3.1.1';
 export default class Oracle extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
+  public static deps: typeof GenericDialect['deps'] = [{
+    type: 'package',
+    name: 'oracledb',
+    version: OracleDBLibVersion,
+  }];
+
   private poolCreated = false;
   public get connection() {
     if (!this.poolCreated) return;
     return this.lib.getConnection() as Promise<OracleDBLib.IConnection>;
   }
 
-  static needToInstall() {
-    try {
-      __non_webpack_require__('oaracledb');
-      const { version } = __non_webpack_require__('oaracledb/package.json');
-      return  version !== OracleDBLibVersion;
-    } catch(e) { }
-    return true;
-  }
   queries = queries
 
   private get lib(): typeof OracleDBLib {
@@ -35,9 +32,7 @@ export default class Oracle extends GenericDialect<OracleDBLib.IConnection> impl
       return this.connection;
     }
 
-    if (Oracle.needToInstall()) {
-      return Promise.reject(new MissingModule('oracledb', OracleDBLibVersion));
-    }
+    this.needToInstallDependencies();
 
     const connectString = (this.credentials.server && this.credentials.port) ?
       `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}` :
@@ -59,22 +54,22 @@ export default class Oracle extends GenericDialect<OracleDBLib.IConnection> impl
 
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();
-    const results = await conn.execute(query, [], { outFormat: this.lib.OBJECT })
-      .then(res => Array.isArray(res) ? res : [res]);
-    console.log(results);
-    // results.map(() => void 0);
-    // return results.map((r, i) => {
-    //   if (r.rowsAffected) {
-    //     messages.push(`${r.rowsAffected} rows were affected.`);
-    //   }
-    //   return {
-    //     cols: (r.rows && r.rows.length) > 0 ? Object.keys(r.rows[0]) : [],
-    //     messages,
-    //     query: queries[i],
-    //     results: r.rows,
-    //   };
-    // });
-    return []
+    const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter(Boolean);
+    const results: DatabaseInterface.QueryResults[] = [];
+    for(let q of queries) {
+      let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
+      const messages = [];
+      if (res.rowsAffected) {
+        messages.push(`${res.rowsAffected} rows were affected.`);
+      }
+      results.push({
+        cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
+        messages,
+        query: queries[results.length],
+        results: res.rows,
+      });
+    }
+    return results;
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {

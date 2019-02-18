@@ -142,7 +142,7 @@ export class Telemetry {
 
   @ifProp('client')
   public registerSession() {
-    this.registerEvent('sessionStarted');
+    this.registerEvent(`sessionStarted:${this.product}`);
   }
 
   @ifProp('client')

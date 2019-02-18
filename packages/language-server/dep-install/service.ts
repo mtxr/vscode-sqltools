@@ -14,6 +14,11 @@ function run(
 ): Promise<{ stdout?: string; stderr?: string; code: number }> {
   return new Promise<{ stdout?: string; stderr?: string; code: number }>(
     (resolve, reject) => {
+      options.env = {
+        ...process.env,
+        NODE_VERSION: process.versions.node,
+        ...options.env,
+      };
       const child = spawn(command, args, { cwd: __dirname, ...options });
       let stderr = '';
       let stdout = '';
@@ -43,9 +48,6 @@ function run(
     }
   );
 }
-
-const depInstallerModule = './../vscode-sqltools/packages/dep-installer';
-const depInstallerVersion = '1.0.0';
 
 interface Options {
   root?: string;
@@ -110,6 +112,11 @@ export class DepInstaller {
         case 'npmscript':
           console.log(`Will run ${dep.name} script`);
           await this.runNpmScript(dep.name, { env: dep.env });
+          console.log(`Finished ${dep.name} script`);
+          break;
+        case 'package':
+          console.log(`Will install ${dep.name} package`);
+          await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
           console.log(`Finished ${dep.name} script`);
           break;
       }
@@ -196,26 +203,8 @@ export class DepInstaller {
     this.updateInfo({ electron: { target, disturl, runtime } });
   }
 
-  private async checkSQLToolsDepInstaller() {
-    try {
-      const { version } = __non_webpack_require__(
-        '@sqltools/dep-installer/package.json'
-      );
-      console.log(`SQLTools Dep Installer version: ${version}`);
-      if (version !== depInstallerVersion) throw 'update!';
-    } catch (e) {
-      await this.installSQLToolsDepInstaller();
-    }
-    return Promise.resolve();
-  }
-
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
     return run('npm', args, { cwd: this.root, shell: true, ...options });
-  }
-
-  private async installSQLToolsDepInstaller() {
-    await this.npm(['install', depInstallerModule], { stdio: [ process.stdin, process.stdout, process.stderr ] });
-    console.log(`SQLTools Dep Installer installed version: ${depInstallerVersion}`);
   }
 
   get npmVersion() {
@@ -231,21 +220,17 @@ export class DepInstaller {
     DepInstaller.instance = this.boot(options);
   }
 
-  public async install(args: string | string[]) {
-    await this.checkSQLToolsDepInstaller();
-    return run('npm', ['install', ...(Array.isArray(args) ? args : [args]) ], { stdio: [ process.stdin, process.stdout, process.stderr ] });
+  public async install(args: string | string[], options: SpawnOptions = {}) {
+    return run('npm', ['install', ...(Array.isArray(args) ? args : [args]) ], { stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
   }
 
   public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
-    await this.checkSQLToolsDepInstaller();
     const { electron } = this.getInfo();
     const env = {
-      ...process.env,
-      NODE_VERSION: process.versions.node,
       ELECTRON_URL: electron.disturl,
       ELECTRON_VERSION: electron.target,
       ...options.env,
     }
-    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], env, shell: true });
+    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], ...options, env });
   }
 }

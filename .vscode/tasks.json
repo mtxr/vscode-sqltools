@@ -7,15 +7,15 @@
       "label": "compile",
       "type": "npm",
       "script": "compile",
-      "group": {
-        "kind": "build",
-        "isDefault": true
-      }
     },
     {
       "label": "watch:compile",
       "type": "npm",
       "script": "watch",
+      "group":{
+        "kind": "build",
+        "isDefault": true
+      },
       "problemMatcher": []
     }
   ]

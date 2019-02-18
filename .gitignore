@@ -13,3 +13,6 @@ cache/
 **/package-lock.json
 .env
 .vscode/aisettings.json
+*.db
+*.zip
+.test-database/oracle/docker-images-master

@@ -1,37 +1,23 @@
 import {
   ConnectionDialect,
   DatabaseInterface,
-  DialectQueries,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
-import path from 'path';
 import SQLiteLib from 'sqlite3';
 import GenericDialect from '../generic';
 import queries from './queries';
-import { MissingModule } from '@sqltools/core/exception';
 
 const SQLite3Version = '4.0.6';
 
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 
   public static deps: typeof GenericDialect['deps'] = [{
-    type: 'npmscript',
-    name: 'dep:sqlite3',
-    env: {
-      VERSION: SQLite3Version
-    }
+    type: 'package',
+    name: 'sqlite3',
+    version: SQLite3Version,
   }];
 
-  static needToInstall() {
-    try {
-      __non_webpack_require__('sqlite3');
-      const { version } = __non_webpack_require__('sqlite3/package.json');
-      return version !== SQLite3Version;
-    } catch(e) {
-      console.error(e);
-    }
-    return true;
-  }
+
   queries = queries;
 
   private get lib() {
@@ -43,9 +29,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
       return this.connection;
     }
 
-    if (SQLite.needToInstall()) {
-      return Promise.reject(new MissingModule('sqlite3', SQLite3Version));
-    }
+    this.needToInstallDependencies();
 
     const db = await new Promise<SQLiteLib.Database>((resolve, reject) => {
       const instance = new (this.lib).Database(this.credentials.database, (err) => {
@@ -69,7 +53,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
 
   private runSingleQuery(db: SQLiteLib.Database, query: string) {
     return new Promise<any[]>((resolve, reject) => {
-      db.all(query,(_, err, rows) => {
+      db.all(query,(err, rows) => {
         if (err) return reject(err);
         return resolve(rows);
       })
@@ -81,20 +65,17 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
     const queries = Utils.query.parse(query).filter(Boolean);
     const results: DatabaseInterface.QueryResults[] = [];
     for(let i = 0; i < queries.length; i++) {
-      const res = await this.runSingleQuery(db, queries[i]);
-      console.log({ res });
-      // if (r.rows.length === 0 && queries[i].toLowerCase() !== 'select') {
-      //   messages.push(`${r.rowCount} rows were affected.`);
-      // }
-      // results.push({
-
-      // })
-      // return {
-      //   cols: (r.fields || []).map(({ name }) => name),
-      //   messages,
-      //   query: queries[i],
-      //   results: r.rows,
-      // };
+      const res: any[][] = (await this.runSingleQuery(db, queries[i])) || [];
+      const messages = [];
+      if (res.length === 0 && queries[i].toLowerCase() !== 'select') {
+        messages.push(`${res.length} rows were affected.`);
+      }
+      results.push({
+        cols: res && res.length ? Object.keys(res[0]) : [],
+        messages,
+        query: queries[i],
+        results: res,
+      });
     }
     return results;
   }
@@ -134,18 +115,5 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
     }));
 
     return columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
-  }
-
-  private prepareResults(query: string, cols: string[] = [], rowsValues: any[][] = [], count = 0): DatabaseInterface.QueryResults {
-    return {
-      query,
-      cols,
-      results: rowsValues.map(v => this.prepareRow(cols, v)),
-      messages: [`${count} rows`]
-    }
-  }
-
-  private prepareRow(cols: string[], results: any[]) {
-    return cols.reduce((agg, c, i) => ({ ...agg, [c]: results[i]  }), {});
   }
 }

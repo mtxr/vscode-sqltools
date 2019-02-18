@@ -34,7 +34,7 @@
     {
       "name": "SQLite",
       "dialect": "SQLite",
-      "database": "./test_db.db",
+      "database": "./sqlite/test_db.db",
       "connectionTimeout": 15
     },
     {

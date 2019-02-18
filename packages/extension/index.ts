@@ -43,7 +43,6 @@ import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
-import AutoInstaller from './language-client/dep-installer';
 import { SQLToolsLanguageClient } from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
 
@@ -60,7 +59,6 @@ namespace SQLTools {
   let bookmarks: BookmarksStorage;
   let history: History;
   let languageClient: SQLToolsLanguageClient;
-  let autoInstaller: AutoInstaller;
   let activationTimer: Timer;
 
   export async function start(context: ExtensionContext): Promise<void> {
@@ -520,7 +518,6 @@ namespace SQLTools {
 
   async function getLanguageServerDisposable() {
     languageClient = new SQLToolsLanguageClient(ContextManager.context, telemetry);
-    autoInstaller = new AutoInstaller(languageClient, telemetry);
 
     return await languageClient.start();
   }
