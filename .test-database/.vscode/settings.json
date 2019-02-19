@@ -1,8 +1,5 @@
 {
   "sqltools.autoConnectTo": [
-    // "PGSQL",
-    // "MySQL",
-    // "MSSQL"
   ],
   "sqltools.telemetry": true,
   "sqltools.connections": [

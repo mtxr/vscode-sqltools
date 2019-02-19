@@ -130,7 +130,6 @@ export class ResultsTable extends React.Component<ResultsTableProps, ResultsTabl
     });
     return (
       <ReactTable
-        // tslint:disable-next-line:quotemark
         noDataText="Query didn't return any results."
         data={this.props.value.data}
         columns={cols}

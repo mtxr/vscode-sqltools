@@ -1,7 +1,6 @@
 import { SpawnOptions, spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import https from 'https';
 import { IConnection } from 'vscode-languageserver';
 import { InstallDep } from '@sqltools/core/contracts/connection-requests';
 import Dialects from '@sqltools/core/dialect';
@@ -52,48 +51,15 @@ function run(
 interface Options {
   root?: string;
   server?: IConnection;
-  vscodeVersion?: string;
 }
 
 export class DepInstaller {
   private static instance: DepInstaller;
   private root: string;
-  private vscodeVersion: string;
-  private mustUpdate = {
-    modules: false
-  };
-
   private server: IConnection;
 
-  private get infoFilePath() {
-    return path.join(this.root, 'vscodeVersionData.json');
-  }
-  private getInfo() {
-    let currentProps: any = {};
-    try {
-      currentProps = JSON.parse(fs.readFileSync(this.infoFilePath).toString());
-      this.mustUpdate.modules =
-        !currentProps.electron ||
-        !currentProps.electron.target ||
-        currentProps.vscodeVersion !== this.vscodeVersion;
-    } catch (error) {
-      this.mustUpdate.modules = true;
-    }
-    return currentProps;
-  }
-  private updateInfo(props: { [id: string]: number | string | object } = {}) {
-    let currentProps = this.getInfo();
-    try {
-      if (Object.keys(props).length > 0) {
-        currentProps = { ...currentProps, ...props };
-        fs.writeFileSync(this.infoFilePath, JSON.stringify(currentProps));
-      }
-    } catch (error) {}
-    console.log('Update extension versions info:', JSON.stringify(currentProps));
-    return currentProps;
-  }
 
-  private onRequestToInstall = async (params) => {
+ private onRequestToInstall = async (params) => {
     console.log('Received request to install deps:', JSON.stringify(params));
     const DialectClass = Dialects[params.dialect];
     if (
@@ -104,7 +70,6 @@ export class DepInstaller {
       throw new Error('Nothing to install. Request is invalid.');
     }
 
-    await this.checkElectronVersion();
     const deps: typeof GenericDialect['deps'] = DialectClass.deps;
 
     for (let dep of deps) {
@@ -125,13 +90,8 @@ export class DepInstaller {
     console.log('Finished installing deps');
   }
 
-  public boot({ server, vscodeVersion, ...options }: Options = {}): DepInstaller {
+  public boot({ server, ...options }: Options = {}): DepInstaller {
     Object.keys(options).forEach(k => (this[k] = options[k] ));
-
-    if (vscodeVersion) {
-      this.vscodeVersion = vscodeVersion;
-      this.updateInfo({ vscodeVersion });
-    }
 
     if (!this.server && server) {
       this.server = this.server || server;
@@ -143,64 +103,6 @@ export class DepInstaller {
     } catch (error) {}
 
     return this;
-  }
-
-  private async getElectronVersion(useMaster: boolean = false) {
-    return new Promise<{
-      disturl: string;
-      target: string;
-      runtime: string;
-    }>((resolve, reject) => {
-      const vsCodeTag = (useMaster
-        ? 'master'
-        : this.vscodeVersion || 'master'
-      ).replace(/(\d+\.\d+\.\d+).*/, '$1');
-
-      https
-        .get(
-          `https://raw.githubusercontent.com/Microsoft/vscode/${vsCodeTag}/.yarnrc`,
-          res => {
-            let data = '';
-
-            res.on('data', chunk => {
-              data += chunk.toString();
-            });
-
-            res.on('end', () => {
-              const result = {
-                disturl: undefined,
-                target: undefined,
-                runtime: undefined
-              };
-              data.split('\n').forEach((line = '') => {
-                const [key = '', value = ''] = line.split(' ');
-                result[key] = value.replace(/^"(.+)" *$/, '$1');
-              });
-              if (!result.target) return reject(new Error('Electron install error: ' + data));
-              resolve(result);
-            });
-          }
-        )
-        .on('error', reject);
-    });
-  }
-
-  private async checkElectronVersion() {
-    console.log('Checking electron version. Needs to update?', JSON.stringify(this.mustUpdate));
-    const { electron = { } } = this.getInfo();
-    if (!this.mustUpdate.modules && electron.target) return;
-
-    const { target, disturl, runtime } = await this.getElectronVersion().catch(
-      () => this.getElectronVersion(true)
-    );
-
-    if (electron.target === target) {
-      console.log('Electron version is correct. Keep going. Version:' + target);
-      return;
-    }
-
-    console.log('New electron version received: ', JSON.stringify({ target, disturl, runtime }));
-    this.updateInfo({ electron: { target, disturl, runtime } });
   }
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
@@ -225,12 +127,6 @@ export class DepInstaller {
   }
 
   public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
-    const { electron } = this.getInfo();
-    const env = {
-      ELECTRON_URL: electron.disturl,
-      ELECTRON_VERSION: electron.target,
-      ...options.env,
-    }
-    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], ...options, env });
+    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
   }
 }

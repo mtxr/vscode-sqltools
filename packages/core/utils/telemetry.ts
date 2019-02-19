@@ -69,6 +69,7 @@ export class Telemetry {
       'common.channel': ENV,
       'common.extname': EXT_NAME,
       'common.extversion': VERSION,
+      'common.nodeversion': process.version,
       ...(this.vscodeInfo
         ? {
             'common.vscodeuniqid': this.vscodeInfo.uniqId,

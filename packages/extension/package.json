@@ -588,7 +588,6 @@
         "watch": "webpack --watch --env.development",
         "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
         "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags"
     },
@@ -605,7 +604,6 @@
         "style-loader": "^0.23.1",
         "ts-jest": "^23.10.5",
         "ts-loader": "^5.3.3",
-        "tslint": "^5.12.1",
         "typescript": "^3.3.3",
         "vscode": "^1.1.29",
         "webpack": "^4.29.3",

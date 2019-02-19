@@ -100,7 +100,7 @@ namespace SQLToolsLanguageServer {
     telemetry = new Telemetry(telemetryArgs);
 
     extensionPath = initializationOptions.extensionPath;
-    depInstaller.boot({ root: extensionPath, server, vscodeVersion: (telemetryArgs.vscodeInfo || {}).version });
+    depInstaller.boot({ root: extensionPath, server });
     return {
       capabilities: {
         completionProvider: {
@@ -222,7 +222,6 @@ namespace SQLToolsLanguageServer {
     const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
     await c.close().catch(notifyError('Connection Error'));
     store.dispatch(actions.Disconnect(c));
-    const state = store.getState();
     req.conn.isConnected = false;
     await updateSidebar(req.conn, null, null);
   });

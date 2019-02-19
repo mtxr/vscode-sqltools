@@ -1,4 +1,3 @@
-// tslint:disable:no-namespace
 export namespace DatabaseInterface {
   export interface Database {
     name: string;

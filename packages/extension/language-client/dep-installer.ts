@@ -1,9 +1,7 @@
-import {
-  window as Win,
-} from 'vscode';
+import { window as Win } from 'vscode';
 import { Telemetry } from '@sqltools/core/utils';
 import Utils from '../api/utils';
-import { InstallDep } from '@sqltools/core/contracts/connection-requests';
+import { InstallDep, OpenConnectionRequest } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { SQLToolsLanguageClient } from '.';
 
@@ -19,12 +17,20 @@ export default class AutoInstaller {
     try {
       const r = await Win.showInformationMessage(
         `You need "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
-        ...options,
-        );
+        ...options
+      );
       switch (r) {
         case installNow:
           await this.client.sendRequest(InstallDep, { dialect: conn.dialect });
-          await Win.showInformationMessage(`"${moduleName}@${moduleVersion}" installed!`);
+          const opt = [`Connect to ${conn.name}`];
+          const rr = await Win.showInformationMessage(
+            `"${moduleName}@${moduleVersion}" installed!\n
+Go ahead and connect!`,
+            ...opt
+          );
+          if (rr === opt[0]) {
+            await this.client.sendRequest(OpenConnectionRequest, { conn });
+          }
           break;
         case readMore:
           // @TODO: link to the wiki and create docs
@@ -36,8 +42,6 @@ export default class AutoInstaller {
     }
   }
   private registerEvents() {
-    this.client.onNotification(
-      Notification.MissingModule,
-      param => this.requestToInstall(param));
+    this.client.onNotification(Notification.MissingModule, param => this.requestToInstall(param));
   }
 }
