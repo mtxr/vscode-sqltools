@@ -7,8 +7,8 @@ module.exports = exports = function getWebviewConfig(env) {
     name: 'webiew',
     mode: env.production ? 'production' : 'development',
     entry: {
-      settingsEditor: path.join(__dirname, 'settings-editor.tsx'),
-      queryResultsPreviewer: path.join(__dirname, 'query-results-previewer.tsx'),
+      Settings: path.join(__dirname, 'screens', 'Settings.tsx'),
+      Results: path.join(__dirname, 'screens', 'Results.tsx'),
     },
     module: {
       rules: [
@@ -47,7 +47,7 @@ module.exports = exports = function getWebviewConfig(env) {
       }
     },
     output: {
-      filename: 'views/[name].js',
+      filename: 'ui/[name].js',
       path: outdir
     },
     plugins: [

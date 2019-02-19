@@ -36,8 +36,8 @@ import {
   SidebarView,
   SidebarConnection,
  } from './providers';
-import QueryResultsPreviewer from './providers/webview/query-results-previewer';
-import SettingsEditor from './providers/webview/settings-editor';
+import ResultsWebview from './providers/webview/results';
+import SettingsWebview from './providers/webview/settings';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
@@ -50,8 +50,8 @@ namespace SQLTools {
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
-  const queryResults = new QueryResultsPreviewer();
-  const settingsEditor = new SettingsEditor();
+  const queryResults = new ResultsWebview();
+  const settingsEditor = new SettingsWebview();
 
   let connectionExplorerView: TreeView<any>;
   let telemetry: Telemetry;

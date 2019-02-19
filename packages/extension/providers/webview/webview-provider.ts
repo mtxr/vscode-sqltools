@@ -22,8 +22,8 @@ export default abstract class WebviewProvider implements Disposable {
 </head>
 <body>
   <div id="root"></div>
-  <script src="{{extRoot}}/views/vendor.js" type="text/javascript" charset="UTF-8"></script>
-  <script src="{{extRoot}}/views/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="{{extRoot}}/ui/vendor.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="{{extRoot}}/ui/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
   }

@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, FormEvent, ChangeEventHandler } from 'react';
+import React, { ReactNode, FormEvent, ChangeEventHandler } from 'react';
 import {
   bool,
   gtz,
@@ -6,9 +6,12 @@ import {
   int,
   notEmpty,
   ValidationFunction,
-} from './../lib/utils';
-import Loading from './loading';
+} from '../../lib/utils';
+import Loading from '../../components/Loading';
 import { VSCodeWebviewAPI, WebviewMessageType } from 'lib/interfaces';
+import Syntax from '../../components/Syntax';
+import '../../sass/app.scss';
+
 let vscode: VSCodeWebviewAPI;
 
 declare var acquireVsCodeApi: () => VSCodeWebviewAPI;
@@ -25,61 +28,6 @@ const dialectDefaultPorts = {
   OracleDB: 1521,
   SQLite: null
 };
-
-interface SyntaxProps {
-  language?: string;
-  code: string;
-}
-
-interface SyntaxState {
-  copyMsg: string;
-}
-class Syntax extends React.Component<SyntaxProps, SyntaxState> {
-  private id = `syntax-${(Math.random() * 1000).toFixed(0)}`;
-  private interval = null;
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      copyMsg: 'Copy',
-    };
-  }
-  public copyCode(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    let msg = 'Copied!';
-    const range = document.createRange();
-    try {
-      range.selectNode(document.getElementById(this.id));
-      window.getSelection().addRange(range);
-      if (!document.execCommand('copy')) {
-        throw new Error('Failed!');
-      }
-    } catch (err) {
-      msg = 'Failed :(';
-    }
-    window.getSelection().removeRange(range);
-    this.setState({ copyMsg: msg }, () => {
-      clearTimeout(this.interval);
-      this.interval = setTimeout(() => {
-        this.setState({ copyMsg: 'Copy' });
-      }, 1000);
-    });
-    return false;
-  }
-  public render() {
-    return (
-      <div className='relative'>
-        <div
-          id={this.id}
-          className={`syntax ${this.props.language}`}
-          dangerouslySetInnerHTML={{ __html: this.props.code }}
-        ></div>
-        <button className='btn copy-code' type='button' onClick={this.copyCode.bind(this)}>{this.state.copyMsg}</button>
-      </div>
-    );
-  }
-}
 
 interface FieldWrapperProps {
   field: any; // to be defined
@@ -129,16 +77,16 @@ storage.setItem = (key: string, value: string) => storage.data[key] = value;
 storage.getItem = (key: string) => storage.data[key];
 storage.removeItem = (key: string) => delete storage.data[key];
 
-export default class Setup extends React.Component<{}, SetupState> {
+export default class SettingsScreen extends React.Component<{}, SetupState> {
 
   public static storageKey = 'sqltools.setupConnection';
 
   public static saveLocal = (data) => {
-    storage.setItem(Setup.storageKey, JSON.stringify(data));
+    storage.setItem(SettingsScreen.storageKey, JSON.stringify(data));
   }
 
   public static loadLocal = () => {
-    const local = storage.getItem(Setup.storageKey);
+    const local = storage.getItem(SettingsScreen.storageKey);
     if (!local) return null;
     return JSON.parse(local);
   }
@@ -242,7 +190,7 @@ export default class Setup extends React.Component<{}, SetupState> {
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
     switch(action) {
       case 'createConnectionSuccess':
-        const data = Setup.loadLocal() || Setup.generateConnData(this.baseFields);
+        const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
         const newState: SetupState = {
           loading: false,
           data,
@@ -252,7 +200,7 @@ export default class Setup extends React.Component<{}, SetupState> {
           saved: null,
         };
         newState.saved = `<strong>${payload.connInfo.name}</strong> added to your settings!`;
-        newState.data = Setup.generateConnData(this.state.fields);
+        newState.data = SettingsScreen.generateConnData(this.state.fields);
         this.setState(newState, this.validateFields);
         break;
 
@@ -269,7 +217,7 @@ export default class Setup extends React.Component<{}, SetupState> {
 
   constructor(props) {
     super(props);
-    const data = Setup.loadLocal() || Setup.generateConnData(this.baseFields);
+    const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
     this.state = {
       loading: true,
       data,

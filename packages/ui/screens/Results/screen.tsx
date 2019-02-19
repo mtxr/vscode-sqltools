@@ -2,7 +2,8 @@ import React, { ReactNode } from 'react';
 import ReactTable from 'react-table';
 import { DatabaseInterface } from '@sqltools/core/interface';
 import { WebviewMessageType } from 'lib/interfaces';
-import Loading from './loading';
+import Loading from '../../components/Loading';
+import '../../sass/app.scss';
 
 interface QueryProps {
   value: string;
@@ -246,7 +247,7 @@ interface QueryResultsState {
   expandMessages: boolean;
 }
 
-export default class QueryResults extends React.Component<{}, QueryResultsState> {
+export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   constructor(props) {
     super(props);
     this.state = { isLoaded: false, resultMap: {}, queries: [], expandViewQuery: false, expandMessages: false };

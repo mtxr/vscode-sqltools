@@ -1,7 +1,7 @@
 import {
   CompletionItem, createConnection,
   Disposable,
-  DocumentRangeFormattingRequest, IConnection, TextDocumentPositionParams, TextDocuments, InitializeParams, ProposedFeatures,
+  DocumentRangeFormattingRequest, IConnection, TextDocuments, InitializeParams, ProposedFeatures,
 } from 'vscode-languageserver';
 
 import Formatter from './requests/format';
@@ -149,7 +149,8 @@ namespace SQLToolsLanguageServer {
   server.onDocumentFormatting((params) => Formatter(docManager, params));
   server.onDocumentRangeFormatting((params) => Formatter(docManager, params));
 
-  server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
+  // server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
+  server.onCompletion((): CompletionItem[] => {
     // const { textDocument, position } = pos;
     // const doc = docManager.get(textDocument.uri);
     if (!store.getState().activeConnections) return [];
