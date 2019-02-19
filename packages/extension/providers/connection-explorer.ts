@@ -14,7 +14,6 @@ import {
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
 import { ConnectionCredentials, SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
-import { Logger, Utils } from '../api';
 import { getDbId } from '@sqltools/core/utils';
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
@@ -27,7 +26,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
   private tree: { [database: string]: SidebarConnection } = {};
-  constructor(private logger: Logger) { }
   public fireUpdate(): void {
     this.onDidChange.fire();
   }

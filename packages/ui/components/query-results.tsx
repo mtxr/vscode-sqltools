@@ -86,7 +86,6 @@ interface ResultsTableState {
 }
 export class ResultsTable extends React.Component<ResultsTableProps, ResultsTableState> {
 
-  private filters = {};
   constructor(props) {
     super(props);
     this.state = {
@@ -145,7 +144,7 @@ export class ResultsTable extends React.Component<ResultsTableProps, ResultsTabl
             />
           );
         }}
-        getTdProps={(state, rowInfo, column) => {
+        getTdProps={(_, rowInfo, column) => {
           try {
             const v = rowInfo.original[column.id];
             const props = {} as any;
@@ -310,10 +309,9 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
         </div>
       );
     }
-    const tabs = [];
-    const results = this.state.queries.map((query: string) => {
+    const tabs = this.state.queries.map((query: string) => {
       const res = this.state.resultMap[query];
-      tabs.push(
+      return (
         <li
           title={query}
           key={query}
@@ -321,17 +319,7 @@ export default class QueryResults extends React.Component<{}, QueryResultsState>
           className={'truncate ' + (this.state.activeTab === query ? 'active' : '')}
         >
           {res.query}
-        </li>,
-      );
-      return (
-        <QueryResult
-          value={res}
-          key={query}
-          expandViewQuery={this.state.expandViewQuery}
-          toggleQuery={this.toggleQuery}
-          expandMessages={this.state.expandMessages}
-          toggleMessages={this.toggleMessages}
-        />
+        </li>
       );
     });
     return (

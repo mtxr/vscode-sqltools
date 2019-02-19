@@ -2,7 +2,6 @@ import {
   commands as VSCode,
   ExtensionContext,
   QuickPickItem,
-  SnippetString,
   StatusBarAlignment,
   TextEditor,
   TextEditorEdit,
@@ -41,7 +40,7 @@ import QueryResultsPreviewer from './providers/webview/query-results-previewer';
 import SettingsEditor from './providers/webview/settings-editor';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Timer, Telemetry, query as QueryUtils, getDbId, TelemetryArgs } from '@sqltools/core/utils';
+import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
 import { SQLToolsLanguageClient } from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
@@ -49,7 +48,7 @@ import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from '.
 namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
-  const connectionExplorer = new ConnectionExplorer(logger);
+  const connectionExplorer = new ConnectionExplorer();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const queryResults = new QueryResultsPreviewer();
   const settingsEditor = new SettingsEditor();
@@ -286,17 +285,18 @@ namespace SQLTools {
     const sel = (await quickPick(availableConns.map((c) => {
       return {
         description: c.isConnected ? 'Currently connected' : '',
-        detail: `${c.username}@${c.server}:${c.port}`,
+        detail: getDbDescription(c),
         label: c.name,
+        value: getDbId(c)
       } as QuickPickItem;
-    }), 'label', {
+    }), 'value', {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Pick a connection',
       placeHolderDisabled: 'You don\'t have any connections yet.',
       title: 'Connections',
     })) as string;
-    return connections.find((c) => c.name === sel);
+    return connections.find((c) => getDbId(c) === sel);
   }
 
   async function bookmarksMenu(prop?: string): Promise<QuickPickItem | string> {

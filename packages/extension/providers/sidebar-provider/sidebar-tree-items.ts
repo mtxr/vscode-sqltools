@@ -5,9 +5,9 @@ import {
 } from 'vscode';
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DatabaseInterface, ConnectionCredentials, DatabaseDialect } from '@sqltools/core/interface';
+import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { getDbId } from '@sqltools/core/utils';
+import { getDbId, getDbDescription } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 
 export class SidebarConnection extends TreeItem {
@@ -16,18 +16,7 @@ export class SidebarConnection extends TreeItem {
   public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables', this);
   public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views', this);
   public get description() {
-    if (this.conn.dialect === DatabaseDialect.SQLite) {
-      return `file://${this.conn.database}`;
-    }
-    return [
-      this.conn.username,
-      this.conn.username ? '@' : '',
-      this.conn.server,
-      this.conn.server && this.conn.port ? ':' : '',
-      this.conn.port,
-      '/',
-      this.conn.database,
-    ].filter(Boolean).join('');
+    return getDbDescription(this.conn);
   }
 
   private isActive = false;
@@ -125,12 +114,12 @@ export class SidebarDatabaseSchemaGroup extends TreeItem {
   public value = this.contextValue;
   public items: { [name: string]: SidebarTable | SidebarView} = {};
   public get conn() { return this.parent.conn; }
-  constructor(private name, public parent: SidebarConnection) {
+  constructor(private name: string, public parent: SidebarConnection) {
     super(name, TreeItemCollapsibleState.Collapsed);
-    this.label = name;
+    const self = this;
     Object.defineProperty(this, 'label', {
       get() {
-        return `${this.name} (${Object.keys(this.items).length} ${name.toLowerCase()})`;
+        return `${self.name} (${Object.keys(self.items).length} ${self.name.toLowerCase()})`;
       },
     });
   }
