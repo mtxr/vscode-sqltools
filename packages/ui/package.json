@@ -10,7 +10,7 @@
     "@sqltools/core": "*",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "react-table": "^6.9.1"
+    "react-table": "^6.9.2"
   },
   "devDependencies": {
     "@babel/cli": "^7.1.2",
@@ -19,6 +19,7 @@
     "@babel/preset-react": "^7.0.0",
     "@types/react": "^16.8.2",
     "@types/react-dom": "^16.8.0",
+    "@types/react-table": "^6.7.22",
     "typescript": "^3.3.3"
   }
 }

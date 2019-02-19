@@ -443,7 +443,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             </div>
           </div>
         </form>
-        <Loading toggle={this.state.loading} />
+        <Loading active={this.state.loading} />
       </div>
     );
   }
