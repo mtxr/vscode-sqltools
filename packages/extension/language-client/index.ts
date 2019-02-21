@@ -92,7 +92,7 @@ export class SQLToolsLanguageClient {
     const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
-      runtime: process.platform !== 'win32' ? 'node' : 'node.cmd',
+      runtime: 'node' ,
     };
 
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
