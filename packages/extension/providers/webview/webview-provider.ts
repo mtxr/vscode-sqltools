@@ -47,6 +47,10 @@ export default abstract class WebviewProvider implements Disposable {
           localResourceRoots: [ContextManager.iconsPath, ContextManager.viewsPath],
         },
       );
+      this.panel.iconPath = {
+        dark: Uri.file(ContextManager.context.asAbsolutePath('icons/database-dark.svg')),
+        light: Uri.file(ContextManager.context.asAbsolutePath('icons/database-light.svg')),
+      };
       this.panel.onDidDispose(this.dispose.bind(this));
       this.disposables.push(Disposable.from(this.panel));
 
