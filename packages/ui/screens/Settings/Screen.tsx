@@ -8,18 +8,10 @@ import {
   ValidationFunction,
 } from '../../lib/utils';
 import Loading from '../../components/Loading';
-import { VSCodeWebviewAPI, WebviewMessageType } from 'lib/interfaces';
+import { WebviewMessageType } from 'lib/interfaces';
 import Syntax from '../../components/Syntax';
 import '../../sass/app.scss';
-
-let vscode: VSCodeWebviewAPI;
-
-declare var acquireVsCodeApi: () => VSCodeWebviewAPI;
-
-function getVscode() {
-  vscode = vscode || acquireVsCodeApi();
-  return vscode as VSCodeWebviewAPI;
-}
+import getVscode from '@sqltools/ui/lib/vscode';
 
 const dialectDefaultPorts = {
   MySQL: 3306,

@@ -1,22 +1,20 @@
 import React from 'react';
-import { DatabaseInterface } from '@sqltools/core/interface';
 import { WebviewMessageType } from 'lib/interfaces';
 import Loading from '../../components/Loading';
 import '../../sass/app.scss';
 import QueryResult from './QueryResult';
-
-interface QueryResultsState {
-  activeTab?: string;
-  isLoaded: boolean;
-  error?: any;
-  queries: string[];
-  resultMap: {
-    [query: string]: DatabaseInterface.QueryResults;
-  };
-}
+import getVscode from '@sqltools/ui/lib/vscode';
+import QueryResultsState from './State';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
-  state = { isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
+  state = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
+
+  saveState = (data, cb = () => {}) => {
+    this.setState(data, () => {
+      cb();
+      getVscode().setState(this.state);
+    });
+  }
 
   componentWillMount() {
     window.addEventListener('message', (ev) => {
@@ -25,12 +23,13 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   toggle(query: QueryResultsState['queries'][number]) {
-    this.setState({
+    this.saveState({
       activeTab: query,
     });
   }
 
-  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+  messagesHandler = ({ action, payload, connId }: WebviewMessageType<any>) => {
+    console.log({action, payload, connId});
     switch (action) {
       case 'queryResults':
         const queries = [];
@@ -39,7 +38,8 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           queries.push(r.query);
           resultMap[r.query] = r;
         });
-        this.setState({
+        this.saveState({
+          connId,
           isLoaded: true,
           queries,
           resultMap,
@@ -48,9 +48,12 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         });
         break;
       case 'reset':
-        this.setState({ isLoaded: false, resultMap: {}, queries: [] });
+        this.saveState({ connId: null, isLoaded: false, resultMap: {}, queries: [] });
         break;
 
+      case 'getState':
+        getVscode().postMessage({ action: 'receivedState', payload: this.state });
+        break;
       default:
         break;
     }

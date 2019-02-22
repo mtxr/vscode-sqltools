@@ -50,11 +50,19 @@ namespace SQLTools {
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
-  const queryResults = new ResultsWebview();
   const settingsEditor = new SettingsWebview();
 
   let connectionExplorerView: TreeView<any>;
-  let telemetry: Telemetry;
+  let telemetry = new Telemetry({
+    product: 'extension',
+    useLogger: logger,
+    vscodeInfo: {
+      sessId: VSCodeEnv.sessionId,
+      uniqId: VSCodeEnv.machineId,
+      version: VSCodeVersion,
+    },
+  });
+  let queryResults: ResultsWebview;
   let bookmarks: BookmarksStorage;
   let history: History;
   let languageClient: SQLToolsLanguageClient;
@@ -64,7 +72,7 @@ namespace SQLTools {
     activationTimer = new Timer();
     if (ContextManager.context) return;
     ContextManager.context = context;
-    telemetry = new Telemetry({
+    telemetry.updateOpts({
       product: 'extension',
       useLogger: logger,
       vscodeInfo: {
@@ -269,6 +277,10 @@ namespace SQLTools {
     languageClient.sendRequest(RefreshConnectionData);
   }
 
+  export async function cmdExportResults(type: 'csv' | 'json') {
+    return queryResults.exportResults(type);
+  }
+
   /**
    * Management functions
    */
@@ -322,10 +334,13 @@ namespace SQLTools {
   }
 
   async function runQuery(query, addHistory = true) {
+    const conn = connectionExplorer.getActive();
+    const connId = conn ? conn.id : null;
+
     const payload = await runConnectionCommand('query', query);
 
     if (addHistory) history.add(query);
-    queryResults.postMessage({ action: 'queryResults', payload });
+    queryResults.postMessage({ action: 'queryResults', payload, connId });
   }
 
   async function tableMenu(conn: SerializedConnection, prop?: string): Promise<string> {
@@ -448,12 +463,14 @@ namespace SQLTools {
 
   async function registerExtension() {
     connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
+    const languageServerDisposable = await getLanguageServerDisposable();
+    queryResults = new ResultsWebview(languageClient);
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
       Wspc.onDidCloseTextDocument(cmdRefreshSidebar),
       Wspc.onDidOpenTextDocument(cmdRefreshSidebar),
-      await getLanguageServerDisposable(),
+      languageServerDisposable,
       settingsEditor,
       queryResults,
       ...getExtCommands(),

@@ -59,3 +59,10 @@ export const InstallDep = new RequestType<
   Error,
   void
 >('dep/install');
+
+export const ExportResults = new RequestType<
+  { connId: string, filename: string, query: string },
+  void,
+  Error,
+  void
+>('results/export');

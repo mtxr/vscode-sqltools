@@ -17,7 +17,6 @@ export default class AutoInstaller {
     try {
       const r = await Win.showInformationMessage(
         `You need "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
-        { modal: true },
         ...options,
       );
       switch (r) {

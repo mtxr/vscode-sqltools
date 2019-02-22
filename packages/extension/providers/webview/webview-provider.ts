@@ -5,10 +5,11 @@ import {
   WebviewPanel,
   window,
   EventEmitter,
+  commands
 } from 'vscode';
 import ContextManager from '../../context';
 
-export default abstract class WebviewProvider implements Disposable {
+export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
   public get onDidDispose() { return this.disposeEvent.event; }
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
@@ -54,9 +55,7 @@ export default abstract class WebviewProvider implements Disposable {
       this.panel.onDidDispose(this.dispose.bind(this));
       this.disposables.push(Disposable.from(this.panel));
 
-      if (this.messageCb) {
-        this.panel.webview.onDidReceiveMessage(this.messageCb, undefined, this.disposables);
-      }
+      this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables);
     }
 
     this.panel.title = this.title;
@@ -67,12 +66,27 @@ export default abstract class WebviewProvider implements Disposable {
         Uri.file(ContextManager.context.asAbsolutePath('.'))
           .with({ scheme: 'vscode-resource' })
           .toString());
+
+    this.panel.onDidChangeViewState(({ webviewPanel }) => {
+			this.setPreviewActiveContext(webviewPanel.active);
+		});
     this.panel.reveal();
+    this.setPreviewActiveContext(true);
+  }
+
+  private onDidReceiveMessage = ({ action, payload, ...rest}) => {
+    switch(action) {
+      case 'receivedState':
+        this.lastState = payload;
+    }
+    if (this.messageCb) {
+      this.messageCb(({ action, payload, ...rest }));
+    }
   }
 
   public hide() {
     if (this.panel === undefined) return;
-
+    this.setPreviewActiveContext(false);
     this.panel.dispose();
   }
   public dispose() {
@@ -88,5 +102,31 @@ export default abstract class WebviewProvider implements Disposable {
   }
   public setMessageCallback(cb) {
     this.messageCb = cb;
+  }
+
+  private setPreviewActiveContext(value: boolean) {
+		commands.executeCommand('setContext', `sqltools.${this.id}.active`, value);
+  }
+
+  private lastState = undefined;
+  public getState(): Promise<State> {
+    if (!this.panel) return Promise.resolve(null);
+
+    return new Promise((resolve, reject) => {
+      let attempts = 0;
+      const timer = setInterval(() => {
+        if (typeof this.lastState === 'undefined') {
+          if (attempts < 10) return attempts++;
+
+          clearInterval(timer);
+          return reject(new Error(`Could not get the state for ${this.id}`));
+        }
+        clearInterval(timer);
+        const state = this.lastState;
+        this.lastState = undefined;
+        return resolve(state);
+      }, 200);
+      this.panel.webview.postMessage({ action: 'getState' });
+    })
   }
 }

@@ -209,6 +209,15 @@
                     "light": "icons/file-light.svg",
                     "dark": "icons/file-dark.svg"
                 }
+            },
+            {
+                "title": "Export to Results",
+                "command": "SQLTools.exportResults",
+                "category": "SQLTools Results",
+                "icon": {
+                    "light": "icons/save-light.svg",
+                    "dark": "icons/save-dark.svg"
+                }
             }
         ],
         "keybindings": [
@@ -498,6 +507,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.exportResults",
+                    "when": "sqltools.Results.active"
+                },
+                {
                     "command": "SQLTools.formatSql",
                     "when": "editorHasSelection"
                 },
@@ -577,6 +590,13 @@
                     "command": "SQLTools.generateInsertQuery",
                     "when": "editorIsOpen && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@2"
+                }
+            ],
+            "editor/title": [
+                {
+                    "command": "SQLTools.exportResults",
+                    "group": "navigation",
+                    "when": "sqltools.Results.active"
                 }
             ]
         }
