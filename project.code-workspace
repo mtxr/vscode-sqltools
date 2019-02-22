@@ -24,5 +24,10 @@
       "path": "./docs",
       "name": "docs"
     }
-  ]
+  ],
+  "extensions": {
+    "recommendations": [
+      "eamodio.tsl-problem-matcher"
+    ]
+  }
 }

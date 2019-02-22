@@ -16,7 +16,7 @@
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": []
+      "problemMatcher": ["$ts-webpack-watch"]
     }
   ]
 }
