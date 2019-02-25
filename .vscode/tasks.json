@@ -16,7 +16,35 @@
         "kind": "build",
         "isDefault": true
       },
-      "problemMatcher": ["$ts-webpack-watch"]
+      "isBackground": true,
+      "problemMatcher": [{
+        "applyTo": "allDocuments",
+        "owner": "typescript",
+        "source": "webpack",
+        "fileLocation": "absolute",
+        "severity": "error",
+        "pattern": [
+            {
+                "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
+                "file": 1,
+                "line": 2,
+                "column": 3
+            },
+            {
+                "regexp": "\\s*TS\\d+:\\s*(.*)",
+                "message": 1
+            }
+        ]
+      }],
+      "background": {
+        "activeOnStart": true,
+        "beginsPattern": {
+            "regexp": "Compilation (.*?)starting.+"
+        },
+        "endsPattern": {
+            "regexp": "Compilation (.*?)finished"
+        }
+    }
     }
   ]
 }

@@ -476,6 +476,12 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Table columns should be expanded on load?"
+                },
+                "sqltools.defaultExportType": {
+                    "type": "string",
+                    "enum": ["csv", "json"],
+                    "default": "csv",
+                    "description": "Default mode to export results"
                 }
             }
         },
@@ -605,7 +611,7 @@
         "vscode:prepublish": "yarn run compile",
         "compile": "webpack --env.production",
         "compile:preview": "env PREVIEW=1 yarn run compile",
-        "watch": "webpack --watch --env.development",
+        "watch": "webpack --watch --env.development --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
         "test": "yarn run test:lint && yarn run test:unit",

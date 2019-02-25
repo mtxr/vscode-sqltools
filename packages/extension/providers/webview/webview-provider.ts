@@ -70,6 +70,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.panel.onDidChangeViewState(({ webviewPanel }) => {
 			this.setPreviewActiveContext(webviewPanel.active);
 		});
+    this.postMessage({ action: 'reset' });
     this.panel.reveal();
     this.setPreviewActiveContext(true);
   }

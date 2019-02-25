@@ -3,26 +3,27 @@ import { SQLToolsLanguageClient } from '@sqltools/extension/language-client';
 import { ExportResults } from '@sqltools/core/contracts/connection-requests';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
+import { ConnectionExplorer } from '../connection-explorer';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
-  constructor(private client: SQLToolsLanguageClient) {
+  constructor(private client: SQLToolsLanguageClient, private connectionExplorer: ConnectionExplorer) {
     super();
   }
 
-  public async exportResults(type: 'csv' | 'json' = 'csv') {
+  public async exportResults(filetype: 'csv' | 'json' = 'csv') {
     const { connId, activeTab } = await this.getState();
     let filters = undefined;
 
-    if (type === 'csv') {
+    if (filetype === 'csv') {
       filters = {
-        'CSV Files': ['csv', 'txt']
+        'CSV File': ['csv', 'txt']
       };
-    } else if (type === 'json') {
+    } else if (filetype === 'json') {
       filters = {
-        'CSV Files': ['json']
+        'JSON File': ['json']
       };
     }
     const file = await vscode.window.showSaveDialog({
@@ -30,7 +31,15 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
       saveLabel: 'Export'
     });
     if (!file) return;
-    const filename = file.toString();
-    return this.client.sendRequest(ExportResults, { connId, query: activeTab, filename });
+    const filename = file.fsPath;
+    await this.client.sendRequest(ExportResults, { connId, query: activeTab, filename, filetype });
+    return vscode.commands.executeCommand('vscode.open', file);
+  }
+
+  updateResults(payload) {
+    const conn = this.connectionExplorer.getActive();
+    const connId = conn ? conn.id : null;
+
+    this.postMessage({ action: 'queryResults', payload, connId });
   }
 }

@@ -179,7 +179,7 @@ namespace SQLTools {
       const table = await getTableName(node);
       printOutput();
       const payload = await runConnectionCommand('showRecords', table, ConfigManager.previewLimit);
-      queryResults.postMessage({ action: 'queryResults', payload });
+      queryResults.updateResults(payload);
 
     } catch (e) {
       ErrorHandler.create('Error while showing table records', cmdShowOutputChannel)(e);
@@ -191,7 +191,7 @@ namespace SQLTools {
       const table = await getTableName(node);
       printOutput();
       const payload = await runConnectionCommand('describeTable', table);
-      queryResults.postMessage({ action: 'queryResults', payload });
+      queryResults.updateResults(payload);
     } catch (e) {
       ErrorHandler.create('Error while describing table records', cmdShowOutputChannel)(e);
     }
@@ -277,8 +277,11 @@ namespace SQLTools {
     languageClient.sendRequest(RefreshConnectionData);
   }
 
-  export async function cmdExportResults(type: 'csv' | 'json') {
-    return queryResults.exportResults(type);
+  export async function cmdExportResults(filetype: 'csv' | 'json') {
+    if (typeof filetype === 'string')
+      return queryResults.exportResults(filetype);
+
+    return queryResults.exportResults(ConfigManager.defaultExportType);
   }
 
   /**
@@ -334,13 +337,10 @@ namespace SQLTools {
   }
 
   async function runQuery(query, addHistory = true) {
-    const conn = connectionExplorer.getActive();
-    const connId = conn ? conn.id : null;
-
     const payload = await runConnectionCommand('query', query);
 
     if (addHistory) history.add(query);
-    queryResults.postMessage({ action: 'queryResults', payload, connId });
+    queryResults.updateResults(payload);
   }
 
   async function tableMenu(conn: SerializedConnection, prop?: string): Promise<string> {
@@ -371,7 +371,6 @@ namespace SQLTools {
 
   function printOutput() {
     queryResults.show();
-    queryResults.postMessage({ action: 'reset' });
   }
 
   async function getConnData(conn: SerializedConnection) {
@@ -464,7 +463,7 @@ namespace SQLTools {
   async function registerExtension() {
     connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     const languageServerDisposable = await getLanguageServerDisposable();
-    queryResults = new ResultsWebview(languageClient);
+    queryResults = new ResultsWebview(languageClient, connectionExplorer);
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),

@@ -18,6 +18,7 @@ import {
   RunCommandRequest,
   CloseConnectionRequest,
   GetCachedPassword,
+  ExportResults,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
@@ -29,6 +30,8 @@ import { Telemetry, TelemetryArgs } from '@sqltools/core/utils';
 import { MissingModule } from '@sqltools/core/exception';
 import Notifications from '@sqltools/core/contracts/notifications';
 import { DepInstaller } from './dep-install/service';
+import fs from 'fs';
+import csvStringify from 'csv-stringify/lib/sync';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -259,6 +262,23 @@ namespace SQLToolsLanguageServer {
       notifyError('Execute query error', e);
       throw e;
     }
+  });
+
+  server.onRequest(ExportResults, ({ connId, filename, query, filetype = 'csv' }) => {
+    const { queryResults } = store.getState();
+    const { results, cols } = queryResults[connId][query];
+    let output = '';
+    if (filetype === 'json') {
+      output = JSON.stringify(results, null, 2);
+    } else if (filetype === 'csv') {
+      output = csvStringify(results, {
+        columns: cols,
+        header: true,
+        quoted_string: true,
+        quoted_empty: true
+      });
+    }
+    fs.writeFileSync(filename, output);
   });
 
   const nodeExit = process.exit;

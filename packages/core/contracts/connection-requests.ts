@@ -61,7 +61,7 @@ export const InstallDep = new RequestType<
 >('dep/install');
 
 export const ExportResults = new RequestType<
-  { connId: string, filename: string, query: string },
+  { connId: string, filename: string, query: string, filetype: 'json' | 'csv' },
   void,
   Error,
   void

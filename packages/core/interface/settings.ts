@@ -128,4 +128,11 @@ export interface Settings {
    * @memberof Settings
    */
   previewLimit?: number;
+  /**
+   * Default mode to export results
+   * @default "csv"
+   * @type {string}
+   * @memberof Settings
+   */
+  defaultExportType?: 'csv' | 'json';
 }

@@ -32,7 +32,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public getActive(): SerializedConnection | null {
     const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
     if (!activeId) return null;
-    return this.tree[activeId].conn as SerializedConnection;
+
+    return {
+      ...this.tree[activeId].conn,
+      id: getDbId(this.tree[activeId].conn),
+    } as SerializedConnection;
   }
 
   public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
