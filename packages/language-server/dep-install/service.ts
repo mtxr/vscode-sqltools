@@ -106,7 +106,7 @@ export class DepInstaller {
   }
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
-    return run('npm', args, { cwd: this.root, shell: true, ...options });
+    return run('npm', args, { cwd: this.root, shell: true, stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
   }
 
   get npmVersion() {
@@ -123,10 +123,10 @@ export class DepInstaller {
   }
 
   public async install(args: string | string[], options: SpawnOptions = {}) {
-    return run('npm', ['install', ...(Array.isArray(args) ? args : [args]) ], { stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
+    return this.npm(['install', ...(Array.isArray(args) ? args : [args]) ], options);
   }
 
   public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
-    return run('npm', ['run', scriptName ], { cwd: this.root, stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
+    return this.npm(['run', scriptName ], options);
   }
 }
