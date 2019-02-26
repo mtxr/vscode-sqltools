@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getWebviewConfig = require('../ui/webpack.config');
+const getLanguageServerConfig = require('../language-server/webpack.config');
 
 const extPkgJson = require('./package.json');
 const corePkgJson = require('./../core/package.json');
@@ -28,7 +29,6 @@ function getExtensionConfig(env) {
     target: 'node',
     entry: {
       extension: path.join(__dirname, 'index.ts'),
-      languageserver: path.join(__dirname, '..', 'language-server', 'index.ts')
     },
     module: {
       rules: [
@@ -75,10 +75,7 @@ function getExtensionConfig(env) {
       ])
     ],
     resolve: {
-      extensions: ['.tsx', '.ts', '.js', '.json'],
-      alias: {
-        'pg-native': path.join(__dirname, '../../' ,'node_modules/pg/lib/native/index.js'),
-      },
+      extensions: ['.ts', '.js', '.json'],
     },
     output: {
       filename: '[name].js',
@@ -88,12 +85,7 @@ function getExtensionConfig(env) {
     },
     externals: {
       'vscode': 'commonjs vscode',
-      'sqlite3': 'commonjs sqlite3',
-      'oracledb': 'commonjs oracledb',
     },
-    optimization: env.production ? {
-      minimize: false,
-    } : undefined,
   };
 
   return config;
@@ -101,11 +93,10 @@ function getExtensionConfig(env) {
 
 module.exports = function (env = {}) {
   env.production = !!env.production;
-  return [getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
+  return [getLanguageServerConfig(env), getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
-        'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
@@ -117,7 +108,9 @@ module.exports = function (env = {}) {
       __dirname: false
     };
     config.devtool = !env.production ? 'inline-source-map' : 'source-map';
-
+    config.optimization = env.production ? {
+      minimize: false,
+    } : undefined;
     return config;
   });
 };

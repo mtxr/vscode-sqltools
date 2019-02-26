@@ -19,6 +19,9 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   public static deps: Deps[] = [];
 
   protected get deps() {
+    if (!Dialects[this.constructor.name]) {
+      return [];
+    }
     return Dialects[this.constructor.name].deps;
   }
   public connection: Promise<ConnectionType>;

@@ -8,7 +8,7 @@ import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
 
 const OracleDBLibVersion = '3.1.1';
-export default class Oracle extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
+export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
   public static deps: typeof GenericDialect['deps'] = [{
     type: 'package',
     name: 'oracledb',

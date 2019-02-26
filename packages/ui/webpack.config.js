@@ -2,9 +2,11 @@ const path = require('path');
 
 const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
+const babelOptions = require(path.join(__dirname, '.babelrc'));
+
 module.exports = exports = function getWebviewConfig(env) {
   return {
-    name: 'webiew',
+    name: 'ui',
     mode: env.production ? 'production' : 'development',
     entry: {
       Settings: path.join(__dirname, 'screens', 'Settings.tsx'),
@@ -15,10 +17,9 @@ module.exports = exports = function getWebviewConfig(env) {
         {
           test: /\.tsx?$/,
           use: [
-            'babel-loader',
+            { loader: 'babel-loader', options: babelOptions },
             { loader: 'ts-loader', options: { transpileOnly: true } }
-        ],
-          exclude: /node_modules/
+          ],
         },
         {
           test: /\.css/,
@@ -31,7 +32,11 @@ module.exports = exports = function getWebviewConfig(env) {
       ]
     },
     resolve: {
-      extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass']
+      extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass'],
+      modules: [
+        'node_modules',
+        path.join(__dirname, '..', '..', 'node_modules')
+      ],
     },
     optimization: {
       splitChunks: {
@@ -50,7 +55,5 @@ module.exports = exports = function getWebviewConfig(env) {
       filename: 'ui/[name].js',
       path: outdir
     },
-    plugins: [
-    ]
   };
 }

@@ -26,7 +26,7 @@ import {
   version as VSCodeVersion,
   workspace as Wspc,
 } from 'vscode';
-import { TelemetryArgs, Telemetry } from '@sqltools/core/utils';
+import { TelemetryArgs, Telemetry, commandExists } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
 import Notification from '@sqltools/core/contracts/notifications';
 import DepInstaller from './dep-installer';
@@ -92,7 +92,7 @@ export class SQLToolsLanguageClient {
     const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
-      runtime: 'node' ,
+      runtime: commandExists('node') ? 'node' : undefined, // use node id possible, otherwise use VSCode electron
     };
 
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };

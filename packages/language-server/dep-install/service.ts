@@ -5,6 +5,7 @@ import { IConnection } from 'vscode-languageserver';
 import { InstallDep } from '@sqltools/core/contracts/connection-requests';
 import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
+import { commandExists } from '@sqltools/core/utils';
 
 function run(
   command: string,
@@ -106,6 +107,9 @@ export class DepInstaller {
   }
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
+    if (!commandExists('npm')) {
+      throw new Error('You need to install node@6 or newer and npm first to install dependencies. Install it and restart to continue.');
+    }
     return run('npm', args, { cwd: this.root, shell: true, stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
   }
 

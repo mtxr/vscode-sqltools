@@ -1,5 +1,6 @@
 import * as query from './query';
 import * as persistence from './persistence';
+import commandExists from './command-exists';
 import { ConnectionCredentials, SerializedConnection, DatabaseDialect } from '../interface';
 
 export * from './get-home';
@@ -31,4 +32,4 @@ export function getDbDescription(c: SerializedConnection | ConnectionCredentials
   ].filter(Boolean).join('');
 }
 
-export { query, persistence };
+export { query, persistence, commandExists };

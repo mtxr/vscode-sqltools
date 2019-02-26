@@ -8,6 +8,7 @@
   "private": true,
   "dependencies": {
     "applicationinsights": "^1.1.0",
+    "command-exists": "^1.2.8",
     "mssql": "^4.3.1",
     "mysql": "^2.16.0",
     "pg": "^7.8.0",
@@ -15,6 +16,7 @@
     "vscode-languageserver": "^5.3.0-next.1"
   },
   "devDependencies": {
+    "@types/command-exists": "^1.2.0",
     "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
     "@types/oracledb": "^1.11.34",
