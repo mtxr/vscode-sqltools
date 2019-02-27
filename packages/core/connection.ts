@@ -1,10 +1,9 @@
 import { Telemetry, getDbId } from './utils';
 import Dialects from './dialect';
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  SerializedConnection,
+  ConnectionInterface,
 } from './interface';
 
 export default class Connection {
@@ -12,7 +11,7 @@ export default class Connection {
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionCredentials, private telemetry: Telemetry) {
+  constructor(credentials: ConnectionInterface, private telemetry: Telemetry) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 
@@ -121,7 +120,7 @@ export default class Connection {
     return getDbId(this.conn.credentials);
   }
 
-  public serialize(): SerializedConnection {
+  public serialize(): ConnectionInterface {
     return {
       id: this.getId(),
       ...this.conn.credentials,

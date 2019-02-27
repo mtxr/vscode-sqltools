@@ -39,7 +39,7 @@ import {
 import ResultsWebview from './providers/webview/results';
 import SettingsWebview from './providers/webview/settings';
 import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
-import { SerializedConnection, Settings as SettingsInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
 import { SQLToolsLanguageClient } from './language-client';
@@ -154,7 +154,7 @@ namespace SQLTools {
   }
   export async function cmdSelectConnection(node?: SidebarConnection): Promise<void> {
     if (node) {
-      await setConnection(node.conn as SerializedConnection).catch(ErrorHandler.create('Error opening connection'));
+      await setConnection(node.conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
       return;
     }
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
@@ -169,7 +169,7 @@ namespace SQLTools {
     return languageClient.sendRequest(CloseConnectionRequest, { conn })
       .then(async () => {
         logger.info('Connection closed!');
-        connectionExplorer.disconnect(conn as SerializedConnection);
+        connectionExplorer.disconnect(conn as ConnectionInterface);
         updateStatusBar();
       }, ErrorHandler.create('Error closing connection'));
   }
@@ -288,8 +288,8 @@ namespace SQLTools {
    * Management functions
    */
 
-  async function connectionMenu(onlyActive = false): Promise<SerializedConnection> {
-    const connections: SerializedConnection[] = await languageClient.sendRequest(ClientRequestConnections);
+  async function connectionMenu(onlyActive = false): Promise<ConnectionInterface> {
+    const connections: ConnectionInterface[] = await languageClient.sendRequest(ClientRequestConnections);
 
     const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
 
@@ -343,7 +343,7 @@ namespace SQLTools {
     queryResults.updateResults(payload);
   }
 
-  async function tableMenu(conn: SerializedConnection, prop?: string): Promise<string> {
+  async function tableMenu(conn: ConnectionInterface, prop?: string): Promise<string> {
     const { tables } = await getConnData(conn);
     return await quickPick(tables
       .map((table) => {
@@ -373,12 +373,12 @@ namespace SQLTools {
     queryResults.show();
   }
 
-  async function getConnData(conn: SerializedConnection) {
+  async function getConnData(conn: ConnectionInterface) {
     return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
-  async function autoConnectIfActive(currConn?: SerializedConnection) {
-    let defaultConnections: SerializedConnection[] = currConn ? [currConn] : [];
+  async function autoConnectIfActive(currConn?: ConnectionInterface) {
+    let defaultConnections: ConnectionInterface[] = currConn ? [currConn] : [];
     if (defaultConnections.length === 0
       && (
         typeof ConfigManager.autoConnectTo === 'string'
@@ -393,7 +393,7 @@ namespace SQLTools {
 
       defaultConnections = ConfigManager.connections
         .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
-        .filter(Boolean) as SerializedConnection[];
+        .filter(Boolean) as ConnectionInterface[];
     }
     if (defaultConnections.length === 0) {
       return setConnection();
@@ -499,7 +499,7 @@ namespace SQLTools {
     if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
-  async function setConnection(c?: SerializedConnection): Promise<SerializedConnection> {
+  async function setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
     let password = null;
     if (c) {
       if (c.askForPassword) password = await askForPassword(c);
@@ -515,7 +515,7 @@ namespace SQLTools {
     return connectionExplorer.getActive();
   }
 
-  async function askForPassword(c: SerializedConnection): Promise<string | null> {
+  async function askForPassword(c: ConnectionInterface): Promise<string | null> {
     const cachedPass = await languageClient.sendRequest(GetCachedPassword, { conn: c });
     return cachedPass || await Win.showInputBox({
       prompt: `${c.name} password`,
@@ -523,11 +523,11 @@ namespace SQLTools {
       validateInput: (v) => Utils.isEmpty(v) ? 'Password not provided.' : null,
     });
   }
-  async function connect(force = false): Promise<SerializedConnection> {
+  async function connect(force = false): Promise<ConnectionInterface> {
     if (!force && connectionExplorer.getActive()) {
       return connectionExplorer.getActive();
     }
-    const c: SerializedConnection = await connectionMenu(true);
+    const c: ConnectionInterface = await connectionMenu(true);
     history.clear();
     return setConnection(c);
   }
@@ -577,7 +577,7 @@ namespace SQLTools {
 
   async function getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
-      await setConnection(node.conn as SerializedConnection);
+      await setConnection(node.conn as ConnectionInterface);
       return node.value;
     }
 

@@ -21,7 +21,7 @@ import {
   ExportResults,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
-import { SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
@@ -90,7 +90,7 @@ namespace SQLToolsLanguageServer {
       });
   }
 
-  function updateSidebar(conn: SerializedConnection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
+  function updateSidebar(conn: ConnectionInterface, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
     if (!conn) return Promise.resolve();
     return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
   }
@@ -176,8 +176,8 @@ namespace SQLToolsLanguageServer {
 
   server.onRequest(
     OpenConnectionRequest,
-    async (req: { conn: SerializedConnection, password?: string }
-  ): Promise<SerializedConnection> => {
+    async (req: { conn: ConnectionInterface, password?: string }
+  ): Promise<ConnectionInterface> => {
     if (!req.conn) {
       return undefined;
     }
@@ -206,7 +206,7 @@ namespace SQLToolsLanguageServer {
 
   server.onRequest(
     GetCachedPassword,
-    async (req: { conn: SerializedConnection }): Promise<string> => {
+    async (req: { conn: ConnectionInterface }): Promise<string> => {
     if (!req.conn) {
       return undefined;
     }
@@ -219,7 +219,7 @@ namespace SQLToolsLanguageServer {
 
   server.onRequest(
     CloseConnectionRequest,
-    async (req: { conn: SerializedConnection }): Promise<void> => {
+    async (req: { conn: ConnectionInterface }): Promise<void> => {
     if (!req.conn) {
       return undefined;
     }
@@ -246,7 +246,7 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(RunCommandRequest, async (req: {
-    conn: SerializedConnection,
+    conn: ConnectionInterface,
     command: string,
     args: any[],
   }) => {

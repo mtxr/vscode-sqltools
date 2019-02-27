@@ -5,7 +5,7 @@ import {
 } from 'vscode';
 import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DatabaseInterface, ConnectionCredentials } from '@sqltools/core/interface';
+import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getDbId, getDbDescription } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
@@ -32,7 +32,7 @@ export class SidebarConnection extends TreeItem {
     return undefined;
   }
 
-  constructor(public conn: ConnectionCredentials) {
+  constructor(public conn: ConnectionInterface) {
     super(conn.name, TreeItemCollapsibleState.None);
     this.iconPath = {
       dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
@@ -98,7 +98,7 @@ export class SidebarConnection extends TreeItem {
     this.collapsibleState = TreeItemCollapsibleState.Expanded;
   }
 
-  public updateCreds(creds: ConnectionCredentials) {
+  public updateCreds(creds: ConnectionInterface) {
     if (isDeepStrictEqual(this.conn, creds)) {
       return false;
     }

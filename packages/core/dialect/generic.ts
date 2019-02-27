@@ -1,8 +1,8 @@
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
   DialectQueries,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
@@ -26,7 +26,7 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   }
   public connection: Promise<ConnectionType>;
   abstract queries: DialectQueries;
-  constructor(public credentials: ConnectionCredentials) { }
+  constructor(public credentials: ConnectionInterface) { }
 
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
