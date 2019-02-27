@@ -20,8 +20,8 @@ export default class Connection {
   }
 
   public async connect() {
-    if (typeof this.conn.getDummy === 'function')
-      await this.conn.getDummy()
+    if (typeof this.conn.testConnection === 'function')
+      await this.conn.testConnection()
     else
       await this.query('SELECT 1;', true);
     this.connected = true;
