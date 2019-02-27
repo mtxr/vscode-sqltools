@@ -44,6 +44,17 @@
       "port": 3307,
       "server": "localhost",
       "username": "root"
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "OracleDB",
+      "name": "OracleDB",
+      "password": "root",
+      "port": 1521,
+      "username": "root",
+      "server": "localhost"      
     }
   ]
 }

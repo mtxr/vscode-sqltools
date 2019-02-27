@@ -75,6 +75,10 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     return results;
   }
 
+  public async getDummy(): Promise<any> {
+    return await this.query(queries.fetchDummy);
+  }
+
   public getTables(): Promise<DatabaseInterface.Table[]> {
     return this.query(this.queries.fetchTables)
       .then(([queryRes]) => {

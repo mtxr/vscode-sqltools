@@ -95,5 +95,6 @@ export interface ConnectionDialect {
   describeTable(tableName: string): Promise<any>;
   showRecords(tableName: string, limit: number): Promise<any>;
   query(query: string): Promise<any>;
+  getDummy?(): Promise<any>;
 }
 
