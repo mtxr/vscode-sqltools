@@ -41,4 +41,5 @@ export default {
   group by v.owner, v.view_name, user
   )
   where owner not like '%SYS%'`,
+  fetchDummy: 'select 1 from dual'
 } as DialectQueries;

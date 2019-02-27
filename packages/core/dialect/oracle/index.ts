@@ -16,9 +16,12 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   }];
 
   private poolCreated = false;
+  private currConnection = null;
   public get connection() {
     if (!this.poolCreated) return;
-    return this.lib.getConnection() as Promise<OracleDBLib.IConnection>;
+    if (!this.currConnection)
+      this.currConnection = this.lib.getConnection() as Promise<OracleDBLib.IConnection>;
+    return this.currConnection;
   }
 
   queries = queries
@@ -70,6 +73,10 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       });
     }
     return results;
+  }
+
+  public async getDummy(): Promise<any> {
+    return await this.query(queries.fetchDummy);
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
