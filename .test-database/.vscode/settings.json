@@ -1,8 +1,5 @@
 {
   "sqltools.autoConnectTo": [
-    "PGSQL",
-    "MySQL",
-    "MSSQL"
   ],
   "sqltools.telemetry": true,
   "sqltools.connections": [
@@ -32,6 +29,12 @@
       },
     },
     {
+      "name": "SQLite",
+      "dialect": "SQLite",
+      "database": "./sqlite/test_db.db",
+      "connectionTimeout": 15
+    },
+    {
       "askForPassword": false,
       "connectionTimeout": 15,
       "database": "test_db",
@@ -41,6 +44,17 @@
       "port": 3307,
       "server": "localhost",
       "username": "root"
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "OracleDB",
+      "name": "OracleDB",
+      "password": "root",
+      "port": 1521,
+      "username": "root",
+      "server": "localhost"      
     }
   ]
 }

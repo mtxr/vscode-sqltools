@@ -1,5 +1,9 @@
 # SQLTools Changelog
 
+### NEXT - WIP
+
+- Added SQLite
+
 ## v0.16
 
 ### v0.16.11

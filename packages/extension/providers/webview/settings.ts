@@ -7,8 +7,8 @@ import { EXT_NAME } from '@sqltools/core/constants';
 
 const cfgKey = EXT_NAME.toLowerCase();
 
-export default class SettingsEditor extends WebviewProvider {
-  protected id: string = 'settingsEditor';
+export default class SettingsWebview extends WebviewProvider {
+  protected id: string = 'Settings';
   protected title: string = 'SQLTools Settings';
 
   constructor() {

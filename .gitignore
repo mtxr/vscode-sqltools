@@ -12,5 +12,7 @@ cache/
 !**/.vscode
 **/package-lock.json
 .env
-sourcemaps.sh
 .vscode/aisettings.json
+*.db
+*.zip
+.test-database/oracle/docker-images-master

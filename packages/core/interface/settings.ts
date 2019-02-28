@@ -1,5 +1,5 @@
 import { LogLevel } from './logger';
-import { ConnectionCredentials } from './connection';
+import { ConnectionInterface } from './connection';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
@@ -116,11 +116,11 @@ export interface Settings {
   format?: FormatOptions;
   /**
    * Connections
-   * @type {ConnectionCredentials[]}
+   * @type {ConnectionInterface[]}
    * @default []
    * @memberof Settings
    */
-  connections?: ConnectionCredentials[];
+  connections?: ConnectionInterface[];
 
   /**
    * Global show records limit
@@ -128,4 +128,11 @@ export interface Settings {
    * @memberof Settings
    */
   previewLimit?: number;
+  /**
+   * Default mode to export results
+   * @default "csv"
+   * @type {string}
+   * @memberof Settings
+   */
+  defaultExportType?: 'csv' | 'json';
 }

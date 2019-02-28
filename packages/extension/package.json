@@ -15,6 +15,7 @@
         "url": "https://github.com/mtxr/vscode-sqltools/issues"
     },
     "main": "./extension.js",
+    "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
         "vscode": "^1.28.0"
@@ -33,6 +34,7 @@
         "mssql",
         "mysql",
         "oracle",
+        "oracledb",
         "postgres",
         "postgresql",
         "sgdb",
@@ -207,6 +209,15 @@
                     "light": "icons/file-light.svg",
                     "dark": "icons/file-dark.svg"
                 }
+            },
+            {
+                "title": "Export to Results",
+                "command": "SQLTools.exportResults",
+                "category": "SQLTools Results",
+                "icon": {
+                    "light": "icons/save-light.svg",
+                    "dark": "icons/save-dark.svg"
+                }
             }
         ],
         "keybindings": [
@@ -264,7 +275,10 @@
                     "description": "Disable new release notifications."
                 },
                 "sqltools.autoConnectTo": {
-                    "type": ["string", "array"],
+                    "type": [
+                        "string",
+                        "array"
+                    ],
                     "default": null,
                     "required": false,
                     "description": "Name of the connection to auto connect on start",
@@ -413,7 +427,9 @@
                                 "enum": [
                                     "MSSQL",
                                     "MySQL",
-                                    "PostgreSQL"
+                                    "OracleDB",
+                                    "PostgreSQL",
+                                    "SQLite"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -460,6 +476,12 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Table columns should be expanded on load?"
+                },
+                "sqltools.defaultExportType": {
+                    "type": "string",
+                    "enum": ["csv", "json"],
+                    "default": "csv",
+                    "description": "Default mode to export results"
                 }
             }
         },
@@ -489,6 +511,10 @@
                 {
                     "command": "SQLTools.generateInsertQuery",
                     "when": "false"
+                },
+                {
+                    "command": "SQLTools.exportResults",
+                    "when": "sqltools.Results.active"
                 },
                 {
                     "command": "SQLTools.formatSql",
@@ -571,6 +597,13 @@
                     "when": "editorIsOpen && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@2"
                 }
+            ],
+            "editor/title": [
+                {
+                    "command": "SQLTools.exportResults",
+                    "group": "navigation",
+                    "when": "sqltools.Results.active"
+                }
             ]
         }
     },
@@ -578,39 +611,34 @@
         "vscode:prepublish": "yarn run compile",
         "compile": "webpack --env.production",
         "compile:preview": "env PREVIEW=1 yarn run compile",
-        "watch": "webpack --watch --env.development",
+        "watch": "webpack --watch --env.development --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
         "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test:lint": "./node_modules/.bin/tslint -c tslint.json .",
         "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
-        "@types/jest": "^23.3.9",
+        "@types/jest": "^24.0.1",
         "babel-loader": "^8.0.4",
-        "copy-webpack-plugin": "^4.5.3",
+        "copy-webpack-plugin": "^4.6.0",
         "css-loader": "^2.1.0",
         "jest": "^23.6.0",
         "jest-cli": "^23.6.0",
-        "node-sass": "^4.10.0",
+        "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
-        "ts-jest": "^23.10.4",
-        "ts-loader": "^5.2.1",
-        "tslint": "^5.4.3",
-        "tslint-webpack-plugin": "^1.2.2",
-        "typescript": "^3.3.1",
-        "uglifyjs-webpack-plugin": "^2.0.1",
-        "vscode": "^1.1.28",
-        "webpack": "^4.29.0",
-        "webpack-cli": "^3.1.2"
+        "ts-jest": "^23.10.5",
+        "ts-loader": "^5.3.3",
+        "typescript": "^3.3.3",
+        "vscode": "^1.1.29",
+        "webpack": "^4.29.3",
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/language-server": "*",
         "@sqltools/ui": "*",
-        "opn": "^5.1.0",
-        "vscode-languageclient": "^5.2.1"
+        "vscode-languageclient": "^5.3.0-next.1"
     }
 }

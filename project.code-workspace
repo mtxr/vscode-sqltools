@@ -24,5 +24,8 @@
       "path": "./docs",
       "name": "docs"
     }
-  ]
+  ],
+  "extensions": {
+
+  }
 }

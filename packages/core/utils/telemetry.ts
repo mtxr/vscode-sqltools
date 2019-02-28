@@ -1,11 +1,11 @@
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
-import { LoggerInterface } from '../interface';
-import { VERSION, ENV, AI_KEY, EXT_NAME } from './../constants';
+import { VERSION, ENV, AI_KEY, EXT_NAME } from '@sqltools/core/constants';
 import Timer from './timer';
 import { ifProp } from './decorators';
+import { LoggerInterface } from '@sqltools/core/interface';
 type Product = 'core' | 'extension' | 'language-server' | 'ui';
-interface VSCodeInfo {
+export interface VSCodeInfo {
   uniqId?: string;
   sessId?: string;
   version?: string;
@@ -69,6 +69,7 @@ export class Telemetry {
       'common.channel': ENV,
       'common.extname': EXT_NAME,
       'common.extversion': VERSION,
+      'common.nodeversion': process.version,
       ...(this.vscodeInfo
         ? {
             'common.vscodeuniqid': this.vscodeInfo.uniqId,
@@ -81,6 +82,10 @@ export class Telemetry {
     AI.start();
   }
   constructor(opts: TelemetryArgs) {
+    this.updateOpts(opts);
+  }
+
+  public updateOpts(opts: TelemetryArgs) {
     this.product = opts.product;
     this.vscodeInfo = opts.vscodeInfo || {};
     const { enableTelemetry, useLogger } = opts;
@@ -138,7 +143,7 @@ export class Telemetry {
 
   @ifProp('client')
   public registerSession() {
-    this.registerEvent('sessionStarted');
+    this.registerEvent(`sessionStarted:${this.product}`);
   }
 
   @ifProp('client')
@@ -155,6 +160,7 @@ export class Telemetry {
     name: string,
     properties?: { [key: string]: string }
   ): void {
+    this.logger.info(`Event ${name}`);
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 

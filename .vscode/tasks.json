@@ -1,0 +1,50 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "compile",
+      "type": "npm",
+      "script": "compile",
+    },
+    {
+      "label": "watch:compile",
+      "type": "npm",
+      "script": "watch",
+      "group":{
+        "kind": "build",
+        "isDefault": true
+      },
+      "isBackground": true,
+      "problemMatcher": [{
+        "applyTo": "allDocuments",
+        "owner": "typescript",
+        "source": "webpack",
+        "fileLocation": "absolute",
+        "severity": "error",
+        "pattern": [
+            {
+                "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
+                "file": 1,
+                "line": 2,
+                "column": 3
+            },
+            {
+                "regexp": "\\s*TS\\d+:\\s*(.*)",
+                "message": 1
+            }
+        ]
+      }],
+      "background": {
+        "activeOnStart": true,
+        "beginsPattern": {
+            "regexp": "Compilation (.*?)starting.+"
+        },
+        "endsPattern": {
+            "regexp": "Compilation (.*?)finished"
+        }
+    }
+    }
+  ]
+}

@@ -1,7 +1,6 @@
 import MSSQLLib from 'mssql';
 
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
 } from '@sqltools/core/interface';
