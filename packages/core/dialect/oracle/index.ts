@@ -15,16 +15,28 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     version: OracleDBLibVersion,
   }];
 
-  private poolCreated = false;
+  private _poolCreated = {};
   public get connection() {
     if (!this.poolCreated) return;
-    return this.lib.getConnection() as Promise<OracleDBLib.IConnection>;
+    return this.lib.getConnection(this.poolName) as Promise<OracleDBLib.IConnection>;
   }
 
   queries = queries
 
   private get lib(): typeof OracleDBLib {
     return __non_webpack_require__('oracledb');
+  }
+
+  private get poolName(): string {
+    return this.credentials.name;
+  }
+
+  private get poolCreated(): boolean {
+    return this._poolCreated[this.poolName];
+  }
+  
+  private set poolCreated(value: boolean) {
+    this._poolCreated[this.poolName] = value;
   }
 
   public async open() {
@@ -41,6 +53,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       connectString,
       password: this.credentials.password,
       user: this.credentials.username,
+      poolAlias: this.poolName
     });
     this.poolCreated = true;
     return this.connection;
@@ -48,7 +61,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
 
   public async close() {
     if (!this.poolCreated) return Promise.resolve();
-    await this.lib.getPool().close(10 as any);
+    await this.lib.getPool(this.poolName).close(10 as any);
     this.poolCreated = false;
   }
 
