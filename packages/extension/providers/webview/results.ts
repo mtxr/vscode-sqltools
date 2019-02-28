@@ -1,5 +1,5 @@
 import WebviewProvider from './webview-provider';
-import { SQLToolsLanguageClient } from '@sqltools/extension/language-client';
+import { SQLToolsLanguageClient } from '@sqltools/extension/language-client/client';
 import { ExportResults } from '@sqltools/core/contracts/connection-requests';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';

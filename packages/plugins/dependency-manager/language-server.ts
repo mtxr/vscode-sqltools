@@ -1,11 +1,12 @@
 import { SpawnOptions, spawn } from 'child_process';
 import path from 'path';
 import fs from 'fs';
-import { IConnection } from 'vscode-languageserver';
-import { InstallDep } from '@sqltools/core/contracts/connection-requests';
 import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import { commandExists } from '@sqltools/core/utils';
+import SQLToolsLanguageServer from '@sqltools/language-server/server';
+import { InstallDep } from './contracts';
+import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
 
 function run(
   command: string,
@@ -49,19 +50,13 @@ function run(
   );
 }
 
-interface Options {
-  root?: string;
-  server?: IConnection;
-}
-
-export class DepInstaller {
-  private static instance: DepInstaller;
+export default class DependencyManager implements LanguageServerPlugin {
   private root: string;
-  private server: IConnection;
+  private server: SQLToolsLanguageServer;
 
 
  private onRequestToInstall = async (params) => {
-    console.log('Received request to install deps:', JSON.stringify(params));
+    this.server.log.debug('Received request to install deps:', JSON.stringify(params));
     const DialectClass = Dialects[params.dialect];
     if (
       !DialectClass ||
@@ -76,34 +71,34 @@ export class DepInstaller {
     for (let dep of deps) {
       switch(dep.type) {
         case 'npmscript':
-          console.log(`Will run ${dep.name} script`);
+          this.server.log.debug(`Will run ${dep.name} script`);
           await this.runNpmScript(dep.name, { env: dep.env });
-          console.log(`Finished ${dep.name} script`);
+          this.server.log.debug(`Finished ${dep.name} script`);
           break;
         case 'package':
-          console.log(`Will install ${dep.name} package`);
+          this.server.log.debug(`Will install ${dep.name} package`);
           await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
-          console.log(`Finished ${dep.name} script`);
+          this.server.log.debug(`Finished ${dep.name} script`);
           break;
       }
 
     }
-    console.log('Finished installing deps');
+    this.server.log.debug('Finished installing deps');
   }
 
-  public boot({ server, ...options }: Options = {}): DepInstaller {
-    Object.keys(options).forEach(k => (this[k] = options[k] ));
+  public register(server: SQLToolsLanguageServer) {
+    this.server = this.server || server;
 
-    if (!this.server && server) {
-      this.server = this.server || server;
-      this.server.onRequest(InstallDep, this.onRequestToInstall);
-    }
+    this.server.addOnInitializeHook(({ initializationOptions }) => {
+      this.root = initializationOptions.extensionPath || __dirname;
+      return { capabilities: {} };
+    });
 
     try {
       fs.mkdirSync(path.join(this.root, 'node_modules'))
-    } catch (error) {}
+    } catch (error) {};
 
-    return this;
+    this.server.onRequest(InstallDep, this.onRequestToInstall);
   }
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
@@ -117,13 +112,6 @@ export class DepInstaller {
     return this.npm(['--version']).then(({ stdout }) =>
       stdout.replace('\n', '')
     );
-  }
-  constructor(options: Options) {
-    if (DepInstaller.instance) {
-      DepInstaller.instance.boot(options);
-      return this;
-    }
-    DepInstaller.instance = this.boot(options);
   }
 
   public async install(args: string | string[], options: SpawnOptions = {}) {

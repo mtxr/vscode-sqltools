@@ -1,12 +1,14 @@
 import { window as Win } from 'vscode';
-import { Telemetry } from '@sqltools/core/utils';
-import Utils from '../api/utils';
-import { InstallDep, OpenConnectionRequest } from '@sqltools/core/contracts/connection-requests';
+import Utils from '@sqltools/extension/api/utils';
+import { OpenConnectionRequest } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
-import { SQLToolsLanguageClient } from '.';
+import { InstallDep } from '@sqltools/plugins/dependency-manager/contracts';
+import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 
-export default class AutoInstaller {
-  constructor(public client: SQLToolsLanguageClient, public telemetry: Telemetry) {
+export default class DependencyManger implements LanguageClientPlugin {
+  public client: SQLToolsLanguageClientInterface;
+  register(client: SQLToolsLanguageClientInterface) {
+    this.client = client;
     this.registerEvents();
   }
 

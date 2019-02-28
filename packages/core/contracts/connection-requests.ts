@@ -53,13 +53,6 @@ export const GetTablesAndColumnsRequest = new RequestType<
   void
 >('connection/getTableAndColumns');
 
-export const InstallDep = new RequestType<
-  { dialect: ConnectionInterface['dialect'] },
-  void,
-  Error,
-  void
->('dep/install');
-
 export const ExportResults = new RequestType<
   { connId: string, filename: string, query: string, filetype: 'json' | 'csv' },
   void,

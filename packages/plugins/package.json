@@ -1,0 +1,14 @@
+{
+  "name": "@sqltools/plugins",
+  "version": "1.0.0",
+  "description": "SQLTools Plugins",
+  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "license": "GPL-3.0",
+  "private": true,
+  "dependencies": {
+    "@sqltools/core": "*"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.3"
+  }
+}

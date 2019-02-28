@@ -42,7 +42,7 @@ import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
-import { SQLToolsLanguageClient } from './language-client';
+import LC from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
 
 namespace SQLTools {
@@ -65,7 +65,6 @@ namespace SQLTools {
   let queryResults: ResultsWebview;
   let bookmarks: BookmarksStorage;
   let history: History;
-  let languageClient: SQLToolsLanguageClient;
   let activationTimer: Timer;
 
   export async function start(context: ExtensionContext): Promise<void> {
@@ -166,7 +165,7 @@ namespace SQLTools {
       return;
     }
 
-    return languageClient.sendRequest(CloseConnectionRequest, { conn })
+    return LC().sendRequest(CloseConnectionRequest, { conn })
       .then(async () => {
         logger.info('Connection closed!');
         connectionExplorer.disconnect(conn as ConnectionInterface);
@@ -274,7 +273,7 @@ namespace SQLTools {
   }
 
   export function cmdRefreshSidebar() {
-    languageClient.sendRequest(RefreshConnectionData);
+    LC().sendRequest(RefreshConnectionData);
   }
 
   export async function cmdExportResults(filetype: 'csv' | 'json') {
@@ -289,7 +288,7 @@ namespace SQLTools {
    */
 
   async function connectionMenu(onlyActive = false): Promise<ConnectionInterface> {
-    const connections: ConnectionInterface[] = await languageClient.sendRequest(ClientRequestConnections);
+    const connections: ConnectionInterface[] = await LC().sendRequest(ClientRequestConnections);
 
     const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
 
@@ -333,7 +332,7 @@ namespace SQLTools {
   }
 
   function runConnectionCommand(command, ...args) {
-    return languageClient.sendRequest(RunCommandRequest, { conn: connectionExplorer.getActive(), command, args });
+    return LC().sendRequest(RunCommandRequest, { conn: connectionExplorer.getActive(), command, args });
   }
 
   async function runQuery(query, addHistory = true) {
@@ -374,7 +373,7 @@ namespace SQLTools {
   }
 
   async function getConnData(conn: ConnectionInterface) {
-    return await languageClient.sendRequest(GetTablesAndColumnsRequest, { conn });
+    return await LC().sendRequest(GetTablesAndColumnsRequest, { conn });
   }
 
   async function autoConnectIfActive(currConn?: ConnectionInterface) {
@@ -463,7 +462,7 @@ namespace SQLTools {
   async function registerExtension() {
     connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     const languageServerDisposable = await getLanguageServerDisposable();
-    queryResults = new ResultsWebview(languageClient, connectionExplorer);
+    queryResults = new ResultsWebview(LC(), connectionExplorer);
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
@@ -482,7 +481,7 @@ namespace SQLTools {
   }
 
   async function registerLanguageServerRequests() {
-    languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
+    LC().onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
       connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
       if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
         connectionExplorer.setActiveConnection();
@@ -504,7 +503,7 @@ namespace SQLTools {
     if (c) {
       if (c.askForPassword) password = await askForPassword(c);
       if (c.askForPassword && password === null) return;
-      c = await languageClient.sendRequest(
+      c = await LC().sendRequest(
         OpenConnectionRequest,
         { conn: c, password },
       );
@@ -516,7 +515,7 @@ namespace SQLTools {
   }
 
   async function askForPassword(c: ConnectionInterface): Promise<string | null> {
-    const cachedPass = await languageClient.sendRequest(GetCachedPassword, { conn: c });
+    const cachedPass = await LC().sendRequest(GetCachedPassword, { conn: c });
     return cachedPass || await Win.showInputBox({
       prompt: `${c.name} password`,
       password: true,
@@ -533,9 +532,7 @@ namespace SQLTools {
   }
 
   async function getLanguageServerDisposable() {
-    languageClient = new SQLToolsLanguageClient(ContextManager.context, telemetry);
-
-    return await languageClient.start();
+    return LC().start();
   }
 
   async function help() {

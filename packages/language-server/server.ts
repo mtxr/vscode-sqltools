@@ -1,321 +1,98 @@
 import {
-  CompletionItem, createConnection,
-  Disposable,
-  DocumentRangeFormattingRequest, IConnection, TextDocuments, InitializeParams, ProposedFeatures,
+  createConnection,
+  IConnection,
+  InitializeParams,
+  ProposedFeatures,
+  InitializedParams,
+  InitializeResult,
+  CancellationToken,
 } from 'vscode-languageserver';
 
-import Formatter from './requests/format';
-import * as Utils from '@sqltools/core/utils';
-import Connection from '@sqltools/core/connection';
-import ConfigManager from '@sqltools/core/config-manager';
-import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
-import {
-  UpdateConnectionExplorerRequest,
-  ClientRequestConnections,
-  OpenConnectionRequest,
-  RefreshConnectionData,
-  GetTablesAndColumnsRequest,
-  RunCommandRequest,
-  CloseConnectionRequest,
-  GetCachedPassword,
-  ExportResults,
-} from '@sqltools/core/contracts/connection-requests';
-import Notification from '@sqltools/core/contracts/notifications';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import ConnectionManager from '@sqltools/core/connection-manager';
-import store from './store';
-import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
-import { Telemetry, TelemetryArgs } from '@sqltools/core/utils';
-import { MissingModule } from '@sqltools/core/exception';
-import Notifications from '@sqltools/core/contracts/notifications';
-import { DepInstaller } from './dep-install/service';
-import fs from 'fs';
-import csvStringify from 'csv-stringify/lib/sync';
+import { Telemetry } from '@sqltools/core/utils';
+import { LanguageServerPlugin, Arg0, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
 
-namespace SQLToolsLanguageServer {
-  const server: IConnection = createConnection(ProposedFeatures.all);
-  const docManager: TextDocuments = new TextDocuments();
-  let formatterRegistration: Thenable<Disposable> | null = null;
-  let formatterLanguages: string[] = [];
-  let sgdbConnections: Connection[] = [];
-  let completionItems: CompletionItem[] = [];
-  let telemetry: Telemetry;
-  let extensionPath: string;
-  let depInstaller = new DepInstaller({ root: __dirname });
+class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
+  private _logger = new Telemetry({
+    enableTelemetry: false,
+    product: 'language-server',
+    useLogger: Logger,
+  });
+  private server: IConnection;
+  private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
+  private onInitializedHooks: Arg0<IConnection['onInitialized']>[] = [];
 
-  docManager.listen(server);
-
-  export function getServer() { return server; }
-
-  export function getStatus() {
-    return {
-      completionItems,
-      connections: sgdbConnections.map((c) => c.serialize()),
-      formatterLanguages,
-    };
-  }
-  /* internal functions */
-
-  function notifyError(message: string, error?: any): any {
-    const cb = (err: any = '') => {
-      Logger.error(message, err);
-      telemetry.registerException(err, { message, languageServer: true });
-      server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
-    }
-    if (typeof error !== 'undefined') return cb(error);
-    return cb;
+  constructor() {
+    this.server = createConnection(ProposedFeatures.all);
+    this.server.onInitialized(this.onInitialized);
+    this.server.onInitialize(this.onInitialize);
   }
 
-  function loadCompletionItens(tables, columns) {
-    completionItems = [];
-    completionItems.push(...tables.map((table) => TableCompletionItem(table)));
-    completionItems.push(...columns.map((col) => TableColumnCompletionItem(col)));
-    return completionItems;
-  }
+  private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
+    this._logger.registerInfoMessage(`Initialized with node version:${process.version}`);
 
-  async function loadConnectionData(conn: Connection) {
-    completionItems = [];
-    if (!conn) {
-      await updateSidebar(null, [], []);
-      return completionItems;
-    }
-    return Promise.all([conn.getTables(), conn.getColumns()])
-      .then(async ([t, c]) => {
-        await updateSidebar(conn.serialize(), t, c);
-        return loadCompletionItens(t, c);
-      }).catch(e => {
-        notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
-        throw e;
+    this.onInitializedHooks.forEach(hook => hook(params));
+  };
+
+  private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
+    if (params.initializationOptions.telemetry) {
+      this._logger.updateOpts({
+        product: 'language-server',
+        ...params.initializationOptions.telemetry,
       });
-  }
-
-  function updateSidebar(conn: ConnectionInterface, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
-    if (!conn) return Promise.resolve();
-    return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
-  }
-
-  /* server events */
-  server.onInitialize(({ initializationOptions = {} }: InitializeParams) => {
-    const telemetryArgs: TelemetryArgs = initializationOptions.telemetry || {
-      product: 'language-server'
     }
-    telemetry = new Telemetry(telemetryArgs);
 
-    extensionPath = initializationOptions.extensionPath;
-    depInstaller.boot({ root: extensionPath, server });
-    return {
-      capabilities: {
-        completionProvider: {
-          resolveProvider: true,
+    return this.onInitializeHooks
+      .reduce<InitializeResult>(
+        (opts, hook) => {
+          const result = hook(params, token) as InitializeResult;
+          return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
         },
-        documentFormattingProvider: false,
-        documentRangeFormattingProvider: false,
-        textDocumentSync: docManager.syncKind,
-      },
-    };
-  });
+        { capabilities: {} }
+      );
+  };
 
-  server.onInitialized(() => {
-    Logger.log('Initialized', process.version, process.execPath);
-  });
+  public listen() {
+    this.server.listen();
+    return this;
+  }
 
-  server.onDidChangeConfiguration(async (change) => {
-    ConfigManager.setSettings(change.settings.sqltools);
-    if (ConfigManager.telemetry) telemetry.enable()
-    else telemetry.disable();
+  public registerPlugin(plugin: LanguageServerPlugin<SQLToolsLanguageServer>) {
+    plugin.register(this);
+    return this;
+  }
 
-    const oldLang = formatterLanguages.sort(Utils.sortText);
-    const newLang = ConfigManager.formatLanguages.sort(Utils.sortText);
-    const register = newLang.length > 0 && (!formatterRegistration || oldLang.join() !== newLang.join());
-    if (register) {
-      formatterLanguages = newLang.reduce((agg, language) => {
-        if (typeof language === 'string') {
-          agg.push({ language, scheme: 'untitled' });
-          agg.push({ language, scheme: 'file' });
-        } else {
-          agg.push(language);
-        }
-        return agg;
-      }, []);
-      if (formatterRegistration) (await formatterRegistration).dispose();
-      formatterRegistration = server.client.register(DocumentRangeFormattingRequest.type, {
-        documentSelector: formatterLanguages,
-      }).then((a) => a, error => notifyError('formatterRegistration error', error));
-    } else if (formatterRegistration) {
-      (await formatterRegistration).dispose();
-    }
-    sgdbConnections = ConnectionManager.getConnections(telemetry);
-  });
+  public get sendNotification(): IConnection['sendNotification'] {
+    return this.sendNotification;
+  }
+  public get onNotification(): IConnection['onNotification'] {
+    return this.onNotification;
+  }
 
-  /* Requests */
-  server.onDocumentFormatting((params) => Formatter(docManager, params));
-  server.onDocumentRangeFormatting((params) => Formatter(docManager, params));
+  public get onRequest(): IConnection['onRequest'] {
+    return this.onRequest;
+  }
 
-  // server.onCompletion((pos: TextDocumentPositionParams): CompletionItem[] => {
-  server.onCompletion((): CompletionItem[] => {
-    // const { textDocument, position } = pos;
-    // const doc = docManager.get(textDocument.uri);
-    if (!store.getState().activeConnections) return [];
-    return completionItems;
-  });
+  public get sendRequest(): IConnection['sendRequest'] {
+    return this.sendRequest;
+  }
 
-  server.onCompletionResolve((item: CompletionItem): CompletionItem => {
-    return item;
-  });
+  public addOnInitializeHook(hook: Arg0<IConnection['onInitialize']>) {
+    this.onInitializeHooks.push(hook);
+    return this;
+  }
 
-  /* Custom Requests */
-  server.onRequest(ClientRequestConnections, () => {
-    return sgdbConnections.map((c) => c.serialize())
-      .sort((a, b) => {
-        if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
-        if (a.isConnected && !b.isConnected) return -1;
-        if (!a.isConnected && b.isConnected) return 1;
-      });
-  });
+  public addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>) {
+    this.onInitializedHooks.push(hook);
+    return this;
+  }
 
-  server.onRequest(
-    OpenConnectionRequest,
-    async (req: { conn: ConnectionInterface, password?: string }
-  ): Promise<ConnectionInterface> => {
-    if (!req.conn) {
-      return undefined;
-    }
-    const c = sgdbConnections.find((conn) => conn.getId() === Utils.getDbId(req.conn));
-    if (!c) return null;
+  public get log() {
+    return this._logger.log;
+  }
 
-    if (req.password) c.setPassword(req.password);
-    return c.connect()
-    .then(async () => {
-      await loadConnectionData(c);
-      store.dispatch(actions.Connect(c));
-      return c.serialize();
-    })
-    .catch(e => {
-      if (e instanceof MissingModule) {
-        server.sendNotification(Notifications.MissingModule, {
-          conn: c.serialize(),
-          moduleName: e.moduleName,
-          moduleVersion: e.moduleVersion,
-        });
-        return c.serialize();
-      }
-      throw e;
-    });
-  });
-
-  server.onRequest(
-    GetCachedPassword,
-    async (req: { conn: ConnectionInterface }): Promise<string> => {
-    if (!req.conn) {
-      return undefined;
-    }
-    const c = sgdbConnections.find((conn) => conn.getId() === Utils.getDbId(req.conn));
-    if (c && store.getState().activeConnections[c.getId()]) {
-      return store.getState().activeConnections[c.getId()].getPassword();
-    }
-    return null;
-  });
-
-  server.onRequest(
-    CloseConnectionRequest,
-    async (req: { conn: ConnectionInterface }): Promise<void> => {
-    if (!req.conn) {
-      return undefined;
-    }
-    const c = sgdbConnections.find((conn) => conn.getName() === req.conn.name);
-    await c.close().catch(notifyError('Connection Error'));
-    store.dispatch(actions.Disconnect(c));
-    req.conn.isConnected = false;
-    await updateSidebar(req.conn, null, null);
-  });
-
-  server.onRequest(RefreshConnectionData, async () => {
-    const activeConnections = store.getState().activeConnections;
-    await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
-  });
-
-  server.onRequest(GetTablesAndColumnsRequest, async ({ conn }) => {
-    if (!conn) {
-      return undefined;
-    }
-    const c = sgdbConnections.find((c) => c.getId() === Utils.getDbId(conn));
-    const { activeConnections } = store.getState();
-    if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
-    return { tables: await c.getTables(true), columns: await c.getColumns(true) };
-  });
-
-  server.onRequest(RunCommandRequest, async (req: {
-    conn: ConnectionInterface,
-    command: string,
-    args: any[],
-  }) => {
-    try {
-      const c = sgdbConnections.find((c) => c.getName() === req.conn.name);
-      if (!c) throw 'Connection not found';
-      const results: DatabaseInterface.QueryResults[] = (await c[req.command](...req.args));
-      results.forEach((r) => {
-        store.dispatch(actions.QuerySuccess(c, r.query, r));
-      });
-      return results;
-    } catch (e) {
-      notifyError('Execute query error', e);
-      throw e;
-    }
-  });
-
-  server.onRequest(ExportResults, ({ connId, filename, query, filetype = 'csv' }) => {
-    const { queryResults } = store.getState();
-    const { results, cols } = queryResults[connId][query];
-    let output = '';
-    if (filetype === 'json') {
-      output = JSON.stringify(results, null, 2);
-    } else if (filetype === 'csv') {
-      output = csvStringify(results, {
-        columns: cols,
-        header: true,
-        quoted_string: true,
-        quoted_empty: true
-      });
-    }
-    fs.writeFileSync(filename, output);
-  });
-
-  const nodeExit = process.exit;
-  process.exit = ((code?: number): void => {
-    const stack = new Error('stack');
-    server.sendNotification(Notification.ExitCalled, [code ? code : 0, stack.stack]);
-    setTimeout(() => {
-      nodeExit(code);
-    }, 1000);
-  }) as any;
-  process.on('uncaughtException', (error: any) => {
-    let message: string;
-    if (error) {
-      telemetry.registerException(error, { type: 'uncaughtException' })
-      if (typeof error.stack === 'string') {
-        message = error.stack;
-      } else if (typeof error.message === 'string') {
-        message = error.message;
-      } else if (typeof error === 'string') {
-        message = error;
-      }
-      if (!message) {
-        try {
-          message = JSON.stringify(error, undefined, 4);
-        } catch (e) {
-          // Should not happen.
-        }
-      }
-    }
-    Logger.error('Uncaught exception received.');
-    if (message) {
-      Logger.error(message);
-    }
-  });
-
-  export function listen() {
-    return server.listen();
+  public get logger() {
+    return this._logger;
   }
 }
 

@@ -4,7 +4,9 @@ import { VERSION, ENV, AI_KEY, EXT_NAME } from '@sqltools/core/constants';
 import Timer from './timer';
 import { ifProp } from './decorators';
 import { LoggerInterface } from '@sqltools/core/interface';
-type Product = 'core' | 'extension' | 'language-server' | 'ui';
+
+type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
+
 export interface VSCodeInfo {
   uniqId?: string;
   sessId?: string;
@@ -20,11 +22,11 @@ export interface TelemetryArgs {
 
 export class Telemetry {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
-  private enabled: Boolean;
-  private logger: LoggerInterface = console;
+  public static enabled: Boolean;
+  public static vscodeInfo: VSCodeInfo;
+  public static logger: LoggerInterface = console;
   private client: AI.TelemetryClient;
   private product: Product;
-  private vscodeInfo: VSCodeInfo;
   private prefixed(key: string) {
     return `${this.product}:${key}`;
   }
@@ -48,10 +50,10 @@ export class Telemetry {
     aiCtx.tags[aiCtx.keys.internalSdkVersion] = `node:${AIVersion}`;
     aiCtx.tags[aiCtx.keys.deviceType] = this.product;
 
-    if (this.vscodeInfo) {
-      aiCtx.tags[aiCtx.keys.userId] = this.vscodeInfo.uniqId;
-      aiCtx.tags[aiCtx.keys.deviceId] = this.vscodeInfo.uniqId;
-      aiCtx.tags[aiCtx.keys.sessionId] = this.vscodeInfo.sessId;
+    if (Telemetry.vscodeInfo) {
+      aiCtx.tags[aiCtx.keys.userId] = Telemetry.vscodeInfo.uniqId;
+      aiCtx.tags[aiCtx.keys.deviceId] = Telemetry.vscodeInfo.uniqId;
+      aiCtx.tags[aiCtx.keys.sessionId] = Telemetry.vscodeInfo.sessId;
 
     }
 
@@ -70,11 +72,11 @@ export class Telemetry {
       'common.extname': EXT_NAME,
       'common.extversion': VERSION,
       'common.nodeversion': process.version,
-      ...(this.vscodeInfo
+      ...(Telemetry.vscodeInfo
         ? {
-            'common.vscodeuniqid': this.vscodeInfo.uniqId,
-            'common.vscodesessid': this.vscodeInfo.sessId,
-            'common.vscodeversion': this.vscodeInfo.version
+            'common.vscodeuniqid': Telemetry.vscodeInfo.uniqId,
+            'common.vscodesessid': Telemetry.vscodeInfo.sessId,
+            'common.vscodeversion': Telemetry.vscodeInfo.version
           }
         : {})
     };
@@ -86,8 +88,8 @@ export class Telemetry {
   }
 
   public updateOpts(opts: TelemetryArgs) {
-    this.product = opts.product;
-    this.vscodeInfo = opts.vscodeInfo || {};
+    this.product = opts.product || this.product;
+    Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
     const { enableTelemetry, useLogger } = opts;
     this.setLogger(useLogger);
     if (enableTelemetry) this.enable();
@@ -95,21 +97,21 @@ export class Telemetry {
   }
 
   public enable(): void {
-    if (this.enabled) return;
-    this.enabled = true;
+    if (Telemetry.enabled) return;
+    Telemetry.enabled = true;
     this.logger.info('Telemetry enabled!');
     this.createClient();
     this.registerSession();
   }
   public disable(): void {
-    if (!this.enabled) return;
-    this.enabled = false;
+    if (!Telemetry.enabled) return;
+    Telemetry.enabled = false;
     AI.dispose();
     this.logger.info('Telemetry disabled!');
     this.client = undefined;
   }
   public setLogger(useLogger: LoggerInterface = console) {
-    this.logger = useLogger;
+    Telemetry.logger = useLogger;
   }
 
   @ifProp('client')
@@ -125,7 +127,6 @@ export class Telemetry {
   @ifProp('client')
   public registerException(error: Error, meta: { [key: string]: any } = {}) {
     if (!error) return;
-    this.logger.error('Registered exception: ', error, { meta });
     this.sendException(error, meta);
   }
 
@@ -152,6 +153,7 @@ export class Telemetry {
     message: string,
     value: string = 'Dismissed'
   ): void {
+    this.logger.debug(`Message: ${message}`);
     this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
   }
 
@@ -160,12 +162,13 @@ export class Telemetry {
     name: string,
     properties?: { [key: string]: string }
   ): void {
-    this.logger.info(`Event ${name}`);
+    this.logger.debug(`Event: ${name}`, properties || '');
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 
   @ifProp('client')
   private sendException(error: Error, properties: { [key: string]: any } = {}) {
+    this.logger.error('Error: ', error);
     this.client.trackException({
       exception: error,
       contextObjects: properties,
@@ -184,6 +187,14 @@ export class Telemetry {
       name,
       value
     });
+  }
+
+  public get log () {
+    return this.logger;
+  }
+
+  public get logger () {
+    return Telemetry.logger;
   }
 }
 

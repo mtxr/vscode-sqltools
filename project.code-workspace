@@ -21,6 +21,10 @@
       "name": "ui"
     },
     {
+      "path": "./packages/plugins",
+      "name": "plugins"
+    },
+    {
       "path": "./docs",
       "name": "docs"
     }
