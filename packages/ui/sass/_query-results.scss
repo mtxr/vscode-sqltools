@@ -135,6 +135,7 @@ body, #root {
     font-size: 0.8em;
     cursor: pointer;
     flex-grow: 1;
+    max-width: 350px;
   }
 }
 
@@ -202,11 +203,13 @@ body, #root {
   li {
     border-color: $lightThemeGray1 !important;
 
-    &:hover, &.active {
-      background: $lightThemeGray1 !important;
+    &:hover {
+      background: $lightThemeGray3 !important;
     }
     &.active {
       font-weight: bold;
+      background: $lightThemeGray1 !important;
+      cursor: initial;
     }
   }
 }
@@ -225,7 +228,10 @@ body.vscode-dark {
     border-bottom-color: $darkThemeWhite1 !important;
     li {
       border-color: $darkThemeWhite1 !important;
-      &:hover, &.active {
+      &:hover {
+        background: $darkThemeWhite3 !important;
+      }
+      &.active {
         background: $darkThemeWhite1 !important;
       }
     }
@@ -331,6 +337,40 @@ div mark {
   }
 }
 
-.ReactTable .rt-tr-group {
-  flex-grow: 0;
+.text-right {
+  text-align: right;
+}
+
+.text-center {
+  text-align: center;
+}
+.ReactTable {
+  .rt-tr-group {
+    flex-grow: 0;
+  }
+  .rt-tbody {
+    overflow: hidden;
+    overflow-y: auto;
+  }
+  .rt-tbody .rt-td {
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+  }
+  .rt-tbody .rt-tr-group {
+    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+  }
+
+  .rt-thead {
+    border-bottom: solid 1px rgba(0, 0, 0, 0.1);
+    &.-filters {
+      top: 35px;
+      height: 42px;
+    }
+    .rt-th, .rt-td {
+      border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
+      outline: none;
+    }
+  }
+  .rt-tr > :last-child {
+    padding-right: 14px;
+  }
 }

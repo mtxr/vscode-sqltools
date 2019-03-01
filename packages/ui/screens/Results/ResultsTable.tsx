@@ -1,5 +1,5 @@
 import React from 'react';
-import ReactTable, { ReactTableDefaults, GlobalColumn } from 'react-table';
+import ReactTable, { ReactTableDefaults, GlobalColumn, Column } from 'react-table';
 
 const FilterComponent = ({ filter, column, onChange }) => {
   return (
@@ -12,6 +12,30 @@ const FilterComponent = ({ filter, column, onChange }) => {
     />
   );
 };
+
+// @TODO: use the real column types here instead of a sample;
+const getSizeForItem = (colname: string, sample: any): Column => {
+  const props: Column = {
+    Header: colname,
+    accessor: colname,
+  };
+  if (typeof sample === 'undefined') {
+    props.width = 100;
+  } else if (
+    sample instanceof Date
+    || typeof sample === 'string'
+  ) {
+    props.width = 200;
+  } else if (typeof sample === 'number') {
+    props.width = 100;
+    props.className = 'text-right';
+  } else if (typeof sample === 'boolean') {
+    props.width = 50;
+    props.className = 'text-center';
+  }
+
+  return props;
+}
 
 interface ResultsTableProps {
   cols: string[];
@@ -60,12 +84,11 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   };
 
   render() {
-    const cols = this.props.cols.map(c => {
-      return {
-        Header: c,
-        accessor: c,
-      };
-    });
+    const firstRow = (this.props.data[0] || {});
+    const cols = this.props.cols.map<Column>(c => getSizeForItem(c, firstRow[c]));
+    if (cols.length > 0 && cols.length < 8) {
+      delete cols[0].width;
+    }
     return (
       <ReactTable
         noDataText="Query didn't return any results."
@@ -75,8 +98,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         filterable
         FilterComponent={FilterComponent}
         showPagination={this.props.data.length > this.props.paginationSize}
-        minRows={Math.min(this.props.paginationSize, this.props.data.length + 1)}
-        {...{ minResizeWidth: 11 }}
+        minRows={Math.min(this.props.paginationSize, this.props.data.length)}
         getTdProps={(_, rowInfo, column) => {
           try {
             const v = rowInfo.original[column.id];
