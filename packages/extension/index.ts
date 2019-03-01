@@ -134,8 +134,9 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdAppendToCursor(node: SidebarDatabaseItem): Promise<void> {
-    return insertText(node.value);
+  export async function cmdAppendToCursor(node: SidebarDatabaseItem | string, ...rest: any): Promise<void> {
+    if (!node) return;
+    return insertText(typeof node === 'string' ? node : node.value);
   }
 
   export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {

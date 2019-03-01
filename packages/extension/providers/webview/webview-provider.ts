@@ -46,12 +46,10 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           retainContextWhenHidden: true,
           enableCommandUris: true,
           localResourceRoots: [ContextManager.iconsPath, ContextManager.viewsPath],
+          enableFindWidget: true,
         },
       );
-      this.panel.iconPath = {
-        dark: Uri.file(ContextManager.context.asAbsolutePath('icons/database-dark.svg')),
-        light: Uri.file(ContextManager.context.asAbsolutePath('icons/database-light.svg')),
-      };
+      this.panel.iconPath = Uri.parse(ContextManager.context.asAbsolutePath('icons/database-active.svg'));
       this.panel.onDidDispose(this.dispose);
       this.disposables.push(Disposable.from(this.panel));
 

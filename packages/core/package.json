@@ -7,6 +7,7 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
+    "@mysql/xdevapi": "^8.0.15",
     "applicationinsights": "^1.1.0",
     "command-exists": "^1.2.8",
     "mssql": "^4.3.1",

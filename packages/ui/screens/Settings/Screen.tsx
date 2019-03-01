@@ -432,6 +432,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           </div>
         </form>
         <Loading active={this.state.loading} />
+        {/* <a href={encodeURI(`command:sqltools.appendToCursor?${JSON.stringify('node:ok')}`)}>Connect</a> */}
       </div>
     );
   }

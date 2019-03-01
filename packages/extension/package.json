@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.16.11",
+    "version": "0.17.0",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -543,59 +543,54 @@
             ],
             "view/item/context": [
                 {
+                    "command": "SQLTools.appendToCursor",
+                    "when": "(!editorIsOpen || !editorReadonly) && view == SQLTools.tableExplorer && viewItem != connection.schema_group && !sqltools.Results.active",
+                    "group": "navigation"
+                },
+                {
                     "command": "SQLTools.selectConnection",
                     "when": "view == SQLTools.tableExplorer && viewItem == connection",
                     "group": "sqltools.dbExplorer@0"
                 },
                 {
-                    "command": "SQLTools.selectConnection",
-                    "when": "view == SQLTools.tableExplorer && viewItem == connection",
-                    "group": "inline@0"
-                },
-                {
                     "command": "SQLTools.closeConnection",
                     "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
                     "group": "sqltools.dbExplorer@0"
-                },
-                {
-                    "command": "SQLTools.closeConnection",
-                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
-                    "group": "inline@0"
-                },
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group",
-                    "group": "sqltools.dbExplorer@1"
-                },
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group",
-                    "group": "inline@3"
-                },
-                {
-                    "command": "SQLTools.describeTable",
-                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@3"
                 },
                 {
                     "command": "SQLTools.showRecords",
                     "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@4"
+                    "group": "sqltools.dbExplorer@1"
+                },
+                {
+                    "command": "SQLTools.describeTable",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "group": "sqltools.dbExplorer@2"
+                },
+                {
+                    "command": "SQLTools.generateInsertQuery",
+                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "group": "sqltools.dbExplorer@3"
+                },
+                {
+                    "command": "SQLTools.selectConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "SQLTools.generateInsertQuery",
+                    "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "group": "inline@0"
                 },
                 {
                     "command": "SQLTools.showRecords",
                     "when": "view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "inline@1"
-                },
-                {
-                    "command": "SQLTools.generateInsertQuery",
-                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@5"
-                },
-                {
-                    "command": "SQLTools.generateInsertQuery",
-                    "when": "editorIsOpen && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
-                    "group": "inline@2"
                 }
             ],
             "editor/title": [
