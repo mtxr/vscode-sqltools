@@ -479,9 +479,9 @@
                 },
                 "sqltools.defaultExportType": {
                     "type": "string",
-                    "enum": ["csv", "json"],
-                    "default": "csv",
-                    "description": "Default mode to export results"
+                    "enum": ["prompt", "csv", "json"],
+                    "default": "prompt",
+                    "description": "Default export results mode."
                 }
             }
         },

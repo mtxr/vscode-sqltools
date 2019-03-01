@@ -278,10 +278,20 @@ namespace SQLTools {
   }
 
   export async function cmdExportResults(filetype: 'csv' | 'json') {
-    if (typeof filetype === 'string')
-      return queryResults.exportResults(filetype);
+    filetype = typeof filetype === 'string' ? filetype : undefined;
+    let mode: any = filetype || ConfigManager.defaultExportType;
+    if (mode === 'prompt') {
+      mode = await quickPick<'csv' | 'json' | undefined>([
+        { label: 'Export as CSV', value: 'csv' },
+        { label: 'Export as JSON', value: 'json' },
+      ], 'value', {
+        title: 'Select a file type to export',
+      });
+    }
 
-    return queryResults.exportResults(ConfigManager.defaultExportType);
+    if (!mode) return;
+
+    return queryResults.exportResults(mode);
   }
 
   /**
@@ -310,6 +320,16 @@ namespace SQLTools {
       placeHolder: 'Pick a connection',
       placeHolderDisabled: 'You don\'t have any connections yet.',
       title: 'Connections',
+      buttons: [
+        {
+          iconPath: {
+            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
+            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
+          },
+          tooltip: ' Add new Connection',
+          cb: cmdAddNewConnection,
+        } as any,
+      ],
     })) as string;
     return connections.find((c) => getDbId(c) === sel);
   }
@@ -601,14 +621,20 @@ namespace SQLTools {
   type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<QuickPickOptions & {
     title: QuickPick<T>['title'];
     placeHolderDisabled?: QuickPick<T>['placeholder'];
+    buttons?: QuickPick<T>['buttons'],
   }>;
 
-  async function quickPick(
-    options: QuickPickItem[],
+  async function quickPick<T = QuickPickItem | any>(
+    options: ((QuickPickItem & { value?: any }) | string)[],
     prop?: string,
     quickPickOptions?: ExtendedQuickPickOptions,
   ): Promise<QuickPickItem | any> {
-    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(options, prop);
+    const items = options.length > 0 && typeof options[0] === 'object' ? <QuickPickItem[]>options : options.map<QuickPickItem>(value => ({
+      value,
+      label: value.toString(),
+    }));
+
+    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(items, prop);
 
     const qPick = Win.createQuickPick();
     const sel = await (new Promise<QuickPickItem | any>((resolve) => {
@@ -626,27 +652,17 @@ namespace SQLTools {
       Object.keys(qPickOptions).forEach(k => {
         qPick[k] = qPickOptions[k];
       });
-      qPick.items = options;
-      qPick.enabled = options.length > 0;
-      qPick.buttons = [
-        {
-          iconPath: {
-            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
-            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
-          },
-          tooltip: ' Add new Connection',
-          cb: cmdAddNewConnection,
-        } as any,
-      ];
+      qPick.items = items;
+      qPick.enabled = items.length > 0;
 
       if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 
-      qPick.title = `${qPick.title || 'Items'} (${options.length})`;
+      qPick.title = `${qPick.title || 'Items'} (${items.length})`;
 
       qPick.show();
     }));
     if (!sel || (prop && !sel[prop])) throw new DismissedException();
-    return prop ? sel[prop] : sel;
+    return <T>(prop ? sel[prop] : sel);
   }
 
   async function readInput(prompt: string, placeholder?: string) {
