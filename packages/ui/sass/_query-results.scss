@@ -324,13 +324,9 @@ div mark {
 
 .rt-td.td-icon {
   &.green:before {
-    background: green;
+    background: #00b159;
   }
   &.red:before {
-    background: red;
+    background: #d11141;
   }
-}
-
-.ReactTable .rt-tr-group {
-  flex: initial;
 }
