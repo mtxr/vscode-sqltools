@@ -275,13 +275,13 @@ namespace SQLTools {
     languageClient.sendRequest(RefreshConnectionData);
   }
 
-  export async function cmdExportResults(filetype: 'csv' | 'json') {
+  export async function cmdSaveResults(filetype: 'csv' | 'json') {
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
     if (mode === 'prompt') {
       mode = await quickPick<'csv' | 'json' | undefined>([
-        { label: 'Export as CSV', value: 'csv' },
-        { label: 'Export as JSON', value: 'json' },
+        { label: 'Save as CSV', value: 'csv' },
+        { label: 'Save as JSON', value: 'json' },
       ], 'value', {
         title: 'Select a file type to export',
       });
@@ -289,7 +289,7 @@ namespace SQLTools {
 
     if (!mode) return;
 
-    return queryResults.exportResults(mode);
+    return queryResults.saveResults(mode);
   }
 
   /**

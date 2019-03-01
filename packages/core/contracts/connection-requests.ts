@@ -60,7 +60,7 @@ export const InstallDep = new RequestType<
   void
 >('dep/install');
 
-export const ExportResults = new RequestType<
+export const SaveResults = new RequestType<
   { connId: string, filename: string, query: string, filetype: 'json' | 'csv' },
   void,
   Error,

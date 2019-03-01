@@ -374,3 +374,37 @@ div mark {
     padding-right: 14px;
   }
 }
+
+.context-menu {
+  background: var(--vscode-menu-background);
+  position: absolute;
+  box-shadow: 0px 2px 2px 1px $lightThemeGray12;
+  padding: 4px 0px;
+  overflow: hidden;
+
+  .context-menu-option {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 4px 24px;
+    color: var(--vscode-menu-foreground);
+    &:hover {
+      background: var(--vscode-menu-selectionBackground);
+      color: var(--vscode-menu-selectionForeground);
+    }
+  }
+  .context-menu-separator {
+    display: block;
+    margin: 4px 0px;
+    height: 1px;
+    background: var(--vscode-menu-separatorBackground);
+    opacity: 0.5;
+  }
+}
+
+.active-row {
+  background: var(--vscode-editor-inactiveSelectionBackground) !important;
+}
+.active-cell {
+  background: var(--vscode-editor-selectionHighlightBackground) !important;
+}

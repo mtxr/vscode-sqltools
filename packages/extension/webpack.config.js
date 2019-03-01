@@ -108,9 +108,8 @@ module.exports = function (env = {}) {
       __dirname: false
     };
     config.devtool = !env.production ? 'inline-source-map' : 'source-map';
-    config.optimization = env.production ? {
-      minimize: false,
-    } : undefined;
+    config.optimization = config.optimization || {};
+    config.optimization.minimize = false;
     return config;
   });
 };

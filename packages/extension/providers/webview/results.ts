@@ -1,6 +1,6 @@
 import WebviewProvider from './webview-provider';
 import { SQLToolsLanguageClient } from '@sqltools/extension/language-client';
-import { ExportResults } from '@sqltools/core/contracts/connection-requests';
+import { SaveResults } from '@sqltools/core/contracts/connection-requests';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
 import { ConnectionExplorer } from '../connection-explorer';
@@ -13,7 +13,7 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     super();
   }
 
-  public async exportResults(filetype: 'csv' | 'json' = 'csv') {
+  public async saveResults(filetype: 'csv' | 'json' = 'csv') {
     const { connId, activeTab } = await this.getState();
     let filters = undefined;
 
@@ -32,7 +32,7 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     });
     if (!file) return;
     const filename = file.fsPath;
-    await this.client.sendRequest(ExportResults, { connId, query: activeTab, filename, filetype });
+    await this.client.sendRequest(SaveResults, { connId, query: activeTab, filename, filetype });
     return vscode.commands.executeCommand('vscode.open', file);
   }
 

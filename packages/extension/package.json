@@ -211,8 +211,8 @@
                 }
             },
             {
-                "title": "Export to Results",
-                "command": "SQLTools.exportResults",
+                "title": "Save query results",
+                "command": "SQLTools.saveResults",
                 "category": "SQLTools Results",
                 "icon": {
                     "light": "icons/save-light.svg",
@@ -513,7 +513,7 @@
                     "when": "false"
                 },
                 {
-                    "command": "SQLTools.exportResults",
+                    "command": "SQLTools.saveResults",
                     "when": "sqltools.Results.active"
                 },
                 {
@@ -600,7 +600,7 @@
             ],
             "editor/title": [
                 {
-                    "command": "SQLTools.exportResults",
+                    "command": "SQLTools.saveResults",
                     "group": "navigation",
                     "when": "sqltools.Results.active"
                 }

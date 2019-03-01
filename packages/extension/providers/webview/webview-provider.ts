@@ -52,7 +52,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         dark: Uri.file(ContextManager.context.asAbsolutePath('icons/database-dark.svg')),
         light: Uri.file(ContextManager.context.asAbsolutePath('icons/database-light.svg')),
       };
-      this.panel.onDidDispose(this.dispose.bind(this));
+      this.panel.onDidDispose(this.dispose);
       this.disposables.push(Disposable.from(this.panel));
 
       this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables);
@@ -90,7 +90,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.setPreviewActiveContext(false);
     this.panel.dispose();
   }
-  public dispose() {
+  public dispose = () => {
     if (this.disposables.length) this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
     this.panel = undefined;

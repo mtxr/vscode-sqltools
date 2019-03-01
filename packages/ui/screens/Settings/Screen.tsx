@@ -287,7 +287,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     });
   }
 
-  public focusField(field) {
+  public focusField = (field) => {
     try {
       document.getElementById(field).focus();
     } catch (e) { /**/ }
@@ -366,11 +366,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         <FieldWrapper field={field} key={i} i={i} component={formField} />
       );
     });
-    const connInfo = JSON.stringify(this.getParsedFormData(), null, 2 )
-      .replace(/( *)(".+") *:/g, '$1<span class="key">$2</span>:')
-      .replace(/: *(".+")/g, ': <span class="string">$1</span>')
-      .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
-      .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
+
     return (
       <div className='fullscreen-container'>
         <form onSubmit={this.handleSubmit} className='container'>
@@ -411,7 +407,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             </div>
             <div className='col-6'>
               <div><h5 className='no-margin-top'>Preview</h5></div>
-              <Syntax code={connInfo} language='json'/>
+              <Syntax code={this.getParsedFormData()} language='json'/>
               {Object.keys(this.state.errors).length ? (
                 <div>
                   <h5>Validations</h5>
@@ -420,7 +416,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                       return (
                         <div
                           key={k}
-                          onClick={this.focusField.bind(this, `input-${f}`)}
+                          onClick={() => this.focusField(`input-${f}`)}
                           className='message error pointer'
                           dangerouslySetInnerHTML={{
                             __html: this.state.errors[f]
