@@ -5,6 +5,7 @@ import {
   TreeDataProvider,
   TreeView,
   TreeItem,
+  window,
 } from 'vscode';
 import {
   SidebarColumn,
@@ -13,9 +14,9 @@ import {
   SidebarTable,
   SidebarView,
 } from './sidebar-provider/sidebar-tree-items';
-import { ConnectionCredentials, SerializedConnection, DatabaseInterface } from '@sqltools/core/interface';
-import { Logger, Utils } from '../api';
+import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import { getDbId } from '@sqltools/core/utils';
+import { EXT_NAME } from '@sqltools/core/constants';
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
 | SidebarColumn
@@ -23,18 +24,22 @@ export type SidebarDatabaseItem = SidebarConnection
 | SidebarDatabaseSchemaGroup;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
+  private treeView: TreeView<TreeItem>;;
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
   private tree: { [database: string]: SidebarConnection } = {};
-  constructor(private logger: Logger) { }
   public fireUpdate(): void {
     this.onDidChange.fire();
   }
-  public getActive(): SerializedConnection | null {
+  public getActive(): ConnectionInterface | null {
     const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
     if (!activeId) return null;
-    return this.tree[activeId].conn as SerializedConnection;
+
+    return {
+      ...this.tree[activeId].conn,
+      id: getDbId(this.tree[activeId].conn),
+    } as ConnectionInterface;
   }
 
   public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
@@ -66,7 +71,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.fireUpdate();
   }
 
-  public setConnections(connections: ConnectionCredentials[]) {
+  public setConnections(connections: (ConnectionInterface)[]) {
     const keys = [];
     let shouldUpdate = false;
     connections.forEach((conn) => {
@@ -89,10 +94,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 
   public setTreeData(
-    conn: SerializedConnection,
+    conn: ConnectionInterface,
     tables: DatabaseInterface.Table[],
     columns: DatabaseInterface.TableColumn[],
-    treeView: TreeView<TreeItem>,
   ) {
     if (!conn) return;
     const treeKey = this.getDbId(conn);
@@ -116,28 +120,31 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     });
     this.refresh();
     if (this.tree[treeKey].active && key)
-      treeView.reveal(this.tree[treeKey][key], { select: false, focus: false })
-        .then(Promise.resolve, Promise.resolve);
+      this.treeView.reveal(this.tree[treeKey][key], { select: false, focus: false });
   }
 
-  public setActiveConnection(c?: SerializedConnection) {
+  public setActiveConnection(c?: ConnectionInterface, reveal?: boolean) {
     const idActive = c ? this.getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
       if (id !== idActive) {
         return this.tree[id].deactivate();
       }
       this.tree[id].activate();
+      if (reveal) {
+        this.treeView.reveal(this.tree[id].tables, { select: false, focus: false });
+        this.treeView.reveal(this.tree[id]);
+      }
     });
     this.refresh();
   }
 
-  public disconnect(c: SerializedConnection) {
+  public disconnect(c: ConnectionInterface) {
     if (!this.tree[getDbId(c)]) return;
     this.tree[getDbId(c)].disconnect();
     this.refresh();
   }
 
-  private getDbId(c: SerializedConnection | ConnectionCredentials) {
+  private getDbId(c: ConnectionInterface) {
     return getDbId(c);
   }
 
@@ -146,6 +153,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       return obj;
     }
     return Object.keys(obj).map((k) => obj[k]);
+  }
+
+  constructor() {
+    this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this })
   }
 }
 

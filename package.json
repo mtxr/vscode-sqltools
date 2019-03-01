@@ -2,30 +2,30 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.16.9",
+  "version": "0.16.11",
   "publisher": "mtxr",
   "license": "GPL-3.0",
-  "main": "dist/extension.js",
+  "main": "../dist/extension.js",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"
   },
   "engines": {
-    "vscode": "^1.28.0"
+    "vscode": "^1.30.0"
   },
   "private": true,
   "workspaces": [
     "packages/*"
   ],
   "scripts": {
-    "clean": "rm -rf dist &> /dev/null",
+    "clean": "rm -rf ../dist &> /dev/null",
     "precompile": "yarn run clean",
-    "prewatch": "yarn run clean",
+    "prewatch": "yarn run clean && mkdir -p ../dist",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
-    "package:preview": "yarn run compile:preview && (cd dist && vsce package)",
-    "package": "yarn run compile && (cd dist && vsce package)",
-    "publish": "cd dist && vsce publish"
-   }
+    "package:preview": "yarn run compile:preview && (cd ../dist && vsce package --yarn)",
+    "package": "yarn run compile && (cd ../dist && vsce package --yarn)",
+    "publish": "cd ../dist && vsce publish --yarn"
+  }
 }

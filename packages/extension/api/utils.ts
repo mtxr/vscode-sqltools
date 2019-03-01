@@ -1,5 +1,10 @@
 import { VERSION } from '@sqltools/core/constants';
 import { read as readLocalConfig, write as writeLocalConfig } from '@sqltools/core/utils/persistence';
+import {
+  commands as VSCommands,
+  env as VSEnv,
+} from 'vscode';
+import { Uri } from 'vscode';
 
 let localSetupData: any;
 
@@ -58,6 +63,18 @@ namespace Utils {
     if (n.length >= 3) return n[0] * 10000 + n[1] * 100 + n[2];
     if (n.length === 2) return n[0] * 10000 + n[1] * 100;
     return n[0] * 10000;
+  }
+
+  export function open(url: string) {
+    if (VSEnv && typeof (VSEnv as any).open === 'function') {
+      return (VSEnv as any).open(Uri.parse(url));
+    }
+
+    return VSCommands.executeCommand('vscode.open', Uri.parse(url));
+  }
+
+  export function isEmpty(v) {
+    return !v || v.length === 0;
   }
 }
 

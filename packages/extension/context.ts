@@ -12,7 +12,7 @@ const Context = {
   set context(v: ExtensionContext) {
     context = v;
     iconsPath = Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
-    viewsPath = Uri.file(path.join(context.extensionPath, 'views')).with({ scheme: 'vscode-resource' });
+    viewsPath = Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   },
   get iconsPath() {
     return iconsPath;

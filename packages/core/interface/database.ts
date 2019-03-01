@@ -1,4 +1,3 @@
-// tslint:disable:no-namespace
 export namespace DatabaseInterface {
   export interface Database {
     name: string;
@@ -17,7 +16,7 @@ export namespace DatabaseInterface {
     columnName: string;
     type: string;
     size?: number;
-    tableSchema: string;
+    tableSchema?: string;
     tableDatabase?: string;
     tableCatalog?: string;
     defaultValue: string;

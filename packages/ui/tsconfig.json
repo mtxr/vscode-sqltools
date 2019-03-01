@@ -1,21 +1,22 @@
 {
   "compilerOptions": {
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "jsx": "react",
-    "baseUrl": ".",
-    "module": "commonjs",
-    "target": "es6",
     "allowSyntheticDefaultImports": true,
+    "baseUrl": ".",
     "esModuleInterop": true,
-    "outDir": "../dist/ui",
-    "sourceMap": true,
-    "lib": [
-      "es6", "dom"
-    ],
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "jsx": "react",
+    "lib": ["es6", "dom"],
+    "module": "commonjs",
+    "noEmit": true,
+    "outDir": "../../../dist/ui",
     "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "es6",
     "paths": {
       "@sqltools/ui/*": ["./*"]
     }
-  },
+  }
 }

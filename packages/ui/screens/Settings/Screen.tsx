@@ -1,4 +1,4 @@
-import React, { ReactElement, ReactNode, FormEvent, ChangeEventHandler } from 'react';
+import React, { ReactNode, FormEvent, ChangeEventHandler } from 'react';
 import {
   bool,
   gtz,
@@ -6,79 +6,21 @@ import {
   int,
   notEmpty,
   ValidationFunction,
-} from './../lib/utils';
-import Loading from './loading';
-import { VSCodeWebviewAPI, WebviewMessageType } from 'lib/interfaces';
-let vscode: VSCodeWebviewAPI;
-
-declare var acquireVsCodeApi: () => VSCodeWebviewAPI;
-
-function getVscode() {
-  vscode = vscode || acquireVsCodeApi();
-  return vscode as VSCodeWebviewAPI;
-}
+} from '../../lib/utils';
+import Loading from '../../components/Loading';
+import { WebviewMessageType } from 'lib/interfaces';
+import Syntax from '../../components/Syntax';
+import '../../sass/app.scss';
+import getVscode from '@sqltools/ui/lib/vscode';
 
 const dialectDefaultPorts = {
   MySQL: 3306,
   MSSQL: 1433,
   PostgreSQL: 5432,
   Firebird: 3050,
+  OracleDB: 1521,
+  SQLite: null
 };
-
-interface SyntaxProps {
-  language?: string;
-  code: string;
-}
-
-interface SyntaxState {
-  copyMsg: string;
-}
-class Syntax extends React.Component<SyntaxProps, SyntaxState> {
-  private id = `syntax-${(Math.random() * 1000).toFixed(0)}`;
-  private interval = null;
-
-  constructor(props) {
-    super(props);
-    this.state = {
-      copyMsg: 'Copy',
-    };
-  }
-  public copyCode(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    let msg = 'Copied!';
-    const range = document.createRange();
-    try {
-      range.selectNode(document.getElementById(this.id));
-      window.getSelection().addRange(range);
-      if (!document.execCommand('copy')) {
-        throw new Error('Failed!');
-      }
-    } catch (err) {
-      msg = 'Failed :(';
-    }
-    window.getSelection().removeRange(range);
-    this.setState({ copyMsg: msg }, () => {
-      clearTimeout(this.interval);
-      this.interval = setTimeout(() => {
-        this.setState({ copyMsg: 'Copy' });
-      }, 1000);
-    });
-    return false;
-  }
-  public render() {
-    return (
-      <div className='relative'>
-        <div
-          id={this.id}
-          className={`syntax ${this.props.language}`}
-          dangerouslySetInnerHTML={{ __html: this.props.code }}
-        ></div>
-        <button className='btn copy-code' type='button' onClick={this.copyCode.bind(this)}>{this.state.copyMsg}</button>
-      </div>
-    );
-  }
-}
 
 interface FieldWrapperProps {
   field: any; // to be defined
@@ -107,10 +49,10 @@ interface Field {
   values?: Array<string | { text: string; value: any }>;
   default?: any;
   type?: string;
-  check?: ValidationFunction[];
-  cb?: Function;
+  validators?: ValidationFunction[];
+  postUpdateHook?: Function;
   parse?: Function;
-  show?: string;
+  visible?: boolean;
 }
 
 interface SetupState {
@@ -128,16 +70,16 @@ storage.setItem = (key: string, value: string) => storage.data[key] = value;
 storage.getItem = (key: string) => storage.data[key];
 storage.removeItem = (key: string) => delete storage.data[key];
 
-export default class Setup extends React.Component<{}, SetupState> {
+export default class SettingsScreen extends React.Component<{}, SetupState> {
 
   public static storageKey = 'sqltools.setupConnection';
 
   public static saveLocal = (data) => {
-    storage.setItem(Setup.storageKey, JSON.stringify(data));
+    storage.setItem(SettingsScreen.storageKey, JSON.stringify(data));
   }
 
   public static loadLocal = () => {
-    const local = storage.getItem(Setup.storageKey);
+    const local = storage.getItem(SettingsScreen.storageKey);
     if (!local) return null;
     return JSON.parse(local);
   }
@@ -152,57 +94,79 @@ export default class Setup extends React.Component<{}, SetupState> {
   baseFields = {
     name: {
       label: 'Connection Name',
-      check: [notEmpty],
-    },
-    server: {
-      label: 'Server',
-      default: '127.0.0.1',
-      check: [notEmpty],
+      validators: [notEmpty],
     },
     dialect: {
       label: 'Dialects',
       values: Object.keys(dialectDefaultPorts),
       default: Object.keys(dialectDefaultPorts)[0],
-      check: [notEmpty],
-      cb: () => {
+      validators: [notEmpty],
+      postUpdateHook: () => {
         const newState = Object.assign({}, this.state);
-        newState.data.port = dialectDefaultPorts[this.state.data.dialect] || 3306;
-        newState.fields.domain.show = this.state.data.dialect !== 'MSSQL' ? 'hidden' : undefined;
+        if (this.state.data.dialect === 'SQLite') {
+          newState.fields.port.visible = false;
+          newState.fields.server.visible = false;
+          newState.fields.username.visible = false;
+          newState.fields.password.visible = false;
+          newState.fields.askForPassword.visible = false;
+          newState.fields.connectionTimeout.visible = false;
+          newState.fields.database.type = 'file';
+        } else {
+          if (this.state.fields.database.type === 'file') {
+            newState.data.database = undefined;
+          }
+          newState.data.port = dialectDefaultPorts[this.state.data.dialect] || dialectDefaultPorts.MySQL;
+          newState.fields.domain.visible = this.state.data.dialect === 'MSSQL';
+          newState.fields.port.visible = true;
+          newState.fields.server.visible = true;
+          newState.fields.username.visible = true;
+          newState.fields.password.visible = true;
+          newState.fields.askForPassword.visible = true;
+          newState.fields.connectionTimeout.visible = true;
+          newState.fields.database.type = 'text';
+        }
         this.setState(newState, this.validateFields);
       },
     },
+    server: {
+      label: 'Server',
+      default: '127.0.0.1',
+      validators: [notEmpty],
+    },
     port: {
-      label: 'Port', type: 'number',
-      default: 3306,
-      check: [notEmpty, inRange(1, 65535)],
+      label: 'Port',
+      type: 'number',
+      default: dialectDefaultPorts.MySQL,
+      validators: [notEmpty, inRange(1, 65535)],
       parse: int,
     },
     database: {
+      type: 'text',
       label: 'Database',
-      check: [notEmpty],
+      validators: [notEmpty],
     },
     username: {
       label: 'Username',
-      check: [notEmpty],
+      validators: [notEmpty],
     },
     askForPassword: {
       label: 'Prompt for password?',
-      values: [{ text: 'No', value: 'false' }, { text: 'Yes', value: 'true' }],
+      values: [{ text: 'No', value: false }, { text: 'Yes', value: true }],
       default: 'false',
       parse: bool,
-      cb: () => {
+      postUpdateHook: () => {
         const parse = this.state.fields.askForPassword.parse;
         const newState = Object.assign({}, this.state);
-        newState.fields.password.show = parse(this.state.data.askForPassword) ? 'hidden' : undefined;
+        newState.fields.password.visible = !parse(this.state.data.askForPassword);
         this.setState(newState, this.validateFields);
       },
     },
     password: {
-      show: undefined,
+      validators:[notEmpty],
       label: 'Password',
     },
     domain: {
-      show: 'hidden',
+      visible: false,
       label: 'Domain',
       info: 'For MSSQL/Azure only',
     },
@@ -211,7 +175,7 @@ export default class Setup extends React.Component<{}, SetupState> {
       info: 'in seconds',
       type: 'number',
       default: 15,
-      check: [notEmpty, gtz],
+      validators: [notEmpty, gtz],
       parse: int,
     },
   };
@@ -219,9 +183,17 @@ export default class Setup extends React.Component<{}, SetupState> {
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
     switch(action) {
       case 'createConnectionSuccess':
-        const newState = { loading: false } as SetupState;
+        const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
+        const newState: SetupState = {
+          loading: false,
+          data,
+          fields: this.baseFields,
+          errors: {},
+          onSaveError: null,
+          saved: null,
+        };
         newState.saved = `<strong>${payload.connInfo.name}</strong> added to your settings!`;
-        newState.data = Setup.generateConnData(this.state.fields);
+        newState.data = SettingsScreen.generateConnData(this.state.fields);
         this.setState(newState, this.validateFields);
         break;
 
@@ -238,7 +210,7 @@ export default class Setup extends React.Component<{}, SetupState> {
 
   constructor(props) {
     super(props);
-    const data = Setup.loadLocal() || Setup.generateConnData(this.baseFields);
+    const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
     this.state = {
       loading: true,
       data,
@@ -253,28 +225,30 @@ export default class Setup extends React.Component<{}, SetupState> {
   }
 
   public handleChange: ChangeEventHandler = (e) => {
-    const { name, value } = e.target as HTMLInputElement;
-    const newData = Object.assign({}, this.state.data, {
-      [name]: value,
-    });
+    const { name, value, files } = e.target as HTMLInputElement;
+    if (this.state.fields[name].visible === false) return this.validateFields();
+    let filePath;
+    if (this.state.fields[name].type === 'file' && files && files.length > 0) {
+      filePath = (files[0] as any).path;
+    }
+
+    const newData = { ...this.state.data, [name]: filePath || value };
     this.setState({ data: newData, saved: null, onSaveError: null }, () => {
-      const errors = this.validateField(name);
-      Setup.saveLocal(this.state.data);
-      this.setState({ errors }, () => {
-        if (!this.state.fields[name].cb) return;
-        this.state.fields[name].cb();
-      });
+      if (!this.state.fields[name].postUpdateHook) return this.validateFields();
+      this.state.fields[name].postUpdateHook();
+      this.validateFields();
     });
   }
 
   public validateField(field) {
-    const checks = this.state.fields[field].check || [];
-    const errors = Object.assign({}, this.state.errors);
+    const checks = this.state.fields[field].validators || [];
+    const errors = {};
     checks.forEach((c) => {
-      if (c(this.state.data[field])) {
+      let message;
+      if (message = c.call(this, this.state.data[field])) {
         errors[field] = null;
       } else {
-        errors[field] = c.errorMessage;
+        errors[field] = c.errorMessage || message;
       }
     });
     return Object.keys(errors).reduce((p, f) => {
@@ -293,10 +267,10 @@ export default class Setup extends React.Component<{}, SetupState> {
     });
     return false;
   }
-  public validateFields(cb = (() => void 0)) {
+  public validateFields() {
     let errors = {};
-    Object.keys(this.state.fields).forEach((f) => {
-      errors = Object.assign({}, errors, this.validateField(f));
+    this.getVisibleFields().forEach((f) => {
+      errors = { ...errors, ...this.validateField(f) };
     });
     this.setState({
       errors: Object.keys(errors).reduce((p, f) => {
@@ -304,29 +278,30 @@ export default class Setup extends React.Component<{}, SetupState> {
         p[f] = errors[f];
         return p;
       }, {}),
-    }, cb);
+    });
   }
 
   public componentDidMount() {
     this.setState({loading: false }, () => {
-      this.validateFields(() => {
-        document.getElementsByTagName('input')[0].focus();
-      });
+      document.getElementsByTagName('input')[0].focus();
+      this.validateFields();
     });
   }
 
-  public focusField(field) {
+  public focusField = (field) => {
     try {
       document.getElementById(field).focus();
     } catch (e) { /**/ }
   }
 
+  public getVisibleFields() {
+    return Object.keys(this.state.fields)
+      .filter(k => this.state.fields[k].visible || typeof this.state.fields[k].visible === 'undefined');
+  }
+
   public getParsedFormData() {
-    return Object.keys(this.state.data)
+    return this.getVisibleFields()
       .reduce((d, k) => {
-        if (this.state.fields[k].show === 'hidden') {
-          return d;
-        }
         const parse = this.state.fields[k].parse || ((v) => (v === '' ? null : v));
         d[k] = parse(this.state.data[k]);
         return d;
@@ -334,9 +309,9 @@ export default class Setup extends React.Component<{}, SetupState> {
   }
 
   public render() {
-    const formFields = Object.keys(this.state.fields).map((f, i) => {
+    const formFields = this.getVisibleFields()
+    .map((f, i) => {
       const field = this.state.fields[f];
-      if (field.show === 'hidden') return null;
       let formField;
       if (Array.isArray(field.values)) {
         const options = field.values.map((o, k) => {
@@ -359,6 +334,17 @@ export default class Setup extends React.Component<{}, SetupState> {
             {options}
           </select>
         );
+      } else if (field.type === 'file') {
+        formField = (
+          <input
+            type="file"
+            id={`input-${f}`}
+            name={f}
+            placeholder={field.label}
+            onChange={this.handleChange}
+            disabled={this.state.loading}
+          />
+        );
       } else {
         formField = (
           <input
@@ -369,20 +355,19 @@ export default class Setup extends React.Component<{}, SetupState> {
             value={this.state.data[f]}
             onChange={this.handleChange}
             disabled={this.state.loading}
-            min='1'
-            max='65535'
+            { ...(field.type === 'number' ? {
+              min: 1,
+              max: 65535,
+            } : {})}
           />
         );
       }
+
       return (
         <FieldWrapper field={field} key={i} i={i} component={formField} />
       );
     });
-    const connInfo = JSON.stringify(this.getParsedFormData(), null, 2 )
-      .replace(/( *)(".+") *:/g, '$1<span class="key">$2</span>:')
-      .replace(/: *(".+")/g, ': <span class="string">$1</span>')
-      .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
-      .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
+
     return (
       <div className='fullscreen-container'>
         <form onSubmit={this.handleSubmit} className='container'>
@@ -423,31 +408,31 @@ export default class Setup extends React.Component<{}, SetupState> {
             </div>
             <div className='col-6'>
               <div><h5 className='no-margin-top'>Preview</h5></div>
-              <Syntax code={connInfo} language='json'/>
-              <div style={{
-                display: Object.keys(this.state.errors).length === 0 ? 'none' : 'initial',
-              }}>
-                <h5>Validations</h5>
-                <div className='messages radius'>
-                  {(Object.keys(this.state.errors).map((f, k) => {
-                    return (
-                      <div
-                        key={k}
-                        onClick={this.focusField.bind(this, `input-${f}`)}
-                        className='message error pointer'
-                        dangerouslySetInnerHTML={{
-                          __html: this.state.errors[f]
-                            .replace('{0}', `<strong>${this.state.fields[f].label}</strong>`),
-                        }}
-                      ></div>
-                    );
-                  }))}
+              <Syntax code={this.getParsedFormData()} language='json'/>
+              {Object.keys(this.state.errors).length ? (
+                <div>
+                  <h5>Validations</h5>
+                  <div className='messages radius'>
+                    {(Object.keys(this.state.errors).map((f, k) => {
+                      return (
+                        <div
+                          key={k}
+                          onClick={() => this.focusField(`input-${f}`)}
+                          className='message error pointer'
+                          dangerouslySetInnerHTML={{
+                            __html: this.state.errors[f]
+                              .replace('{0}', `<strong>${this.state.fields[f].label}</strong>`),
+                          }}
+                        ></div>
+                      );
+                    }))}
+                  </div>
                 </div>
-              </div>
+              ) : null}
             </div>
           </div>
         </form>
-        <Loading toggle={this.state.loading} />
+        <Loading active={this.state.loading} />
       </div>
     );
   }

@@ -26,3 +26,14 @@ export function inRange(max, min) {
     return value >= min && value <= max;
   };
 }
+
+
+export const clipboardInsert = (value, format = 'text/plain') => {
+  const listener = function(e: ClipboardEvent) {
+    e.clipboardData.setData(format, value);
+    e.preventDefault();
+  };
+  document.addEventListener('copy', listener);
+  document.execCommand('copy');
+  document.removeEventListener('copy', listener);
+}

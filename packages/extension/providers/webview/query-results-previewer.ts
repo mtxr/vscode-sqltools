@@ -1,6 +1,6 @@
 import WebviewProvider from './webview-provider';
 
-export default class QueryResultsPreviewer extends WebviewProvider {
-  protected id: string = 'queryResultsPreviewer';
+export default class ResultsWebview extends WebviewProvider {
+  protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 }

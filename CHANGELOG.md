@@ -1,6 +1,23 @@
 # SQLTools Changelog
 
+### NEXT - WIP
+
+- Added SQLite
+
 ## v0.16
+
+### v0.16.11
+- **Enhancements**
+  - ***Connections***:
+    - MSSQL: Fixed tryning to access 'encrypt of undefined issue'.
+
+### v0.16.10
+- **Enhancements**
+  - ***General***:
+    - Removed some dependencies
+    - Reduced startup time
+  - ***Connections***:
+    - Error logging minor fix
 
 ### v0.16.9
 - **Enhancements**

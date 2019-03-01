@@ -2,6 +2,7 @@ const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getWebviewConfig = require('../ui/webpack.config');
+const getLanguageServerConfig = require('../language-server/webpack.config');
 
 const extPkgJson = require('./package.json');
 const corePkgJson = require('./../core/package.json');
@@ -14,8 +15,7 @@ const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkg
 // defintions
 extPkgJson.name = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools'; // vscode marketplace name
 
-const outdir = path.resolve(__dirname, '..', '..', 'dist');
-
+const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 /**
  *
  * @param {*} env
@@ -29,7 +29,6 @@ function getExtensionConfig(env) {
     target: 'node',
     entry: {
       extension: path.join(__dirname, 'index.ts'),
-      languageserver: path.join(__dirname, '..', 'language-server', 'index.ts')
     },
     module: {
       rules: [
@@ -53,7 +52,11 @@ function getExtensionConfig(env) {
               content.preview = true;
               content.displayName = `${extPkgJson.displayName} - Preview`;
             }
-            content.scripts = {};
+            Object.keys(content.scripts || {}).forEach(k => {
+              if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
+                delete content.scripts[k];
+              }
+            });
             content.dependencies = {};
             content.devDependencies = { ...devDependencies, ...dependencies };
 
@@ -61,7 +64,7 @@ function getExtensionConfig(env) {
               delete content.devDependencies[k];
             });
 
-            return JSON.stringify(content, null, 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
+            return JSON.stringify(content, null, env.production ? undefined : 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -72,10 +75,7 @@ function getExtensionConfig(env) {
       ])
     ],
     resolve: {
-      extensions: ['.tsx', '.ts', '.js', '.json'],
-      alias: {
-        'pg-native': path.join(__dirname, '../../' ,'node_modules/pg/lib/native/index.js'),
-      },
+      extensions: ['.ts', '.js', '.json'],
     },
     output: {
       filename: '[name].js',
@@ -86,9 +86,6 @@ function getExtensionConfig(env) {
     externals: {
       'vscode': 'commonjs vscode',
     },
-    optimization: env.production ? {
-      minimize: false,
-    } : undefined,
   };
 
   return config;
@@ -96,15 +93,13 @@ function getExtensionConfig(env) {
 
 module.exports = function (env = {}) {
   env.production = !!env.production;
-  return [getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
+  return [getLanguageServerConfig(env), getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
-        'process.env.GA_CODE': JSON.stringify(env.production ? 'UA-110380775-2' : 'UA-110380775-1'),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.RB': JSON.stringify(process.env.RB || null),
         'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
       })
     ].concat(config.plugins || []);
@@ -112,8 +107,9 @@ module.exports = function (env = {}) {
       ...(config.node || {}),
       __dirname: false
     };
-    config.devtool = !env.production ? 'cheap-module-eval-source-map' : 'source-map';
-
+    config.devtool = !env.production ? 'inline-source-map' : 'source-map';
+    config.optimization = config.optimization || {};
+    config.optimization.minimize = false;
     return config;
   });
 };
