@@ -7,7 +7,6 @@ import {
   TextEditorEdit,
   window as Win,
   workspace as Wspc,
-  TreeView,
   QuickPickOptions,
   QuickPick,
   env as VSCodeEnv,
@@ -52,7 +51,6 @@ namespace SQLTools {
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const settingsEditor = new SettingsWebview();
 
-  let connectionExplorerView: TreeView<any>;
   let telemetry = new Telemetry({
     product: 'extension',
     useLogger: logger,
@@ -154,7 +152,7 @@ namespace SQLTools {
   }
   export async function cmdSelectConnection(node?: SidebarConnection): Promise<void> {
     if (node) {
-      await setConnection(node.conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
+      await setConnection(node.conn as ConnectionInterface, true).catch(ErrorHandler.create('Error opening connection'));
       return;
     }
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
@@ -481,7 +479,6 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     const languageServerDisposable = await getLanguageServerDisposable();
     queryResults = new ResultsWebview(languageClient, connectionExplorer);
     ContextManager.context.subscriptions.push(
@@ -503,7 +500,7 @@ namespace SQLTools {
 
   async function registerLanguageServerRequests() {
     languageClient.onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-      connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
+      connectionExplorer.setTreeData(conn, tables, columns);
       if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
         connectionExplorer.setActiveConnection();
       } else {
@@ -519,7 +516,7 @@ namespace SQLTools {
     if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
-  async function setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
+  async function setConnection(c?: ConnectionInterface, reveal?: boolean): Promise<ConnectionInterface> {
     let password = null;
     if (c) {
       if (c.askForPassword) password = await askForPassword(c);
@@ -530,7 +527,7 @@ namespace SQLTools {
       );
     }
     if (c && c.isConnected)
-      connectionExplorer.setActiveConnection(c);
+      connectionExplorer.setActiveConnection(c, reveal);
     updateStatusBar();
     return connectionExplorer.getActive();
   }
