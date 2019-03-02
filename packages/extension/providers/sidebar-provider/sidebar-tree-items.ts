@@ -18,6 +18,13 @@ export class SidebarConnection extends TreeItem {
   public contextValue = 'connection';
   public tables: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Tables', this);
   public views: SidebarDatabaseSchemaGroup = new SidebarDatabaseSchemaGroup('Views', this);
+
+  public get items() {
+    return [
+      this.tables,
+      this.views,
+    ];
+  }
   public get description() {
     return getDbDescription(this.conn);
   }

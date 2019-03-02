@@ -7,7 +7,6 @@ const babelOptions = require(path.join(__dirname, '.babelrc'));
 module.exports = exports = function getWebviewConfig(env) {
   return {
     name: 'ui',
-    mode: env.production ? 'production' : 'development',
     entry: {
       Settings: path.join(__dirname, 'screens', 'Settings.tsx'),
       Results: path.join(__dirname, 'screens', 'Results.tsx'),

@@ -453,6 +453,19 @@
                                     }
                                 }
                             },
+                            "mysqlOptions": {
+                                "type": ["object", "null"],
+                                "default": {},
+                                "required": false,
+                                "properties": {
+                                    "authProtocol": {
+                                        "required": false,
+                                        "type": "string",
+                                        "enum": ["xprotocol", "default"],
+                                        "default": "default"
+                                    }
+                                }
+                            },
                             "connectionTimeout": {
                                 "type": "number",
                                 "description": "Connection timeout in seconds",
