@@ -21,6 +21,7 @@
             "restart": true,
             "sourceMaps": true,
             "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
+            "protocol": "inspector"
         },
         // {
         //     "type": "node",

@@ -49,13 +49,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
     if (!element) {
       return Promise.resolve(this.toArray(this.tree));
-    } else if (element instanceof SidebarConnection) {
-      const result = [];
-      if (Object.keys(element.tables.items).length > 0) result.push(element.tables);
-      if (Object.keys(element.views.items).length > 0) result.push(element.views);
-      return Promise.resolve(result);
     } else if (
-      element instanceof SidebarTable
+      element instanceof SidebarConnection
+      || element instanceof SidebarTable
       || element instanceof SidebarView
       || element instanceof SidebarDatabaseSchemaGroup
     ) {

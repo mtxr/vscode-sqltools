@@ -46,7 +46,7 @@ const getSizeForItem = (colname: string, sample: any): Column => {
     props.width = 100;
     props.className = 'text-right';
   } else if (typeof sample === 'boolean') {
-    props.width = 50;
+    props.width = 75;
     props.className = 'text-center';
   }
 
