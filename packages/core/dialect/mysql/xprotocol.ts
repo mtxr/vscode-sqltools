@@ -92,7 +92,6 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
 
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const session = await this.open().then(client => client.getSession());
-    console.log({ session });
     const queries = Utils.query.parse(query);
     const results = [];
     for(let q of queries) {

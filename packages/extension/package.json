@@ -177,11 +177,7 @@
             {
                 "title": "Add name to cursor",
                 "command": "SQLTools.appendToCursor",
-                "category": "SQLTools Sidebar",
-                "icon": {
-                    "light": "icons/pencil-light.svg",
-                    "dark": "icons/pencil-dark.svg"
-                }
+                "category": "SQLTools Sidebar"
             },
             {
                 "title": "Generate Insert Query",
@@ -547,6 +543,11 @@
                     "command": "SQLTools.addNewConnection",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
+                  },
+                {
+                    "command": "SQLTools.newSqlFile",
+                    "when": "view == SQLTools.tableExplorer",
+                    "group": "navigation@2"
                 },
                 {
                     "command": "SQLTools.refreshSidebar",
@@ -555,11 +556,6 @@
                 }
             ],
             "view/item/context": [
-                {
-                    "command": "SQLTools.appendToCursor",
-                    "when": "(!editorIsOpen || !editorReadonly) && view == SQLTools.tableExplorer && viewItem != connection.schema_group && !sqltools.Results.active",
-                    "group": "navigation"
-                },
                 {
                     "command": "SQLTools.selectConnection",
                     "when": "view == SQLTools.tableExplorer && viewItem == connection",
@@ -582,8 +578,13 @@
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "editorIsOpen && !editorReadonly && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
+                    "when": "!editorReadonly && view == SQLTools.tableExplorer && viewItem == connection.tableOrView",
                     "group": "sqltools.dbExplorer@3"
+                },
+                {
+                    "command": "SQLTools.appendToCursor",
+                    "when": "!editorReadonly && view == SQLTools.tableExplorer && viewItem != connection.schema_group && !sqltools.Results.active",
+                    "group": "navigation"
                 },
                 {
                     "command": "SQLTools.selectConnection",
