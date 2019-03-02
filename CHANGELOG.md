@@ -2,7 +2,23 @@
 
 ### NEXT - WIP
 
-- Added SQLite
+- @TODO: Add image
+
+- **NEW**
+  - Added support for SQLite. #51
+  - Added support for Oracle Database. #13
+  - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental).
+  - Export query results as JSON and CSV. #95
+    - @TODO: Add image
+  - Added feature to copy cell value and the entire row. #63
+    - @TODO: Add image
+
+- **Fixes**
+  - ***UI***:
+    - Fixed results ui scroll and resizer issues. #131 and #132
+    - Improved more the look and feel to match VSCode Standards.
+  - ***Connections***:
+    - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental)
 
 ## v0.16
 
