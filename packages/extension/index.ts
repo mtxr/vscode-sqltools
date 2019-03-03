@@ -43,8 +43,10 @@ import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from
 import { DismissedException } from '@sqltools/core/exception';
 import LC from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
+import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 
-namespace SQLTools {
+
+export namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
   const connectionExplorer = new ConnectionExplorer();
@@ -79,6 +81,7 @@ namespace SQLTools {
       },
     });
     loadConfigs();
+    loadPlugins();
     await registerExtension();
     updateStatusBar();
     activationTimer.end();
@@ -119,19 +122,6 @@ namespace SQLTools {
 
   export function cmdClearBookmarks(): void {
     bookmarks.clear();
-  }
-
-  // @TODO: Inplace edit any doc
-  // inplace format for any lang
-  export function editorFormatSql(editor: TextEditor, edit: TextEditorEdit): void {
-    try {
-      const indentSize: number = ConfigManager.format.indentSize;
-      edit.replace(editor.selection, QueryUtils.format(editor.document.getText(editor.selection), indentSize));
-      VSCode.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
-      logger.debug('Query formatted!');
-    } catch (error) {
-      ErrorHandler.create('Error formatting query.')(error);
-    }
   }
 
   export async function cmdAppendToCursor(node: SidebarDatabaseItem | string, ...rest: any): Promise<void> {
@@ -665,6 +655,10 @@ namespace SQLTools {
     const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
     if (Utils.isEmpty(data)) throw new DismissedException();
     return data;
+  }
+
+  function loadPlugins() {
+    FormatterPlugin.register();
   }
 }
 

@@ -14,6 +14,10 @@ export interface LanguageClientPlugin<T = SQLToolsLanguageClientInterface> {
   register: (client: T) => void;
 }
 
+export interface ExtensionPlugin<T = any> { // @TODO: Add type
+  register: (extension: T) => void;
+}
+
 export interface SQLToolsLanguageServerInterface {
   listen(): void;
   registerPlugin(plugin: LanguageServerPlugin): this;
