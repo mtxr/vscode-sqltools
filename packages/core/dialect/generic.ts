@@ -6,7 +6,7 @@ import {
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
-import { MissingModule } from '../exception';
+import { MissingModuleException } from '../exception';
 
 export interface Deps {
   type: 'package' | 'npmscript';
@@ -57,7 +57,7 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
                 throw new Error('Version not matching');
               }
             } catch(e) {
-              throw new MissingModule(dep.name, dep.version);
+              throw new MissingModuleException(dep.name, dep.version);
             }
             break;
         }
