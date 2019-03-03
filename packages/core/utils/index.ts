@@ -11,7 +11,7 @@ export function sortText(a: string, b: string) { return a.toString().localeCompa
 
 export function getDbId(c: ConnectionInterface): string | null {
   if (!c) return null;
-  return c.id || `${c.name}#${c.database}#${c.dialect}`;
+  return c.id || `${c.name}|${c.database}|${c.dialect}`;
 }
 
 export function getDbDescription(c: ConnectionInterface): string | null {

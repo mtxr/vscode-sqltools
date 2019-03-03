@@ -3,8 +3,19 @@
 @import './query-results';
 @import './syntax';
 
-.setup {
-  input, select {
-    width: 200px;
+.settings-screen {
+  .message .btn {
+    float: right;
+    padding: 0 4px;
+    margin: 0 4px;
+    color: white;
+    text-decoration: none;
+    font-weight: bold;
+    background: var(--vscode-editorLink-activeForeground);
+    text-transform: initial;
+
+    &.danger {
+      background: var(--vscode-editorError-foreground);
+    }
   }
 }

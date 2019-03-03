@@ -26,7 +26,7 @@
       "connectionTimeout": 15,
       "dialectOptions": {
         "encrypt": false
-      },
+      }
     },
     {
       "name": "SQLite",

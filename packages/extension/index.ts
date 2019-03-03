@@ -133,9 +133,11 @@ export namespace SQLTools {
     logger.info(message);
     Win.showInformationMessage(message, { modal: true });
   }
-  export async function cmdSelectConnection(node?: SidebarConnection): Promise<void> {
-    if (node) {
-      await setConnection(node.conn as ConnectionInterface, true).catch(ErrorHandler.create('Error opening connection'));
+  export async function cmdSelectConnection(connIdOrNode?: SidebarConnection | string): Promise<void> {
+    if (connIdOrNode) {
+      const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : ConnectionExplorer.getById(connIdOrNode);
+
+      await setConnection(conn as ConnectionInterface, true).catch(ErrorHandler.create('Error opening connection'));
       return;
     }
     connect(true).catch(ErrorHandler.create('Error selecting connection'));

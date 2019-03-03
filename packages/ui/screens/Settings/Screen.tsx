@@ -60,7 +60,7 @@ interface SetupState {
   fields: { [id: string]: Field };
   errors: { [field: string]: string };
   onSaveError?: string;
-  saved?: string;
+  saved?: JSX.Element;
 }
 
 const storage = { data: {}, setItem: undefined, getItem: undefined, removeItem: undefined };
@@ -192,7 +192,13 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           onSaveError: null,
           saved: null,
         };
-        newState.saved = `<strong>${payload.connInfo.name}</strong> added to your settings!`;
+        newState.saved = (
+          <div>
+            <strong>{payload.connInfo.name}</strong> added to your settings!
+            <a onClick={this.reset} className="btn danger" href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.deleteConnection?${JSON.stringify(payload.connInfo.id)}`)}>Delete {payload.connInfo.name}</a>
+            <a onClick={this.reset} className="btn" href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.selectConnection?${JSON.stringify(payload.connInfo.id)}`)}>Connect now</a>
+          </div>
+        );
         newState.data = SettingsScreen.generateConnData(this.state.fields);
         this.setState(newState, this.validateFields);
         break;
@@ -207,6 +213,18 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       default:
         break;
     }
+  }
+
+  reset = () => {
+    const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
+    this.setState({
+      loading: true,
+      data,
+      fields: this.baseFields,
+      errors: {},
+      onSaveError: null,
+      saved: null,
+    }, () => this.componentDidMount());
   }
 
   constructor(props) {
@@ -370,7 +388,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     });
 
     return (
-      <div className='fullscreen-container'>
+      <div className='fullscreen-container settings-screen'>
         <form onSubmit={this.handleSubmit} className='container'>
           <div className='row'>
             <div className='col-12'>
@@ -381,8 +399,11 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             (
               <div className='row'>
                 <div className='col-12 messages radius'>
-                  <div className={`message ${this.state.saved ? 'success' : 'error'}`}
-                  dangerouslySetInnerHTML={{__html: this.state.saved || this.state.onSaveError}}></div>
+                  <div className={`message ${this.state.saved ? 'success' : 'error'}`}>
+                    {this.state.saved ? this.state.saved : (
+                      <span dangerouslySetInnerHTML={{__html: this.state.onSaveError}}></span>
+                    )}
+                  </div>
                 </div>
               </div>
             )
@@ -434,7 +455,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           </div>
         </form>
         <Loading active={this.state.loading} />
-        {/* <a href={encodeURI(`command:sqltools.appendToCursor?${JSON.stringify('node:ok')}`)}>Connect</a> */}
       </div>
     );
   }
