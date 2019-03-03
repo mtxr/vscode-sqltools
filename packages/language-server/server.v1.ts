@@ -18,7 +18,7 @@ import {
   RunCommandRequest,
   CloseConnectionRequest,
   GetCachedPassword,
-  ExportResults,
+  SaveResults,
 } from '@sqltools/core/contracts/connection-requests';
 import Notification from '@sqltools/core/contracts/notifications';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
@@ -264,7 +264,7 @@ namespace SQLToolsLanguageServer {
     }
   });
 
-  server.onRequest(ExportResults, ({ connId, filename, query, filetype = 'csv' }) => {
+  server.onRequest(SaveResults, ({ connId, filename, query, filetype = 'csv' }) => {
     const { queryResults } = store.getState();
     const { results, cols } = queryResults[connId][query];
     let output = '';

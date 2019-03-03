@@ -25,7 +25,6 @@ function getExtensionConfig(env) {
   /** @type webpack.Configuration */
   let config = {
     name: 'sqltools',
-    mode: env.production ? 'production' : 'development',
     target: 'node',
     entry: {
       extension: path.join(__dirname, 'index.ts'),
@@ -107,10 +106,16 @@ module.exports = function (env = {}) {
       ...(config.node || {}),
       __dirname: false
     };
-    config.devtool = !env.production ? 'inline-source-map' : 'source-map';
-    config.optimization = env.production ? {
-      minimize: false,
-    } : undefined;
+
+    config.devtool = 'inline-source-map';
+    if (env.production) {
+      config.devtool = 'source-map'   ;
+      config.optimization = config.optimization || {};
+      config.optimization.minimize = false;
+    } else {
+      delete config.optimization;
+    }
+    config.mode = env.production ? 'production' : 'development';
     return config;
   });
 };

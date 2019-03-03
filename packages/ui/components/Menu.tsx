@@ -1,0 +1,21 @@
+import React from 'react';
+
+const Separator = () => (<div className="context-menu-separator"></div>);
+
+const Option = ({ value, label, onSelect }) => (<div onClick={() => onSelect(value)} className="context-menu-option">{label}</div>);
+
+export default ({ x, y, open, onSelect, options = [], width = 200 }) => {
+  if (!open || options.length === 0)
+    return null;
+  return (<div className="context-menu" style={{ top: `${y}px`, left: `${Math.max(x - width, 15)}px`, width: `${width}px` }}>
+    {options.map((opt, index) => {
+      if (opt === 'sep' || opt.value === 'sep') {
+        return <Separator key={index}/>
+      }
+      if (typeof opt === 'string') {
+        return <Option value={opt} label={opt} onSelect={onSelect} key={index}/>
+      }
+      return <Option value={opt.value} label={opt.label} onSelect={onSelect} key={index}/>
+    })}
+    </div>);
+};

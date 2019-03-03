@@ -49,12 +49,26 @@
       "askForPassword": false,
       "connectionTimeout": 15,
       "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQLX",
+      "password": "root",
+      "port": 33080,
+      "server": "localhost",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
       "dialect": "OracleDB",
       "name": "OracleDB",
       "password": "root",
       "port": 1521,
       "username": "root",
-      "server": "localhost"      
-    }
+      "server": "localhost"
+    },
   ]
 }

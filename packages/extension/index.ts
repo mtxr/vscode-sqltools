@@ -7,7 +7,6 @@ import {
   TextEditorEdit,
   window as Win,
   workspace as Wspc,
-  TreeView,
   QuickPickOptions,
   QuickPick,
   env as VSCodeEnv,
@@ -52,7 +51,6 @@ namespace SQLTools {
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const settingsEditor = new SettingsWebview();
 
-  let connectionExplorerView: TreeView<any>;
   let telemetry = new Telemetry({
     product: 'extension',
     useLogger: logger,
@@ -135,8 +133,9 @@ namespace SQLTools {
     }
   }
 
-  export async function cmdAppendToCursor(node: SidebarDatabaseItem): Promise<void> {
-    return insertText(node.value);
+  export async function cmdAppendToCursor(node: SidebarDatabaseItem | string, ...rest: any): Promise<void> {
+    if (!node) return;
+    return insertText(typeof node === 'string' ? node : node.value);
   }
 
   export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
@@ -153,7 +152,7 @@ namespace SQLTools {
   }
   export async function cmdSelectConnection(node?: SidebarConnection): Promise<void> {
     if (node) {
-      await setConnection(node.conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
+      await setConnection(node.conn as ConnectionInterface, true).catch(ErrorHandler.create('Error opening connection'));
       return;
     }
     connect(true).catch(ErrorHandler.create('Error selecting connection'));
@@ -276,11 +275,21 @@ namespace SQLTools {
     LC().sendRequest(RefreshConnectionData);
   }
 
-  export async function cmdExportResults(filetype: 'csv' | 'json') {
-    if (typeof filetype === 'string')
-      return queryResults.exportResults(filetype);
+  export async function cmdSaveResults(filetype: 'csv' | 'json') {
+    filetype = typeof filetype === 'string' ? filetype : undefined;
+    let mode: any = filetype || ConfigManager.defaultExportType;
+    if (mode === 'prompt') {
+      mode = await quickPick<'csv' | 'json' | undefined>([
+        { label: 'Save as CSV', value: 'csv' },
+        { label: 'Save as JSON', value: 'json' },
+      ], 'value', {
+        title: 'Select a file type to export',
+      });
+    }
 
-    return queryResults.exportResults(ConfigManager.defaultExportType);
+    if (!mode) return;
+
+    return queryResults.saveResults(mode);
   }
 
   /**
@@ -309,6 +318,16 @@ namespace SQLTools {
       placeHolder: 'Pick a connection',
       placeHolderDisabled: 'You don\'t have any connections yet.',
       title: 'Connections',
+      buttons: [
+        {
+          iconPath: {
+            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
+            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
+          },
+          tooltip: ' Add new Connection',
+          cb: cmdAddNewConnection,
+        } as any,
+      ],
     })) as string;
     return connections.find((c) => getDbId(c) === sel);
   }
@@ -460,7 +479,6 @@ namespace SQLTools {
   }
 
   async function registerExtension() {
-    connectionExplorerView = Win.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: connectionExplorer });
     const languageServerDisposable = await getLanguageServerDisposable();
     queryResults = new ResultsWebview(LC(), connectionExplorer);
     ContextManager.context.subscriptions.push(
@@ -482,7 +500,7 @@ namespace SQLTools {
 
   async function registerLanguageServerRequests() {
     LC().onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-      connectionExplorer.setTreeData(conn, tables, columns, connectionExplorerView);
+      connectionExplorer.setTreeData(conn, tables, columns);
       if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
         connectionExplorer.setActiveConnection();
       } else {
@@ -498,7 +516,7 @@ namespace SQLTools {
     if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
-  async function setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
+  async function setConnection(c?: ConnectionInterface, reveal?: boolean): Promise<ConnectionInterface> {
     let password = null;
     if (c) {
       if (c.askForPassword) password = await askForPassword(c);
@@ -509,7 +527,7 @@ namespace SQLTools {
       );
     }
     if (c && c.isConnected)
-      connectionExplorer.setActiveConnection(c);
+      connectionExplorer.setActiveConnection(c, reveal);
     updateStatusBar();
     return connectionExplorer.getActive();
   }
@@ -598,14 +616,20 @@ namespace SQLTools {
   type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<QuickPickOptions & {
     title: QuickPick<T>['title'];
     placeHolderDisabled?: QuickPick<T>['placeholder'];
+    buttons?: QuickPick<T>['buttons'],
   }>;
 
-  async function quickPick(
-    options: QuickPickItem[],
+  async function quickPick<T = QuickPickItem | any>(
+    options: ((QuickPickItem & { value?: any }) | string)[],
     prop?: string,
     quickPickOptions?: ExtendedQuickPickOptions,
   ): Promise<QuickPickItem | any> {
-    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(options, prop);
+    const items = options.length > 0 && typeof options[0] === 'object' ? <QuickPickItem[]>options : options.map<QuickPickItem>(value => ({
+      value,
+      label: value.toString(),
+    }));
+
+    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(items, prop);
 
     const qPick = Win.createQuickPick();
     const sel = await (new Promise<QuickPickItem | any>((resolve) => {
@@ -623,27 +647,17 @@ namespace SQLTools {
       Object.keys(qPickOptions).forEach(k => {
         qPick[k] = qPickOptions[k];
       });
-      qPick.items = options;
-      qPick.enabled = options.length > 0;
-      qPick.buttons = [
-        {
-          iconPath: {
-            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
-            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
-          },
-          tooltip: ' Add new Connection',
-          cb: cmdAddNewConnection,
-        } as any,
-      ];
+      qPick.items = items;
+      qPick.enabled = items.length > 0;
 
       if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 
-      qPick.title = `${qPick.title || 'Items'} (${options.length})`;
+      qPick.title = `${qPick.title || 'Items'} (${items.length})`;
 
       qPick.show();
     }));
     if (!sel || (prop && !sel[prop])) throw new DismissedException();
-    return prop ? sel[prop] : sel;
+    return <T>(prop ? sel[prop] : sel);
   }
 
   async function readInput(prompt: string, placeholder?: string) {

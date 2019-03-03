@@ -71,7 +71,16 @@ export interface ConnectionInterface {
    * @type {any}
    * @memberof ConnectionInterface
    */
-  dialectOptions?: { encrypt: boolean };
+  dialectOptions?: { encrypt?: boolean };
+
+  /**
+   * MySQL specific options
+   * @type {any}
+   * @memberof ConnectionInterface
+   */
+  mysqlOptions?: {
+    authProtocol?: 'xprotocol' | 'default'
+  }
   /**
    * Connection domain (for MSSQL/Azure only)
    * @type {string}

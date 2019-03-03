@@ -129,10 +129,10 @@ export interface Settings {
    */
   previewLimit?: number;
   /**
-   * Default mode to export results
-   * @default "csv"
+   * Default export results mode
+   * @default "prompt"
    * @type {string}
    * @memberof Settings
    */
-  defaultExportType?: 'csv' | 'json';
+  defaultExportType?: 'prompt' | 'csv' | 'json';
 }

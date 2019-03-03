@@ -1,8 +1,9 @@
 import React from 'react';
+import { clipboardInsert } from '../lib/utils';
 
 interface SyntaxProps {
   language?: string;
-  code: string;
+  code: any;
 }
 
 interface SyntaxState {
@@ -18,28 +19,26 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
       copyMsg: 'Copy',
     };
   }
-  public copyCode(e) {
-    e.preventDefault();
-    e.stopPropagation();
-    let msg = 'Copied!';
-    const range = document.createRange();
-    try {
-      range.selectNode(document.getElementById(this.id));
-      window.getSelection().addRange(range);
-      if (!document.execCommand('copy')) {
-        throw new Error('Failed!');
-      }
-    } catch (err) {
-      msg = 'Failed :(';
-    }
-    window.getSelection().removeRange(range);
-    this.setState({ copyMsg: msg }, () => {
+  copyCode = () => {
+    clipboardInsert(JSON.stringify(this.props.code, null, 2));
+    this.setState({ copyMsg: 'Copied!' }, () => {
       clearTimeout(this.interval);
       this.interval = setTimeout(() => {
         this.setState({ copyMsg: 'Copy' });
       }, 1000);
     });
-    return false;
+  }
+
+  renderCode = (code) => {
+    if (this.props.language === 'json' && typeof code === 'object') {
+      return JSON.stringify(code, null, 2 )
+      .replace(/( *)(".+") *:/g, '$1<span class="key">$2</span>:')
+      .replace(/: *(".+")/g, ': <span class="string">$1</span>')
+      .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
+      .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
+    }
+
+    return JSON.stringify(code);
   }
   public render() {
     return (
@@ -47,9 +46,9 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
         <div
           id={this.id}
           className={`syntax ${this.props.language}`}
-          dangerouslySetInnerHTML={{ __html: this.props.code }}
+          dangerouslySetInnerHTML={{ __html: this.renderCode(this.props.code) }}
         ></div>
-        <button className='btn copy-code' type='button' onClick={this.copyCode.bind(this)}>{this.state.copyMsg}</button>
+        <button className='btn copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>
       </div>
     );
   }

@@ -5,6 +5,7 @@ import {
   TreeDataProvider,
   TreeView,
   TreeItem,
+  window,
 } from 'vscode';
 import {
   SidebarColumn,
@@ -15,6 +16,7 @@ import {
 } from './sidebar-provider/sidebar-tree-items';
 import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import { getDbId } from '@sqltools/core/utils';
+import { EXT_NAME } from '@sqltools/core/constants';
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
 | SidebarColumn
@@ -22,6 +24,7 @@ export type SidebarDatabaseItem = SidebarConnection
 | SidebarDatabaseSchemaGroup;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
+  private treeView: TreeView<TreeItem>;;
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
@@ -46,13 +49,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
     if (!element) {
       return Promise.resolve(this.toArray(this.tree));
-    } else if (element instanceof SidebarConnection) {
-      const result = [];
-      if (Object.keys(element.tables.items).length > 0) result.push(element.tables);
-      if (Object.keys(element.views.items).length > 0) result.push(element.views);
-      return Promise.resolve(result);
     } else if (
-      element instanceof SidebarTable
+      element instanceof SidebarConnection
+      || element instanceof SidebarTable
       || element instanceof SidebarView
       || element instanceof SidebarDatabaseSchemaGroup
     ) {
@@ -94,7 +93,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     conn: ConnectionInterface,
     tables: DatabaseInterface.Table[],
     columns: DatabaseInterface.TableColumn[],
-    treeView: TreeView<TreeItem>,
   ) {
     if (!conn) return;
     const treeKey = this.getDbId(conn);
@@ -118,17 +116,20 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     });
     this.refresh();
     if (this.tree[treeKey].active && key)
-      treeView.reveal(this.tree[treeKey][key], { select: false, focus: false })
-        .then(Promise.resolve, Promise.resolve);
+      this.treeView.reveal(this.tree[treeKey][key], { select: false, focus: false });
   }
 
-  public setActiveConnection(c?: ConnectionInterface) {
+  public setActiveConnection(c?: ConnectionInterface, reveal?: boolean) {
     const idActive = c ? this.getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
       if (id !== idActive) {
         return this.tree[id].deactivate();
       }
       this.tree[id].activate();
+      if (reveal) {
+        this.treeView.reveal(this.tree[id].tables, { select: false, focus: false });
+        this.treeView.reveal(this.tree[id]);
+      }
     });
     this.refresh();
   }
@@ -148,6 +149,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       return obj;
     }
     return Object.keys(obj).map((k) => obj[k]);
+  }
+
+  constructor() {
+    this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this })
   }
 }
 

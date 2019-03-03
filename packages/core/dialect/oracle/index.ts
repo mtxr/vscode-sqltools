@@ -15,7 +15,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     version: OracleDBLibVersion,
   }];
 
-  private _poolCreated = {};
+  public static poolMap = new Map<string, boolean>();
   public get connection() {
     if (!this.poolCreated) return;
     return this.lib.getConnection(this.poolName) as Promise<OracleDBLib.IConnection>;
@@ -28,15 +28,18 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   }
 
   private get poolName(): string {
-    return this.credentials.name;
+    return Utils.getDbId(this.credentials);
   }
 
   private get poolCreated(): boolean {
-    return this._poolCreated[this.poolName];
+    return !!OracleDB.poolMap.get(this.poolName);
   }
-  
-  private set poolCreated(value: boolean) {
-    this._poolCreated[this.poolName] = value;
+
+  private registerPool() {
+    OracleDB.poolMap.set(this.poolName, true);
+  }
+  private unregisterPool() {
+    OracleDB.poolMap.delete(this.poolName);
   }
 
   public async open() {
@@ -55,14 +58,14 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       user: this.credentials.username,
       poolAlias: this.poolName
     });
-    this.poolCreated = true;
+    this.registerPool();
     return this.connection;
   }
 
   public async close() {
     if (!this.poolCreated) return Promise.resolve();
     await this.lib.getPool(this.poolName).close(10 as any);
-    this.poolCreated = false;
+    this.unregisterPool();
   }
 
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {

@@ -53,7 +53,7 @@ export const GetTablesAndColumnsRequest = new RequestType<
   void
 >('connection/getTableAndColumns');
 
-export const ExportResults = new RequestType<
+export const SaveResults = new RequestType<
   { connId: string, filename: string, query: string, filetype: 'json' | 'csv' },
   void,
   Error,

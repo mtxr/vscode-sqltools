@@ -29,7 +29,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   messagesHandler = ({ action, payload, connId }: WebviewMessageType<any>) => {
-    console.log({action, payload, connId});
+    process.env.ENV === 'development' && console.log('message received', {action, payload, connId});
     switch (action) {
       case 'queryResults':
         const queries = [];
