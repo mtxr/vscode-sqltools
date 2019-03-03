@@ -6,6 +6,7 @@ import {
   TreeView,
   TreeItem,
   window,
+  workspace,
 } from 'vscode';
 import {
   SidebarColumn,
@@ -17,6 +18,8 @@ import {
 import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import { getDbId } from '@sqltools/core/utils';
 import { EXT_NAME } from '@sqltools/core/constants';
+import ConfigManager from '@sqltools/core/config-manager';
+
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
 | SidebarColumn
@@ -24,7 +27,8 @@ export type SidebarDatabaseItem = SidebarConnection
 | SidebarDatabaseSchemaGroup;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
-  private treeView: TreeView<TreeItem>;;
+  private static _instance: ConnectionExplorer;
+  private treeView: TreeView<TreeItem>;
   public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
     this.onDidChange.event;
@@ -71,12 +75,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     const keys = [];
     let shouldUpdate = false;
     connections.forEach((conn) => {
-      if (this.tree[this.getDbId(conn)] && this.tree[this.getDbId(conn)].updateCreds(conn)) {
+      if (this.tree[getDbId(conn)] && this.tree[getDbId(conn)].updateCreds(conn)) {
         shouldUpdate = true;
       } else {
-        this.tree[this.getDbId(conn)] = new SidebarConnection(conn);
+        this.tree[getDbId(conn)] = new SidebarConnection(conn);
       }
-      keys.push(this.getDbId(conn));
+      keys.push(getDbId(conn));
     });
 
     if (Object.keys(this.tree).length !== keys.length) {
@@ -95,7 +99,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     columns: DatabaseInterface.TableColumn[],
   ) {
     if (!conn) return;
-    const treeKey = this.getDbId(conn);
+    const treeKey = getDbId(conn);
 
     this.tree[treeKey] = this.tree[treeKey] || new SidebarConnection(conn);
 
@@ -120,7 +124,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 
   public setActiveConnection(c?: ConnectionInterface, reveal?: boolean) {
-    const idActive = c ? this.getDbId(c) : null;
+    const idActive = c ? getDbId(c) : null;
     Object.keys(this.tree).forEach(id => {
       if (id !== idActive) {
         return this.tree[id].deactivate();
@@ -140,10 +144,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.refresh();
   }
 
-  private getDbId(c: ConnectionInterface) {
-    return getDbId(c);
-  }
-
   private toArray(obj: any) {
     if (Array.isArray(obj)) {
       return obj;
@@ -151,9 +151,31 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return Object.keys(obj).map((k) => obj[k]);
   }
 
-  constructor() {
+  public getById(id: string) {
+    return this.tree[id] ? this.tree[id].conn : undefined;
+  }
+
+  public addConnection(connInfo: ConnectionInterface) {
+    const connList = ConfigManager.connections;
+    connList.push(connInfo);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+  }
+
+  public deleteConnection(connInfoOrId: ConnectionInterface | string) {
+    const id = typeof connInfoOrId === 'string' ? connInfoOrId : getDbId(connInfoOrId);
+    const connList = ConfigManager.connections.filter(c => getDbId(c) !== id);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+  }
+
+  private constructor() {
     this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this })
+  }
+
+  public static get instance() {
+    return this._instance || (this._instance = new this());
   }
 }
 
 export { SidebarColumn, SidebarConnection, SidebarTable, SidebarView };
+
+export default ConnectionExplorer.instance;

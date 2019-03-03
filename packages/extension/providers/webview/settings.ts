@@ -1,11 +1,5 @@
-import {
-  workspace as Wspc,
-} from 'vscode';
 import WebviewProvider from './webview-provider';
-import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
-
-const cfgKey = EXT_NAME.toLowerCase();
+import ConnectionExplorer from '../connection-explorer';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
@@ -24,9 +18,7 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private createConnection = async ({ connInfo }) => {
-    const connList = ConfigManager.connections;
-    connList.push(connInfo);
-    Wspc.getConfiguration(cfgKey).update('connections', connList)
+    ConnectionExplorer.addConnection(connInfo)
     .then(() => {
       this.postMessage({ action: 'createConnectionSuccess', payload: { connInfo } });
     }, (payload) => {

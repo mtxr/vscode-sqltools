@@ -175,6 +175,11 @@
                 }
             },
             {
+                "title": "Delete connection",
+                "command": "SQLTools.deleteConnection",
+                "category": "SQLTools Management"
+            },
+            {
                 "title": "Add name to cursor",
                 "command": "SQLTools.appendToCursor",
                 "category": "SQLTools Sidebar"
@@ -564,6 +569,11 @@
                 {
                     "command": "SQLTools.closeConnection",
                     "when": "view == SQLTools.tableExplorer && viewItem == connectedConnection",
+                    "group": "sqltools.dbExplorer@0"
+                },
+                {
+                    "command": "SQLTools.deleteConnection",
+                    "when": "view == SQLTools.tableExplorer && viewItem =~ /connection|connectedConnection/",
                     "group": "sqltools.dbExplorer@0"
                 },
                 {

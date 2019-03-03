@@ -26,13 +26,6 @@ import {
   CloseConnectionRequest,
 } from '@sqltools/core/contracts/connection-requests';
 import LogWriter from './log-writer';
-import {
-  ConnectionExplorer,
-  SidebarDatabaseItem,
-  SidebarTable,
-  SidebarView,
-  SidebarConnection,
- } from './providers';
 import ResultsWebview from './providers/webview/results';
 import SettingsWebview from './providers/webview/settings';
 import { BookmarksStorage, History, ErrorHandler, Utils } from './api';
@@ -43,12 +36,12 @@ import LC from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import Logger from '@sqltools/core/utils/logger';
+import ConnectionExplorer, { SidebarDatabaseItem, SidebarTable, SidebarConnection, SidebarView } from './providers/connection-explorer';
 
 
 export namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
   const logger = new Logger(LogWriter);
-  const connectionExplorer = new ConnectionExplorer();
   const extDatabaseStatus = Win.createStatusBarItem(StatusBarAlignment.Left, 10);
   const settingsEditor = new SettingsWebview();
 
@@ -157,7 +150,7 @@ export namespace SQLTools {
     return LC().sendRequest(CloseConnectionRequest, { conn })
       .then(async () => {
         logger.info('Connection closed!');
-        connectionExplorer.disconnect(conn as ConnectionInterface);
+        ConnectionExplorer.disconnect(conn as ConnectionInterface);
         updateStatusBar();
       }, ErrorHandler.create('Error closing connection'));
   }
@@ -219,7 +212,7 @@ export namespace SQLTools {
 
     try {
       await connect();
-      const query = await readInput('Query', `Type the query to run on ${connectionExplorer.getActive().name}`);
+      const query = await readInput('Query', `Type the query to run on ${ConnectionExplorer.getActive().name}`);
       printOutput();
       await runQuery(query);
     } catch (e) {
@@ -259,6 +252,26 @@ export namespace SQLTools {
 
   export async function cmdAddNewConnection() {
     settingsEditor.show();
+  }
+
+  export async function cmdDeleteConnection(connIdOrNode?: string | SidebarConnection) {
+    let id: string;
+    if (connIdOrNode) {
+      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
+    } else {
+      const conn = await connectionMenu();
+      id = conn ? getDbId(conn) : undefined;
+    }
+
+    if (!id) return;
+
+    const conn = ConnectionExplorer.getById(id);
+
+    const res = await Win.showInformationMessage(`Are you sure you want to remove ${conn.name}?`, { modal: true }, 'Yes');
+
+    if (!res) return;
+
+    return ConnectionExplorer.deleteConnection(id);
   }
 
   export function cmdRefreshSidebar() {
@@ -341,7 +354,7 @@ export namespace SQLTools {
   }
 
   function runConnectionCommand(command, ...args) {
-    return LC().sendRequest(RunCommandRequest, { conn: connectionExplorer.getActive(), command, args });
+    return LC().sendRequest(RunCommandRequest, { conn: ConnectionExplorer.getActive(), command, args });
   }
 
   async function runQuery(query, addHistory = true) {
@@ -458,8 +471,8 @@ export namespace SQLTools {
     extDatabaseStatus.tooltip = 'Select a connection';
     extDatabaseStatus.command = `${EXT_NAME}.selectConnection`;
     extDatabaseStatus.text = '$(database) Connect';
-    if (connectionExplorer.getActive()) {
-      extDatabaseStatus.text = `$(database) ${connectionExplorer.getActive().name}`;
+    if (ConnectionExplorer.getActive()) {
+      extDatabaseStatus.text = `$(database) ${ConnectionExplorer.getActive().name}`;
     }
     if (ConfigManager.showStatusbar) {
       extDatabaseStatus.show();
@@ -470,7 +483,7 @@ export namespace SQLTools {
 
   async function registerExtension() {
     const languageServerDisposable = await getLanguageServerDisposable();
-    queryResults = new ResultsWebview(LC(), connectionExplorer);
+    queryResults = new ResultsWebview(LC(), ConnectionExplorer);
     ContextManager.context.subscriptions.push(
       LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
@@ -485,25 +498,25 @@ export namespace SQLTools {
     queryResults.onDidDispose(cmdRefreshSidebar);
 
     registerLanguageServerRequests();
-    connectionExplorer.setConnections(ConfigManager.connections);
+    ConnectionExplorer.setConnections(ConfigManager.connections);
   }
 
   async function registerLanguageServerRequests() {
     LC().onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
-      connectionExplorer.setTreeData(conn, tables, columns);
-      if (conn && getDbId(connectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
-        connectionExplorer.setActiveConnection();
+      ConnectionExplorer.setTreeData(conn, tables, columns);
+      if (conn && getDbId(ConnectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
+        ConnectionExplorer.setActiveConnection();
       } else {
-        connectionExplorer.setActiveConnection(connectionExplorer.getActive());
+        ConnectionExplorer.setActiveConnection(ConnectionExplorer.getActive());
       }
     });
   }
   function reloadConfig() {
     loadConfigs();
     logger.info('Config reloaded!');
-    autoConnectIfActive(connectionExplorer.getActive());
+    autoConnectIfActive(ConnectionExplorer.getActive());
     updateStatusBar();
-    if (connectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
+    if (ConnectionExplorer.setConnections(ConfigManager.connections)) cmdRefreshSidebar();
   }
 
   async function setConnection(c?: ConnectionInterface, reveal?: boolean): Promise<ConnectionInterface> {
@@ -517,9 +530,9 @@ export namespace SQLTools {
       );
     }
     if (c && c.isConnected)
-      connectionExplorer.setActiveConnection(c, reveal);
+      ConnectionExplorer.setActiveConnection(c, reveal);
     updateStatusBar();
-    return connectionExplorer.getActive();
+    return ConnectionExplorer.getActive();
   }
 
   async function askForPassword(c: ConnectionInterface): Promise<string | null> {
@@ -531,8 +544,8 @@ export namespace SQLTools {
     });
   }
   async function connect(force = false): Promise<ConnectionInterface> {
-    if (!force && connectionExplorer.getActive()) {
-      return connectionExplorer.getActive();
+    if (!force && ConnectionExplorer.getActive()) {
+      return ConnectionExplorer.getActive();
     }
     const c: ConnectionInterface = await connectionMenu(true);
     history.clear();
