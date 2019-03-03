@@ -1,5 +1,5 @@
-import { LogLevel } from './logger';
-import { ConnectionInterface } from './connection';
+import { ConnectionInterface } from '@sqltools/core/interface/connection';
+import { LogLevel } from '@sqltools/core/utils/logger';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];

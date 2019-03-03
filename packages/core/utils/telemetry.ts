@@ -1,9 +1,9 @@
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
 import { VERSION, ENV, AI_KEY, EXT_NAME } from '@sqltools/core/constants';
-import Timer from './timer';
-import { runIfPropIsDefined } from './decorators';
-import { LoggerInterface } from '@sqltools/core/interface';
+import Timer from '@sqltools/core/utils/timer';
+import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
+import Logger from '@sqltools/core/utils/logger';
 
 type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
 
@@ -16,7 +16,7 @@ export interface VSCodeInfo {
 export interface TelemetryArgs {
   product: Product;
   enableTelemetry?: boolean;
-  useLogger?: LoggerInterface;
+  useLogger?: Logger;
   vscodeInfo?: VSCodeInfo;
 }
 
@@ -24,7 +24,7 @@ export class Telemetry {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
   public static enabled: Boolean;
   public static vscodeInfo: VSCodeInfo;
-  public static logger: LoggerInterface = console;
+  public static logger: Logger = new Logger();
   private client: AI.TelemetryClient;
   private product: Product;
   private prefixed(key: string) {
@@ -110,7 +110,7 @@ export class Telemetry {
     this.logger.info('Telemetry disabled!');
     this.client = undefined;
   }
-  public setLogger(useLogger: LoggerInterface = console) {
+  public setLogger(useLogger: Logger = new Logger()) {
     Telemetry.logger = useLogger;
   }
 

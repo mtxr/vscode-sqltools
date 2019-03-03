@@ -35,13 +35,14 @@ import {
  } from './providers';
 import ResultsWebview from './providers/webview/results';
 import SettingsWebview from './providers/webview/settings';
-import { Logger, BookmarksStorage, History, ErrorHandler, Utils } from './api';
+import { BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
 import { DismissedException } from '@sqltools/core/exception';
 import LC from './language-client';
 import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
+import Logger from '@sqltools/core/utils/logger';
 
 
 export namespace SQLTools {

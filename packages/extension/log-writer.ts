@@ -2,31 +2,70 @@ import {
   OutputChannel,
   window,
 } from 'vscode';
-import { EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { VERSION, DISPLAY_NAME } from '@sqltools/core/constants';
+import { Console } from 'console';
+import { Writable } from 'stream';
 
-namespace Logwriter {
-  const outputChannel = window.createOutputChannel('SQLTools');
-  export function debug(message: string, ...data: any[]) {
-    writeLog(`DEBUG: ${message}`, ...data);
+const outputChannel = window.createOutputChannel(DISPLAY_NAME);
+
+const writableStream: Writable = new Writable({
+
+  write: (chunk, _, done) => {
+    outputChannel.append(chunk.toString());
+    done();
   }
-  export function error(message: string, ...data: any[]) {
-    writeLog(`ERROR: ${message}`, ...data);
+})
+
+const console = new Console({ stdout: writableStream, stderr: writableStream });
+
+export class Logwriter implements Console {
+  Console: NodeJS.ConsoleConstructor;
+  assert = console.assert;
+  clear(): void {
+    outputChannel.clear()
   }
-  export function info(message: string, ...data: any[]) {
-    writeLog(`INFO: ${message}`, ...data);
+  count = console.count;
+  countReset = console.countReset;
+  dir = console.dir;
+  dirxml = console.dirxml;
+  group = console.group;
+  groupCollapsed = console.groupCollapsed;
+  groupEnd = console.groupEnd;
+  table = console.table;
+  time = console.time;
+  timeEnd = console.timeEnd;
+  timeLog = console.timeLog;
+  trace = console.trace;
+  markTimeline = console.markTimeline;
+  profile = console.profile;
+  profileEnd = console.profileEnd;
+  timeStamp = console.timeStamp;
+  timeline = console.timeline;
+  timelineEnd = console.timelineEnd;
+  public log(message: string, ...data: any[]) {
+    this.writeLog(`DEBUG: ${message}`, ...data);
   }
-  export function warn(message: string, ...data: any[]) {
-    writeLog(`WARN: ${message}`, ...data);
+  public debug(message: string, ...data: any[]) {
+    this.writeLog(`DEBUG: ${message}`, ...data);
   }
-  export function showOutput() {
+  public error(message: string, ...data: any[]) {
+    this.writeLog(`ERROR: ${message}`, ...data);
+  }
+  public info(message: string, ...data: any[]) {
+    this.writeLog(`INFO: ${message}`, ...data);
+  }
+  public warn(message: string, ...data: any[]) {
+    this.writeLog(`WARN: ${message}`, ...data);
+  }
+  public showOutput() {
     outputChannel.show();
   }
-  export function getOutputChannel(): OutputChannel {
+  public getOutputChannel(): OutputChannel {
     return outputChannel;
   }
 
-  export function writeLog(message: string, ...data: any[]) {
-    const date = (new Date()).toISOString().substring(0, 20);
+  public writeLog(message: string, ...data: any[]) {
+    const date = new Date().toISOString().substr(0, 19).replace('T', ' ');
     outputChannel.appendLine(`[${date}][${VERSION}] ${message}`);
     if (data.length > 0) {
       data.forEach((obj: any | object) => {
@@ -38,4 +77,4 @@ namespace Logwriter {
     }
   }
 }
-export default Logwriter;
+export default new Logwriter();

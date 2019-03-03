@@ -1,4 +1,4 @@
-import { Notifications } from './contracts';
+import { ExitCalledNotification } from './contracts';
 import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
 
 const AutoRestartPlugin: LanguageServerPlugin = {
@@ -6,7 +6,7 @@ const AutoRestartPlugin: LanguageServerPlugin = {
     const nodeExit = process.exit;
     process.exit = ((code?: number): void => {
       const stack = new Error('stack');
-      server.sendNotification(Notifications.ExitCalled, [code ? code : 0, stack.stack]);
+      server.sendNotification(ExitCalledNotification, [code ? code : 0, stack.stack]);
       setTimeout(() => {
         nodeExit(code);
       }, 1000);

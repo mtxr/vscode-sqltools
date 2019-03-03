@@ -1,7 +1,7 @@
 import { IConnection, TextDocuments } from 'vscode-languageserver';
 import { LanguageClient, ErrorHandler as LanguageClientErrorHandler, } from 'vscode-languageclient';
-import { LoggerInterface } from './logger';
-import { Telemetry } from '../utils';
+import Telemetry from '@sqltools/core/utils/telemetry';
+import Logger from '@sqltools/core/utils/logger';
 export type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 
 export type Arg0<T> = ArgsType<T>[0];
@@ -32,7 +32,7 @@ export interface SQLToolsLanguageServerInterface {
   notifyError(message: string, error?: any): any;
   client: IConnection['client'];
   docManager: TextDocuments;
-  log: LoggerInterface;
+  log: Logger;
   logger: Telemetry;
 }
 
@@ -45,6 +45,6 @@ export interface SQLToolsLanguageClientInterface {
   sendNotification: LanguageClient['sendNotification'];
   onNotification: LanguageClient['onNotification'];
   registerPlugin(plugin: LanguageClientPlugin): this;
-  log: LoggerInterface;
+  log: Logger;
   logger: Telemetry;
 }

@@ -18,7 +18,7 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   private _logger = new Telemetry({
     enableTelemetry: false,
     product: 'language-server',
-    useLogger: Logger,
+    useLogger: new Logger(),
   });
   private _server: IConnection;
   private _docManager = new TextDocuments();
@@ -134,7 +134,6 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
 
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
-      Logger.error(message, err);
       this.logger.registerException(err, { message, languageServer: true });
       this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
     }
