@@ -4,7 +4,7 @@ const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
-module.exports = function getLanguageServerConfig(env) {
+module.exports = function getLanguageServerConfig() {
   let config = {
     name: 'languageserver',
     target: 'node',

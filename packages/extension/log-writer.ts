@@ -13,6 +13,10 @@ const writableStream: Writable = new Writable({
   write: (chunk, _, done) => {
     outputChannel.append(chunk.toString());
     done();
+  },
+  writev: (chunk, done) => {
+    outputChannel.append(chunk.toString());
+    done();
   }
 })
 
@@ -42,39 +46,30 @@ export class Logwriter implements Console {
   timeStamp = console.timeStamp;
   timeline = console.timeline;
   timelineEnd = console.timelineEnd;
+
+  private prefix(type: string) {
+    return `${type}:`;
+  }
   public log(message: string, ...data: any[]) {
-    this.writeLog(`DEBUG: ${message}`, ...data);
+    console.log(this.prefix('DEBUG'), message, ...data);
   }
   public debug(message: string, ...data: any[]) {
-    this.writeLog(`DEBUG: ${message}`, ...data);
+    console.debug(this.prefix('DEBUG'), message, ...data);
   }
   public error(message: string, ...data: any[]) {
-    this.writeLog(`ERROR: ${message}`, ...data);
+    console.error(this.prefix('ERROR'), message, ...data);
   }
   public info(message: string, ...data: any[]) {
-    this.writeLog(`INFO: ${message}`, ...data);
+    console.info(this.prefix('INFO'), message, ...data);
   }
   public warn(message: string, ...data: any[]) {
-    this.writeLog(`WARN: ${message}`, ...data);
+    console.warn(this.prefix('WARN'), message, ...data);
   }
   public showOutput() {
     outputChannel.show();
   }
   public getOutputChannel(): OutputChannel {
     return outputChannel;
-  }
-
-  public writeLog(message: string, ...data: any[]) {
-    const date = new Date().toISOString().substr(0, 19).replace('T', ' ');
-    outputChannel.appendLine(`[${date}][${VERSION}] ${message}`);
-    if (data.length > 0) {
-      data.forEach((obj: any | object) => {
-        if (typeof obj === 'object' || Array.isArray(obj)) {
-          return outputChannel.appendLine(`[${date}][${VERSION}] ` + JSON.stringify(obj));
-        }
-        return outputChannel.appendLine(`[${date}][${VERSION}] ` + obj.toString());
-      });
-    }
   }
 }
 export default new Logwriter();

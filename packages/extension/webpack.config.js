@@ -13,15 +13,11 @@ const dependencies = Object.assign({}, uiPkgJson.dependencies || {}, lsPkgJson.d
 const devDependencies = Object.assign({}, uiPkgJson.devDependencies || {}, lsPkgJson.devDependencies || {}, corePkgJson.devDependencies || {}, extPkgJson.devDependencies || {});
 
 // defintions
-extPkgJson.name = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools'; // vscode marketplace name
+extPkgJson.name = process.env.PREVIEW ? 'SQLTools-preview' : 'SQLTools'; // vscode marketplace name
 
 const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
-/**
- *
- * @param {*} env
- * @returns webpack.Configuration
- */
-function getExtensionConfig(env) {
+
+function getExtensionConfig() {
   /** @type webpack.Configuration */
   let config = {
     name: 'sqltools',
@@ -45,8 +41,8 @@ function getExtensionConfig(env) {
         {
           from: path.join(__dirname, 'package.json'),
           to: path.join(outdir, 'package.json'),
-          transform: (content, filepath) => {
-            content = extPkgJson;
+          transform: () => {
+            const content = { ...extPkgJson, name: extPkgJson.name.toLowerCase() };
             if (process.env.PREVIEW) {
               content.preview = true;
               content.displayName = `${extPkgJson.displayName} - Preview`;
@@ -63,7 +59,7 @@ function getExtensionConfig(env) {
               delete content.devDependencies[k];
             });
 
-            return JSON.stringify(content, null, env.production ? undefined : 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
+            return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2).replace(/SQLTools\./g, `${extPkgJson.name}.`);
           }
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -90,16 +86,16 @@ function getExtensionConfig(env) {
   return config;
 }
 
-module.exports = function (env = {}) {
-  env.production = !!env.production;
-  return [getLanguageServerConfig(env), getExtensionConfig(env), getWebviewConfig(env)].map((config) => {
+module.exports = () => {
+  const isProduction = process.env.NODE_ENV !== 'development';
+  return [getLanguageServerConfig(), getExtensionConfig(), getWebviewConfig()].map((config) => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
-        'process.env.ENV': JSON.stringify(env.production ? 'production' : 'development'),
+        'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
       })
     ].concat(config.plugins || []);
     config.node = {
@@ -108,14 +104,14 @@ module.exports = function (env = {}) {
     };
 
     config.devtool = 'inline-source-map';
-    if (env.production) {
+    if (isProduction) {
       config.devtool = 'source-map'   ;
       config.optimization = config.optimization || {};
       config.optimization.minimize = false;
     } else {
       delete config.optimization;
     }
-    config.mode = env.production ? 'production' : 'development';
+    config.mode = isProduction ? 'production' : 'development';
     return config;
   });
 };

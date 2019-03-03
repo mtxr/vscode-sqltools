@@ -180,6 +180,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   };
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    process.env.NODE_ENV === 'development' && console.log(`Message received: ${action}`, payload);
     switch(action) {
       case 'createConnectionSuccess':
         const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
@@ -198,7 +199,8 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
 
       case 'createConnectionError':
         this.setState({
-          onSaveError: (payload || '').toString(),
+          loading: false,
+          onSaveError: ((payload && payload.message ? payload.message : payload) || '').toString(),
         });
         break;
 

@@ -4,7 +4,7 @@ const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
-module.exports = exports = function getWebviewConfig(env) {
+module.exports = exports = function getWebviewConfig() {
   return {
     name: 'ui',
     entry: {
