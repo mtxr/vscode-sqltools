@@ -1,12 +1,14 @@
+import path from 'path';
 import { VERSION } from '@sqltools/core/constants';
-import { read as readLocalConfig, write as writeLocalConfig } from '@sqltools/core/utils/persistence';
 import {
   commands as VSCommands,
   env as VSEnv,
 } from 'vscode';
 import { Uri } from 'vscode';
+import SerializableStorage from '@sqltools/core/utils/serializable-storage';
+import { getHome } from '@sqltools/core/utils/get-home';
 
-let localSetupData: any;
+let setup: SerializableStorage<any, string>;
 
 namespace Utils {
   /**
@@ -15,10 +17,11 @@ namespace Utils {
    * @throws {EnvironmentException} Can't find user path from wnv
    * @returns {string} Returns user path as string
    */
-  export async function getlastRunInfo() {
-    if (localSetupData) {
-      return localSetupData;
+  export function getlastRunInfo() {
+    if (setup) {
+      return setup.getContent();
     }
+    setup = new SerializableStorage<any, string>(path.join(getHome(), '.sqltools-setup'));
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),
@@ -36,24 +39,20 @@ namespace Utils {
       },
     };
     try {
-      localConfig.onDisk = readLocalConfig();
+      localConfig.onDisk = setup.getContent();
       localConfig.current.updated = localConfig.current.numericVersion > localConfig.onDisk.numericVersion;
       localConfig.current.lastNotificationDate = localConfig.onDisk.lastNotificationDate || 0;
     } catch (e) { /**/ }
 
-    localSetupData = localConfig;
-    writeLocalConfig(localConfig.current);
+    setup.content(localConfig.current).save();
 
-    return localConfig;
+    return localConfig.current;
   }
 
-  export async function updateLastRunInfo(props = {}) {
+  export function updateLastRunInfo(props = {}) {
     try {
-      const lastRun = await getlastRunInfo();
-      lastRun.current = Object.assign({}, lastRun.current || {}, props);
-      localSetupData = lastRun;
-
-      await writeLocalConfig(lastRun.current);
+      const current = Object.assign({}, getlastRunInfo() || {}, props);
+      setup.content(current).save();
     } catch (e) { /**/ }
   }
 

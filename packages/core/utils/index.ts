@@ -1,5 +1,4 @@
 import * as query from './query';
-import * as persistence from './persistence';
 import commandExists from './command-exists';
 import { ConnectionInterface, DatabaseDialect } from '../interface';
 
@@ -32,4 +31,4 @@ export function getDbDescription(c: ConnectionInterface): string | null {
   ].filter(Boolean).join('');
 }
 
-export { query, persistence, commandExists };
+export { query, commandExists };

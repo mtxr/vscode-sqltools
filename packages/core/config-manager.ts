@@ -35,6 +35,6 @@ const handler = {
 };
 
 type ExtendedSettings = Settings & { get?(...args): any, setSettings?(...args): void };
-const settingsProxy = new Proxy<ExtendedSettings>(settings, handler);
+const ConfigManager = new Proxy<ExtendedSettings>(settings, handler);
 
-export default settingsProxy;
+export default ConfigManager;

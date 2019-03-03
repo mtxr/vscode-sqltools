@@ -3,8 +3,6 @@ import {
   ExtensionContext,
   QuickPickItem,
   StatusBarAlignment,
-  TextEditor,
-  TextEditorEdit,
   window as Win,
   workspace as Wspc,
   QuickPickOptions,
@@ -106,7 +104,7 @@ export namespace SQLTools {
   export async function cmdBookmarkSelection() {
     try {
       const query = await getSelectedText('bookmark');
-      bookmarks.add(await readInput('Query name'), query);
+      bookmarks.set(await readInput('Query name'), query);
     } catch (e) {
       ErrorHandler.create('Error bookmarking query.')(e);
     }
@@ -121,10 +119,10 @@ export namespace SQLTools {
   }
 
   export function cmdClearBookmarks(): void {
-    bookmarks.clear();
+    bookmarks.reset();
   }
 
-  export async function cmdAppendToCursor(node: SidebarDatabaseItem | string, ...rest: any): Promise<void> {
+  export async function cmdAppendToCursor(node: SidebarDatabaseItem | string): Promise<void> {
     if (!node) return;
     return insertText(typeof node === 'string' ? node : node.value);
   }
@@ -323,10 +321,10 @@ export namespace SQLTools {
     return connections.find((c) => getDbId(c) === sel);
   }
 
-  async function bookmarksMenu(prop?: string): Promise<QuickPickItem | string> {
+  async function bookmarksMenu<R = QuickPickItem | string>(prop?: string): Promise<R> {
     const all = bookmarks.all();
 
-    return await quickPick(Object.keys(all).map((key) => {
+    return await quickPick<R>(Object.keys(all).map((key) => {
       return {
         description: '',
         detail: all[key],
@@ -546,7 +544,7 @@ export namespace SQLTools {
 
   async function help() {
     try {
-      const { current = { } } = await Utils.getlastRunInfo();
+      const current = Utils.getlastRunInfo();
       const { lastNotificationDate = 0, updated } = current;
       const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
       const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
@@ -558,7 +556,7 @@ export namespace SQLTools {
         || updatedRecently
       ) return;
 
-      await Utils.updateLastRunInfo({ lastNotificationDate: +new Date() });
+      Utils.updateLastRunInfo({ lastNotificationDate: +new Date() });
 
       const moreInfo = 'More Info';
       const supportProject = 'Support This Project';
