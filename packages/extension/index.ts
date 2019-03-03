@@ -121,6 +121,7 @@ namespace SQLTools {
     bookmarks.clear();
   }
 
+  // @TODO: Inplace edit any doc
   // inplace format for any lang
   export function editorFormatSql(editor: TextEditor, edit: TextEditorEdit): void {
     try {

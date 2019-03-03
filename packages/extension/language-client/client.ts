@@ -147,7 +147,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
       )((errMessage || err.message || err).toString());
     };
     this.client.onNotification(
-      Notification.OnError,
+      'serverError', // @TODO: constant
       onError,
     );
     this.logger.registerInfoMessage('LanguageClient ready');

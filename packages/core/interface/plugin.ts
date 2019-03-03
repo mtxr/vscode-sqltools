@@ -1,4 +1,4 @@
-import { IConnection } from 'vscode-languageserver';
+import { IConnection, TextDocuments } from 'vscode-languageserver';
 import { LanguageClient, ErrorHandler as LanguageClientErrorHandler, } from 'vscode-languageclient';
 import { LoggerInterface } from './logger';
 import { Telemetry } from '../utils';
@@ -19,10 +19,15 @@ export interface SQLToolsLanguageServerInterface {
   registerPlugin(plugin: LanguageServerPlugin): this;
   sendNotification: IConnection['sendNotification'];
   onNotification: IConnection['onNotification'];
-  onRequest: IConnection['onRequest'];
+  onDocumentFormatting: IConnection['onDocumentFormatting'];
+  onDocumentRangeFormatting: IConnection['onDocumentRangeFormatting'];
   sendRequest: IConnection['sendRequest'];
-  addOnInitializeHook(hook: Arg0<IConnection['onInitialize']>): SQLToolsLanguageServerInterface;
-  addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>): SQLToolsLanguageServerInterface;
+  addOnDidChangeConfigurationHooks(hook: Arg0<IConnection['onDidChangeConfiguration']>): this;
+  addOnInitializeHook(hook: Arg0<IConnection['onInitialize']>): this;
+  addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>): this;
+  notifyError(message: string, error?: any): any;
+  client: IConnection['client'];
+  docManager: TextDocuments;
   log: LoggerInterface;
   logger: Telemetry;
 }

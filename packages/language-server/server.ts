@@ -6,11 +6,13 @@ import {
   InitializedParams,
   InitializeResult,
   CancellationToken,
+  TextDocuments,
 } from 'vscode-languageserver';
 
 import Logger from '@sqltools/core/utils/logger';
 import { Telemetry } from '@sqltools/core/utils';
 import { LanguageServerPlugin, Arg0, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
+import ConfigManager from '@sqltools/core/config-manager';
 
 class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   private _logger = new Telemetry({
@@ -18,14 +20,18 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     product: 'language-server',
     useLogger: Logger,
   });
-  private server: IConnection;
+  private _server: IConnection;
+  private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
   private onInitializedHooks: Arg0<IConnection['onInitialized']>[] = [];
+  private onDidChangeConfigurationHooks: Arg0<IConnection['onInitialized']>[] = [];
 
   constructor() {
-    this.server = createConnection(ProposedFeatures.all);
-    this.server.onInitialized(this.onInitialized);
-    this.server.onInitialize(this.onInitialize);
+    this._server = createConnection(ProposedFeatures.all);
+    this._server.onInitialized(this.onInitialized);
+    this._server.onInitialize(this.onInitialize);
+    this._server.onDidChangeConfiguration(this.onDidChangeConfiguration);
+    this._docManager.listen(this._server);
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
@@ -43,17 +49,35 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     }
 
     return this.onInitializeHooks
-      .reduce<InitializeResult>(
-        (opts, hook) => {
-          const result = hook(params, token) as InitializeResult;
-          return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
-        },
-        { capabilities: {} }
-      );
+    .reduce<InitializeResult>((opts, hook) => {
+      const result = hook(params, token) as InitializeResult;
+      return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
+    },
+    {
+      capabilities: {
+        documentFormattingProvider: false,
+        documentRangeFormattingProvider: false,
+        textDocumentSync: this.docManager.syncKind,
+      }
+    });
   };
 
+  private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = (changes) => {
+    ConfigManager.setSettings(changes.settings.sqltools);
+    if (ConfigManager.telemetry && !Telemetry.enabled) this.logger.enable();
+    else if (Telemetry.enabled) this.logger.disable();
+
+    this.onDidChangeConfigurationHooks.forEach(hook => hook(changes));
+  };
+  public get onDocumentFormatting () {
+    return this._server.onDocumentFormatting;
+  }
+  public get onDocumentRangeFormatting () {
+    return this._server.onDocumentRangeFormatting;
+  }
+
   public listen() {
-    this.server.listen();
+    this._server.listen();
     return this;
   }
 
@@ -63,18 +87,23 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   }
 
   public get sendNotification(): IConnection['sendNotification'] {
-    return this.sendNotification;
+    return this._server.sendNotification;
   }
   public get onNotification(): IConnection['onNotification'] {
-    return this.onNotification;
+    return this._server.onNotification;
   }
 
   public get onRequest(): IConnection['onRequest'] {
-    return this.onRequest;
+    return this._server.onRequest;
   }
 
   public get sendRequest(): IConnection['sendRequest'] {
-    return this.sendRequest;
+    return this._server.sendRequest;
+  }
+
+  public addOnDidChangeConfigurationHooks(hook: Arg0<IConnection['onDidChangeConfiguration']>) {
+    this.onDidChangeConfigurationHooks.push(hook);
+    return this;
   }
 
   public addOnInitializeHook(hook: Arg0<IConnection['onInitialize']>) {
@@ -87,12 +116,30 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     return this;
   }
 
+  public get client() {
+    return this._server.client;
+  }
+
+  public get docManager() {
+    return this._docManager;
+  }
+
   public get log() {
     return this._logger.log;
   }
 
   public get logger() {
     return this._logger;
+  }
+
+  public notifyError(message: string, error?: any): any {
+    const cb = (err: any = '') => {
+      Logger.error(message, err);
+      this.logger.registerException(err, { message, languageServer: true });
+      this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
+    }
+    if (typeof error !== 'undefined') return cb(error);
+    return cb;
   }
 }
 
