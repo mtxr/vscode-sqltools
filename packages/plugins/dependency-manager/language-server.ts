@@ -5,7 +5,7 @@ import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import { commandExists } from '@sqltools/core/utils';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
-import { InstallDep } from './contracts';
+import { InstallDepRequest } from './contracts';
 import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
 
 function run(
@@ -98,7 +98,7 @@ export default class DependencyManager implements LanguageServerPlugin {
       fs.mkdirSync(path.join(this.root, 'node_modules'))
     } catch (error) {};
 
-    this.server.onRequest(InstallDep, this.onRequestToInstall);
+    this.server.onRequest(InstallDepRequest, this.onRequestToInstall);
   }
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {

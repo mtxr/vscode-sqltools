@@ -4,7 +4,7 @@ import {
   DocumentRangeFormattingRequest, IConnection, TextDocuments, InitializeParams, ProposedFeatures,
 } from 'vscode-languageserver';
 
-import Formatter from './requests/format';
+import Formatter from '@sqltools/plugins/formatter/request-handler';
 import * as Utils from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
@@ -20,18 +20,18 @@ import {
   GetCachedPassword,
   SaveResults,
 } from '@sqltools/core/contracts/connection-requests';
-import Notification from '@sqltools/core/contracts/notifications';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
 import store from './store';
 import * as actions from './store/actions';
 import Logger from '@sqltools/core/utils/logger';
 import { Telemetry, TelemetryArgs } from '@sqltools/core/utils';
-import { MissingModule } from '@sqltools/core/exception';
-import Notifications from '@sqltools/core/contracts/notifications';
-import { DepInstaller } from './dep-install/service';
+import { MissingModuleException } from '@sqltools/core/exception';
+// import { DepInstaller } from './dep-install/service';
 import fs from 'fs';
 import csvStringify from 'csv-stringify/lib/sync';
+import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { ExitCalledNotification } from '@sqltools/plugins/auto-restart/contracts';
 
 namespace SQLToolsLanguageServer {
   const server: IConnection = createConnection(ProposedFeatures.all);
@@ -41,8 +41,8 @@ namespace SQLToolsLanguageServer {
   let sgdbConnections: Connection[] = [];
   let completionItems: CompletionItem[] = [];
   let telemetry: Telemetry;
-  let extensionPath: string;
-  let depInstaller = new DepInstaller({ root: __dirname });
+  // let extensionPath: string;
+  // // let depInstaller = new DepInstaller({ root: __dirname });
 
   docManager.listen(server);
 
@@ -61,7 +61,7 @@ namespace SQLToolsLanguageServer {
     const cb = (err: any = '') => {
       Logger.error(message, err);
       telemetry.registerException(err, { message, languageServer: true });
-      server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
+      // server.sendNotification(Notification.OnError, { err, message, errMessage: (err.message || err).toString() });
     }
     if (typeof error !== 'undefined') return cb(error);
     return cb;
@@ -102,8 +102,8 @@ namespace SQLToolsLanguageServer {
     }
     telemetry = new Telemetry(telemetryArgs);
 
-    extensionPath = initializationOptions.extensionPath;
-    depInstaller.boot({ root: extensionPath, server });
+    // extensionPath = initializationOptions.extensionPath;
+    // depInstaller.boot({ root: extensionPath, server });
     return {
       capabilities: {
         completionProvider: {
@@ -192,8 +192,8 @@ namespace SQLToolsLanguageServer {
       return c.serialize();
     })
     .catch(e => {
-      if (e instanceof MissingModule) {
-        server.sendNotification(Notifications.MissingModule, {
+      if (e instanceof MissingModuleException) {
+        server.sendNotification(MissingModuleNotification, {
           conn: c.serialize(),
           moduleName: e.moduleName,
           moduleVersion: e.moduleVersion,
@@ -284,7 +284,7 @@ namespace SQLToolsLanguageServer {
   const nodeExit = process.exit;
   process.exit = ((code?: number): void => {
     const stack = new Error('stack');
-    server.sendNotification(Notification.ExitCalled, [code ? code : 0, stack.stack]);
+    server.sendNotification(ExitCalledNotification, [code ? code : 0, stack.stack]);
     setTimeout(() => {
       nodeExit(code);
     }, 1000);

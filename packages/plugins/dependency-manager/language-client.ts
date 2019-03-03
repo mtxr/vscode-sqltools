@@ -1,8 +1,7 @@
 import { window as Win } from 'vscode';
 import Utils from '@sqltools/extension/api/utils';
 import { OpenConnectionRequest } from '@sqltools/core/contracts/connection-requests';
-import Notification from '@sqltools/core/contracts/notifications';
-import { InstallDep } from '@sqltools/plugins/dependency-manager/contracts';
+import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 
 export default class DependencyManger implements LanguageClientPlugin {
@@ -23,7 +22,7 @@ export default class DependencyManger implements LanguageClientPlugin {
       );
       switch (r) {
         case installNow:
-          await this.client.sendRequest(InstallDep, { dialect: conn.dialect });
+          await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
           const opt = [`Connect to ${conn.name}`];
           const rr = await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
@@ -44,6 +43,6 @@ Go ahead and connect!`,
     }
   }
   private registerEvents() {
-    this.client.onNotification(Notification.MissingModule, param => this.requestToInstall(param));
+    this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
   }
 }

@@ -1,3 +1,1 @@
-export const Notifications = {
-  ExitCalled: 'AutoRestart/exitCalled',
-};
+export const ExitCalledNotification = 'AutoRestart/exitCalled';

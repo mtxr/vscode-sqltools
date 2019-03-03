@@ -1,6 +1,6 @@
 import { LanguageClientPlugin } from '@sqltools/core/interface/plugin';
 import { CloseAction } from 'vscode-languageclient';
-import { Notifications } from './contracts';
+import { ExitCalledNotification } from './contracts';
 
 let avoidRestart = false;
 
@@ -17,7 +17,7 @@ const AutoRestartPlugin: LanguageClientPlugin = {
       },
     };
 
-    client.onNotification(Notifications.ExitCalled, () => {
+    client.onNotification(ExitCalledNotification, () => {
       this.avoidRestart = true;
     });
   }
