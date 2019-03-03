@@ -1,19 +1,41 @@
 import { LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
-import { Disposable, DocumentRangeFormattingRequest } from 'vscode-languageserver';
-import requestHandler from './request-handler';
+import { Disposable, DocumentRangeFormattingRequest, DocumentRangeFormattingParams, DocumentFormattingParams, TextEdit, Range } from 'vscode-languageserver';
 import ConfigManager from '@sqltools/core/config-manager';
 import * as Utils from '@sqltools/core/utils';
+import { format } from './utils';
 
 export default class FormatterPlugin implements LanguageServerPlugin {
   private server: SQLToolsLanguageServerInterface;
   private formatterLanguages: string[] = [];
   private  formatterRegistration: Thenable<Disposable> | null = null;
 
+  private handler = (params: DocumentRangeFormattingParams | DocumentFormattingParams | DocumentRangeFormattingParams[]): TextEdit[] => {
+    try {
+      if (Array.isArray(params)) {
+        params = params[0];
+      }
+      const { textDocument, options, range } = params as DocumentRangeFormattingParams;
+      const document = this.server.docManager.get(textDocument.uri);
+      let text: string;
+      let newRange: Range;
+      if (range) {
+        text = document.getText().substring(document.offsetAt(range.start), document.offsetAt(range.end));
+      } else {
+        text = document.getText();
+        newRange = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
+      }
+
+      return [ TextEdit.replace(newRange || range, format(text, options.tabSize)) ];
+    } catch (e) {
+      this.server.logger.registerException(e);
+    }
+  }
+
   register(server: SQLToolsLanguageServerInterface) {
     this.server = server;
     this.server.addOnDidChangeConfigurationHooks(this.onDidChangeConfiguration);
-    this.server.onDocumentFormatting((params) => requestHandler(this.server.docManager, params));
-    this.server.onDocumentRangeFormatting((params) => requestHandler(this.server.docManager, params));
+    this.server.onDocumentFormatting(this.handler);
+    this.server.onDocumentRangeFormatting(this.handler);
   }
 
   private onDidChangeConfiguration = async () => {

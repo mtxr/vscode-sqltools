@@ -2,7 +2,7 @@ import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
 import { VERSION, ENV, AI_KEY, EXT_NAME } from '@sqltools/core/constants';
 import Timer from './timer';
-import { ifProp } from './decorators';
+import { runIfPropIsDefined } from './decorators';
 import { LoggerInterface } from '@sqltools/core/interface';
 
 type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
@@ -114,23 +114,23 @@ export class Telemetry {
     Telemetry.logger = useLogger;
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerCommand(command: string) {
     this.registerEvent(`cmd:${command}`);
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerInfoMessage(message, value = 'Dismissed') {
     this.registerMessage(Telemetry.SeveriryLevel.Information, message, value);
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerException(error: Error, meta: { [key: string]: any } = {}) {
     if (!error) return;
     this.sendException(error, meta);
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerErrorMessage(
     message,
     error?: Error,
@@ -142,12 +142,12 @@ export class Telemetry {
     }
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerSession() {
     this.registerEvent(`sessionStarted:${this.product}`);
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerMessage(
     severity: AI.Contracts.SeverityLevel,
     message: string,
@@ -157,7 +157,7 @@ export class Telemetry {
     this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerEvent(
     name: string,
     properties?: { [key: string]: string }
@@ -166,7 +166,7 @@ export class Telemetry {
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   private sendException(error: Error, properties: { [key: string]: any } = {}) {
     this.logger.error('Error: ', error);
     this.client.trackException({
@@ -176,12 +176,12 @@ export class Telemetry {
     });
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerTime(timeKey: string, timer: Timer) {
     this.registerMetric(this.prefixed(`time:${timeKey}`), timer.elapsed());
   }
 
-  @ifProp('client')
+  @runIfPropIsDefined('client')
   public registerMetric(name: string, value: number) {
     this.client.trackMetric({
       name,

@@ -13,7 +13,6 @@
     "mssql": "^4.3.1",
     "mysql": "^2.16.0",
     "pg": "^7.8.0",
-    "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b",
     "vscode-languageclient": "^5.3.0-next.1",
     "vscode-languageserver": "^5.3.0-next.1"
 

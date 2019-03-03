@@ -6,7 +6,8 @@
   "license": "GPL-3.0",
   "private": true,
   "dependencies": {
-    "@sqltools/core": "*"
+    "@sqltools/core": "*",
+    "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b"
   },
   "devDependencies": {
     "typescript": "^3.3.3"
