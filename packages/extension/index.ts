@@ -22,7 +22,7 @@ import {
   UpdateConnectionExplorerRequest,
   GetCachedPassword,
   CloseConnectionRequest,
-} from '@sqltools/core/contracts/connection-requests';
+} from '@sqltools/plugins/connection-manager/contracts';
 import LogWriter from './log-writer';
 import ResultsWebview from './providers/webview/results';
 import SettingsWebview from './providers/webview/settings';
@@ -301,16 +301,14 @@ export namespace SQLTools {
    * Management functions
    */
 
-  async function connectionMenu(onlyActive = false): Promise<ConnectionInterface> {
-    const connections: ConnectionInterface[] = await LC().sendRequest(ClientRequestConnections);
+  async function connectionMenu(connectedOnly = false): Promise<ConnectionInterface> {
+    const connections: ConnectionInterface[] = await LC().sendRequest(ClientRequestConnections, { connectedOnly });
 
-    const availableConns = connections.filter(c => onlyActive ? c.isConnected : true);
+    if (connections.length === 0 && connectedOnly) return connectionMenu();
 
-    if (availableConns.length === 0 && onlyActive) return connectionMenu();
+    if (connections.length === 1) return connections[0];
 
-    if (availableConns.length === 1) return availableConns[0];
-
-    const sel = (await quickPick(availableConns.map((c) => {
+    const sel = (await quickPick(connections.map((c) => {
       return {
         description: c.isConnected ? 'Currently connected' : '',
         detail: getDbDescription(c),

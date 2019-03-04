@@ -1,7 +1,8 @@
 import { RequestType, RequestType0 } from 'vscode-languageserver';
-import { DatabaseInterface, ConnectionInterface } from '../interface';
+import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 
-export const ClientRequestConnections = new RequestType0<
+export const ClientRequestConnections = new RequestType<
+  { connectedOnly?: boolean },
   ConnectionInterface[],
   Error,
   void
@@ -17,7 +18,7 @@ export const GetCachedPassword = new RequestType<
 >('connection/getCachedPassword');
 export const RunCommandRequest = new RequestType<
   { conn: ConnectionInterface; command: string; args: any[] },
-  DatabaseInterface.QueryResults[] | boolean,
+  DatabaseInterface.QueryResults[],
   Error,
   void
 >('connection/runCommand');
