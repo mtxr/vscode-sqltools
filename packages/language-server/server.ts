@@ -13,6 +13,7 @@ import Logger from '@sqltools/core/utils/logger';
 import { Telemetry } from '@sqltools/core/utils';
 import { LanguageServerPlugin, Arg0, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
 import ConfigManager from '@sqltools/core/config-manager';
+import store from './store';
 
 class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   private _logger = new Telemetry({
@@ -139,6 +140,10 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     }
     if (typeof error !== 'undefined') return cb(error);
     return cb;
+  }
+
+  public get store() {
+    return store;
   }
 }
 
