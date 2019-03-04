@@ -12,7 +12,12 @@ const initialState: State = {
 };
 
 function registerActionHandler<S = State>(type: string, handler: ActionHandler<S>) {
-  actionHandlers[type] = handler;
+  let actionHandler = handler;
+  if (actionHandlers[type]) {
+    const currentHandler = <typeof handler>actionHandlers[type];
+    actionHandler = (state, payload) => actionHandler(currentHandler(state, payload), payload);
+  }
+  actionHandlers[type] = actionHandler;
 }
 
 const store = createStore<State, AnyAction, {}, {}>((state = initialState, action) => {
