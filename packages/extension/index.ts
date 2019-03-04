@@ -5,8 +5,6 @@ import {
   StatusBarAlignment,
   window as Win,
   workspace as Wspc,
-  QuickPickOptions,
-  QuickPick,
   env as VSCodeEnv,
   version as VSCodeVersion,
 } from 'vscode';
@@ -31,9 +29,8 @@ import SettingsWebview from './providers/webview/settings';
 import { BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
-import { DismissedException } from '@sqltools/core/exception';
 import LC from './language-client';
-import { getOrCreateEditor, insertText, getSelectedText, insertSnippet } from './api/editor-utils';
+import { getOrCreateEditor, insertText, getSelectedText, insertSnippet, readInput, quickPick } from './api/vscode-utils';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import Logger from '@sqltools/core/utils/logger';
 import ConnectionExplorer, { SidebarDatabaseItem, SidebarTable, SidebarConnection, SidebarView } from './providers/connection-explorer';
@@ -604,71 +601,6 @@ export namespace SQLTools {
     const conn = await connect(true);
 
     return await tableMenu(conn, 'label');
-  }
-
-  /**
-   * @deprecated Will be removed in newer versions.
-   */
-  async function quickPickOldApi(
-    options: QuickPickItem[],
-    prop?: string,
-  ): Promise<QuickPickItem | any> {
-    const sel: QuickPickItem = await Win.showQuickPick(options);
-    if (!sel || (prop && !sel[prop])) throw new DismissedException();
-    return prop ? sel[prop] : sel;
-  }
-
-  type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<QuickPickOptions & {
-    title: QuickPick<T>['title'];
-    placeHolderDisabled?: QuickPick<T>['placeholder'];
-    buttons?: QuickPick<T>['buttons'],
-  }>;
-
-  async function quickPick<T = QuickPickItem | any>(
-    options: ((QuickPickItem & { value?: any }) | string)[],
-    prop?: string,
-    quickPickOptions?: ExtendedQuickPickOptions,
-  ): Promise<QuickPickItem | any> {
-    const items = options.length > 0 && typeof options[0] === 'object' ? <QuickPickItem[]>options : options.map<QuickPickItem>(value => ({
-      value,
-      label: value.toString(),
-    }));
-
-    if (typeof Win.createQuickPick !== 'function') return quickPickOldApi(items, prop);
-
-    const qPick = Win.createQuickPick();
-    const sel = await (new Promise<QuickPickItem | any>((resolve) => {
-      const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || {} as ExtendedQuickPickOptions;
-      qPick.onDidHide(() => qPick.dispose());
-      qPick.onDidChangeSelection((selection = []) => {
-        qPick.hide();
-        return resolve(qPickOptions.canPickMany ? selection : selection[0]);
-      });
-      qPick.onDidTriggerButton((btn: any) => {
-        if (btn.cb) btn.cb();
-        qPick.hide();
-      });
-
-      Object.keys(qPickOptions).forEach(k => {
-        qPick[k] = qPickOptions[k];
-      });
-      qPick.items = items;
-      qPick.enabled = items.length > 0;
-
-      if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
-
-      qPick.title = `${qPick.title || 'Items'} (${items.length})`;
-
-      qPick.show();
-    }));
-    if (!sel || (prop && !sel[prop])) throw new DismissedException();
-    return <T>(prop ? sel[prop] : sel);
-  }
-
-  async function readInput(prompt: string, placeholder?: string) {
-    const data = await Win.showInputBox({ prompt, placeHolder: placeholder || prompt });
-    if (Utils.isEmpty(data)) throw new DismissedException();
-    return data;
   }
 
   function loadPlugins() {
