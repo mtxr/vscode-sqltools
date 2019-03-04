@@ -1,16 +1,17 @@
 import { createStore, AnyAction, Store } from 'redux';
+import ConnetionManagerPlugin from '@sqltools/plugins/connection-manager/store';
 
 interface DefaultState {};
+type State = DefaultState & typeof ConnetionManagerPlugin.ConnectionManagerState; // add plugin state data here
+type ActionHandler<S = State> = (state: State & S, payload: any) => State & S;
 
-type State = DefaultState; // add plugin state data here
-
+const actionHandlers: { [type: string]: ActionHandler } = {};
 const initialState: State = {
   // add plugin props here
+  ...ConnetionManagerPlugin.ConnectionManagerState,
 };
 
-const actionHandlers: { [type: string]: (state: State, payload: any) => State } = {};
-
-export function registerActionHandler(type: string, handler: typeof actionHandlers[string]) {
+function registerActionHandler<S = State>(type: string, handler: ActionHandler<S>) {
   actionHandlers[type] = handler;
 }
 
@@ -21,4 +22,9 @@ const store = createStore<State, AnyAction, {}, {}>((state = initialState, actio
 
 (<any>store).registerActionHandler = registerActionHandler;
 
-export default <Store & { registerActionHandler?: typeof registerActionHandler }>store;
+export type LSStore = Store & { registerActionHandler?: typeof registerActionHandler };
+
+/** REGISTER PLUGINS **/
+ConnetionManagerPlugin.register(store);
+
+export default <LSStore>store;
