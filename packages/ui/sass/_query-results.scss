@@ -388,6 +388,7 @@ div mark {
     text-overflow: ellipsis;
     padding: 4px 24px;
     color: var(--vscode-menu-foreground);
+    text-decoration: none;
     &:hover {
       background: var(--vscode-menu-selectionBackground);
       color: var(--vscode-menu-selectionForeground);

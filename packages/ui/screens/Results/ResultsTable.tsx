@@ -12,10 +12,9 @@ const SaveJSONOption = 'Save as JSON';
 const TableContextMenuOptions = [
   CopyCellOption,
   CopyRowOption,
-  // @TODO: add option to export save menu
-  // 'sep',
-  // SaveCSVOption,
-  // SaveJSONOption,
+  'sep',
+  { label: SaveCSVOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?csv`) },
+  { label: SaveJSONOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?json`) },
 ];
 
 const FilterComponent = ({ filter, column, onChange }) => {
@@ -179,8 +178,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
         break;
       case SaveCSVOption:
-        break;
       case SaveJSONOption:
+        // handled with commands uri
         break;
     }
     this.onMenuClose();
