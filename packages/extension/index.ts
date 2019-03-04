@@ -26,7 +26,6 @@ import {
 import LogWriter from './log-writer';
 import ResultsWebview from './providers/webview/results';
 import SettingsWebview from './providers/webview/settings';
-import { BookmarksStorage, History, ErrorHandler, Utils } from './api';
 import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Timer, Telemetry, query as QueryUtils, getDbId, getDbDescription } from '@sqltools/core/utils';
 import LC from './language-client';
@@ -34,6 +33,10 @@ import { getOrCreateEditor, insertText, getSelectedText, insertSnippet, readInpu
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import Logger from '@sqltools/core/utils/logger';
 import ConnectionExplorer, { SidebarDatabaseItem, SidebarTable, SidebarConnection, SidebarView } from './providers/connection-explorer';
+import BookmarksStorage from './api/bookmarks-storage';
+import History from './api/history';
+import ErrorHandler from './api/error-handler';
+import Utils from './api/utils';
 
 
 export namespace SQLTools {

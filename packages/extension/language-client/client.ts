@@ -15,11 +15,11 @@ import {
 } from 'vscode';
 import { TelemetryArgs, Telemetry, commandExists } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
-import { ErrorHandler } from '../api';
 import { SQLToolsLanguageClientInterface, LanguageClientPlugin } from '@sqltools/core/interface/plugin';
 import ContextManager from './../context';
 import Logger from '@sqltools/core/utils/logger';
 import { DISPLAY_NAME } from '@sqltools/core/constants';
+import ErrorHandler from '../api/error-handler';
 
 export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
   public client: LanguageClient;
