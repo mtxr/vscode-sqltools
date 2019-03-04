@@ -2,15 +2,15 @@ import fs from 'fs';
 import { LanguageServerPlugin, RequestHandler as RHandler } from '@sqltools/core/interface/plugin';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import {
-  ClientRequestConnections,
-  RefreshConnectionData,
-  GetCachedPassword,
+  GetConnectionsRequest,
+  RefreshAllRequest,
+  GetConnectionPasswordRequest,
   RunCommandRequest,
-  OpenConnectionRequest,
-  CloseConnectionRequest,
-  UpdateConnectionExplorerRequest,
-  GetTablesAndColumnsRequest,
-  SaveResults,
+  ConnectRequest,
+  DisconnectRequest,
+  ConnectionDataUpdatedRequest,
+  GetConnectionDataRequest,
+  SaveResultsRequest,
 } from './contracts';
 import csvStringify from 'csv-stringify/lib/sync';
 import actions from './store/actions';
@@ -43,7 +43,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     }
   };
 
-  private saveResultsHandler: RHandler<typeof SaveResults> = ({ connId, filename, query, filetype = 'csv' }) => {
+  private saveResultsHandler: RHandler<typeof SaveResultsRequest> = ({ connId, filename, query, filetype = 'csv' }) => {
     const { queryResults } = this.server.store.getState();
     const { results, cols } = queryResults[connId][query];
     let output = '';
@@ -60,7 +60,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     fs.writeFileSync(filename, output);
   };
 
-  private getTablesAndColumnsHandler: RHandler<typeof GetTablesAndColumnsRequest> = async ({ conn }) => {
+  private getTablesAndColumnsHandler: RHandler<typeof GetConnectionDataRequest> = async ({ conn }) => {
     if (!conn) {
       return undefined;
     }
@@ -70,12 +70,12 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   };
 
-  private refreshConnectionHandler: RHandler<typeof RefreshConnectionData> = async () => {
+  private refreshConnectionHandler: RHandler<typeof RefreshAllRequest> = async () => {
     const activeConnections = this.server.store.getState().activeConnections;
     await Promise.all(Object.keys(activeConnections).map(c => this.loadConnectionData(activeConnections[c])));
   };
 
-  private closeConnectionHandler: RHandler<typeof CloseConnectionRequest> = async ({ conn }): Promise<void> => {
+  private closeConnectionHandler: RHandler<typeof DisconnectRequest> = async ({ conn }): Promise<void> => {
     if (!conn) {
       return undefined;
     }
@@ -86,7 +86,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     await this.updateSidebar(conn, null, null);
   };
 
-  private getCachedPasswordHandler: RHandler<typeof GetCachedPassword> = async ({ conn }): Promise<string> => {
+  private GetConnectionPasswordRequestHandler: RHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
     if (!conn) {
       return undefined;
     }
@@ -97,7 +97,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     return null;
   };
 
-  private openConnectionHandler: RHandler<typeof OpenConnectionRequest> = async (req: {
+  private openConnectionHandler: RHandler<typeof ConnectRequest> = async (req: {
     conn: ConnectionInterface;
     password?: string;
   }): Promise<ConnectionInterface> => {
@@ -128,7 +128,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
       });
   };
 
-  private clientRequestConnectionHandler: RHandler<typeof ClientRequestConnections> = ({ connectedOnly } = {}) => {
+  private clientRequestConnectionHandler: RHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
     let connList = this.connections.map((c) => c.serialize());
 
     if (connectedOnly) connList = connList.filter(c => c.isConnected);
@@ -145,13 +145,13 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
-    this.server.onRequest(SaveResults, this.saveResultsHandler);
-    this.server.onRequest(GetTablesAndColumnsRequest, this.getTablesAndColumnsHandler);
-    this.server.onRequest(RefreshConnectionData, this.refreshConnectionHandler);
-    this.server.onRequest(CloseConnectionRequest, this.closeConnectionHandler);
-    this.server.onRequest(GetCachedPassword, this.getCachedPasswordHandler);
-    this.server.onRequest(OpenConnectionRequest, this.openConnectionHandler);
-    this.server.onRequest(ClientRequestConnections, this.clientRequestConnectionHandler)
+    this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
+    this.server.onRequest(GetConnectionDataRequest, this.getTablesAndColumnsHandler);
+    this.server.onRequest(RefreshAllRequest, this.refreshConnectionHandler);
+    this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
+    this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
+    this.server.onRequest(ConnectRequest, this.openConnectionHandler);
+    this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler)
   }
 
   // internal utils
@@ -174,6 +174,6 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
     columns: DatabaseInterface.TableColumn[]
   ) {
     if (!conn) return Promise.resolve();
-    return this.server.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
+    return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
   }
 }

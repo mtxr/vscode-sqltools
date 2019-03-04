@@ -14,14 +14,14 @@ import { EXT_NAME, VERSION } from '@sqltools/core/constants';
 import ContextManager from './context';
 
 import {
-  ClientRequestConnections,
-  GetTablesAndColumnsRequest,
-  OpenConnectionRequest,
-  RefreshConnectionData,
+  GetConnectionsRequest,
+  GetConnectionDataRequest,
+  ConnectRequest,
+  RefreshAllRequest,
   RunCommandRequest,
-  UpdateConnectionExplorerRequest,
-  GetCachedPassword,
-  CloseConnectionRequest,
+  ConnectionDataUpdatedRequest,
+  GetConnectionPasswordRequest,
+  DisconnectRequest,
 } from '@sqltools/plugins/connection-manager/contracts';
 import LogWriter from './log-writer';
 import ResultsWebview from './providers/webview/results';
@@ -149,7 +149,7 @@ export namespace SQLTools {
       return;
     }
 
-    return LC().sendRequest(CloseConnectionRequest, { conn })
+    return LC().sendRequest(DisconnectRequest, { conn })
       .then(async () => {
         logger.info('Connection closed!');
         ConnectionExplorer.disconnect(conn as ConnectionInterface);
@@ -277,7 +277,7 @@ export namespace SQLTools {
   }
 
   export function cmdRefreshSidebar() {
-    LC().sendRequest(RefreshConnectionData);
+    LC().sendRequest(RefreshAllRequest);
   }
 
   export async function cmdSaveResults(filetype: 'csv' | 'json') {
@@ -302,7 +302,7 @@ export namespace SQLTools {
    */
 
   async function connectionMenu(connectedOnly = false): Promise<ConnectionInterface> {
-    const connections: ConnectionInterface[] = await LC().sendRequest(ClientRequestConnections, { connectedOnly });
+    const connections: ConnectionInterface[] = await LC().sendRequest(GetConnectionsRequest, { connectedOnly });
 
     if (connections.length === 0 && connectedOnly) return connectionMenu();
 
@@ -395,7 +395,7 @@ export namespace SQLTools {
   }
 
   async function getConnData(conn: ConnectionInterface) {
-    return await LC().sendRequest(GetTablesAndColumnsRequest, { conn });
+    return await LC().sendRequest(GetConnectionDataRequest, { conn });
   }
 
   async function autoConnectIfActive(currConn?: ConnectionInterface) {
@@ -502,7 +502,7 @@ export namespace SQLTools {
   }
 
   async function registerLanguageServerRequests() {
-    LC().onRequest(UpdateConnectionExplorerRequest, ({ conn, tables, columns }) => {
+    LC().onRequest(ConnectionDataUpdatedRequest, ({ conn, tables, columns }) => {
       ConnectionExplorer.setTreeData(conn, tables, columns);
       if (conn && getDbId(ConnectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
         ConnectionExplorer.setActiveConnection();
@@ -525,7 +525,7 @@ export namespace SQLTools {
       if (c.askForPassword) password = await askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await LC().sendRequest(
-        OpenConnectionRequest,
+        ConnectRequest,
         { conn: c, password },
       );
     }
@@ -536,7 +536,7 @@ export namespace SQLTools {
   }
 
   async function askForPassword(c: ConnectionInterface): Promise<string | null> {
-    const cachedPass = await LC().sendRequest(GetCachedPassword, { conn: c });
+    const cachedPass = await LC().sendRequest(GetConnectionPasswordRequest, { conn: c });
     return cachedPass || await Win.showInputBox({
       prompt: `${c.name} password`,
       password: true,

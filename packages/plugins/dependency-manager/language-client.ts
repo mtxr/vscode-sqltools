@@ -2,7 +2,7 @@ import { window as Win } from 'vscode';
 import Utils from '@sqltools/extension/api/utils';
 import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
-import { OpenConnectionRequest } from '@sqltools/plugins/connection-manager/contracts';
+import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 
 export default class DependencyManger implements LanguageClientPlugin {
   public client: SQLToolsLanguageClientInterface;
@@ -30,7 +30,7 @@ Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
-            await this.client.sendRequest(OpenConnectionRequest, { conn });
+            await this.client.sendRequest(ConnectRequest, { conn });
           }
           break;
         case readMore:

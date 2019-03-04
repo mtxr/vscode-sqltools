@@ -10,15 +10,15 @@ import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
 import { TableCompletionItem, TableColumnCompletionItem } from './requests/completion/models';
 import {
-  UpdateConnectionExplorerRequest,
-  ClientRequestConnections,
-  OpenConnectionRequest,
-  RefreshConnectionData,
-  GetTablesAndColumnsRequest,
+  ConnectionDataUpdatedRequest,
+  GetConnectionsRequest,
+  ConnectRequest,
+  RefreshAllRequest,
+  GetConnectionDataRequest,
   RunCommandRequest,
-  CloseConnectionRequest,
-  GetCachedPassword,
-  SaveResults,
+  DisconnectRequest,
+  GetConnectionPasswordRequest,
+  SaveResultsRequest,
 } from '@sqltools/core/contracts/connection-requests';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import ConnectionManager from '@sqltools/core/connection-manager';
@@ -92,7 +92,7 @@ namespace SQLToolsLanguageServer {
 
   function updateSidebar(conn: ConnectionInterface, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[]) {
     if (!conn) return Promise.resolve();
-    return server.client.connection.sendRequest(UpdateConnectionExplorerRequest, { conn, tables, columns });
+    return server.client.connection.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
   }
 
   /* server events */
@@ -165,7 +165,7 @@ namespace SQLToolsLanguageServer {
   });
 
   /* Custom Requests */
-  server.onRequest(ClientRequestConnections, () => {
+  server.onRequest(GetConnectionsRequest, () => {
     return sgdbConnections.map((c) => c.serialize())
       .sort((a, b) => {
         if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
@@ -175,7 +175,7 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(
-    OpenConnectionRequest,
+    ConnectRequest,
     async (req: { conn: ConnectionInterface, password?: string }
   ): Promise<ConnectionInterface> => {
     if (!req.conn) {
@@ -205,7 +205,7 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(
-    GetCachedPassword,
+    GetConnectionPasswordRequest,
     async (req: { conn: ConnectionInterface }): Promise<string> => {
     if (!req.conn) {
       return undefined;
@@ -218,7 +218,7 @@ namespace SQLToolsLanguageServer {
   });
 
   server.onRequest(
-    CloseConnectionRequest,
+    DisconnectRequest,
     async (req: { conn: ConnectionInterface }): Promise<void> => {
     if (!req.conn) {
       return undefined;
@@ -230,12 +230,12 @@ namespace SQLToolsLanguageServer {
     await updateSidebar(req.conn, null, null);
   });
 
-  server.onRequest(RefreshConnectionData, async () => {
+  server.onRequest(RefreshAllRequest, async () => {
     const activeConnections = store.getState().activeConnections;
     await Promise.all(Object.keys(activeConnections).map(c => loadConnectionData(activeConnections[c])));
   });
 
-  server.onRequest(GetTablesAndColumnsRequest, async ({ conn }) => {
+  server.onRequest(GetConnectionDataRequest, async ({ conn }) => {
     if (!conn) {
       return undefined;
     }
@@ -264,7 +264,7 @@ namespace SQLToolsLanguageServer {
     }
   });
 
-  server.onRequest(SaveResults, ({ connId, filename, query, filetype = 'csv' }) => {
+  server.onRequest(SaveResultsRequest, ({ connId, filename, query, filetype = 'csv' }) => {
     const { queryResults } = store.getState();
     const { results, cols } = queryResults[connId][query];
     let output = '';
