@@ -1,13 +1,5 @@
-import {
-  Disposable,
-  Uri,
-  ViewColumn,
-  WebviewPanel,
-  window,
-  EventEmitter,
-  commands
-} from 'vscode';
-import ContextManager from '../../context';
+import ContextManager from '@sqltools/extension/context';
+import { commands, Disposable, EventEmitter, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
@@ -49,7 +41,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableFindWidget: true,
         },
       );
-      this.panel.iconPath = Uri.parse(ContextManager.context.asAbsolutePath('icons/database-active.svg'));
+      this.panel.iconPath = Uri.parse(`file://${ContextManager.context.asAbsolutePath('icons/database-active.svg')}`);
       this.panel.onDidDispose(this.dispose);
       this.disposables.push(Disposable.from(this.panel));
 

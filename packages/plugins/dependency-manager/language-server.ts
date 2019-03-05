@@ -1,12 +1,12 @@
-import { SpawnOptions, spawn } from 'child_process';
-import path from 'path';
-import fs from 'fs';
 import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
+import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
 import { commandExists } from '@sqltools/core/utils';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
+import { spawn, SpawnOptions } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 import { InstallDepRequest } from './contracts';
-import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
 
 function run(
   command: string,
@@ -56,7 +56,7 @@ export default class DependencyManager implements LanguageServerPlugin {
 
 
  private onRequestToInstall = async (params) => {
-    this.server.log.debug('Received request to install deps:', JSON.stringify(params));
+    console.debug('Received request to install deps:', JSON.stringify(params));
     const DialectClass = Dialects[params.dialect];
     if (
       !DialectClass ||
@@ -71,19 +71,19 @@ export default class DependencyManager implements LanguageServerPlugin {
     for (let dep of deps) {
       switch(dep.type) {
         case 'npmscript':
-          this.server.log.debug(`Will run ${dep.name} script`);
+          console.debug(`Will run ${dep.name} script`);
           await this.runNpmScript(dep.name, { env: dep.env });
-          this.server.log.debug(`Finished ${dep.name} script`);
+          console.debug(`Finished ${dep.name} script`);
           break;
         case 'package':
-          this.server.log.debug(`Will install ${dep.name} package`);
+          console.debug(`Will install ${dep.name} package`);
           await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
-          this.server.log.debug(`Finished ${dep.name} script`);
+          console.debug(`Finished ${dep.name} script`);
           break;
       }
 
     }
-    this.server.log.debug('Finished installing deps');
+    console.debug('Finished installing deps');
   }
 
   public register(server: SQLToolsLanguageServer) {

@@ -1,15 +1,13 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { Arg0, LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
 import { Telemetry } from '@sqltools/core/utils';
-import Logger from '@sqltools/core/utils/logger';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
 
 class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
-  private _logger = new Telemetry({
+  private _telemetry = new Telemetry({
     enableTelemetry: false,
     product: 'language-server',
-    useLogger: new Logger(),
   });
   private _server: IConnection;
   private _docManager = new TextDocuments();
@@ -26,14 +24,14 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
-    this._logger.registerInfoMessage(`Initialized with node version:${process.version}`);
+    this.telemetry.registerInfoMessage(`Initialized with node version:${process.version}`);
 
     this.onInitializedHooks.forEach(hook => hook(params));
   };
 
   private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
     if (params.initializationOptions.telemetry) {
-      this._logger.updateOpts({
+      this.telemetry.updateOpts({
         product: 'language-server',
         ...params.initializationOptions.telemetry,
       });
@@ -56,8 +54,8 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigManager.update(changes.settings.sqltools);
-    if (ConfigManager.telemetry && !Telemetry.enabled) this.logger.enable();
-    else if (Telemetry.enabled) this.logger.disable();
+    if (ConfigManager.telemetry && !Telemetry.enabled) this.telemetry.enable();
+    else if (Telemetry.enabled) this.telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -116,17 +114,13 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     return this._docManager;
   }
 
-  public get log() {
-    return this._logger.log;
-  }
-
-  public get logger() {
-    return this._logger;
+  public get telemetry() {
+    return this._telemetry;
   }
 
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
-      this.logger.registerException(err, { message, languageServer: true });
+      this.telemetry.registerException(err, { message, languageServer: true });
       this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
     };
     if (typeof error !== 'undefined') return cb(error);

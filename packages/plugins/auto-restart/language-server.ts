@@ -1,5 +1,5 @@
-import { ExitCalledNotification } from './contracts';
 import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
+import { ExitCalledNotification } from './contracts';
 
 const AutoRestartPlugin: LanguageServerPlugin = {
   register: server => {
@@ -14,7 +14,7 @@ const AutoRestartPlugin: LanguageServerPlugin = {
     process.on('uncaughtException', (error: any) => {
       let message: string;
       if (error) {
-        server.logger.registerException(error, { type: 'uncaughtException' })
+        server.telemetry.registerException(error, { type: 'uncaughtException' })
         if (typeof error.stack === 'string') {
           message = error.stack;
         } else if (typeof error.message === 'string') {
@@ -26,7 +26,7 @@ const AutoRestartPlugin: LanguageServerPlugin = {
         }
       }
       if (message) {
-        server.logger.registerInfoMessage(message);
+        server.telemetry.registerInfoMessage(message);
       }
     });
   },

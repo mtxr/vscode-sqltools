@@ -1,10 +1,10 @@
 import React from 'react';
-import { WebviewMessageType } from 'lib/interfaces';
-import Loading from '../../components/Loading';
-import '../../sass/app.scss';
+import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
+import Loading from '@sqltools/ui/components/Loading';
 import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
+import '@sqltools/ui/sass/results.scss';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
@@ -29,7 +29,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   messagesHandler = ({ action, payload, connId }: WebviewMessageType<any>) => {
-    process.env.NODE_ENV === 'development' && console.log('message received', {action, payload, connId});
+    console.log('Message received', {action, payload, connId});
     switch (action) {
       case 'queryResults':
         const queries = [];

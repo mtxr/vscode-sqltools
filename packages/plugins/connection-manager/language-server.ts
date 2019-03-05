@@ -1,31 +1,21 @@
-import fs from 'fs';
-import { LanguageServerPlugin, RequestHandler as RHandler } from '@sqltools/core/interface/plugin';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
-import {
-  GetConnectionsRequest,
-  RefreshAllRequest,
-  GetConnectionPasswordRequest,
-  RunCommandRequest,
-  ConnectRequest,
-  DisconnectRequest,
-  ConnectionDataUpdatedRequest,
-  GetConnectionDataRequest,
-  SaveResultsRequest,
-} from './contracts';
-import csvStringify from 'csv-stringify/lib/sync';
-import actions from './store/actions';
-import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
-import ConnectionManager from '@sqltools/core/connection-manager';
-import { getDbId } from '@sqltools/core/utils';
 import Connection from '@sqltools/core/connection';
+import ConnectionManager from '@sqltools/core/connection-manager';
 import { MissingModuleException } from '@sqltools/core/exception';
+import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { LanguageServerPlugin, RequestHandler as RHandler } from '@sqltools/core/interface/plugin';
+import { getDbId } from '@sqltools/core/utils';
+import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import csvStringify from 'csv-stringify/lib/sync';
+import fs from 'fs';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
+import actions from './store/actions';
 
 export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   private server: SQLToolsLanguageServer;
 
   private get connections() {
-    return ConnectionManager.getConnections(this.server.logger);
+    return ConnectionManager.getConnections(this.server.telemetry);
   }
 
   private runCommandHandler: RHandler<typeof RunCommandRequest> = async ({ conn, args, command }) => {

@@ -1,7 +1,7 @@
-import { LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
-import { Disposable, DocumentRangeFormattingRequest, DocumentRangeFormattingParams, DocumentFormattingParams, TextEdit, Range } from 'vscode-languageserver';
 import ConfigManager from '@sqltools/core/config-manager';
+import { LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
 import * as Utils from '@sqltools/core/utils';
+import { Disposable, DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangeFormattingRequest, Range, TextEdit } from 'vscode-languageserver';
 import { format } from './utils';
 
 export default class FormatterPlugin implements LanguageServerPlugin {
@@ -27,7 +27,7 @@ export default class FormatterPlugin implements LanguageServerPlugin {
 
       return [ TextEdit.replace(newRange || range, format(text, options.tabSize)) ];
     } catch (e) {
-      this.server.logger.registerException(e);
+      this.server.telemetry.registerException(e);
     }
   }
 

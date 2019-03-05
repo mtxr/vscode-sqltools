@@ -3,21 +3,22 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { LanguageClientPlugin, RequestHandler as RHandler, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 import { getDbDescription, getDbId } from '@sqltools/core/utils';
+import { logOnCall } from '@sqltools/core/utils/decorators';
 import ErrorHandler from '@sqltools/extension/api/error-handler';
 import Utils from '@sqltools/extension/api/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/extension/api/vscode-utils';
 import ContextManager from '@sqltools/extension/context';
-import ConnectionExplorer, { SidebarConnection, SidebarTable, SidebarView } from '@sqltools/extension/providers/connection-explorer';
-import ResultsWebview from '@sqltools/extension/providers/webview/results';
-import SettingsWebview from '@sqltools/extension/providers/webview/settings';
+import ConnectionExplorer, { SidebarConnection, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer';
+import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
+import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 
 export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   public client: SQLToolsLanguageClientInterface;
   public resultsWebview: ResultsWebview;
-  private settingsWebview: SettingsWebview;
-  private statusBar: StatusBarItem;;
+  public settingsWebview: SettingsWebview;
+  public statusBar: StatusBarItem;;
 
   public handler_connectionDataUpdated: RHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
     ConnectionExplorer.setTreeData(conn, tables, columns);
@@ -29,10 +30,12 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   // extension commands
+  @logOnCall()
   public ext_refreshAll = () => {
     return this.client.sendRequest(RefreshAllRequest);
   }
 
+  @logOnCall()
   public ext_runFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${ConnectionExplorer.getActive().name}`);
@@ -44,6 +47,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     }
   }
 
+  @logOnCall()
   public ext_showRecords = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
@@ -56,6 +60,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     }
   }
 
+  @logOnCall()
   public ext_describeTable = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
@@ -67,10 +72,12 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     }
   }
 
+  @logOnCall()
   public ext_describeFunction() {
     window.showInformationMessage('Not implemented yet.');
   }
 
+  @logOnCall()
   public ext_closeConnection = async (node?: SidebarConnection) => {
     const conn = node ? node.conn : await this._pickConnection(true);
     if (!conn) {
@@ -79,12 +86,13 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
     return this.client.sendRequest(DisconnectRequest, { conn })
       .then(async () => {
-        this.client.logger.registerInfoMessage('Connection closed!');
+        this.client.telemetry.registerInfoMessage('Connection closed!');
         ConnectionExplorer.disconnect(conn as ConnectionInterface);
         this._updateStatusBar();
       }, ErrorHandler.create('Error closing connection'));
   }
 
+  @logOnCall()
   public ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : ConnectionExplorer.getById(connIdOrNode);
@@ -95,6 +103,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     this._connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
+  @logOnCall()
   public ext_executeQuery = async (action = 'execute query', fullText = false) => {
     try {
       const query: string = await getSelectedText(action, fullText);
@@ -106,14 +115,17 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     }
   }
 
+  @logOnCall()
   public ext_executeQueryFromFile = async () => {
     return this.ext_executeQuery('execute file', true);
   }
 
+  @logOnCall()
   public ext_showOutputChannel = () => {
-    ContextManager.logWriter.show();
+    (<any>console).show();
   }
 
+  @logOnCall()
   public ext_saveResults = async (filetype: 'csv' | 'json') => {
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
@@ -131,11 +143,11 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this.resultsWebview.saveResults(mode);
   }
 
-  private ext_addNewConnection = () => {
+  public ext_openAddConnectionScreen = () => {
     return this.settingsWebview.show();
   }
 
-  private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
+  public ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
     let id: string;
     if (connIdOrNode) {
       id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
@@ -152,7 +164,19 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
     if (!res) return;
 
-    return ConnectionExplorer.deleteConnection(id);
+    const connList = ConfigManager.connections.filter(c => getDbId(c) !== id);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+  }
+
+  @logOnCall()
+  public ext_addConnection(connInfo: ConnectionInterface) {
+    if (!connInfo) {
+      console.warn('Nothing to do. No parameter received');
+      return;
+    }
+    const connList = ConfigManager.connections;
+    connList.push(connInfo);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
   }
 
   // internal utils
@@ -219,7 +243,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
             light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
           },
           tooltip: 'Add new Connection',
-          cb: () => commands.executeCommand(`${EXT_NAME}.addNewConnection`),
+          cb: () => commands.executeCommand(`${EXT_NAME}.openAddConnectionScreen`),
         } as any,
       ],
     })) as string;
@@ -263,7 +287,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return ConnectionExplorer.getActive();
   }
 
-  private _updateStatusBar() {
+  public _updateStatusBar() {
     if (!this.statusBar) {
       this.statusBar = window.createStatusBarItem(StatusBarAlignment.Left, 10);
       this.statusBar.tooltip = 'Select a connection';
@@ -283,6 +307,43 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this.statusBar;
   }
 
+  public async _autoConnectIfActive(currConn?: ConnectionInterface) {
+    let defaultConnections: ConnectionInterface[] = currConn ? [currConn] : [];
+    if (defaultConnections.length === 0
+      && (
+        typeof ConfigManager.autoConnectTo === 'string'
+        || (
+          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
+          )
+        )
+    ) {
+      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
+      ? ConfigManager.autoConnectTo
+      : [ConfigManager.autoConnectTo];
+
+      defaultConnections = ConfigManager.connections
+        .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
+        .filter(Boolean) as ConnectionInterface[];
+    }
+    if (defaultConnections.length === 0) {
+      return this._setConnection();
+    }
+    console.info(`Configuration set to auto connect to: ${defaultConnections.map(({name}) => name).join(', ')}`);
+    try {
+      await Promise.all(defaultConnections.slice(1).map(c =>
+        this._setConnection(c)
+          .catch(e => {
+            ErrorHandler.create(`Failed to auto connect to  ${c.name}`)(e);
+            Promise.resolve();
+          }),
+      ));
+
+      await this._setConnection(defaultConnections[0]);
+    } catch (error) {
+      ErrorHandler.create('Auto connect failed')(error);
+    }
+  }
+
   public register(client: SQLToolsLanguageClientInterface) {
     if (this.client) return; // do not register twice
     this.client = client;
@@ -296,10 +357,12 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       this._updateStatusBar(),
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
+      ConnectionExplorer.onConnectionDidChange(() => this.ext_refreshAll()),
     );
 
     // register extension commands
-    commands.registerCommand(`${EXT_NAME}.addNewConnection`, this.ext_addNewConnection);
+    commands.registerCommand(`${EXT_NAME}.addConnection`, this.ext_addConnection);
+    commands.registerCommand(`${EXT_NAME}.openAddConnectionScreen`, this.ext_openAddConnectionScreen);
     commands.registerCommand(`${EXT_NAME}.closeConnection`, this.ext_closeConnection);
     commands.registerCommand(`${EXT_NAME}.deleteConnection`, this.ext_deleteConnection);
     commands.registerCommand(`${EXT_NAME}.describeFunction`, this.ext_describeFunction);
@@ -316,7 +379,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     // hooks
     ConfigManager.addOnUpdateHook(() => {
       this._updateStatusBar();
-      if (ConnectionExplorer.setConnections(ConfigManager.connections)) this.ext_refreshAll();
+      this._autoConnectIfActive(ConnectionExplorer.getActive());
     });
   }
 }

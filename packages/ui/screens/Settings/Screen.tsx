@@ -6,12 +6,12 @@ import {
   int,
   notEmpty,
   ValidationFunction,
-} from '../../lib/utils';
-import Loading from '../../components/Loading';
-import { WebviewMessageType } from 'lib/interfaces';
-import Syntax from '../../components/Syntax';
-import '../../sass/app.scss';
+} from '@sqltools/ui/lib/utils';
+import Loading from '@sqltools/ui/components/Loading';
+import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
+import Syntax from '@sqltools/ui/components/Syntax';
 import getVscode from '@sqltools/ui/lib/vscode';
+import '@sqltools/ui/sass/app.scss';
 
 const dialectDefaultPorts = {
   MySQL: 3306,
@@ -180,7 +180,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   };
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    process.env.NODE_ENV === 'development' && console.log(`Message received: ${action}`, payload);
+    console.log(`Message received: ${action}`, payload);
     switch(action) {
       case 'createConnectionSuccess':
         const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);

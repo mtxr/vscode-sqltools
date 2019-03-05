@@ -1,4 +1,3 @@
-import Logger from '@sqltools/core/utils/logger';
 import Telemetry from '@sqltools/core/utils/telemetry';
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
 import { IConnection, RequestType, RequestType0, TextDocuments } from 'vscode-languageserver';
@@ -35,8 +34,7 @@ export interface SQLToolsLanguageServerInterface {
   notifyError(message: string, error?: any): any;
   client: IConnection['client'];
   docManager: TextDocuments;
-  log: Logger;
-  logger: Telemetry;
+  telemetry: Telemetry;
 }
 
 export interface SQLToolsLanguageClientInterface {
@@ -48,6 +46,5 @@ export interface SQLToolsLanguageClientInterface {
   sendNotification: LanguageClient['sendNotification'];
   onNotification: LanguageClient['onNotification'];
   registerPlugin(plugin: LanguageClientPlugin): this;
-  log: Logger;
-  logger: Telemetry;
+  telemetry: Telemetry;
 }

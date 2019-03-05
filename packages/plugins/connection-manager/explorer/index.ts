@@ -1,24 +1,9 @@
-import {
-  Event,
-  EventEmitter,
-  ProviderResult,
-  TreeDataProvider,
-  TreeView,
-  TreeItem,
-  window,
-  workspace,
-} from 'vscode';
-import {
-  SidebarColumn,
-  SidebarConnection,
-  SidebarDatabaseSchemaGroup,
-  SidebarTable,
-  SidebarView,
-} from './sidebar-provider/sidebar-tree-items';
-import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
-import { getDbId } from '@sqltools/core/utils';
-import { EXT_NAME } from '@sqltools/core/constants';
 import ConfigManager from '@sqltools/core/config-manager';
+import { EXT_NAME } from '@sqltools/core/constants';
+import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { getDbId } from '@sqltools/core/utils';
+import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree';
+import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window } from 'vscode';
 
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
@@ -29,13 +14,11 @@ export type SidebarDatabaseItem = SidebarConnection
 export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
   private static _instance: ConnectionExplorer;
   private treeView: TreeView<TreeItem>;
-  public onDidChange: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
-  public readonly onDidChangeTreeData: Event<SidebarDatabaseItem | undefined> =
-    this.onDidChange.event;
+  private _onDidChangeTreeData: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
+  private _onConnectionDidChange: EventEmitter<{ conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[]> = new EventEmitter();
+  public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  public readonly onConnectionDidChange = this._onConnectionDidChange.event;
   private tree: { [database: string]: SidebarConnection } = {};
-  public fireUpdate(): void {
-    this.onDidChange.fire();
-  }
   public getActive(): ConnectionInterface | null {
     const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
     if (!activeId) return null;
@@ -68,17 +51,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return element.parent || null;
   }
   public refresh() {
-    this.fireUpdate();
+    this._onDidChangeTreeData.fire();
   }
 
   public setConnections(connections: (ConnectionInterface)[]) {
     const keys = [];
-    let shouldUpdate = false;
+    const changed: { conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[] = [];
+
     connections.forEach((conn) => {
       if (this.tree[getDbId(conn)] && this.tree[getDbId(conn)].updateCreds(conn)) {
-        shouldUpdate = true;
+        changed.push({ conn, action: 'changed' });
       } else {
         this.tree[getDbId(conn)] = new SidebarConnection(conn);
+        changed.push({ conn, action: 'added' });
       }
       keys.push(getDbId(conn));
     });
@@ -86,11 +71,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     if (Object.keys(this.tree).length !== keys.length) {
       Object.keys(this.tree).forEach(k => {
         if (keys.indexOf(k) >= 0) return;
+        changed.push({ conn: this.tree[k].conn, action: 'deleted' });
         delete this.tree[k];
       });
     }
     this.refresh();
-    return shouldUpdate;
+    if (changed.length > 0) {
+      this._onConnectionDidChange.fire(changed);
+    }
   }
 
   public setTreeData(
@@ -141,7 +129,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public disconnect(c: ConnectionInterface) {
     if (!this.tree[getDbId(c)]) return;
     this.tree[getDbId(c)].disconnect();
-    this.refresh();
+    this._onDidChangeTreeData.fire(this.tree[getDbId(c)]);
   }
 
   private toArray(obj: any) {
@@ -155,20 +143,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return this.tree[id] ? this.tree[id].conn : undefined;
   }
 
-  public addConnection(connInfo: ConnectionInterface) {
-    const connList = ConfigManager.connections;
-    connList.push(connInfo);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
-  }
-
-  public deleteConnection(connInfoOrId: ConnectionInterface | string) {
-    const id = typeof connInfoOrId === 'string' ? connInfoOrId : getDbId(connInfoOrId);
-    const connList = ConfigManager.connections.filter(c => getDbId(c) !== id);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
-  }
-
   private constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this })
+    this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this });
+    ConfigManager.addOnUpdateHook(() => {
+      this.setConnections(ConfigManager.connections);
+    });
+
   }
 
   public static get instance() {

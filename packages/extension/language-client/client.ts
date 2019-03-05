@@ -1,32 +1,17 @@
-import {
-  LanguageClient,
-  ServerOptions,
-  TransportKind,
-  LanguageClientOptions,
-  ErrorAction,
-  CloseAction,
-  ErrorHandler as LanguageClientErrorHandler,
-  NodeModule,
-} from 'vscode-languageclient';
-import {
-  env as VSCodeEnv,
-  version as VSCodeVersion,
-  workspace as Wspc,
-} from 'vscode';
-import { TelemetryArgs, Telemetry, commandExists } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
-import { SQLToolsLanguageClientInterface, LanguageClientPlugin } from '@sqltools/core/interface/plugin';
-import ContextManager from './../context';
-import Logger from '@sqltools/core/utils/logger';
 import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
+import { commandExists, Telemetry, TelemetryArgs } from '@sqltools/core/utils';
+import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc } from 'vscode';
+import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
+import ContextManager from './../context';
 
 export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
-  private _logger = new Telemetry({
+  private _telemetry = new Telemetry({
     product: 'language-client',
-    useLogger: new Logger(),
   });
 
   constructor() {
@@ -116,7 +101,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: error => {
-        this.logger.registerException(error, {
+        this.telemetry.registerException(error, {
           message: 'Server initialization failed.',
         });
         this.client.error('Server initialization failed.', error);
@@ -125,7 +110,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
       },
       errorHandler: {
         error: (error, message, count): ErrorAction => {
-          this.logger.registerException(error, {
+          this.telemetry.registerException(error, {
             message: 'Language Server error.',
             givenMessage: message,
             count,
@@ -151,14 +136,10 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
       'serverError', // @TODO: constant
       onError,
     );
-    this.logger.registerInfoMessage('LanguageClient ready');
+    this.telemetry.registerInfoMessage('LanguageClient ready');
   }
 
-  public get log() {
-    return this._logger.log;
-  }
-
-  public get logger() {
-    return this._logger;
+  public get telemetry() {
+    return this._telemetry;
   }
 }

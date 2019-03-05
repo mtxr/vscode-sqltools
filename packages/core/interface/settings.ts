@@ -1,5 +1,4 @@
 import { ConnectionInterface } from '@sqltools/core/interface/connection';
-import { LogLevel } from '@sqltools/core/utils/logger';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
@@ -30,13 +29,6 @@ export interface Settings {
    */
   autoConnectTo?: string | string[];
   /**
-   * Show debugging messages on console.
-   * @default true
-   * @type {boolean}
-   * @memberof Settings
-   */
-  logging?: boolean;
-  /**
    * Help SQLTools development.
    * @type {boolean}
    * @default true
@@ -57,13 +49,6 @@ export interface Settings {
    * @memberof Settings
    */
    showStatusbar?: boolean;
-  /**
-   * Severity of logged messages.
-   * @type {keyof LogLevel}
-   * @default DEBUG
-   * @memberof Settings
-   */
-   logLevel?: keyof LogLevel;
   /**
    * Timeout in seconds for killing query process after the timeout.
    * @type {number}

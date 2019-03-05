@@ -1,15 +1,10 @@
-import {
-  ThemeIcon,
-  TreeItem,
-  TreeItemCollapsibleState,
-} from 'vscode';
-import ContextManager from '../../context';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { getDbId, getDbDescription } from '@sqltools/core/utils';
+import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { getDbDescription, getDbId } from '@sqltools/core/utils';
+import ContextManager from '@sqltools/extension/context';
 import { isDeepStrictEqual } from 'util';
-import { Uri } from 'vscode';
+import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
 
 export class SidebarConnection extends TreeItem {
   public static icons;
@@ -49,9 +44,10 @@ export class SidebarConnection extends TreeItem {
       command: `${EXT_NAME}.selectConnection`,
       arguments: [this],
     };
+
     if (!SidebarConnection.icons) {
       SidebarConnection.icons = {
-        active: Uri.parse(ContextManager.context.asAbsolutePath('icons/database-active.svg')),
+        active: Uri.parse(`file://${ContextManager.context.asAbsolutePath('icons/database-active.svg')}`),
         connected: {
           dark: ContextManager.context.asAbsolutePath('icons/database-dark.svg'),
           light: ContextManager.context.asAbsolutePath('icons/database-light.svg'),

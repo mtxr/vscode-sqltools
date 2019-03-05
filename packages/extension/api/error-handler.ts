@@ -20,7 +20,7 @@ namespace ErrorHandler {
       }
     };
   }
-  export function setLogger(cli: Telemetry) {
+  export function setTelemetryClient(cli: Telemetry) {
     telemetry = cli;
   }
 

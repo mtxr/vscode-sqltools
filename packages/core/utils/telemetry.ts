@@ -1,9 +1,8 @@
+import { AI_KEY, ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
+import Timer from '@sqltools/core/utils/timer';
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
-import { VERSION, ENV, AI_KEY, EXT_NAME } from '@sqltools/core/constants';
-import Timer from '@sqltools/core/utils/timer';
-import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
-import Logger from '@sqltools/core/utils/logger';
 
 type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
 
@@ -16,7 +15,6 @@ export interface VSCodeInfo {
 export interface TelemetryArgs {
   product: Product;
   enableTelemetry?: boolean;
-  useLogger?: Logger;
   vscodeInfo?: VSCodeInfo;
 }
 
@@ -24,7 +22,6 @@ export class Telemetry {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
   public static enabled: Boolean;
   public static vscodeInfo: VSCodeInfo;
-  public static logger: Logger = new Logger();
   private client: AI.TelemetryClient;
   private product: Product;
   private prefixed(key: string) {
@@ -90,8 +87,7 @@ export class Telemetry {
   public updateOpts(opts: TelemetryArgs) {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
-    const { enableTelemetry, useLogger } = opts;
-    this.setLogger(useLogger);
+    const { enableTelemetry } = opts;
     if (enableTelemetry) this.enable();
     else this.disable();
   }
@@ -99,7 +95,7 @@ export class Telemetry {
   public enable(): void {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
-    this.logger.info('Telemetry enabled!');
+    console.info('Telemetry enabled!');
     this.createClient();
     this.registerSession();
   }
@@ -107,11 +103,8 @@ export class Telemetry {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     AI.dispose();
-    this.logger.info('Telemetry disabled!');
+    console.info('Telemetry disabled!');
     this.client = undefined;
-  }
-  public setLogger(useLogger: Logger = new Logger()) {
-    Telemetry.logger = useLogger;
   }
 
   @runIfPropIsDefined('client')
@@ -153,7 +146,7 @@ export class Telemetry {
     message: string,
     value: string = 'Dismissed'
   ): void {
-    this.logger.debug(`Message: ${message}`);
+    console.debug(`Message: ${message}`);
     this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
   }
 
@@ -162,13 +155,13 @@ export class Telemetry {
     name: string,
     properties?: { [key: string]: string }
   ): void {
-    this.logger.debug(`Event: ${name}`, properties || '');
+    console.debug(`Event: ${name}`, properties || '');
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 
   @runIfPropIsDefined('client')
   private sendException(error: Error, properties: { [key: string]: any } = {}) {
-    this.logger.error('Error: ', error);
+    console.error('Error: ', error);
     this.client.trackException({
       exception: error,
       contextObjects: properties,
@@ -187,14 +180,6 @@ export class Telemetry {
       name,
       value
     });
-  }
-
-  public get log () {
-    return this.logger;
-  }
-
-  public get logger () {
-    return Telemetry.logger;
   }
 }
 

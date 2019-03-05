@@ -1,8 +1,8 @@
+import './patch-console';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION } from '@sqltools/core/constants';
-import { ConnectionInterface, Settings as SettingsInterface } from '@sqltools/core/interface';
+import { Settings as SettingsInterface } from '@sqltools/core/interface';
 import { query as QueryUtils, Telemetry, Timer } from '@sqltools/core/utils';
-import Logger from '@sqltools/core/utils/logger';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/language-client';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import { commands as VSCode, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window as Win, workspace as Wspc } from 'vscode';
@@ -13,18 +13,14 @@ import Utils from './api/utils';
 import { getOrCreateEditor, getSelectedText, insertSnippet, insertText, quickPick, readInput } from './api/vscode-utils';
 import ContextManager from './context';
 import LC from './language-client';
-import LogWriter from './log-writer';
-import ConnectionExplorer, { SidebarDatabaseItem, SidebarTable } from './providers/connection-explorer';
 
 export namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
-  const logger = new Logger(LogWriter);
 
   const CMPlugin = new ConnectionManagerPlugin();
 
   let telemetry = new Telemetry({
     product: 'extension',
-    useLogger: logger,
     vscodeInfo: {
       sessId: VSCodeEnv.sessionId,
       uniqId: VSCodeEnv.machineId,
@@ -39,10 +35,8 @@ export namespace SQLTools {
     activationTimer = new Timer();
     if (ContextManager.context) return;
     ContextManager.context = context;
-    ContextManager.logWriter = LogWriter;
     telemetry.updateOpts({
       product: 'extension',
-      useLogger: logger,
       vscodeInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
@@ -50,10 +44,9 @@ export namespace SQLTools {
       },
     });
     loadConfigs();
-    loadPlugins();
     await registerExtension();
     activationTimer.end();
-    logger.log(`Activation Time: ${activationTimer.elapsed()}ms`);
+    console.log(`Activation Time: ${activationTimer.elapsed()}ms`);
     telemetry.registerTime('activation', activationTimer);
     help();
   }
@@ -92,18 +85,20 @@ export namespace SQLTools {
     bookmarks.reset();
   }
 
-  export async function cmdAppendToCursor(node: SidebarDatabaseItem | string): Promise<void> {
+  // export async function cmdAppendToCursor(node: SidebarDatabaseItem | string): Promise<void> {
+  export async function cmdAppendToCursor(node: { value: string } | string): Promise<void> {
     if (!node) return;
     return insertText(typeof node === 'string' ? node : node.value);
   }
 
-  export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
+  // export async function cmdGenerateInsertQuery(node: SidebarTable): Promise<boolean> {
+  export async function cmdGenerateInsertQuery(node: { value: string, items: any }): Promise<boolean> {
     return insertSnippet(QueryUtils.generateInsert(node.value, node.items, ConfigManager.format.indentSize));
   }
 
   export function cmdAboutVersion(): void {
     const message = `Using SQLTools ${VERSION}`;
-    logger.info(message);
+    console.info(message);
     Win.showInformationMessage(message, { modal: true });
   }
 
@@ -176,55 +171,13 @@ export namespace SQLTools {
       });
   }
 
-  async function autoConnectIfActive(currConn?: ConnectionInterface) {
-    let defaultConnections: ConnectionInterface[] = currConn ? [currConn] : [];
-    if (defaultConnections.length === 0
-      && (
-        typeof ConfigManager.autoConnectTo === 'string'
-        || (
-          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
-          )
-        )
-    ) {
-      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
-      ? ConfigManager.autoConnectTo
-      : [ConfigManager.autoConnectTo];
-
-      defaultConnections = ConfigManager.connections
-        .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
-        .filter(Boolean) as ConnectionInterface[];
-    }
-    if (defaultConnections.length === 0) {
-      return CMPlugin._setConnection();
-    }
-    logger.info(`Configuration set to auto connect to: ${defaultConnections.map(({name}) => name).join(', ')}`);
-    try {
-      await Promise.all(defaultConnections.slice(1).map(c =>
-        CMPlugin._setConnection(c)
-          .catch(e => {
-            ErrorHandler.create(`Failed to auto connect to  ${c.name}`)(e);
-            Promise.resolve();
-          }),
-      ));
-
-      await CMPlugin._setConnection(defaultConnections[0]);
-      // first should be the active
-    } catch (error) {
-      ErrorHandler.create('Auto connect failed')(error);
-    }
-  }
   function loadConfigs() {
     ConfigManager.update(Wspc.getConfiguration(cfgKey) as SettingsInterface);
-    setupLogger();
+    ErrorHandler.setTelemetryClient(telemetry);
+    ErrorHandler.setOutputFn(Win.showErrorMessage);
     bookmarks = new BookmarksStorage();
     history = (history || new History(ConfigManager.historySize));
-    logger.log(`Env: ${process.env.NODE_ENV}`);
-  }
-  function setupLogger() {
-    logger.setLevel(Logger.levels[ConfigManager.logLevel])
-      .setLogging(ConfigManager.logging);
-    ErrorHandler.setLogger(telemetry);
-    ErrorHandler.setOutputFn(Win.showErrorMessage);
+    console.log(`Env: ${process.env.NODE_ENV}`);
   }
 
   function getExtCommands() {
@@ -234,33 +187,32 @@ export namespace SQLTools {
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
       const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
       list.push(regFn(`${EXT_NAME}.${extCmd}`, (...args) => {
-        logger.log(`Command triggered: ${extCmd}`);
+        console.log(`Command triggered: ${extCmd}`);
         telemetry.registerCommand(extCmd);
         SQLTools[extFn](...args);
       }));
       return list;
     }, []);
 
-    logger.log(`${commands.length} commands to register.`);
+    console.log(`${commands.length} commands to register.`);
     return commands;
   }
 
   async function registerExtension() {
     ContextManager.context.subscriptions.push(
-      LogWriter.getOutputChannel(),
       Wspc.onDidChangeConfiguration(reloadConfig),
       LC().start(),
       ...getExtCommands(),
     );
-    LC().registerPlugin(CMPlugin);
-    ConnectionExplorer.setConnections(ConfigManager.connections);
+    if ((<any>console).outputChannel) {
+      ContextManager.context.subscriptions.push((<any>console).outputChannel);
+    }
+    loadPlugins();
   }
 
   function reloadConfig() {
     loadConfigs();
-    logger.info('Config reloaded!');
-    autoConnectIfActive(ConnectionExplorer.getActive());
-    if (ConnectionExplorer.setConnections(ConfigManager.connections)) CMPlugin.ext_refreshAll();
+    console.info('Config reloaded!');
   }
 
   async function help() {
@@ -301,6 +253,7 @@ export namespace SQLTools {
   }
 
   function loadPlugins() {
+    LC().registerPlugin(CMPlugin);
     FormatterPlugin.register();
   }
 }

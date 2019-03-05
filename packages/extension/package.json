@@ -167,12 +167,17 @@
             },
             {
                 "title": "Add new connection",
-                "command": "SQLTools.addNewConnection",
+                "command": "SQLTools.openAddConnectionScreen",
                 "category": "SQLTools Management",
                 "icon": {
                     "light": "icons/add-connection-light.svg",
                     "dark": "icons/add-connection-dark.svg"
                 }
+            },
+            {
+                "title": "Add new connection from arg",
+                "command": "SQLTools.addConnection",
+                "category": "SQLTools internal"
             },
             {
                 "title": "Delete connection",
@@ -287,11 +292,6 @@
                         "type": "string"
                     }
                 },
-                "sqltools.logging": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Show debugging messages on console."
-                },
                 "sqltools.telemetry": {
                     "type": "boolean",
                     "default": true,
@@ -301,17 +301,6 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Toggle statusbar visibility."
-                },
-                "sqltools.logLevel": {
-                    "type": "string",
-                    "enum": [
-                        "DEBUG",
-                        "INFO",
-                        "WARN",
-                        "ERROR"
-                    ],
-                    "default": "DEBUG",
-                    "description": "Set the severity of logged messages messages on console."
                 },
                 "sqltools.queryTimeout": {
                     "type": "number",
@@ -527,6 +516,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.addConnection",
+                    "when": "false"
+                },
+                {
                     "command": "SQLTools.saveResults",
                     "when": "sqltools.Results.active"
                 },
@@ -545,7 +538,7 @@
             ],
             "view/title": [
                 {
-                    "command": "SQLTools.addNewConnection",
+                    "command": "SQLTools.openAddConnectionScreen",
                     "when": "view == SQLTools.tableExplorer",
                     "group": "navigation@1"
                   },

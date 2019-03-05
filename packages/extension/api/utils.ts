@@ -65,6 +65,9 @@ namespace Utils {
   }
 
   export function open(url: string) {
+    if (VSEnv && typeof (VSEnv as any).openExternal === 'function') {
+      return (VSEnv as any).openExternal(Uri.parse(url));
+    }
     if (VSEnv && typeof (VSEnv as any).open === 'function') {
       return (VSEnv as any).open(Uri.parse(url));
     }
