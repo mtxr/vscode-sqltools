@@ -65,8 +65,8 @@ export class Logwriter implements Console {
   public warn(message: string, ...data: any[]) {
     console.warn(this.prefix('WARN'), message, ...data);
   }
-  public showOutput() {
-    outputChannel.show();
+  public show() {
+    return outputChannel.show();
   }
   public getOutputChannel(): OutputChannel {
     return outputChannel;

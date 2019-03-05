@@ -9,7 +9,7 @@ module.exports = function getLanguageServerConfig() {
     name: 'languageserver',
     target: 'node',
     entry: {
-      languageserver: path.join(__dirname, 'index.ts')
+      languageserver: path.join(__dirname, 'index.ts'),
     },
     module: {
       rules: [
@@ -17,38 +17,32 @@ module.exports = function getLanguageServerConfig() {
           test: /\.ts$/,
           use: [
             { loader: 'babel-loader', options: babelOptions },
-            { loader: 'ts-loader', options: { transpileOnly: true } }
+            { loader: 'ts-loader', options: { transpileOnly: true } },
           ],
         },
         {
           test: /\.js$/,
-          use: [
-            { loader: 'babel-loader', options: babelOptions },
-          ],
-        }
-      ]
+          use: [{ loader: 'babel-loader', options: babelOptions }],
+        },
+      ],
     },
     resolve: {
       extensions: ['.ts', '.js', '.json'],
       alias: {
-        'pg-native': path.join(__dirname, '../../' ,'node_modules/pg/lib/native/index.js'),
+        'pg-native': path.join(__dirname, '../../', 'node_modules/pg/lib/native/index.js'),
       },
-      modules: [
-        'node_modules',
-        path.join(__dirname, '..', '..', 'node_modules')
-      ],
+      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
     },
     output: {
       filename: '[name].js',
       path: outdir,
-      libraryTarget: "commonjs",
-      devtoolModuleFilenameTemplate: 'file:///[absolute-resource-path]'
+      libraryTarget: 'commonjs2',
     },
     externals: {
-      'sqlite3': 'commonjs sqlite3',
-      'oracledb': 'commonjs oracledb',
+      sqlite3: 'commonjs sqlite3',
+      oracledb: 'commonjs oracledb',
     },
   };
 
   return config;
-}
+};

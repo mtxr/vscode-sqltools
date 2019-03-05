@@ -4,7 +4,16 @@ import path from 'path';
 let context = null;
 let iconsPath = null;
 let viewsPath = null;
+let logWriter: Console & { show?: () => void } = console;
 const Context = {
+  get logWriter() {
+    return logWriter;
+  },
+
+  set logWriter(l: typeof logWriter) {
+    logWriter = l || console;
+  },
+
   get context(): ExtensionContext {
     return context;
   },

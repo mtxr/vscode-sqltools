@@ -1,7 +1,7 @@
-import { IConnection, TextDocuments, RequestType, RequestType0 } from 'vscode-languageserver';
-import { LanguageClient, ErrorHandler as LanguageClientErrorHandler, } from 'vscode-languageclient';
-import Telemetry from '@sqltools/core/utils/telemetry';
 import Logger from '@sqltools/core/utils/logger';
+import Telemetry from '@sqltools/core/utils/telemetry';
+import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
+import { IConnection, RequestType, RequestType0, TextDocuments } from 'vscode-languageserver';
 export type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 export type RequestHandler<T> = T extends RequestType<infer P, infer R, any, any>
   ? (params: P) => R | Promise<R>
@@ -29,7 +29,7 @@ export interface SQLToolsLanguageServerInterface {
   onDocumentFormatting: IConnection['onDocumentFormatting'];
   onDocumentRangeFormatting: IConnection['onDocumentRangeFormatting'];
   sendRequest: IConnection['sendRequest'];
-  addOnDidChangeConfigurationHooks(hook: Arg0<IConnection['onDidChangeConfiguration']>): this;
+  addOnDidChangeConfigurationHooks(hook: () => void): this;
   addOnInitializeHook(hook: Arg0<IConnection['onInitialize']>): this;
   addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>): this;
   notifyError(message: string, error?: any): any;

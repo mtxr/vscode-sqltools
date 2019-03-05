@@ -17,42 +17,39 @@ module.exports = exports = function getWebviewConfig() {
           test: /\.tsx?$/,
           use: [
             { loader: 'babel-loader', options: babelOptions },
-            { loader: 'ts-loader', options: { transpileOnly: true } }
+            { loader: 'ts-loader', options: { transpileOnly: true } },
           ],
         },
         {
           test: /\.css/,
-          use: ['style-loader', 'css-loader']
+          use: ['style-loader', 'css-loader'],
         },
         {
           test: /\.scss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader']
-        }
-      ]
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        },
+      ],
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass'],
-      modules: [
-        'node_modules',
-        path.join(__dirname, '..', '..', 'node_modules')
-      ],
+      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
     },
     optimization: {
       splitChunks: {
         cacheGroups: {
           vendor: {
             test: /node_modules/,
-            chunks: "initial",
-            name: "vendor",
+            chunks: 'initial',
+            name: 'vendor',
             priority: 10,
-            enforce: true
-          }
-        }
-      }
+            enforce: true,
+          },
+        },
+      },
     },
     output: {
       filename: 'ui/[name].js',
-      path: outdir
+      path: outdir,
     },
   };
-}
+};

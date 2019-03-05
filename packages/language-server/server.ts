@@ -1,18 +1,8 @@
-import {
-  createConnection,
-  IConnection,
-  InitializeParams,
-  ProposedFeatures,
-  InitializedParams,
-  InitializeResult,
-  CancellationToken,
-  TextDocuments,
-} from 'vscode-languageserver';
-
-import Logger from '@sqltools/core/utils/logger';
-import { Telemetry } from '@sqltools/core/utils';
-import { LanguageServerPlugin, Arg0, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
 import ConfigManager from '@sqltools/core/config-manager';
+import { Arg0, LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
+import { Telemetry } from '@sqltools/core/utils';
+import Logger from '@sqltools/core/utils/logger';
+import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
 
 class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
@@ -25,7 +15,7 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
   private onInitializedHooks: Arg0<IConnection['onInitialized']>[] = [];
-  private onDidChangeConfigurationHooks: Arg0<IConnection['onInitialized']>[] = [];
+  private onDidChangeConfigurationHooks: Function[] = [];
 
   constructor() {
     this._server = createConnection(ProposedFeatures.all);
@@ -49,31 +39,32 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
       });
     }
 
-    return this.onInitializeHooks
-    .reduce<InitializeResult>((opts, hook) => {
-      const result = hook(params, token) as InitializeResult;
-      return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
-    },
-    {
-      capabilities: {
-        documentFormattingProvider: false,
-        documentRangeFormattingProvider: false,
-        textDocumentSync: this.docManager.syncKind,
+    return this.onInitializeHooks.reduce<InitializeResult>(
+      (opts, hook) => {
+        const result = hook(params, token) as InitializeResult;
+        return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
+      },
+      {
+        capabilities: {
+          documentFormattingProvider: false,
+          documentRangeFormattingProvider: false,
+          textDocumentSync: this.docManager.syncKind,
+        },
       }
-    });
+    );
   };
 
-  private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = (changes) => {
-    ConfigManager.setSettings(changes.settings.sqltools);
+  private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
+    ConfigManager.update(changes.settings.sqltools);
     if (ConfigManager.telemetry && !Telemetry.enabled) this.logger.enable();
     else if (Telemetry.enabled) this.logger.disable();
 
-    this.onDidChangeConfigurationHooks.forEach(hook => hook(changes));
+    this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
-  public get onDocumentFormatting () {
+  public get onDocumentFormatting() {
     return this._server.onDocumentFormatting;
   }
-  public get onDocumentRangeFormatting () {
+  public get onDocumentRangeFormatting() {
     return this._server.onDocumentRangeFormatting;
   }
 
@@ -137,7 +128,7 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     const cb = (err: any = '') => {
       this.logger.registerException(err, { message, languageServer: true });
       this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
-    }
+    };
     if (typeof error !== 'undefined') return cb(error);
     return cb;
   }

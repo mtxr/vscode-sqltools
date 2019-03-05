@@ -1,15 +1,15 @@
 import WebviewProvider from './webview-provider';
-import { SQLToolsLanguageClient } from '@sqltools/extension/language-client/client';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
-import { ConnectionExplorer } from '../connection-explorer';
+import ConnectionExplorer from '../connection-explorer';
+import { SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
-  constructor(private client: SQLToolsLanguageClient, private connectionExplorer: ConnectionExplorer) {
+  constructor(private client: SQLToolsLanguageClientInterface) {
     super();
   }
 
@@ -37,7 +37,7 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   updateResults(payload) {
-    const conn = this.connectionExplorer.getActive();
+    const conn = ConnectionExplorer.getActive();
     const connId = conn ? conn.id : null;
 
     this.postMessage({ action: 'queryResults', payload, connId });

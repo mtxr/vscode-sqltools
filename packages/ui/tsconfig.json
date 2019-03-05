@@ -1,7 +1,6 @@
 {
   "compilerOptions": {
     "allowSyntheticDefaultImports": true,
-    "baseUrl": ".",
     "esModuleInterop": true,
     "noUnusedLocals": true,
     "noUnusedParameters": true,
@@ -15,8 +14,5 @@
     "resolveJsonModule": true,
     "sourceMap": true,
     "target": "es6",
-    "paths": {
-      "@sqltools/ui/*": ["./*"]
-    }
   }
 }
