@@ -28,7 +28,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   }
 
   private get poolName(): string {
-    return Utils.getDbId(this.credentials);
+    return Utils.getConnectionId(this.credentials);
   }
 
   private get poolCreated(): boolean {

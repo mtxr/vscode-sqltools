@@ -2,7 +2,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { LanguageClientPlugin, RequestHandler as RHandler, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
-import { getDbDescription, getDbId } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import { logOnCall } from '@sqltools/core/utils/decorators';
 import ErrorHandler from '@sqltools/extension/api/error-handler';
 import Utils from '@sqltools/extension/api/utils';
@@ -22,11 +22,6 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
   public handler_connectionDataUpdated: RHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
     ConnectionExplorer.setTreeData(conn, tables, columns);
-    if (conn && getDbId(ConnectionExplorer.getActive()) === getDbId(conn) && !conn.isConnected) {
-      ConnectionExplorer.setActiveConnection();
-    } else {
-      ConnectionExplorer.setActiveConnection(ConnectionExplorer.getActive());
-    }
   }
 
   // extension commands
@@ -97,7 +92,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : ConnectionExplorer.getById(connIdOrNode);
 
-      await this._setConnection(conn as ConnectionInterface, true).catch(ErrorHandler.create('Error opening connection'));
+      await this._setConnection(conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
       return;
     }
     this._connect(true).catch(ErrorHandler.create('Error selecting connection'));
@@ -153,7 +148,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
     } else {
       const conn = await this._pickConnection();
-      id = conn ? getDbId(conn) : undefined;
+      id = conn ? getConnectionId(conn) : undefined;
     }
 
     if (!id) return;
@@ -164,7 +159,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
     if (!res) return;
 
-    const connList = ConfigManager.connections.filter(c => getDbId(c) !== id);
+    const connList = ConfigManager.connections.filter(c => getConnectionId(c) !== id);
     return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
   }
 
@@ -226,9 +221,9 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     const sel = (await quickPick(connections.map((c) => {
       return <QuickPickItem>{
         description: c.isConnected ? 'Currently connected' : '',
-        detail: getDbDescription(c),
+        detail: getConnectionDescription(c),
         label: c.name,
-        value: getDbId(c)
+        value: getConnectionId(c)
       };
     }), 'value', {
       matchOnDescription: true,
@@ -247,7 +242,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
         } as any,
       ],
     })) as string;
-    return connections.find((c) => getDbId(c) === sel);
+    return connections.find((c) => getConnectionId(c) === sel);
   }
 
   public async _runQuery(query: string, addHistory = true) {
@@ -270,7 +265,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       validateInput: (v) => Utils.isEmpty(v) ? 'Password not provided.' : null,
     });
   }
-  public async _setConnection(c?: ConnectionInterface, reveal?: boolean): Promise<ConnectionInterface> {
+  public async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
     let password = null;
 
     if (c) {
@@ -281,8 +276,6 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
         { conn: c, password },
       );
     }
-    if (c && c.isConnected)
-      ConnectionExplorer.setActiveConnection(c, reveal);
     this._updateStatusBar();
     return ConnectionExplorer.getActive();
   }
@@ -305,43 +298,6 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     }
 
     return this.statusBar;
-  }
-
-  public async _autoConnectIfActive(currConn?: ConnectionInterface) {
-    let defaultConnections: ConnectionInterface[] = currConn ? [currConn] : [];
-    if (defaultConnections.length === 0
-      && (
-        typeof ConfigManager.autoConnectTo === 'string'
-        || (
-          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
-          )
-        )
-    ) {
-      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
-      ? ConfigManager.autoConnectTo
-      : [ConfigManager.autoConnectTo];
-
-      defaultConnections = ConfigManager.connections
-        .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
-        .filter(Boolean) as ConnectionInterface[];
-    }
-    if (defaultConnections.length === 0) {
-      return this._setConnection();
-    }
-    console.info(`Configuration set to auto connect to: ${defaultConnections.map(({name}) => name).join(', ')}`);
-    try {
-      await Promise.all(defaultConnections.slice(1).map(c =>
-        this._setConnection(c)
-          .catch(e => {
-            ErrorHandler.create(`Failed to auto connect to  ${c.name}`)(e);
-            Promise.resolve();
-          }),
-      ));
-
-      await this._setConnection(defaultConnections[0]);
-    } catch (error) {
-      ErrorHandler.create('Auto connect failed')(error);
-    }
   }
 
   public register(client: SQLToolsLanguageClientInterface) {
@@ -379,7 +335,6 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     // hooks
     ConfigManager.addOnUpdateHook(() => {
       this._updateStatusBar();
-      this._autoConnectIfActive(ConnectionExplorer.getActive());
     });
   }
 }

@@ -1,7 +1,7 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import { getDbDescription, getDbId } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import ContextManager from '@sqltools/extension/context';
 import { isDeepStrictEqual } from 'util';
 import { ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
@@ -21,7 +21,7 @@ export class SidebarConnection extends TreeItem {
     ];
   }
   public get description() {
-    return getDbDescription(this.conn);
+    return getConnectionDescription(this.conn);
   }
 
   private isActive = false;
@@ -71,7 +71,7 @@ export class SidebarConnection extends TreeItem {
   }
 
   public getId() {
-    return getDbId(this.conn);
+    return getConnectionId(this.conn);
   }
 
   public addItem(item) {

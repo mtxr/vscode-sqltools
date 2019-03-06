@@ -12,33 +12,38 @@ export function runIfPropIsDefined(prop: string) {
   };
 }
 
-export function logOnCall(env?: string) {
+export function logOnCall(opts: Partial<{ message: string; trace: boolean, prefix: string; env: string; verbose: boolean | Function, args: any[] }> = {}) {
   return function(_: any, prop: string, descriptor?: TypedPropertyDescriptor<any>): any {
-    if (!env || process.env.NODE_ENV === env) {
-      let fn, patched;
+    let fn, patched;
 
-      if (descriptor) {
-        fn = descriptor.value;
-      }
-
-      return {
-        configurable: true,
-        enumerable: false,
-        get() {
-          if (!patched) {
-            patched = (...args) => {
-              console.log('Called', prop);
-              return fn.apply(this, args);
-            }
-          }
-          return patched;
-
-        },
-        set(newFn) {
-          patched = undefined;
-          fn = newFn;
-        },
-      };
+    if (descriptor) {
+      fn = descriptor.value;
     }
+
+    return {
+      configurable: true,
+      enumerable: false,
+      get() {
+        if (!patched) {
+          patched = (...args) => {
+            if (!opts.env || process.env.NODE_ENV === opts.env) {
+              console[opts.trace ? 'trace' : 'log'](opts.message || `${opts.prefix || 'Called'} ${prop}`);
+              if (typeof opts.verbose === 'function') {
+                opts.verbose(args);
+              } else if (opts.verbose) {
+                console.table(args);
+              }
+            }
+            return fn.apply(this, args);
+          }
+        }
+        return patched;
+
+      },
+      set(newFn) {
+        patched = undefined;
+        fn = newFn;
+      },
+    };
   };
 }

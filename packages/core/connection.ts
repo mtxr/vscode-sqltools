@@ -1,4 +1,4 @@
-import { Telemetry, getDbId } from './utils';
+import { Telemetry, getConnectionId } from './utils';
 import Dialects from './dialect';
 import {
   ConnectionDialect,
@@ -120,7 +120,7 @@ export default class Connection {
   }
 
   public getId() {
-    return getDbId(this.conn.credentials);
+    return getConnectionId(this.conn.credentials);
   }
 
   public serialize(): ConnectionInterface {

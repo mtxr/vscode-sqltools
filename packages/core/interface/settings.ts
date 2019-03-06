@@ -41,14 +41,7 @@ export interface Settings {
    * @default null
    * @memberof Settings
    */
-  telemetryUUID?: string;
-  /**
-   * Toggle statusbar visibility.
-   * @type {boolean}
-   * @default true
-   * @memberof Settings
-   */
-   showStatusbar?: boolean;
+  showStatusbar?: boolean;
   /**
    * Timeout in seconds for killing query process after the timeout.
    * @type {number}

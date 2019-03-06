@@ -54,8 +54,8 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigManager.update(changes.settings.sqltools);
-    if (ConfigManager.telemetry && !Telemetry.enabled) this.telemetry.enable();
-    else if (Telemetry.enabled) this.telemetry.disable();
+    if (ConfigManager.telemetry) this.telemetry.enable();
+    else this.telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };

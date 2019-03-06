@@ -19,6 +19,7 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
 }
 
 async function update(newSettings: Settings) {
+  console.log('Configs reloaded!');
   settings = newSettings;
   onUpdateHooks.forEach(cb => cb());
 }

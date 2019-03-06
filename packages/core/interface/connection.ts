@@ -100,7 +100,12 @@ export interface ConnectionInterface {
    * @memberof ConnectionInterface
    */
   isConnected: boolean;
-
+  /**
+   * Connection flag. This is not a settings. It's generated in runtime
+   * @type {boolean}
+   * @memberof ConnectionInterface
+   */
+  isActive: boolean;
 }
 
 export interface ConnectionDialect {

@@ -1,6 +1,4 @@
 {
-  "sqltools.autoConnectTo": [
-  ],
   "sqltools.telemetry": true,
   "sqltools.connections": [
     {

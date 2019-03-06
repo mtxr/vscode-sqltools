@@ -1,5 +1,5 @@
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/store';
-import { AnyAction, createStore, Store } from 'redux';
+import { AnyAction, createStore } from 'redux';
 
 interface DefaultState {};
 type State = DefaultState & typeof ConnectionManagerPlugin.ConnectionManagerState; // add plugin state data here
@@ -27,7 +27,7 @@ const store = createStore<State, AnyAction, {}, {}>((state = initialState, actio
 
 (<any>store).registerActionHandler = registerActionHandler;
 
-export type LSStore = Store & { registerActionHandler?: typeof registerActionHandler };
+export type LSStore = typeof store & { registerActionHandler?: typeof registerActionHandler };
 
 /** REGISTER PLUGINS **/
 ConnectionManagerPlugin.register(store);
