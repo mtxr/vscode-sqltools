@@ -26,12 +26,12 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
   // extension commands
   @logOnCall()
-  public ext_refreshAll = () => {
+  private ext_refreshAll = () => {
     return this.client.sendRequest(RefreshAllRequest);
   }
 
   @logOnCall()
-  public ext_runFromInput = async () => {
+  private ext_runFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${ConnectionExplorer.getActive().name}`);
       this._openResultsWebview();
@@ -43,7 +43,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_showRecords = async (node?: SidebarTable | SidebarView) => {
+  private ext_showRecords = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
@@ -56,7 +56,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_describeTable = async (node?: SidebarTable | SidebarView) => {
+  private ext_describeTable = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
@@ -68,12 +68,12 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_describeFunction() {
+  private ext_describeFunction() {
     window.showInformationMessage('Not implemented yet.');
   }
 
   @logOnCall()
-  public ext_closeConnection = async (node?: SidebarConnection) => {
+  private ext_closeConnection = async (node?: SidebarConnection) => {
     const conn = node ? node.conn : await this._pickConnection(true);
     if (!conn) {
       return;
@@ -88,7 +88,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
+  private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : ConnectionExplorer.getById(connIdOrNode);
 
@@ -99,9 +99,9 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_executeQuery = async (action = 'execute query', fullText = false) => {
+  private ext_executeQuery = async (query?: string) => {
     try {
-      const query: string = await getSelectedText(action, fullText);
+      query = query || await getSelectedText('execute query');
       this._openResultsWebview();
       await this._connect();
       await this._runQuery(query);
@@ -111,17 +111,18 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_executeQueryFromFile = async () => {
-    return this.ext_executeQuery('execute file', true);
+  private ext_executeQueryFromFile = async () => {
+    // @TODO: read from file and run
+    return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
   @logOnCall()
-  public ext_showOutputChannel = () => {
+  private ext_showOutputChannel = () => {
     (<any>console).show();
   }
 
   @logOnCall()
-  public ext_saveResults = async (filetype: 'csv' | 'json') => {
+  private ext_saveResults = async (filetype: 'csv' | 'json') => {
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
     if (mode === 'prompt') {
@@ -138,11 +139,11 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this.resultsWebview.saveResults(mode);
   }
 
-  public ext_openAddConnectionScreen = () => {
+  private ext_openAddConnectionScreen = () => {
     return this.settingsWebview.show();
   }
 
-  public ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
+  private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
     let id: string;
     if (connIdOrNode) {
       id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
@@ -164,7 +165,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   @logOnCall()
-  public ext_addConnection(connInfo: ConnectionInterface) {
+  private ext_addConnection(connInfo: ConnectionInterface) {
     if (!connInfo) {
       console.warn('Nothing to do. No parameter received');
       return;
@@ -175,7 +176,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   // internal utils
-  public async _getTableName(node?: SidebarTable | SidebarView): Promise<string> {
+  private async _getTableName(node?: SidebarTable | SidebarView): Promise<string> {
     if (node && node.value) {
       await this._setConnection(node.conn as ConnectionInterface);
       return node.value;
@@ -186,10 +187,10 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return await this._pickTable(conn, 'label');
   }
 
-  public _openResultsWebview() {
+  private _openResultsWebview() {
     this.resultsWebview.show();
   }
-  public async _connect(force = false): Promise<ConnectionInterface> {
+  private async _connect(force = false): Promise<ConnectionInterface> {
     if (!force && ConnectionExplorer.getActive()) {
       return ConnectionExplorer.getActive();
     }
@@ -198,7 +199,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this._setConnection(c);
   }
 
-  public async _pickTable(conn: ConnectionInterface, prop?: string): Promise<string> {
+  private async _pickTable(conn: ConnectionInterface, prop?: string): Promise<string> {
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
     return await quickPick(tables
       .map((table) => {
@@ -211,7 +212,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       });
   }
 
-  public async _pickConnection(connectedOnly = false): Promise<ConnectionInterface> {
+  private async _pickConnection(connectedOnly = false): Promise<ConnectionInterface> {
     const connections: ConnectionInterface[] = await this.client.sendRequest(GetConnectionsRequest, { connectedOnly });
 
     if (connections.length === 0 && connectedOnly) return this._pickConnection();
@@ -245,18 +246,18 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return connections.find((c) => getConnectionId(c) === sel);
   }
 
-  public async _runQuery(query: string, addHistory = true) {
+  private async _runQuery(query: string, addHistory = true) {
     const payload = await this._runConnectionCommandWithArgs('query', query);
 
     // if (addHistory) history.add(query);
     this.resultsWebview.updateResults(payload);
   }
 
-  public _runConnectionCommandWithArgs(command, ...args) {
+  private _runConnectionCommandWithArgs(command, ...args) {
     return this.client.sendRequest(RunCommandRequest, { conn: ConnectionExplorer.getActive(), command, args });
   }
 
-  public async _askForPassword(c: ConnectionInterface): Promise<string | null> {
+  private async _askForPassword(c: ConnectionInterface): Promise<string | null> {
     const cachedPass = await this.client.sendRequest(GetConnectionPasswordRequest, { conn: c });
     return cachedPass || await window.showInputBox({
 
@@ -265,7 +266,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       validateInput: (v) => Utils.isEmpty(v) ? 'Password not provided.' : null,
     });
   }
-  public async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
+  private async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
     let password = null;
 
     if (c) {
@@ -280,7 +281,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return ConnectionExplorer.getActive();
   }
 
-  public _updateStatusBar() {
+  private _updateStatusBar() {
     if (!this.statusBar) {
       this.statusBar = window.createStatusBarItem(StatusBarAlignment.Left, 10);
       this.statusBar.tooltip = 'Select a connection';

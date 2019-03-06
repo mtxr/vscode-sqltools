@@ -116,7 +116,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.setActiveConnection(conn);
   }
 
-  @logOnCall({verbose: true})
+  @logOnCall()
   public setActiveConnection(c: ConnectionInterface) {
     const id = getConnectionId(c);
     this.tree[id].activate();

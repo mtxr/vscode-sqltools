@@ -9,7 +9,7 @@ export default (): SQLToolsLanguageClient => {
   if (languageClient) return languageClient;
 
   languageClient = new SQLToolsLanguageClient()
-    .registerPlugin(AutoRestartPlugin);
-    // .registerPlugin(new ConnectionManagerPlugin());
+    .registerPlugin(AutoRestartPlugin)
+    .registerPlugin(new ConnectionManagerPlugin());
   return languageClient;
 }

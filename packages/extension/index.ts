@@ -3,9 +3,8 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
 import { query as QueryUtils, Telemetry, Timer } from '@sqltools/core/utils';
-import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/language-client';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import { commands as VSCode, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window as Win, workspace as Wspc } from 'vscode';
+import { commands, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window, workspace } from 'vscode';
 import BookmarksStorage from './api/bookmarks-storage';
 import ErrorHandler from './api/error-handler';
 import History from './api/history';
@@ -16,8 +15,6 @@ import LC from './language-client';
 
 export namespace SQLTools {
   const cfgKey: string = EXT_NAME.toLowerCase();
-
-  const CMPlugin = new ConnectionManagerPlugin();
 
   let telemetry = new Telemetry({
     product: 'extension',
@@ -99,7 +96,7 @@ export namespace SQLTools {
   export function cmdAboutVersion(): void {
     const message = `Using SQLTools ${VERSION}`;
     console.info(message);
-    Win.showInformationMessage(message, { modal: true });
+    window.showInformationMessage(message, { modal: true });
   }
 
   export async function cmdNewSqlFile() {
@@ -108,12 +105,10 @@ export namespace SQLTools {
 
   export async function cmdRunFromHistory(): Promise<void> {
     try {
-      await CMPlugin._connect();
       const query = await historyMenu();
-      await CMPlugin._openResultsWebview();
-      await CMPlugin._runQuery(query, false);
+      await commands.executeCommand(`${EXT_NAME}.executeQuery`, query, false);
     } catch (e) {
-      ErrorHandler.create('Error while running query.', CMPlugin.ext_showOutputChannel)(e);
+      ErrorHandler.create('Error while running query.', `${EXT_NAME}.showOutputChannel`)(e);
     }
   }
 
@@ -128,11 +123,9 @@ export namespace SQLTools {
 
   export async function cmdRunFromBookmarks(): Promise<void> {
     try {
-      await CMPlugin._connect();
-      CMPlugin._openResultsWebview();
-      await CMPlugin._runQuery(await bookmarksMenu('detail'));
+      await commands.executeCommand(`${EXT_NAME}.executeQuery`, await bookmarksMenu('detail'));
     } catch (e) {
-      ErrorHandler.create('Error while running query.', CMPlugin.ext_showOutputChannel)(e);
+      ErrorHandler.create('Error while running query.', `${EXT_NAME}.showOutputChannel`)(e);
     }
   }
 
@@ -172,20 +165,20 @@ export namespace SQLTools {
   }
 
   function loadConfigs() {
-    ConfigManager.update(Wspc.getConfiguration(cfgKey) as SettingsInterface);
+    ConfigManager.update(workspace.getConfiguration(cfgKey) as SettingsInterface);
     ErrorHandler.setTelemetryClient(telemetry);
-    ErrorHandler.setOutputFn(Win.showErrorMessage);
+    ErrorHandler.setOutputFn(window.showErrorMessage);
     bookmarks = new BookmarksStorage();
     history = (history || new History(ConfigManager.historySize));
     console.log(`Env: ${process.env.NODE_ENV}`);
   }
 
   function getExtCommands() {
-    const commands = Object.keys(SQLTools).reduce((list, extFn) => {
+    const extCommands = Object.keys(SQLTools).reduce((list, extFn) => {
       if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
       let extCmd = extFn.replace(/^(editor|cmd)/, '');
       extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
-      const regFn = extFn.startsWith('editor') ? VSCode.registerTextEditorCommand : VSCode.registerCommand;
+      const regFn = extFn.startsWith('editor') ? commands.registerTextEditorCommand : commands.registerCommand;
       list.push(regFn(`${EXT_NAME}.${extCmd}`, (...args) => {
         console.log(`Command triggered: ${extCmd}`);
         telemetry.registerCommand(extCmd);
@@ -194,13 +187,13 @@ export namespace SQLTools {
       return list;
     }, []);
 
-    console.log(`${commands.length} commands to register.`);
-    return commands;
+    console.log(`${extCommands.length} commands to register.`);
+    return extCommands;
   }
 
   async function registerExtension() {
     ContextManager.context.subscriptions.push(
-      Wspc.onDidChangeConfiguration(reloadConfig),
+      workspace.onDidChangeConfiguration(reloadConfig),
       LC().start(),
       ...getExtCommands(),
     );
@@ -236,7 +229,7 @@ export namespace SQLTools {
       const releaseNotes = 'Release Notes';
       const message = `SQLTools updated! Check out the release notes for more information.`;
       const options = [ moreInfo, supportProject, releaseNotes ];
-      const res: string = await Win.showInformationMessage(message, ...options);
+      const res: string = await window.showInformationMessage(message, ...options);
       telemetry.registerInfoMessage(message, res);
       switch (res) {
         case moreInfo:
@@ -253,8 +246,7 @@ export namespace SQLTools {
   }
 
   function loadPlugins() {
-    LC().registerPlugin(CMPlugin);
-    FormatterPlugin.register();
+    FormatterPlugin.register(); // @MOVE TO LC
   }
 }
 
