@@ -111,6 +111,7 @@ module.exports = () => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
+        'process.env.PRODUCT': JSON.stringify(config.name),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
@@ -128,7 +129,7 @@ module.exports = () => {
     } else {
       delete config.optimization;
     }
-    config.devtool = 'source-map';
+    config.devtool = isProduction ? 'source-map' : 'cheap-module-eval-source-map';
     config.mode = isProduction ? 'production' : 'development';
     config.output = config.output || {};
     config.output.devtoolModuleFilenameTemplate = 'file:///[absolute-resource-path]';

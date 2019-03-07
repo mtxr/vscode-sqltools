@@ -1,5 +1,5 @@
-import ContextManager from '@sqltools/extension/context';
-import { commands, Disposable, EventEmitter, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
+import path from 'path';
+import { Uri, commands, Disposable, EventEmitter, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
@@ -26,7 +26,13 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   private panel: WebviewPanel;
   private disposables: Disposable[] = [];
   private messageCb;
+  private iconsPath: Uri;
+  private viewsPath: Uri;
 
+  public constructor(private context: ExtensionContext) {
+    this.iconsPath = Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' })
+    this.viewsPath = Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
+  }
   public show() {
     if (!this.panel) {
       this.panel = window.createWebviewPanel(
@@ -37,11 +43,11 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableScripts: true,
           retainContextWhenHidden: true,
           enableCommandUris: true,
-          localResourceRoots: [ContextManager.iconsPath, ContextManager.viewsPath],
+          localResourceRoots: [this.iconsPath, this.viewsPath],
           enableFindWidget: true,
         },
       );
-      this.panel.iconPath = Uri.parse(`file://${ContextManager.context.asAbsolutePath('icons/database-active.svg')}`);
+      this.panel.iconPath = Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`);
       this.panel.onDidDispose(this.dispose);
       this.disposables.push(Disposable.from(this.panel));
 
@@ -53,7 +59,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       .replace(/{{id}}/g, this.id)
       .replace(
         /{{extRoot}}/g,
-        Uri.file(ContextManager.context.asAbsolutePath('.'))
+        Uri.file(this.context.asAbsolutePath('.'))
           .with({ scheme: 'vscode-resource' })
           .toString());
 

@@ -1,10 +1,8 @@
-import { commands } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { SQLToolsExtensionPlugin, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
 
-const register = () => {
-  commands.registerTextEditorCommand(`${EXT_NAME}.exmapleEditorCommand`, () => {});
-  commands.registerCommand(`${EXT_NAME}.exmapleCommand`, () => {});
-  // @TODO: registerTextEditorCommand should be a method of the extension
+export default class ExamplePlugin implements SQLToolsExtensionPlugin {
+  public client: SQLToolsLanguageClientInterface;
+  register(extension: SQLToolsExtensionInterface) {
+    this.client = extension.client;
+  }
 }
-
-export default { register };

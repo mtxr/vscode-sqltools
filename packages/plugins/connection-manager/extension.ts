@@ -1,27 +1,28 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
-import { LanguageClientPlugin, RequestHandler as RHandler, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
+import { SQLToolsExtensionPlugin, RequestHandler as RHandler, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
 import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import { logOnCall } from '@sqltools/core/utils/decorators';
 import ErrorHandler from '@sqltools/extension/api/error-handler';
 import Utils from '@sqltools/extension/api/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/extension/api/vscode-utils';
-import ContextManager from '@sqltools/extension/context';
-import ConnectionExplorer, { SidebarConnection, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer';
+import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 
-export default class ConnectionManagerPlugin implements LanguageClientPlugin {
+export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin {
   public client: SQLToolsLanguageClientInterface;
   public resultsWebview: ResultsWebview;
   public settingsWebview: SettingsWebview;
   public statusBar: StatusBarItem;;
+  private context: ExtensionContext;
+  private explorer: ConnectionExplorer;
 
   public handler_connectionDataUpdated: RHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
-    ConnectionExplorer.setTreeData(conn, tables, columns);
+    this.explorer.setTreeData(conn, tables, columns);
   }
 
   // extension commands
@@ -33,7 +34,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   @logOnCall()
   private ext_runFromInput = async () => {
     try {
-      const query = await readInput('Query', `Type the query to run on ${ConnectionExplorer.getActive().name}`);
+      const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
       this._openResultsWebview();
       await this._connect();
       await this._runQuery(query);
@@ -82,7 +83,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this.client.sendRequest(DisconnectRequest, { conn })
       .then(async () => {
         this.client.telemetry.registerInfoMessage('Connection closed!');
-        ConnectionExplorer.disconnect(conn as ConnectionInterface);
+        this.explorer.disconnect(conn as ConnectionInterface);
         this._updateStatusBar();
       }, ErrorHandler.create('Error closing connection'));
   }
@@ -90,7 +91,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   @logOnCall()
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
-      const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : ConnectionExplorer.getById(connIdOrNode);
+      const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
       await this._setConnection(conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
       return;
@@ -127,8 +128,8 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     let mode: any = filetype || ConfigManager.defaultExportType;
     if (mode === 'prompt') {
       mode = await quickPick<'csv' | 'json' | undefined>([
-        { label: 'Save as CSV', value: 'csv' },
-        { label: 'Save as JSON', value: 'json' },
+        { label: 'Save results as CSV', value: 'csv' },
+        { label: 'Save results as JSON', value: 'json' },
       ], 'value', {
         title: 'Select a file type to export',
       });
@@ -154,7 +155,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
 
     if (!id) return;
 
-    const conn = ConnectionExplorer.getById(id);
+    const conn = this.explorer.getById(id);
 
     const res = await window.showInformationMessage(`Are you sure you want to remove ${conn.name}?`, { modal: true }, 'Yes');
 
@@ -191,8 +192,8 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     this.resultsWebview.show();
   }
   private async _connect(force = false): Promise<ConnectionInterface> {
-    if (!force && ConnectionExplorer.getActive()) {
-      return ConnectionExplorer.getActive();
+    if (!force && this.explorer.getActive()) {
+      return this.explorer.getActive();
     }
     const c: ConnectionInterface = await this._pickConnection(true);
     // history.clear();
@@ -235,8 +236,8 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       buttons: [
         {
           iconPath: {
-            dark: ContextManager.context.asAbsolutePath('icons/add-connection-dark.svg'),
-            light: ContextManager.context.asAbsolutePath('icons/add-connection-light.svg'),
+            dark: this.context.asAbsolutePath('icons/add-connection-dark.svg'),
+            light: this.context.asAbsolutePath('icons/add-connection-light.svg'),
           },
           tooltip: 'Add new Connection',
           cb: () => commands.executeCommand(`${EXT_NAME}.openAddConnectionScreen`),
@@ -254,7 +255,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
   }
 
   private _runConnectionCommandWithArgs(command, ...args) {
-    return this.client.sendRequest(RunCommandRequest, { conn: ConnectionExplorer.getActive(), command, args });
+    return this.client.sendRequest(RunCommandRequest, { conn: this.explorer.getActive(), command, args });
   }
 
   private async _askForPassword(c: ConnectionInterface): Promise<string | null> {
@@ -278,7 +279,7 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       );
     }
     this._updateStatusBar();
-    return ConnectionExplorer.getActive();
+    return this.explorer.getActive();
   }
 
   private _updateStatusBar() {
@@ -287,8 +288,8 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
       this.statusBar.tooltip = 'Select a connection';
       this.statusBar.command = `${EXT_NAME}.selectConnection`;
     }
-    if (ConnectionExplorer.getActive()) {
-      this.statusBar.text = `$(database) ${ConnectionExplorer.getActive().name}`;
+    if (this.explorer.getActive()) {
+      this.statusBar.text = `$(database) ${this.explorer.getActive().name}`;
     } else {
       this.statusBar.text = '$(database) Connect';
     }
@@ -301,37 +302,39 @@ export default class ConnectionManagerPlugin implements LanguageClientPlugin {
     return this.statusBar;
   }
 
-  public register(client: SQLToolsLanguageClientInterface) {
+  public register(extension: SQLToolsExtensionInterface) {
     if (this.client) return; // do not register twice
-    this.client = client;
+    this.client = extension.client;
+    this.context = extension.context;
+    this.explorer = new ConnectionExplorer(this.context);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
 
     // extension stuff
-    ContextManager.context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebview(this.client)),
-      (this.settingsWebview = new SettingsWebview()),
+    this.context.subscriptions.push(
+      (this.resultsWebview = new ResultsWebview(this.context, this.client)),
+      (this.settingsWebview = new SettingsWebview(this.context, )),
       this._updateStatusBar(),
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
-      ConnectionExplorer.onConnectionDidChange(() => this.ext_refreshAll()),
+      this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
+      // register extension commands
+      commands.registerCommand(`${EXT_NAME}.addConnection`, this.ext_addConnection),
+      commands.registerCommand(`${EXT_NAME}.openAddConnectionScreen`, this.ext_openAddConnectionScreen),
+      commands.registerCommand(`${EXT_NAME}.closeConnection`, this.ext_closeConnection),
+      commands.registerCommand(`${EXT_NAME}.deleteConnection`, this.ext_deleteConnection),
+      commands.registerCommand(`${EXT_NAME}.describeFunction`, this.ext_describeFunction),
+      commands.registerCommand(`${EXT_NAME}.describeTable`, this.ext_describeTable),
+      commands.registerCommand(`${EXT_NAME}.executeQuery`, this.ext_executeQuery),
+      commands.registerCommand(`${EXT_NAME}.executeQueryFromFile`, this.ext_executeQueryFromFile),
+      commands.registerCommand(`${EXT_NAME}.refreshAll`, this.ext_refreshAll),
+      commands.registerCommand(`${EXT_NAME}.runFromInput`, this.ext_runFromInput),
+      commands.registerCommand(`${EXT_NAME}.saveResults`, this.ext_saveResults),
+      commands.registerCommand(`${EXT_NAME}.selectConnection`, this.ext_selectConnection),
+      commands.registerCommand(`${EXT_NAME}.showOutputChannel`, this.ext_showOutputChannel),
+      commands.registerCommand(`${EXT_NAME}.showRecords`, this.ext_showRecords),
     );
 
-    // register extension commands
-    commands.registerCommand(`${EXT_NAME}.addConnection`, this.ext_addConnection);
-    commands.registerCommand(`${EXT_NAME}.openAddConnectionScreen`, this.ext_openAddConnectionScreen);
-    commands.registerCommand(`${EXT_NAME}.closeConnection`, this.ext_closeConnection);
-    commands.registerCommand(`${EXT_NAME}.deleteConnection`, this.ext_deleteConnection);
-    commands.registerCommand(`${EXT_NAME}.describeFunction`, this.ext_describeFunction);
-    commands.registerCommand(`${EXT_NAME}.describeTable`, this.ext_describeTable);
-    commands.registerCommand(`${EXT_NAME}.executeQuery`, this.ext_executeQuery);
-    commands.registerCommand(`${EXT_NAME}.executeQueryFromFile`, this.ext_executeQueryFromFile);
-    commands.registerCommand(`${EXT_NAME}.refreshAll`, this.ext_refreshAll);
-    commands.registerCommand(`${EXT_NAME}.runFromInput`, this.ext_runFromInput);
-    commands.registerCommand(`${EXT_NAME}.saveResults`, this.ext_saveResults);
-    commands.registerCommand(`${EXT_NAME}.selectConnection`, this.ext_selectConnection);
-    commands.registerCommand(`${EXT_NAME}.showOutputChannel`, this.ext_showOutputChannel);
-    commands.registerCommand(`${EXT_NAME}.showRecords`, this.ext_showRecords);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {

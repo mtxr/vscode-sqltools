@@ -1,13 +1,13 @@
-import { LanguageClientPlugin } from '@sqltools/core/interface/plugin';
+import { SQLToolsExtensionPlugin } from '@sqltools/core/interface/plugin';
 import { CloseAction } from 'vscode-languageclient';
 import { ExitCalledNotification } from './contracts';
 
 let avoidRestart = false;
 
-const AutoRestartPlugin: LanguageClientPlugin = {
-  register(client) {
-    const defaultHandler = client.clientErrorHandler;
-    client.clientErrorHandler = {
+const AutoRestartPlugin: SQLToolsExtensionPlugin = {
+  register(extension) {
+    const defaultHandler = extension.client.clientErrorHandler;
+    extension.client.clientErrorHandler = {
       error: defaultHandler.error,
       closed: (): CloseAction => {
         if (avoidRestart) {
@@ -17,7 +17,7 @@ const AutoRestartPlugin: LanguageClientPlugin = {
       },
     };
 
-    client.onNotification(ExitCalledNotification, () => {
+    extension.client.onNotification(ExitCalledNotification, () => {
       this.avoidRestart = true;
     });
   }

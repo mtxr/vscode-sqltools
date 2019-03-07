@@ -79,6 +79,7 @@ export class Telemetry {
     };
 
     AI.start();
+    this.registerSession();
   }
   constructor(opts: TelemetryArgs) {
     this.updateOpts(opts);
@@ -87,9 +88,8 @@ export class Telemetry {
   public updateOpts(opts: TelemetryArgs) {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
-    const { enableTelemetry } = opts;
-    if (enableTelemetry) this.enable();
-    else this.disable();
+    if (opts.enableTelemetry === true) this.enable();
+    else if (opts.enableTelemetry === false)this.disable();
   }
 
   public enable(): void {
@@ -97,8 +97,8 @@ export class Telemetry {
     Telemetry.enabled = true;
     console.info('Telemetry enabled!');
     this.createClient();
-    this.registerSession();
   }
+
   public disable(): void {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
@@ -171,6 +171,7 @@ export class Telemetry {
 
   @runIfPropIsDefined('client')
   public registerTime(timeKey: string, timer: Timer) {
+    console.log(`${timeKey.charAt(0).toUpperCase()}${timeKey.substr(1).toLowerCase()} time: ${timer.elapsed()}ms`);
     this.registerMetric(this.prefixed(`time:${timeKey}`), timer.elapsed());
   }
 

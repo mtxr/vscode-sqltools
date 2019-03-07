@@ -1,16 +1,16 @@
 import { SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
-import ConnectionExplorer from '@sqltools/plugins/connection-manager/explorer';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
+import { DatabaseInterface } from '@sqltools/core/interface';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
-  constructor(private client: SQLToolsLanguageClientInterface) {
-    super();
+  constructor(context: vscode.ExtensionContext, private client: SQLToolsLanguageClientInterface) {
+    super(context);
   }
 
   public async saveResults(filetype: 'csv' | 'json' = 'csv') {
@@ -36,10 +36,7 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
-  updateResults(payload) {
-    const conn = ConnectionExplorer.getActive();
-    const connId = conn ? conn.id : null;
-
-    this.postMessage({ action: 'queryResults', payload, connId });
+  updateResults(payload: DatabaseInterface.QueryResults[]) {
+    this.postMessage({ action: 'queryResults', payload });
   }
 }

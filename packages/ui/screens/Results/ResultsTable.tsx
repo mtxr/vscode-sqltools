@@ -1,21 +1,29 @@
 import React from 'react';
-import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo } from 'react-table';
+import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo, Filter } from 'react-table';
 import ReactDOM from 'react-dom';
 import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 
+const FilterByValue = 'Filter by \'{value}\'';
+const ClearFilters = 'Clear all filters';
 const CopyCellOption = 'Copy Cell value';
 const CopyRowOption = 'Copy Row value';
-const SaveCSVOption = 'Save as CSV';
-const SaveJSONOption = 'Save as JSON';
+const SaveCSVOption = 'Save results as CSV';
+const SaveJSONOption = 'Save results as JSON';
+const isRegExMatcher = /^\/(.+)\/(\w+)?$/gi;
 
-const TableContextMenuOptions = [
-  CopyCellOption,
-  CopyRowOption,
-  'sep',
-  { label: SaveCSVOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?csv`) },
-  { label: SaveJSONOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?json`) },
-];
+function toRegEx(value: string | RegExp) {
+  if (value instanceof RegExp) return value;
+  try {
+    if (isRegExMatcher.test(value)) {
+      try {
+        return eval(value.replace(isRegExMatcher, '/($1)/$2'));
+      } catch(ee) {}
+    }
+    return new RegExp(`(${value})`, 'gi');
+  } catch (e) { }
+  return value
+}
 
 const FilterComponent = ({ filter, column, onChange }) => {
   return (
@@ -58,22 +66,24 @@ interface ResultsTableProps {
   paginationSize: number; // add setting to change
 }
 interface ResultsTableState {
-  filtered: { [id: string]: any };
+  filtered: { [id: string]: string | RegExp };
+  tableFiltered: Filter[];
   clickedData: {
     value: any,
     index: number,
     col: string,
-  },
+  };
   contextMenu: {
     x: number,
     y: number,
     open: boolean,
-  }
+  };
 }
 
 export default class ResultsTable extends React.PureComponent<ResultsTableProps, ResultsTableState> {
-  static initialState = {
+  static initialState: ResultsTableState = {
     filtered: {},
+    tableFiltered: [],
     clickedData: {
       value: undefined,
       index: -1,
@@ -136,17 +146,23 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     }
 
     const { value, index, col } = node.dataset;
+    const { pageX, pageY } = e;
+
     this.setState({
       clickedData: {
         value,
         col,
         index: parseInt(index),
       },
-      contextMenu: {
-        open: true,
-        x: e.pageX,
-        y: e.pageY,
-      }
+    }, () => {
+      // delay menu open til we have clickedData
+      this.setState({
+        contextMenu: {
+          open: true,
+          x: pageX,
+          y: pageY,
+        }
+      });
     });
   }
 
@@ -168,14 +184,54 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     })
   }
 
-  onMenuSelect = (choice: typeof TableContextMenuOptions[number]) => {
+  tableContextOptions = (): any[] => {
+    const options: any[] = [];
+    if (!this.state.clickedData.col) return options;
+    const { clickedData } = this.state;;
+    if (typeof this.state.clickedData.value !== 'undefined') {
+      options.push({ get label() { return FilterByValue.replace('{value}', clickedData.value) }, value: FilterByValue });
+      options.push('sep');
+    }
+    if (this.state.tableFiltered.length > 0) {
+      options.push(ClearFilters);
+      options.push('sep');
+    }
+    return options
+    .concat([
+      CopyCellOption,
+      CopyRowOption,
+      'sep',
+      { label: SaveCSVOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?csv`) },
+      { label: SaveJSONOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?json`) },
+    ]);
+  }
+
+  onMenuSelect = (choice: string) => {
     const { clickedData } = this.state;
     switch(choice) {
+      case FilterByValue:
+        const { filtered = {}, tableFiltered = [] } = this.state;
+        this.setState({
+          tableFiltered: tableFiltered.filter(({ id }) => id !== clickedData.col).concat([{
+            id: clickedData.col,
+            value: clickedData.value,
+          }]),
+          filtered: {
+            ...filtered,
+            [clickedData.col]: toRegEx(clickedData.value),
+          },
+        })
       case CopyCellOption:
         this.clipboardInsert(clickedData.value);
         break;
       case CopyRowOption:
         this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
+        break;
+      case ClearFilters:
+        this.setState({
+          tableFiltered: [],
+          filtered: {},
+        });
         break;
       case SaveCSVOption:
       case SaveJSONOption:
@@ -199,6 +255,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           columns={cols}
           column={this.columnDefault}
           filterable
+          filtered={this.state.tableFiltered}
           FilterComponent={FilterComponent}
           showPagination={this.props.data.length > this.props.paginationSize}
           minRows={this.props.data.length === 0 ?  this.props.paginationSize : Math.min(this.props.paginationSize, this.props.data.length)}
@@ -232,30 +289,23 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           }}
           onFilteredChange={filtered => {
             this.setState({
+              tableFiltered: filtered,
               filtered: filtered.reduce((p, c) => {
-                let exp: string | RegExp = String(c.value);
-                try {
-                  exp = new RegExp(`(${exp})`, 'gi');
-                } catch (e) {
-                  /** */
-                }
-                p[c.id] = exp;
+                p[c.id] = toRegEx(String(c.value));
                 return p;
               }, {}),
             });
           }}
           defaultFilterMethod={(filter, row) => {
-            let exp: string | RegExp = String(filter.value);
-            try {
-              exp = new RegExp(`(${exp})`, 'gi');
+            const exp = this.state.filtered[filter.id];
+            if (exp instanceof RegExp) {
               return exp.test(String(row[filter.id]));
-            } catch (e) {
-              return String(row[filter.id]) === exp;
             }
+            return String(row[filter.id]) === exp;
           }}
           className="-striped"
         />
-        <Menu {...this.state.contextMenu} onSelect={this.onMenuSelect} options={TableContextMenuOptions} />
+        <Menu {...this.state.contextMenu} width={250} onSelect={this.onMenuSelect} options={this.tableContextOptions()} />
       </div>
     );
   }

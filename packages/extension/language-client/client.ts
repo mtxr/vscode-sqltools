@@ -1,11 +1,11 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { DISPLAY_NAME } from '@sqltools/core/constants';
-import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
+import { SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
 import { commandExists, Telemetry, TelemetryArgs } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
-import ContextManager from './../context';
+import { ExtensionContext } from 'vscode';
 
 export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
   public client: LanguageClient;
@@ -14,7 +14,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
     product: 'language-client',
   });
 
-  constructor() {
+  constructor(public context: ExtensionContext) {
     this.client = new LanguageClient(
       `${DISPLAY_NAME} Language Server`,
       this.getServerOptions(),
@@ -29,10 +29,6 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
     return this.client.start();
   }
 
-  public registerPlugin(plugin: LanguageClientPlugin) {
-    plugin.register(this);
-    return this;
-  }
   public sendRequest: LanguageClient['sendRequest'] = async function () {
     await this.client.onReady();
     return this.client.sendRequest.apply(this.client, arguments);
@@ -53,7 +49,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
   }
 
   private getServerOptions(): ServerOptions {
-    const serverModule = ContextManager.context.asAbsolutePath('languageserver.js');
+    const serverModule = this.context.asAbsolutePath('languageserver.js');
     const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
@@ -94,7 +90,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
       documentSelector: selector,
       initializationOptions: {
         telemetry: telemetryArgs,
-        extensionPath: ContextManager.context.extensionPath,
+        extensionPath: this.context.extensionPath,
       },
       synchronize: {
         configurationSection: 'sqltools',

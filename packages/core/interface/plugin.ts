@@ -1,6 +1,7 @@
 import Telemetry from '@sqltools/core/utils/telemetry';
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
 import { IConnection, RequestType, RequestType0, TextDocuments } from 'vscode-languageserver';
+import { ExtensionContext } from 'vscode';
 export type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 export type RequestHandler<T> = T extends RequestType<infer P, infer R, any, any>
   ? (params: P) => R | Promise<R>
@@ -12,12 +13,19 @@ export interface LanguageServerPlugin<T = SQLToolsLanguageServerInterface> {
   register: (server: T) => void;
 }
 
-export interface LanguageClientPlugin<T = SQLToolsLanguageClientInterface> {
-  register: (client: T) => void;
+export interface SQLToolsExtensionPlugin<T = SQLToolsExtensionInterface> {
+  register: (extension: T) => void;
 }
 
-export interface ExtensionPlugin<T = any> { // @TODO: Add type
-  register: (extension: T) => void;
+export interface SQLToolsExtensionInterface {
+  client: SQLToolsLanguageClientInterface;
+
+  context: ExtensionContext;
+  activate(): void;
+
+  deactivate(): void;
+
+  registerPlugin(plugin: SQLToolsExtensionPlugin): this;
 }
 
 export interface SQLToolsLanguageServerInterface {
@@ -45,6 +53,5 @@ export interface SQLToolsLanguageClientInterface {
   onRequest: LanguageClient['onRequest'];
   sendNotification: LanguageClient['sendNotification'];
   onNotification: LanguageClient['onNotification'];
-  registerPlugin(plugin: LanguageClientPlugin): this;
   telemetry: Telemetry;
 }

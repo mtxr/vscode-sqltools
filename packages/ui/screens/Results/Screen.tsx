@@ -5,6 +5,7 @@ import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
+import DatabaseInterface from '@sqltools/core/interface/database';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
@@ -28,13 +29,16 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     });
   }
 
-  messagesHandler = ({ action, payload, connId }: WebviewMessageType<any>) => {
-    console.log('Message received', {action, payload, connId});
+  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    console.log('Message received', {action, payload});
     switch (action) {
       case 'queryResults':
+        const results: DatabaseInterface.QueryResults[] = payload;
         const queries = [];
         const resultMap = {};
-        (Array.isArray(payload) ? payload : [payload]).forEach((r) => {
+        let connId: string;
+        (Array.isArray(results) ? results : [results]).forEach((r) => {
+          connId = r.connId;
           queries.push(r.query);
           resultMap[r.query] = r;
         });

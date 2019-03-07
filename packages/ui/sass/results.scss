@@ -390,6 +390,7 @@ div mark {
     padding: 4px 24px;
     color: var(--vscode-menu-foreground);
     text-decoration: none;
+    white-space: nowrap;
     &:hover {
       background: var(--vscode-menu-selectionBackground);
       color: var(--vscode-menu-selectionForeground);

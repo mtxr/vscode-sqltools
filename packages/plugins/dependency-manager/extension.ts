@@ -1,14 +1,14 @@
 import { window as Win } from 'vscode';
 import Utils from '@sqltools/extension/api/utils';
 import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import { LanguageClientPlugin, SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
+import { SQLToolsExtensionPlugin, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 
-export default class DependencyManger implements LanguageClientPlugin {
+export default class DependencyManger implements SQLToolsExtensionPlugin {
   public client: SQLToolsLanguageClientInterface;
-  register(client: SQLToolsLanguageClientInterface) {
-    this.client = client;
-    this.registerEvents();
+  register(extension: SQLToolsExtensionInterface) {
+    this.client = extension.client;
+    this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
   }
 
   public async requestToInstall({ moduleName, moduleVersion, conn }) {
@@ -41,8 +41,5 @@ Go ahead and connect!`,
     } catch (error) {
       Win.showErrorMessage(error && error.message ? error.message : error.toString());
     }
-  }
-  private registerEvents() {
-    this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
   }
 }
