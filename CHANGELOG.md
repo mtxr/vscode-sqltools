@@ -4,7 +4,7 @@
 
 - @TODO: Add image
 
-- **NEW**
+- **NEW** :tada:
   - Added support for SQLite. #51
   - Added support for Oracle Database. #13
   - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental).
@@ -13,12 +13,20 @@
   - Added feature to copy cell value and the entire row. #63
     - @TODO: Add image
 
-- **Fixes**
+- **Fixes** :wrench:
   - ***UI***:
     - Fixed results ui scroll and resizer issues. #131 and #132
     - Improved more the look and feel to match VSCode Standards.
   - ***Connections***:
     - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental)
+
+- **Breaking Changes** :exclamation:
+  - ***Commands***:
+    - `SQLTools.addNewConnection` command was renamed to `SQLTools.openAddConnectionScreen`
+    - `SQLTools.appendToCursor` command was renamed to `SQLTools.insertText`
+    - `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
+  - ***Settngs***:
+    - `sqltools.logging` and `sqltools.logLevel` was removed.
 
 ## v0.16
 
