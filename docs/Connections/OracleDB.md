@@ -10,6 +10,8 @@
 > - macOS 64-bit (Intel x64)
 > - Linux 64-bit (x86-64) (built on Oracle Linux 6)
 
+More information you cand find in [node-oracledb](https://github.com/oracle/node-oracledb) repo: https://github.com/oracle/node-oracledb.
+
 ## 2. Connections
 
 ### 2.1 Oracle's Easy Connect Syntax
