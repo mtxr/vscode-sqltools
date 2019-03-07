@@ -75,6 +75,10 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     switch(action) {
       case 'receivedState':
         this.lastState = payload;
+        break;
+      case 'call':
+        commands.executeCommand(payload.command, ...(payload.args || []));
+        break;
     }
     if (this.messageCb) {
       this.messageCb(({ action, payload, ...rest }));

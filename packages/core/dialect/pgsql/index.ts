@@ -43,11 +43,12 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
           results = [results];
         }
 
-        return results.map((r, i) => {
+        return results.map((r, i): DatabaseInterface.QueryResults => {
           if (r.rows.length === 0 && r.command.toLowerCase() !== 'select') {
             messages.push(`${r.rowCount} rows were affected.`);
           }
           return {
+            connId: this.getId(),
             cols: (r.fields || []).map(({ name }) => name),
             messages,
             query: queries[i],

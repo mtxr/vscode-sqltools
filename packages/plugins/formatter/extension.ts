@@ -12,7 +12,7 @@ function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
     edit.replace(editor.selection, format(editor.document.getText(editor.selection), indentSize));
     commands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
   } catch (error) {
-    console.error('Error formatting query.', error); // @TODO: User default extension error handler
+    console.error('Error formatting query.', error);
   }
 }
 
@@ -30,7 +30,6 @@ function newSqlFileHandler() {
 }
 
 const register = (extension: SQLToolsExtensionInterface) => {
-  // @TODO: registerTextEditorCommand should be a method of the extension
   extension.context.subscriptions.push(
     commands.registerTextEditorCommand(`${EXT_NAME}.formatSql`, formatSqlHandler),
     commands.registerCommand(`${EXT_NAME}.insertText`, insertTextHandler),

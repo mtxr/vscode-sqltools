@@ -18,6 +18,9 @@ export interface Deps {
 export default abstract class GenericDialect<ConnectionType extends any> implements ConnectionDialect {
   public static deps: Deps[] = [];
 
+  public getId() {
+    return Utils.getConnectionId(this.credentials) || 'BROKEN';
+  }
   protected get deps() {
     if (!Dialects[this.constructor.name]) {
       return [];

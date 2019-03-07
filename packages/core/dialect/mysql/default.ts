@@ -62,7 +62,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
           if (results.length === 0) {
             return [];
           }
-          return resolve(results.map((r, i) => {
+          return resolve(results.map((r, i): DatabaseInterface.QueryResults => {
             const messages = [];
             if (r.affectedRows) {
               messages.push(`${r.affectedRows} rows were affected.`);
@@ -71,6 +71,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
               messages.push(`${r.changedRows} rows were changed.`);
             }
             return {
+              connId: this.getId(),
               cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
               messages,
               query: queries[i],

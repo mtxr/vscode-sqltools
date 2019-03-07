@@ -89,6 +89,7 @@ export default class Connection {
           message = JSON.stringify(e);
         }
         return [ {
+          connId: this.getId(),
           cols: [],
           error: true,
           messages: [ message ],

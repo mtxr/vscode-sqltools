@@ -111,7 +111,7 @@ export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin 
 
   @logOnCall()
   private ext_executeQueryFromFile = async () => {
-    // @TODO: read from file and run
+    // @TODO: add option read from file and run
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 

@@ -34,8 +34,7 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          // @TODO: link to the wiki and create docs
-          Utils.open('https://mtxr.gitbook.io/vscode-sqltools');
+          Utils.open('https://mtxr.gitbook.io/vscode-sqltools/connections');
           break;
       }
     } catch (error) {

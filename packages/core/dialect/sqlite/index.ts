@@ -71,6 +71,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
         messages.push(`${res.length} rows were affected.`);
       }
       results.push({
+        connId: this.getId(),
         cols: res && res.length ? Object.keys(res[0]) : [],
         messages,
         query: queries[i],

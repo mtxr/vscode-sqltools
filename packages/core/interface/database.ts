@@ -29,7 +29,7 @@ export namespace DatabaseInterface {
     name: string;
   }
   export interface QueryResults {
-    connId?: string;
+    connId: string;
     error?: boolean;
     results: any[];
     cols: string[];

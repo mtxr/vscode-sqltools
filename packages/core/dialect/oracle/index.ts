@@ -79,6 +79,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
         messages.push(`${res.rowsAffected} rows were affected.`);
       }
       results.push({
+        connId: this.getId(),
         cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
         messages,
         query: queries[results.length],

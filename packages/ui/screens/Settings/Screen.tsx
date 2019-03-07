@@ -472,7 +472,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                           </ul>
                         </div>
                       ) : null}
-                      <div>You can find more information <a href="https://mtxr.gitbook.io/vscode-sqltools/">here</a>.</div>
+                      <div>You can find more information <a href={`https://mtxr.gitbook.io/vscode-sqltools/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
                       {/** @TODO fix this link */}
                     </div>
                   </div>

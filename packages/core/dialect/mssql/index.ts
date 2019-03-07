@@ -71,12 +71,13 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     request.multiple = true;
     const { recordsets, rowsAffected } = await request.query(query);
     const queries = Utils.query.parse(query);
-    return recordsets.map((r, i) => {
+    return recordsets.map((r, i): DatabaseInterface.QueryResults => {
       const messages = [];
       if (typeof rowsAffected[i] === 'number')
         messages.push(`${rowsAffected[i]} rows were affected.`);
 
       return {
+        connId: this.getId(),
         cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
         messages,
         query: queries[i],

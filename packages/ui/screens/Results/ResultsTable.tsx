@@ -3,6 +3,7 @@ import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo
 import ReactDOM from 'react-dom';
 import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
+import getVscode from '../../lib/vscode';
 
 const FilterByValue = 'Filter by \'{value}\'';
 const ClearFilters = 'Clear all filters';
@@ -201,8 +202,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       CopyCellOption,
       CopyRowOption,
       'sep',
-      { label: SaveCSVOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?csv`) },
-      { label: SaveJSONOption, command: encodeURI(`${process.env.EXT_NAME || 'sqltools'}.saveResults?json`) },
+      SaveCSVOption,
+      SaveJSONOption,
     ]);
   }
 
@@ -234,8 +235,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         });
         break;
       case SaveCSVOption:
+        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['csv']} });
+        break;
       case SaveJSONOption:
-        // handled with commands uri
+        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['json']} });
         break;
     }
     this.onMenuClose();

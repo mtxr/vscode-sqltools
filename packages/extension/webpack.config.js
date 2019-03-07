@@ -25,7 +25,7 @@ const devDependencies = Object.assign(
 );
 
 // defintions
-extPkgJson.name = process.env.PREVIEW ? 'SQLTools-preview' : 'SQLTools'; // vscode marketplace name
+extPkgJson.name = process.env.PREVIEW ? 'SQLTools-preview' : 'SQLTools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
 const outdir = path.resolve(rootdir, '..', 'dist');

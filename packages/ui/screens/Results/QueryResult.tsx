@@ -4,6 +4,7 @@ import ResultsTable from './ResultsTable';
 import ErrorIcon from '@sqltools/ui/components/ErrorIcon';
 
 interface QueryResultProps {
+  connId: string;
   messages: string[];
   cols: string[];
   results: any[];

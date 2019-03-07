@@ -83,10 +83,11 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
       messages.push(`${affectedRows} rows were affected.`);
     }
     return {
+      connId: this.getId(),
       cols,
       messages,
       query,
-      results,//: results.map(toMappedRow),
+      results,
     }
   }
 
