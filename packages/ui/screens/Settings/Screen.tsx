@@ -13,12 +13,40 @@ import Syntax from '@sqltools/ui/components/Syntax';
 import getVscode from '@sqltools/ui/lib/vscode';
 import '@sqltools/ui/sass/app.scss';
 
-const dialectDefaultPorts = {
-  MySQL: 3306,
-  MSSQL: 1433,
-  PostgreSQL: 5432,
-  OracleDB: 1521,
-  SQLite: null
+const requirements = [
+  'Node 6 or newer. 7 or newer is prefered.',
+];
+
+const dialectOptions = {
+  MySQL: {
+    port: 3306,
+    value: 'MySQL',
+    text: 'MySQL',
+  },
+  MSSQL: {
+    port: 1433,
+    value: 'MSSQL',
+    text: 'MSSQL',
+  },
+  PostgreSQL: {
+    port: 5432,
+    value: 'PostgreSQL',
+    text: 'PostgreSQL',
+  },
+  OracleDB: {
+    port: 1521,
+    value: 'OracleDB',
+    text: 'OracleDB (Node Native)',
+    experimental: true,
+    showHelperText: true,
+    requirements,
+  },
+  SQLite: {
+    value: 'SQLite',
+    text: 'SQLite (Node Native)',
+    showHelperText: true,
+    requirements,
+  },
 };
 
 interface FieldWrapperProps {
@@ -35,7 +63,7 @@ class FieldWrapper extends React.Component<FieldWrapperProps> {
     return (
       <div className={'row ' + (this.props.i === 0 ? 'no-margin-first-top' : '')}>
         <div className='col-4 no-margin-left capitalize'>{field.label}</div>
-        <div className='col-8 capitalize no-margin-right'>
+        <div className='col-8 capitalize no-margin-right flex-full'>
           {html}
           {info}
         </div>
@@ -97,8 +125,8 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     },
     dialect: {
       label: 'Dialects',
-      values: Object.keys(dialectDefaultPorts),
-      default: Object.keys(dialectDefaultPorts)[0],
+      values: Object.values(dialectOptions),
+      default: dialectOptions.MySQL.value,
       validators: [notEmpty],
       postUpdateHook: () => {
         const newState = Object.assign({}, this.state);
@@ -114,7 +142,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           if (this.state.fields.database.type === 'file') {
             newState.data.database = undefined;
           }
-          newState.data.port = dialectDefaultPorts[this.state.data.dialect] || dialectDefaultPorts.MySQL;
+          newState.data.port = (dialectOptions[this.state.data.dialect] ? dialectOptions[this.state.data.dialect].port : null) || dialectOptions.MySQL.port;
           newState.fields.domain.visible = this.state.data.dialect === 'MSSQL';
           newState.fields.port.visible = true;
           newState.fields.server.visible = true;
@@ -135,7 +163,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     port: {
       label: 'Port',
       type: 'number',
-      default: dialectDefaultPorts.MySQL,
+      default: dialectOptions.MySQL.port,
       validators: [notEmpty, inRange(1, 65535)],
       parse: int,
     },
@@ -429,7 +457,28 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
               </div>
             </div>
             <div className='col-6'>
-              <div><h5 className='no-margin-top'>Preview</h5></div>
+              {this.state.data.dialect && dialectOptions[this.state.data.dialect].showHelperText ? (
+                <div>
+                  <h5 className="no-margin-top">Attention: Beta Feature</h5>
+                  <div className='messages radius'>
+                    <div className='message radius attention'>
+                      This connection dialect <strong>{this.state.data.dialect}</strong> is new and might not work for some machines.
+                      Please, open an issue at <a href='https://github.com/mtxr/vscode-sqltools/issues'>GitHub</a> if it doesn't work for you.
+                      {(dialectOptions[this.state.data.dialect].requirements || []).length > 0 ? (
+                        <div>
+                          <strong>Requirements:</strong>
+                          <ul>
+                            {(dialectOptions[this.state.data.dialect].requirements || []).map(r => (<li>{r}</li>))}
+                          </ul>
+                        </div>
+                      ) : null}
+                      <div>You can find more information <a href="https://mtxr.gitbook.io/vscode-sqltools/">here</a>.</div>
+                      {/** @TODO fix this link */}
+                    </div>
+                  </div>
+                </div>
+              ) : null}
+              <div><h5 className={this.state.data.dialect && dialectOptions[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
               <Syntax code={this.getParsedFormData()} language='json'/>
               {Object.keys(this.state.errors).length ? (
                 <div>

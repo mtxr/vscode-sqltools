@@ -68,35 +68,6 @@ body, #root {
   overflow-x: auto;
 }
 
-.messages {
-  .message {
-    padding: 4px;
-    border-bottom-width: 1px;
-    border-bottom-style: solid;
-    border-bottom-color: $lightThemeGray3;
-
-    &:last-child {
-      border-bottom-color: transparent !important;
-    }
-    &.error {
-      background: rgba(255, 0, 0, 0.2)
-    }
-    &.success {
-      background: rgba(0, 255, 0, 0.4)
-    }
-  }
-  &.radius {
-    .message:first-child {
-      border-top-left-radius: 4px;
-      border-top-right-radius: 4px;
-    }
-    .message:last-child {
-      border-bottom-left-radius: 4px;
-      border-bottom-right-radius: 4px;
-    }
-  }
-}
-
 .tabs {
   width: 100%;
   padding: 0;

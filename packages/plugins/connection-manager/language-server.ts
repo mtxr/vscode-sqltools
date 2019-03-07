@@ -181,7 +181,6 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   ) {
     if (!conn) return Promise.resolve();
     conn.isActive = this.server.store.getState().lastUsedId === getConnectionId(conn);
-    console.log({ conn });
     return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
   }
 

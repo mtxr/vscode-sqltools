@@ -60,22 +60,20 @@ body {
   background: $backgroundColor;
 }
 
-input, select {
+input, select, select > option {
   border-radius: 0;
-  background: $lightThemeGray1;
-  border-color: $lightThemeGray2;
-  border-width: 1px;
-  border-style: solid;
-  color: $fallbackColor;
-  color: $color;
+  background: var(--vscode-settings-textInputBackground);
+  border: none;
+  color: var(--vscode-settings-textInputForeground);
+  padding: 4px;
 }
 
-.vscode-dark {
-input, select {
-    background: $darkThemeWhite1;
-    border-color: $darkThemeWhite2;
-  }
-}
+// .vscode-dark {
+// input, select, select > option {
+//     background: $darkThemeWhite1;
+//     border-color: $darkThemeWhite2;
+//   }
+// }
 
 .fullscreen-container {
   @include full-screen();
@@ -213,4 +211,12 @@ input, select {
 
 .relative {
   position: relative !important;
+}
+
+.flex-full {
+  display: flex;
+  align-items: baseline;
+  > * {
+    flex-grow: 1;
+  }
 }

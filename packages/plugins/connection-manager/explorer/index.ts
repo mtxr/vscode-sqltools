@@ -123,13 +123,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   @logOnCall()
   public setActiveConnection(c: ConnectionInterface) {
-    const id = getConnectionId(c);
-    this.tree[id].activate();
+    Object.keys(this.tree).forEach(id => {
+      const item = this.tree[id];
+      if (item.active) item.deactivate();
+    });
+    if (!c) return;
+    const item = this.tree[getConnectionId(c)];
+    if (!item) return;
+    item.activate();
     if (this.treeView.visible) {
-      this.treeView.reveal(this.tree[id].tables, { select: false, focus: false });
-      this.treeView.reveal(this.tree[id]);
+      this.treeView.reveal(item.tables, { select: false, focus: false });
+      this.treeView.reveal(item);
     }
-    this.refresh(this.tree[id]);
+    this.refresh(item);
   }
 
   public disconnect(c: ConnectionInterface) {

@@ -2,19 +2,50 @@
 @import './lib/simple-grid';
 @import './syntax';
 
-.settings-screen {
-  .message .btn {
-    float: right;
-    padding: 0 4px;
-    margin: 0 4px;
-    color: white;
-    text-decoration: none;
-    font-weight: bold;
-    background: var(--vscode-editorLink-activeForeground);
-    text-transform: initial;
+.messages {
+  .message {
+    padding: 4px;
+    border-bottom-width: 1px;
+    border-bottom-style: solid;
+    border-bottom-color: $lightThemeGray3;
 
-    &.danger {
-      background: var(--vscode-editorError-foreground);
+    &:last-child {
+      border-bottom-color: transparent !important;
+    }
+    &.error {
+      background: rgba(255, 0, 0, 0.2)
+    }
+    &.success {
+      background: rgba(0, 255, 0, 0.4)
+    }
+    &.attention {
+      border: 1px solid var(--vscode-inputValidation-warningBorder) !important;
+      padding: 4px;
+      background: var(--vscode-editorGroup-background);
+    }
+    .btn {
+      float: right;
+      padding: 0 4px;
+      margin: 0 4px;
+      color: white;
+      text-decoration: none;
+      font-weight: bold;
+      background: var(--vscode-editorLink-activeForeground);
+      text-transform: initial;
+
+      &.danger {
+        background: var(--vscode-editorError-foreground);
+      }
+    }
+  }
+  &.radius {
+    .message:first-child {
+      border-top-left-radius: 4px;
+      border-top-right-radius: 4px;
+    }
+    .message:last-child {
+      border-bottom-left-radius: 4px;
+      border-bottom-right-radius: 4px;
     }
   }
 }
