@@ -35,9 +35,7 @@ export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin 
   private ext_runFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
-      this._openResultsWebview();
-      await this._connect();
-      await this._runQuery(query);
+      await this.ext_executeQuery(query);
     } catch (e) {
       ErrorHandler.create('Error running query.', this.ext_showOutputChannel)(e);
     }
@@ -183,7 +181,7 @@ export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin 
       return node.value;
     }
 
-    const conn = await this._connect(true);
+    const conn = await this._connect();
 
     return await this._pickTable(conn, 'label');
   }
