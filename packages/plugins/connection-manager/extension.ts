@@ -32,7 +32,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_executeFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
-      await this.ext_executeQuery(query);
+      return this.ext_executeQuery(query);
     } catch (e) {
       ErrorHandler.create('Error running query.', this.ext_showOutputChannel)(e);
     }
@@ -293,7 +293,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     // extension stuff
     this.context.subscriptions.push(
       (this.resultsWebview = new ResultsWebview(this.context, this.client)),
-      (this.settingsWebview = new SettingsWebview(this.context, )),
+      (this.settingsWebview = new SettingsWebview(this.context)),
       this._updateStatusBar(),
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
