@@ -2,7 +2,7 @@ import './patch-console';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Telemetry, Timer } from '@sqltools/core/utils';
+import { Telemetry, Timer, openExternal } from '@sqltools/core/utils';
 import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
 import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
@@ -13,7 +13,7 @@ import BookmarksStorage from './api/bookmarks-storage';
 import ErrorHandler from './api/error-handler';
 import History from './api/history';
 import Utils from './api/utils';
-import { getSelectedText, insertText, quickPick, readInput } from './api/vscode-utils';
+import { getSelectedText, insertText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
 
@@ -198,13 +198,13 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
       this.telemetry.registerInfoMessage(message, res);
       switch (res) {
         case moreInfo:
-          Utils.open('https://github.com/mtxr/vscode-sqltools#donate');
+          openExternal('https://github.com/mtxr/vscode-sqltools#donate');
           break;
         case releaseNotes:
-          Utils.open(current.releaseNotes);
+          openExternal(current.releaseNotes);
           break;
         case supportProject:
-          Utils.open('https://www.patreon.com/mteixeira');
+          openExternal('https://www.patreon.com/mteixeira');
           break;
       }
     } catch (e) { /***/ }

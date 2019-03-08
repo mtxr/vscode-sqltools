@@ -2,10 +2,9 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
-import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
-import ErrorHandler from '@sqltools/extension/api/error-handler';
-import Utils from '@sqltools/extension/api/utils';
-import { getSelectedText, quickPick, readInput } from '@sqltools/extension/api/vscode-utils';
+import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
+import ErrorHandler from '@sqltools/extension/api/error-handler'; // @TODO: Remove from here. Plugins should not access extension package
+import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -244,7 +243,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
       prompt: `${c.name} password`,
       password: true,
-      validateInput: (v) => Utils.isEmpty(v) ? 'Password not provided.' : null,
+      validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
     });
   }
   private async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {

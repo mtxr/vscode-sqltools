@@ -1,10 +1,5 @@
 import path from 'path';
 import { VERSION } from '@sqltools/core/constants';
-import {
-  commands as VSCommands,
-  env as VSEnv,
-} from 'vscode';
-import { Uri } from 'vscode';
 import SerializableStorage from '@sqltools/core/utils/serializable-storage';
 import { getHome } from '@sqltools/core/utils/get-home';
 
@@ -62,21 +57,6 @@ namespace Utils {
     if (n.length >= 3) return n[0] * 10000 + n[1] * 100 + n[2];
     if (n.length === 2) return n[0] * 10000 + n[1] * 100;
     return n[0] * 10000;
-  }
-
-  export function open(url: string) {
-    if (VSEnv && typeof (VSEnv as any).openExternal === 'function') {
-      return (VSEnv as any).openExternal(Uri.parse(url));
-    }
-    if (VSEnv && typeof (VSEnv as any).open === 'function') {
-      return (VSEnv as any).open(Uri.parse(url));
-    }
-
-    return VSCommands.executeCommand('vscode.open', Uri.parse(url));
-  }
-
-  export function isEmpty(v) {
-    return !v || v.length === 0;
   }
 }
 

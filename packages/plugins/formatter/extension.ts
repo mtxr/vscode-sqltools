@@ -1,9 +1,8 @@
 import { TextEditor, TextEditorEdit, commands } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
-import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/extension/api/vscode-utils';
+import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import SQLTools from '@sqltools/core/plugin-api';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {

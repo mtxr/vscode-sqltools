@@ -3,8 +3,8 @@ import { window } from 'vscode';
 import { workspace } from 'vscode';
 import { DismissedException } from '@sqltools/core/exception';
 import { SnippetString } from 'vscode';
-import Utils from './utils';
 import { QuickPickItem, QuickPickOptions, QuickPick } from 'vscode';
+import { isEmpty } from '@sqltools/core/utils';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
   if (forceCreate || !window.activeTextEditor) {
@@ -17,7 +17,7 @@ export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor
 export async function getSelectedText(action = 'proceed', fullText = false) {
   const editor = await getOrCreateEditor();
   const query = editor.document.getText(fullText ? undefined : editor.selection);
-  if (Utils.isEmpty(query)) {
+  if (isEmpty(query)) {
     window.showInformationMessage(`Can't ${action}. You have selected nothing.`);
     throw new DismissedException();
   }
@@ -37,7 +37,7 @@ export async function insertSnippet(text: string, forceCreate = false) {
 
 export async function readInput(prompt: string, placeholder?: string) {
   const data = await window.showInputBox({ prompt, placeHolder: placeholder || prompt });
-  if (Utils.isEmpty(data)) throw new DismissedException();
+  if (isEmpty(data)) throw new DismissedException();
   return data;
 }
 

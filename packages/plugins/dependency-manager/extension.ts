@@ -1,8 +1,8 @@
 import { window as Win } from 'vscode';
-import Utils from '@sqltools/extension/api/utils';
 import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
+import { openExternal } from '@sqltools/core/utils';
 
 export default class DependencyManger implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -34,7 +34,7 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          Utils.open('https://mtxr.gitbook.io/vscode-sqltools/connections');
+          openExternal('https://mtxr.gitbook.io/vscode-sqltools/connections');
           break;
       }
     } catch (error) {
