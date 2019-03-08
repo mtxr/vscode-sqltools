@@ -48,10 +48,12 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         },
       );
       this.panel.iconPath = Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`);
-      this.panel.onDidDispose(this.dispose);
       this.disposables.push(Disposable.from(this.panel));
-
-      this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables);
+      this.disposables.push(this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables));
+      this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
+        this.setPreviewActiveContext(webviewPanel.active);
+      }));
+      this.panel.onDidDispose(this.dispose);
     }
 
     this.panel.title = this.title;
@@ -63,9 +65,6 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           .with({ scheme: 'vscode-resource' })
           .toString());
 
-    this.panel.onDidChangeViewState(({ webviewPanel }) => {
-			this.setPreviewActiveContext(webviewPanel.active);
-		});
     this.postMessage({ action: 'reset' });
     this.panel.reveal();
     this.setPreviewActiveContext(true);

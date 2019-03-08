@@ -92,8 +92,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_executeQuery = async (query?: string) => {
     try {
       query = query || await getSelectedText('execute query');
-      this._openResultsWebview();
       await this._connect();
+      this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
       this.resultsWebview.updateResults(payload);
       return payload;
