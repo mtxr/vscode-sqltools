@@ -113,6 +113,11 @@ module.exports = () => {
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
       }),
+      new webpack.SourceMapDevToolPlugin({
+        moduleFilenameTemplate: (info) => path.relative(rootdir, info.absoluteResourcePath),
+        filename: isProduction ? '[file].map' : undefined,
+        sourceRoot: path.relative(outdir, rootdir)}
+      )
     ].concat(config.plugins || []);
     config.node = {
       ...(config.node || {}),
@@ -125,12 +130,9 @@ module.exports = () => {
     } else {
       delete config.optimization;
     }
-    config.devtool = isProduction ? 'source-map' : 'cheap-module-eval-source-map';
+    config.devtool = false;
     config.mode = isProduction ? 'production' : 'development';
     config.output = config.output || {};
-    // config.output.devtoolModuleFilenameTemplate = 'file:///[absolute-resource-path]';
-
-    config.output.devtoolModuleFilenameTemplate = '../../[resource-path]';
     return config;
   });
 };

@@ -64,8 +64,8 @@ export declare namespace SQLTools {
         activate(): void;
         deactivate(): void;
         registerPlugin(plugin: ExtensionPlugin): this;
-        beforeCommandHook(command: string, handler: CommandEventHandler<CommandEvent>): any;
-        afterCommandSuccessHook(command: string, handler: CommandEventHandler<CommandSuccessEvent>): any;
+        addBeforeCommandHook(command: string, handler: CommandEventHandler<CommandEvent>): any;
+        addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<CommandSuccessEvent>): any;
         registerPlugin(plugin: ExtensionPlugin): any;
         registerCommand(command: string, handler: Function): any;
         registerTextEditorCommand(command: string, handler: Function): any;

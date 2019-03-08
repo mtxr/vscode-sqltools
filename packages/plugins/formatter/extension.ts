@@ -30,12 +30,10 @@ function newSqlFileHandler() {
 }
 
 const register = (extension: SQLTools.ExtensionInterface) => {
-  extension.context.subscriptions.push(
-    commands.registerTextEditorCommand(`${EXT_NAME}.formatSql`, formatSqlHandler),
-    commands.registerCommand(`${EXT_NAME}.insertText`, insertTextHandler),
-    commands.registerCommand(`${EXT_NAME}.generateInsertQuery`, generateInsertQueryHandler),
-    commands.registerCommand(`${EXT_NAME}.newSqlFile`, newSqlFileHandler),
-  );
+  extension.registerTextEditorCommand(`formatSql`, formatSqlHandler)
+    .registerCommand(`insertText`, insertTextHandler)
+    .registerCommand(`generateInsertQuery`, generateInsertQueryHandler)
+    .registerCommand(`newSqlFile`, newSqlFileHandler);
 }
 
 export default { register };

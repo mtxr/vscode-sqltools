@@ -4,7 +4,6 @@ import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface
 import { getConnectionId, asArray } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext } from 'vscode';
-import { logOnCall } from '@sqltools/core/utils/decorators';
 
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
@@ -121,7 +120,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this.setActiveConnection(conn);
   }
 
-  @logOnCall()
   public setActiveConnection(c: ConnectionInterface) {
     Object.keys(this.tree).forEach(id => {
       const item = this.tree[id];

@@ -10,7 +10,6 @@ import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
 import actions from './store/actions';
-import { logOnCall } from '@sqltools/core/utils/decorators';
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLToolsLanguageServer;
@@ -24,7 +23,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return <Connection | null>(activeConnections[id] || null);
   }
 
-  @logOnCall()
   private runCommandHandler: RequestHandler<typeof RunCommandRequest> = async ({ conn, args, command }) => {
     try {
       const c = this.getConnectionInstance(conn);
@@ -40,7 +38,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     }
   };
 
-  @logOnCall()
   private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = ({ connId, filename, query, filetype = 'csv' }) => {
     const { queryResults } = this.server.store.getState();
     const { results, cols } = queryResults[connId][query];
@@ -58,7 +55,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     fs.writeFileSync(filename, output);
   };
 
-  @logOnCall()
   private getTablesAndColumnsHandler: RequestHandler<typeof GetConnectionDataRequest> = async ({ conn }) => {
     if (!conn) {
       return undefined;
@@ -70,13 +66,11 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return { tables: await c.getTables(true), columns: await c.getColumns(true) };
   };
 
-  @logOnCall()
   private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
     const activeConnections = this.server.store.getState().activeConnections;
     await Promise.all(Object.keys(activeConnections).map(c => this._loadConnectionData(activeConnections[c])));
   };
 
-  @logOnCall()
   private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }): Promise<void> => {
     if (!conn) {
       return undefined;
@@ -88,7 +82,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     await this._updateSidebar(conn, null, null);
   };
 
-  @logOnCall()
   private GetConnectionPasswordRequestHandler: RequestHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
     if (!conn) {
       return undefined;
@@ -100,7 +93,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return null;
   };
 
-  @logOnCall()
   private openConnectionHandler: RequestHandler<typeof ConnectRequest> = async (req: {
     conn: ConnectionInterface;
     password?: string;
@@ -131,7 +123,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       });
   };
 
-  @logOnCall()
   private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
     let connList = this.connections;
 
@@ -173,7 +164,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       });
   }
 
-  @logOnCall()
   private _updateSidebar(
     conn: ConnectionInterface,
     tables: DatabaseInterface.Table[],
@@ -184,7 +174,6 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
   }
 
-  @logOnCall()
   public async _autoConnectIfActive() {
     const defaultConnections: ConnectionInterface[] = [];
     const { lastUsedId, activeConnections } = this.server.store.getState();

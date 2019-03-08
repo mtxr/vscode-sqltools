@@ -3,7 +3,6 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
-import { logOnCall } from '@sqltools/core/utils/decorators';
 import ErrorHandler from '@sqltools/extension/api/error-handler';
 import Utils from '@sqltools/extension/api/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/extension/api/vscode-utils';
@@ -26,12 +25,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   // extension commands
-  @logOnCall()
   private ext_refreshAll = () => {
     return this.client.sendRequest(RefreshAllRequest);
   }
 
-  @logOnCall()
   private ext_runFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
@@ -41,7 +38,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  @logOnCall()
   private ext_showRecords = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
@@ -54,7 +50,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  @logOnCall()
   private ext_describeTable = async (node?: SidebarTable | SidebarView) => {
     try {
       const table = await this._getTableName(node);
@@ -66,12 +61,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  @logOnCall()
   private ext_describeFunction() {
     window.showInformationMessage('Not implemented yet.');
   }
 
-  @logOnCall()
   private ext_closeConnection = async (node?: SidebarConnection) => {
     const conn = node ? node.conn : await this._pickConnection(true);
     if (!conn) {
@@ -86,7 +79,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       }, ErrorHandler.create('Error closing connection'));
   }
 
-  @logOnCall()
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
@@ -97,7 +89,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this._connect(true).catch(ErrorHandler.create('Error selecting connection'));
   }
 
-  @logOnCall()
   private ext_executeQuery = async (query?: string) => {
     try {
       query = query || await getSelectedText('execute query');
@@ -109,18 +100,15 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  @logOnCall()
   private ext_executeQueryFromFile = async () => {
     // @TODO: add option read from file and run
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  @logOnCall()
   private ext_showOutputChannel = () => {
     (<any>console).show();
   }
 
-  @logOnCall()
   private ext_saveResults = async (filetype: 'csv' | 'json') => {
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
@@ -163,7 +151,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
   }
 
-  @logOnCall()
   private ext_addConnection(connInfo: ConnectionInterface) {
     if (!connInfo) {
       console.warn('Nothing to do. No parameter received');
@@ -316,23 +303,23 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
       this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
-      // register extension commands
-      commands.registerCommand(`${EXT_NAME}.addConnection`, this.ext_addConnection),
-      commands.registerCommand(`${EXT_NAME}.openAddConnectionScreen`, this.ext_openAddConnectionScreen),
-      commands.registerCommand(`${EXT_NAME}.closeConnection`, this.ext_closeConnection),
-      commands.registerCommand(`${EXT_NAME}.deleteConnection`, this.ext_deleteConnection),
-      commands.registerCommand(`${EXT_NAME}.describeFunction`, this.ext_describeFunction),
-      commands.registerCommand(`${EXT_NAME}.describeTable`, this.ext_describeTable),
-      commands.registerCommand(`${EXT_NAME}.executeQuery`, this.ext_executeQuery),
-      commands.registerCommand(`${EXT_NAME}.executeQueryFromFile`, this.ext_executeQueryFromFile),
-      commands.registerCommand(`${EXT_NAME}.refreshAll`, this.ext_refreshAll),
-      commands.registerCommand(`${EXT_NAME}.runFromInput`, this.ext_runFromInput),
-      commands.registerCommand(`${EXT_NAME}.saveResults`, this.ext_saveResults),
-      commands.registerCommand(`${EXT_NAME}.selectConnection`, this.ext_selectConnection),
-      commands.registerCommand(`${EXT_NAME}.showOutputChannel`, this.ext_showOutputChannel),
-      commands.registerCommand(`${EXT_NAME}.showRecords`, this.ext_showRecords),
     );
 
+    // register extension commands
+    extension.registerCommand(`addConnection`, this.ext_addConnection)
+      .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
+      .registerCommand(`closeConnection`, this.ext_closeConnection)
+      .registerCommand(`deleteConnection`, this.ext_deleteConnection)
+      .registerCommand(`describeFunction`, this.ext_describeFunction)
+      .registerCommand(`describeTable`, this.ext_describeTable)
+      .registerCommand(`executeQuery`, this.ext_executeQuery)
+      .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
+      .registerCommand(`refreshAll`, this.ext_refreshAll)
+      .registerCommand(`runFromInput`, this.ext_runFromInput)
+      .registerCommand(`saveResults`, this.ext_saveResults)
+      .registerCommand(`selectConnection`, this.ext_selectConnection)
+      .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
+      .registerCommand(`showRecords`, this.ext_showRecords);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {

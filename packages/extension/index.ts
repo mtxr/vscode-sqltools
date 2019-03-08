@@ -56,8 +56,10 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
       this.client.start(),
       this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
       this.onDidRunCommandSuccessfullyEmitter.event(this.onDidRunCommandSuccessfullyHandler),
-      );
+    );
+
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
+
     if ((<any>console).outputChannel) {
       this.context.subscriptions.push((<any>console).outputChannel);
     }
@@ -214,25 +216,28 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 
   private onWillRunCommandHandler = (evt: SQLTools.CommandEvent): void => {
     if (!evt.command) return;
-    if (!this.willRunCommandHooks[evt.command]) return;
+    if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
 
+    console.debug(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
   }
   private onDidRunCommandSuccessfullyHandler = (evt: SQLTools.CommandSuccessEvent): void => {
     if (!evt.command) return;
-    if (!this.didRunCommandSuccessfullyHooks[evt.command]) return;
+    if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
+
+    console.debug(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
-  public beforeCommandHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandEvent>) {
-    if (!this.didRunCommandSuccessfullyHooks[command]) {
-      this.didRunCommandSuccessfullyHooks[command] = [];
+  public addBeforeCommandHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandEvent>) {
+    if (!this.willRunCommandHooks[command]) {
+      this.willRunCommandHooks[command] = [];
     }
-    this.didRunCommandSuccessfullyHooks[command].push(handler);
+    this.willRunCommandHooks[command].push(handler);
     return this;
   }
 
-  public afterCommandSuccessHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandSuccessEvent>) {
+  public addAfterCommandSuccessHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandSuccessEvent>) {
     if (!this.didRunCommandSuccessfullyHooks[command]) {
       this.didRunCommandSuccessfullyHooks[command] = [];
     }
@@ -246,24 +251,17 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   }
 
   public registerCommand(command: string, handler: Function) {
-    this.context.subscriptions.push(
-      commands.registerCommand(`${EXT_NAME}.${command}`, async (...args) => {
-       this.onWillRunCommandEmitter.fire({ command, args });
-
-       let result = handler(...args);
-       if (typeof result.then === 'function') {
-         result = await result;
-       }
-       this.onDidRunCommandSuccessfullyEmitter.fire({ args, command, result });
-       return result;
-     })
-    );
-    return this;
+    return this.decorateAndRegisterCommand(command, handler);
   }
 
   public registerTextEditorCommand(command: string, handler: Function) {
+    return this.decorateAndRegisterCommand(command, handler, 'registerTextEditorCommand');
+  }
+
+  private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
     this.context.subscriptions.push(
-      commands.registerTextEditorCommand(`${EXT_NAME}.${command}`, async (...args) => {
+      commands[type](`${EXT_NAME}.${command}`, async (...args) => {
+        console.info(`Executing ${EXT_NAME}.${command}`)
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);

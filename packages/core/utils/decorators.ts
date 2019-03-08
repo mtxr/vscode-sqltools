@@ -12,8 +12,9 @@ export function runIfPropIsDefined(prop: string) {
   };
 }
 
-export function logOnCall(opts: Partial<{ message: string; trace: boolean, prefix: string; env: string; verbose: boolean | Function, args: any[] }> = {}) {
+export function logIfEnv(opts: Partial<{ message: string; trace: boolean, prefix: string; env: string; verbose: boolean | Function, args: any[] }> = { env: 'development' }) {
   return function(_: any, prop: string, descriptor?: TypedPropertyDescriptor<any>): any {
+    if (process.env.NODE_ENV !== opts.env) return;
     let fn, patched;
 
     if (descriptor) {
