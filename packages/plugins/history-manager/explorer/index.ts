@@ -1,13 +1,17 @@
-import { asArray } from '@sqltools/core/utils';
-import { EventEmitter, ProviderResult, TreeDataProvider } from 'vscode';
+import { EventEmitter, ProviderResult, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
+import { logIfEnv } from '@sqltools/core/utils/decorators';
+import { window } from 'vscode';
+import { EXT_NAME } from '@sqltools/core/constants';
 
 type HistoryExplorerItem = HistoryTreeItem | HistoryTreeGroup;
 
 export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
+  private treeView: TreeView<HistoryExplorerItem>;
   private _onDidChangeTreeData: EventEmitter<HistoryExplorerItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-  private tree: { [database: string]: HistoryTreeGroup } = {};
+  private tree: { [group: string]: HistoryTreeGroup } = {};
+  private treeGroupOrder: string[] = [];
 
   public getTreeItem(element: HistoryExplorerItem): HistoryExplorerItem {
     return element;
@@ -15,9 +19,9 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
 
   public getChildren(element?: HistoryExplorerItem): ProviderResult<HistoryExplorerItem[]> {
     if (!element) {
-      return Promise.resolve(asArray(this.tree));
-    } else if (element instanceof HistoryTreeItem) {
-      return Promise.resolve([]);
+      return this.treeGroupOrder.map(group => this.tree[group]);
+    } else if (element instanceof HistoryTreeGroup) {
+      return element.items;
     }
     return [];
   }
@@ -25,12 +29,24 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   public getParent(element: HistoryTreeItem | HistoryTreeGroup) {
     return element.parent || null;
   }
-  public refresh(item?: HistoryExplorerItem) {
+  @logIfEnv()
+  public refresh = (item?: HistoryExplorerItem) => {
     this._onDidChangeTreeData.fire(item);
   }
 
+  public addItem(group: string, value: string) {
+    if (!this.tree[group]) {
+      this.tree[group] = new HistoryTreeGroup(group, this.refresh);
+    }
 
-  public constructor() {
+    this.treeGroupOrder = [group].concat(this.treeGroupOrder.filter(g => g !== group));
+    this.tree[group].addItem(value);
+    this.refresh();
+  }
+
+  constructor(context: ExtensionContext) {
+    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAME}/historyExplorer`, { treeDataProvider: this });
+    context.subscriptions.push(this.treeView);
   }
 }
 

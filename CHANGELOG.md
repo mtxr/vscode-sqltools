@@ -7,6 +7,7 @@
 - **NEW** :tada:
   - Added support for SQLite. #51
   - Added support for Oracle Database. #13
+  - Added History Explorer on sidebar
   - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental).
   - Export query results as JSON and CSV. #95
     - @TODO: Add image
@@ -25,8 +26,9 @@
     - `SQLTools.addNewConnection` command was renamed to `SQLTools.openAddConnectionScreen`
     - `SQLTools.appendToCursor` command was renamed to `SQLTools.insertText`
     - `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
+    - `SQLTools.runFromInput` command was renamed to `SQLTools.executeFromInput`
   - ***Settngs***:
-    - `sqltools.logging` and `sqltools.logLevel` was removed.
+    - `sqltools.logging` and `sqltools.logLevel` were removed.
 
 ## v0.16
 

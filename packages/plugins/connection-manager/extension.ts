@@ -29,7 +29,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.client.sendRequest(RefreshAllRequest);
   }
 
-  private ext_runFromInput = async () => {
+  private ext_executeFromInput = async () => {
     try {
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
       await this.ext_executeQuery(query);
@@ -94,7 +94,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       query = query || await getSelectedText('execute query');
       this._openResultsWebview();
       await this._connect();
-      await this._runQuery(query);
+      const payload = await this._runConnectionCommandWithArgs('query', query);
+      this.resultsWebview.updateResults(payload);
+      return payload;
     } catch (e) {
       ErrorHandler.create('Error fetching records.', this.ext_showOutputChannel)(e);
     }
@@ -232,13 +234,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return connections.find((c) => getConnectionId(c) === sel);
   }
 
-  private async _runQuery(query: string, addHistory = true) {
-    const payload = await this._runConnectionCommandWithArgs('query', query);
-
-    // if (addHistory) history.add(query);
-    this.resultsWebview.updateResults(payload);
-  }
-
   private _runConnectionCommandWithArgs(command, ...args) {
     return this.client.sendRequest(RunCommandRequest, { conn: this.explorer.getActive(), command, args });
   }
@@ -312,10 +307,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
       .registerCommand(`describeFunction`, this.ext_describeFunction)
       .registerCommand(`describeTable`, this.ext_describeTable)
+      .registerCommand(`executeFromInput`, this.ext_executeFromInput)
       .registerCommand(`executeQuery`, this.ext_executeQuery)
       .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
       .registerCommand(`refreshAll`, this.ext_refreshAll)
-      .registerCommand(`runFromInput`, this.ext_runFromInput)
       .registerCommand(`saveResults`, this.ext_saveResults)
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)

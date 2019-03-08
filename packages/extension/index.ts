@@ -241,7 +241,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     if (!this.didRunCommandSuccessfullyHooks[command]) {
       this.didRunCommandSuccessfullyHooks[command] = [];
     }
-    this.willRunCommandHooks[command].push(handler);
+    this.didRunCommandSuccessfullyHooks[command].push(handler);
     return this;
   }
 

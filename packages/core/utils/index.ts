@@ -7,11 +7,18 @@ export * from './replacer';
 export * from './telemetry';
 export * from './timer';
 
+const idSep = '|';
+
 export function sortText(a: string, b: string) { return a.toString().localeCompare(b.toString()); }
 
 export function getConnectionId(c: ConnectionInterface): string | null {
   if (!c) return null;
-  return c.id || `${c.name}|${c.database}|${c.dialect}`;
+  return c.id || `${c.name}${idSep}${c.database}${idSep}${c.dialect}`;
+}
+
+export function getNameFromId(id: string) {
+  if (!id) return null;
+  return id.split(idSep)[0];
 }
 
 export function asArray(obj: any) {

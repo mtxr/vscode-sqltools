@@ -139,7 +139,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public disconnect(c: ConnectionInterface) {
     if (!this.tree[getConnectionId(c)]) return;
     this.tree[getConnectionId(c)].disconnect();
-    this._onDidChangeTreeData.fire(this.tree[getConnectionId(c)]);
+    this.refresh(this.tree[getConnectionId(c)]);
   }
 
   public getById(id: string) {
@@ -152,6 +152,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       this.setConnections(ConfigManager.connections);
     });
     this.setConnections(ConfigManager.connections);
+    context.subscriptions.push(this.treeView);
   }
 }
 

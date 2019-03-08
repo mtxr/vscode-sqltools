@@ -52,10 +52,10 @@ export declare namespace SQLTools {
         command: string;
         args: any[];
     };
-    type CommandSuccessEvent = {
+    type CommandSuccessEvent<T = any> = {
         command: string;
         args: any[];
-        result: any;
+        result: T;
     };
     type CommandEventHandler<T> = (evt: T) => void;
     interface ExtensionInterface {

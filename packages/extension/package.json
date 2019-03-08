@@ -143,7 +143,7 @@
             },
             {
                 "title": "Run query",
-                "command": "SQLTools.runFromInput",
+                "command": "SQLTools.executeFromInput",
                 "category": "SQLTools Connection"
             },
             {
@@ -506,7 +506,7 @@
                     "name": "Connections"
                 },
                 {
-                    "id": "SQLTools/HistoryExplorer",
+                    "id": "SQLTools/historyExplorer",
                     "name": "Query History"
                 }
             ]
