@@ -1,8 +1,8 @@
-import { SQLToolsExtensionPlugin, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 
-export default class ExamplePlugin implements SQLToolsExtensionPlugin {
-  public client: SQLToolsLanguageClientInterface;
-  register(extension: SQLToolsExtensionInterface) {
+export default class ExamplePlugin implements SQLTools.ExtensionPlugin {
+  public client: SQLTools.LanguageClientInterface;
+  register(extension: SQLTools.ExtensionInterface) {
     this.client = extension.client;
   }
 }

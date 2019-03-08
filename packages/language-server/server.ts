@@ -1,10 +1,10 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import { Arg0, LanguageServerPlugin, SQLToolsLanguageServerInterface } from '@sqltools/core/interface/plugin';
+import SQLTools, { Arg0 } from '@sqltools/core/plugin-api';
 import { Telemetry } from '@sqltools/core/utils';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
 
-class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
+class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   private _telemetry = new Telemetry({
     enableTelemetry: false,
     product: 'language-server',
@@ -71,7 +71,7 @@ class SQLToolsLanguageServer implements SQLToolsLanguageServerInterface {
     return this;
   }
 
-  public registerPlugin(plugin: LanguageServerPlugin<SQLToolsLanguageServer>) {
+  public registerPlugin(plugin: SQLTools.LanguageServerPlugin<SQLToolsLanguageServer>) {
     plugin.register(this);
     return this;
   }

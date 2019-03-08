@@ -4,7 +4,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
 import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/extension/api/vscode-utils';
-import { SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
   try {
@@ -29,7 +29,7 @@ function newSqlFileHandler() {
   return getOrCreateEditor(true);
 }
 
-const register = (extension: SQLToolsExtensionInterface) => {
+const register = (extension: SQLTools.ExtensionInterface) => {
   extension.context.subscriptions.push(
     commands.registerTextEditorCommand(`${EXT_NAME}.formatSql`, formatSqlHandler),
     commands.registerCommand(`${EXT_NAME}.insertText`, insertTextHandler),

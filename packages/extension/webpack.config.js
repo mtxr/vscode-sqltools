@@ -103,11 +103,7 @@ function getExtensionConfig() {
 
 module.exports = () => {
   const isProduction = process.env.NODE_ENV !== 'development';
-  return [
-    getLanguageServerConfig(),
-    getExtensionConfig(),
-    getWebviewConfig(),
-  ].map(config => {
+  return [getLanguageServerConfig(), getExtensionConfig(), getWebviewConfig()].map(config => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
@@ -132,7 +128,9 @@ module.exports = () => {
     config.devtool = isProduction ? 'source-map' : 'cheap-module-eval-source-map';
     config.mode = isProduction ? 'production' : 'development';
     config.output = config.output || {};
-    config.output.devtoolModuleFilenameTemplate = 'file:///[absolute-resource-path]';
+    // config.output.devtoolModuleFilenameTemplate = 'file:///[absolute-resource-path]';
+
+    config.output.devtoolModuleFilenameTemplate = '../../[resource-path]';
     return config;
   });
 };

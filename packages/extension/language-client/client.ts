@@ -1,13 +1,13 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { DISPLAY_NAME } from '@sqltools/core/constants';
-import { SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
-import { commandExists, Telemetry, TelemetryArgs } from '@sqltools/core/utils';
+import SQLTools from '@sqltools/core/plugin-api';
+import { commandExists, Telemetry } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
 import { ExtensionContext } from 'vscode';
 
-export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
+export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
   private _telemetry = new Telemetry({
@@ -65,7 +65,7 @@ export class SQLToolsLanguageClient implements SQLToolsLanguageClientInterface {
   }
 
   private getClientOptions(): LanguageClientOptions {
-    const telemetryArgs: TelemetryArgs = {
+    const telemetryArgs: SQLTools.TelemetryArgs = {
       product: 'language-server',
       enableTelemetry: ConfigManager.telemetry,
       vscodeInfo: {

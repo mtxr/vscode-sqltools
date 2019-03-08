@@ -6,21 +6,26 @@ import { Telemetry, Timer } from '@sqltools/core/utils';
 import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
 import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
+import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import { commands, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window, workspace } from 'vscode';
+import { commands, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import BookmarksStorage from './api/bookmarks-storage';
 import ErrorHandler from './api/error-handler';
 import History from './api/history';
 import Utils from './api/utils';
 import { getSelectedText, insertText, quickPick, readInput } from './api/vscode-utils';
 import SQLToolsLanguageClient from './language-client';
-import { SQLToolsExtensionInterface, SQLToolsExtensionPlugin } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 
-export class SQLToolsExtension implements SQLToolsExtensionInterface {
+export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;
   private bookmarks: BookmarksStorage;
   private history: History;
-  private pluginsQueue: SQLToolsExtensionPlugin<this>[] = [];
+  private pluginsQueue: SQLTools.ExtensionPlugin<this>[] = [];
+  private onWillRunCommandEmitter: EventEmitter<SQLTools.CommandEvent>;
+  private onDidRunCommandSuccessfullyEmitter: EventEmitter<SQLTools.CommandSuccessEvent>;
+  private willRunCommandHooks: { [commands: string]: Array<(evt: SQLTools.CommandEvent) => void> } = {};
+  private didRunCommandSuccessfullyHooks: { [commands: string]: Array<(evt: SQLTools.CommandSuccessEvent) => void> } = {};
   public client: SQLToolsLanguageClient;
 
   public activate() {
@@ -40,6 +45,8 @@ export class SQLToolsExtension implements SQLToolsExtensionInterface {
       },
     });
     this.client = new SQLToolsLanguageClient(this.context);
+    this.onWillRunCommandEmitter = new EventEmitter();
+    this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
     ErrorHandler.setTelemetryClient(this.telemetry);
     ErrorHandler.setOutputFn(window.showErrorMessage);
@@ -47,9 +54,10 @@ export class SQLToolsExtension implements SQLToolsExtensionInterface {
     this.context.subscriptions.push(
       workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
-      commands.registerCommand(`${EXT_NAME}.aboutVersion`, this.aboutVersionHandler),
-      // ...getExtCommands(),
-    );
+      this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
+      this.onDidRunCommandSuccessfullyEmitter.event(this.onDidRunCommandSuccessfullyHandler),
+      );
+    this.registerCommand('aboutVersion', this.aboutVersionHandler);
     if ((<any>console).outputChannel) {
       this.context.subscriptions.push((<any>console).outputChannel);
     }
@@ -159,24 +167,6 @@ export class SQLToolsExtension implements SQLToolsExtensionInterface {
       });
   }
 
-  // getExtCommands() {
-  //   const extCommands = Object.keys(SQLTools).reduce((list, extFn) => {
-  //     if (!extFn.startsWith('cmd') && !extFn.startsWith('editor')) return list;
-  //     let extCmd = extFn.replace(/^(editor|cmd)/, '');
-  //     extCmd = extCmd.charAt(0).toLocaleLowerCase() + extCmd.substring(1, extCmd.length);
-  //     const regFn = extFn.startsWith('editor') ? commands.registerTextEditorCommand : commands.registerCommand;
-  //     list.push(regFn(`${EXT_NAME}.${extCmd}`, (...args) => {
-  //       console.log(`Command triggered: ${extCmd}`);
-  //       telemetry.registerCommand(extCmd);
-  //       SQLTools[extFn](...args);
-  //     }));
-  //     return list;
-  //   }, []);
-
-  //   console.log(`${extCommands.length} commands to register.`);
-  //   return extCommands;
-  // }
-
   private getAndUpdateConfig() {
     ConfigManager.update(<SettingsInterface>workspace.getConfiguration(EXT_NAME.toLowerCase()));
   }
@@ -222,10 +212,72 @@ export class SQLToolsExtension implements SQLToolsExtensionInterface {
     this.pluginsQueue.forEach(plugin => plugin.register(this));
   }
 
-  public registerPlugin(plugin: SQLToolsExtensionPlugin) {
+  private onWillRunCommandHandler = (evt: SQLTools.CommandEvent): void => {
+    if (!evt.command) return;
+    if (!this.willRunCommandHooks[evt.command]) return;
+
+    this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
+  }
+  private onDidRunCommandSuccessfullyHandler = (evt: SQLTools.CommandSuccessEvent): void => {
+    if (!evt.command) return;
+    if (!this.didRunCommandSuccessfullyHooks[evt.command]) return;
+    this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
+  }
+
+  public beforeCommandHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandEvent>) {
+    if (!this.didRunCommandSuccessfullyHooks[command]) {
+      this.didRunCommandSuccessfullyHooks[command] = [];
+    }
+    this.didRunCommandSuccessfullyHooks[command].push(handler);
+    return this;
+  }
+
+  public afterCommandSuccessHook(command: string, handler: SQLTools.CommandEventHandler<SQLTools.CommandSuccessEvent>) {
+    if (!this.didRunCommandSuccessfullyHooks[command]) {
+      this.didRunCommandSuccessfullyHooks[command] = [];
+    }
+    this.willRunCommandHooks[command].push(handler);
+    return this;
+  }
+
+  public registerPlugin(plugin: SQLTools.ExtensionPlugin) {
     this.pluginsQueue.push(plugin);
     return this;
   }
+
+  public registerCommand(command: string, handler: Function) {
+    this.context.subscriptions.push(
+      commands.registerCommand(`${EXT_NAME}.${command}`, async (...args) => {
+       this.onWillRunCommandEmitter.fire({ command, args });
+
+       let result = handler(...args);
+       if (typeof result.then === 'function') {
+         result = await result;
+       }
+       this.onDidRunCommandSuccessfullyEmitter.fire({ args, command, result });
+       return result;
+     })
+    );
+    return this;
+  }
+
+  public registerTextEditorCommand(command: string, handler: Function) {
+    this.context.subscriptions.push(
+      commands.registerTextEditorCommand(`${EXT_NAME}.${command}`, async (...args) => {
+        this.onWillRunCommandEmitter.fire({ command, args });
+
+        let result = handler(...args);
+        if (typeof result.then === 'function' || typeof result.catch === 'function') {
+          result = await result;
+          // @TODO: add on fail hook
+        }
+        this.onDidRunCommandSuccessfullyEmitter.fire({ args, command, result });
+        return result;
+      })
+    );
+    return this;
+  }
+
   constructor(public context: ExtensionContext) {}
 }
 
@@ -236,7 +288,8 @@ export function activate(context: ExtensionContext) {
     .registerPlugin(FormatterPlugin)
     .registerPlugin(AutoRestartPlugin)
     .registerPlugin(new ConnectionManagerPlugin())
-    .registerPlugin(new DependencyManagerPlugin());
+    .registerPlugin(new DependencyManagerPlugin())
+    .registerPlugin(new HistoryManagerPlugin());
 
   return instance.activate();
 }

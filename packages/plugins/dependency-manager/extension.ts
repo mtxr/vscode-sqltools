@@ -1,12 +1,12 @@
 import { window as Win } from 'vscode';
 import Utils from '@sqltools/extension/api/utils';
 import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import { SQLToolsExtensionPlugin, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 
-export default class DependencyManger implements SQLToolsExtensionPlugin {
-  public client: SQLToolsLanguageClientInterface;
-  register(extension: SQLToolsExtensionInterface) {
+export default class DependencyManger implements SQLTools.ExtensionPlugin {
+  public client: SQLTools.LanguageClientInterface;
+  register(extension: SQLTools.ExtensionInterface) {
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
   }

@@ -1,7 +1,7 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
-import { SQLToolsExtensionPlugin, RequestHandler as RHandler, SQLToolsLanguageClientInterface, SQLToolsExtensionInterface } from '@sqltools/core/interface/plugin';
+import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import { logOnCall } from '@sqltools/core/utils/decorators';
 import ErrorHandler from '@sqltools/extension/api/error-handler';
@@ -13,15 +13,15 @@ import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settin
 import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 
-export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin {
-  public client: SQLToolsLanguageClientInterface;
+export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
+  public client: SQLTools.LanguageClientInterface;
   public resultsWebview: ResultsWebview;
   public settingsWebview: SettingsWebview;
   public statusBar: StatusBarItem;;
   private context: ExtensionContext;
   private explorer: ConnectionExplorer;
 
-  public handler_connectionDataUpdated: RHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
+  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
     this.explorer.setTreeData(conn, tables, columns);
   }
 
@@ -300,7 +300,7 @@ export default class ConnectionManagerPlugin implements SQLToolsExtensionPlugin 
     return this.statusBar;
   }
 
-  public register(extension: SQLToolsExtensionInterface) {
+  public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
     this.context = extension.context;

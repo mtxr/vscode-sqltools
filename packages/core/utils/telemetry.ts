@@ -3,27 +3,14 @@ import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
 import Timer from '@sqltools/core/utils/timer';
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
+import SQLTools from '../plugin-api';
 
-type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
-
-export interface VSCodeInfo {
-  uniqId?: string;
-  sessId?: string;
-  version?: string;
-}
-
-export interface TelemetryArgs {
-  product: Product;
-  enableTelemetry?: boolean;
-  vscodeInfo?: VSCodeInfo;
-}
-
-export class Telemetry {
+export class Telemetry implements SQLTools.TelemetryInterface {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
   public static enabled: Boolean;
-  public static vscodeInfo: VSCodeInfo;
+  public static vscodeInfo: SQLTools.VSCodeInfo;
   private client: AI.TelemetryClient;
-  private product: Product;
+  private product: SQLTools.Product;
   private prefixed(key: string) {
     return `${this.product}:${key}`;
   }
@@ -81,11 +68,11 @@ export class Telemetry {
     AI.start();
     this.registerSession();
   }
-  constructor(opts: TelemetryArgs) {
+  constructor(opts: SQLTools.TelemetryArgs) {
     this.updateOpts(opts);
   }
 
-  public updateOpts(opts: TelemetryArgs) {
+  public updateOpts(opts: SQLTools.TelemetryArgs) {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
     if (opts.enableTelemetry === true) this.enable();

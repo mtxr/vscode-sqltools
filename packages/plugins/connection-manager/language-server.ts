@@ -2,7 +2,7 @@ import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
 import { MissingModuleException } from '@sqltools/core/exception';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import { LanguageServerPlugin, RequestHandler as RHandler } from '@sqltools/core/interface/plugin';
+import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionId } from '@sqltools/core/utils';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
@@ -12,7 +12,7 @@ import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetCon
 import actions from './store/actions';
 import { logOnCall } from '@sqltools/core/utils/decorators';
 
-export default class ConnectionManagerPlugin implements LanguageServerPlugin {
+export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLToolsLanguageServer;
   private get connections() {
     return ConfigManager.connections || [];
@@ -25,7 +25,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   }
 
   @logOnCall()
-  private runCommandHandler: RHandler<typeof RunCommandRequest> = async ({ conn, args, command }) => {
+  private runCommandHandler: RequestHandler<typeof RunCommandRequest> = async ({ conn, args, command }) => {
     try {
       const c = this.getConnectionInstance(conn);
       if (!c) throw 'Connection not found';
@@ -41,7 +41,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private saveResultsHandler: RHandler<typeof SaveResultsRequest> = ({ connId, filename, query, filetype = 'csv' }) => {
+  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = ({ connId, filename, query, filetype = 'csv' }) => {
     const { queryResults } = this.server.store.getState();
     const { results, cols } = queryResults[connId][query];
     let output = '';
@@ -59,7 +59,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private getTablesAndColumnsHandler: RHandler<typeof GetConnectionDataRequest> = async ({ conn }) => {
+  private getTablesAndColumnsHandler: RequestHandler<typeof GetConnectionDataRequest> = async ({ conn }) => {
     if (!conn) {
       return undefined;
     }
@@ -71,13 +71,13 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private refreshConnectionHandler: RHandler<typeof RefreshAllRequest> = async () => {
+  private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
     const activeConnections = this.server.store.getState().activeConnections;
     await Promise.all(Object.keys(activeConnections).map(c => this._loadConnectionData(activeConnections[c])));
   };
 
   @logOnCall()
-  private closeConnectionHandler: RHandler<typeof DisconnectRequest> = async ({ conn }): Promise<void> => {
+  private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }): Promise<void> => {
     if (!conn) {
       return undefined;
     }
@@ -89,7 +89,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private GetConnectionPasswordRequestHandler: RHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
+  private GetConnectionPasswordRequestHandler: RequestHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
     if (!conn) {
       return undefined;
     }
@@ -101,7 +101,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private openConnectionHandler: RHandler<typeof ConnectRequest> = async (req: {
+  private openConnectionHandler: RequestHandler<typeof ConnectRequest> = async (req: {
     conn: ConnectionInterface;
     password?: string;
   }): Promise<ConnectionInterface> => {
@@ -132,7 +132,7 @@ export default class ConnectionManagerPlugin implements LanguageServerPlugin {
   };
 
   @logOnCall()
-  private clientRequestConnectionHandler: RHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
+  private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
     let connList = this.connections;
 
     if (connectedOnly) connList = connList.filter(c => c.isConnected);

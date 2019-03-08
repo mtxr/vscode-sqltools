@@ -1,8 +1,8 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import { getConnectionId } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree';
+import { getConnectionId, asArray } from '@sqltools/core/utils';
+import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext } from 'vscode';
 import { logOnCall } from '@sqltools/core/utils/decorators';
 
@@ -41,14 +41,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
     if (!element) {
-      return Promise.resolve(this.toArray(this.tree));
+      return Promise.resolve(asArray(this.tree));
     } else if (
       element instanceof SidebarConnection
       || element instanceof SidebarTable
       || element instanceof SidebarView
       || element instanceof SidebarDatabaseSchemaGroup
     ) {
-      return Promise.resolve(this.toArray(element.items));
+      return Promise.resolve(asArray(element.items));
     }
     return [];
   }
@@ -144,19 +144,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     this._onDidChangeTreeData.fire(this.tree[getConnectionId(c)]);
   }
 
-  private toArray(obj: any) {
-    if (Array.isArray(obj)) {
-      return obj;
-    }
-    return Object.keys(obj).map((k) => obj[k]);
-  }
-
   public getById(id: string) {
     return this.tree[id] ? this.tree[id].conn : undefined;
   }
 
   public constructor(private context: ExtensionContext) {
-    this.treeView = window.createTreeView(`${EXT_NAME}.tableExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this });
     ConfigManager.addOnUpdateHook(() => {
       this.setConnections(ConfigManager.connections);
     });

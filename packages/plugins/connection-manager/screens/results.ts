@@ -1,4 +1,4 @@
-import { SQLToolsLanguageClientInterface } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
@@ -9,7 +9,7 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
-  constructor(context: vscode.ExtensionContext, private client: SQLToolsLanguageClientInterface) {
+  constructor(context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface) {
     super(context);
   }
 

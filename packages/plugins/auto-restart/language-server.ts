@@ -1,7 +1,7 @@
-import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 import { ExitCalledNotification } from './contracts';
 
-const AutoRestartPlugin: LanguageServerPlugin = {
+const AutoRestartPlugin: SQLTools.LanguageServerPlugin = {
   register: server => {
     const nodeExit = process.exit;
     process.exit = ((code?: number): void => {

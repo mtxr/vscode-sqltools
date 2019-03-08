@@ -1,6 +1,6 @@
 import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
-import { LanguageServerPlugin } from '@sqltools/core/interface/plugin';
+import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists } from '@sqltools/core/utils';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import { spawn, SpawnOptions } from 'child_process';
@@ -50,7 +50,7 @@ function run(
   );
 }
 
-export default class DependencyManager implements LanguageServerPlugin {
+export default class DependencyManager implements SQLTools.LanguageServerPlugin {
   private root: string;
   private server: SQLToolsLanguageServer;
 

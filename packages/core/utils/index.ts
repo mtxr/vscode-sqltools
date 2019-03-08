@@ -14,6 +14,13 @@ export function getConnectionId(c: ConnectionInterface): string | null {
   return c.id || `${c.name}|${c.database}|${c.dialect}`;
 }
 
+export function asArray(obj: any) {
+  if (Array.isArray(obj)) {
+    return obj;
+  }
+  return Object.keys(obj).map((k) => obj[k]);
+}
+
 export function getConnectionDescription(c: ConnectionInterface): string | null {
   if (!c) return null;
 
