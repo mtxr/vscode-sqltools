@@ -581,7 +581,7 @@
                 },
                 {
                     "command": "SQLTools.deleteConnection",
-                    "when": "view == SQLTools/connectionExplorer && viewItem =~ /connection|connectedConnection/",
+                    "when": "view == SQLTools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
                     "group": "sqltools.dbExplorer@0"
                 },
                 {
@@ -601,7 +601,7 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem != connection.schema_group && !sqltools.Results.active",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(schema_group|tableOrView)$/ && !sqltools.Results.active",
                     "group": "navigation"
                 },
                 {

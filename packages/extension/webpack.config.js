@@ -25,7 +25,9 @@ const devDependencies = Object.assign(
 );
 
 // defintions
-extPkgJson.name = process.env.PREVIEW ? 'SQLTools-preview' : 'SQLTools';
+const EXT_NAME = process.env.PREVIEW ? 'SQLToolsPreview' : 'SQLTools';
+const DISPLAY_NAME = process.env.PREVIEW ? 'SQLTools (Beta)' : 'SQLTools';
+const EXT_ID = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
 const outdir = path.resolve(rootdir, '..', 'dist');
@@ -52,11 +54,12 @@ function getExtensionConfig() {
         {
           from: path.join(__dirname, 'package.json'),
           to: path.join(outdir, 'package.json'),
-          transform: () => {
-            const content = { ...extPkgJson, name: extPkgJson.name.toLowerCase() };
+          transform: (content) => {
+            content = JSON.parse(content.toString())
+            content.name = EXT_ID;
+            content.displayName = DISPLAY_NAME;
             if (process.env.PREVIEW) {
               content.preview = true;
-              content.displayName = `${extPkgJson.displayName} - Preview`;
             }
             Object.keys(content.scripts || {}).forEach(k => {
               if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
@@ -72,10 +75,9 @@ function getExtensionConfig() {
                 delete content.devDependencies[k];
               });
 
-            return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2).replace(
-              /SQLTools\./g,
-              `${extPkgJson.name}.`
-            );
+            return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2)
+              .replace(/SQLTools\./g, `${EXT_NAME}.`)
+              .replace(/SQLTools\//g, `${EXT_NAME}/`);
           },
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
@@ -109,7 +111,8 @@ module.exports = () => {
       new webpack.DefinePlugin({
         'process.env.PRODUCT': JSON.stringify(config.name),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
-        'process.env.EXT_NAME': JSON.stringify(extPkgJson.name),
+        'process.env.EXT_NAME': JSON.stringify(EXT_NAME),
+        'process.env.DISPLAY_NAME': JSON.stringify(DISPLAY_NAME),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
       }),
