@@ -1,8 +1,8 @@
 import './patch-console';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Telemetry, Timer, openExternal } from '@sqltools/core/utils';
+import { Telemetry, Timer } from '@sqltools/core/utils';
 import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
 import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
@@ -11,16 +11,14 @@ import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import { commands, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import BookmarksStorage from './api/bookmarks-storage';
 import ErrorHandler from './api/error-handler';
-import History from './api/history';
 import Utils from './api/utils';
-import { getSelectedText, insertText, quickPick, readInput } from '@sqltools/core/utils/vscode';
+import { getSelectedText, insertText, quickPick, readInput, openExternal } from '@sqltools/core/utils/vscode';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;
   private bookmarks: BookmarksStorage;
-  private history: History;
   private pluginsQueue: SQLTools.ExtensionPlugin<this>[] = [];
   private onWillRunCommandEmitter: EventEmitter<SQLTools.CommandEvent>;
   private onDidRunCommandSuccessfullyEmitter: EventEmitter<SQLTools.CommandSuccessEvent>;
@@ -34,7 +32,6 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
       if (ConfigManager.telemetry) this.telemetry.enable();
       else this.telemetry.disable();
       this.bookmarks = new BookmarksStorage();
-      this.history = (this.history || new History(ConfigManager.historySize));
     })
     this.telemetry = new Telemetry({
       product: 'extension',
@@ -74,7 +71,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   }
 
   private aboutVersionHandler(): void {
-    const message = `Using SQLTools ${VERSION}`;
+    const message = `Using SQLTools ${VERSION}\n\nby @mtxr ${AUTHOR}`;
     window.showInformationMessage(message, { modal: true });
   }
 
@@ -108,24 +105,6 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     this.bookmarks.reset();
   }
 
-  private async cmdRunFromHistory(): Promise<void> {
-    try {
-      const query = await this.historyMenu();
-      await commands.executeCommand(`${EXT_NAME}.executeQuery`, query, false);
-    } catch (e) {
-      ErrorHandler.create('Error while running query.', `${EXT_NAME}.showOutputChannel`)(e);
-    }
-  }
-
-  private async cmdEditFromHistory(): Promise<void> {
-    try {
-      const query = (await this.historyMenu());
-      insertText(query, true);
-    } catch (e) {
-      ErrorHandler.create('Could not edit bookmarked query')(e);
-    }
-  }
-
   private async cmdRunFromBookmarks(): Promise<void> {
     try {
       await commands.executeCommand(`${EXT_NAME}.executeQuery`, await this.bookmarksMenu('detail'));
@@ -152,20 +131,6 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
         placeHolder: 'Pick a bookmarked query',
         placeHolderDisabled: 'You don\'t have any bookmarks yet.',
         title: 'Bookmarks',
-      });
-  }
-
-  private async historyMenu(prop: string = 'label'): Promise<string> {
-    return await quickPick(this.history.all().map((query) => {
-      return {
-        description: '',
-        label: query,
-      } as QuickPickItem;
-    }), prop, {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolderDisabled: 'You don\'t have any queries on your history.',
-        title: 'History',
       });
   }
 
@@ -258,6 +223,10 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     return this.decorateAndRegisterCommand(command, handler, 'registerTextEditorCommand');
   }
 
+  public errorHandler = (message: string, error: any, yesCallbackOrCommand?: Function | string) => {
+    return ErrorHandler.create(message, yesCallbackOrCommand)(error);
+  }
+
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
     this.context.subscriptions.push(
       commands[type](`${EXT_NAME}.${command}`, async (...args) => {
@@ -265,7 +234,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);
-        if (typeof result.then === 'function' || typeof result.catch === 'function') {
+        if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
           result = await result;
           // @TODO: add on fail hook
         }

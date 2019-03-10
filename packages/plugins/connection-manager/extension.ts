@@ -3,7 +3,6 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
-import ErrorHandler from '@sqltools/extension/api/error-handler'; // @TODO: Remove from here. Plugins should not access extension package
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
@@ -17,6 +16,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   public settingsWebview: SettingsWebview;
   public statusBar: StatusBarItem;;
   private context: ExtensionContext;
+  private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
 
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
@@ -33,7 +33,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
       return this.ext_executeQuery(query);
     } catch (e) {
-      ErrorHandler.create('Error running query.', this.ext_showOutputChannel)(e);
+      this.errorHandler('Error running query.', e, this.ext_showOutputChannel);
     }
   }
 
@@ -45,7 +45,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this.resultsWebview.updateResults(payload);
 
     } catch (e) {
-      ErrorHandler.create('Error while showing table records', this.ext_showOutputChannel)(e);
+      this.errorHandler('Error while showing table records', e, this.ext_showOutputChannel);
     }
   }
 
@@ -56,7 +56,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.updateResults(payload);
     } catch (e) {
-      ErrorHandler.create('Error while describing table records', this.ext_showOutputChannel)(e);
+      this.errorHandler('Error while describing table records', e, this.ext_showOutputChannel);
     }
   }
 
@@ -75,17 +75,17 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         this.client.telemetry.registerInfoMessage('Connection closed!');
         this.explorer.disconnect(conn as ConnectionInterface);
         this._updateStatusBar();
-      }, ErrorHandler.create('Error closing connection'));
+      }, (e) => this.errorHandler('Error closing connection', e));
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
-      await this._setConnection(conn as ConnectionInterface).catch(ErrorHandler.create('Error opening connection'));
+      await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
       return;
     }
-    this._connect(true).catch(ErrorHandler.create('Error selecting connection'));
+    this._connect(true).catch(e => this.errorHandler('Error selecting connection', e));
   }
 
   private ext_executeQuery = async (query?: string) => {
@@ -97,7 +97,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this.resultsWebview.updateResults(payload);
       return payload;
     } catch (e) {
-      ErrorHandler.create('Error fetching records.', this.ext_showOutputChannel)(e);
+      this.errorHandler('Error fetching records.', e, this.ext_showOutputChannel);
     }
   }
 
@@ -106,9 +106,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  private ext_showOutputChannel = () => {
-    (<any>console).show();
-  }
+  private ext_showOutputChannel = () => (<any>console).show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json') => {
     filetype = typeof filetype === 'string' ? filetype : undefined;
@@ -171,7 +169,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     const conn = await this._connect();
 
-    return await this._pickTable(conn, 'label');
+    return this._pickTable(conn, 'label');
   }
 
   private _openResultsWebview() {
@@ -188,7 +186,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private async _pickTable(conn: ConnectionInterface, prop?: string): Promise<string> {
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
-    return await quickPick(tables
+    return quickPick(tables
       .map((table) => {
         return { label: table.name } as QuickPickItem;
       }), prop, {
@@ -257,6 +255,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         { conn: c, password },
       );
     }
+    this.explorer.setActiveConnection(c);
     this._updateStatusBar();
     return this.explorer.getActive();
   }
@@ -285,6 +284,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (this.client) return; // do not register twice
     this.client = extension.client;
     this.context = extension.context;
+    this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer(this.context);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);

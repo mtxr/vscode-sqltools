@@ -1,11 +1,9 @@
 import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { MissingModuleException } from '@sqltools/core/exception';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionId } from '@sqltools/core/utils';
 import SQLToolsLanguageServer from '@sqltools/language-server/server';
-import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
@@ -111,13 +109,8 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         return c.serialize();
       })
       .catch(e => {
-        if (e instanceof MissingModuleException) {
-          this.server.sendNotification(MissingModuleNotification, {
-            conn: c.serialize(),
-            moduleName: e.moduleName,
-            moduleVersion: e.moduleVersion,
-          });
-          return c.serialize();
+        if (e.data && e.data.notification) {
+          this.server.sendNotification(e.data.notification, e.data.args);
         }
         throw e;
       });

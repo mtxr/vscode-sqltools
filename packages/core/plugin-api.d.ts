@@ -64,11 +64,11 @@ export declare namespace SQLTools {
         activate(): void;
         deactivate(): void;
         registerPlugin(plugin: ExtensionPlugin): this;
-        addBeforeCommandHook(command: string, handler: CommandEventHandler<CommandEvent>): any;
-        addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<CommandSuccessEvent>): any;
-        registerPlugin(plugin: ExtensionPlugin): any;
-        registerCommand(command: string, handler: Function): any;
-        registerTextEditorCommand(command: string, handler: Function): any;
+        addBeforeCommandHook(command: string, handler: CommandEventHandler<CommandEvent>): this;
+        addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<CommandSuccessEvent>): this;
+        registerCommand(command: string, handler: Function): this;
+        registerTextEditorCommand(command: string, handler: Function): this;
+        errorHandler(message: string, error: any, yesCallbackOrCommand?: Function | string): any;
     }
     interface LanguageServerInterface {
         listen(): void;

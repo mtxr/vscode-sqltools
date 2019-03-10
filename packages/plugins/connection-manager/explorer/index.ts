@@ -121,8 +121,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 
   public setActiveConnection(c: ConnectionInterface) {
-    Object.keys(this.tree).forEach(id => {
-      const item = this.tree[id];
+    Object.values(this.tree).forEach(item => {
       if (item.active) item.deactivate();
     });
     if (!c) return;

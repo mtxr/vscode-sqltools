@@ -53,19 +53,20 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
         this.setPreviewActiveContext(webviewPanel.active);
       }));
-      this.panel.onDidDispose(this.dispose);
+      this.disposables.push(this.panel.onDidDispose(this.dispose));
+      this.panel.webview.html = (this.html || this.baseHtml)
+        .replace(/{{id}}/g, this.id)
+        .replace(
+          /{{extRoot}}/g,
+          Uri.file(this.context.asAbsolutePath('.'))
+            .with({ scheme: 'vscode-resource' })
+            .toString());
     }
 
     this.panel.title = this.title;
-    this.panel.webview.html = (this.html || this.baseHtml)
-      .replace(/{{id}}/g, this.id)
-      .replace(
-        /{{extRoot}}/g,
-        Uri.file(this.context.asAbsolutePath('.'))
-          .with({ scheme: 'vscode-resource' })
-          .toString());
-
-    this.postMessage({ action: 'reset' });
+    if (!this.panel.visible) {
+      this.postMessage({ action: 'reset' });
+    }
     this.panel.reveal();
     this.setPreviewActiveContext(true);
   }

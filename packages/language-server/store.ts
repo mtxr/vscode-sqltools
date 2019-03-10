@@ -21,8 +21,11 @@ function registerActionHandler<S = State>(type: string, handler: ActionHandler<S
 }
 
 const store = createStore<State, AnyAction, {}, {}>((state = initialState, action) => {
-  if (actionHandlers[action.type]) return actionHandlers[action.type](state, action.payload);
-  return state;
+  let newState = state
+  if (actionHandlers[action.type]) {
+    newState = { ...actionHandlers[action.type](state, action.payload) };
+  }
+  return newState;
 });
 
 (<any>store).registerActionHandler = registerActionHandler;

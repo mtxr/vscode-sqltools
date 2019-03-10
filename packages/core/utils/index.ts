@@ -1,4 +1,3 @@
-import * as vscode from 'vscode';
 import * as query from './query';
 import commandExists from './command-exists';
 import { ConnectionInterface, DatabaseDialect } from '../interface';
@@ -43,18 +42,6 @@ export function getConnectionDescription(c: ConnectionInterface): string | null 
     '/',
     c.database,
   ].filter(Boolean).join('');
-}
-
-export function openExternal(url: string) {
-  const uri = vscode.Uri.parse(url);
-  if (vscode.env && typeof (vscode.env as any).openExternal === 'function') {
-    return (vscode.env as any).openExternal(uri);
-  }
-  if (vscode.env && typeof (vscode.env as any).open === 'function') {
-    return (vscode.env as any).open(uri);
-  }
-
-  return vscode.commands.executeCommand('vscode.open', uri);
 }
 
 export function isEmpty(v?: string) {

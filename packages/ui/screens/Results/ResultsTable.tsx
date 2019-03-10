@@ -6,6 +6,7 @@ import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 
 const FilterByValue = 'Filter by \'{value}\'';
+const ReRunQuery = 'Re-run this query';
 const ClearFilters = 'Clear all filters';
 const CopyCellOption = 'Copy Cell value';
 const CopyRowOption = 'Copy Row value';
@@ -65,6 +66,8 @@ interface ResultsTableProps {
   cols: string[];
   data: any[];
   paginationSize: number; // add setting to change
+  query: string;
+  connId: string;
 }
 interface ResultsTableState {
   filtered: { [id: string]: string | RegExp };
@@ -199,6 +202,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     }
     return options
     .concat([
+      ReRunQuery,
+      'sep',
       CopyCellOption,
       CopyRowOption,
       'sep',
@@ -233,6 +238,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           tableFiltered: [],
           filtered: {},
         });
+        break;
+      case ReRunQuery:
+        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.executeQuery`, args: [this.props.query]} });
         break;
       case SaveCSVOption:
         getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['csv']} });

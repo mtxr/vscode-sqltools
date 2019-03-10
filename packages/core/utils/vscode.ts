@@ -3,7 +3,7 @@ import { window } from 'vscode';
 import { workspace } from 'vscode';
 import { DismissedException } from '@sqltools/core/exception';
 import { SnippetString } from 'vscode';
-import { QuickPickItem, QuickPickOptions, QuickPick } from 'vscode';
+import { QuickPickItem, QuickPickOptions, QuickPick, env, commands, Uri } from 'vscode';
 import { isEmpty } from '@sqltools/core/utils';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
@@ -100,4 +100,16 @@ export async function quickPick<T = QuickPickItem | any>(
   });
   if (!sel || (prop && !sel[prop])) throw new DismissedException();
   return <T>(prop ? sel[prop] : sel);
+}
+
+export function openExternal(url: string) {
+  const uri = Uri.parse(url);
+  if (env && typeof (env as any).openExternal === 'function') {
+    return (env as any).openExternal(uri);
+  }
+  if (env && typeof (env as any).open === 'function') {
+    return (env as any).open(uri);
+  }
+
+  return commands.executeCommand('vscode.open', uri);
 }

@@ -60,7 +60,7 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
                 throw new Error('Version not matching');
               }
             } catch(e) {
-              throw new MissingModuleException(dep.name, dep.version);
+              throw new MissingModuleException(dep.name, dep.version, this.credentials);
             }
             break;
         }

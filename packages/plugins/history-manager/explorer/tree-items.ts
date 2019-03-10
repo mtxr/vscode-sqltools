@@ -1,8 +1,9 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
+import { EXT_NAME } from '@sqltools/core/constants';
 
 export class HistoryTreeItem extends TreeItem {
-  public contextValue = 'historyItem';
+  public contextValue = 'history.item';
   public description: string;
   public get tooltip() {
     return this.query;
@@ -11,12 +12,17 @@ export class HistoryTreeItem extends TreeItem {
   constructor(public query: string, public parent: HistoryTreeGroup) {
     super(query, TreeItemCollapsibleState.None);
     this.description = new Date().toLocaleString();
+    this.command = {
+      title: 'Edit',
+      command: `${EXT_NAME}.editFromHistory`,
+      arguments: [this],
+    };
   }
 }
 
 export class HistoryTreeGroup extends TreeItem {
   public parent = null;
-  public contextValue = 'historyGroup';
+  public contextValue = 'history.group';
   public items: HistoryTreeItem[] = [];
   public get tooltip() {
     return this.name;

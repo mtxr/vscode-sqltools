@@ -623,6 +623,21 @@
                     "command": "SQLTools.showRecords",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
                     "group": "inline@1"
+                },
+                {
+                    "command": "SQLTools.runFromHistory",
+                    "when": "view == SQLTools/historyExplorer && viewItem == history.item",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "SQLTools.runFromHistory",
+                    "when": "view == SQLTools/historyExplorer && viewItem == history.item",
+                    "group": "sqltools.historyExplorer@0"
+                },
+                {
+                    "command": "SQLTools.editFromHistory",
+                    "when": "view == SQLTools/historyExplorer && viewItem == history.item",
+                    "group": "sqltools.historyExplorer@1"
                 }
             ],
             "editor/title": [
@@ -664,7 +679,6 @@
     },
     "dependencies": {
         "@sqltools/core": "*",
-        "@sqltools/language-server": "*",
         "@sqltools/plugins": "*",
         "vscode-languageclient": "^5.3.0-next.1"
     }

@@ -11,7 +11,7 @@ interface QueryResultProps {
   error?: boolean;
   query?: string;
 }
-export default ({ cols, error, query, messages, results }: QueryResultProps) => {
+export default ({ cols, error, query, messages, results, connId }: QueryResultProps) => {
   const table: string | ReactNode = error ? (
     <div
       style={{
@@ -29,7 +29,7 @@ export default ({ cols, error, query, messages, results }: QueryResultProps) => 
       <div>Query with errors. Please, check the error below.</div>
     </div>
   ) : (
-    <ResultsTable cols={!cols || cols.length === 0 ? [''] : cols} data={results || []} paginationSize={20} />
+    <ResultsTable cols={!cols || cols.length === 0 ? [''] : cols} data={results || []} paginationSize={20} query={query} connId={connId} />
   );
 
   return (

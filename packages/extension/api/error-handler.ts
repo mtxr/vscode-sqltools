@@ -2,12 +2,12 @@ import { Telemetry } from '@sqltools/core/utils';
 import { commands } from 'vscode';
 namespace ErrorHandler {
   let telemetry: Telemetry;
-  let outputFn = async (...args): Promise<string | void> => Promise.resolve();
+  let outputFn = (...args: any[]): Promise<string | void> => void args;
   export function create(message: string, yesCallbackOrCommand?: Function | string): (reason: any) => void {
     return async (error: any): Promise<void> => {
       if (error) {
+        if (error.dontNotify || (error.data && error.data.dontNotify)) return;
         telemetry.registerException(error);
-        if (error.swallowError) return;
         message = `${message} ${error.message ? error.message : error.toString()}`;
       }
       if (typeof yesCallbackOrCommand === 'undefined') {

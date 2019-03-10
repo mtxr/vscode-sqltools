@@ -17,7 +17,7 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
     return element;
   }
 
-  public getChildren(element?: HistoryExplorerItem): ProviderResult<HistoryExplorerItem[]> {
+  public getChildren(element?: HistoryExplorerItem): HistoryExplorerItem[] {
     if (!element) {
       return this.treeGroupOrder.map(group => this.tree[group]);
     } else if (element instanceof HistoryTreeGroup) {

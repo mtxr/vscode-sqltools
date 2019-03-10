@@ -3,6 +3,7 @@ import SQLTools, { Arg0 } from '@sqltools/core/plugin-api';
 import { Telemetry } from '@sqltools/core/utils';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
+import { InvalidActionException } from '@sqltools/core/exception';
 
 class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   private _telemetry = new Telemetry({
@@ -82,9 +83,16 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   public get onNotification(): IConnection['onNotification'] {
     return this._server.onNotification;
   }
-
-  public get onRequest(): IConnection['onRequest'] {
-    return this._server.onRequest;
+  public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
+    if (!handler) throw new InvalidActionException('Disabled registration for * handlers');
+    return this._server.onRequest(req, async (...args) => {
+      console.log(`Request ${req._method || req.toString()} received`);
+      let result = handler(...args);
+      if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
+        result = await result;
+      }
+      return result;
+    });
   }
 
   public get sendRequest(): IConnection['sendRequest'] {

@@ -2,7 +2,7 @@ import { window as Win } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
-import { openExternal } from '@sqltools/core/utils';
+import { openExternal } from '@sqltools/core/utils/vscode';
 
 export default class DependencyManger implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
