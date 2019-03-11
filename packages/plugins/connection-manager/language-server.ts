@@ -12,7 +12,13 @@ import actions from './store/actions';
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLToolsLanguageServer;
   private get connections() {
-    return ConfigManager.connections || [];
+    const { activeConnections, lastUsedId } = this.server.store.getState();
+    return (ConfigManager.connections || []).map(conn => {
+      conn.isActive = getConnectionId(conn) === lastUsedId;
+      conn.isConnected = !!activeConnections[getConnectionId(conn)];
+
+      return conn;
+    });
   }
 
   private getConnectionInstance(creds: ConnectionInterface) {

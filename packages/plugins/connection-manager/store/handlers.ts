@@ -3,17 +3,21 @@ import Connection from '@sqltools/core/connection';
 import { DatabaseInterface } from '@sqltools/core/interface';
 
 export const onConnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {
-  const activeConnections = Object.assign({}, state.activeConnections, { [conn.getId()]: conn });
-  const queryResults = Object.assign({}, state.queryResults, { [conn.getId()]: {} });
   return {
     ...state,
-    activeConnections,
-    queryResults,
-    lastUsedId: conn.getId(),
+    activeConnections: {
+      ...state.activeConnections,
+      [conn.getId()]: conn,
+    },
+    queryResults: {
+      ...state.queryResults,
+      [conn.getId()]: {},
+    },
     connectionInfo: {
       ...state.connectionInfo,
       [conn.getId()]: { tables: [], columns: [] },
-    }
+    },
+    lastUsedId: conn.getId(),
   };
 };
 

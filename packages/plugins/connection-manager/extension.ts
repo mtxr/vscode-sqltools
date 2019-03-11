@@ -174,11 +174,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private _openResultsWebview() {
     this.resultsWebview.show();
   }
-  private async _connect(force = false): Promise<ConnectionInterface> {
+  private _connect = async (force = false): Promise<ConnectionInterface> => {
     if (!force && this.explorer.getActive()) {
       return this.explorer.getActive();
     }
-    const c: ConnectionInterface = await this._pickConnection(true);
+    const c: ConnectionInterface = await this._pickConnection(!force);
     // history.clear();
     return this._setConnection(c);
   }
@@ -201,7 +201,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     if (connections.length === 0 && connectedOnly) return this._pickConnection();
 
-    if (connections.length === 1) return connections[0];
+    if (connectedOnly && connections.length === 1) return connections[0];
 
     const sel = (await quickPick(connections.map((c) => {
       return <QuickPickItem>{
