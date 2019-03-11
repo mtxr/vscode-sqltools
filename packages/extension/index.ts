@@ -3,18 +3,20 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
 import { Telemetry, Timer } from '@sqltools/core/utils';
-import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
-import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
-import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
-import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
-import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
-import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
+
+// plugins
+import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
+import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
+import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
+import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
+import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
+import FormatterPlugin from '@sqltools/plugins/formatter/extension';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;

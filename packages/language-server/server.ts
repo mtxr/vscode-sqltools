@@ -67,6 +67,14 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
     return this._server.onDocumentRangeFormatting;
   }
 
+  public get onCompletion() {
+    return this._server.onCompletion;
+  }
+
+  public get onCompletionResolve() {
+    return this._server.onCompletionResolve;
+  }
+
   public listen() {
     this._server.listen();
     return this;
