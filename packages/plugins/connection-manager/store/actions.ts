@@ -11,13 +11,21 @@ function Disconnect(conn: Connection) {
 }
 Disconnect.type = 'Disconnect';
 
-function QuerySuccess(conn: Connection, query: string, results: DatabaseInterface.QueryResults) {
-  return { type: QuerySuccess.type, payload: { conn, query, results } };
+function QuerySuccess(conn: Connection, { results }: { results: DatabaseInterface.QueryResults[] }) {
+  return { type: QuerySuccess.type, payload: { conn, results } };
 }
 QuerySuccess.type = 'QuerySuccess';
+
+function ConnectionData(conn: Connection, { tables, columns }: { tables: DatabaseInterface.Table[] ;columns?: DatabaseInterface.TableColumn[], }) {
+  return { type: ConnectionData.type, payload: { conn, tables, columns } };
+}
+ConnectionData.type = 'ConnectionData';
+
+
 
 export default {
   Connect,
   Disconnect,
   QuerySuccess,
+  ConnectionData,
 }

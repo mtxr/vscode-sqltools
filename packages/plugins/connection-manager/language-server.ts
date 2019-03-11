@@ -26,9 +26,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       const c = this.getConnectionInstance(conn);
       if (!c) throw 'Connection not found';
       const results: DatabaseInterface.QueryResults[] = await c[command](...args);
-      results.forEach(r => {
-        this.server.store.dispatch(actions.QuerySuccess(c, r.query, r));
-      });
+      this.server.store.dispatch(actions.QuerySuccess(c, { results }));
       return results;
     } catch (e) {
       this.server.notifyError('Execute query error', e);
@@ -145,12 +143,14 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
   // internal utils
   private async _loadConnectionData(conn: Connection) {
-    // @TODO commpletion items should be loaded somewhereelse
     if (!conn) {
       return this._updateSidebar(null, [], []);
     }
     return Promise.all([conn.getTables(), conn.getColumns()])
-      .then(async ([t, c]) => this._updateSidebar(conn.serialize(), t, c))
+      .then(async ([tables, columns]) => {
+        this.server.store.dispatch(actions.ConnectionData(conn, { tables, columns }))
+        return this._updateSidebar(conn.serialize(), tables, columns);
+      })
       .catch(e => {
         this.server.notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
         throw e;

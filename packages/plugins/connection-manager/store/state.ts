@@ -8,13 +8,20 @@ export interface ConnectionManagerState {
     [connection_id: string]: {
       [query: string]: DatabaseInterface.QueryResults
     }
-  }
+  };
+  connectionInfo: {
+    [id: string]: {
+      tables: DatabaseInterface.Table[];
+      columns: DatabaseInterface.TableColumn[];
+    };
+  };
 }
 
 const initialState: ConnectionManagerState = {
   lastUsedId: undefined,
   activeConnections: {},
-  queryResults: {}
+  queryResults: {},
+  connectionInfo: {},
 }
 
 export default initialState;

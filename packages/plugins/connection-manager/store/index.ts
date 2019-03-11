@@ -7,6 +7,7 @@ function register(store: LSStore) {
   store.registerActionHandler<State>(Actions.Connect.type, handlers.onConnect);
   store.registerActionHandler<State>(Actions.Disconnect.type, handlers.onDisconnect);
   store.registerActionHandler<State>(Actions.QuerySuccess.type, handlers.onQuerySuccess);
+  store.registerActionHandler<State>(Actions.ConnectionData.type, handlers.onConnectionData);
 }
 export default {
   ConnectionManagerState,

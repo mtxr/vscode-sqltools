@@ -5,28 +5,60 @@ import { DatabaseInterface } from '@sqltools/core/interface';
 export const onConnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {
   const activeConnections = Object.assign({}, state.activeConnections, { [conn.getId()]: conn });
   const queryResults = Object.assign({}, state.queryResults, { [conn.getId()]: {} });
-
-  return Object.assign({}, state, { activeConnections, queryResults, lastUsedId: conn.getId() });
+  return {
+    ...state,
+    activeConnections,
+    queryResults,
+    lastUsedId: conn.getId(),
+    connectionInfo: {
+      ...state.connectionInfo,
+      [conn.getId()]: { tables: [], columns: [] },
+    }
+  };
 };
 
 export const onDisconnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {
-  const { activeConnections, queryResults, lastUsedId } = state;
+  const { activeConnections, connectionInfo, queryResults, lastUsedId } = state;
   delete activeConnections[conn.getId()];
   delete queryResults[conn.getId()];
+  delete connectionInfo[conn.getId()];
 
   const newLastUsedId = lastUsedId === conn.getId() ? undefined : lastUsedId;
 
-  return Object.assign({}, state, { activeConnections, queryResults, lastUsedId: newLastUsedId });
+  return {
+    ...state,
+    activeConnections,
+    queryResults,
+    lastUsedId: newLastUsedId,
+    connectionInfo,
+  };
 };
 
-export const onQuerySuccess = (state: ConnectionManagerState, { conn, query, results }: { conn: Connection, query: string, results: DatabaseInterface.QueryResults }): ConnectionManagerState => {
+export const onQuerySuccess = (state: ConnectionManagerState, { conn, results }: { conn: Connection, results: DatabaseInterface.QueryResults[] }): ConnectionManagerState => {
   let { queryResults } = state;
-  queryResults[conn.getId()][query] = results;
-  return Object.assign({}, state, { queryResults });
+  queryResults[conn.getId()] = results.reduce((agg, res) => ({ ...agg, [res.query]: res }), {});
+  return {
+    ...state,
+    queryResults
+  };
+}
+
+export const onConnectionData = (state: ConnectionManagerState, { conn, tables, columns }: { conn: Connection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }): ConnectionManagerState => {
+  let { connectionInfo } = state;
+
+  const newState = {
+    ...state,
+    connectionInfo: {
+      ...connectionInfo,
+      [conn.getId()]: { tables, columns },
+    }
+  };
+  return newState;
 }
 
 export default {
   onConnect,
   onDisconnect,
   onQuerySuccess,
+  onConnectionData,
 };
