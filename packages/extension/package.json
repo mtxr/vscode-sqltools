@@ -506,6 +506,10 @@
                     "name": "Connections"
                 },
                 {
+                    "id": "SQLTools/bookmarksExplorer",
+                    "name": "Bookmarks"
+                },
+                {
                     "id": "SQLTools/historyExplorer",
                     "name": "Query History"
                 }

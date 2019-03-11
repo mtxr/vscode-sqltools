@@ -7,18 +7,17 @@ import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
 import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
+import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import { commands, env as VSCodeEnv, ExtensionContext, QuickPickItem, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
-import BookmarksStorage from './api/bookmarks-storage';
+import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
-import { getSelectedText, insertText, quickPick, readInput, openExternal } from '@sqltools/core/utils/vscode';
+import { openExternal } from '@sqltools/core/utils/vscode';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;
-  private bookmarks: BookmarksStorage;
   private pluginsQueue: SQLTools.ExtensionPlugin<this>[] = [];
   private onWillRunCommandEmitter: EventEmitter<SQLTools.CommandEvent>;
   private onDidRunCommandSuccessfullyEmitter: EventEmitter<SQLTools.CommandSuccessEvent>;
@@ -31,8 +30,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     ConfigManager.addOnUpdateHook(() => {
       if (ConfigManager.telemetry) this.telemetry.enable();
       else this.telemetry.disable();
-      this.bookmarks = new BookmarksStorage();
-    })
+    });
     this.telemetry = new Telemetry({
       product: 'extension',
       vscodeInfo: {
@@ -75,65 +73,9 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     window.showInformationMessage(message, { modal: true });
   }
 
-  private async cmdEditBookmark(): Promise<void> {
-    try {
-      const query = (await this.bookmarksMenu()) as QuickPickItem;
-      const headerText = ''.replace('{queryName}', query.label);
-      insertText(`${headerText}${query.detail}`, true);
-    } catch (e) {
-      ErrorHandler.create('Could not edit bookmarked query')(e);
-    }
-  }
-  private async cmdBookmarkSelection() {
-    try {
-      const query = await getSelectedText('bookmark');
-      this.bookmarks.set(await readInput('Query name'), query);
-    } catch (e) {
-      ErrorHandler.create('Error bookmarking query.')(e);
-    }
-  }
-
-  private async cmdDeleteBookmark(): Promise<void> {
-    try {
-      this.bookmarks.delete((await this.bookmarksMenu('label')));
-    } catch (e) {
-      ErrorHandler.create('Error deleting bookmark.')(e);
-    }
-  }
-
-  private cmdClearBookmarks(): void {
-    this.bookmarks.reset();
-  }
-
-  private async cmdRunFromBookmarks(): Promise<void> {
-    try {
-      await commands.executeCommand(`${EXT_NAME}.executeQuery`, await this.bookmarksMenu('detail'));
-    } catch (e) {
-      ErrorHandler.create('Error while running query.', `${EXT_NAME}.showOutputChannel`)(e);
-    }
-  }
-
   /**
    * Management functions
    */
-  private async bookmarksMenu<R = QuickPickItem | string>(prop?: string): Promise<R> {
-    const all = this.bookmarks.all();
-
-    return await quickPick<R>(Object.keys(all).map((key) => {
-      return {
-        description: '',
-        detail: all[key],
-        label: key,
-      };
-    }), prop, {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        placeHolder: 'Pick a bookmarked query',
-        placeHolderDisabled: 'You don\'t have any bookmarks yet.',
-        title: 'Bookmarks',
-      });
-  }
-
   private getAndUpdateConfig() {
     ConfigManager.update(<SettingsInterface>workspace.getConfiguration(EXT_NAME.toLowerCase()));
   }
@@ -256,7 +198,8 @@ export function activate(context: ExtensionContext) {
     .registerPlugin(AutoRestartPlugin)
     .registerPlugin(new ConnectionManagerPlugin())
     .registerPlugin(new DependencyManagerPlugin())
-    .registerPlugin(new HistoryManagerPlugin());
+    .registerPlugin(new HistoryManagerPlugin())
+    .registerPlugin(new BookmarksManagerPlugin());
 
   return instance.activate();
 }

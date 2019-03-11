@@ -29,7 +29,7 @@ export class HistoryTreeGroup extends TreeItem {
   }
 
   public addItem(query: string) {
-    if (!query) {
+    if (!query || (query.trim().length === 0)) {
       return;
     }
     if (this.items.length > 0 && this.items[0].query.trim() === query.toString().trim()) {

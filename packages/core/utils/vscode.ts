@@ -35,8 +35,8 @@ export async function insertSnippet(text: string, forceCreate = false) {
   return editor.insertSnippet(new SnippetString(text));
 }
 
-export async function readInput(prompt: string, placeholder?: string) {
-  const data = await window.showInputBox({ prompt, placeHolder: placeholder || prompt });
+export async function readInput(prompt: string, placeholder?: string, value?: string) {
+  const data = (await window.showInputBox({ prompt, placeHolder: placeholder || prompt, value }));
   if (isEmpty(data)) throw new DismissedException();
   return data;
 }
