@@ -1,5 +1,6 @@
 {
   "sqltools.telemetry": true,
+  "sqltools.useNodeRuntime": true,
   "sqltools.connections": [
     {
       "name": "PGSQL",

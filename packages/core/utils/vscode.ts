@@ -1,17 +1,20 @@
-import { TextEditor } from 'vscode';
-import { window } from 'vscode';
-import { workspace } from 'vscode';
-import { DismissedException } from '@sqltools/core/exception';
-import { SnippetString } from 'vscode';
+import {
+  TextEditor,
+  window,
+  workspace,
+  SnippetString,
+} from 'vscode';
 import { QuickPickItem, QuickPickOptions, QuickPick, env, commands, Uri } from 'vscode';
+import { DismissedException } from '@sqltools/core/exception';
 import { isEmpty } from '@sqltools/core/utils';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
-  if (forceCreate || !window.activeTextEditor) {
+  if (forceCreate || !window.activeTextEditor || !window.activeTextEditor.viewColumn) {
     const doc = await workspace.openTextDocument({ language: 'sql' });
     await window.showTextDocument(doc, 1, false);
   }
-  return window.activeTextEditor;
+  const editor = window.activeTextEditor;
+  return editor;
 }
 
 export async function getSelectedText(action = 'proceed', fullText = false) {
@@ -103,7 +106,10 @@ export async function quickPick<T = QuickPickItem | any>(
 }
 
 export function openExternal(url: string) {
-  const uri = Uri.parse(url);
+  let uri = Uri.parse(url);
+  if (uri.query && /http/.test(uri.scheme)) {
+    uri = uri.with({ query: uri.query.replace(/\n/g, encodeURI('\n'))});
+  }
   if (env && typeof (env as any).openExternal === 'function') {
     return (env as any).openExternal(uri);
   }

@@ -1,11 +1,12 @@
+import path from 'path';
+import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DISPLAY_NAME } from '@sqltools/core/constants';
 import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists, Telemetry } from '@sqltools/core/utils';
-import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc } from 'vscode';
+import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
-import { ExtensionContext } from 'vscode';
 
 export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface {
   public client: LanguageClient;
@@ -23,6 +24,15 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
     this.clientErrorHandler = this.client.createDefaultErrorHandler();
 
     this.registerBaseNotifications();
+
+    const useNodeRuntimePrevValue = ConfigManager.useNodeRuntime;
+    ConfigManager.addOnUpdateHook(async () => {
+      if (ConfigManager.useNodeRuntime !== useNodeRuntimePrevValue) {
+        const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
+        if (!res) return;
+        commands.executeCommand('workbench.action.reloadWindow');
+      }
+    })
   }
 
   public start() {
@@ -50,10 +60,27 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
 
   private getServerOptions(): ServerOptions {
     const serverModule = this.context.asAbsolutePath('languageserver.js');
+    let runtime: string = undefined;
+    const useNodeRuntime = ConfigManager.useNodeRuntime;
+    if (useNodeRuntime && typeof useNodeRuntime === 'string') {
+      const runtimePath = path.normalize(useNodeRuntime);
+      if (fs.existsSync(runtimePath)) {
+        runtime = runtimePath;
+      } else {
+        window.showInformationMessage('Node runtime not found. Using default as a fallback.');
+      }
+    } else if (useNodeRuntime === true) {
+      if (commandExists('node')) {
+        runtime = 'node';
+      } else {
+        window.showInformationMessage('Node runtime not found. Using default as a fallback.');
+      }
+    }
+
     const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
-      runtime: commandExists('node') ? 'node' : undefined, // use node id possible, otherwise use VSCode electron
+      runtime,
     };
 
     const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };

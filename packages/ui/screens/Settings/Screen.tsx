@@ -201,7 +201,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       label: 'Connection Timeout',
       info: 'in seconds',
       type: 'number',
-      default: 15,
+      default: 30,
       validators: [notEmpty, gtz],
       parse: int,
     },
@@ -473,7 +473,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                         </div>
                       ) : null}
                       <div>You can find more information <a href={`https://mtxr.gitbook.io/vscode-sqltools/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
-                      {/** @TODO fix this link */}
                     </div>
                   </div>
                 </div>

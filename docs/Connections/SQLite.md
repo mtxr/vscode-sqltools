@@ -3,6 +3,7 @@
 ## 1. Prerequisites
 
 - Node.js 6 or newer
+- Enable `sqltools.useNodeRuntime` setting, can be `true` or a path to the node runtime.
 
 > Extension automatically installs SQLite driver (sqlite@v4.0.6)
 

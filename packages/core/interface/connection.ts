@@ -56,7 +56,7 @@ export interface ConnectionInterface {
   /**
    * Connection timeout in seconds"
    * @type {number}
-   * @default 1
+   * @default 30
    * @memberof ConnectionInterface
    */
   connectionTimeout?: number;

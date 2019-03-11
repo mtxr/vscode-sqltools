@@ -3,7 +3,7 @@ import { Settings } from '@sqltools/core/interface';
 import packageJson from '@sqltools/extension/package.json';
 const { contributes: { configuration: { properties: defaults } } } = packageJson;
 
-let settings: Settings = {};
+let settings: Settings & { inspect?: (prop) => { defaultValue: any } } = {};
 const onUpdateHooks: (() => any)[] = [];
 function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
   const keys: string [] = configKey.split('.');
@@ -18,9 +18,18 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
   return setting;
 }
 
-function update(newSettings: Settings) {
+function update(newSettings: typeof settings) {
   console.log('Configs reloaded!');
   settings = newSettings;
+  if (!settings.inspect) {
+    // inspect implementation for language server.
+    settings.inspect = prop => {
+      const key = `sqltools.${prop}`;
+      return {
+        defaultValue: key in defaults ? defaults[key].default : undefined,
+      }
+    };
+  }
   onUpdateHooks.forEach(cb => cb());
 }
 
@@ -30,13 +39,15 @@ function addOnUpdateHook(handler: () => void) {
 
 const handler = {
   get(_: never, prop: string) {
-    if (prop === 'get') return get;
     if (prop === 'update') return update;
+    if (prop === 'get') return get;
     if (prop === 'addOnUpdateHook') return addOnUpdateHook;
     if (prop in settings && typeof settings[prop] !== 'undefined') return settings[prop];
-    const key = `sqltools.${prop}`;
-    if (key in defaults && typeof defaults[key].default !== 'undefined') return defaults[key].default;
-    return null;
+    if (settings.inspect) {
+      const data = settings.inspect(prop) || { defaultValue: undefined };
+      return data.defaultValue;
+    }
+    return undefined;
   },
   set() {
     throw new InvalidActionException('Cannot set settings value directly!');

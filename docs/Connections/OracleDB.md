@@ -4,6 +4,7 @@
 ## 1. Prerequisites
 
 - Node.js 6, 8, 10 or 11
+- Enable `sqltools.useNodeRuntime` setting, can be `true` or a path to the node runtime.
 
 > Extension automatically installs Oracle driver (node-oracledb@v3.1.1) that contains pre-built binaries for Node 6, 8, 10 and 11 on:
 > - Windows 64-bit (x64) (built with VS 2015)

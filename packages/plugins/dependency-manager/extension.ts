@@ -1,17 +1,27 @@
-import { window as Win } from 'vscode';
-import { InstallDepRequest, MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { window as Win, workspace } from 'vscode';
+import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
+import { EXT_NAME } from '@sqltools/core/constants';
 
 export default class DependencyManger implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
   register(extension: SQLTools.ExtensionInterface) {
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
+    this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
   }
 
-  public async requestToInstall({ moduleName, moduleVersion, conn }) {
+  private electronNotSupported = async () => {
+    const r = await Win.showInformationMessage(
+      'Electron is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
+      'Enable now',
+    );
+    if (!r) return;
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true);
+  }
+  private requestToInstall = async ({ moduleName, moduleVersion, conn }) =>  {
     const installNow = 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];

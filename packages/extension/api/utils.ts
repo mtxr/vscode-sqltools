@@ -20,7 +20,7 @@ namespace Utils {
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),
-        releaseNotes: `https://github.com/mtxr/vscode-sqltools/blob/master/CHANGELOG.md#v${VERSION.replace(/\./g, '')}`,
+        releaseNotes: `https://mtxr.gitbook.io/vscode-sqltools/changelog#v-${VERSION.replace(/\./g, '-')}`,
         run: new Date().getTime(),
         updated: false,
         version: VERSION,

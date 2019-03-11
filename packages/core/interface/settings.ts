@@ -43,33 +43,12 @@ export interface Settings {
    */
   showStatusbar?: boolean;
   /**
-   * Timeout in seconds for killing query process after the timeout.
-   * @type {number}
-   * @default 300000
-   * @memberof Settings
-   */
-   queryTimeout?: number;
-  /**
    * Number of queries to keep on History.
    * @type {number}
    * @default 100
    * @memberof Settings
    */
    historySize?: number;
-  /**
-   * Show results using new tab.
-   * @type {boolean}
-   * @default false
-   * @memberof Settings
-   */
-   showResultOnTab?: boolean;
-  /**
-   * Clear output for new commands.
-   * @type {boolean}
-   * @default false
-   * @memberof Settings
-   */
-   clearOutput?: boolean;
   /**
    * Languages with SQL completion activated.
    * @type {CompletionLanguages}
@@ -113,4 +92,11 @@ export interface Settings {
    * @memberof Settings
    */
   defaultExportType?: 'prompt' | 'csv' | 'json';
+  /**
+   * Enable node runtime usage.
+   * @default false
+   * @type {null | boolean | string}
+   * @memberof Settings
+   */
+  useNodeRuntime?: null | boolean | string;
 }

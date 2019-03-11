@@ -64,10 +64,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     }
 
     this.panel.title = this.title;
-    if (!this.panel.visible) {
-      this.postMessage({ action: 'reset' });
-    }
-    this.panel.reveal();
+    this.panel.reveal(this.panel.viewColumn, true);
+    this.postMessage({ action: 'reset' });
     this.setPreviewActiveContext(true);
   }
 

@@ -20,8 +20,8 @@ function insertTextHandler(node: { value: string } | string) {
   return insertText(typeof node === 'string' ? node : node.value);
 }
 
-function generateInsertQueryHandler({ table, columns }: { table: string, columns: any }): Promise<boolean> {
-  return insertSnippet(QueryUtils.generateInsert(table.toString(), columns, ConfigManager.format.indentSize));
+function generateInsertQueryHandler(item: { columns: any }): Promise<boolean> {
+  return insertSnippet(QueryUtils.generateInsert(item.toString(), item.columns, ConfigManager.format.indentSize));
 }
 
 function newSqlFileHandler() {

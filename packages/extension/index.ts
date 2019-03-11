@@ -1,4 +1,5 @@
 import './patch-console';
+import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
@@ -30,8 +31,10 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   public activate() {
     const activationTimer = new Timer();
     ConfigManager.addOnUpdateHook(() => {
-      if (ConfigManager.telemetry) this.telemetry.enable();
-      else this.telemetry.disable();
+      if (this.telemetry) {
+        if (ConfigManager.telemetry) this.telemetry.enable();
+        else this.telemetry.disable();
+      }
     });
     this.telemetry = new Telemetry({
       product: 'extension',
@@ -41,13 +44,13 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
         version: VSCodeVersion,
       },
     });
+    this.getAndUpdateConfig();
     this.client = new SQLToolsLanguageClient(this.context);
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
     ErrorHandler.setTelemetryClient(this.telemetry);
     ErrorHandler.setOutputFn(window.showErrorMessage);
-    this.getAndUpdateConfig();
     this.context.subscriptions.push(
       workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
@@ -70,9 +73,65 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     return this.context.subscriptions.forEach((sub) => void sub.dispose());
   }
 
-  private aboutVersionHandler(): void {
-    const message = `Using SQLTools ${VERSION}\n\nby @mtxr ${AUTHOR}`;
-    window.showInformationMessage(message, { modal: true });
+  private getIssueTemplate(name: string) {
+    const url = `https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/.github/ISSUE_TEMPLATE/${name}`;
+    return new Promise<string>((resolve) => {
+      https.get(url, (resp) => {
+        let data = '';
+        resp.on('data', chunk => data += chunk.toString());
+        resp.on('end', () => resolve(data));
+      }).on('error', () => resolve(null));
+    });
+  }
+
+  private aboutVersionHandler = async () => {
+    const FoundABug = 'Found a bug?';
+    const FeatureRequest = 'Feature Request';
+    const message = [
+      `SQLTools v${VERSION}`,
+      '',
+      `Platform: ${process.platform}, ${process.arch}`,
+      `Using Node Runtime: ${ConfigManager.useNodeRuntime ? 'yes' : 'no'}`,
+      '',
+      `by @mtxr ${AUTHOR}`
+    ];
+    const res = await window.showInformationMessage(message.join('\n'), { modal: true }, FeatureRequest, FoundABug);
+    if (!res) return;
+    const newIssueUrl = 'https://github.com/mtxr/vscode-sqltools/issues/new';
+
+    try {
+      let template: string;
+      let body: string;
+
+      switch (res) {
+        case FoundABug:
+          template = 'bug_report.md';
+          break;
+        case FeatureRequest:
+          template = 'feature_request.md';
+          break;
+      }
+      body = await this.getIssueTemplate(template);
+      if (body) {
+        body = encodeURIComponent(
+          body
+          .replace(/---([^\-]+---\n\n)/gim, '')
+          .replace(/(- OS).+/gi, `$1: ${process.platform}, ${process.arch}`)
+          .replace(/(- Version).+/gi, `$1: v${VERSION}`));
+      }
+
+      if (!template && !body) {
+        return openExternal(`${newIssueUrl}/choose`);
+      }
+      let issueUrl = `${newIssueUrl}?assignees=&labels=feature+request&template=${template}&body=${body}`;
+      openExternal(issueUrl);
+    } catch (e) {
+      const res = await window.showInformationMessage('Could not open a issue. Please go to GitHub to open.', 'Open Github');
+      if (res) {
+        openExternal(`${newIssueUrl}/choose`);
+      }
+    }
+
   }
 
   /**

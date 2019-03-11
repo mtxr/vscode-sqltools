@@ -161,7 +161,7 @@
                 }
             },
             {
-                "title": "Version",
+                "title": "About SQLTools",
                 "command": "SQLTools.aboutVersion",
                 "category": "SQLTools Management"
             },
@@ -217,7 +217,7 @@
                 }
             },
             {
-                "title": "Save query results",
+                "title": "Save results",
                 "command": "SQLTools.saveResults",
                 "category": "SQLTools Results",
                 "icon": {
@@ -302,36 +302,10 @@
                     "default": true,
                     "description": "Toggle statusbar visibility."
                 },
-                "sqltools.queryTimeout": {
-                    "type": "number",
-                    "default": 300000,
-                    "description": "Timeout in seconds for killing query process after the timeout."
-                },
                 "sqltools.historySize": {
                     "type": "number",
                     "default": 100,
                     "description": "Number of queries to keep on History."
-                },
-                "sqltools.showResultOnTab": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Show results using new tab."
-                },
-                "sqltools.clearOutput": {
-                    "type": "boolean",
-                    "default": false,
-                    "description": "Clear output for new commands."
-                },
-                "sqltools.completionTriggers": {
-                    "type": "array",
-                    "default": [
-                        ".",
-                        " "
-                    ],
-                    "items": {
-                        "type": "string"
-                    },
-                    "description": "Characters that auto trigger completion menu."
                 },
                 "sqltools.completionLanguages": {
                     "type": "array",
@@ -495,6 +469,11 @@
                     ],
                     "default": "prompt",
                     "description": "Default export results mode."
+                },
+                "sqltools.useNodeRuntime": {
+                    "type": ["null", "boolean", "string"],
+                    "default": false,
+                    "description": "Enable node runtime usage."
                 }
             }
         },

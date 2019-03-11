@@ -59,10 +59,8 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
           if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
             results = [results];
           }
-          if (results.length === 0) {
-            return [];
-          }
-          return resolve(results.map((r, i): DatabaseInterface.QueryResults => {
+          return resolve(queries.map((q, i): DatabaseInterface.QueryResults => {
+            const r = results[i] || [];
             const messages = [];
             if (r.affectedRows) {
               messages.push(`${r.affectedRows} rows were affected.`);
@@ -74,7 +72,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
               connId: this.getId(),
               cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
               messages,
-              query: queries[i],
+              query: q,
               results: Array.isArray(r) ? r : [],
             };
           }));

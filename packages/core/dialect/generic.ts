@@ -6,7 +6,7 @@ import {
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
-import { MissingModuleException } from '../exception';
+import { MissingModuleException, ElectronNotSupportedException } from '../exception';
 
 export interface Deps {
   type: 'package' | 'npmscript';
@@ -49,6 +49,9 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   }
 
   protected needToInstallDependencies() {
+    if (!process.release.sourceUrl.startsWith('https://nodejs.org')) {
+      throw new ElectronNotSupportedException();
+    }
     if (this.deps && this.deps.length > 0) {
       this.deps.forEach(dep => {
         switch (dep.type) {

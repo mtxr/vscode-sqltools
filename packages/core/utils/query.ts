@@ -14,5 +14,7 @@ export function generateInsert(
   cols.forEach((col, index) => {
     insertQuery = insertQuery.concat(`'\${${index + 1}:${col.column.type}}', `);
   });
-  return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, indentSize).concat('$0');
+  return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, indentSize)
+  .replace(/'(\${\d+:(int|bool|num).+})'/gi, '$1')
+  .concat('$0');
 }

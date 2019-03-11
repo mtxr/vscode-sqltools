@@ -1,114 +1,123 @@
-# SQLTools Changelog
+# Changelog
 
-### NEXT - WIP
+## v0.17
 
-- @TODO: Add image
+## v0.17.0
 
-- **NEW** :tada:
-  - Added support for SQLite. #51
-  - Added support for Oracle Database. #13
-  - Added History Explorer on sidebar
-  - Added Bookmarks Explorer on sidebar
-  - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental).
-  - Export query results as JSON and CSV. #95
-    - @TODO: Add image
-  - Added feature to copy cell value and the entire row. #63
-    - @TODO: Add image
-
-- **Fixes** :wrench:
-  - ***UI***:
-    - Fixed results ui scroll and resizer issues. #131 and #132
-    - Improved more the look and feel to match VSCode Standards.
-  - ***Connections***:
-    - MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. (Experimental)
-
-- **Breaking Changes** :exclamation:
-  - ***Commands***:
-    - `SQLTools.addNewConnection` command was renamed to `SQLTools.openAddConnectionScreen`
-    - `SQLTools.appendToCursor` command was renamed to `SQLTools.insertText`
-    - `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
-    - `SQLTools.runFromInput` command was renamed to `SQLTools.executeFromInput`
-    - `SQLTools.editFromHistory` command was renamed to `SQLTools.editHistory`
-  - ***Settngs***:
-    - `sqltools.logging` and `sqltools.logLevel` were removed.
+* **NEW** 🎉
+  * Added support for SQLite. \#51
+  * Added support for Oracle Database. \#13
+  * Added History Explorer on sidebar
+  * Added Bookmarks Explorer on sidebar
+  * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\).
+  * Export query results as JSON and CSV. \#95
+    * ![static/export-results.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/export-results.gif)
+  * Added feature to copy cell value and the entire row. \#63
+* **Fixes** 🔧
+  * _**UI**_:
+    * Fixed results ui scroll and resize issues. \#131 and \#132
+    * Improved more the look and feel to match VSCode Standards.
+  * _**Connections**_:
+    * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\)
+* **Breaking Changes** ❗
+  * _**Commands**_:
+    * `SQLTools.addNewConnection` command was renamed to `SQLTools.openAddConnectionScreen`
+    * `SQLTools.appendToCursor` command was renamed to `SQLTools.insertText`
+    * `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
+    * `SQLTools.runFromInput` command was renamed to `SQLTools.executeFromInput`
+    * `SQLTools.editFromHistory` command was renamed to `SQLTools.editHistory`
+  * _**Settngs**_:
+    * `sqltools.logging` and `sqltools.logLevel` were removed.
+    * **Fixes**
+      * This settings were ported from Sublime Text version but were never used here.
+        * `SQLTools.queryTimeout` not used in VSCode version.
+        * `SQLTools.showResultOnTab` not used in VSCode version.
+        * `SQLTools.clearOutput` not used in VSCode version.
+        * `sqltools.completionTriggers` not used in VSCode version.
 
 ## v0.16
 
 ### v0.16.11
-- **Enhancements**
-  - ***Connections***:
-    - MSSQL: Fixed tryning to access 'encrypt of undefined issue'.
+
+* **Enhancements**
+  * _**Connections**_:
+    * MSSQL: Fixed trying to access 'encrypt of undefined issue'.
 
 ### v0.16.10
-- **Enhancements**
-  - ***General***:
-    - Removed some dependencies
-    - Reduced startup time
-  - ***Connections***:
-    - Error logging minor fix
+
+* **Enhancements**
+  * _**General**_:
+    * Removed some dependencies
+    * Reduced startup time
+  * _**Connections**_:
+    * Error logging minor fix
 
 ### v0.16.9
-- **Enhancements**
-  - ***General***: Reduced extension size from 9.8MB to ~3MB
-  - ***Settings***:
-    - Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
-  - ***Connections***:
-    - MySQL: Updated library to mysql instead of mysql2. Previous was vey buggy.
-    - PostgreSQL: Updated library and migrated to connection pooling to avoid errors.
-    - MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue #126
+
+* **Enhancements**
+  * _**General**_: Reduced extension size from 9.8MB to ~3MB
+  * _**Settings**_:
+    * Added options to disable release notifications. `disableReleaseNotifications` defaults to `false`.
+  * _**Connections**_:
+    * MySQL: Updated library to mysql instead of mysql2. Previous was very buggy.
+    * PostgreSQL: Updated library and migrated to connection pooling to avoid errors.
+    * MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue \#126
 
 ### v0.16.8
-- **Fixes**
-  - ***Connections***:
-    - MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue #126
+
+* **Fixes**
+  * _**Connections**_:
+    * MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue \#126
 
 ### v0.16.7
-- **Fixes**
-  - ***UI***:
-    - Using Octicons as suggested by VSCode team.
-    - Adopeted the new QuickPick API.
-    - Added disconnect icon to connection-explorer
-  - ***Connections***:
-    - General: quick pick not showing options if no connection active. Issue #124
-    - General: Allow auto connect to multiple connections.
-    - MySQL: Fixes `Can't add new command when connection is in closed state`. Should happen less often at least.
-  - ***History***:
-    - Add option to edit item from history.
-    - Updated history to show most recenetly used at first position
-  - ***Query Format***:
-    - Fixed formatting with comments. Issue #97
-    - Fixed formatting with non latin chars. Issue #99
+
+* **Fixes**
+  * _**UI**_:
+    * Using Octicons as suggested by VSCode team.
+    * Adopted the new QuickPick API.
+    * Added disconnect icon to connection-explorer
+  * _**Connections**_:
+    * General: quick pick not showing options if no connection active. Issue \#124
+    * General: Allow auto connect to multiple connections.
+    * MySQL: Fixes `Can't add new command when connection is in closed state`. Should happen less often at least.
+  * _**History**_:
+    * Add option to edit item from history.
+    * Updated history to show most recently used at first position
+  * _**Query Format**_:
+    * Fixed formatting with comments. Issue \#97
+    * Fixed formatting with non latin chars. Issue \#99
 
 ### v0.16.6
-- **Fixes**
-  - ***Connections***: Error while connecting => `toString() of undefined`
+
+* **Fixes**
+  * _**Connections**_: Error while connecting =&gt; `toString() of undefined`
 
 ### v0.16.5
 
-- **Enhancements**
-  - ***UI***: Updated extension icon and README.
-  - ***Settings***: Added settings defintion for `dialectOptions`.
-  - ***Connection Explorer***
-    - Improved to show  `Generate insert Query` and `Add to cursor` only when an editor is open and editable.
-    - Auto Expand connection on connect.
-- **Fixes**
-  - ***Connection Explorer***: Fixes tables not showing columns.
+* **Enhancements**
+  * _**UI**_: Updated extension icon and README.
+  * _**Settings**_: Added settings definition for `dialectOptions`.
+  * _**Connection Explorer**_
+    * Improved to show  `Generate insert Query` and `Add to cursor` only when an editor is open and editable.
+    * Auto Expand connection on connect.
+* **Fixes**
+  * _**Connection Explorer**_: Fixes tables not showing columns.
 
 ### v0.16.4
 
-- Fixes disconnect not working. #122.
-- Auto connecting if have just one connection
-- 'Add new Server' changed to 'Add new connection'
-- Fixes show records when not connected
+* Fixes disconnect not working. \#122.
+* Auto connecting if have just one connection
+* 'Add new Server' changed to 'Add new connection'
+* Fixes show records when not connected
 
 ### v0.16.3
 
-- Show records and describe tables when using multiple connections. #119
-- Avoid asking password for already open connection
+* Show records and describe tables when using multiple connections. \#119
+* Avoid asking password for already open connection
 
 ### v0.16.2
 
-- Minor fix. Show records infinity loop.
+* Minor fix. Show records infinity loop.
 
 ### v0.16.0 and v0.16.1
 
