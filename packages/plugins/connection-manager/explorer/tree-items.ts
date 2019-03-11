@@ -23,7 +23,11 @@ export class SidebarConnection extends TreeItem {
     return getConnectionDescription(this.conn);
   }
 
-  private isActive = false;
+  private _isActive = false;
+
+  public get isConnected() {
+    return this.conn.isConnected;
+  }
   public get id() {
     return this.getId();
   }
@@ -32,7 +36,7 @@ export class SidebarConnection extends TreeItem {
   }
 
   public get tooltip() {
-    if (this.isActive) return `Active Connection - Queries will run for this connection`;
+    if (this._isActive) return `Active Connection - Queries will run for this connection`;
     return undefined;
   }
 
@@ -64,7 +68,7 @@ export class SidebarConnection extends TreeItem {
 
   public updateIconPath() {
     this.iconPath = SidebarConnection.icons.disconnected;
-    if (this.isActive) {
+    if (this._isActive) {
       this.iconPath = SidebarConnection.icons.active;
     } else if (this.contextValue === 'connectedConnection') {
       this.iconPath = SidebarConnection.icons.connected;
@@ -93,7 +97,7 @@ export class SidebarConnection extends TreeItem {
   }
 
   public activate() {
-    this.isActive = true;
+    this._isActive = true;
     this.expand();
     this.contextValue = 'connectedConnection';
     this.updateIconPath();
@@ -101,7 +105,7 @@ export class SidebarConnection extends TreeItem {
   }
 
   public deactivate() {
-    this.isActive = false;
+    this._isActive = false;
     this.updateIconPath();
     return this;
   }
@@ -116,8 +120,8 @@ export class SidebarConnection extends TreeItem {
     return this;
   }
 
-  public get active() {
-    return this.isActive;
+  public get isActive() {
+    return this._isActive;
   }
 
   public expand() {

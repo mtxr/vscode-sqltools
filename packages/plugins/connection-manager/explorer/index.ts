@@ -19,7 +19,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   public readonly onConnectionDidChange = this._onConnectionDidChange.event;
   private tree: { [database: string]: SidebarConnection } = {};
   public getActive(): ConnectionInterface | null {
-    const activeId = Object.keys(this.tree).find(k => this.tree[k].active);
+    const activeId = Object.keys(this.tree).find(k => this.tree[k].isActive);
     if (!activeId) return null;
 
     return {
@@ -122,7 +122,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
 
   public setActiveConnection(c: ConnectionInterface) {
     Object.values(this.tree).forEach(item => {
-      if (item.active) item.deactivate();
+      if (item.isActive) item.deactivate();
     });
     if (!c) return;
     const item = this.tree[getConnectionId(c)];

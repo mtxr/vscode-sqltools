@@ -82,8 +82,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (connIdOrNode) {
       const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
-      await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
-      return;
+      return this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
     }
     this._connect(true).catch(e => this.errorHandler('Error selecting connection', e));
   }
@@ -247,7 +246,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
     let password = null;
 
-    if (c) {
+    if (c && getConnectionId(c) !== this.explorer.getActiveId()) {
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(
