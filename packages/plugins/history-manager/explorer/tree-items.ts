@@ -14,7 +14,7 @@ export class HistoryTreeItem extends TreeItem {
     this.description = new Date().toLocaleString();
     this.command = {
       title: 'Edit',
-      command: `${EXT_NAME}.editFromHistory`,
+      command: `${EXT_NAME}.editHistory`,
       arguments: [this],
     };
   }

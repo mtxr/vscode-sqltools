@@ -1,4 +1,4 @@
-import { EventEmitter, ProviderResult, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
+import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
 import { logIfEnv } from '@sqltools/core/utils/decorators';
 import { window } from 'vscode';

@@ -13,7 +13,7 @@ export class BookmarkTreeItem extends TreeItem {
     this.description = query;
     this.command = {
       title: 'Edit',
-      command: `${EXT_NAME}.editFromBookmark`,
+      command: `${EXT_NAME}.editBookmark`,
       arguments: [this],
     };
   }

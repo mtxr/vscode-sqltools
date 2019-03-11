@@ -31,9 +31,9 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
       });
   }
 
-  private ext_editBookmark = async (): Promise<void> => {
+  private ext_editBookmark = async (item?: BookmarkTreeItem): Promise<void> => {
     try {
-      const item = (await this.bookmarksMenu());
+      item = item || (await this.bookmarksMenu());
       // Add an option for bookmark header
       const headerText = `-- Bookmarked query
 --   Name: {queryGroup}
@@ -55,9 +55,9 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
     }
   }
 
-  private ext_deleteBookmark = async (): Promise<void> => {
+  private ext_deleteBookmark = async (item?: BookmarkTreeItem): Promise<void> => {
     try {
-      const item = await this.bookmarksMenu();
+      item = item || (await this.bookmarksMenu());
       if (!item) return;
       this.explorer.delete(item.parent.name, item.name);
     } catch (e) {
@@ -69,9 +69,9 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
     this.explorer.clear();
   }
 
-  private ext_runFromBookmarks = async (): Promise<void> => {
+  private ext_runFromBookmarks = async (item?: BookmarkTreeItem): Promise<void> => {
     try {
-      const item = await this.bookmarksMenu();
+      item = item || (await this.bookmarksMenu());
       if (!item) return;
       await commands.executeCommand(`${EXT_NAME}.executeQuery`, item.query);
     } catch (e) {
@@ -87,10 +87,10 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
     this.errorHandler = extension.errorHandler;
 
     extension
-    .registerCommand('editBookmark', this.ext_editBookmark)
     .registerCommand('bookmarkSelection', this.ext_bookmarkSelection)
-    .registerCommand('deleteBookmark', this.ext_deleteBookmark)
     .registerCommand('clearBookmarks', this.ext_clearBookmarks)
+    .registerCommand('editBookmark', this.ext_editBookmark)
+    .registerCommand('deleteBookmark', this.ext_deleteBookmark)
     .registerCommand('runFromBookmarks', this.ext_runFromBookmarks);
   }
 }

@@ -118,7 +118,7 @@
             },
             {
                 "title": "Edit from history",
-                "command": "SQLTools.editFromHistory",
+                "command": "SQLTools.editHistory",
                 "category": "SQLTools History"
             },
             {
@@ -570,18 +570,23 @@
                     "command": "SQLTools.refreshAll",
                     "when": "view == SQLTools/connectionExplorer",
                     "group": "navigation@3"
+                },
+                {
+                    "command": "SQLTools.clearBookmarks",
+                    "when": "view == SQLTools/bookmarksExplorer",
+                    "group": "navigation@1"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "SQLTools.selectConnection",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connection",
-                    "group": "sqltools.dbExplorer@0"
+                    "group": "navigation@0"
                 },
                 {
                     "command": "SQLTools.closeConnection",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connectedConnection",
-                    "group": "sqltools.dbExplorer@0"
+                    "group": "navigation@0"
                 },
                 {
                     "command": "SQLTools.deleteConnection",
@@ -591,17 +596,17 @@
                 {
                     "command": "SQLTools.showRecords",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@1"
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.describeTable",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@2"
+                    "group": "navigation@2"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
                     "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
-                    "group": "sqltools.dbExplorer@3"
+                    "group": "navigation@3"
                 },
                 {
                     "command": "SQLTools.insertText",
@@ -636,12 +641,32 @@
                 {
                     "command": "SQLTools.runFromHistory",
                     "when": "view == SQLTools/historyExplorer && viewItem == history.item",
-                    "group": "sqltools.historyExplorer@0"
+                    "group": "navigation@0"
                 },
                 {
-                    "command": "SQLTools.editFromHistory",
+                    "command": "SQLTools.editHistory",
                     "when": "view == SQLTools/historyExplorer && viewItem == history.item",
-                    "group": "sqltools.historyExplorer@1"
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "SQLTools.runFromBookmarks",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "SQLTools.runFromBookmarks",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "SQLTools.editBookmark",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "SQLTools.deleteBookmark",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "sqltools.bmExplorer@0"
                 }
             ],
             "editor/title": [

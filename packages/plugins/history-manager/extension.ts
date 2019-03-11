@@ -55,7 +55,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_editFromHistory = async (entry?: HistoryTreeItem): Promise<void> => {
+  private ext_editHistory = async (entry?: HistoryTreeItem): Promise<void> => {
     let query: string;
     if (entry && entry.query) {
       query = entry.query
@@ -75,6 +75,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.errorHandler = extension.errorHandler;
     hookedCommands.forEach(cmd => extension.addAfterCommandSuccessHook(cmd, this.addToHistoryHook));
     extension.registerCommand('runFromHistory', this.ext_runFromHistory)
-      .registerCommand('editFromHistory', this.ext_editFromHistory);
+      .registerCommand('editHistory', this.ext_editHistory);
   }
 }

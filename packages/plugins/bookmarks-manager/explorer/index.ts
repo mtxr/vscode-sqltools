@@ -94,12 +94,19 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     }
   }
 
-  public clear() {
-    this.tree = {};
-    this.save();
+  public async clear() {
+    const res = await window.showInformationMessage('Do you really want to delete all your bookmarks?', { modal: true }, 'Yes');
+    if (res === 'Yes') {
+      this.tree = {};
+      this.refresh();
+      this.save();
+    }
   }
 
-  public delete(group: string, name: string) {
+  public async delete(group: string, name: string) {
+    const res = await window.showInformationMessage(`Do you really want to delete ${name} bookmark?`, { modal: true }, 'Yes');
+    if (res !== 'Yes') return;
+
     this.tree[group].delete(name);
     if (this.tree[group].length === 0) {
       delete this.tree[group];
