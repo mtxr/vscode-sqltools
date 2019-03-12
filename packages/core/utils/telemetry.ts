@@ -4,6 +4,7 @@ import Timer from '@sqltools/core/utils/timer';
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
 import SQLTools from '../plugin-api';
+import { numericVersion } from '.';
 
 export class Telemetry implements SQLTools.TelemetryInterface {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
@@ -55,6 +56,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
       'common.channel': ENV,
       'common.extname': EXT_NAME,
       'common.extversion': VERSION,
+      'common.extversionnum': numericVersion(VERSION).toString(),
       'common.nodeversion': process.version,
       ...(Telemetry.vscodeInfo
         ? {

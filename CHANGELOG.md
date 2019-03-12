@@ -2,6 +2,11 @@
 
 ## v0.17
 
+## v0.17.3
+
+* Fixes readme documentation link
+* Fixes 'server' of undefined issue. Webpack/babel issue.
+
 ## v0.17.0
 
 * **NEW** 🎉

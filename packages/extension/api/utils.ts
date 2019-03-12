@@ -2,6 +2,7 @@ import path from 'path';
 import { VERSION } from '@sqltools/core/constants';
 import SerializableStorage from '@sqltools/core/utils/serializable-storage';
 import { getHome } from '@sqltools/core/utils/get-home';
+import { numericVersion } from '@sqltools/core/utils';
 
 let setup: SerializableStorage<any, string>;
 
@@ -49,14 +50,6 @@ namespace Utils {
       const current = Object.assign({}, getlastRunInfo() || {}, props);
       setup.content(current).save();
     } catch (e) { /**/ }
-  }
-
-  export function numericVersion(v: string) {
-    const n: number[] = v.replace(/^v/, '').split('.')
-      .map((a) => parseInt(a.replace(/\D+/, ''), 10));
-    if (n.length >= 3) return n[0] * 10000 + n[1] * 100 + n[2];
-    if (n.length === 2) return n[0] * 10000 + n[1] * 100;
-    return n[0] * 10000;
   }
 }
 

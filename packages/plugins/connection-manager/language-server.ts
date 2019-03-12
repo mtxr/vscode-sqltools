@@ -78,6 +78,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       return undefined;
     }
     const c = this.getConnectionInstance(conn);
+    if (!c) return;
     await c.close().catch(this.server.notifyError('Connection Error'));
     this.server.store.dispatch(actions.Disconnect(c));
     conn.isConnected = false;
@@ -173,7 +174,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
   }
 
-  public async _autoConnectIfActive() {
+  public _autoConnectIfActive = async () => {
     const defaultConnections: ConnectionInterface[] = [];
     const { lastUsedId, activeConnections } = this.server.store.getState();
     if (lastUsedId && activeConnections[lastUsedId]) {
