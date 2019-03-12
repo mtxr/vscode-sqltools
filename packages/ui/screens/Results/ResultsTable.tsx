@@ -140,26 +140,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   openContextMenu = (e) => {
     e.preventDefault && e.preventDefault();
     e.stopPropagation && e.stopPropagation();
-    let node = ReactDOM.findDOMNode(e.target) as Element & HTMLElement;
-    let i = 0;
-    while (i < 5) {
-      if (!node) return true;
-      if (node.classList.contains('copy-allowed')) break;
-      i++;
-      node = node.parentNode as Element & HTMLElement;
-    }
-
-    const { value, index, col } = node.dataset;
     const { pageX, pageY } = e;
 
-    this.setState({
-      clickedData: {
-        value,
-        col,
-        index: parseInt(index),
-      },
-    }, () => {
-      // delay menu open til we have clickedData
+    this.highlightClickedRow(e, () => {
       this.setState({
         contextMenu: {
           open: true,
@@ -170,22 +153,47 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     });
   }
 
+  highlightClickedRow (e, cb = (() => void 0)) {
+    let node = ReactDOM.findDOMNode(e.target) as Element & HTMLElement;
+    let i = 0;
+    while (i < 5) {
+      if (!node) return true;
+      if (node.classList.contains('copy-allowed')) break;
+      i++;
+      node = node.parentNode as Element & HTMLElement;
+    }
+
+    const { value, index, col } = node.dataset;
+
+    this.setState({
+      clickedData: {
+        value,
+        col,
+        index: parseInt(index),
+      },
+    }, () => cb());
+  }
+
   clipboardInsert(value) {
     value = typeof value ==='string' ? value : JSON.stringify(value, null, 2);
     clipboardInsert(value);
   }
 
-  onMenuClose = (e = undefined) => {
+  onTableClick = (e = undefined) => {
     if (e) {
       e.preventDefault && e.preventDefault();
       e.stopPropagation && e.stopPropagation();
     }
 
-    const { clickedData, contextMenu } = ResultsTable.initialState;
-    this.setState({
-      clickedData,
-      contextMenu,
-    })
+    if (this.state.contextMenu.open) {
+      const { clickedData, contextMenu } = ResultsTable.initialState;
+      this.setState({
+        clickedData,
+        contextMenu,
+      });
+    } else if (e) {
+      this.highlightClickedRow(e);
+    }
   }
 
   tableContextOptions = (): any[] => {
@@ -249,7 +257,25 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['json']} });
         break;
     }
-    this.onMenuClose();
+    this.onTableClick();
+  }
+
+  handleScroll(event) {
+    let headers = document.getElementsByClassName("rt-thead");
+    for (let i = 0; i < headers.length; i++) {
+      headers[i].scrollLeft = event.target.scrollLeft;
+    }
+  }
+
+  _tBodyComponent = null;
+
+  componentDidMount() {
+    this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
+    this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+  }
+
+  componentWillUnmount() {
+    this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
   }
 
   render() {
@@ -258,8 +284,30 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     if (cols.length > 0 && cols.length < 8) {
       delete cols[0].width;
     }
+
+    const TbodyComponent = props => {
+      for (let i = 0; i < props.children[0].length; i++) {
+        props.children[0][i] = React.cloneElement(props.children[0][i], {
+          minWidth: props.style.minWidth
+        });
+      }
+
+      return <div className="rt-tbody">{props.children}</div>;
+    };
+
+    const TrGroupComponent = props => {
+      return (
+        <div
+          className="rt-tr-group"
+          role="rowgroup"
+          style={{ minWidth: props.minWidth }}
+        >
+          {props.children}
+        </div>
+      );
+    };
     return (
-      <div onContextMenu={this.openContextMenu} onClick={this.onMenuClose} className="react-table-clickable">
+      <div onContextMenu={this.openContextMenu} onClick={this.onTableClick} className="react-table-clickable">
         <ReactTable
           noDataText="Query didn't return any results."
           data={this.props.data}
@@ -314,7 +362,13 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
             }
             return String(row[filter.id]) === exp;
           }}
-          className="-striped"
+          className="-striped -highlight"
+          TbodyComponent={TbodyComponent}
+          TrGroupComponent={TrGroupComponent}
+          style={{
+            width: '100%',
+            height: '100%'
+          }}
         />
         <Menu {...this.state.contextMenu} width={250} onSelect={this.onMenuSelect} options={this.tableContextOptions()} />
       </div>

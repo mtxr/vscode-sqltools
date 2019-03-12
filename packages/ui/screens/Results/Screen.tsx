@@ -8,7 +8,7 @@ import '@sqltools/ui/sass/results.scss';
 import DatabaseInterface from '@sqltools/core/interface/database';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
-  state = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
+  state: QueryResultsState = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
 
   saveState = (data, cb = () => {}) => {
     this.setState(data, () => {
@@ -74,14 +74,14 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         </div>
       );
     }
-    const tabs = this.state.queries.map((query: string) => (
+    const tabs = this.state.queries.map((query: string, i: number) => (
       <li
         title={query}
         key={query}
         onClick={() => this.toggle(query)}
         className={'truncate ' + (this.state.activeTab === query ? 'active' : '')}
       >
-        {query}
+        {(this.state.resultMap[query] &&  this.state.resultMap[query].label) || query}
       </li>
     ));
 

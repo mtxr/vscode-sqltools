@@ -115,8 +115,8 @@ export interface ConnectionDialect {
   close(): Promise<any>;
   getTables(): Promise<DatabaseInterface.Table[]>;
   getColumns(): Promise<DatabaseInterface.TableColumn[]>;
-  describeTable(tableName: string): Promise<any>;
-  showRecords(tableName: string, limit: number): Promise<any>;
+  describeTable(tableName: string): Promise<DatabaseInterface.QueryResults[]>;
+  showRecords(tableName: string, limit: number): Promise<DatabaseInterface.QueryResults[]>;
   query(query: string): Promise<DatabaseInterface.QueryResults[]>;
   testConnection?(): Promise<void>;
 }

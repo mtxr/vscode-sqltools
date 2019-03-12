@@ -2,6 +2,15 @@
 
 ## v0.17
 
+## v0.17.4
+
+* **NEW** 🎉
+  * Highlight result row on click.
+  * Using query labels for `Describe Table` and `Show Records`.
+* **Fixes** 🔧
+  * _**UI**_:
+    * Fixed scroll issue on windows #132
+
 ## v0.17.3
 
 * Fixes readme documentation link
@@ -10,17 +19,17 @@
 ## v0.17.0
 
 * **NEW** 🎉
-  * Added support for SQLite. \#51
-  * Added support for Oracle Database. \#13
+  * Added support for SQLite. #51
+  * Added support for Oracle Database. #13
   * Added History Explorer on sidebar
   * Added Bookmarks Explorer on sidebar
   * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\).
-  * Export query results as JSON and CSV. \#95
+  * Export query results as JSON and CSV. #95
     * ![static/export-results.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/export-results.gif)
-  * Added feature to copy cell value and the entire row. \#63
+  * Added feature to copy cell value and the entire row. #63
 * **Fixes** 🔧
   * _**UI**_:
-    * Fixed results ui scroll and resize issues. \#131 and \#132
+    * Fixed results ui scroll and resize issues. #131 and #132
     * Improved more the look and feel to match VSCode Standards.
   * _**Connections**_:
     * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\)
@@ -66,13 +75,13 @@
   * _**Connections**_:
     * MySQL: Updated library to mysql instead of mysql2. Previous was very buggy.
     * PostgreSQL: Updated library and migrated to connection pooling to avoid errors.
-    * MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue \#126
+    * MSSQL: Updated library and migrated to connection pooling to avoid errors. Issue #126
 
 ### v0.16.8
 
 * **Fixes**
   * _**Connections**_:
-    * MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue \#126
+    * MSSQL: Fixes `Requests can only be made in the LoggedIn state, not the LoggedInSendingInitialSql state`. Issue #126
 
 ### v0.16.7
 
@@ -82,15 +91,15 @@
     * Adopted the new QuickPick API.
     * Added disconnect icon to connection-explorer
   * _**Connections**_:
-    * General: quick pick not showing options if no connection active. Issue \#124
+    * General: quick pick not showing options if no connection active. Issue #124
     * General: Allow auto connect to multiple connections.
     * MySQL: Fixes `Can't add new command when connection is in closed state`. Should happen less often at least.
   * _**History**_:
     * Add option to edit item from history.
     * Updated history to show most recently used at first position
   * _**Query Format**_:
-    * Fixed formatting with comments. Issue \#97
-    * Fixed formatting with non latin chars. Issue \#99
+    * Fixed formatting with comments. Issue #97
+    * Fixed formatting with non latin chars. Issue #99
 
 ### v0.16.6
 
@@ -110,14 +119,14 @@
 
 ### v0.16.4
 
-* Fixes disconnect not working. \#122.
+* Fixes disconnect not working. #122.
 * Auto connecting if have just one connection
 * 'Add new Server' changed to 'Add new connection'
 * Fixes show records when not connected
 
 ### v0.16.3
 
-* Show records and describe tables when using multiple connections. \#119
+* Show records and describe tables when using multiple connections. #119
 * Avoid asking password for already open connection
 
 ### v0.16.2

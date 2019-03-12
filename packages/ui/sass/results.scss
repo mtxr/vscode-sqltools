@@ -13,6 +13,10 @@ body {
   background: $fallbackBackgroundColor;
   background: $backgroundColor;
   @include full-screen();
+
+  ::-webkit-scrollbar-corner {
+    display: none;
+  }
 }
 pre {
   margin: 0;
@@ -47,10 +51,15 @@ body, #root {
   flex-direction: column;
   background: $lightThemeGray1 !important;
   .results-table {
-    flex-grow: 1;
     overflow: hidden;
-    min-height: 0;
+    height: 100%;
     display: flex;
+    flex: 1;
+    > div {
+      flex: 1;
+      width: 100%;
+      display: flex;
+    }
   }
   .query-extras {
     width: 100%;
@@ -320,10 +329,6 @@ div mark {
   .rt-tr-group {
     flex-grow: 0;
   }
-  .rt-tbody {
-    overflow: hidden;
-    overflow-y: auto;
-  }
   .rt-tbody .rt-td {
     border-right: 1px solid rgba(0, 0, 0, 0.1);
   }
@@ -333,17 +338,10 @@ div mark {
 
   .rt-thead {
     border-bottom: solid 1px rgba(0, 0, 0, 0.1);
-    &.-filters {
-      top: 35px;
-      height: 42px;
-    }
     .rt-th, .rt-td {
       border-right: 1px solid rgba(0, 0, 0, 0.1) !important;
       outline: none;
     }
-  }
-  .rt-tr > :last-child {
-    padding-right: 14px;
   }
 }
 
@@ -381,4 +379,18 @@ div mark {
 }
 .active-cell {
   background: var(--vscode-editor-selectionHighlightBackground) !important;
+}
+
+.ReactTable .rt-table {
+  overflow: hidden;
+}
+
+.ReactTable .rt-thead,
+.ReactTable .rt-tbody {
+  min-width: auto !important;
+}
+
+.ReactTable .rt-thead {
+  overflow-x: hidden;
+  overflow-y: auto;
 }

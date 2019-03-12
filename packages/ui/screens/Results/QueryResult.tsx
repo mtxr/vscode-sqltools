@@ -11,7 +11,7 @@ interface QueryResultProps {
   error?: boolean;
   query?: string;
 }
-export default ({ cols, error, query, messages, results, connId }: QueryResultProps) => {
+export default ({ cols, error, query, messages, results = [], connId }: QueryResultProps) => {
   const table: string | ReactNode = error ? (
     <div
       style={{
@@ -34,12 +34,14 @@ export default ({ cols, error, query, messages, results, connId }: QueryResultPr
 
   return (
     <div className="result">
-      <div className="results-table">{table}</div>
+      <div className="results-table">
+        {table}
+      </div>
       <div className="query-extras">
         <Collapsible title="View Query">
           <pre>{query}</pre>
         </Collapsible>
-        <Collapsible title={`Messages (${messages.length})`}>
+        <Collapsible title={`Messages (${messages.length})`} open={results.length === 0}>
           <div className="messages">
             {(messages.length > 0 ? messages : ['No messages to show.']).map((m, i) => (
               <div key={i} className={'message ' + (error ? 'error' : '')}>

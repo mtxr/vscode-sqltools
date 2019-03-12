@@ -68,11 +68,21 @@ export default class Connection {
     });
   }
 
-  public describeTable(tableName: string): Promise<any> {
-    return this.conn.describeTable(tableName);
+  public async  describeTable(tableName: string) {
+    const info = await this.conn.describeTable(tableName);
+
+    if (info[0]) {
+      info[0].label = `Table ${tableName}`;
+    }
+    return info;
   }
-  public showRecords(tableName: string, globalLimit: number): Promise<any> {
-    return this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
+  public async showRecords(tableName: string, globalLimit: number) {
+    const records = await this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
+
+    if (records[0]) {
+      records[0].label = `Show ${tableName}`;
+    }
+    return records;
   }
 
   public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
