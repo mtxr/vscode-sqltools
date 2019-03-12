@@ -29,7 +29,7 @@ export default ({ cols, error, query, messages, results = [], connId }: QueryRes
       <div>Query with errors. Please, check the error below.</div>
     </div>
   ) : (
-    <ResultsTable cols={!cols || cols.length === 0 ? [''] : cols} data={results || []} paginationSize={20} query={query} connId={connId} />
+    <ResultsTable cols={!cols || cols.length === 0 ? [''] : cols} data={results || []} paginationSize={50} query={query} connId={connId} />
   );
 
   return (

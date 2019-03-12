@@ -77,10 +77,11 @@ export default class Connection {
     return info;
   }
   public async showRecords(tableName: string, globalLimit: number) {
-    const records = await this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
+    const limit = this.conn.credentials.previewLimit || globalLimit || 10;
+    const records = await this.conn.showRecords(tableName, limit);
 
     if (records[0]) {
-      records[0].label = `Show ${tableName}`;
+      records[0].label = `Showing ${limit} ${tableName} records`;
     }
     return records;
   }

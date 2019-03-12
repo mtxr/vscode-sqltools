@@ -138,8 +138,6 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   };
 
   openContextMenu = (e) => {
-    e.preventDefault && e.preventDefault();
-    e.stopPropagation && e.stopPropagation();
     const { pageX, pageY } = e;
 
     this.highlightClickedRow(e, () => {
@@ -156,7 +154,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   highlightClickedRow (e, cb = (() => void 0)) {
     let node = ReactDOM.findDOMNode(e.target) as Element & HTMLElement;
     let i = 0;
-    while (i < 5) {
+    while (i < 3) {
       if (!node) return true;
       if (node.classList.contains('copy-allowed')) break;
       i++;
@@ -164,6 +162,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     }
 
     const { value, index, col } = node.dataset;
+    if (typeof index === 'undefined' || typeof col === 'undefined') {
+      return;
+    }
 
     this.setState({
       clickedData: {
@@ -180,10 +181,6 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   }
 
   onTableClick = (e = undefined) => {
-    if (e) {
-      e.preventDefault && e.preventDefault();
-      e.stopPropagation && e.stopPropagation();
-    }
 
     if (this.state.contextMenu.open) {
       const { clickedData, contextMenu } = ResultsTable.initialState;
@@ -267,7 +264,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     }
   }
 
-  _tBodyComponent = null;
+  _tBodyComponent: Element = null;
 
   componentDidMount() {
     this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
@@ -276,6 +273,30 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
 
   componentWillUnmount() {
     this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
+  }
+
+  getSnapshotBeforeUpdate() {
+    try {
+      if (document.getElementsByClassName("rt-tbody")[0]) {
+        const { scrollHeight, scrollLeft, scrollTop, scrollWidth } = document.getElementsByClassName("rt-tbody")[0];
+        return {
+          scrollHeight, scrollLeft, scrollTop, scrollWidth
+        };
+      }
+    } catch (e) {
+      return null;
+    }
+    return null;
+  }
+
+  componentDidUpdate(_, __, snapshot) {
+    if (
+        snapshot !== null
+        && document.getElementsByClassName("rt-tbody")[0]
+      ) {
+      document.getElementsByClassName("rt-tbody")[0].scrollLeft = snapshot.scrollLeft;
+      document.getElementsByClassName("rt-tbody")[0].scrollTop = snapshot.scrollTop;
+    }
   }
 
   render() {
@@ -316,8 +337,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           filterable
           filtered={this.state.tableFiltered}
           FilterComponent={FilterComponent}
+          pageSize={this.props.paginationSize}
           showPagination={this.props.data.length > this.props.paginationSize}
-          minRows={this.props.data.length === 0 ?  this.props.paginationSize : Math.min(this.props.paginationSize, this.props.data.length)}
+          minRows={this.props.data.length === 0 ? 1 : Math.min(this.props.paginationSize, this.props.data.length)}
           getTrProps={(_, rowInfo: RowInfo) => {
             if (!rowInfo) return {};
             if (rowInfo && rowInfo.index === this.state.clickedData.index)
