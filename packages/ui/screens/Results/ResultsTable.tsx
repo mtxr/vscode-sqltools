@@ -267,12 +267,14 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   _tBodyComponent: Element = null;
 
   componentDidMount() {
-    this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
-    this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    setTimeout(() => {
+      this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
+      this._tBodyComponent && this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    }, 1000);
   }
 
   componentWillUnmount() {
-    this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
+    this._tBodyComponent && this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
   }
 
   getSnapshotBeforeUpdate() {
