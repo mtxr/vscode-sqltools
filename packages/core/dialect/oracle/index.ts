@@ -72,21 +72,30 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     const conn = await this.open();
     const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter(Boolean);
     const results: DatabaseInterface.QueryResults[] = [];
-    for(let q of queries) {
-      let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
-      const messages = [];
-      if (res.rowsAffected) {
-        messages.push(`${res.rowsAffected} rows were affected.`);
+    try {
+      for(let q of queries) {
+        let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
+        const messages = [];
+        if (res.rowsAffected) {
+          messages.push(`${res.rowsAffected} rows were affected.`);
+        }
+        results.push({
+          connId: this.getId(),
+          cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
+          messages,
+          query: queries[results.length],
+          results: res.rows,
+        });
       }
-      results.push({
-        connId: this.getId(),
-        cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
-        messages,
-        query: queries[results.length],
-        results: res.rows,
-      });
+    } finally {      
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (e) {
+          console.log(e);
+        }
+      }  
     }
-    conn.close();
     return results;
   }
 
