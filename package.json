@@ -18,14 +18,17 @@
     "packages/*"
   ],
   "scripts": {
-    "clean": "rm -rf ../dist &> /dev/null",
+    "clean": "rimraf -rf ../dist",
     "precompile": "yarn run clean",
-    "prewatch": "yarn run clean && mkdir -p ../dist",
+    "prewatch": "yarn run clean",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
     "package:preview": "yarn run compile:preview && (cd ../dist && vsce package --yarn)",
     "package": "yarn run compile && (cd ../dist && vsce package --yarn)",
     "publish": "cd ../dist && vsce publish --yarn"
+  },
+  "devDependencies": {
+    "rimraf": "^2.6.3"
   }
 }
