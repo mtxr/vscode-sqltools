@@ -1,40 +1,13 @@
 {
   "folders": [
-    {
-      "path": ".",
-      "name": "root"
-    },
-    {
-      "path": "./packages/core",
-      "name": "core"
-    },
-    {
-      "path": "./packages/extension",
-      "name": "extension"
-    },
-    {
-      "path": "./packages/language-server",
-      "name": "language-server"
-    },
-    {
-      "path": "./packages/ui",
-      "name": "ui"
-    },
-    {
-      "path": "./packages/plugins",
-      "name": "plugins"
-    },
-    {
-      "path": "./docs",
-      "name": "docs"
-    }
+    { "path": ".", "name": "root" },
+    { "path": "./packages/core" },
+    { "path": "./packages/extension" },
+    { "path": "./packages/language-server" },
+    { "path": "./packages/ui" },
+    { "path": "./packages/plugins" },
+    { "path": "./docs" }
   ],
-  "extensions": {
-
-  },
-  "settings": {
-    "editor.codeActionsOnSave": {
-      "source.fixAll": true,
-    }
-  }
+  "extensions": {},
+  "settings": {}
 }
