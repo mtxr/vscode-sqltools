@@ -3,6 +3,7 @@ import MSSQLLib from 'mssql';
 import {
   ConnectionDialect,
   DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
@@ -17,10 +18,10 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       return this.connection;
     }
 
-    const { dialectOptions = { encrypt: true } } = this.credentials;
+    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || (<any>this.credentials).dialectOptions || { encrypt: true };
 
-    let encryptAttempt = typeof dialectOptions.encrypt !== 'undefined'
-      ? dialectOptions.encrypt : true;
+    let encryptAttempt = typeof mssqlOptions.encrypt !== 'undefined'
+      ? mssqlOptions.encrypt : true;
     if (typeof encrypt !== 'undefined') {
       encryptAttempt = encrypt;
     }

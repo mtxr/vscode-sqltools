@@ -404,7 +404,26 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options",
+                                "description": "Dialect driver options. Deprecated. Will be removed on v0.18",
+                                "required": false,
+                                "default": {},
+                                "properties": {
+                                    "encrypt": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ],
+                                        "default": null,
+                                        "description": "Encrypt connection"
+                                    }
+                                }
+                            },
+                            "mssqlOptions": {
+                                "type": [
+                                    "null",
+                                    "object"
+                                ],
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -444,12 +463,12 @@
                                 ],
                                 "default": {},
                                 "required": false,
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "required": false,
                                         "type": ["boolean", "object", "null"],
-                                        "default": "null",
-                                        "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details."
+                                        "default": "null"
                                     }
                                 }
                             },

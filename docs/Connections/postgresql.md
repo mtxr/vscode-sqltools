@@ -1,5 +1,5 @@
 
-# Oracle Start Guide
+# PostgreSQL Start Guide
 
 ## 1. Connections
 
