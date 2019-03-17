@@ -449,7 +449,7 @@
                                         "required": false,
                                         "type": ["boolean", "object", "null"],
                                         "default": "null",
-                                        "description": "See https://node-postgres.com/features/ssl for more details."
+                                        "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details."
                                     }
                                 }
                             },
@@ -461,7 +461,7 @@
                             },
                             "previewLimit": {
                                 "type": "number",
-                                "description": "Global show records limit",
+                                "description": "Connection show records limit",
                                 "default": 10
                             }
                         }

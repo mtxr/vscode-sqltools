@@ -84,7 +84,7 @@ export interface ConnectionInterface {
   }
 
   /**
-   * PostgreSQL specific options
+   * PostgreSQL specific options. See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options
    * @type {any}
    * @memberof ConnectionInterface
    */
