@@ -2,6 +2,14 @@
 
 ## v0.17
 
+### v0.17.6
+
+* **NEW** 🎉
+  * Added option to open results rows/values in editor. Issue #140.
+  * Added SSL support for postgres viw `pgOptions` connection setting. Issue #141
+
+* **Fixes**
+
 ### v0.17.5
 
 * **Fixes**

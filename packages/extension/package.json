@@ -437,6 +437,22 @@
                                     }
                                 }
                             },
+                            "pqOptions": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": {},
+                                "required": false,
+                                "properties": {
+                                    "ssl": {
+                                        "required": false,
+                                        "type": ["boolean", "object", "null"],
+                                        "default": "null",
+                                        "description": "See https://node-postgres.com/features/ssl for more details."
+                                    }
+                                }
+                            },
                             "connectionTimeout": {
                                 "type": "number",
                                 "description": "Connection timeout in seconds",

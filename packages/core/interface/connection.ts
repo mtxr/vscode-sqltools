@@ -1,5 +1,6 @@
 import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
+import { ClientConfig } from 'pg';
 
 export interface ConnectionInterface {
   /**
@@ -80,6 +81,15 @@ export interface ConnectionInterface {
    */
   mysqlOptions?: {
     authProtocol?: 'xprotocol' | 'default'
+  }
+
+  /**
+   * PostgreSQL specific options
+   * @type {any}
+   * @memberof ConnectionInterface
+   */
+  pgOptions?: {
+    ssl?: ClientConfig['ssl'];
   }
   /**
    * Connection domain (for MSSQL/Azure only)
