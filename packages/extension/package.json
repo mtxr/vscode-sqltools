@@ -699,8 +699,6 @@
         "compile:preview": "env PREVIEW=1 yarn run compile",
         "watch": "NODE_ENV=development webpack --watch --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
-        "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {

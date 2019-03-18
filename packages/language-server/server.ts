@@ -80,7 +80,7 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
     return this;
   }
 
-  public registerPlugin(plugin: SQLTools.LanguageServerPlugin<SQLToolsLanguageServer>) {
+  public registerPlugin(plugin: SQLTools.LanguageServerPlugin) {
     plugin.register(this);
     return this;
   }

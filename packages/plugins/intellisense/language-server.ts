@@ -1,12 +1,12 @@
 import SQLTools from '@sqltools/core/plugin-api';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
-import { TextDocumentPositionParams, CompletionItem } from 'vscode-languageserver';
+import { CompletionItem } from 'vscode-languageserver';
 import { TableCompletionItem, TableColumnCompletionItem } from './models';
 
 export default class IntellisensePlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
 
-  private onCompletion = (pos: TextDocumentPositionParams): CompletionItem[] => {
+  // private onCompletion = (pos: TextDocumentPositionParams): CompletionItem[] => {
+  private onCompletion = (): CompletionItem[] => {
     // const { textDocument, position } = pos;
     // const doc = docManager.get(textDocument.uri);
     const { connectionInfo, lastUsedId } = this.server.store.getState();
@@ -18,7 +18,7 @@ export default class IntellisensePlugin implements SQLTools.LanguageServerPlugin
     .concat(columns.map(TableColumnCompletionItem));
   }
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
     this.server.addOnInitializeHook(() => ({
       capabilities: {

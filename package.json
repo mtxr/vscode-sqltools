@@ -19,7 +19,8 @@
   ],
   "scripts": {
     "clean": "rm -rf ../dist &> /dev/null",
-    "precompile": "yarn run clean",
+    "test": "jest --config=jest.config.js",
+    "precompile": "yarn test && yarn run clean",
     "prewatch": "yarn run clean && mkdir -p ../dist",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/extension compile",
@@ -27,5 +28,21 @@
     "package:preview": "yarn run compile:preview && (cd ../dist && vsce package --yarn)",
     "package": "yarn run compile && (cd ../dist && vsce package --yarn)",
     "publish": "cd ../dist && vsce publish --yarn"
+  },
+  "dependencies": {
+    "husky": "^1.3.1"
+  },
+  "devDependencies": {
+    "typescript": "^3.3.3333",
+    "babel-jest": "^24.5.0",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
+    "ts-jest": "^23.10.5"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test",
+      "pre-push": "yarn test"
+    }
   }
 }

@@ -3,14 +3,13 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionId } from '@sqltools/core/utils';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
 import actions from './store/actions';
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
   private get connections() {
     const { activeConnections, lastUsedId } = this.server.store.getState();
     return (ConfigManager.connections || []).map(conn => {
@@ -134,7 +133,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       });
   }
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);

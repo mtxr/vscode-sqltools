@@ -74,7 +74,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         </div>
       );
     }
-    const tabs = this.state.queries.map((query: string, i: number) => (
+    const tabs = this.state.queries.map((query: string) => (
       <li
         title={query}
         key={query}
