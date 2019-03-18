@@ -69,7 +69,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   };
 
   private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
-    const activeConnections = this.server.store.getState().activeConnections;
+    const { activeConnections } = this.server.store.getState();
     await Promise.all(Object.keys(activeConnections).map(c => this._loadConnectionData(activeConnections[c])));
   };
 
@@ -109,8 +109,8 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return c
       .connect()
       .then(async () => {
-        await this._loadConnectionData(c);
         this.server.store.dispatch(actions.Connect(c));
+        await this._loadConnectionData(c);
         return c.serialize();
       })
       .catch(e => {
