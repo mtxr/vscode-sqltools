@@ -20,3 +20,4 @@ To keep it short, basically we have 2 files:
 - language-server.ts
   > This file should register everything we need to do async.
   > Long requests, query manipulation, server connection e etc.
+
