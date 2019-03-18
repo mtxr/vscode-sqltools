@@ -5,3 +5,11 @@ CREATE TABLE contacts (
   email text NOT NULL UNIQUE,
   phone text NOT NULL UNIQUE
 );
+
+
+CREATE VIEW contacts_view
+AS
+SELECT
+*
+FROM
+contacts;

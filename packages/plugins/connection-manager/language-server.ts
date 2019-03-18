@@ -3,14 +3,13 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionId } from '@sqltools/core/utils';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
 import actions from './store/actions';
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
   private get connections() {
     const { activeConnections, lastUsedId } = this.server.store.getState();
     return (ConfigManager.connections || []).map(conn => {
@@ -69,7 +68,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   };
 
   private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
-    const activeConnections = this.server.store.getState().activeConnections;
+    const { activeConnections } = this.server.store.getState();
     await Promise.all(Object.keys(activeConnections).map(c => this._loadConnectionData(activeConnections[c])));
   };
 
@@ -109,8 +108,8 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return c
       .connect()
       .then(async () => {
-        await this._loadConnectionData(c);
         this.server.store.dispatch(actions.Connect(c));
+        await this._loadConnectionData(c);
         return c.serialize();
       })
       .catch(e => {
@@ -134,7 +133,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       });
   }
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);

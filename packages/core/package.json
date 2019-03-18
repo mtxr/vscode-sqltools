@@ -23,6 +23,7 @@
     "@types/mysql": "^2.15.5",
     "@types/oracledb": "^1.11.34",
     "@types/pg": "^7.4.13",
+    "@types/redux": "^3.6.0",
     "@types/sqlite3": "^3.1.5",
     "@types/webpack-env": "^1.13.8",
     "typescript": "^3.3.3333"

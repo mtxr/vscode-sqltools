@@ -2,7 +2,23 @@
 
 ## v0.17
 
-## v0.17.4
+### v0.17.6
+
+* **NEW** 🎉
+  * Added option to open results rows/values in editor. Issue #140.
+  * Added SSL support for postgres via `pgOptions` connection setting. Issue #141
+  * Deprecating `dialectOptions` in favor of `[dialect]Options` settings.
+
+* **Fixes**
+  * Fixed dollar quoting on formatter. Issue #142
+
+### v0.17.5
+
+* **Fixes**
+  - Fixed formater when formatting query with $1 parameters
+  - Fixed #136 scroll issue
+
+### v0.17.4
 
 * **NEW** 🎉
   * Highlight result row on click.
@@ -11,12 +27,12 @@
   * _**UI**_:
     * Fixed scroll issue on windows #132
 
-## v0.17.3
+### v0.17.3
 
 * Fixes readme documentation link
 * Fixes 'server' of undefined issue. Webpack/babel issue.
 
-## v0.17.0
+### v0.17.0
 
 * **NEW** 🎉
   * Added support for SQLite. #51

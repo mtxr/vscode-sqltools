@@ -1,17 +1,18 @@
-import { Telemetry, getConnectionId } from './utils';
+import { getConnectionId } from './utils';
 import Dialects from './dialect';
 import {
   ConnectionDialect,
   DatabaseInterface,
   ConnectionInterface,
 } from './interface';
+import SQLTools from './plugin-api';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionInterface, private telemetry: Telemetry) {
+  constructor(credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 

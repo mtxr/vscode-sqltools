@@ -16,7 +16,7 @@
 
 * Suggest your change under GitHub [Issues](https://github.com/mtxr/vscode-sqltools/issues) and start writing code. Send a PR when finished.
 
-All information about building is [here](BUILDING.md)
+All information about building is [here](Contributing/building.md)
 
 
 Thanks!

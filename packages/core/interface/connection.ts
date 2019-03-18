@@ -1,5 +1,6 @@
 import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
+import { ClientConfig } from 'pg';
 
 export interface ConnectionInterface {
   /**
@@ -67,19 +68,29 @@ export interface ConnectionInterface {
    */
   previewLimit?: number;
   /**
-   * Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options
+   * MSSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options
+   * @deprecated replaced by mssqlOptions
    * @type {any}
    * @memberof ConnectionInterface
    */
-  dialectOptions?: { encrypt?: boolean };
+  mssqlOptions?: { encrypt?: boolean };
 
   /**
-   * MySQL specific options
+   * MySQL specific driver options
    * @type {any}
    * @memberof ConnectionInterface
    */
   mysqlOptions?: {
     authProtocol?: 'xprotocol' | 'default'
+  }
+
+  /**
+   * PostgreSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options
+   * @type {any}
+   * @memberof ConnectionInterface
+   */
+  pgOptions?: {
+    ssl?: ClientConfig['ssl'];
   }
   /**
    * Connection domain (for MSSQL/Azure only)

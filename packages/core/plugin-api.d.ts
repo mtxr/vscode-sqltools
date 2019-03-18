@@ -1,6 +1,7 @@
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
 import { IConnection, RequestType, RequestType0, TextDocuments } from 'vscode-languageserver';
 import { ExtensionContext } from 'vscode';
+import { Store } from 'redux';
 import { Contracts } from 'applicationinsights';
 export declare type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 export declare type Arg0<T> = ArgsType<T>[0];
@@ -74,7 +75,10 @@ export declare namespace SQLTools {
         listen(): void;
         registerPlugin(plugin: LanguageServerPlugin): this;
         sendNotification: IConnection['sendNotification'];
+        onRequest: IConnection['onRequest'];
         onNotification: IConnection['onNotification'];
+        onCompletion: IConnection['onCompletion'];
+        onCompletionResolve: IConnection['onCompletionResolve'];
         onDocumentFormatting: IConnection['onDocumentFormatting'];
         onDocumentRangeFormatting: IConnection['onDocumentRangeFormatting'];
         sendRequest: IConnection['sendRequest'];
@@ -85,6 +89,7 @@ export declare namespace SQLTools {
         client: IConnection['client'];
         docManager: TextDocuments;
         telemetry: TelemetryInterface;
+        store: Store;
     }
     interface LanguageClientInterface {
         client: LanguageClient;

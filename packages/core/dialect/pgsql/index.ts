@@ -1,6 +1,6 @@
 import { Pool } from 'pg';
 import Queries from './queries';
-import { ConnectionDialect, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionDialect, DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
 
@@ -10,6 +10,9 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     if (this.connection) {
       return this.connection;
     }
+
+    const { ssl } = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
+
     const pool = new Pool({
       database: this.credentials.database,
       host: this.credentials.server,
@@ -17,6 +20,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
       port: this.credentials.port,
       statement_timeout: this.credentials.connectionTimeout * 1000,
       user: this.credentials.username,
+      ssl,
     });
     return pool.connect()
       .then(cli => {

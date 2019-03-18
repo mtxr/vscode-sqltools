@@ -117,7 +117,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       this.tree[treeKey][key].items[column.tableName].addItem(column);
     });
     this.refresh();
-    this.setActiveConnection(conn);
+    if (conn.isActive)
+      this.setActiveConnection(conn);
   }
 
   public setActiveConnection(c: ConnectionInterface) {

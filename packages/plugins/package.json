@@ -5,6 +5,9 @@
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "GPL-3.0",
   "private": true,
+  "scripts": {
+    "postinstall": "cd ../../node_modules/sql-formatter && npm i --ignore-scripts && npm run build:commonjs"
+  },
   "dependencies": {
     "@sqltools/core": "*",
     "@sqltools/language-server": "*",

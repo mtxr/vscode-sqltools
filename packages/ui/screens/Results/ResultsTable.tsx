@@ -5,13 +5,16 @@ import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 
-const FilterByValue = 'Filter by \'{value}\'';
-const ReRunQuery = 'Re-run this query';
-const ClearFilters = 'Clear all filters';
+const FilterByValueOption = 'Filter by \'{value}\'';
+const ReRunQueryOption = 'Re-run this query';
+const ClearFiltersOption = 'Clear all filters';
 const CopyCellOption = 'Copy Cell value';
 const CopyRowOption = 'Copy Row value';
 const SaveCSVOption = 'Save results as CSV';
 const SaveJSONOption = 'Save results as JSON';
+const OpenEditorWithValueOption = 'Open editor with\'{value}\'';
+const OpenEditorWithRowOption = 'Open editor with row';
+
 const isRegExMatcher = /^\/(.+)\/(\w+)?$/gi;
 
 function toRegEx(value: string | RegExp) {
@@ -198,20 +201,21 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     if (!this.state.clickedData.col) return options;
     const { clickedData } = this.state;;
     if (typeof this.state.clickedData.value !== 'undefined') {
-      options.push({ get label() { return FilterByValue.replace('{value}', clickedData.value) }, value: FilterByValue });
+      options.push({ get label() { return FilterByValueOption.replace('{value}', clickedData.value) }, value: FilterByValueOption });
       options.push('sep');
     }
     if (this.state.tableFiltered.length > 0) {
-      options.push(ClearFilters);
+      options.push(ClearFiltersOption);
       options.push('sep');
     }
     return options
     .concat([
-      ReRunQuery,
-      'sep',
+      { get label() { return OpenEditorWithValueOption.replace('{value}', clickedData.value) }, value: OpenEditorWithValueOption },
+      OpenEditorWithRowOption,
       CopyCellOption,
       CopyRowOption,
       'sep',
+      ReRunQueryOption,
       SaveCSVOption,
       SaveJSONOption,
     ]);
@@ -220,7 +224,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   onMenuSelect = (choice: string) => {
     const { clickedData } = this.state;
     switch(choice) {
-      case FilterByValue:
+      case FilterByValueOption:
         const { filtered = {}, tableFiltered = [] } = this.state;
         this.setState({
           tableFiltered: tableFiltered.filter(({ id }) => id !== clickedData.col).concat([{
@@ -238,20 +242,56 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       case CopyRowOption:
         this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
         break;
-      case ClearFilters:
+      case ClearFiltersOption:
         this.setState({
           tableFiltered: [],
           filtered: {},
         });
         break;
-      case ReRunQuery:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.executeQuery`, args: [this.props.query]} });
+      case OpenEditorWithValueOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.insertText`,
+            args: [clickedData.value]
+          }
+        });
+        break;
+      case OpenEditorWithRowOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.insertText`,
+            args: [JSON.stringify(this.props.data[clickedData.index], null, 2)]
+          }
+        });
+        break;
+      case ReRunQueryOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.executeQuery`,
+            args: [this.props.query]
+          }
+        });
         break;
       case SaveCSVOption:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['csv']} });
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.saveResults`,
+            args: ['csv']
+          }
+        });
         break;
       case SaveJSONOption:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['json']} });
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.saveResults`,
+            args: ['json']
+          }
+        });
         break;
     }
     this.onTableClick();
@@ -267,12 +307,14 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   _tBodyComponent: Element = null;
 
   componentDidMount() {
-    this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
-    this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    setTimeout(() => {
+      this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
+      this._tBodyComponent && this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    }, 1000);
   }
 
   componentWillUnmount() {
-    this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
+    this._tBodyComponent && this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
   }
 
   getSnapshotBeforeUpdate() {

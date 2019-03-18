@@ -31,7 +31,7 @@ class OutputChannelLogger implements Console {
   dirxml: Console['dirxml'] =  (...args) => patchedConsole.dirxml(...args);
   group: Console['group'] =  (...args) => patchedConsole.group(...args);
   groupCollapsed: Console['groupCollapsed'] =  (...args) => patchedConsole.groupCollapsed(...args);
-  groupEnd: Console['groupEnd'] =  (...args) => patchedConsole.groupEnd(...args);
+  groupEnd: Console['groupEnd'] =  patchedConsole.groupEnd;
   table: Console['table'] =  (...args) => patchedConsole.table(...args);
   time: Console['time'] =  (...args) => patchedConsole.time(...args);
   timeEnd: Console['timeEnd'] =  (...args) => patchedConsole.timeEnd(...args);
@@ -62,6 +62,10 @@ class OutputChannelLogger implements Console {
   show = (...args) => outputChannel.show(...args);
   get outputChannel(): OutputChannel {
     return outputChannel;
+  };
+  memory = () => void 0;
+  exception = (...data: any[]) => {
+    patchedConsole.error(this.prefix('EXCEPTION'), ...data);
   }
 }
 

@@ -20,12 +20,13 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     AI.setup(AI_KEY)
       .setAutoCollectConsole(false)
       .setAutoCollectDependencies(false)
-      .setAutoCollectExceptions(true)
+      .setAutoCollectExceptions(false)
       .setAutoCollectPerformance(false)
       .setAutoCollectRequests(false)
       .setAutoDependencyCorrelation(false)
       .setUseDiskRetryCaching(true);
 
+    AI.defaultClient.config.samplingPercentage = 50;
     this.client = AI.defaultClient;
 
     const aiCtx = this.client.context;

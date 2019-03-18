@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.17.4",
+    "version": "0.17.5",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -37,7 +37,8 @@
         "oracledb",
         "postgres",
         "postgresql",
-        "sgdb",
+        "rdbms",
+        "dbms",
         "sql server",
         "sql",
         "sqlite",
@@ -403,7 +404,26 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options",
+                                "description": "Dialect driver options. Deprecated. Will be removed on v0.18",
+                                "required": false,
+                                "default": {},
+                                "properties": {
+                                    "encrypt": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ],
+                                        "default": null,
+                                        "description": "Encrypt connection"
+                                    }
+                                }
+                            },
+                            "mssqlOptions": {
+                                "type": [
+                                    "null",
+                                    "object"
+                                ],
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -436,6 +456,22 @@
                                     }
                                 }
                             },
+                            "pqOptions": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": {},
+                                "required": false,
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details.",
+                                "properties": {
+                                    "ssl": {
+                                        "required": false,
+                                        "type": ["boolean", "object", "null"],
+                                        "default": "null"
+                                    }
+                                }
+                            },
                             "connectionTimeout": {
                                 "type": "number",
                                 "description": "Connection timeout in seconds",
@@ -444,7 +480,7 @@
                             },
                             "previewLimit": {
                                 "type": "number",
-                                "description": "Global show records limit",
+                                "description": "Connection show records limit",
                                 "default": 10
                             }
                         }
@@ -663,8 +699,6 @@
         "compile:preview": "env PREVIEW=1 yarn run compile",
         "watch": "cross-env NODE_ENV=development webpack --watch --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
-        "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
