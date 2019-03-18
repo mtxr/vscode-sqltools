@@ -5,6 +5,10 @@
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "GPL-3.0",
   "private": true,
+  "scripts": {
+    "test": "jest --config=jest.config.js",
+    "postinstall": "cd ../../node_modules/sql-formatter && npm i --ignore-scripts && npm run build:commonjs"
+  },
   "dependencies": {
     "@sqltools/core": "*",
     "@sqltools/language-server": "*",
@@ -13,6 +17,10 @@
     "sql-formatter": "https://github.com/zeroturnaround/sql-formatter.git#15e1188371e684e814e05a250bb1a1c75206f82b"
   },
   "devDependencies": {
-    "typescript": "^3.3.3333"
+    "typescript": "^3.3.3333",
+    "babel-jest": "^24.5.0",
+    "jest": "^23.6.0",
+    "jest-cli": "^23.6.0",
+    "ts-jest": "^23.10.5"
   }
 }

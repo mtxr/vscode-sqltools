@@ -17,3 +17,5 @@ where a >= some_date1  -- from
   and b >= some_date3  -- and
   and b <  some_date4  -- where, select etc.
   and 1 = 1
+
+create function foo() returns void AS $$ begin select $1 end $$ language PLPGSQL;

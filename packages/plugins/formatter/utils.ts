@@ -1,13 +1,20 @@
-import formatter from 'sql-formatter/src/sqlFormatter';
+import formatter from 'sql-formatter';
 
 // Issue #99. Waiting 3rd party
 function nonLatinQuickFix(query: string) {
   return query.replace(/([^\x00-\x7F]) /gi, '$1');
 }
 
+const dollarRegex = /\$([^\s]+)/gi;
+
 function fixParameters(query: string, originalQuery: string) {
-  if (!(/\$\d+/g).test(originalQuery)) return query;
-  return query.replace(/\$ (\d+)/g, '\$$1');
+  if (!dollarRegex.test(originalQuery)) return query;
+  const matches = originalQuery.match(dollarRegex) || [];
+
+  return matches.reduce((text, match) => {
+    const matchEscaped = match.replace(/\$/g, '\\$$');
+    return text.replace(new RegExp('\\\$' + ' +' + matchEscaped.substr(2), 'g'), match.replace(/\$/g, '$$$$'));
+  }, query);
 }
 
 export function format(query: string, indentSize: number = 2) {
