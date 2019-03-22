@@ -2,16 +2,36 @@ import { DialectQueries } from '@sqltools/core/interface';
 
 export default {
   describeTable: 'SP_COLUMNS :table',
-  fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName,
-        DATA_TYPE AS type,
-        CHARACTER_MAXIMUM_LENGTH AS size,
-        TABLE_SCHEMA as tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DB_NAME() as dbName,
-        COLUMN_DEFAULT as defaultValue,
-        IS_NULLABLE as isNullable
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_CATALOG= DB_NAME()`,
+  fetchColumns: `SELECT
+  C.TABLE_NAME AS tableName,
+  C.COLUMN_NAME AS columnName,
+  C.DATA_TYPE AS type,
+  C.CHARACTER_MAXIMUM_LENGTH AS size,
+  C.TABLE_SCHEMA as tableSchema,
+  C.TABLE_CATALOG AS tableCatalog,
+  DB_NAME() as dbName,
+  C.COLUMN_DEFAULT as defaultValue,
+  C.IS_NULLABLE as isNullable,
+  TC.CONSTRAINT_TYPE as constraintType
+FROM
+  INFORMATION_SCHEMA.COLUMNS C
+  LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU ON (
+    C.TABLE_CATALOG = KCU.TABLE_CATALOG
+    AND C.TABLE_NAME = KCU.TABLE_NAME
+    AND C.TABLE_SCHEMA = KCU.TABLE_SCHEMA
+    AND C.TABLE_CATALOG = KCU.TABLE_CATALOG
+    AND C.COLUMN_NAME = KCU.COLUMN_NAME
+  )
+  LEFT JOIN INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS TC ON (
+    TC.CONSTRAINT_NAME = KCU.CONSTRAINT_NAME
+    AND TC.TABLE_SCHEMA = KCU.TABLE_SCHEMA
+    AND TC.TABLE_CATALOG = KCU.TABLE_CATALOG
+  )
+WHERE
+  C.TABLE_CATALOG = DB_NAME()
+ORDER BY
+  C.TABLE_NAME,
+  C.ORDINAL_POSITION`,
   fetchRecords: 'SELECT TOP :limit * FROM :table',
   fetchTables: `SELECT
         C.TABLE_NAME AS tableName,

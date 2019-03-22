@@ -91,8 +91,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
           isView: obj.type === 'view',
           tableDatabase: this.credentials.database,
         } as DatabaseInterface.Table;
-      })
-      .sort((a, b) => a.name.localeCompare(b.name));
+      });
   }
 
   public async getColumns(): Promise<DatabaseInterface.TableColumn[]> {

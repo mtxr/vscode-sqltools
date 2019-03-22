@@ -1,4 +1,4 @@
-import MSSQLLib from 'mssql';
+import MSSQLLib, { IResult } from 'mssql';
 
 import {
   ConnectionDialect,
@@ -70,10 +70,14 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     const pool = await this.open();
     const request = pool.request();
     request.multiple = true;
-    const { recordsets, rowsAffected } = await request.query(query);
+    const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
     const queries = Utils.query.parse(query);
-    return recordsets.map((r, i): DatabaseInterface.QueryResults => {
+    return queries.map((q, i): DatabaseInterface.QueryResults => {
+      const r = recordsets[i] || [];
       const messages = [];
+      if (error) {
+        messages.push(error.message || error.toString());
+      }
       if (typeof rowsAffected[i] === 'number')
         messages.push(`${rowsAffected[i]} rows were affected.`);
 
@@ -81,7 +85,8 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
         connId: this.getId(),
         cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
         messages,
-        query: queries[i],
+        error,
+        query: q,
         results: Array.isArray(r) ? r : [],
       };
     })
@@ -111,10 +116,14 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
-            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
-            obj.tableDatabase = obj.dbName;
-            return obj as DatabaseInterface.TableColumn;
+            return <DatabaseInterface.TableColumn>{
+              ...obj,
+              isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
+              size: obj.size !== null ? parseInt(obj.size, 10) : null,
+              tableDatabase: obj.dbName,
+              isPk: (obj.constraintType || '').toLowerCase() === 'primary key',
+              isFk: (obj.constraintType || '').toLowerCase() === 'foreign key'
+            };
           });
       });
   }
