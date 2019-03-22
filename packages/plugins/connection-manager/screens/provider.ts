@@ -1,6 +1,5 @@
 import path from 'path';
 import { Uri, commands, Disposable, EventEmitter, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
-import ConfigManager from '@sqltools/core/config-manager';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
@@ -34,25 +33,14 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.iconsPath = Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' })
     this.viewsPath = Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
   }
+  public preserveFocus = true;
+  public wereToShow = ViewColumn.One;
   public show() {
-    let wereToShow = ViewColumn.Active;
-    if (window.activeTextEditor) {
-      wereToShow = window.activeTextEditor.viewColumn;
-    }
-    let preserveFocus = false;
-
-    if (ConfigManager.results) {
-      if (ConfigManager.results.location === 'beside') {
-        wereToShow = ViewColumn.Beside;
-        preserveFocus = true;
-      }
-    }
-
-    if (!this.panel) {
+        if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.id,
         this.title,
-        wereToShow,
+        this.wereToShow,
         {
           enableScripts: true,
           retainContextWhenHidden: true,
@@ -79,7 +67,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 
     this.panel.title = this.title;
 
-    this.panel.reveal(wereToShow, preserveFocus);
+    this.panel.reveal(this.wereToShow, this.preserveFocus);
     this.postMessage({ action: 'reset' });
     this.setPreviewActiveContext(true);
   }

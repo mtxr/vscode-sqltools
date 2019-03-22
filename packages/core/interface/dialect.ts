@@ -1,8 +1,9 @@
 export interface DialectQueries {
   fetchTables: string;
   describeTable: string;
-  fetchColumns: string;
+  fetchColumns?: string;
   fetchRecords: string;
+  [id: string]: string;
 }
 
 export enum DatabaseDialect {

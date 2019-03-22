@@ -1,7 +1,7 @@
 import { DialectQueries } from '@sqltools/core/interface';
 
 export default {
-  describeTable: 'PRAGMA table_info(:table)',
+  describeTable: 'SELECT * FROM pragma_table_info(\':table\') ORDER BY cid ASC',
   fetchRecords: 'SELECT * FROM :table LIMIT :limit',
   fetchTables: `SELECT
       name AS tableName,
@@ -11,4 +11,5 @@ export default {
     WHERE type = 'table' OR type = 'view'
     ORDER BY
       name;`,
+  listFks: `PRAGMA foreign_key_list(:table);`
 } as DialectQueries;

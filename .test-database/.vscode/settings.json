@@ -1,6 +1,11 @@
 {
   "sqltools.telemetry": true,
   "sqltools.useNodeRuntime": true,
+  "sqltools.sortColumns": "ordinalnumber",
+  "sqltools.results": {
+    "limit": 100,
+    "location": "beside"
+  },
   "sqltools.format": {
     "indentSize": 2,
     "reservedWordCase": "upper"

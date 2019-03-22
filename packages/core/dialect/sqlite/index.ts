@@ -100,9 +100,14 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
     const columns: DatabaseInterface.TableColumn[] = [];
 
     await Promise.all(allTables.map(async t => {
-      const [{ results }] = await this.describeTable(t.name);
+      const [[{ results: tableColumns }], [{ results: fks }]] = await Promise.all([
+        this.describeTable(t.name),
+        this.query(Utils.replacer(this.queries.listFks, { table: t.name })),
+      ]);
 
-      results.forEach(obj => columns.push({
+      const fksMap = fks.reduce((agg, fk) => ({ ...agg, [fk.from]: true }), {});
+
+      tableColumns.forEach(obj => columns.push({
           columnName: obj.name,
           defaultValue: obj.dftl_value || undefined,
           isNullable: obj.notnull ? obj.notnull.toString() === '1' : null,
@@ -111,10 +116,12 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
           tableName: t.name,
           type: obj.type,
           size: null,
+          isPk: Boolean(obj.pk),
+          isFk: !!fksMap[obj.name],
       }));
       return Promise.resolve();
     }));
 
-    return columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
+    return columns;
   }
 }

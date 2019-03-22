@@ -4,6 +4,7 @@ import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provid
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/interface';
+import ConfigManager from '@sqltools/core/config-manager';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
@@ -36,7 +37,26 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
+  show() {
+    this.wereToShow = vscode.ViewColumn.Active;
+    this.preserveFocus = false;
+
+    if (vscode.window.activeTextEditor) {
+      this.wereToShow = vscode.window.activeTextEditor.viewColumn;
+    }
+        if (ConfigManager.results) {
+      if (ConfigManager.results.location === 'beside') {
+        this.wereToShow = vscode.ViewColumn.Beside;
+        this.preserveFocus = true;
+      }
+    }
+
+    return super.show();
+  }
   updateResults(payload: DatabaseInterface.QueryResults[]) {
     this.postMessage({ action: 'queryResults', payload });
   }
+
+  wereToShow = vscode.ViewColumn.Active;
+  preserveFocus = false;
 }
