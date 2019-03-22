@@ -5,9 +5,11 @@
 ### v0.17.7
 
 * **NEW** 🎉
-  * Added setting `format.reservedWordCase` allowing to change SQL reserved words case to `upper` or `lower`. Default is null meaning no changes.
-  * Added settings `sortColumns` to change column sorting on explorer. Default sort is by `name`.
   * Added Primary key ![Alt text](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/extension/icons/pk.svg?sanitize=true) and foreign key ![Alt text](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/extension/icons/fk.svg?sanitize=true) icons for PostgreSQL columns.
+  * Added setting `format.reservedWordCase` allowing to change SQL reserved words case to `upper` or `lower`. Default is null meaning no changes.
+  * Added setting `sortColumns` to change column sorting on explorer. Default sort is by `name`.
+  * Added setting `results.location` to set results show up. Default sort is by `active` editor.
+  * Added setting `results.limit` to set the limit when using Show Records function. This deprecates global `previewLimit`. Default changed to 50.
 
 ### v0.17.6
 

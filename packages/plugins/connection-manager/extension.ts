@@ -41,7 +41,13 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, ConfigManager.previewLimit);
+      let limit = 50;
+      if (ConfigManager.results && ConfigManager.results.limit) {
+        limit = ConfigManager.results.limit;
+      } else if ((<any>ConfigManager).previewLimit) { // @TODO: this is deprecated! Will be removed.
+        limit = (<any>ConfigManager).previewLimit;
+      }
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, limit);
       this.resultsWebview.updateResults(payload);
 
     } catch (e) {

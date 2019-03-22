@@ -489,16 +489,32 @@
                             },
                             "previewLimit": {
                                 "type": "number",
-                                "description": "Connection show records limit",
-                                "default": 10
+                                "description": "Connection show records limit"
                             }
+                        }
+                    }
+                },
+                "sqltools.results": {
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "limit": {
+                            "type": "number",
+                            "description": "Global show records limit",
+                            "default": 50
+                        },
+                        "location": {
+                            "type": "string",
+                            "default": "active",
+                            "enum": ["active", "beside"],
+                            "description": "Define where the results should show up."
                         }
                     }
                 },
                 "sqltools.previewLimit": {
                     "type": "number",
-                    "description": "Global show records limit",
-                    "default": 10
+                    "deprecationMessage": "Use `sqltools.results.limit` instead. Will be removed in the future",
+                    "description": "Global show records limit"
                 },
                 "sqltools.tableTreeItemsExpanded": {
                     "type": "boolean",

@@ -21,6 +21,24 @@ export interface FormatOptions {
   reservedWordCase?: 'upper' | 'lower' | null;
 }
 
+export interface ResultsOptions {
+  /**
+   * Global show records limit
+   * @type {number}
+   * @default 50
+   * @memberof ResultsOptions
+   */
+  limit: number;
+
+  /**
+   * Define where the results should show up.
+   * @type {string}
+   * @default null
+   * @memberof ResultsOptions
+   */
+  location?: 'current' | 'beside';
+}
+
 export interface Settings {
   /**
    * Disable new release notifications.
@@ -79,6 +97,14 @@ export interface Settings {
    * @memberof Settings
    */
   format?: FormatOptions;
+
+  /**
+   * Results view options
+   * @type {ResultsOptions}
+   * @memberof Settings
+   */
+  results?: ResultsOptions;
+
   /**
    * Connections
    * @type {ConnectionInterface[]}
@@ -87,12 +113,6 @@ export interface Settings {
    */
   connections?: ConnectionInterface[];
 
-  /**
-   * Global show records limit
-   * @type {string}
-   * @memberof Settings
-   */
-  previewLimit?: number;
   /**
    * Default export results mode
    * @default "prompt"

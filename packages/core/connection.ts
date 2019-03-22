@@ -78,11 +78,11 @@ export default class Connection {
     return info;
   }
   public async showRecords(tableName: string, globalLimit: number) {
-    const limit = this.conn.credentials.previewLimit || globalLimit || 10;
+    const limit = this.conn.credentials.previewLimit || globalLimit || 50;
     const records = await this.conn.showRecords(tableName, limit);
 
     if (records[0]) {
-      records[0].label = `Showing ${limit} ${tableName} records`;
+      records[0].label = `Showing ${Math.min(limit, records[0].results.length || 0)} ${tableName} records`;
     }
     return records;
   }

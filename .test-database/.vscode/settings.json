@@ -73,16 +73,5 @@
       "username": "root",
       "server": "localhost"
     },
-    {
-      "askForPassword": false,
-      "connectionTimeout": 30,
-      "database": "studykik",
-      "dialect": "PostgreSQL",
-      "name": "Local",
-      "password": "root",
-      "port": 5432,
-      "server": "localhost",
-      "username": "studykik"
-    }
   ]
 }
