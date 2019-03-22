@@ -139,6 +139,8 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableName: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
+              isPk: obj.constraintType === 'P',
+              isFk: obj.constraintType === 'R'
             } as DatabaseInterface.TableColumn;
           });
       });
