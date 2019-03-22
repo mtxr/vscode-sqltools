@@ -2,16 +2,43 @@ import { DialectQueries } from '@sqltools/core/interface';
 
 export default {
   describeTable: 'DESCRIBE :table',
-  fetchColumns: `SELECT TABLE_NAME AS tableName,
-        COLUMN_NAME AS columnName,
-        DATA_TYPE AS type,
-        CHARACTER_MAXIMUM_LENGTH AS size,
-        TABLE_SCHEMA as tableSchema,
-        TABLE_CATALOG AS tableCatalog,
-        DATABASE() as dbName,
-        COLUMN_DEFAULT as defaultValue,
-        IS_NULLABLE as isNullable
-      FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE()`,
+  fetchColumns: `SELECT
+  DISTINCT
+  C.TABLE_NAME AS tableName,
+  C.COLUMN_NAME AS columnName,
+  C.DATA_TYPE AS type,
+  C.CHARACTER_MAXIMUM_LENGTH AS size,
+  C.TABLE_SCHEMA as tableSchema,
+  C.TABLE_CATALOG AS tableCatalog,
+  DATABASE() as tableDatabase,
+  C.COLUMN_DEFAULT as defaultValue,
+  C.IS_NULLABLE as isNullable,
+  C.ORDINAL_POSITION,
+  (
+    CASE
+      WHEN C.COLUMN_KEY = 'PRI' THEN TRUE
+      ELSE FALSE
+    END
+  ) as isPk,
+  (
+    CASE
+      WHEN KCU.REFERENCED_COLUMN_NAME IS NULL THEN FALSE
+      ELSE TRUE
+    END
+  ) as isFk
+FROM
+  INFORMATION_SCHEMA.COLUMNS AS C
+  LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU ON (
+    C.TABLE_CATALOG = KCU.TABLE_CATALOG
+    AND C.TABLE_SCHEMA = KCU.TABLE_SCHEMA
+    AND C.TABLE_CATALOG = KCU.TABLE_CATALOG
+    AND C.COLUMN_NAME = KCU.COLUMN_NAME
+  )
+WHERE
+  C.TABLE_SCHEMA = DATABASE()
+ORDER BY
+  C.TABLE_NAME,
+  C.ORDINAL_POSITION`,
   fetchRecords: 'SELECT * FROM :table LIMIT :limit',
   fetchTables: `SELECT
         C.TABLE_NAME AS tableName,

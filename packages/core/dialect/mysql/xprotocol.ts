@@ -127,10 +127,13 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
-            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
-            obj.tableDatabase = obj.dbName;
-            return obj as DatabaseInterface.TableColumn;
+            return <DatabaseInterface.TableColumn>{
+              ...obj,
+              isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
+              size: obj.size !== null ? parseInt(obj.size, 10) : null,
+              isPk: Boolean(obj.isPk),
+              isFk: Boolean(obj.isFk),
+            };
           });
       });
   }
