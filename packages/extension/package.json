@@ -333,6 +333,11 @@
                             "type": "number",
                             "default": 2,
                             "description": "Indent size"
+                        },
+                        "reservedWordCase": {
+                            "type": ["string", "null"],
+                            "default": null,
+                            "description": "Reserverd word case"
                         }
                     }
                 },
@@ -467,7 +472,11 @@
                                 "properties": {
                                     "ssl": {
                                         "required": false,
-                                        "type": ["boolean", "object", "null"],
+                                        "type": [
+                                            "boolean",
+                                            "object",
+                                            "null"
+                                        ],
                                         "default": "null"
                                     }
                                 }
@@ -507,16 +516,28 @@
                     "description": "Default export results mode."
                 },
                 "sqltools.useNodeRuntime": {
-                    "type": ["null", "boolean", "string"],
+                    "type": [
+                        "null",
+                        "boolean",
+                        "string"
+                    ],
                     "default": false,
                     "description": "Enable node runtime usage."
+                },
+                "sqltools.sortColumns": {
+                    "type": [
+                        "null",
+                        "string"
+                    ],
+                    "enum": ["name", "ordinalnumber"],
+                    "default": "name",
+                    "description": "Sort columns criteria."
                 }
             }
         },
         "views": {
             "SQLToolsExplorer": [
                 {
-
                     "id": "SQLTools/connectionExplorer",
                     "name": "Connections"
                 },
@@ -703,22 +724,22 @@
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
-        "@types/jest": "^24.0.1",
+        "@types/jest": "^24.0.11",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
+        "cross-env": "^5.2.0",
         "css-loader": "^2.1.1",
-        "jest": "^23.6.0",
-        "jest-cli": "^23.6.0",
+        "jest": "^24.5.0",
+        "jest-cli": "^24.5.0",
         "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
-        "ts-jest": "^23.10.5",
+        "ts-jest": "^24.0.0",
         "ts-loader": "^5.3.3",
         "typescript": "^3.3.3333",
         "vscode": "^1.1.30",
         "webpack": "^4.29.6",
-        "webpack-cli": "^3.2.3",
-        "cross-env": "^5.2.0"
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "@sqltools/core": "*",

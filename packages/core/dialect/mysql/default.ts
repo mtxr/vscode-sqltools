@@ -95,8 +95,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -110,8 +109,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
             obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
             obj.tableDatabase = obj.dbName;
             return obj as DatabaseInterface.TableColumn;
-          })
-          .sort();
+          });
       });
   }
 }

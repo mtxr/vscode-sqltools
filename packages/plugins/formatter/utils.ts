@@ -1,4 +1,4 @@
-import formatter from 'sql-formatter';
+import formatter from '@sqltools/formatter';
 
 // Issue #99. Waiting 3rd party
 function nonLatinQuickFix(query: string) {
@@ -12,11 +12,15 @@ function fixParameters(query: string, originalQuery: string) {
   const matches = originalQuery.match(dollarRegex) || [];
 
   return matches.reduce((text, match) => {
-    const matchEscaped = match.replace(/\$/g, '\\$$');
+    const matchEscaped = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     return text.replace(new RegExp('\\\$' + ' +' + matchEscaped.substr(2), 'g'), match.replace(/\$/g, '$$$$'));
   }, query);
 }
 
-export function format(query: string, indentSize: number = 2) {
-  return fixParameters(nonLatinQuickFix(formatter.format(query, { indent: ' '.repeat(indentSize) })), query);
+export function format(query: string, formatOptions: Partial<{ indentSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
+  const { reservedWordCase = null, indentSize = 2 } = formatOptions;
+  return fixParameters(nonLatinQuickFix(formatter.format(query, {
+    indent: ' '.repeat(indentSize),
+    reservedWordCase,
+  })), query);
 }

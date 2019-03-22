@@ -11,6 +11,14 @@ export interface FormatOptions {
    * @memberof FormatOptions
    */
   indentSize: number;
+
+  /**
+   * Reserverd word case
+   * @type {string}
+   * @default null
+   * @memberof FormatOptions
+   */
+  reservedWordCase?: 'upper' | 'lower' | null;
 }
 
 export interface Settings {
@@ -99,4 +107,12 @@ export interface Settings {
    * @memberof Settings
    */
   useNodeRuntime?: null | boolean | string;
+
+  /**
+   * Columns sort order
+   * @default 'name'
+   * @type {null | string}
+   * @memberof Settings
+   */
+  sortColumns?: 'name' | 'ordinalnumber' | null;
 }

@@ -117,8 +117,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -132,8 +131,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
             obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
             obj.tableDatabase = obj.dbName;
             return obj as DatabaseInterface.TableColumn;
-          })
-          .sort();
+          });
       });
   }
 }

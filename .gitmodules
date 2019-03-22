@@ -1,0 +1,3 @@
+[submodule "packages/formatter"]
+	path = packages/formatter
+	url = git@github.com:mtxr/sql-formatter.git

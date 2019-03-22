@@ -87,14 +87,14 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           results: res.rows,
         });
       }
-    } finally {      
+    } finally {
       if (conn) {
         try {
           await conn.close();
         } catch (e) {
           console.log(e);
         }
-      }  
+      }
     }
     return results;
   }
@@ -117,8 +117,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -139,8 +138,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
             } as DatabaseInterface.TableColumn;
-          })
-          .sort();
+          });
       });
   }
 

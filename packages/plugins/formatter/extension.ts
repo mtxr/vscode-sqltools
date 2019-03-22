@@ -7,8 +7,7 @@ import SQLTools from '@sqltools/core/plugin-api';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
   try {
-    const indentSize: number = ConfigManager.format.indentSize;
-    edit.replace(editor.selection, format(editor.document.getText(editor.selection), indentSize));
+    edit.replace(editor.selection, format(editor.document.getText(editor.selection), ConfigManager.format));
     commands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
   } catch (error) {
     console.error('Error formatting query.', error);
@@ -21,7 +20,7 @@ function insertTextHandler(node: { value: string } | string) {
 }
 
 function generateInsertQueryHandler(item: { columns: any }): Promise<boolean> {
-  return insertSnippet(QueryUtils.generateInsert(item.toString(), item.columns, ConfigManager.format.indentSize));
+  return insertSnippet(QueryUtils.generateInsert(item.toString(), item.columns, ConfigManager.format));
 }
 
 function newSqlFileHandler() {

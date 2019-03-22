@@ -54,7 +54,7 @@ const handler = {
   },
 };
 
-type ExtendedSettings = Settings & { get?: typeof get, update?: typeof update, addOnUpdateHook?: typeof addOnUpdateHook };
-const ConfigManager = new Proxy<ExtendedSettings>(settings, handler);
+type ExtendedSettings = Settings & { get: typeof get, update: typeof update, addOnUpdateHook: typeof addOnUpdateHook };
+const ConfigManager = new Proxy<ExtendedSettings>(<any>settings, handler);
 
 export default ConfigManager;

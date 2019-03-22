@@ -112,7 +112,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       this.tree[treeKey].addItem(item);
     });
     let key;
-    columns.sort((a, b) => a.columnName.localeCompare(b.columnName)).forEach((column) => {
+    if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
+      columns = columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
+    } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
+
+    columns.forEach((column) => {
       key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
       this.tree[treeKey][key].items[column.tableName].addItem(column);
     });

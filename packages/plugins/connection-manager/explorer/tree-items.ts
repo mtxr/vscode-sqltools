@@ -29,7 +29,7 @@ export class SidebarConnection extends TreeItem {
     return this.conn.isConnected;
   }
   public get id() {
-    return this.getId();
+    return <string>this.getId();
   }
   public get value() {
     return this.conn.database;
@@ -197,6 +197,7 @@ export class SidebarTable extends TreeItem {
 export class SidebarView extends SidebarTable { }
 
 export class SidebarColumn extends TreeItem {
+  static icons;
   public contextValue = 'connection.column';
   public value: string;
 
@@ -212,14 +213,30 @@ export class SidebarColumn extends TreeItem {
   constructor(private context: ExtensionContext, public column: DatabaseInterface.TableColumn, public parent: SidebarTable) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
-    this.iconPath = {
-      dark: this.context.asAbsolutePath('icons/column-dark.png'),
-      light: this.context.asAbsolutePath('icons/column-light.png'),
-    };
+    if (!SidebarColumn.icons) {
+      SidebarColumn.icons = {
+        default: {
+          dark: this.context.asAbsolutePath('icons/column-dark.png'),
+          light: this.context.asAbsolutePath('icons/column-light.png'),
+        },
+        primaryKey: Uri.parse(`file://${this.context.asAbsolutePath('icons/pk.svg')}`),
+        foreignKey: Uri.parse(`file://${this.context.asAbsolutePath('icons/fk.svg')}`),
+      }
+    }
+    this.updateIconPath();
     this.command = {
       title: 'Append to Cursor',
       command: `${EXT_NAME}.insertText`,
       arguments: [this],
     };
+  }
+
+  public updateIconPath() {
+    this.iconPath = SidebarColumn.icons.default;
+    if (this.column.isPk) {
+      this.iconPath = SidebarColumn.icons.primaryKey;
+    } else if (this.column.isFk) {
+      this.iconPath = SidebarColumn.icons.foreignKey;
+    }
   }
 }

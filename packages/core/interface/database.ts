@@ -21,6 +21,8 @@ export namespace DatabaseInterface {
     tableCatalog?: string;
     defaultValue: string;
     isNullable: boolean;
+    isPk?: boolean;
+    isFk?: boolean;
     columnKey?: string;
     extra?: string;
   }
