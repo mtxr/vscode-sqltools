@@ -24,7 +24,9 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   queries = queries
 
   private get lib(): typeof OracleDBLib {
-    return __non_webpack_require__('oracledb');
+    const oracledb = __non_webpack_require__('oracledb');    
+    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB];    
+    return oracledb;
   }
 
   private get poolName(): string {
@@ -137,6 +139,8 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableName: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
+              isPk: obj.constraintType === 'P',
+              isFk: obj.constraintType === 'R'
             } as DatabaseInterface.TableColumn;
           });
       });

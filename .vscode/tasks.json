@@ -6,45 +6,47 @@
     {
       "label": "compile",
       "type": "npm",
-      "script": "compile",
+      "script": "compile"
     },
     {
       "label": "watch:compile",
       "type": "npm",
       "script": "watch",
-      "group":{
+      "group": {
         "kind": "build",
         "isDefault": true
       },
       "isBackground": true,
-      "problemMatcher": [{
-        "applyTo": "allDocuments",
-        "owner": "typescript",
-        "source": "webpack",
-        "fileLocation": "absolute",
-        "severity": "error",
-        "pattern": [
+      "problemMatcher": [
+        {
+          "applyTo": "allDocuments",
+          "owner": "typescript",
+          "source": "webpack",
+          "fileLocation": "absolute",
+          "severity": "error",
+          "pattern": [
             {
-                "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
-                "file": 1,
-                "line": 2,
-                "column": 3
+              "regexp": "\\[tsl\\] ERROR in (.*)?\\((\\d+),(\\d+)\\)",
+              "file": 1,
+              "line": 2,
+              "column": 3
             },
             {
-                "regexp": "\\s*TS\\d+:\\s*(.*)",
-                "message": 1
+              "regexp": "\\s*TS\\d+:\\s*(.*)",
+              "message": 1
             }
-        ]
-      }],
-      "background": {
-        "activeOnStart": true,
-        "beginsPattern": {
-            "regexp": "Compilation (.*?)starting.+"
-        },
-        "endsPattern": {
-            "regexp": "Compilation (.*?)finished"
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": {
+              "regexp": "Compilation (.*?)starting.+"
+            },
+            "endsPattern": {
+              "regexp": "Compilation (.*?)finished"
+            }
+          }
         }
-    }
+      ]
     }
   ]
 }

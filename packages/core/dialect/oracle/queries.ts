@@ -13,14 +13,24 @@ export default {
   c.owner as tableschema,
   c.owner as dbname,
   c.data_default as defaultvalue,
-  c.nullable as isnullable
+  c.nullable as isnullable,
+  cols.CONSTRAINT_TYPE as constraintType
   from all_tab_columns c
   join (
-  select table_name, owner from all_tables
+  select table_name, owner 
+  from all_tables
   union all
   select view_name as table_name, owner from all_views
   ) v on (c.table_name = v.table_name and c.owner = v.owner)
-  where c.owner not like '%SYS%'`,
+  left join (
+  select cons.CONSTRAINT_TYPE, cols.table_name, cols.column_name, cols.owner
+  from all_cons_columns cols 
+  join all_constraints cons
+  on (cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner)
+  where cons.CONSTRAINT_TYPE in ('P', 'R')
+  ) cols on (cols.table_name = c.table_name and cols.column_name = c.column_name and cols.owner = c.owner)
+  where c.owner = user
+  ORDER BY c.table_name, c.column_id`,
   fetchRecords: 'select * from :table where rownum <= :limit',
   fetchTables: `select
   table_name as tableName,
@@ -40,5 +50,5 @@ export default {
   join all_tab_columns c on c.table_name = v.view_name and c.owner = v.owner
   group by v.owner, v.view_name, user
   )
-  where owner not like '%SYS%'`,
+  where owner = user`,
 } as DialectQueries;
