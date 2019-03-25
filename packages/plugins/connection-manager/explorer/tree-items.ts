@@ -3,7 +3,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
-import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
+import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState } from 'vscode';
 
 export class SidebarConnection extends TreeItem {
   public static icons;

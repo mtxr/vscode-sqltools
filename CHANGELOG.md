@@ -2,6 +2,13 @@
 
 ## v0.17
 
+### v0.17.8
+
+* **Fixes**
+  - Fixes Icon Paths on windows. Issue #151
+  - Allow empty password. Issue #150
+  - Fixes clutered database tree view. Issue #139
+
 ### v0.17.7
 
 * **NEW** 🎉
