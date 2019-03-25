@@ -49,7 +49,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableFindWidget: true,
         },
       );
-      this.panel.iconPath = Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`);
+      this.panel.iconPath = this.context.asAbsolutePath('icons/database-active.svg');
       this.disposables.push(Disposable.from(this.panel));
       this.disposables.push(this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables));
       this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
