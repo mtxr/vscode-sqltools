@@ -189,7 +189,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       },
     },
     password: {
-      validators:[notEmpty],
       label: 'Password',
     },
     domain: {
@@ -347,12 +346,15 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   }
 
   public getParsedFormData() {
-    return this.getVisibleFields()
+    const data = this.getVisibleFields()
       .reduce((d, k) => {
         const parse = this.state.fields[k].parse || ((v) => (v === '' ? null : v));
         d[k] = parse(this.state.data[k]);
         return d;
       }, {});
+
+      data['password'] = data['password'] || undefined;
+      return data;
   }
 
   public render() {
