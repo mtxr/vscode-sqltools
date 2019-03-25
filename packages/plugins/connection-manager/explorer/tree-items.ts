@@ -52,7 +52,7 @@ export class SidebarConnection extends TreeItem {
 
     if (!SidebarConnection.icons) {
       SidebarConnection.icons = {
-        active: Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`),
+        active: this.context.asAbsolutePath('icons/database-active.svg'),
         connected: {
           dark: this.context.asAbsolutePath('icons/database-dark.svg'),
           light: this.context.asAbsolutePath('icons/database-light.svg'),
@@ -219,8 +219,8 @@ export class SidebarColumn extends TreeItem {
           dark: this.context.asAbsolutePath('icons/column-dark.png'),
           light: this.context.asAbsolutePath('icons/column-light.png'),
         },
-        primaryKey: Uri.parse(`file://${this.context.asAbsolutePath('icons/pk.svg')}`),
-        foreignKey: Uri.parse(`file://${this.context.asAbsolutePath('icons/fk.svg')}`),
+        primaryKey: this.context.asAbsolutePath('icons/pk.svg'),
+        foreignKey: this.context.asAbsolutePath('icons/fk.svg'),
       }
     }
     this.updateIconPath();
