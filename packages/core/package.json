@@ -19,6 +19,7 @@
   },
   "devDependencies": {
     "@types/command-exists": "^1.2.0",
+    "@types/jest": "^24.0.11",
     "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
     "@types/oracledb": "^1.11.34",
@@ -26,6 +27,10 @@
     "@types/redux": "^3.6.0",
     "@types/sqlite3": "^3.1.5",
     "@types/webpack-env": "^1.13.8",
+    "babel-jest": "^24.5.0",
+    "jest-cli": "^24.5.0",
+    "jest": "^24.5.0",
+    "ts-jest": "^24.0.0",
     "typescript": "^3.3.3333"
   }
 }

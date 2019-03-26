@@ -10,6 +10,7 @@ export function generateInsert(
   cols: Array<{ value: string, column: DatabaseInterface.TableColumn }>,
   formatOptions?: Settings['format'],
 ): string {
+  // @todo: snippet should have variable name and type
   let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.value).join(', ')}) VALUES (`;
   cols.forEach((col, index) => {
     insertQuery = insertQuery.concat(`'\${${index + 1}:${col.column.type}}', `);

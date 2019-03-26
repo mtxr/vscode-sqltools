@@ -3,13 +3,10 @@ module.exports = {
   testEnvironment: 'node',
   collectCoverage: true,
   collectCoverageFrom: ['**/*.ts', '**/*.tsx'],
-  coverageDirectory: '<rootDir>/coverage',
-  coverageReporters: ['lcov'],
+  coverageDirectory: '<rootDir>/../../coverage/plugins',
   coveragePathIgnorePatterns: [
     '/node_modules/',
     '/interface/',
-    '/packages\/extension/',
-    '/packages\/formatter/', // formatter has it's own test suite
     '/coverage/'
   ],
   coverageThreshold: {
