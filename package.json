@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "clean": "rimraf -rf ../dist",
-    "test": "yarn workspace @sqltools/formatter test && yarn workspace @sqltools/plugins test",
+    "test": "yarn workspace @sqltools/plugins test",
     "precompile": "yarn test && yarn run clean",
     "prewatch": "yarn run clean",
     "watch": "yarn workspace @sqltools/extension watch",

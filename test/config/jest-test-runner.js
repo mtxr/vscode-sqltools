@@ -25,12 +25,16 @@ async function run(_testRoot, callback) {
     forwardStdoutStderrStreams();
 
     try {
-        const { results } = await runCLI(jestConfig, [rootDir]);
+        const { results, ...rest } = await runCLI(jestConfig, [rootDir]);
         const failures = collectTestFailureMessages(results);
-
+        const { success } = results;
         if (failures.length > 0) {
-            callback(null, failures);
+            throw new Error('There are some failed tests');
             return;
+        }
+
+        if (!success) {
+            throw new Error('Test did not succeed.');
         }
 
         callback(null);
