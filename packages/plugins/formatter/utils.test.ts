@@ -67,7 +67,7 @@ where
   );
 });
 
-it('Format vscode query snipper', () => {
+it('Format vscode query snippet', () => {
   expect(format("INSERT INTO  access_token (created, id, scopes, ttl, userid) VALUES  ('${1:timestamp with time zone}', '${2:text}', '${3:text}', '${4:integer}', '${5:integer}');")).toEqual(
 `INSERT INTO
   access_token (created, id, scopes, ttl, userid)

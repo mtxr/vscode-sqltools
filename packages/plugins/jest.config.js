@@ -1,14 +1,8 @@
 module.exports = {
-  preset: 'ts-jest',
-  testEnvironment: 'node',
-  collectCoverage: true,
+  ...(require('../../test/config/baseConfig')),
+  preset: 'ts-jest/presets/js-with-babel',
   collectCoverageFrom: ['**/*.ts', '**/*.tsx'],
   coverageDirectory: '<rootDir>/../../coverage/plugins',
-  coveragePathIgnorePatterns: [
-    '/node_modules/',
-    '/interface/',
-    '/coverage/'
-  ],
   coverageThreshold: {
     global: {
       statements: 0.34,
@@ -17,5 +11,5 @@ module.exports = {
       lines: 0.34,
     },
   },
-  testMatch: ['**/*.test.ts'],
+  testMatch: ['**/*.test.(ts|js)'],
 };

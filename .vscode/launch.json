@@ -1,41 +1,57 @@
 // A launch configuration that compiles the extension and then opens it inside a new window
 {
-    "version": "0.1.0",
-    "configurations": [
-        {
-            "name": "Launch Extension",
-            "type": "extensionHost",
-            "request": "launch",
-            "runtimeExecutable": "${execPath}",
-            "args": ["${workspaceRoot}/.test-database/.", "--extensionDevelopmentPath=${workspaceRoot}/../dist", "-p"],
-            "stopOnEntry": false,
-            "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
-            "env": { "NODE_ENV": "development" }
-        },
-        {
-            "type": "node",
-            "request": "attach",
-            "name": "Attach Language Server",
-            "port": 6010,
-            "restart": true,
-            "sourceMaps": true,
-            "outFiles": [ "${workspaceRoot}/../dist/*.js" ],
-            "protocol": "inspector"
-        },
-        // {
-        //     "type": "node",
-        //     "request": "launch",
-        //     "name": "Run Client Tests",
-        //     "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-        //     "cwd": "${workspaceRoot}/.test-database/.",
-        //     "env": { "NODE_ENV": "development" },
-        //     "args": [
-        //         "--i",
-        //         "--coverage",
-        //         "--config=${workspaceRoot}/jest.json",
-        //         "--no-cache"
-        //     ]
-        // }
-    ]
+  "version": "0.1.0",
+  "configurations": [
+    {
+      "name": "Launch Extension",
+      "type": "extensionHost",
+      "request": "launch",
+      "runtimeExecutable": "${execPath}",
+      "args": [
+        "${workspaceRoot}/.test-database/.",
+        "--extensionDevelopmentPath=${workspaceRoot}/../dist",
+        "-p"
+      ],
+      "stopOnEntry": false,
+      "sourceMaps": true,
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/../dist/*.js"
+      ],
+      "env": {
+        "NODE_ENV": "development"
+      }
+    },
+    {
+      "type": "node",
+      "request": "attach",
+      "name": "Attach Language Server",
+      "port": 6010,
+      "restart": true,
+      "sourceMaps": true,
+      "skipFiles": [
+        "<node_internals>/**/*.js"
+      ],
+      "outFiles": [
+        "${workspaceRoot}/../dist/*.js"
+      ],
+      "protocol": "inspector"
+    },
+    // {
+    //     "type": "node",
+    //     "request": "launch",
+    //     "name": "Run Client Tests",
+    //     "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
+    //     "cwd": "${workspaceRoot}/.test-database/.",
+    //     "env": { "NODE_ENV": "development" },
+    //     "args": [
+    //         "--i",
+    //         "--coverage",
+    //         "--config=${workspaceRoot}/jest.json",
+    //         "--no-cache"
+    //     ]
+    // }
+  ]
 }

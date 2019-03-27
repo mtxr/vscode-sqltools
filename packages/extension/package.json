@@ -18,7 +18,7 @@
     "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
-        "vscode": "^1.29.0"
+        "vscode": "^1.30.0"
     },
     "categories": [
         "Programming Languages",
@@ -761,6 +761,6 @@
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/plugins": "*",
-        "vscode-languageclient": "^5.3.0-next.1"
+        "vscode-languageclient": "^5.2.1"
     }
 }
