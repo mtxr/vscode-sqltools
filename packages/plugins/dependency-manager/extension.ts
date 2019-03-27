@@ -1,4 +1,4 @@
-import { window as Win, workspace } from 'vscode';
+import { window as Win, workspace, ConfigurationTarget } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
@@ -19,7 +19,7 @@ export default class DependencyManger implements SQLTools.ExtensionPlugin {
       'Enable now',
     );
     if (!r) return;
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
   }
   private requestToInstall = async ({ moduleName, moduleVersion, conn }) =>  {
     const installNow = 'Install now';
