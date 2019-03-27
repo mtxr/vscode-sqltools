@@ -50,7 +50,7 @@ const availableDialects = {
 };
 
 interface FieldWrapperProps {
-  field: any; // to be defined
+  field: Field;
   component: ReactNode;
   i: number;
 }
@@ -73,6 +73,7 @@ class FieldWrapper extends React.Component<FieldWrapperProps> {
 }
 interface Field {
   label: string;
+  info?: string;
   values?: Array<string | { text: string; value: any }>;
   default?: any;
   type?: string;
@@ -80,6 +81,10 @@ interface Field {
   postUpdateHook?: Function;
   parse?: Function;
   visible?: boolean;
+  minMax?: {
+    min?: number,
+    max?: number,
+  };
 }
 
 interface SetupState {
@@ -118,7 +123,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     }, {});
   }
 
-  baseFields = {
+  baseFields: { [id: string]: Field } = {
     name: {
       label: 'Connection Name',
       validators: [notEmpty],
@@ -166,6 +171,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       default: availableDialects.MySQL.port,
       validators: [notEmpty, inRange(1, 65535)],
       parse: int,
+      minMax: {
+        min: 1,
+        max: 65535,
+      },
     },
     database: {
       type: 'text',
@@ -203,7 +212,17 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       default: 30,
       validators: [notEmpty, gtz],
       parse: int,
+      minMax: {
+        min: 0,
+      }
     },
+    isGlobal: {
+      label: 'Save to global settings?',
+      info: 'If checked, will save to global settings',
+      type: 'checkbox',
+      default: false,
+      parse: bool,
+    }
   };
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
@@ -271,7 +290,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   }
 
   public handleChange: ChangeEventHandler = (e) => {
-    const { name, value, files } = e.target as HTMLInputElement;
+    let { name, value, files, type, checked } = e.target as HTMLInputElement & { value: any };
+
+    value = type === 'checkbox' ? Boolean(checked) : value;
+
     if (this.state.fields[name].visible === false) return this.validateFields();
     let filePath;
     if (this.state.fields[name].type === 'file' && files && files.length > 0) {
@@ -309,7 +331,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     e.preventDefault();
     getVscode().postMessage({
       action: 'createConnection',
-      payload: { connInfo: this.getParsedFormData(), isGlobal: false }
+      payload: { connInfo: this.getParsedFormData(), isGlobal: this.state.data.isGlobal }
     });
     return false;
   }
@@ -354,6 +376,9 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       }, {});
 
       data['password'] = data['password'] || undefined;
+
+      delete data['isGlobal'];
+
       return data;
   }
 
@@ -395,19 +420,31 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           />
         );
       } else {
+        let fieldProps: any = {
+          value: this.state.data[f],
+        };
+        if (field.type === 'number') {
+          fieldProps = {
+            value: this.state.data[f],
+            ...field.minMax,
+          };
+        }
+
+        if (field.type === 'checkbox') {
+          fieldProps = {
+            checked: this.state.data[f],
+          }
+        }
+
         formField = (
           <input
             type={field.type || 'text'}
             id={`input-${f}`}
             name={f}
             placeholder={field.label}
-            value={this.state.data[f]}
             onChange={this.handleChange}
             disabled={this.state.loading}
-            { ...(field.type === 'number' ? {
-              min: 1,
-              max: 65535,
-            } : {})}
+            {...fieldProps}
           />
         );
       }

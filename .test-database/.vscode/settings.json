@@ -77,6 +77,6 @@
       "port": 1521,
       "username": "root",
       "server": "localhost"
-    },
+    }
   ]
 }

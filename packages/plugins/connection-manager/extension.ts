@@ -7,7 +7,7 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
@@ -151,18 +151,43 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     if (!res) return;
 
-    const connList = ConfigManager.connections.filter(c => getConnectionId(c) !== id);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+    const {
+      workspaceFolderValue = [],
+      workspaceValue = [],
+      globalValue = [],
+    } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+
+    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) == id);
+
+    let index = findIndex(workspaceFolderValue);
+    if (index >= 0) {
+      workspaceFolderValue.splice(index, 1);
+      return this.saveConnectionList(workspaceFolderValue, ConfigurationTarget.WorkspaceFolder);
+    }
+
+    index = findIndex(workspaceValue);
+    if (index >= 0) {
+      workspaceValue.splice(index, 1);
+      return this.saveConnectionList(workspaceValue, ConfigurationTarget.Workspace);
+    }
+
+    index = findIndex(globalValue);
+    if (index >= 0) {
+      globalValue.splice(index, 1);
+      return this.saveConnectionList(globalValue, ConfigurationTarget.Global);
+    }
+    return Promise.resolve(true);
   }
 
-  private ext_addConnection(connInfo: ConnectionInterface) {
+  private ext_addConnection = (connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
       console.warn('Nothing to do. No parameter received');
       return;
     }
-    const connList = ConfigManager.connections;
+
+    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined);
     connList.push(connInfo);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
   // internal utils
@@ -283,6 +308,27 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     return this.statusBar;
+  }
+
+  private async saveConnectionList(connList: ConnectionInterface[], writeTo?: ConfigurationTarget) {
+    if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
+      writeTo = ConfigurationTarget.Global;
+    }
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList, writeTo);
+  }
+
+  private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
+    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections');
+
+    const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+    if (from === ConfigurationTarget.Global) {
+      return <ConnectionInterface[]>(config.globalValue || config.defaultValue);
+    }
+    if (from === ConfigurationTarget.WorkspaceFolder) {
+      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue);
+    }
+
+    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
   }
 
   public register(extension: SQLTools.ExtensionInterface) {

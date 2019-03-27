@@ -55,7 +55,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
         this.setPreviewActiveContext(webviewPanel.active);
       }));
-      this.disposables.push(this.panel.onDidDispose(this.dispose));
+      this.disposables.push(this.panel.onDidDispose(this.dispose, null, this.disposables));
       this.panel.webview.html = (this.html || this.baseHtml)
         .replace(/{{id}}/g, this.id)
         .replace(
@@ -92,6 +92,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.panel.dispose();
   }
   public dispose = () => {
+    this.hide();
     if (this.disposables.length) this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
     this.panel = undefined;
