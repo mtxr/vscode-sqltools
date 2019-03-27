@@ -27,17 +27,17 @@ function toRegEx(value: string | RegExp) {
     }
     return new RegExp(`(${value})`, 'gi');
   } catch (e) { }
-  return value
+  return value;
 }
 
-const FilterComponent = ({ filter, column, onChange }) => {
+const FilterComponent = ({ filter = { value: '' }, column, onChange }) => {
   return (
     <input
       type="text"
       placeholder={`Filter by ${column.id}`}
       style={{ width: '100%' }}
-      value={filter ? filter.value : ''}
-      onChange={event => onChange(event.target.value)}
+      value={filter.value}
+      onChange={event => onChange(column.id, event.target.value)}
     />
   );
 };
@@ -73,8 +73,7 @@ interface ResultsTableProps {
   connId: string;
 }
 interface ResultsTableState {
-  filtered: { [id: string]: string | RegExp };
-  tableFiltered: Filter[];
+  filtered: { [id: string]: Filter & { regex: RegExp | string } };
   clickedData: {
     value: any,
     index: number,
@@ -90,7 +89,6 @@ interface ResultsTableState {
 export default class ResultsTable extends React.PureComponent<ResultsTableProps, ResultsTableState> {
   static initialState: ResultsTableState = {
     filtered: {},
-    tableFiltered: [],
     clickedData: {
       value: undefined,
       index: -1,
@@ -123,7 +121,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         if (!this.state.filtered[r.column.id]) return <span>{v}</span>;
         return <span>
           {
-            v.replace(this.state.filtered[r.column.id], '<###>$1<###>')
+            v.replace(this.state.filtered[r.column.id].regex || this.state.filtered[r.column.id].value, '<###>$1<###>')
             .split('<###>')
             .map((str, i) => {
               if (i % 2 === 1)
@@ -204,7 +202,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       options.push({ get label() { return FilterByValueOption.replace('{value}', clickedData.value) }, value: FilterByValueOption });
       options.push('sep');
     }
-    if (this.state.tableFiltered.length > 0) {
+    if (Object.keys(this.state.filtered).length > 0) {
       options.push(ClearFiltersOption);
       options.push('sep');
     }
@@ -221,19 +219,35 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     ]);
   }
 
+  onFilterChange = (id: string, value: string = '', cb?: Function) => {
+    const { filtered } = this.state;
+    if (!value) {
+      delete filtered[id];
+    } else {
+      filtered[id] = {
+        id,
+        value,
+        regex: toRegEx(value),
+      }
+    }
+    this.setState({
+      filtered
+    }, () => cb ? cb(value) : void 0);
+  }
+
   onMenuSelect = (choice: string) => {
     const { clickedData } = this.state;
     switch(choice) {
       case FilterByValueOption:
-        const { filtered = {}, tableFiltered = [] } = this.state;
+        const { filtered = {} } = this.state;
         this.setState({
-          tableFiltered: tableFiltered.filter(({ id }) => id !== clickedData.col).concat([{
-            id: clickedData.col,
-            value: clickedData.value,
-          }]),
           filtered: {
             ...filtered,
-            [clickedData.col]: toRegEx(clickedData.value),
+            [clickedData.col]: {
+              id: clickedData.col,
+              value: clickedData.value,
+              regex: clickedData.value
+            },
           },
         })
       case CopyCellOption:
@@ -243,10 +257,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
         break;
       case ClearFiltersOption:
-        this.setState({
-          tableFiltered: [],
-          filtered: {},
-        });
+        this.setState({ filtered: {} });
         break;
       case OpenEditorWithValueOption:
         getVscode().postMessage({
@@ -307,10 +318,13 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   _tBodyComponent: Element = null;
 
   componentDidMount() {
+    try {
+      this.componentWillUnmount();
+    } catch (error) { };
     setTimeout(() => {
       this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
       this._tBodyComponent && this._tBodyComponent.addEventListener("scroll", this.handleScroll);
-    }, 1000);
+    }, 300);
   }
 
   componentWillUnmount() {
@@ -377,8 +391,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           columns={cols}
           column={this.columnDefault}
           filterable
-          filtered={this.state.tableFiltered}
-          FilterComponent={FilterComponent}
+          filtered={Object.values(this.state.filtered)}
+          FilterComponent={({ column, onChange }) => <FilterComponent filter={this.state.filtered[column.id]} column={column} onChange={(id, value) => this.onFilterChange(id, value, onChange)} />}
           pageSize={this.props.paginationSize}
           showPagination={this.props.data.length > this.props.paginationSize}
           minRows={this.props.data.length === 0 ? 1 : Math.min(this.props.paginationSize, this.props.data.length)}
@@ -410,21 +424,13 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
             }
             return {};
           }}
-          onFilteredChange={filtered => {
-            this.setState({
-              tableFiltered: filtered,
-              filtered: filtered.reduce((p, c) => {
-                p[c.id] = toRegEx(String(c.value));
-                return p;
-              }, {}),
-            });
-          }}
+          onFilteredChange={() => this.componentDidMount()}
           defaultFilterMethod={(filter, row) => {
-            const exp = this.state.filtered[filter.id];
-            if (exp instanceof RegExp) {
-              return exp.test(String(row[filter.id]));
-            }
-            return String(row[filter.id]) === exp;
+            const filterData = this.state.filtered[filter.id];
+            if (!filterData || typeof row[filter.id] === 'undefined') return true;
+            const { regex, value } = filterData;
+            const position = `${row[filter.id]}`.search(regex || value);
+            return position !== -1;
           }}
           className="-striped -highlight"
           TbodyComponent={TbodyComponent}

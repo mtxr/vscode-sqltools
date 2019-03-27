@@ -2,6 +2,12 @@
 
 ## v0.17
 
+### v0.17.9
+
+* **Fixes**
+  - Allow user to force ad connection to global settings. Part of issue #137.
+  - Fixed filtering excluding some values.
+
 ### v0.17.8
 
 * **Fixes**
