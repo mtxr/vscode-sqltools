@@ -7,7 +7,7 @@
   "license": "GPL-3.0",
   "private": false,
   "scripts": {
-    "postinstall": "mkdir -p lib; jison -m commonjs generic-grammar.jison -o lib/index.js"
+    "postinstall": "mkdir -p lib; npx jison -m commonjs generic-grammar.jison -o lib/index.js"
   },
   "devDependencies": {
     "jison": "^0.4.18"

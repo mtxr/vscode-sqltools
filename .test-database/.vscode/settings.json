@@ -10,6 +10,7 @@
     "indentSize": 2,
     "reservedWordCase": "upper"
   },
+  "sqltools.autoConnectTo": ["SQLite"],
   "sqltools.connections": [
     {
       "name": "PGSQL",

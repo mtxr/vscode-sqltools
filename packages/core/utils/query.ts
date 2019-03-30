@@ -2,6 +2,7 @@ import { DatabaseInterface, Settings } from '../interface';
 import { format } from '@sqltools/plugins/formatter/utils';
 
 export function parse(query = '') {
+  // @todo: use https://github.com/TeamSQL/SQL-Statement-Parser for better parsing
   return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
 }
 

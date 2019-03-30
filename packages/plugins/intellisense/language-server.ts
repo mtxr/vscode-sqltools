@@ -1,21 +1,28 @@
 import SQLTools from '@sqltools/core/plugin-api';
 import { CompletionItem } from 'vscode-languageserver';
 import { TableCompletionItem, TableColumnCompletionItem } from './models';
+import { TextDocumentPositionParams } from 'vscode-languageclient';
 
 export default class IntellisensePlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
 
-  // private onCompletion = (pos: TextDocumentPositionParams): CompletionItem[] => {
-  private onCompletion = (): CompletionItem[] => {
-    // const { textDocument, position } = pos;
-    // const doc = docManager.get(textDocument.uri);
-    const { connectionInfo, lastUsedId } = this.server.store.getState();
-    if (!lastUsedId) return [];
+  private onCompletion = (pos: TextDocumentPositionParams): CompletionItem[] => {
+    const { textDocument, position } = pos;
+    const doc = this.server.docManager.get(textDocument.uri);
+    const docText = doc.getText();
 
-    const { columns, tables } = connectionInfo[lastUsedId];
+    const queryEndingsMatch = docText.match(/;/gi);
 
-    return tables.map(TableCompletionItem)
-    .concat(columns.map(TableColumnCompletionItem));
+    console.log({ queryEndingsMatch });
+
+    return [];
+    // const { connectionInfo, lastUsedId } = this.server.store.getState();
+    // if (!lastUsedId) return [];
+
+    // const { columns, tables } = connectionInfo[lastUsedId];
+
+    // return tables.map(TableCompletionItem)
+    //   .concat(columns.map(TableColumnCompletionItem));
   }
 
   public register(server: SQLTools.LanguageServerInterface) {

@@ -3,7 +3,7 @@
 /* :tabSize=2:indentSize=2:noTabs=true: */
 %lex
 
-%options case-insensitive
+%options case-insensitive backtrack_lexer flex
 
 %%
 
