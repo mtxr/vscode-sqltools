@@ -1,15 +1,17 @@
 {
   "compilerOptions": {
-    "noEmit": true,
-    "resolveJsonModule": true,
-    "baseUrl": ".",
-    "module": "commonjs",
-    "target": "es6",
     "allowSyntheticDefaultImports": true,
     "esModuleInterop": true,
-    "outDir": "../../dist/core",
-    "sourceMap": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
     "lib": ["es6"],
-    "removeComments": true
+    "module": "commonjs",
+    "noEmit": true,
+    "outDir": "../../../dist/core",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": true,
+    "target": "es6",
   }
 }

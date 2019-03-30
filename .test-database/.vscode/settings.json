@@ -1,9 +1,15 @@
 {
-  "sqltools.autoConnectTo": [
-    // "PGSQL",
-    // "MySQL",
-    "MSSQL"
-  ],
+  "sqltools.telemetry": true,
+  "sqltools.useNodeRuntime": true,
+  "sqltools.sortColumns": "ordinalnumber",
+  "sqltools.results": {
+    "limit": 100,
+    "location": "beside"
+  },
+  "sqltools.format": {
+    "indentSize": 2,
+    "reservedWordCase": "upper"
+  },
   "sqltools.connections": [
     {
       "name": "PGSQL",
@@ -28,7 +34,13 @@
       "connectionTimeout": 15,
       "dialectOptions": {
         "encrypt": false
-      },
+      }
+    },
+    {
+      "name": "SQLite",
+      "dialect": "SQLite",
+      "database": "./sqlite/test_db.db",
+      "connectionTimeout": 15
     },
     {
       "askForPassword": false,
@@ -40,6 +52,31 @@
       "port": 3307,
       "server": "localhost",
       "username": "root"
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQLX",
+      "password": "root",
+      "port": 33080,
+      "server": "localhost",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "OracleDB",
+      "name": "OracleDB",
+      "password": "root",
+      "port": 1521,
+      "username": "root",
+      "server": "localhost"
     }
   ]
 }

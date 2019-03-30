@@ -31,11 +31,13 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 ![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
 
+* Export results to JSON and CSV
+
+![static/export-results.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/export-results.gif)
+
 ## Docs
 
-[Setup your first connection](https://github.com/mtxr/vscode-sqltools/wiki/connections) using this [guide](https://github.com/mtxr/vscode-sqltools/wiki/connections).
-
-You can read the entire docs in the [SQLTools Wiki](https://github.com/mtxr/vscode-sqltools/wiki)
+You can read the entire docs in the [https://mtxr.gitbook.io/vscode-sqltools/](https://mtxr.gitbook.io/vscode-sqltools/)
 
 
 ## Donate and Support

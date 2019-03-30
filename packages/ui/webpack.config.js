@@ -1,56 +1,55 @@
 const path = require('path');
 
-const outdir = path.resolve(__dirname, '..', '..', 'dist');
+const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
-module.exports = exports = function getWebviewConfig(env) {
+const babelOptions = require(path.join(__dirname, '.babelrc'));
+
+module.exports = exports = function getWebviewConfig() {
   return {
-    name: 'webiew',
-    mode: env.production ? 'production' : 'development',
+    name: 'ui',
     entry: {
-      settingsEditor: path.join(__dirname, 'settings-editor.tsx'),
-      queryResultsPreviewer: path.join(__dirname, 'query-results-previewer.tsx'),
+      Settings: path.join(__dirname, 'screens', 'Settings.tsx'),
+      Results: path.join(__dirname, 'screens', 'Results.tsx'),
     },
     module: {
       rules: [
         {
           test: /\.tsx?$/,
           use: [
-            'babel-loader',
-            { loader: 'ts-loader', options: { transpileOnly: true } }
-        ],
-          exclude: /node_modules/
+            { loader: 'babel-loader', options: babelOptions },
+            { loader: 'ts-loader', options: { transpileOnly: true } },
+          ],
         },
         {
           test: /\.css/,
-          use: ['style-loader', 'css-loader']
+          use: ['style-loader', 'css-loader'],
         },
         {
           test: /\.scss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader']
-        }
-      ]
+          use: ['style-loader', 'css-loader', 'sass-loader'],
+        },
+      ],
     },
     resolve: {
-      extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass']
+      extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass'],
+      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
     },
     optimization: {
       splitChunks: {
         cacheGroups: {
           vendor: {
             test: /node_modules/,
-            chunks: "initial",
-            name: "vendor",
+            chunks: 'initial',
+            name: 'vendor',
             priority: 10,
-            enforce: true
-          }
-        }
-      }
+            enforce: true,
+          },
+        },
+      },
     },
     output: {
-      filename: 'views/[name].js',
-      path: outdir
+      filename: 'ui/[name].js',
+      path: outdir,
     },
-    plugins: [
-    ]
   };
-}
+};

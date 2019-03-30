@@ -1,11 +1,17 @@
 @import './mixins';
 
-$color: var(--color);
-$backgroundColor: var(--background-color);
-$fontFamily: var(--font-family);
-$fontSize: var(--font-size);
-$fontWeight: var(--font-weight);
-$linkColor: var(--link-color);
+$color: var(--vscode-editor-foreground);
+$backgroundColor: var(--vscode-editor-background);
+$fontFamily: var(--vscode-editor-font-family);
+$fontSize: var(--vscode-editor-font-size);
+$linkColor: var(--vscode-button-background);
+$linkColorFg: var(--vscode-button-foreground);
+
+$fallbackColor: var(--color);
+$fallbackBackgroundColor: var(--background-color);
+$fallbackFontFamily: var(--font-family);
+$fallbackFontSize: var(--font-size);
+$fallbackLinkColor: var(--link-color);
 
 $tabsHeight: 30px;
 $collapseHeight: 29px;
@@ -44,29 +50,30 @@ $radius: 3px;
 
 * {
   font-family: $fontFamily;
+  color: $fallbackColor;
   color: $color;
 }
 
 body {
+  font-size: $fallbackFontSize;
   font-size: $fontSize;
   background: $backgroundColor;
 }
 
-input, select {
+input, select, select > option {
   border-radius: 0;
-  background: $lightThemeGray1;
-  border-color: $lightThemeGray2;
-  border-width: 1px;
-  border-style: solid;
-  color: $color;
+  background: var(--vscode-settings-textInputBackground);
+  border: none;
+  color: var(--vscode-settings-textInputForeground);
+  padding: 4px;
 }
 
-.vscode-dark {
-input, select {
-    background: $darkThemeWhite1;
-    border-color: $darkThemeWhite2;
-  }
-}
+// .vscode-dark {
+// input, select, select > option {
+//     background: $darkThemeWhite1;
+//     border-color: $darkThemeWhite2;
+//   }
+// }
 
 .fullscreen-container {
   @include full-screen();
@@ -99,6 +106,7 @@ input, select {
 }
 
 .btn {
+  background: $fallbackLinkColor;
   background: $linkColor;
   padding: 4px 8px;
   color: $lightThemeGray16;
@@ -118,14 +126,14 @@ input, select {
   }
 }
 .backdrop {
-    position: absolute;
+    position: fixed;
     top: 0;
-    bottom: 0;
     left: 0;
-    right: 0;
     background: $darkThemeWhite10;
     overflow: hidden;
     display: none;
+    width: 100vw;
+    height: 100vh;
 }
 
 .loading {
@@ -203,4 +211,12 @@ input, select {
 
 .relative {
   position: relative !important;
+}
+
+.flex-full {
+  display: flex;
+  align-items: baseline;
+  > * {
+    flex-grow: 1;
+  }
 }

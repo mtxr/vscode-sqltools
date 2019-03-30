@@ -1,159 +1,177 @@
-import Analytics from 'universal-analytics';
-import uuidv4 from 'uuid/v4';
-import { LoggerInterface } from '../interface';
-import { get, set } from './persistence';
-import { GA_CODE, VERSION, RB, ENV } from './../constants';
-import Timer from './timer';
-import Rollbar from 'rollbar';
+import { AI_KEY, ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
+import Timer from '@sqltools/core/utils/timer';
+import * as AI from 'applicationinsights';
+import { version as AIVersion } from 'applicationinsights/package.json';
+import SQLTools from '../plugin-api';
+import { numericVersion } from '.';
 
-const metaData = {
-  platform: {
-    os: process.platform,
-    arch: process.arch,
+export class Telemetry implements SQLTools.TelemetryInterface {
+  public static SeveriryLevel = AI.Contracts.SeverityLevel;
+  public static enabled: Boolean;
+  public static vscodeInfo: SQLTools.VSCodeInfo;
+  private client: AI.TelemetryClient;
+  private product: SQLTools.Product;
+  private prefixed(key: string) {
+    return `${this.product}:${key}`;
   }
-};
 
-const opts: Rollbar.Configuration = {
-  enabled: false,
-  accessToken: RB,
-  captureUncaught: true,
-  captureUnhandledRejections: true,
-  captureIp: false,
-  captureEmail: false,
-  captureUsername: false,
-  captureLambdaTimeouts: false,
-  environment: ENV,
-  codeVersion: VERSION,
-  payload: {
-    ...metaData,
-  },
-  checkIgnore: () => {
-    return !Telemetry.shouldSend();
-  },
-  transform: (payload: any) => {
-    if (Telemetry.extensionUUID)
-      payload.person = { id: Telemetry.extensionUUID }
-  }
-};
-const rollbar = new Rollbar(opts);
-type Product = 'core' | 'extension' | 'language-server' | 'ui';
+  private createClient() {
+    AI.setup(AI_KEY)
+      .setAutoCollectConsole(false)
+      .setAutoCollectDependencies(false)
+      .setAutoCollectExceptions(false)
+      .setAutoCollectPerformance(false)
+      .setAutoCollectRequests(false)
+      .setAutoDependencyCorrelation(false)
+      .setUseDiskRetryCaching(true);
 
-namespace Telemetry {
-  let isEnabled: Boolean = true;
-  let logger: LoggerInterface = console;
-  let analytics: Analytics.Visitor;
-  export let extensionUUID: string;
+    AI.defaultClient.config.samplingPercentage = 50;
+    this.client = AI.defaultClient;
 
-  export function register(product: Product, enableTelemetry: boolean, useLogger?: LoggerInterface): any {
-    setLogger(useLogger);
-    if (enableTelemetry) {
-      enable();
-    } else {
-      disable();
+    const aiCtx = this.client.context;
+    aiCtx.tags[aiCtx.keys.applicationVersion] = `${EXT_NAME}-${
+      this.product
+      }@${VERSION}`;
+    aiCtx.tags[aiCtx.keys.internalSdkVersion] = `node:${AIVersion}`;
+    aiCtx.tags[aiCtx.keys.deviceType] = this.product;
+
+    if (Telemetry.vscodeInfo) {
+      aiCtx.tags[aiCtx.keys.userId] = Telemetry.vscodeInfo.uniqId;
+      aiCtx.tags[aiCtx.keys.deviceId] = Telemetry.vscodeInfo.uniqId;
+      aiCtx.tags[aiCtx.keys.sessionId] = Telemetry.vscodeInfo.sessId;
+
     }
-    extensionUUID = get('telemetryUUID');
-    if (!extensionUUID) {
-      extensionUUID = uuidv4();
-      start();
-      set('telemetryUUID', extensionUUID);
-      registerEvent('evt:install', VERSION, 'installed');
-      logger.log(`Telemetry random UUID generated: ${extensionUUID}`);
-    } else {
-      start();
-    }
-    registerSession('started');
-  }
 
-  export function registerCommand(command: string) {
-    registerEvent(`cmd:${command}`, VERSION);
-  }
-  export function registerInfoMessage(message, value = 'Dismissed') {
-    registerMessage('info', message, value);
-  }
-
-  export function registerErrorMessage(message, error?: Error, value: string = 'Dismissed') {
-    registerMessage('error', message, value);
-    if (error) {
-      registerException(error, { message });
-    }
-  }
-
-  export function enable(): void {
-    isEnabled = true;
-    logger.info('Telemetry enabled!');
-    if (RB)
-      rollbar.configure({
-        ...opts,
-        enabled: true,
-      });
-  }
-  export function disable(): void {
-    isEnabled = false;
-    logger.info('Telemetry disabled!');
-    if (RB)
-      rollbar.configure({
-        ...opts,
-        enabled: false,
-      });
-  }
-  export function setLogger(useLogger: LoggerInterface = console) {
-    logger = useLogger;
-  }
-  export function registerSession(evt: string) {
-    if (!isEnabled) return;
-    analytics.screenview(evt, `vscode-sqltools`, VERSION, errorHandler('screenview', { evt }));
-  }
-  export function registerMessage(type: string, message: string, value: string = 'Dismissed'): void {
-    registerEvent(`msg:${type}`, message, value);
-  }
-  export function registerEvent(category: string, event: string, label?: string): void {
-    if (!isEnabled) return;
-    analytics.event(category, event, label || event, errorHandler('event', { category, event, label }));
-  }
-
-  export function registerException(error: Error, meta: { [key: string]: any } = {}) {
-    if (!isEnabled) return;
-    errorHandler('registeredException', meta)(error);
-    let exceptionDescription = error.toString();
-    if (error.message) {
-      exceptionDescription = `${error.name}:${error.message}`;
-    }
-    analytics.exception(
-      {
-        exceptionDescription,
-        isExceptionFatal: false,
-      },
-      errorHandler('analyticsException', meta),
-    );
-  }
-
-  export function registerTime(timeKey: string, timer: Timer) {
-    analytics.timing(timeKey, timer.elapsed().toString(), errorHandler('timer', { timeKey }));
-  }
-
-  function start() {
-    analytics = Analytics(GA_CODE, extensionUUID, { strictCidFormat: false });
-    analytics.set('uid', extensionUUID);
-    analytics.set('cid', extensionUUID);
-    analytics.set('applicationVersion', VERSION);
-  }
-
-  function errorHandler(definedType: string, meta: { [key: string]: any } = {}) {
-    return (error?: Error) => {
-      if (!error) return;
-      rollbar.error(error, {
-        ...metaData,
-        definedType,
-        from: 'errorHandler',
-        ...meta,
-      });
-      logger.error(`Telemetry:${definedType} error`, error);
+    // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.arch" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.channel" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.vscodeuniqid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.vscodesessid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
+    this.client.commonProperties = {
+      'common.os': process.platform,
+      'common.arch': process.arch,
+      'common.channel': ENV,
+      'common.extname': EXT_NAME,
+      'common.extversion': VERSION,
+      'common.extversionnum': numericVersion(VERSION).toString(),
+      'common.nodeversion': process.version,
+      ...(Telemetry.vscodeInfo
+        ? {
+            'common.vscodeuniqid': Telemetry.vscodeInfo.uniqId,
+            'common.vscodesessid': Telemetry.vscodeInfo.sessId,
+            'common.vscodeversion': Telemetry.vscodeInfo.version
+          }
+        : {})
     };
+
+    AI.start();
+    this.registerSession();
   }
-  export function shouldSend() {
-    return !!isEnabled;
+  constructor(opts: SQLTools.TelemetryArgs) {
+    this.updateOpts(opts);
+  }
+
+  public updateOpts(opts: SQLTools.TelemetryArgs) {
+    this.product = opts.product || this.product;
+    Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
+    if (opts.enableTelemetry === true) this.enable();
+    else if (opts.enableTelemetry === false)this.disable();
+  }
+
+  public enable(): void {
+    if (Telemetry.enabled) return;
+    Telemetry.enabled = true;
+    console.info('Telemetry enabled!');
+    this.createClient();
+  }
+
+  public disable(): void {
+    if (!Telemetry.enabled) return;
+    Telemetry.enabled = false;
+    AI.dispose();
+    console.info('Telemetry disabled!');
+    this.client = undefined;
+  }
+
+  @runIfPropIsDefined('client')
+  public registerCommand(command: string) {
+    this.registerEvent(`cmd:${command}`);
+  }
+
+  @runIfPropIsDefined('client')
+  public registerInfoMessage(message, value = 'Dismissed') {
+    this.registerMessage(Telemetry.SeveriryLevel.Information, message, value);
+  }
+
+  @runIfPropIsDefined('client')
+  public registerException(error: Error, meta: { [key: string]: any } = {}) {
+    if (!error) return;
+    this.sendException(error, meta);
+  }
+
+  @runIfPropIsDefined('client')
+  public registerErrorMessage(
+    message,
+    error?: Error,
+    value: string = 'Dismissed'
+  ) {
+    this.registerMessage(Telemetry.SeveriryLevel.Error, message, value);
+    if (error) {
+      this.registerException(error, { message });
+    }
+  }
+
+  @runIfPropIsDefined('client')
+  public registerSession() {
+    this.registerEvent(`sessionStarted:${this.product}`);
+  }
+
+  @runIfPropIsDefined('client')
+  public registerMessage(
+    severity: AI.Contracts.SeverityLevel,
+    message: string,
+    value: string = 'Dismissed'
+  ): void {
+    console.debug(`Message: ${message}`);
+    this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
+  }
+
+  @runIfPropIsDefined('client')
+  public registerEvent(
+    name: string,
+    properties?: { [key: string]: string }
+  ): void {
+    console.debug(`Event: ${name}`, properties || '');
+    this.client.trackEvent({ name: this.prefixed(name), properties });
+  }
+
+  @runIfPropIsDefined('client')
+  private sendException(error: Error, properties: { [key: string]: any } = {}) {
+    console.error('Error: ', error);
+    this.client.trackException({
+      exception: error,
+      contextObjects: properties,
+      properties
+    });
+  }
+
+  @runIfPropIsDefined('client')
+  public registerTime(timeKey: string, timer: Timer) {
+    console.log(`${timeKey.charAt(0).toUpperCase()}${timeKey.substr(1).toLowerCase()} time: ${timer.elapsed()}ms`);
+    this.registerMetric(this.prefixed(`time:${timeKey}`), timer.elapsed());
+  }
+
+  @runIfPropIsDefined('client')
+  public registerMetric(name: string, value: number) {
+    this.client.trackMetric({
+      name,
+      value
+    });
   }
 }
 
 export default Telemetry;
-export { Telemetry };

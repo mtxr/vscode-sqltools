@@ -1,5 +1,4 @@
-import { LogLevel } from './logger';
-import { ConnectionCredentials } from './connection';
+import { ConnectionInterface } from '@sqltools/core/interface/connection';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
@@ -12,9 +11,42 @@ export interface FormatOptions {
    * @memberof FormatOptions
    */
   indentSize: number;
+
+  /**
+   * Reserverd word case
+   * @type {string}
+   * @default null
+   * @memberof FormatOptions
+   */
+  reservedWordCase?: 'upper' | 'lower' | null;
+}
+
+export interface ResultsOptions {
+  /**
+   * Global show records limit
+   * @type {number}
+   * @default 50
+   * @memberof ResultsOptions
+   */
+  limit: number;
+
+  /**
+   * Define where the results should show up.
+   * @type {string}
+   * @default null
+   * @memberof ResultsOptions
+   */
+  location?: 'current' | 'beside';
 }
 
 export interface Settings {
+  /**
+   * Disable new release notifications.
+   * @default false
+   * @type {boolean}
+   * @memberof Settings
+   */
+  disableReleaseNotifications?: boolean;
   /**
    * Name of the connection to auto connect on start
    * @type {string | string[]}
@@ -22,13 +54,6 @@ export interface Settings {
    * @memberof Settings
    */
   autoConnectTo?: string | string[];
-  /**
-   * Show debugging messages on console.
-   * @default true
-   * @type {boolean}
-   * @memberof Settings
-   */
-  logging?: boolean;
   /**
    * Help SQLTools development.
    * @type {boolean}
@@ -42,28 +67,7 @@ export interface Settings {
    * @default null
    * @memberof Settings
    */
-  telemetryUUID?: string;
-  /**
-   * Toggle statusbar visibility.
-   * @type {boolean}
-   * @default true
-   * @memberof Settings
-   */
-   showStatusbar?: boolean;
-  /**
-   * Severity of logged messages.
-   * @type {keyof LogLevel}
-   * @default DEBUG
-   * @memberof Settings
-   */
-   logLevel?: keyof LogLevel;
-  /**
-   * Timeout in seconds for killing query process after the timeout.
-   * @type {number}
-   * @default 300000
-   * @memberof Settings
-   */
-   queryTimeout?: number;
+  showStatusbar?: boolean;
   /**
    * Number of queries to keep on History.
    * @type {number}
@@ -71,20 +75,6 @@ export interface Settings {
    * @memberof Settings
    */
    historySize?: number;
-  /**
-   * Show results using new tab.
-   * @type {boolean}
-   * @default false
-   * @memberof Settings
-   */
-   showResultOnTab?: boolean;
-  /**
-   * Clear output for new commands.
-   * @type {boolean}
-   * @default false
-   * @memberof Settings
-   */
-   clearOutput?: boolean;
   /**
    * Languages with SQL completion activated.
    * @type {CompletionLanguages}
@@ -107,18 +97,42 @@ export interface Settings {
    * @memberof Settings
    */
   format?: FormatOptions;
+
+  /**
+   * Results view options
+   * @type {ResultsOptions}
+   * @memberof Settings
+   */
+  results?: ResultsOptions;
+
   /**
    * Connections
-   * @type {ConnectionCredentials[]}
+   * @type {ConnectionInterface[]}
    * @default []
    * @memberof Settings
    */
-  connections?: ConnectionCredentials[];
+  connections?: ConnectionInterface[];
 
   /**
-   * Global show records limit
+   * Default export results mode
+   * @default "prompt"
    * @type {string}
    * @memberof Settings
    */
-  previewLimit?: number;
+  defaultExportType?: 'prompt' | 'csv' | 'json';
+  /**
+   * Enable node runtime usage.
+   * @default false
+   * @type {null | boolean | string}
+   * @memberof Settings
+   */
+  useNodeRuntime?: null | boolean | string;
+
+  /**
+   * Columns sort order
+   * @default 'name'
+   * @type {null | string}
+   * @memberof Settings
+   */
+  sortColumns?: 'name' | 'ordinalnumber' | null;
 }

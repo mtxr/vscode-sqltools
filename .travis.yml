@@ -26,14 +26,6 @@ before_install:
 
 install:
   - yarn
-  - yarn add codacy-coverage
 
 script:
-  - yarn run test:lint
-  - yarn run test:unit
-
-after_script:
-  - cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript && echo 'Codacy coverage updated!'
-
-notifications:
-  webhooks: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN
+  - yarn test

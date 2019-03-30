@@ -1,19 +1,18 @@
-import { Telemetry, getDbId } from './utils';
+import { getConnectionId } from './utils';
 import Dialects from './dialect';
 import {
-  ConnectionCredentials,
   ConnectionDialect,
   DatabaseInterface,
-  LoggerInterface,
-  SerializedConnection,
+  ConnectionInterface,
 } from './interface';
+import SQLTools from './plugin-api';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionCredentials, private logger: LoggerInterface) {
+  constructor(credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 
@@ -21,13 +20,12 @@ export default class Connection {
     return this.conn.credentials.askForPassword;
   }
 
-  public connect() {
-    return this.query('SELECT 1;', true)
-      .then(() => {
-        this.connected = true;
-        return true;
-      })
-      .catch((e) => Promise.reject(e));
+  public async connect() {
+    if (typeof this.conn.testConnection === 'function')
+      await this.conn.testConnection()
+    else
+      await this.query('SELECT 1;', true);
+    this.connected = true;
   }
 
   public setPassword(password: string) {
@@ -71,19 +69,29 @@ export default class Connection {
     });
   }
 
-  public describeTable(tableName: string): Promise<any> {
-    return this.conn.describeTable(tableName);
+  public async  describeTable(tableName: string) {
+    const info = await this.conn.describeTable(tableName);
+
+    if (info[0]) {
+      info[0].label = `Table ${tableName}`;
+    }
+    return info;
   }
-  public showRecords(tableName: string, globalLimit: number): Promise<any> {
-    return this.conn.showRecords(tableName, this.conn.credentials.previewLimit || globalLimit || 10);
+  public async showRecords(tableName: string, globalLimit: number) {
+    const limit = this.conn.credentials.previewLimit || globalLimit || 50;
+    const records = await this.conn.showRecords(tableName, limit);
+
+    if (records[0]) {
+      records[0].label = `Showing ${Math.min(limit, records[0].results.length || 0)} ${tableName} records`;
+    }
+    return records;
   }
 
-  public query(query: string, autoHandleError: boolean = true): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
     return this.conn.query(query)
       .catch((e) => {
-        if (!autoHandleError) throw e;
-        this.logger.error('Query error:', e);
-        Telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
+        if (throwIfError) throw e;
+        this.telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
         let message = '';
         if (typeof e === 'string') {
           message = e;
@@ -93,6 +101,7 @@ export default class Connection {
           message = JSON.stringify(e);
         }
         return [ {
+          connId: this.getId(),
           cols: [],
           error: true,
           messages: [ message ],
@@ -124,10 +133,10 @@ export default class Connection {
   }
 
   public getId() {
-    return getDbId(this.conn.credentials);
+    return getConnectionId(this.conn.credentials);
   }
 
-  public serialize(): SerializedConnection {
+  public serialize(): ConnectionInterface {
     return {
       id: this.getId(),
       ...this.conn.credentials,

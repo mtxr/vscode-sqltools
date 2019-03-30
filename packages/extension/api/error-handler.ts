@@ -1,29 +1,28 @@
 import { Telemetry } from '@sqltools/core/utils';
-
+import { commands } from 'vscode';
 namespace ErrorHandler {
-  let logger = console;
-  let outputFn = async (...args): Promise<string | void> => Promise.resolve();
-  export function create(message: string, yesCallback?: Function): (reason: any) => void {
+  let telemetry: Telemetry;
+  let outputFn = (...args: any[]): Promise<string | void> => void args;
+  export function create(message: string, yesCallbackOrCommand?: Function | string): (reason: any) => void {
     return async (error: any): Promise<void> => {
       if (error) {
-        if (error.swallowError) return;
-        logger.error(`${message}: `, error.stack);
+        if (error.dontNotify || (error.data && error.data.dontNotify)) return;
+        telemetry.registerException(error);
         message = `${message} ${error.message ? error.message : error.toString()}`;
       }
-      if (typeof yesCallback !== 'function') {
-        Telemetry.registerErrorMessage(message, error, 'No callback');
+      if (typeof yesCallbackOrCommand === 'undefined') {
         outputFn(message);
         return;
       }
       const res = await outputFn(`${message}\nWould you like to see the logs?`, 'Yes', 'No');
-      Telemetry.registerErrorMessage(message, error, res === 'Yes' ? 'View Log' : 'Dismissed');
       if (res === 'Yes') {
-        yesCallback();
+        if (typeof yesCallbackOrCommand === 'function') yesCallbackOrCommand();
+        else commands.executeCommand(yesCallbackOrCommand)
       }
     };
   }
-  export function setLogger(newLogger) {
-    logger = newLogger;
+  export function setTelemetryClient(cli: Telemetry) {
+    telemetry = cli;
   }
 
   export function setOutputFn(newOutputFn) {
