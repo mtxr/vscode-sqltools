@@ -5,6 +5,11 @@ export function parse(query = '') {
   return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
 }
 
+// @todo add some tests for this new function
+export function cleanUp(query = '') {
+  return query.replace(/('(''|[^'])*')|[\t\r\n]|(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/gmi, '')
+}
+
 export function generateInsert(
   table: string,
   cols: Array<{ value: string, column: DatabaseInterface.TableColumn }>,
