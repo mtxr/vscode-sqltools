@@ -12,7 +12,6 @@
     "@sqltools/core": "*",
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
-    "@sqltools/sql-parser": "*",
     "@sqltools/ui": "*",
     "csv-stringify": "^5.3.0"
   },

@@ -7,7 +7,6 @@
     { "path": "./packages/ui" },
     { "path": "./packages/plugins" },
     { "path": "./packages/formatter" },
-    { "path": "./packages/sql-parser" },
     { "path": "./docs" }
   ],
   "extensions": {},

@@ -71,7 +71,7 @@ export declare namespace SQLTools {
         registerTextEditorCommand(command: string, handler: Function): this;
         errorHandler(message: string, error: any, yesCallbackOrCommand?: Function | string): any;
     }
-    interface LanguageServerInterface {
+    interface LanguageServerInterface<S = Store> {
         listen(): void;
         registerPlugin(plugin: LanguageServerPlugin): this;
         sendNotification: IConnection['sendNotification'];
@@ -89,7 +89,7 @@ export declare namespace SQLTools {
         client: IConnection['client'];
         docManager: TextDocuments;
         telemetry: TelemetryInterface;
-        store: Store;
+        store: S;
     }
     interface LanguageClientInterface {
         client: LanguageClient;
