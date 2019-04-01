@@ -62,7 +62,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
     try {
       query = query || (await this.historyMenu());
-      insertText(query, true);
+      insertText(query);
     } catch (e) {
       this.errorHandler('Coudl not edtir query.', e, `${EXT_NAME}.showOutputChannel`);
     }

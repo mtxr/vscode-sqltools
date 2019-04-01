@@ -286,7 +286,7 @@
                         "string",
                         "array"
                     ],
-                    "default": null,
+                    "default": [],
                     "required": false,
                     "description": "Name of the connection to auto connect on start",
                     "items": {

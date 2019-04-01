@@ -41,7 +41,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
-        const queries = Utils.query.parse(query);
+        const queries = Utils.query.parse(query, 'pg', ';');
         const messages = [];
         if (!Array.isArray(results)) {
           results = [results];
