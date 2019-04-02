@@ -1,5 +1,11 @@
 # Changelog
 
+### NEXT
+
+* **Enhancements**
+  * Improved query multiple statements parser
+
+
 ## v0.17
 
 ### v0.17.9

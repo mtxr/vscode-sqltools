@@ -4,7 +4,7 @@ import multipleQueiesParse from './query/parse';
 
 export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql', delimiter: string = ';'): string[] {
   try {
-    return multipleQueiesParse(query, dialect, delimiter)
+    return multipleQueiesParse(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, ''), dialect, delimiter)
   } catch (error) {
     return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
   }
