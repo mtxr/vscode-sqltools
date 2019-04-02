@@ -458,6 +458,16 @@
                                             "default"
                                         ],
                                         "default": "default"
+                                    },
+                                    "ssl": {
+                                        "required": false,
+                                        "type": [
+                                            "boolean",
+                                            "object",
+                                            "string",
+                                            "null"
+                                        ],
+                                        "default": "null"
                                     }
                                 }
                             },

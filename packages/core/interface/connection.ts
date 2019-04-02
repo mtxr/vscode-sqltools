@@ -83,7 +83,12 @@ export interface ConnectionInterface {
    */
   mysqlOptions?: {
     authProtocol?: 'xprotocol' | 'default'
-    ssl?: ConnectionConfig['ssl'];
+    /**
+     * If using xprotocol, must be boolean
+     *
+     * @type {ConnectionConfig['ssl'] | boolean}
+     */
+    ssl?: ConnectionConfig['ssl'] | boolean;
   }
 
   /**

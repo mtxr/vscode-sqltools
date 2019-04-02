@@ -2,6 +2,7 @@ import MySQLXLib from '@mysql/xdevapi';
 import {
   ConnectionDialect,
   DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
@@ -14,6 +15,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
       return this.connection;
     }
 
+    const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
     const client = MySQLXLib.getClient(
       {
         host: this.credentials.server,
@@ -22,6 +24,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
         user: this.credentials.username,
         schema: this.credentials.database,
         connectTimeout: this.credentials.connectionTimeout * 1000,
+        ssl,
       },
       {
         pooling: {

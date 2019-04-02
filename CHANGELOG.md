@@ -4,6 +4,7 @@
 
 * **Enhancements**
   * Improved query multiple statements parser
+  * Add ssl support for MySQL. Thanks to @MOZGIII.
 
 
 ## v0.17
