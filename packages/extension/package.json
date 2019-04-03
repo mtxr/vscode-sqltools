@@ -350,7 +350,10 @@
                             "description": "Indent size"
                         },
                         "reservedWordCase": {
-                            "type": ["string", "null"],
+                            "type": [
+                                "string",
+                                "null"
+                            ],
                             "default": null,
                             "description": "Reserverd word case"
                         }
@@ -531,7 +534,10 @@
                         "location": {
                             "type": "string",
                             "default": "active",
-                            "enum": ["active", "beside"],
+                            "enum": [
+                                "active",
+                                "beside"
+                            ],
                             "description": "Define where the results should show up."
                         }
                     }
@@ -570,7 +576,10 @@
                         "null",
                         "string"
                     ],
-                    "enum": ["name", "ordinalnumber"],
+                    "enum": [
+                        "name",
+                        "ordinalnumber"
+                    ],
                     "default": "name",
                     "description": "Sort columns criteria."
                 }
@@ -766,13 +775,12 @@
     "devDependencies": {
         "@babel/cli": "^7.1.2",
         "@types/jest": "^24.0.11",
-        "babel-jest": "^24.5.0",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
         "css-loader": "^2.1.1",
-        "jest-cli": "^24.5.0",
         "jest": "^24.5.0",
+        "jest-cli": "^24.5.0",
         "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
@@ -780,8 +788,8 @@
         "ts-loader": "^5.3.3",
         "typescript": "^3.4.1",
         "vscode": "^1.1.30",
-        "webpack-cli": "^3.2.3",
-        "webpack": "^4.29.6"
+        "webpack": "^4.29.6",
+        "webpack-cli": "^3.2.3"
     },
     "dependencies": {
         "@sqltools/core": "*",

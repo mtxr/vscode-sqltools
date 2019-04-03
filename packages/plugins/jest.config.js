@@ -1,6 +1,6 @@
 module.exports = {
   ...(require('../../test/config/baseConfig')),
-  preset: 'ts-jest/presets/js-with-babel',
+  preset: 'ts-jest',
   collectCoverageFrom: ['**/*.ts', '**/*.tsx'],
   coverageDirectory: '<rootDir>/../../coverage/plugins',
   coverageThreshold: {

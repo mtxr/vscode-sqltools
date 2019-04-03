@@ -1,4 +1,4 @@
-import formatter from '@sqltools/formatter';
+import formatter from '@sqltools/formatter/src/sqlFormatter';
 
 // Issue #99. Waiting 3rd party
 function nonLatinQuickFix(query: string) {
