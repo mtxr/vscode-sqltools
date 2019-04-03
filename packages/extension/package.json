@@ -52,13 +52,28 @@
     "icon": "static/icon.png",
     "badges": [
         {
+            "description": "Build Status",
+            "url": "https://img.shields.io/travis/com/mtxr/vscode-sqltools/master.svg?style=flat-square",
+            "href": "https://travis-ci.com/mtxr/vscode-sqltools"
+        },
+        {
+            "description": "Greenkeeper badge",
+            "url": "https://badges.greenkeeper.io/mtxr/vscode-sqltools.svg?style=flat-square",
+            "href": "https://greenkeeper.io/"
+        },
+        {
+            "description": "Gitter",
+            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
+            "href": "https://gitter.im/vscode-sqltools"
+        },
+        {
             "description": "Patreon Support",
-            "url": "https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon",
+            "url": "https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square&logo=patreon",
             "href": "https://www.patreon.com/mteixeira"
         },
         {
             "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal",
+            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square&logo=paypal",
             "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
         }
     ],
@@ -763,7 +778,7 @@
         "style-loader": "^0.23.1",
         "ts-jest": "^24.0.0",
         "ts-loader": "^5.3.3",
-        "typescript": "^3.3.3333",
+        "typescript": "^3.4.1",
         "vscode": "^1.1.30",
         "webpack-cli": "^3.2.3",
         "webpack": "^4.29.6"

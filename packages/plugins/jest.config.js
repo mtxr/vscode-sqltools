@@ -11,5 +11,5 @@ module.exports = {
       lines: 0.34,
     },
   },
-  testMatch: ['**/*.test.(ts|js)'],
+  testMatch: ['**/*.test.(ts)'],
 };
