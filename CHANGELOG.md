@@ -1,13 +1,14 @@
 # Changelog
 
-### NEXT
+
+## v0.17
+
+### v0.17.10
 
 * **Enhancements**
   * Improved query multiple statements parser
   * Add ssl support for MySQL. Thanks to @MOZGIII.
-
-
-## v0.17
+  * Ignoring comments on Query History tree view
 
 ### v0.17.9
 
