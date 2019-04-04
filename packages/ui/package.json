@@ -6,6 +6,10 @@
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "GPL-3.0",
   "private": true,
+  "scripts": {
+    "test": "(cd ../.. && cross-env TESTS_PATH_FILTER=packages/ui yarn test)",
+    "test:watch": "cross-env WATCH=1 yarn run test"
+  },
   "dependencies": {
     "@sqltools/core": "*",
     "react": "^16.8.1",

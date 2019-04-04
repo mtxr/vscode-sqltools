@@ -12,6 +12,10 @@
     "redux": "^4.0.1",
     "vscode-languageserver": "^5.3.0-next.1"
   },
+  "scripts": {
+    "test": "(cd ../.. && cross-env TESTS_PATH_FILTER=packages/language-server yarn test)",
+    "test:watch": "cross-env WATCH=1 yarn run test"
+  },
   "devDependencies": {
     "@babel/core": "7.4.0",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",

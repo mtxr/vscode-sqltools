@@ -19,6 +19,7 @@ module.exports = exports = function getWebviewConfig() {
             { loader: 'babel-loader', options: babelOptions },
             { loader: 'ts-loader', options: { transpileOnly: true } },
           ],
+          exclude: /node_modules|\.test\..+/i,
         },
         {
           test: /\.css/,

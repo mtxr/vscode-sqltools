@@ -765,6 +765,8 @@
         }
     },
     "scripts": {
+        "test": "(cd ../.. && cross-env TESTS_PATH_FILTER=packages/extension yarn test)",
+        "test:watch": "cross-env WATCH=1 yarn run test",
         "vscode:prepublish": "yarn run compile",
         "compile": "cross-env NODE_ENV=production webpack",
         "compile:preview": "env PREVIEW=1 yarn run compile",
