@@ -8,7 +8,7 @@ node_js:
 cache: yarn
 
 env:
-  - HUSKY_SKIP_INSTALL=tru
+  - HUSKY_SKIP_INSTALL=true
 
 addons:
   apt:
