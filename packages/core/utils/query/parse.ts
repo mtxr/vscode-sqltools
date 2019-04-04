@@ -107,7 +107,6 @@ class QueryParser {
           var tagSymbolResult = this.getTag(queryUntilTagSymbol, dialect);
           if (tagSymbolResult != null) {
             var tagSymbol = tagSymbolResult[0];
-            var tagSymbolIndex = tagSymbolResult[1];
             if (tagSymbol == tagChar) {
               isInTag = false;
             }
@@ -174,7 +173,7 @@ class QueryParser {
         parsedQueryAfterIndex = parsedQueryAfterIndex.substring(0, indexOfNewLine);
         parsedQueryAfterIndex = parsedQueryAfterIndex.substring(delimiterLength);
         var delimiterSymbol = parsedQueryAfterIndex.trim();
-        delimiterSymbol = this.clearTextUntilComment(delimiterSymbol, dialect);
+        delimiterSymbol = this.clearTextUntilComment(delimiterSymbol);
         if (delimiterSymbol != null) {
           delimiterSymbol = delimiterSymbol.trim();
           var delimiterSymbolEndIndex =
@@ -219,16 +218,16 @@ class QueryParser {
     }
   }
 
-  private static clearTextUntilComment(text: string, dialect: string): string {
-    var previousChar: string = null;
+  private static clearTextUntilComment(text: string): string {
+    // var previousChar: string = null;
     var nextChar: string = null;
     var charArray: Array<string> = Array.from(text);
     var clearedText: string = null;
     for (var index = 0; index < charArray.length; index++) {
       var char = charArray[index];
-      if (index > 0) {
-        previousChar = charArray[index - 1];
-      }
+      // if (index > 0) {
+      //   previousChar = charArray[index - 1];
+      // }
 
       if (index < charArray.length) {
         nextChar = charArray[index + 1];

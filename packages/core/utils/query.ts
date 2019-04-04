@@ -2,6 +2,15 @@ import { DatabaseInterface, Settings } from '../interface';
 import { format } from '@sqltools/plugins/formatter/utils';
 import multipleQueiesParse from './query/parse';
 
+/**
+ * Parse multiple queries to an array of queries
+ *
+ * @export
+ * @param {string} query
+ * @param {('pg' | 'mysql' | 'mssql')} [dialect='mysql']
+ * @param {string} [delimiter=';']
+ * @returns {string[]}
+ */
 export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql', delimiter: string = ';'): string[] {
   try {
     return multipleQueiesParse(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, ''), dialect, delimiter)
@@ -9,8 +18,13 @@ export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'
     return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
   }
 }
-
-// @todo add some tests for this new function
+/**
+ * Removes comments and line breaks from query
+ *
+ * @export
+ * @param {string} [query='']
+ * @returns
+ */
 export function cleanUp(query = '') {
   return query.replace('\t', '  ')
     .replace(/('(''|[^'])*')|(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/gmi, '')
@@ -21,6 +35,15 @@ export function cleanUp(query = '') {
     .trim();
 }
 
+/**
+ * Generates insert queries based on table columns
+ *
+ * @export
+ * @param {string} table
+ * @param {Array<{ value: string, column: DatabaseInterface.TableColumn }>} cols
+ * @param {Settings['format']} [formatOptions]
+ * @returns {string}
+ */
 export function generateInsert(
   table: string,
   cols: Array<{ value: string, column: DatabaseInterface.TableColumn }>,
