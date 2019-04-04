@@ -19,7 +19,9 @@
   ],
   "scripts": {
     "clean": "rimraf -rf ../dist",
-    "test": "yarn workspace @sqltools/plugins test",
+    "pretest": "rimraf -rf ./coverage",
+    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 node ./node_modules/vscode/bin/test",
+    "test:watch": "cross-env WATCH=1 yarn run test",
     "precompile": "yarn test && yarn run clean",
     "prewatch": "yarn run clean",
     "watch": "yarn workspace @sqltools/extension watch",
@@ -36,6 +38,7 @@
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
+    "cross-env": "^5.2.0",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",

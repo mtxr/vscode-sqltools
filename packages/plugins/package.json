@@ -16,7 +16,7 @@
     "csv-stringify": "^5.3.0"
   },
   "scripts": {
-    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 node --inspect ../../node_modules/vscode/bin/test",
+    "test": "(cd ../.. && cross-env TESTS_PATH_FILTER=packages/plugins yarn test)",
     "test:watch": "cross-env WATCH=1 yarn run test"
   },
   "devDependencies": {
