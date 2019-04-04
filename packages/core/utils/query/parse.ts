@@ -4,14 +4,15 @@
  */
 
 class QueryParser {
-  static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql', delimiter: string = ';'): Array<string> {
+  static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): Array<string> {
+    const delimiter: string = ';';
     var queries: Array<string> = [];
     var flag = true;
     while (flag) {
       if (restOfQuery == null) {
         restOfQuery = query;
       }
-      var statementAndRest = this.getStatements(restOfQuery, dialect, delimiter);
+      var statementAndRest = QueryParser.getStatements(restOfQuery, dialect, delimiter);
 
       var statement = statementAndRest[0];
       if (statement != null && statement.trim() != '') {
@@ -27,7 +28,7 @@ class QueryParser {
     return queries;
   }
 
-  private static getStatements(query: string, dialect: string, delimiter: string): Array<string> {
+  static getStatements(query: string, dialect: string, delimiter: string): Array<string> {
     var charArray: Array<string> = Array.from(query);
     var previousChar: string = null;
     var nextChar: string = null;
@@ -84,13 +85,13 @@ class QueryParser {
       }
 
       if (char.toLowerCase() == 'd' && isInComment == false && isInString == false) {
-        var delimiterResult = this.getDelimiter(index, query, dialect);
+        var delimiterResult = QueryParser.getDelimiter(index, query, dialect);
         if (delimiterResult != null) {
           // it's delimiter
           var delimiterSymbol: string = delimiterResult[0];
           var delimiterEndIndex: number = delimiterResult[1];
           query = query.substring(delimiterEndIndex);
-          resultQueries = this.getStatements(query, dialect, delimiterSymbol);
+          resultQueries = QueryParser.getStatements(query, dialect, delimiterSymbol);
           break;
         }
       }
@@ -98,13 +99,13 @@ class QueryParser {
       if (char == '$' && isInComment == false && isInString == false) {
         var queryUntilTagSymbol = query.substring(index);
         if (isInTag == false) {
-          var tagSymbolResult = this.getTag(queryUntilTagSymbol, dialect);
+          var tagSymbolResult = QueryParser.getTag(queryUntilTagSymbol, dialect);
           if (tagSymbolResult != null) {
             isInTag = true;
             tagChar = tagSymbolResult[0];
           }
         } else {
-          var tagSymbolResult = this.getTag(queryUntilTagSymbol, dialect);
+          var tagSymbolResult = QueryParser.getTag(queryUntilTagSymbol, dialect);
           if (tagSymbolResult != null) {
             var tagSymbol = tagSymbolResult[0];
             if (tagSymbol == tagChar) {
@@ -113,26 +114,24 @@ class QueryParser {
           }
         }
       }
-
-      if (delimiter.length > 1 && charArray[index + delimiter.length - 1] != undefined) {
-        for (var i = index + 1; i < index + delimiter.length; i++) {
-          char += charArray[i];
-        }
+      if (dialect === 'mssql' && char.toLowerCase() === 'g' && charArray[index + 1] && charArray[index + 1].toLowerCase() === 'o') {
+        char = `${char}${charArray[index + 1]}`;
       }
 
       // it's a query, continue until you get delimiter hit
       if (
-        char.toLowerCase() == delimiter.toLowerCase() &&
+        (char.toLowerCase() === delimiter.toLowerCase() || char.toLowerCase() === 'go') &&
         isInString == false &&
         isInComment == false &&
         isInTag == false
       ) {
-        if (this.isGoDelimiter(dialect, query, index) == false) {
-          continue;
+        var splittingIndex = index + 1;
+        if (dialect === 'mssql' && char.toLowerCase() === 'go') {
+          splittingIndex = index;
+          resultQueries = QueryParser.getQueryParts(query, splittingIndex, 2);
+          break;
         }
-        var splittingIndex = index;
-        // if (delimiter == ";") {     splittingIndex = index + 1 }
-        resultQueries = this.getQueryParts(query, splittingIndex, delimiter);
+        resultQueries = QueryParser.getQueryParts(query, splittingIndex);
         break;
       }
     }
@@ -146,9 +145,9 @@ class QueryParser {
     return resultQueries;
   }
 
-  private static getQueryParts(query: string, splittingIndex: number, delimiter: string): Array<string> {
+  static getQueryParts(query: string, splittingIndex: number, numChars: number = 1): Array<string> {
     var statement: string = query.substring(0, splittingIndex);
-    var restOfQuery: string = query.substring(splittingIndex + delimiter.length);
+    var restOfQuery: string = query.substring(splittingIndex + numChars);
     var result: Array<string> = [];
     if (statement != null) {
       statement = statement.trim();
@@ -158,7 +157,7 @@ class QueryParser {
     return result;
   }
 
-  private static getDelimiter(index: number, query: string, dialect: string): Array<any> {
+  static getDelimiter(index: number, query: string, dialect: string): Array<any> {
     if (dialect == 'mysql') {
       var delimiterKeyword = 'delimiter ';
       var delimiterLength = delimiterKeyword.length;
@@ -173,7 +172,7 @@ class QueryParser {
         parsedQueryAfterIndex = parsedQueryAfterIndex.substring(0, indexOfNewLine);
         parsedQueryAfterIndex = parsedQueryAfterIndex.substring(delimiterLength);
         var delimiterSymbol = parsedQueryAfterIndex.trim();
-        delimiterSymbol = this.clearTextUntilComment(delimiterSymbol);
+        delimiterSymbol = QueryParser.clearTextUntilComment(delimiterSymbol);
         if (delimiterSymbol != null) {
           delimiterSymbol = delimiterSymbol.trim();
           var delimiterSymbolEndIndex =
@@ -191,7 +190,7 @@ class QueryParser {
     }
   }
 
-  private static getTag(query: string, dialect: string): Array<any> {
+  static getTag(query: string, dialect: string): Array<any> {
     if (dialect == 'pg') {
       var matchTag = query.match(/^(\$[a-zA-Z]*\$)/i);
       if (matchTag != null && matchTag.length > 1) {
@@ -207,7 +206,7 @@ class QueryParser {
     }
   }
 
-  private static isGoDelimiter(dialect: string, query: string, index: number): boolean {
+  static isGoDelimiter(dialect: string, query: string, index: number): boolean {
     if (dialect == 'mssql') {
       var match = /(?:\bgo\b\s*)/i.exec(query);
       if (match != null && match.index == index) {
@@ -218,7 +217,7 @@ class QueryParser {
     }
   }
 
-  private static clearTextUntilComment(text: string): string {
+  static clearTextUntilComment(text: string): string {
     // var previousChar: string = null;
     var nextChar: string = null;
     var charArray: Array<string> = Array.from(text);

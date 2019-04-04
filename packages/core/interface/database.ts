@@ -19,7 +19,7 @@ export namespace DatabaseInterface {
     tableSchema?: string;
     tableDatabase?: string;
     tableCatalog?: string;
-    defaultValue: string;
+    defaultValue?: string;
     isNullable: boolean;
     isPk?: boolean;
     isFk?: boolean;

@@ -1,7 +1,7 @@
 module.exports = {
   ...(require('./test/config/baseConfig')),
   preset: 'ts-jest',
-  collectCoverageFrom: ['**/*.ts', '**/*.tsx'],
+  collectCoverageFrom: ['<rootDir>/packages/**/*.ts', '<rootDir>/packages/**/*.tsx'],
   coverageDirectory: '<rootDir>/coverage',
   coverageThreshold: {
     global: {
