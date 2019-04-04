@@ -10,5 +10,13 @@
         "packages/ui/package.json"
       ]
     }
-  }
+  },
+  "ignore": [
+    "@sqltools/core",
+    "@sqltools/extension",
+    "@sqltools/formatter",
+    "@sqltools/language-server",
+    "@sqltools/plugins",
+    "@sqltools/ui"
+  ]
 }
