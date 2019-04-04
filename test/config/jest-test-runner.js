@@ -21,6 +21,9 @@ async function run(_testRoot, callback) {
     // so do it here. It is not clear if this is having any effect.
     sourceMapSupport.install();
 
+    if (process.env.TESTS_PATH_FILTER)
+        jestConfig.testPathPattern = process.env.TESTS_PATH_FILTER.split(/ *,/);
+
     // Forward logging from Jest to the Debug Console.
     forwardStdoutStderrStreams();
 

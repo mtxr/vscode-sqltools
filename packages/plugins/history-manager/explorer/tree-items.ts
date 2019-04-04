@@ -1,6 +1,7 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
+import { cleanUp } from '@sqltools/core/utils/query';
 
 export class HistoryTreeItem extends TreeItem {
   public contextValue = 'history.item';
@@ -10,7 +11,7 @@ export class HistoryTreeItem extends TreeItem {
   }
 
   constructor(public query: string, public parent: HistoryTreeGroup) {
-    super(query, TreeItemCollapsibleState.None);
+    super(cleanUp(query), TreeItemCollapsibleState.None);
     this.description = new Date().toLocaleString();
     this.command = {
       title: 'Edit',

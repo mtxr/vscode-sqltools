@@ -1,7 +1,13 @@
 sudo: false
 language: node_js
+node_js:
+  - "8"
+  - "10"
 
 cache: yarn
+
+env:
+  - HUSKY_SKIP_INSTALL=true
 
 addons:
   apt:
@@ -9,9 +15,6 @@ addons:
       - sourceline: 'ppa:ubuntu-toolchain-r/test'
     packages:
       - libstdc++6-4.7-dev
-
-node_js:
-  - "8"
 
 os:
   # - osx
@@ -25,7 +28,9 @@ before_install:
     fi
 
 install:
+  - yarn global add codecov
   - yarn
-
 script:
   - yarn test
+after_success:
+  - codecov

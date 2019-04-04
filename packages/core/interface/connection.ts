@@ -1,6 +1,7 @@
 import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
 import { ClientConfig } from 'pg';
+import { ConnectionConfig } from 'mysql';
 
 export interface ConnectionInterface {
   /**
@@ -82,6 +83,12 @@ export interface ConnectionInterface {
    */
   mysqlOptions?: {
     authProtocol?: 'xprotocol' | 'default'
+    /**
+     * If using xprotocol, must be boolean
+     *
+     * @type {ConnectionConfig['ssl'] | boolean}
+     */
+    ssl?: ConnectionConfig['ssl'] | boolean;
   }
 
   /**

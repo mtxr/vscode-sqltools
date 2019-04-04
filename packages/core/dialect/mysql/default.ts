@@ -2,6 +2,7 @@ import MySQLLib from 'mysql';
 import {
   ConnectionDialect,
   DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
@@ -13,6 +14,11 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       return this.connection;
     }
 
+    const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
+    if (typeof ssl === 'boolean') {
+      throw new Error('SSL as boolean only supported for xprotocol. See: https://mtxr.gitbook.io/vscode-sqltools/connections/mysql#2-ssl');
+    }
+
     const pool = MySQLLib.createPool({
       connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
@@ -20,7 +26,8 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       password: this.credentials.password,
       port: this.credentials.port,
       user: this.credentials.username,
-      multipleStatements: true
+      multipleStatements: true,
+      ssl
     });
 
     return new Promise<MySQLLib.Pool>((resolve, reject) => {
