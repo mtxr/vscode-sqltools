@@ -79,6 +79,6 @@ describe('generateInsert query', () => {
   const expected = `INSERT INTO
   tablename (col1)
 VALUES
-  (\${1:integer});$0`;
+  (\${1:col1:integer});$0`;
   expect(generated).toBe(expected);
 });

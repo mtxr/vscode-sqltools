@@ -48,12 +48,11 @@ export function generateInsert(
   cols: Array<DatabaseInterface.TableColumn>,
   formatOptions?: Settings['format'],
 ): string {
-  // @todo: snippet should have variable name and type
   let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.columnName).join(', ')}) VALUES (`;
   cols.forEach((col, index) => {
-    insertQuery = insertQuery.concat(`'\${${index + 1}:${col.type}}', `);
+    insertQuery = insertQuery.concat(`'\${${index + 1}:${col.columnName}:${col.type}}', `);
   });
   return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, formatOptions)
-  .replace(/'(\${\d+:(int|bool|num)[\w ]+})'/gi, '$1')
+  .replace(/'\${(\d+):([\w\s]+):((int|bool|num)[\w\s]+)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
   .concat('$0');
 }
