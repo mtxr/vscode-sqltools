@@ -7,6 +7,9 @@
 * **Enhancements**
   * Improved query parser for better handling MSSQL queires
   * Insert query generator includes column name and type on placeholders
+  * Identifing table name prefix word for suggestions
+  * Sorting column names by table name on suggestions
+  * Changed the icon on sugestions if it`s a view to make it visually different of a table
 
 * **Fixes**
   - Fixed history cutting some query parts on history explorer.

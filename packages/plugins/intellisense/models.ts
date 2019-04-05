@@ -5,7 +5,7 @@ import {
 import { DatabaseInterface } from '@sqltools/core/interface';
 
 export function TableCompletionItem(table: DatabaseInterface.Table): CompletionItem {
-
+  const tableOrView = table.isView ? 'View' : 'Table';
   let yml = '';
   if (table.tableDatabase) {
     yml += `Database: ${table.tableDatabase}\n`;
@@ -14,21 +14,28 @@ export function TableCompletionItem(table: DatabaseInterface.Table): CompletionI
     yml += `Table Catalog: ${table.tableCatalog}\n`;
   }
   if (table.tableSchema) {
-    yml += `Table Schema: ${table.tableSchema}\n`;
+    yml += `${tableOrView} Schema: ${table.tableSchema}\n`;
   }
-  yml += `Table: ${table.name}\n`;
+  yml += `${tableOrView}: ${table.name}\n`;
   if (table.numberOfColumns !== null && typeof table.numberOfColumns !== 'undefined') {
     yml += `Number of Columns: ${table.numberOfColumns}\n`;
   }
   return {
-    detail: 'Table',
+    detail: tableOrView,
     documentation: {
       value: `\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
-    kind: 21,
+    kind: table.isView ? CompletionItemKind.Reference : CompletionItemKind.Constant,
     label: table.name,
   };
+}
+
+export function TableCompletionItemFirst(table: DatabaseInterface.Table): CompletionItem {
+  return {
+    ...TableCompletionItem(table),
+    sortText: `0.${table.name}`,
+  }
 }
 
 export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): CompletionItem {
@@ -58,7 +65,7 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): C
   yml += `Table: ${col.tableName}`;
 
   return <CompletionItem>{
-    detail: 'Column',
+    detail: `${col.tableName} Col`,
     documentation: {
       value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
@@ -66,5 +73,6 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): C
     kind: CompletionItemKind.Field,
     filterText: `${col.tableName}.${col.columnName}`,
     label: col.columnName,
+    sortText: `${col.tableName}.${col.columnName}`,
   };
 }

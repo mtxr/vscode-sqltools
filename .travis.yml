@@ -9,12 +9,12 @@ cache: yarn
 env:
   - HUSKY_SKIP_INSTALL=true
 
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    packages:
-      - libstdc++6-4.7-dev
+# addons:
+#   apt:
+#     sources:
+#       - sourceline: 'ppa:ubuntu-toolchain-r/test'
+#     packages:
+#       - libstdc++6-4.7-dev
 
 os:
   # - osx
