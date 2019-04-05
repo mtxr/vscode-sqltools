@@ -20,6 +20,7 @@
   "scripts": {
     "clean": "rimraf -rf ../dist",
     "pretest": "rimraf -rf ./coverage",
+    "jest": "jest --config jest.config.js --passWithNoTests",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 node ./node_modules/vscode/bin/test",
     "test:watch": "cross-env WATCH=1 yarn run test",
     "precompile": "yarn test && yarn run clean",

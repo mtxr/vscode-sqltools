@@ -71,7 +71,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     const request = pool.request();
     request.multiple = true;
     const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '')).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
-    const queries = Utils.query.parse(query, 'mssql', ';');
+    const queries = Utils.query.parse(query, 'mssql');
     return queries.map((q, i): DatabaseInterface.QueryResults => {
       const r = recordsets[i] || [];
       const messages = [];

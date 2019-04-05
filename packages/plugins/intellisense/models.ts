@@ -57,13 +57,14 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): C
   }
   yml += `Table: ${col.tableName}`;
 
-  return {
+  return <CompletionItem>{
     detail: 'Column',
     documentation: {
       value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
-    kind: CompletionItemKind.Property,
+    kind: CompletionItemKind.Field,
+    filterText: `${col.tableName}.${col.columnName}`,
     label: col.columnName,
   };
 }

@@ -166,8 +166,8 @@ export class SidebarTable extends TreeItem {
   public toString() {
     return this.table.name;
   }
-  public get columns() {
-    return this.items;
+  public get columns(): DatabaseInterface.TableColumn[] {
+    return this.items.map(item => item.column);
   }
   public items: SidebarColumn[] = [];
   public get conn() { return this.parent.conn; }

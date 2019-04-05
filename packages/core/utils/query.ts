@@ -2,18 +2,31 @@ import { DatabaseInterface, Settings } from '../interface';
 import { format } from '@sqltools/plugins/formatter/utils';
 import multipleQueiesParse from './query/parse';
 
-export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql', delimiter: string = ';'): string[] {
-  try {
-    return multipleQueiesParse(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, ''), dialect, delimiter)
-  } catch (error) {
-    return query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim());
-  }
+/**
+ * Parse multiple queries to an array of queries
+ *
+ * @export
+ * @param {string} query
+ * @param {('pg' | 'mysql' | 'mssql')} [dialect='mysql']
+ * @param {string} [delimiter=';']
+ * @returns {string[]}
+ */
+export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): string[] {
+  return multipleQueiesParse(query, dialect);
+  // return fixedQuery.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim()).map(v => `${v};`);
 }
+/**
+ * Removes comments and line breaks from query
+ *
+ * @export
+ * @param {string} [query='']
+ * @returns
+ */
+export function cleanUp(query: string = '') {
+  if (!query) return '';
 
-// @todo add some tests for this new function
-export function cleanUp(query = '') {
-  return query.replace('\t', '  ')
-    .replace(/('(''|[^'])*')|(--[^\r\n]*)|(\/\*[\w\W]*?(?=\*\/)\*\/)/gmi, '')
+  return query.toString().replace('\t', '  ')
+    .replace(/(--.*)|(((\/\*)+?[\w\W]+?(\*\/)+))/gmi, '')
     .split(/\r\n|\n/gi)
     .map(v => v.trim())
     .filter(Boolean)
@@ -21,17 +34,25 @@ export function cleanUp(query = '') {
     .trim();
 }
 
+/**
+ * Generates insert queries based on table columns
+ *
+ * @export
+ * @param {string} table
+ * @param {Array<DatabaseInterface.TableColumn>} cols
+ * @param {Settings['format']} [formatOptions]
+ * @returns {string}
+ */
 export function generateInsert(
   table: string,
-  cols: Array<{ value: string, column: DatabaseInterface.TableColumn }>,
+  cols: Array<DatabaseInterface.TableColumn>,
   formatOptions?: Settings['format'],
 ): string {
-  // @todo: snippet should have variable name and type
-  let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.value).join(', ')}) VALUES (`;
+  let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.columnName).join(', ')}) VALUES (`;
   cols.forEach((col, index) => {
-    insertQuery = insertQuery.concat(`'\${${index + 1}:${col.column.type}}', `);
+    insertQuery = insertQuery.concat(`'\${${index + 1}:${col.columnName}:${col.type}}', `);
   });
   return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, formatOptions)
-  .replace(/'(\${\d+:(int|bool|num)[\w ]+})'/gi, '$1')
+  .replace(/'\${(\d+):([\w\s]+):((int|bool|num)[\w\s]+)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
   .concat('$0');
 }

@@ -4,6 +4,7 @@ import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
 import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import SQLTools from '@sqltools/core/plugin-api';
+import { DatabaseInterface } from '@sqltools/core/interface';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
   try {
@@ -19,8 +20,8 @@ function insertTextHandler(node: { value: string } | string) {
   return insertText(typeof node === 'string' ? node : node.value);
 }
 
-function generateInsertQueryHandler(item: { columns: any }): Promise<boolean> {
-  return insertSnippet(QueryUtils.generateInsert(item.toString(), item.columns, ConfigManager.format));
+function generateInsertQueryHandler(item: { columns: DatabaseInterface.TableColumn[], name?: string }): Promise<boolean> {
+  return insertSnippet(QueryUtils.generateInsert(item.name || item.toString(), item.columns, ConfigManager.format));
 }
 
 function newSqlFileHandler() {
