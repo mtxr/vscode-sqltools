@@ -6,8 +6,10 @@ $transition: all .3s ease 0s;
 
 body {
   font-size: $fallbackFontSize;
+  font-size: $fontSizeFallback;
   font-size: $fontSize;
   font-family: $fallbackFontFamily;
+  font-family: $fontFamilyFallback;
   font-family: $fontFamily;
   color: $color;
   background: $fallbackBackgroundColor;

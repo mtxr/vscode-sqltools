@@ -2,8 +2,10 @@
 
 $color: var(--vscode-editor-foreground);
 $backgroundColor: var(--vscode-editor-background);
-$fontFamily: var(--vscode-editor-font-family);
-$fontSize: var(--vscode-editor-font-size);
+$fontFamily: var(--vscode-font-family);
+$fontSize: var(--vscode-font-size);
+$fontFamilyFallback: var(--vscode-editor-font-family);
+$fontSizeFallback: var(--vscode-editor-font-size);
 $linkColor: var(--vscode-button-background);
 $linkColorFg: var(--vscode-button-foreground);
 
@@ -49,6 +51,8 @@ $darkThemeWhite16: rgba(255, 255, 255, 0.80);
 $radius: 3px;
 
 * {
+  font-family: $fallbackFontFamily;
+  font-family: $fontFamilyFallback;
   font-family: $fontFamily;
   color: $fallbackColor;
   color: $color;
@@ -56,6 +60,7 @@ $radius: 3px;
 
 body {
   font-size: $fallbackFontSize;
+  font-size: $fontSizeFallback;
   font-size: $fontSize;
   background: $backgroundColor;
 }
