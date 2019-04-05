@@ -1,7 +1,15 @@
 # Changelog
 
-
 ## v0.17
+
+### v0.17.11
+
+* **Enhancements**
+  * Improved query parser for better handling MSSQL queires
+  * Insert query generator includes column name and type on placeholders
+
+* **Fixes**
+  - Fixed history cutting some query parts on history explorer.
 
 ### v0.17.10
 
