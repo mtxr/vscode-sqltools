@@ -16,7 +16,7 @@ env:
 #       - libstdc++6-4.7-dev
 
 os:
-  # - osx
+  - osx
   - linux
 
 before_install:
