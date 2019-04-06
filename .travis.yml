@@ -7,7 +7,6 @@ cache: yarn
 
 env:
   - HUSKY_SKIP_INSTALL=true
-  - LOG_LEVEL=trace
 
 # addons:
 #   apt:
