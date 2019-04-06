@@ -48,7 +48,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
         }
 
         return results.map((r, i): DatabaseInterface.QueryResults => {
-          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select') {
+          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number') {
             messages.push(`${r.rowCount} rows were affected.`);
           }
           return {

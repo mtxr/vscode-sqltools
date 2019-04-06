@@ -30,6 +30,7 @@ install:
   - yarn global add codecov
   - yarn
 script:
+  - yarn test:older --no-coverage
   - yarn test
 after_success:
   - codecov
