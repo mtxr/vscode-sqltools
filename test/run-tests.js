@@ -30,7 +30,7 @@ function runTests(executablePath) {
         '--extensionDevelopmentPath=' + extensionsFolder,
         '--extensionTestsPath=' + testsFolder,
         '--locale=' + locale,
-        '--log=trace'
+        `--log=${process.env.LOG_LEVEL || 'debug'}`
     ];
 
     if (userDataDir) {

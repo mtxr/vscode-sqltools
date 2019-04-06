@@ -8,22 +8,14 @@ cache: yarn
 env:
   - HUSKY_SKIP_INSTALL=true
 
-# addons:
-#   apt:
-#     sources:
-#       - sourceline: 'ppa:ubuntu-toolchain-r/test'
-#     packages:
-#       - libstdc++6-4.7-dev
-
 os:
-  # - osx
   - linux
 
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
-      sleep 3;
+      sleep 15;
     fi
 
 install:
