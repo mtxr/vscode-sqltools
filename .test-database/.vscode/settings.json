@@ -21,7 +21,10 @@
       "username": "root",
       "askForPassword": false,
       "password": "root",
-      "connectionTimeout": 15
+      "connectionTimeout": 15,
+      "icons": {
+        "active": "https://cdn.iconscout.com/icon/free/png-256/postgresql-10-1175121.png"
+      }
     },
     {
       "name": "MSSQL",

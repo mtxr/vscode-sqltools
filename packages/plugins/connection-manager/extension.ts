@@ -134,6 +134,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.settingsWebview.show();
   }
 
+  private ext_focusOnExplorer = () => {
+    return this.explorer.focus();
+  }
+
   private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
     let id: string;
     if (connIdOrNode) {
@@ -364,7 +368,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`saveResults`, this.ext_saveResults)
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
-      .registerCommand(`showRecords`, this.ext_showRecords);
+      .registerCommand(`showRecords`, this.ext_showRecords)
+      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {

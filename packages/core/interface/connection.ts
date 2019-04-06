@@ -124,6 +124,18 @@ export interface ConnectionInterface {
    * @memberof ConnectionInterface
    */
   isActive: boolean;
+
+  /**
+   * Define an icon for this connection. If not specified, use defaults
+   *
+   * @type {string}
+   * @memberof ConnectionInterface
+   */
+  icons?: {
+    active?: string;
+    connected?: string;
+    disconnected?: string;
+  };
 }
 
 export interface ConnectionDialect {

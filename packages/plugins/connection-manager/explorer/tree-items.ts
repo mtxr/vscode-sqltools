@@ -3,7 +3,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
-import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState } from 'vscode';
+import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
 
 export class SidebarConnection extends TreeItem {
   public static icons;
@@ -67,11 +67,24 @@ export class SidebarConnection extends TreeItem {
   }
 
   public updateIconPath() {
-    this.iconPath = SidebarConnection.icons.disconnected;
+    const iconOptions = Object.assign({}, SidebarConnection.icons);
+    if (this.conn.icons) {
+      if (this.conn.icons.active) {
+        iconOptions.active = Uri.parse(this.conn.icons.active);
+      }
+
+      if (this.conn.icons.connected) {
+        iconOptions.connected = Uri.parse(this.conn.icons.connected);
+      }
+      if (this.conn.icons.disconnected) {
+        iconOptions.disconnected = Uri.parse(this.conn.icons.disconnected);
+      }
+    }
+    this.iconPath = iconOptions.disconnected;
     if (this._isActive) {
-      this.iconPath = SidebarConnection.icons.active;
+      this.iconPath = iconOptions.active;
     } else if (this.contextValue === 'connectedConnection') {
-      this.iconPath = SidebarConnection.icons.connected;
+      this.iconPath = iconOptions.connected;
     }
   }
 

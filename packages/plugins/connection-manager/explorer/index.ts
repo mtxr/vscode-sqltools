@@ -150,6 +150,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return this.tree[id] ? this.tree[id].conn : undefined;
   }
 
+  public focus() {
+    this.treeView.reveal(this.treeView.selection[0] || Object.values(this.tree)[0], {
+      focus: true,
+      select: true,
+    });
+  }
+
   public constructor(private context: ExtensionContext) {
     this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this });
     ConfigManager.addOnUpdateHook(() => {
