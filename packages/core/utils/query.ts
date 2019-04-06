@@ -53,6 +53,6 @@ export function generateInsert(
     insertQuery = insertQuery.concat(`'\${${index + 1}:${col.columnName}:${col.type}}', `);
   });
   return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, formatOptions)
-  .replace(/'\${(\d+):([\w\s]+):((int|bool|num)[\w\s]+)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
+  .replace(/'\${(\d+):([\w\s]+):((int|bool|num|real)[\w\s]*)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
   .concat('$0');
 }

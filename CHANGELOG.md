@@ -10,6 +10,7 @@
   * Identifing table name prefix word for suggestions
   * Sorting column names by table name on suggestions
   * Changed the icon on sugestions if it`s a view to make it visually different of a table
+  * Fixed formatting with CRLF. Formatter issue [#3](https://github.com/mtxr/sqltools-formatter/issues/3)
 
 * **Fixes**
   - Fixed history cutting some query parts on history explorer.

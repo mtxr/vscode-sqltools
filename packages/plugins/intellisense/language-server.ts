@@ -17,7 +17,8 @@ export default class IntellisensePlugin implements SQLTools.LanguageServerPlugin
     const tablePrefixes = [
       'from',
       'join',
-      'update'
+      'update',
+      'table'
     ];
 
     const { columns, tables } = connectionInfo[lastUsedId];
