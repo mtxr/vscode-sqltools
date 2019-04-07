@@ -732,7 +732,7 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(schema_group|tableOrView)$/ && !sqltools.Results.active",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resouce_group|tableOrView)$/ && !sqltools.Results.active",
                     "group": "navigation"
                 },
                 {

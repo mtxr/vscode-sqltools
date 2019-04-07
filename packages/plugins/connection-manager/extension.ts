@@ -4,7 +4,7 @@ import { ConnectionInterface } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
-import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
+import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget } from 'vscode';
@@ -37,7 +37,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_showRecords = async (node?: SidebarTable | SidebarView) => {
+  private ext_showRecords = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
@@ -55,7 +55,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_describeTable = async (node?: SidebarTable | SidebarView) => {
+  private ext_describeTable = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
@@ -195,7 +195,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   // internal utils
-  private async _getTableName(node?: SidebarTable | SidebarView): Promise<string> {
+  private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.value) {
       await this._setConnection(node.conn as ConnectionInterface);
       return node.value;
