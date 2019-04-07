@@ -139,7 +139,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     let created = [];
     let tree: SidebarAbstractItem = null;
     k.forEach((g, i) => {
-      tree = this.getGroup(connId, ...created).addItem(new SidebarResourceGroup(g, hierachyNames[i]));
+      tree = this.getGroup(connId, ...created);
+      tree.addItem(new SidebarResourceGroup(g, hierachyNames[i]));
       created.push(g);
     });
     return tree.tree[created.pop()];
