@@ -1,6 +1,5 @@
-import SQLTools from '@sqltools/core/plugin-api';
+import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import HistoryExplorer from './explorer';
-import { DatabaseInterface } from '@sqltools/core/interface';
 import { getNameFromId } from '@sqltools/core/utils';
 import { quickPick, insertText } from '@sqltools/core/utils/vscode';
 import { QuickPickItem, commands } from 'vscode';

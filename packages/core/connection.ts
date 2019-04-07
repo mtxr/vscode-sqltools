@@ -2,10 +2,9 @@ import { getConnectionId } from './utils';
 import Dialects from './dialect';
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from './interface';
-import SQLTools from './plugin-api';
+import SQLTools, { DatabaseInterface } from './plugin-api';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];

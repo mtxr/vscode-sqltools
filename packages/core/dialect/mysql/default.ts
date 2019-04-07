@@ -1,12 +1,12 @@
 import MySQLLib from 'mysql';
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implements ConnectionDialect {
   queries = Queries;
   public open() {

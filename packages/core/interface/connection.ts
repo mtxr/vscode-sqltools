@@ -1,7 +1,7 @@
-import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
 import { ClientConfig } from 'pg';
 import { ConnectionConfig } from 'mysql';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface ConnectionInterface {
   /**

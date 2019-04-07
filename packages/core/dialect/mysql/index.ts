@@ -1,12 +1,12 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 export default class MySQL extends GenericDialect<any> implements ConnectionDialect {
   queries = Queries;
   private driver: GenericDialect<any>;

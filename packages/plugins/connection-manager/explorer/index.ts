@@ -1,19 +1,14 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree-items';
+import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-export type SidebarDatabaseItem = SidebarConnection
-| SidebarTable
-| SidebarColumn
-| SidebarView
-| SidebarDatabaseSchemaGroup;
-
-export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem> {
+export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
-  private _onDidChangeTreeData: EventEmitter<SidebarDatabaseItem | undefined> = new EventEmitter();
+  private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
   private _onConnectionDidChange: EventEmitter<{ conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[]> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   public readonly onConnectionDidChange = this._onConnectionDidChange.event;
@@ -34,7 +29,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return active.id;
   }
 
-  public getTreeItem(element: SidebarDatabaseItem): SidebarDatabaseItem {
+  public getTreeItem(element: SidebarTreeItem): SidebarTreeItem {
     return element;
   }
 
@@ -48,25 +43,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
       };
       return [addNew];
     }
+    return items;
   }
-  public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
+  public getChildren(element?: SidebarTreeItem): ProviderResult<SidebarTreeItem[]> {
     if (!element) {
       return Promise.resolve(asArray(this.getTreeItems()));
-    } else if (
-      element instanceof SidebarConnection
-      || element instanceof SidebarTable
-      || element instanceof SidebarView
-      || element instanceof SidebarDatabaseSchemaGroup
-    ) {
-      return Promise.resolve(asArray(element.items));
     }
-    return [];
+    return element.items;
   }
 
-  public getParent(element: SidebarDatabaseItem) {
+  public getParent(element: SidebarTreeItem) {
     return element.parent || null;
   }
-  public refresh(item?: SidebarDatabaseItem) {
+  public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
   }
 
@@ -108,19 +97,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     columns: DatabaseInterface.TableColumn[],
   ) {
     if (!conn) return;
-    const treeKey = getConnectionId(conn);
+    const connId = getConnectionId(conn);
 
-    this.tree[treeKey] = this.tree[treeKey] || new SidebarConnection(this.context, conn);
+    this.tree[connId] = this.tree[connId] || new SidebarConnection(this.context, conn);
 
-    this.tree[treeKey].reset();
+    this.tree[connId].reset();
 
     if (!tables && !columns) {
       return this.refresh();
     }
 
     tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
-      if (!this.tree[treeKey]) return;
-      this.tree[treeKey].addItem(item);
+      if (!this.tree[connId]) return;
+      this.tree[connId].addItem(item);
     });
     let key;
     if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
@@ -128,8 +117,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
 
     columns.forEach((column) => {
-      key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
-      this.tree[treeKey][key].items[column.tableName].addItem(column);
+      key = this.tree[connId].tree.views.tree[column.tableName] ? 'views' : 'tables';
+      this.tree[connId].tree[key].tree[column.tableName].addItem(column);
     });
     this.refresh();
     if (conn.isActive)
@@ -145,7 +134,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     if (!item) return;
     item.activate();
     if (this.treeView.visible) {
-      this.treeView.reveal(item.tables, { select: false, focus: false });
+      this.treeView.reveal(item.tree.tables, { select: false, focus: false });
       this.treeView.reveal(item);
     }
     this.refresh(item);
@@ -178,6 +167,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
   }
 }
 
-export { SidebarColumn, SidebarConnection, SidebarTable, SidebarView };
+export { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem };
 
 export default ConnectionExplorer;

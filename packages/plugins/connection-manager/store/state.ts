@@ -1,5 +1,5 @@
-import { DatabaseInterface } from '@sqltools/core/interface';
 import Connection from '@sqltools/core/connection';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface ConnectionManagerState {
   lastUsedId: string;

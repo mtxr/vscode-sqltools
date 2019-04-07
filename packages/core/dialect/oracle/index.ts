@@ -1,11 +1,11 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
 } from '../../interface';
 import * as Utils from '../../utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 const OracleDBLibVersion = '3.1.1';
 export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
@@ -24,8 +24,8 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   queries = queries
 
   private get lib(): typeof OracleDBLib {
-    const oracledb = __non_webpack_require__('oracledb');    
-    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB];    
+    const oracledb = __non_webpack_require__('oracledb');
+    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB];
     return oracledb;
   }
 
