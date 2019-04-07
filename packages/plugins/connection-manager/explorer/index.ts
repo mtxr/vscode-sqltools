@@ -2,7 +2,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarResourceGroup, SidebarTableOrView, SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
+import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
@@ -47,14 +47,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public getChildren(element?: SidebarTreeItem): ProviderResult<SidebarTreeItem[]> {
     if (!element) {
       return Promise.resolve(asArray(this.getTreeItems()));
-    } else if (
-      element instanceof SidebarConnection
-      || element instanceof SidebarTableOrView
-      || element instanceof SidebarResourceGroup
-    ) {
-      return Promise.resolve(asArray(element.items));
     }
-    return [];
+    return element.items;
   }
 
   public getParent(element: SidebarTreeItem) {
@@ -122,8 +116,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
 
     columns.forEach((column) => {
-      key = this.tree[treeKey].views.items[column.tableName] ? 'views' : 'tables';
-      this.tree[treeKey][key].items[column.tableName].addItem(column);
+      key = this.tree[treeKey].tree.views.tree[column.tableName] ? 'views' : 'tables';
+      this.tree[treeKey].tree[key].tree[column.tableName].addItem(column);
     });
     this.refresh();
     if (conn.isActive)
@@ -139,7 +133,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     if (!item) return;
     item.activate();
     if (this.treeView.visible) {
-      this.treeView.reveal(item.tables, { select: false, focus: false });
+      this.treeView.reveal(item.tree.tables, { select: false, focus: false });
       this.treeView.reveal(item);
     }
     this.refresh(item);
