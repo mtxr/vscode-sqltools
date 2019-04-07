@@ -12,7 +12,7 @@ export function sortText(a: string, b: string) { return a.toString().localeCompa
 
 export function getConnectionId(c: ConnectionInterface): string | null {
   if (!c) return null;
-  return c.id || `${c.name}${idSep}${c.database}${idSep}${c.dialect}`;
+  return c.id || `${c.name}${idSep}${c.database}${idSep}${c.dialect}`.replace(/\./g, ':').replace(/\//g, '\\');
 }
 
 export function getNameFromId(id: string) {
