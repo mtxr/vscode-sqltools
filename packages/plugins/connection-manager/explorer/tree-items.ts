@@ -56,8 +56,6 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
 
   constructor(private context: ExtensionContext, public conn: ConnectionInterface) {
     super(conn.name, TreeItemCollapsibleState.None);
-    // this.tree.tables = new SidebarResourceGroup<SidebarTableOrView>('Tables', this);
-    // this.tree.views = new SidebarResourceGroup<SidebarTableOrView>('Views', this);
     this.command = {
       title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
