@@ -1,9 +1,10 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T> {
   value: string;

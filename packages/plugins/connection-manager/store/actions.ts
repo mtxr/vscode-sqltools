@@ -1,5 +1,5 @@
 import Connection from '@sqltools/core/connection';
-import { DatabaseInterface } from '@sqltools/core/interface';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 function Connect(conn: Connection) {
   return { type: Connect.type, payload: conn };

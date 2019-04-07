@@ -1,12 +1,12 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
   DialectQueries,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
 import { MissingModuleException, ElectronNotSupportedException } from '../exception';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface Deps {
   type: 'package' | 'npmscript';

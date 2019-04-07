@@ -5,7 +5,7 @@ import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
-import DatabaseInterface from '@sqltools/core/interface/database';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state: QueryResultsState = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };

@@ -1,12 +1,12 @@
 import MySQLXLib from '@mysql/xdevapi';
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class MySQLX extends GenericDialect<any> implements ConnectionDialect {
   queries = Queries;

@@ -1,8 +1,9 @@
 import { Pool } from 'pg';
 import Queries from './queries';
-import { ConnectionDialect, DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionDialect, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class PostgreSQL extends GenericDialect<Pool> implements ConnectionDialect {
   queries = Queries;

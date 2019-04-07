@@ -3,8 +3,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
 import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/core/utils/vscode';
-import SQLTools from '@sqltools/core/plugin-api';
-import { DatabaseInterface } from '@sqltools/core/interface';
+import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
   try {

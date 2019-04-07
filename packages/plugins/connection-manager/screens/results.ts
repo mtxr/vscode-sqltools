@@ -1,9 +1,8 @@
-import SQLTools from '@sqltools/core/plugin-api';
+import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
-import { DatabaseInterface } from '@sqltools/core/interface';
 import ConfigManager from '@sqltools/core/config-manager';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {

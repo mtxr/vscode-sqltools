@@ -1,6 +1,6 @@
 import { ConnectionManagerState } from './state';
 import Connection from '@sqltools/core/connection';
-import { DatabaseInterface } from '@sqltools/core/interface';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export const onConnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {
   return {

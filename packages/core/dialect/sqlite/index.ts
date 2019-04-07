@@ -1,11 +1,11 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import SQLiteLib from 'sqlite3';
 import GenericDialect from '../generic';
 import queries from './queries';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 const SQLite3Version = '4.0.6';
 

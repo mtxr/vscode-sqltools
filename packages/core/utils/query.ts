@@ -1,6 +1,7 @@
-import { DatabaseInterface, Settings } from '../interface';
+import { Settings } from '../interface';
 import { format } from '@sqltools/plugins/formatter/utils';
 import multipleQueiesParse from './query/parse';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 /**
  * Parse multiple queries to an array of queries

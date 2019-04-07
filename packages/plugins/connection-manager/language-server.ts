@@ -1,7 +1,7 @@
 import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
+import { ConnectionInterface,} from '@sqltools/core/interface';
+import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plugin-api';
 import { getConnectionId } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';

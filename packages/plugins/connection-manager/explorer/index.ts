@@ -1,9 +1,10 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
@@ -96,19 +97,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     columns: DatabaseInterface.TableColumn[],
   ) {
     if (!conn) return;
-    const treeKey = getConnectionId(conn);
+    const connId = getConnectionId(conn);
 
-    this.tree[treeKey] = this.tree[treeKey] || new SidebarConnection(this.context, conn);
+    this.tree[connId] = this.tree[connId] || new SidebarConnection(this.context, conn);
 
-    this.tree[treeKey].reset();
+    this.tree[connId].reset();
 
     if (!tables && !columns) {
       return this.refresh();
     }
 
     tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
-      if (!this.tree[treeKey]) return;
-      this.tree[treeKey].addItem(item);
+      if (!this.tree[connId]) return;
+      this.tree[connId].addItem(item);
     });
     let key;
     if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
@@ -116,8 +117,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
 
     columns.forEach((column) => {
-      key = this.tree[treeKey].tree.views.tree[column.tableName] ? 'views' : 'tables';
-      this.tree[treeKey].tree[key].tree[column.tableName].addItem(column);
+      key = this.tree[connId].tree.views.tree[column.tableName] ? 'views' : 'tables';
+      this.tree[connId].tree[key].tree[column.tableName].addItem(column);
     });
     this.refresh();
     if (conn.isActive)

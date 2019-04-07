@@ -2,7 +2,7 @@ import {
   CompletionItem,
   CompletionItemKind,
 } from 'vscode-languageserver';
-import { DatabaseInterface } from '@sqltools/core/interface';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export function TableCompletionItem(table: DatabaseInterface.Table): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';

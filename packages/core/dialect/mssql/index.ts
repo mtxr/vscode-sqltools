@@ -2,12 +2,12 @@ import MSSQLLib, { IResult } from 'mssql';
 
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import GenericDialect from '@sqltools/core/dialect/generic';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> implements ConnectionDialect {
   queries = queries;
