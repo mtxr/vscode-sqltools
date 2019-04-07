@@ -30,9 +30,13 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 ![static/autocomplete.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/autocomplete.png)
 
-* Sidebar database explorer and setup GUI
+* Add connection wizard
 
 ![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
+
+* Sidebar database explorer
+
+![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
 
 * Export results to JSON and CSV
 
