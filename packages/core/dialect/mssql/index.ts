@@ -105,6 +105,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
           });
       });
@@ -122,7 +123,8 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
               size: obj.size !== null ? parseInt(obj.size, 10) : null,
               tableDatabase: obj.dbName,
               isPk: (obj.constraintType || '').toLowerCase() === 'primary key',
-              isFk: (obj.constraintType || '').toLowerCase() === 'foreign key'
+              isFk: (obj.constraintType || '').toLowerCase() === 'foreign key',
+              tree: obj.tree,
             };
           });
       });

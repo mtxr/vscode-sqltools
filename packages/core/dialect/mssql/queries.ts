@@ -2,7 +2,8 @@ import { DialectQueries } from '@sqltools/core/interface';
 
 export default {
   describeTable: 'SP_COLUMNS :table',
-  fetchColumns: `SELECT
+  fetchColumns: `
+SELECT
   C.TABLE_NAME AS tableName,
   C.COLUMN_NAME AS columnName,
   C.DATA_TYPE AS type,
@@ -12,7 +13,23 @@ export default {
   DB_NAME() as dbName,
   C.COLUMN_DEFAULT as defaultValue,
   C.IS_NULLABLE as isNullable,
-  TC.CONSTRAINT_TYPE as constraintType
+  TC.CONSTRAINT_TYPE as constraintType,
+  CONCAT(
+    C.TABLE_CATALOG,
+    '/',
+    C.TABLE_SCHEMA,
+    '/',
+    (
+      CASE
+        WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
+        ELSE 'tables'
+      END
+    ),
+    '/',
+    C.TABLE_name,
+    '/',
+    C.COLUMN_NAME
+  ) AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS C
   LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU ON (
@@ -27,29 +44,52 @@ FROM
     AND TC.TABLE_SCHEMA = KCU.TABLE_SCHEMA
     AND TC.TABLE_CATALOG = KCU.TABLE_CATALOG
   )
+  JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+  AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+  AND C.TABLE_CATALOG = T.TABLE_CATALOG
 WHERE
   C.TABLE_CATALOG = DB_NAME()
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION`,
   fetchRecords: 'SELECT TOP :limit * FROM :table',
-  fetchTables: `SELECT
-        C.TABLE_NAME AS tableName,
-        C.TABLE_SCHEMA AS tableSchema,
-        C.TABLE_CATALOG AS tableCatalog,
-        (CASE WHEN T.TABLE_TYPE = 'VIEW' THEN 1 ELSE 0 END) AS isView,
-        DB_NAME() AS dbName,
-        COUNT(1) AS numberOfColumns
-      FROM
-        INFORMATION_SCHEMA.COLUMNS AS C
-        JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
-        AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-        AND C.TABLE_CATALOG = T.TABLE_CATALOG
-      GROUP by
-        C.TABLE_NAME,
-        C.TABLE_SCHEMA,
-        C.TABLE_CATALOG,
-        T.TABLE_TYPE
-      ORDER BY
-        C.TABLE_NAME;`,
+  fetchTables: `
+SELECT
+  T.TABLE_NAME AS tableName,
+  T.TABLE_SCHEMA AS tableSchema,
+  T.TABLE_CATALOG AS tableCatalog,
+  (
+    CASE
+      WHEN T.TABLE_TYPE = 'VIEW' THEN 1
+      ELSE 0
+    END
+  ) AS isView,
+  DB_NAME() AS dbName,
+  COUNT(1) AS numberOfColumns,
+  CONCAT(
+    T.TABLE_CATALOG,
+    '/',
+    T.TABLE_SCHEMA,
+    '/',
+    (
+      CASE
+        WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
+        ELSE 'tables'
+      END
+    ),
+    '/',
+    T.TABLE_name
+  ) AS tree
+FROM
+  INFORMATION_SCHEMA.COLUMNS AS C
+  JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+  AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+  AND C.TABLE_CATALOG = T.TABLE_CATALOG
+GROUP by
+  T.TABLE_NAME,
+  T.TABLE_SCHEMA,
+  T.TABLE_CATALOG,
+  T.TABLE_TYPE
+ORDER BY
+  T.TABLE_NAME;`,
 } as DialectQueries;

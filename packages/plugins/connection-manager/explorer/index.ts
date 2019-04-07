@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, ConnectionDialect, DatabaseDialect } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
@@ -151,6 +151,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       case DatabaseDialect.PostgreSQL:
       case DatabaseDialect.SQLite:
       case DatabaseDialect.MySQL:
+      case DatabaseDialect.MSSQL:
         tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
           this.getOrCreatGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.context, item));
         });
@@ -173,6 +174,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       case DatabaseDialect.PostgreSQL:
       case DatabaseDialect.SQLite:
       case DatabaseDialect.MySQL:
+      case DatabaseDialect.MSSQL:
         columns.forEach((column) => {
           this.getOrCreatGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.context, column));
         });
