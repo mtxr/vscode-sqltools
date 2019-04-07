@@ -56,7 +56,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     if (!element) {
       return Promise.resolve(asArray(this.getTreeItems()));
     }
-    return element.items;
+    const items: SidebarTreeItem[] = element.items;
+    if (items.length === 1) {
+      return this.getChildren(items[0]);
+    }
+    return items;
   }
 
   public getParent(element: SidebarTreeItem) {
