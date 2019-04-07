@@ -17,6 +17,7 @@
     "@sqltools/formatter",
     "@sqltools/language-server",
     "@sqltools/plugins",
-    "@sqltools/ui"
+    "@sqltools/ui",
+    "react-table"
   ]
 }
