@@ -76,6 +76,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
               tableCatalog: obj.tablecatalog,
               tableDatabase: obj.dbname,
               tableSchema: obj.tableschema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
           });
       });
@@ -99,6 +100,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
               isPk: (obj.keytype || '').toLowerCase() === 'primary key',
               isFk: (obj.keytype || '').toLowerCase() === 'foreign key',
               type: obj.type,
+              tree: obj.tree,
             } as DatabaseInterface.TableColumn;
           });
       });

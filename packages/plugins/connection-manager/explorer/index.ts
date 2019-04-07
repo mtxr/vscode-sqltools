@@ -1,10 +1,17 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, ConnectionDialect, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
+import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import safeGet from 'lodash/get';
+
+
+const DialectHierarchyChildNames = {
+  [DatabaseDialect.PostgreSQL]: ['Database', 'Schema'],
+}
+
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
@@ -107,22 +114,76 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return this.refresh();
     }
 
-    tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
-      if (!this.tree[connId]) return;
-      this.tree[connId].addItem(item);
-    });
-    let key;
-    if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
-      columns = columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
-    } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
+    if (!this.tree[connId]) return;
 
-    columns.forEach((column) => {
-      key = this.tree[connId].tree.views.tree[column.tableName] ? 'views' : 'tables';
-      this.tree[connId].tree[key].tree[column.tableName].addItem(column);
-    });
+    this.insertTables(connId, conn.dialect, tables);
+
+    this.insertColumns(connId, conn.dialect, columns);
     this.refresh();
     if (conn.isActive)
       this.setActiveConnection(conn);
+  }
+
+  private getGroup(...k: string[]): SidebarAbstractItem {
+    return safeGet(this.tree, [...k].join('.tree.'));
+  }
+
+  private getOrCreatGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
+    let k = path.split('/');
+    const hierachyNames = DialectHierarchyChildNames[dialect] || [];
+    if (ignoreLasts > 0) {
+      k = k.slice(0, k.length - ignoreLasts);
+    }
+    const treeRef = this.getGroup(connId, ...k);
+    if(treeRef) return treeRef;
+    let created = [];
+    let tree: SidebarAbstractItem = null;
+    k.forEach((g, i) => {
+      tree = this.getGroup(connId, ...created).addItem(new SidebarResourceGroup(g, hierachyNames[i]));
+      created.push(g);
+    });
+    return tree.tree[created.pop()];
+  }
+
+  private insertTables(connId: string, dialect: DatabaseDialect, tables: DatabaseInterface.Table[]) {
+    switch (dialect) {
+      case DatabaseDialect.PostgreSQL:
+      case DatabaseDialect.SQLite:
+      case DatabaseDialect.MySQL:
+        tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
+          this.getOrCreatGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.context, item));
+        });
+        break;
+      default:
+        // old style. Compatibily
+        tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
+          const key = item.isView ? 'views' : 'tables';
+          this.getOrCreatGroups(connId, dialect, key).addItem(new SidebarTableOrView(this.context, item));
+        });
+        break;
+    }
+  }
+
+  private insertColumns(connId: string, dialect: DatabaseDialect, columns: DatabaseInterface.TableColumn[]) {
+    if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
+      columns = columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
+    } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
+    switch (dialect) {
+      case DatabaseDialect.PostgreSQL:
+      case DatabaseDialect.SQLite:
+      case DatabaseDialect.MySQL:
+        columns.forEach((column) => {
+          this.getOrCreatGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.context, column));
+        });
+        break;
+      default:
+        // old style. Compatibily
+        columns.forEach((column) => {
+          const key = this.getGroup(connId, 'views', column.tableName) ? 'views' : 'tables';
+          this.getOrCreatGroups(connId, dialect, `${key}/${column.tableName}`).addItem(new SidebarColumn(this.context, column));
+        });
+        break;
+    }
   }
 
   public setActiveConnection(c: ConnectionInterface) {
@@ -133,8 +194,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     const item = this.tree[getConnectionId(c)];
     if (!item) return;
     item.activate();
-    if (this.treeView.visible) {
-      this.treeView.reveal(item.tree.tables, { select: false, focus: false });
+    if (this.treeView.visible && Object.keys(item.tree).length > 0) {
+      this.treeView.reveal(Object.values(item.tree)[0], { select: false, focus: false });
       this.treeView.reveal(item);
     }
     this.refresh(item);

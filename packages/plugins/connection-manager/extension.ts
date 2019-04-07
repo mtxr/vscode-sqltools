@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
@@ -198,6 +198,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.value) {
       await this._setConnection(node.conn as ConnectionInterface);
+      switch(node.conn.dialect) {
+        case DatabaseDialect.PostgreSQL:
+          return [node.table.tableDatabase, node.table.tableSchema, node.table.name].join('.');
+        case DatabaseDialect.MySQL:
+          return [node.table.tableSchema, node.table.name].join('.');
+      }
       return node.value;
     }
 

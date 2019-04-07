@@ -90,6 +90,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
           name: obj.tableName,
           isView: obj.type === 'view',
           tableDatabase: this.credentials.database,
+          tree: obj.tree,
         } as DatabaseInterface.Table;
       });
   }
@@ -100,7 +101,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
 
     await Promise.all(allTables.map(async t => {
       const [[{ results: tableColumns }], [{ results: fks }]] = await Promise.all([
-        this.describeTable(t.name),
+        this.query(Utils.replacer(this.queries.fetchColumns, { table: t.name })),
         this.query(Utils.replacer(this.queries.listFks, { table: t.name })),
       ]);
 
@@ -117,6 +118,7 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
           size: null,
           isPk: Boolean(obj.pk),
           isFk: !!fksMap[obj.name],
+          tree: obj.tree,
       }));
       return Promise.resolve();
     }));

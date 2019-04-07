@@ -101,6 +101,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
           });
       });
