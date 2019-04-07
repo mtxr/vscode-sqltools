@@ -191,10 +191,17 @@ export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn, Datab
         : TreeItemCollapsibleState.Collapsed
     ));
     this.value = table.name;
-    this.iconPath = {
-      dark: this.context.asAbsolutePath('icons/table-dark.svg'),
-      light: this.context.asAbsolutePath('icons/table-light.svg'),
-    };
+    if (this.table.isView) {
+      this.iconPath = {
+        dark: this.context.asAbsolutePath('icons/view-dark.svg'),
+        light: this.context.asAbsolutePath('icons/view-light.svg'),
+      };
+    } else {
+      this.iconPath = {
+        dark: this.context.asAbsolutePath('icons/table-dark.svg'),
+        light: this.context.asAbsolutePath('icons/table-light.svg'),
+      };
+    }
   }
 
   public addItem(item: DatabaseInterface.TableColumn) {
@@ -229,8 +236,8 @@ export class SidebarColumn extends SidebarAbstractItem<null> {
     if (!SidebarColumn.icons) {
       SidebarColumn.icons = {
         default: {
-          dark: this.context.asAbsolutePath('icons/column-dark.png'),
-          light: this.context.asAbsolutePath('icons/column-light.png'),
+          dark: this.context.asAbsolutePath('icons/column-dark.svg'),
+          light: this.context.asAbsolutePath('icons/column-light.svg'),
         },
         primaryKey: this.context.asAbsolutePath('icons/pk.svg'),
         foreignKey: this.context.asAbsolutePath('icons/fk.svg'),
