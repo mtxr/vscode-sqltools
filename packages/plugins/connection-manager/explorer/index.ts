@@ -3,7 +3,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarDatabaseSchemaGroup, SidebarTable, SidebarView } from '@sqltools/plugins/connection-manager/explorer/tree-items';
-import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext } from 'vscode';
+import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
 
 export type SidebarDatabaseItem = SidebarConnection
 | SidebarTable
@@ -38,9 +38,20 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarDatabaseItem>
     return element;
   }
 
+  private getTreeItems() {
+    const items = asArray(this.tree);
+    if (items.length === 0) {
+      const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
+      addNew.command = {
+        title: 'Add New Connections',
+        command: `${EXT_NAME}.openAddConnectionScreen`,
+      };
+      return [addNew];
+    }
+  }
   public getChildren(element?: SidebarDatabaseItem): ProviderResult<SidebarDatabaseItem[]> {
     if (!element) {
-      return Promise.resolve(asArray(this.tree));
+      return Promise.resolve(asArray(this.getTreeItems()));
     } else if (
       element instanceof SidebarConnection
       || element instanceof SidebarTable
