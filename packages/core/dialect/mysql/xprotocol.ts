@@ -119,6 +119,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
           });
       });

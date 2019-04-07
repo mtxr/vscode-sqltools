@@ -120,6 +120,13 @@ export namespace DatabaseInterface {
     name: string;
     isView: boolean;
     numberOfColumns?: number;
+    /**
+     * This is used to build the connections explorer tree
+     *
+     * @type {string}
+     * @memberof TableColumn
+     */
+     tree?: string;
   }
   export interface TableColumn {
     tableName: string;
@@ -135,6 +142,13 @@ export namespace DatabaseInterface {
     isFk?: boolean;
     columnKey?: string;
     extra?: string;
+    /**
+     * This is used to build the connections explorer tree
+     *
+     * @type {string}
+     * @memberof TableColumn
+     */
+    tree?: string;
   }
 
   export interface Function {
