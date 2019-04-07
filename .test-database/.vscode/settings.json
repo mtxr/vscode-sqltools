@@ -11,6 +11,7 @@
     "reservedWordCase": "upper"
   },
   "sqltools.autoConnectTo": ["SQLite"],
+  "sqltools.flattenGroupsIfOne": true,
   "sqltools.connections": [
     {
       "name": "PGSQL",

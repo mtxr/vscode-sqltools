@@ -14,7 +14,8 @@
   * Allow users to set connection icons
   * Add command `SQLTools.focusOnExplorer` to focus on explorer.
   * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71]https://github.com/mtxr/sqltools-formatter/issues/71
-    ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
+    * You can flatten groups with only one child using the setting `sqltools.flattenGroupsIfOne`. Default to `false`
+    * ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
 
 * **Fixes**
   - Fixed history cutting some query parts on history explorer.

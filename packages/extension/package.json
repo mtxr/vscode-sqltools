@@ -618,6 +618,11 @@
                     ],
                     "default": "name",
                     "description": "Sort columns criteria."
+                },
+                "sqltools.flattenGroupsIfOne": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Flatten groups with has only one child"
                 }
             }
         },

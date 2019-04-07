@@ -135,4 +135,12 @@ export interface Settings {
    * @memberof Settings
    */
   sortColumns?: 'name' | 'ordinalnumber' | null;
+
+  /**
+   * Flatten groups with has only one child
+   * @default true
+   * @type {boolean}
+   * @memberof Settings
+   */
+  flattenGroupsIfOne: boolean;
 }
