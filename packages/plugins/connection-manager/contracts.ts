@@ -40,6 +40,7 @@ export const ConnectionDataUpdatedRequest = new RequestType<
     conn: ConnectionInterface;
     tables: DatabaseInterface.Table[];
     columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
   },
   void,
   Error,
@@ -50,6 +51,7 @@ export const GetConnectionDataRequest = new RequestType<
   {
     tables: DatabaseInterface.Table[];
     columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
   },
   Error,
   void

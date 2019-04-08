@@ -9,6 +9,7 @@ import SQLTools, { DatabaseInterface } from './plugin-api';
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
+  private functions: DatabaseInterface.Function[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
   constructor(credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
@@ -65,6 +66,16 @@ export default class Connection {
     return this.conn.getColumns().then((columns: DatabaseInterface.TableColumn[]) => {
       this.columns = columns;
       return this.columns;
+    });
+  }
+
+  public getFunctions(cached: boolean = false): Promise<DatabaseInterface.Function[]> {
+    if (cached && this.columns.length > 0) {
+      return Promise.resolve(this.functions);
+    }
+    return this.conn.getFunctions().then((functions: DatabaseInterface.Function[]) => {
+      this.functions = functions;
+      return this.functions;
     });
   }
 

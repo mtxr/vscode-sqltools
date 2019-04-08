@@ -4,20 +4,23 @@
 
 ### v0.17.11
 
-* **Enhancements**
-  * Improved query parser for better handling MSSQL queires
-  * Insert query generator includes column name and type on placeholders
-  * Identifing table name prefix word for suggestions
-  * Sorting column names by table name on suggestions
-  * Changed the icon on sugestions if it`s a view to make it visually different of a table
-  * Fixed formatting with CRLF. Formatter issue [#3](https://github.com/mtxr/sqltools-formatter/issues/3)
-  * Allow users to set connection icons
+* **NEW** 🎉
   * Add command `SQLTools.focusOnExplorer` to focus on explorer.
-  * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71]https://github.com/mtxr/sqltools-formatter/issues/71
+  * Allow users to set connection icons.
+  * Add stored procedure listing on explorer.
+  * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/issues/71)
     * You can flatten groups with only one child using the setting `sqltools.flattenGroupsIfOne`. Default to `false`
     * ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
 
+* **Enhancements**
+  * Insert query generator includes column name and type on placeholders.
+  * Improved query parser for better handling MSSQL queries.
+  * Identifing table prefix words for suggestions.
+  * Changed the icon on sugestions if it`s a view to make it visually different of a table.
+  * Sorting column names by table name on suggestions.
+
 * **Fixes**
+  * Fixed formatting with CRLF. Formatter issue [#3](https://github.com/mtxr/sqltools-formatter/issues/3)
   - Fixed history cutting some query parts on history explorer.
 
 ### v0.17.10

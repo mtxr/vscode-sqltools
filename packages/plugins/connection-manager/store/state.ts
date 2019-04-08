@@ -13,6 +13,7 @@ export interface ConnectionManagerState {
     [id: string]: {
       tables: DatabaseInterface.Table[];
       columns: DatabaseInterface.TableColumn[];
+      functions: DatabaseInterface.Function[];
     };
   };
 }

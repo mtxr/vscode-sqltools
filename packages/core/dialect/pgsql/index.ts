@@ -105,4 +105,18 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
           });
       });
   }
+
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    return this.query(this.queries.fetchFunctions)
+      .then(([queryRes]) => {
+        return queryRes.results
+          .reduce((prev, curr) => prev.concat(curr), [])
+          .map((obj) => {
+            return {
+              ...obj,
+              args: obj.args ? obj.args.split(/, */g) : [],
+            } as DatabaseInterface.TableColumn;
+          });
+      });
+  }
 }

@@ -40,6 +40,11 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
 
   abstract getColumns(): Promise<DatabaseInterface.TableColumn[]>;
 
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    console.error(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.dialect}\n####################`);
+    return Promise.resolve([]);
+  }
+
   public describeTable(table: string) {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }

@@ -621,7 +621,7 @@
                 },
                 "sqltools.flattenGroupsIfOne": {
                     "type": "boolean",
-                    "default": true,
+                    "default": false,
                     "description": "Flatten groups with has only one child"
                 }
             }

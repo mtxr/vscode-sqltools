@@ -26,16 +26,9 @@ export async function getSelectedText(action = 'proceed', fullText = false) {
   }
   return query;
 }
-export async function insertText(text: string, forceCreate = false) {
+export async function insertText(text: string | SnippetString, forceCreate = false) {
   const editor = await getOrCreateEditor(forceCreate);
-  editor.edit(edit => {
-    editor.selections.forEach(cursor => edit.insert(cursor.active, text));
-  });
-}
-
-export async function insertSnippet(text: string, forceCreate = false) {
-  const editor = await getOrCreateEditor(forceCreate);
-  return editor.insertSnippet(new SnippetString(text));
+  await Promise.all(editor.selections.map(cursor => editor.insertSnippet(text instanceof SnippetString ? text : new SnippetString(`\${1:${text}}$0`), cursor.active)));
 }
 
 export async function readInput(prompt: string, placeholder?: string, value?: string) {

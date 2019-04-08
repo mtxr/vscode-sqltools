@@ -61,10 +61,23 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       return undefined;
     }
     const { activeConnections } = this.server.store.getState();
-    if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [] };
+    if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [], functions: [] };
 
     const c = this.getConnectionInstance(conn);
-    return { tables: await c.getTables(true), columns: await c.getColumns(true) };
+    const [
+      tables,
+      columns,
+      functions,
+    ] = await Promise.all([
+      c.getTables(true),
+      c.getColumns(true),
+      c.getFunctions(true)
+    ])
+    return {
+      tables,
+      columns,
+      functions,
+    };
   };
 
   private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
@@ -81,7 +94,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     await c.close().catch(this.server.notifyError('Connection Error'));
     this.server.store.dispatch(actions.Disconnect(c));
     conn.isConnected = false;
-    await this._updateSidebar(conn, null, null);
+    await this._updateSidebar({ conn, tables: null, columns: null, functions: null });
   };
 
   private GetConnectionPasswordRequestHandler: RequestHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
@@ -150,12 +163,12 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   // internal utils
   private async _loadConnectionData(conn: Connection) {
     if (!conn) {
-      return this._updateSidebar(null, [], []);
+      return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
     }
-    return Promise.all([conn.getTables(), conn.getColumns()])
-      .then(async ([tables, columns]) => {
-        this.server.store.dispatch(actions.ConnectionData(conn, { tables, columns }))
-        return this._updateSidebar(conn.serialize(), tables, columns);
+    return Promise.all([conn.getTables(), conn.getColumns(), conn.getFunctions()])
+      .then(async ([tables, columns, functions ]) => {
+        this.server.store.dispatch(actions.ConnectionData(conn, { tables, columns, functions }))
+        return this._updateSidebar({ conn: conn.serialize(), tables, columns, functions });
       })
       .catch(e => {
         this.server.notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
@@ -163,14 +176,20 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       });
   }
 
-  private _updateSidebar(
-    conn: ConnectionInterface,
-    tables: DatabaseInterface.Table[],
-    columns: DatabaseInterface.TableColumn[]
-  ) {
+  private _updateSidebar({
+    conn,
+    tables,
+    columns,
+    functions
+  }: {
+    conn: ConnectionInterface;
+    tables: DatabaseInterface.Table[];
+    columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
+   }) {
     if (!conn) return Promise.resolve();
     conn.isActive = this.server.store.getState().lastUsedId === getConnectionId(conn);
-    return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns });
+    return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns, functions });
   }
 
   public _autoConnectIfActive = async () => {

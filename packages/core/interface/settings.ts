@@ -138,7 +138,7 @@ export interface Settings {
 
   /**
    * Flatten groups with has only one child
-   * @default true
+   * @default false
    * @type {boolean}
    * @memberof Settings
    */
