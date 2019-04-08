@@ -142,5 +142,5 @@ export interface Settings {
    * @type {boolean}
    * @memberof Settings
    */
-  flattenGroupsIfOne: boolean;
+  flattenGroupsIfOne?: boolean;
 }
