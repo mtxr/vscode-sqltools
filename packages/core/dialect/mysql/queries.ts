@@ -97,4 +97,44 @@ GROUP BY
   T.TABLE_TYPE
 ORDER BY
   T.TABLE_NAME;`,
+  fetchFunctions: `
+SELECT
+  f.specific_name AS name,
+  f.ROUTINE_SCHEMA,
+  f.routine_schema,
+  concat(
+    case
+      WHEN routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', routine_schema, '\`')
+      ELSE routine_schema
+    end,
+    '.',
+    case
+      WHEN routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', routine_name, '\`')
+      ELSE routine_name
+    end,
+    concat('(', GROUP_CONCAT(p.data_type), ')')
+  ) as signature,
+  GROUP_CONCAT(p.data_type) as args,
+  f.data_type AS resultType,
+  CONCAT(
+    f.routine_schema,
+    '/functions/',
+    f.specific_name
+  ) AS tree,
+  f.routine_definition AS source
+FROM
+  information_schema.routines AS f
+  LEFT JOIN information_schema.parameters AS p ON (
+    f.specific_name = p.specific_name
+    AND f.routine_schema = p.specific_schema
+    AND f.routine_catalog = p.specific_catalog
+  )
+WHERE
+  f.routine_schema = DATABASE()
+GROUP BY
+  f.routine_schema,
+  f.routine_catalog,
+  f.specific_name,
+  f.ROUTINE_DEFINITION,
+  f.data_type;`,
 } as DialectQueries;

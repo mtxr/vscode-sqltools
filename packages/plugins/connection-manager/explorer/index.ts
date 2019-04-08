@@ -205,8 +205,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private insertFunctions(connId: string, dialect: DatabaseDialect, functions: DatabaseInterface.Function[]) {
     switch (dialect) {
       case DatabaseDialect.PostgreSQL:
+      case DatabaseDialect.MySQL:
       // case DatabaseDialect.SQLite:
-      // case DatabaseDialect.MySQL:
       // case DatabaseDialect.MSSQL:
         functions.forEach((fn) => {
           this.getOrCreatGroups(connId, dialect, fn.tree, 1).addItem(new SidebarFunction(this.context, fn));

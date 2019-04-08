@@ -167,6 +167,8 @@ export namespace DatabaseInterface {
     tree?: string;
     source?: string;
   }
+
+  export type Procedure = Function;
   export interface QueryResults {
     label?: string;
     connId: string;
