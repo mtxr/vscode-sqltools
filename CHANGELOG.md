@@ -2,7 +2,74 @@
 
 ## v0.17
 
-## v0.17.4
+### v0.17.11
+
+* **NEW** 🎉
+  * Add command `SQLTools.focusOnExplorer` to focus on explorer.
+  * Allow users to set connection icons.
+  * Add stored procedure listing on explorer for Postgres and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
+    * ![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
+  * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/issues/71)
+    * You can flatten groups with only one child using the setting `sqltools.flattenGroupsIfOne`. Default to `false`
+    * ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
+
+* **Enhancements**
+  * Insert query generator includes column name and type on placeholders.
+  * Improved query parser for better handling MSSQL queries.
+  * Identifing table prefix words for suggestions.
+  * Changed the icon on sugestions if it`s a view to make it visually different of a table.
+  * Sorting column names by table name on suggestions.
+
+* **Fixes**
+  * Fixed formatting with CRLF. Formatter issue [#3](https://github.com/mtxr/sqltools-formatter/issues/3)
+  - Fixed history cutting some query parts on history explorer.
+
+### v0.17.10
+
+* **Enhancements**
+  * Improved query multiple statements parser
+  * Add ssl support for MySQL. Thanks to @MOZGIII.
+  * Ignoring comments on Query History tree view
+
+### v0.17.9
+
+* **Fixes**
+  - Allow user to force add connection to global settings. Part of issue #137.
+  - Fixed filtering excluding some values.
+
+### v0.17.8
+
+* **Fixes**
+  - Fixes Icon Paths on windows. Issue #151
+  - Allow empty password. Issue #150
+  - Fixes clutered database tree view. Issue #139
+
+### v0.17.7
+
+* **NEW** 🎉
+  * Added Primary key ![Alt text](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/pk.png) and foreign key ![Alt text](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/fk.png) icons for PostgreSQL, MySQL, MSSQL and SQLite columns.
+  * Added setting `format.reservedWordCase` allowing to change SQL reserved words case to `upper` or `lower`. Default is null meaning no changes.
+  * Added setting `sortColumns` to change column sorting on explorer. Default sort is by `name`.
+  * Added setting `results.location` to set results show up. Default sort is by `active` editor.
+  * Added setting `results.limit` to set the limit when using Show Records function. This deprecates global `previewLimit`. Default changed to 50.
+
+### v0.17.6
+
+* **NEW** 🎉
+  * Added option to open results rows/values in editor. Issue #140.
+  * Added SSL support for postgres via `pgOptions` connection setting. Issue #141
+  * Deprecating `dialectOptions` in favor of `[dialect]Options` settings.
+
+* **Fixes**
+  * Fixed dollar quoting on formatter. Issue #142
+
+### v0.17.5
+
+* **Fixes**
+  - Fixed formater when formatting query with $1 parameters
+  - Fixed #136 scroll issue
+
+### v0.17.4
 
 * **NEW** 🎉
   * Highlight result row on click.
@@ -11,12 +78,12 @@
   * _**UI**_:
     * Fixed scroll issue on windows #132
 
-## v0.17.3
+### v0.17.3
 
 * Fixes readme documentation link
 * Fixes 'server' of undefined issue. Webpack/babel issue.
 
-## v0.17.0
+### v0.17.0
 
 * **NEW** 🎉
   * Added support for SQLite. #51

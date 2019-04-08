@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   id="icons"
+   viewBox="0 0 24 24"
+   version="1.1">
+  <path
+     style="fill:#111111;fill-opacity:1;stroke:none;stroke-width:0.2315052;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+     d="M 0.90947689,13.792734 V 4.9906957 H 4.2129055 7.516334 v 8.8020383 8.802039 H 4.2129055 0.90947689 Z"/>
+  <path
+     style="display:inline;fill:#424242;fill-opacity:1;stroke-width:0.92582011;stroke:none"
+     d="M 8.9999999e-8,12 V 0 H 12 24 V 12 24 H 12 8.9999999e-8 Z M 6.857143,19.999999 V 18 H 4.2857144 1.7142858 V 19.999999 22 H 4.2857144 6.857143 Z m 8.571429,0 V 18 H 12 8.5714288 V 19.999999 22 H 12 15.428572 Z m 6.857142,0 V 18 H 19.714286 17.142858 V 19.999999 22 h 2.571428 2.571428 z M 6.857143,14 V 12 H 4.2857144 1.7142858 v 2 2.000001 H 4.2857144 6.857143 Z m 8.571429,0 V 12 H 12 8.5714288 v 2 2.000001 H 12 15.428572 Z m 6.857142,0 v -2 h -2.571428 -2.571428 v 2 2.000001 h 2.571428 2.571428 z M 6.857143,7.9999991 V 5.9999997 H 4.2857144 1.7142858 V 7.9999991 9.9999995 H 4.2857144 6.857143 Z m 8.571429,0 V 5.9999997 H 12 8.5714288 V 7.9999991 9.9999995 H 12 15.428572 Z m 6.857142,0 V 5.9999997 h -2.571428 -2.571428 v 1.9999994 2.0000004 h 2.571428 2.571428 z"/>
+</svg>

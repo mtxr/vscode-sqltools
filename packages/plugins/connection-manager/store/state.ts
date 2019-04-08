@@ -1,5 +1,5 @@
-import { DatabaseInterface } from '@sqltools/core/interface';
 import Connection from '@sqltools/core/connection';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface ConnectionManagerState {
   lastUsedId: string;
@@ -13,6 +13,7 @@ export interface ConnectionManagerState {
     [id: string]: {
       tables: DatabaseInterface.Table[];
       columns: DatabaseInterface.TableColumn[];
+      functions: DatabaseInterface.Function[];
     };
   };
 }

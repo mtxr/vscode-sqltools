@@ -19,11 +19,14 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private createConnection = async ({ connInfo }) => {
-    commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo)
+  private createConnection = async ({ connInfo, isGlobal }) => {
+    commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, isGlobal ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'createConnectionSuccess', payload: { connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
-    }, (payload) => {
+      this.postMessage({ action: 'createConnectionSuccess', payload: { isGlobal, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+    }, (payload = {}) => {
+        payload = {
+          message: (payload.message || payload || '').toString(),
+        }
         this.postMessage({ action: 'createConnectionError', payload });
     });
   }

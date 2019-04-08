@@ -1,37 +1,51 @@
 import SQLTools from '@sqltools/core/plugin-api';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
-import { TextDocumentPositionParams, CompletionItem } from 'vscode-languageserver';
-import { TableCompletionItem, TableColumnCompletionItem } from './models';
+import { CompletionItem, CompletionParams, Range } from 'vscode-languageserver';
+import { TableCompletionItem, TableColumnCompletionItem, TableCompletionItemFirst } from './models';
 
 export default class IntellisensePlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
 
-  private onCompletion = (pos: TextDocumentPositionParams): CompletionItem[] => {
-    // const { textDocument, position } = pos;
-    // const doc = docManager.get(textDocument.uri);
+  private onCompletion = (params: CompletionParams): CompletionItem[] => {
     const { connectionInfo, lastUsedId } = this.server.store.getState();
-    if (!lastUsedId) return [];
+    if (!lastUsedId) return;
+
+    const { textDocument, position } = params;
+    const doc = this.server.docManager.get(textDocument.uri);
+
+    const prevWord = doc.getText(Range.create(Math.max(0, position.line - 5), 0, position.line, position.character)).replace(/[\r\n|\n]+/g, ' ').split(/[\s]+/g).filter(Boolean).pop();
+
+    const tablePrefixes = [
+      'from',
+      'join',
+      'update',
+      'table'
+    ];
 
     const { columns, tables } = connectionInfo[lastUsedId];
 
-    return tables.map(TableCompletionItem)
-    .concat(columns.map(TableColumnCompletionItem));
+    if (tablePrefixes.includes(prevWord.toLowerCase())) {
+      return tables.map(TableCompletionItemFirst)
+      .concat(columns.map(TableColumnCompletionItem));
+    }
+
+    return columns.map(TableColumnCompletionItem).concat(tables.map(TableCompletionItem));
   }
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
     this.server.addOnInitializeHook(() => ({
       capabilities: {
         completionProvider: {
-          resolveProvider: true,
+          // resolveProvider: true,
+          triggerCharacters: ['.', ' '],
         },
       }
     }));
 
     this.server.onCompletion(this.onCompletion);
 
-    this.server.onCompletionResolve((item: CompletionItem): CompletionItem => {
-      return item;
-    });
+    // this.server.onCompletionResolve((item: CompletionItem): CompletionItem => {
+    //   return item;
+    // });
   }
 }

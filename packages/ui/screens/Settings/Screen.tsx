@@ -17,7 +17,7 @@ const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
 ];
 
-const dialectOptions = {
+const availableDialects = {
   MySQL: {
     port: 3306,
     value: 'MySQL',
@@ -50,7 +50,7 @@ const dialectOptions = {
 };
 
 interface FieldWrapperProps {
-  field: any; // to be defined
+  field: Field;
   component: ReactNode;
   i: number;
 }
@@ -73,6 +73,7 @@ class FieldWrapper extends React.Component<FieldWrapperProps> {
 }
 interface Field {
   label: string;
+  info?: string;
   values?: Array<string | { text: string; value: any }>;
   default?: any;
   type?: string;
@@ -80,6 +81,10 @@ interface Field {
   postUpdateHook?: Function;
   parse?: Function;
   visible?: boolean;
+  minMax?: {
+    min?: number,
+    max?: number,
+  };
 }
 
 interface SetupState {
@@ -118,15 +123,15 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     }, {});
   }
 
-  baseFields = {
+  baseFields: { [id: string]: Field } = {
     name: {
       label: 'Connection Name',
       validators: [notEmpty],
     },
     dialect: {
       label: 'Dialects',
-      values: Object.values(dialectOptions),
-      default: dialectOptions.MySQL.value,
+      values: Object.values(availableDialects),
+      default: availableDialects.MySQL.value,
       validators: [notEmpty],
       postUpdateHook: () => {
         const newState = Object.assign({}, this.state);
@@ -142,7 +147,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           if (this.state.fields.database.type === 'file') {
             newState.data.database = undefined;
           }
-          newState.data.port = (dialectOptions[this.state.data.dialect] ? dialectOptions[this.state.data.dialect].port : null) || dialectOptions.MySQL.port;
+          newState.data.port = (availableDialects[this.state.data.dialect] ? availableDialects[this.state.data.dialect].port : null) || availableDialects.MySQL.port;
           newState.fields.domain.visible = this.state.data.dialect === 'MSSQL';
           newState.fields.port.visible = true;
           newState.fields.server.visible = true;
@@ -163,9 +168,13 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     port: {
       label: 'Port',
       type: 'number',
-      default: dialectOptions.MySQL.port,
+      default: availableDialects.MySQL.port,
       validators: [notEmpty, inRange(1, 65535)],
       parse: int,
+      minMax: {
+        min: 1,
+        max: 65535,
+      },
     },
     database: {
       type: 'text',
@@ -189,7 +198,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       },
     },
     password: {
-      validators:[notEmpty],
       label: 'Password',
     },
     domain: {
@@ -204,7 +212,17 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       default: 30,
       validators: [notEmpty, gtz],
       parse: int,
+      minMax: {
+        min: 0,
+      }
     },
+    isGlobal: {
+      label: 'Save to global settings?',
+      info: 'If checked, will save to global settings',
+      type: 'checkbox',
+      default: false,
+      parse: bool,
+    }
   };
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
@@ -272,7 +290,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   }
 
   public handleChange: ChangeEventHandler = (e) => {
-    const { name, value, files } = e.target as HTMLInputElement;
+    let { name, value, files, type, checked } = e.target as HTMLInputElement & { value: any };
+
+    value = type === 'checkbox' ? Boolean(checked) : value;
+
     if (this.state.fields[name].visible === false) return this.validateFields();
     let filePath;
     if (this.state.fields[name].type === 'file' && files && files.length > 0) {
@@ -310,7 +331,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     e.preventDefault();
     getVscode().postMessage({
       action: 'createConnection',
-      payload: { connInfo: this.getParsedFormData(), isGlobal: false }
+      payload: { connInfo: this.getParsedFormData(), isGlobal: this.state.data.isGlobal }
     });
     return false;
   }
@@ -347,12 +368,18 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   }
 
   public getParsedFormData() {
-    return this.getVisibleFields()
+    const data = this.getVisibleFields()
       .reduce((d, k) => {
         const parse = this.state.fields[k].parse || ((v) => (v === '' ? null : v));
         d[k] = parse(this.state.data[k]);
         return d;
       }, {});
+
+      data['password'] = data['password'] || undefined;
+
+      delete data['isGlobal'];
+
+      return data;
   }
 
   public render() {
@@ -393,19 +420,31 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           />
         );
       } else {
+        let fieldProps: any = {
+          value: this.state.data[f],
+        };
+        if (field.type === 'number') {
+          fieldProps = {
+            value: this.state.data[f],
+            ...field.minMax,
+          };
+        }
+
+        if (field.type === 'checkbox') {
+          fieldProps = {
+            checked: this.state.data[f],
+          }
+        }
+
         formField = (
           <input
             type={field.type || 'text'}
             id={`input-${f}`}
             name={f}
             placeholder={field.label}
-            value={this.state.data[f]}
             onChange={this.handleChange}
             disabled={this.state.loading}
-            { ...(field.type === 'number' ? {
-              min: 1,
-              max: 65535,
-            } : {})}
+            {...fieldProps}
           />
         );
       }
@@ -457,18 +496,18 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
               </div>
             </div>
             <div className='col-6'>
-              {this.state.data.dialect && dialectOptions[this.state.data.dialect].showHelperText ? (
+              {this.state.data.dialect && availableDialects[this.state.data.dialect].showHelperText ? (
                 <div>
                   <h5 className="no-margin-top">Attention: Beta Feature</h5>
                   <div className='messages radius'>
                     <div className='message radius attention'>
                       This connection dialect <strong>{this.state.data.dialect}</strong> is new and might not work for some machines.
                       Please, open an issue at <a href='https://github.com/mtxr/vscode-sqltools/issues'>GitHub</a> if it doesn't work for you.
-                      {(dialectOptions[this.state.data.dialect].requirements || []).length > 0 ? (
+                      {(availableDialects[this.state.data.dialect].requirements || []).length > 0 ? (
                         <div>
                           <strong>Requirements:</strong>
                           <ul>
-                            {(dialectOptions[this.state.data.dialect].requirements || []).map(r => (<li>{r}</li>))}
+                            {(availableDialects[this.state.data.dialect].requirements || []).map(r => (<li>{r}</li>))}
                           </ul>
                         </div>
                       ) : null}
@@ -477,7 +516,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                   </div>
                 </div>
               ) : null}
-              <div><h5 className={this.state.data.dialect && dialectOptions[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
+              <div><h5 className={this.state.data.dialect && availableDialects[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
               <Syntax code={this.getParsedFormData()} language='json'/>
               {Object.keys(this.state.errors).length ? (
                 <div>

@@ -1,4 +1,4 @@
-import { DatabaseInterface } from '@sqltools/core/interface';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 export default interface QueryResultsState {
   connId: string;
   activeTab?: string;

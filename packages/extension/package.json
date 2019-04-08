@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.17.4",
+    "version": "0.17.11",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -18,7 +18,7 @@
     "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
-        "vscode": "^1.29.0"
+        "vscode": "^1.30.0"
     },
     "categories": [
         "Programming Languages",
@@ -37,7 +37,8 @@
         "oracledb",
         "postgres",
         "postgresql",
-        "sgdb",
+        "rdbms",
+        "dbms",
         "sql server",
         "sql",
         "sqlite",
@@ -51,13 +52,28 @@
     "icon": "static/icon.png",
     "badges": [
         {
+            "description": "Build Status",
+            "url": "https://img.shields.io/travis/com/mtxr/vscode-sqltools/master.svg?style=flat-square",
+            "href": "https://travis-ci.com/mtxr/vscode-sqltools"
+        },
+        {
+            "description": "Greenkeeper badge",
+            "url": "https://badges.greenkeeper.io/mtxr/vscode-sqltools.svg?style=flat-square",
+            "href": "https://greenkeeper.io/"
+        },
+        {
+            "description": "Gitter",
+            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
+            "href": "https://gitter.im/vscode-sqltools"
+        },
+        {
             "description": "Patreon Support",
-            "url": "https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon",
+            "url": "https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square&logo=patreon",
             "href": "https://www.patreon.com/mteixeira"
         },
         {
             "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal",
+            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square&logo=paypal",
             "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
         }
     ],
@@ -67,6 +83,12 @@
         "onCommand:SQLTools.selectConnection"
     ],
     "contributes": {
+        "languages": [{
+            "id": "sql",
+            "extensions": [ ".sql" ],
+            "aliases": [ "SQL", "sql" ],
+            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b"
+        }],
         "commands": [
             {
                 "title": "Connect",
@@ -149,6 +171,11 @@
             {
                 "title": "Show output channel (Logs)",
                 "command": "SQLTools.showOutputChannel",
+                "category": "SQLTools Management"
+            },
+            {
+                "title": "Focus on connection explorer",
+                "command": "SQLTools.focusOnExplorer",
                 "category": "SQLTools Management"
             },
             {
@@ -285,7 +312,7 @@
                         "string",
                         "array"
                     ],
-                    "default": null,
+                    "default": [],
                     "required": false,
                     "description": "Name of the connection to auto connect on start",
                     "items": {
@@ -310,8 +337,7 @@
                 "sqltools.completionLanguages": {
                     "type": "array",
                     "default": [
-                        "sql",
-                        "plaintext"
+                        "sql"
                     ],
                     "items": {
                         "type": "string"
@@ -332,6 +358,14 @@
                             "type": "number",
                             "default": 2,
                             "description": "Indent size"
+                        },
+                        "reservedWordCase": {
+                            "type": [
+                                "string",
+                                "null"
+                            ],
+                            "default": null,
+                            "description": "Reserverd word case"
                         }
                     }
                 },
@@ -403,7 +437,26 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options",
+                                "description": "Dialect driver options. Deprecated. Will be removed on v0.18",
+                                "required": false,
+                                "default": {},
+                                "properties": {
+                                    "encrypt": {
+                                        "type": [
+                                            "boolean",
+                                            "null"
+                                        ],
+                                        "default": null,
+                                        "description": "Encrypt connection"
+                                    }
+                                }
+                            },
+                            "mssqlOptions": {
+                                "type": [
+                                    "null",
+                                    "object"
+                                ],
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -433,6 +486,36 @@
                                             "default"
                                         ],
                                         "default": "default"
+                                    },
+                                    "ssl": {
+                                        "required": false,
+                                        "type": [
+                                            "boolean",
+                                            "object",
+                                            "string",
+                                            "null"
+                                        ],
+                                        "default": "null"
+                                    }
+                                }
+                            },
+                            "pqOptions": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": {},
+                                "required": false,
+                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details.",
+                                "properties": {
+                                    "ssl": {
+                                        "required": false,
+                                        "type": [
+                                            "boolean",
+                                            "object",
+                                            "null"
+                                        ],
+                                        "default": "null"
                                     }
                                 }
                             },
@@ -444,16 +527,61 @@
                             },
                             "previewLimit": {
                                 "type": "number",
-                                "description": "Global show records limit",
-                                "default": 10
+                                "description": "Connection show records limit"
+                            },
+                            "icons": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": null,
+                                "required": false,
+                                "description": "Define an icon for this connection. If not specified, use defaults",
+                                "properties": {
+                                    "active": {
+                                        "required": false,
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "connected": {
+                                        "required": false,
+                                        "type": "string",
+                                        "default": null
+                                    },
+                                    "disconnected": {
+                                        "required": false,
+                                        "type": "string",
+                                        "default": null
+                                    }
+                                }
                             }
+                        }
+                    }
+                },
+                "sqltools.results": {
+                    "type": "object",
+                    "default": {},
+                    "properties": {
+                        "limit": {
+                            "type": "number",
+                            "description": "Global show records limit",
+                            "default": 50
+                        },
+                        "location": {
+                            "type": "string",
+                            "default": "active",
+                            "enum": [
+                                "active",
+                                "beside"
+                            ],
+                            "description": "Define where the results should show up."
                         }
                     }
                 },
                 "sqltools.previewLimit": {
                     "type": "number",
-                    "description": "Global show records limit",
-                    "default": 10
+                    "deprecationMessage": "Use `sqltools.results.limit` instead. Will be removed in the future",
+                    "description": "Global show records limit"
                 },
                 "sqltools.tableTreeItemsExpanded": {
                     "type": "boolean",
@@ -471,16 +599,36 @@
                     "description": "Default export results mode."
                 },
                 "sqltools.useNodeRuntime": {
-                    "type": ["null", "boolean", "string"],
+                    "type": [
+                        "null",
+                        "boolean",
+                        "string"
+                    ],
                     "default": false,
                     "description": "Enable node runtime usage."
+                },
+                "sqltools.sortColumns": {
+                    "type": [
+                        "null",
+                        "string"
+                    ],
+                    "enum": [
+                        "name",
+                        "ordinalnumber"
+                    ],
+                    "default": "name",
+                    "description": "Sort columns criteria."
+                },
+                "sqltools.flattenGroupsIfOne": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Flatten groups with has only one child"
                 }
             }
         },
         "views": {
             "SQLToolsExplorer": [
                 {
-
                     "id": "SQLTools/connectionExplorer",
                     "name": "Connections"
                 },
@@ -589,7 +737,7 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(schema_group|tableOrView)$/ && !sqltools.Results.active",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView)/ && !sqltools.Results.active",
                     "group": "navigation"
                 },
                 {
@@ -659,28 +807,27 @@
     },
     "scripts": {
         "vscode:prepublish": "yarn run compile",
-        "compile": "NODE_ENV=production webpack",
+        "compile": "cross-env NODE_ENV=production webpack",
         "compile:preview": "env PREVIEW=1 yarn run compile",
-        "watch": "NODE_ENV=development webpack --watch --info-verbosity verbose",
+        "watch": "cross-env NODE_ENV=development webpack --watch --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
-        "test:unit": "./node_modules/.bin/jest --config jest.json",
-        "test": "yarn run test:lint && yarn run test:unit",
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
         "@babel/cli": "^7.1.2",
-        "@types/jest": "^24.0.1",
+        "@types/jest": "^24.0.11",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
+        "cross-env": "^5.2.0",
         "css-loader": "^2.1.1",
-        "jest": "^23.6.0",
-        "jest-cli": "^23.6.0",
+        "jest": "^24.5.0",
+        "jest-cli": "^24.5.0",
         "node-sass": "^4.11.0",
         "sass-loader": "^7.1.0",
         "style-loader": "^0.23.1",
-        "ts-jest": "^23.10.5",
+        "ts-jest": "^24.0.2",
         "ts-loader": "^5.3.3",
-        "typescript": "^3.3.3333",
+        "typescript": "^3.4.1",
         "vscode": "^1.1.30",
         "webpack": "^4.29.6",
         "webpack-cli": "^3.2.3"
@@ -688,6 +835,6 @@
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/plugins": "*",
-        "vscode-languageclient": "^5.3.0-next.1"
+        "vscode-languageclient": "^5.2.1"
     }
 }

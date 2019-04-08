@@ -1,11 +1,11 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
 } from '../../interface';
 import * as Utils from '../../utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 const OracleDBLibVersion = '3.1.1';
 export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
@@ -24,7 +24,9 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   queries = queries
 
   private get lib(): typeof OracleDBLib {
-    return __non_webpack_require__('oracledb');
+    const oracledb = __non_webpack_require__('oracledb');
+    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB];
+    return oracledb;
   }
 
   private get poolName(): string {
@@ -72,21 +74,30 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     const conn = await this.open();
     const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter(Boolean);
     const results: DatabaseInterface.QueryResults[] = [];
-    for(let q of queries) {
-      let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
-      const messages = [];
-      if (res.rowsAffected) {
-        messages.push(`${res.rowsAffected} rows were affected.`);
+    try {
+      for(let q of queries) {
+        let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
+        const messages = [];
+        if (res.rowsAffected) {
+          messages.push(`${res.rowsAffected} rows were affected.`);
+        }
+        results.push({
+          connId: this.getId(),
+          cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
+          messages,
+          query: queries[results.length],
+          results: res.rows,
+        });
       }
-      results.push({
-        connId: this.getId(),
-        cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
-        messages,
-        query: queries[results.length],
-        results: res.rows,
-      });
+    } finally {
+      if (conn) {
+        try {
+          await conn.close();
+        } catch (e) {
+          console.log(e);
+        }
+      }
     }
-    conn.close();
     return results;
   }
 
@@ -108,8 +119,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -129,9 +139,10 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               tableName: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
+              isPk: obj.CONSTRAINTTYPE === 'P',
+              isFk: obj.CONSTRAINTTYPE === 'R'
             } as DatabaseInterface.TableColumn;
-          })
-          .sort();
+          });
       });
   }
 

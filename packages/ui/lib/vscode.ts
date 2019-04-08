@@ -1,4 +1,4 @@
-import { VSCodeWebviewAPI } from 'lib/interfaces';
+import { VSCodeWebviewAPI } from './interfaces';
 
 let vscode: VSCodeWebviewAPI;
 

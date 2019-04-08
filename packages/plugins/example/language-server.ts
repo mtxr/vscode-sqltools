@@ -4,12 +4,11 @@
  */
 
 import SQLTools from '@sqltools/core/plugin-api';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
 
 export default class ExamplePlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
   }
 }

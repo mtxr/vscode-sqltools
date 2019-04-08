@@ -48,7 +48,8 @@ tslint.json
 **/*.vsix
 node_modules/**
 **/node_modules/**
-
+jest.config.js
+**/jest.config.js
 # exceptions
 !static/icon.png
 !README.md

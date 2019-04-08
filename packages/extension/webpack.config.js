@@ -45,7 +45,7 @@ function getExtensionConfig() {
         {
           test: /\.ts?$/,
           loaders: [{ loader: 'ts-loader', options: { transpileOnly: true } }],
-          exclude: /node_modules/,
+          exclude: /node_modules|\.test\..+/i,
         },
       ],
     },

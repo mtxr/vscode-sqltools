@@ -14,7 +14,7 @@ export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
       if (Array.isArray(params)) {
         params = params[0];
       }
-      const { textDocument, options, range } = params as DocumentRangeFormattingParams;
+      const { textDocument, range } = params as DocumentRangeFormattingParams;
       const document = this.server.docManager.get(textDocument.uri);
       let text: string;
       let newRange: Range;
@@ -25,7 +25,7 @@ export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
         newRange = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
       }
 
-      return [ TextEdit.replace(newRange || range, format(text, options.tabSize)) ];
+      return [ TextEdit.replace(newRange || range, format(text, ConfigManager.format)) ];
     } catch (e) {
       this.server.telemetry.registerException(e);
     }

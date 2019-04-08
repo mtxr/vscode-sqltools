@@ -1,0 +1,23 @@
+{
+  "groups": {
+    "default": {
+      "packages": [
+        "package.json",
+        "packages/core/package.json",
+        "packages/extension/package.json",
+        "packages/language-server/package.json",
+        "packages/plugins/package.json",
+        "packages/ui/package.json"
+      ]
+    }
+  },
+  "ignore": [
+    "@sqltools/core",
+    "@sqltools/extension",
+    "@sqltools/formatter",
+    "@sqltools/language-server",
+    "@sqltools/plugins",
+    "@sqltools/ui",
+    "react-table"
+  ]
+}

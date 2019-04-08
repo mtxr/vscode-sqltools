@@ -1,5 +1,7 @@
-import DatabaseInterface from './database';
 import { DatabaseDialect } from './dialect';
+import { ClientConfig } from 'pg';
+import { ConnectionConfig } from 'mysql';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface ConnectionInterface {
   /**
@@ -67,19 +69,35 @@ export interface ConnectionInterface {
    */
   previewLimit?: number;
   /**
-   * Dialect driver options. See more on https://github.com/mtxr/vscode-sqltools/wiki/connection-driver-options
+   * MSSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options
+   * @deprecated replaced by mssqlOptions
    * @type {any}
    * @memberof ConnectionInterface
    */
-  dialectOptions?: { encrypt?: boolean };
+  mssqlOptions?: { encrypt?: boolean };
 
   /**
-   * MySQL specific options
+   * MySQL specific driver options
    * @type {any}
    * @memberof ConnectionInterface
    */
   mysqlOptions?: {
     authProtocol?: 'xprotocol' | 'default'
+    /**
+     * If using xprotocol, must be boolean
+     *
+     * @type {ConnectionConfig['ssl'] | boolean}
+     */
+    ssl?: ConnectionConfig['ssl'] | boolean;
+  }
+
+  /**
+   * PostgreSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options
+   * @type {any}
+   * @memberof ConnectionInterface
+   */
+  pgOptions?: {
+    ssl?: ClientConfig['ssl'];
   }
   /**
    * Connection domain (for MSSQL/Azure only)
@@ -106,6 +124,18 @@ export interface ConnectionInterface {
    * @memberof ConnectionInterface
    */
   isActive: boolean;
+
+  /**
+   * Define an icon for this connection. If not specified, use defaults
+   *
+   * @type {string}
+   * @memberof ConnectionInterface
+   */
+  icons?: {
+    active?: string;
+    connected?: string;
+    disconnected?: string;
+  };
 }
 
 export interface ConnectionDialect {
@@ -115,6 +145,7 @@ export interface ConnectionDialect {
   close(): Promise<any>;
   getTables(): Promise<DatabaseInterface.Table[]>;
   getColumns(): Promise<DatabaseInterface.TableColumn[]>;
+  getFunctions(): Promise<DatabaseInterface.Function[]>;
   describeTable(tableName: string): Promise<DatabaseInterface.QueryResults[]>;
   showRecords(tableName: string, limit: number): Promise<DatabaseInterface.QueryResults[]>;
   query(query: string): Promise<DatabaseInterface.QueryResults[]>;

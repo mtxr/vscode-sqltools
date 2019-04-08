@@ -1,23 +1,39 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseInterface } from '@sqltools/core/interface';
-import { getConnectionDescription, getConnectionId } from '@sqltools/core/utils';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
-import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri } from 'vscode';
+import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, SnippetString } from 'vscode';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-export class SidebarConnection extends TreeItem {
+interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T> {
+  parent: SidebarItemIterface<T, A>;
+  value: string;
+  snippet?: SnippetString;
+  items: T[] | never;
+  conn: ConnectionInterface;
+  addItem(item: A): this | never;
+}
+
+export abstract class SidebarAbstractItem<T extends SidebarItemIterface<SidebarAbstractItem> = any, A = T> extends TreeItem implements SidebarItemIterface<T, A> {
+  tree?: { [id: string]: SidebarAbstractItem };
+  snippet?: SnippetString;
+  abstract value: string;
+  abstract conn: ConnectionInterface;
+  abstract items: T[];
+  abstract addItem(item: A): this;
+  public parent: SidebarAbstractItem = null;
+}
+
+export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
   public static icons;
-
   public parent = null;
   public contextValue = 'connection';
-  public tables: SidebarDatabaseSchemaGroup;
-  public views: SidebarDatabaseSchemaGroup;
+
+  public tree: { [id: string]: SidebarResourceGroup } = {};
 
   public get items() {
-    return [
-      this.tables,
-      this.views,
-    ];
+    return asArray(this.tree);
   }
   public get description() {
     return getConnectionDescription(this.conn);
@@ -29,7 +45,7 @@ export class SidebarConnection extends TreeItem {
     return this.conn.isConnected;
   }
   public get id() {
-    return this.getId();
+    return <string>this.getId();
   }
   public get value() {
     return this.conn.database;
@@ -42,8 +58,6 @@ export class SidebarConnection extends TreeItem {
 
   constructor(private context: ExtensionContext, public conn: ConnectionInterface) {
     super(conn.name, TreeItemCollapsibleState.None);
-    this.tables = new SidebarDatabaseSchemaGroup('Tables', this);
-    this.views = new SidebarDatabaseSchemaGroup('Views', this);
     this.command = {
       title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
@@ -52,7 +66,7 @@ export class SidebarConnection extends TreeItem {
 
     if (!SidebarConnection.icons) {
       SidebarConnection.icons = {
-        active: Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`),
+        active: this.context.asAbsolutePath('icons/database-active.svg'),
         connected: {
           dark: this.context.asAbsolutePath('icons/database-dark.svg'),
           light: this.context.asAbsolutePath('icons/database-light.svg'),
@@ -67,11 +81,24 @@ export class SidebarConnection extends TreeItem {
   }
 
   public updateIconPath() {
-    this.iconPath = SidebarConnection.icons.disconnected;
+    const iconOptions = Object.assign({}, SidebarConnection.icons);
+    if (this.conn.icons) {
+      if (this.conn.icons.active) {
+        iconOptions.active = Uri.parse(this.conn.icons.active);
+      }
+
+      if (this.conn.icons.connected) {
+        iconOptions.connected = Uri.parse(this.conn.icons.connected);
+      }
+      if (this.conn.icons.disconnected) {
+        iconOptions.disconnected = Uri.parse(this.conn.icons.disconnected);
+      }
+    }
+    this.iconPath = iconOptions.disconnected;
     if (this._isActive) {
-      this.iconPath = SidebarConnection.icons.active;
+      this.iconPath = iconOptions.active;
     } else if (this.contextValue === 'connectedConnection') {
-      this.iconPath = SidebarConnection.icons.connected;
+      this.iconPath = iconOptions.connected;
     }
   }
 
@@ -79,19 +106,19 @@ export class SidebarConnection extends TreeItem {
     return getConnectionId(this.conn);
   }
 
-  public addItem(item) {
-    const key = item.isView ? 'views' : 'tables';
-    const element = item.isView ? new SidebarView(this.context, item, this[key]) : new SidebarTable(this.context, item, this[key]);
-    this[key].addItem(element);
+  public addItem(item: SidebarResourceGroup) {
+    if (this.tree[item.value]) return this;
+
+    this.tree[item.value] = this.tree[item.value] || item;
+    this.tree[item.value].parent = this;
     this.collapsibleState = this.collapsibleState === TreeItemCollapsibleState.None
       ? TreeItemCollapsibleState.Collapsed
       : this.collapsibleState;
-    return element;
+    return this;
   }
 
   public reset() {
-    if (this.views) this.views = new SidebarDatabaseSchemaGroup('Views', this);
-    if (this.tables) this.tables = new SidebarDatabaseSchemaGroup('Tables', this);
+    this.tree = {};
     this.collapsibleState = TreeItemCollapsibleState.None;
     this.deactivate();
   }
@@ -138,67 +165,83 @@ export class SidebarConnection extends TreeItem {
   }
 }
 
-export class SidebarDatabaseSchemaGroup extends TreeItem {
-  public iconPath = ThemeIcon.Folder;
-  public contextValue = 'connection.schema_group';
-  public value = this.contextValue;
-  public items: { [name: string]: SidebarTable | SidebarView} = {};
-  public get description() {
-    return `${Object.keys(this.items).length} ${this.label.toLowerCase()}`;
-  }
-  public get conn() { return this.parent.conn; }
-  constructor(public label: string, public parent: SidebarConnection) {
-    super(label, TreeItemCollapsibleState.Collapsed);
-  }
 
-  public addItem(item) {
-    this.items[item.value] = this.items[item.value] || item;
-  }
-
-  public reset() {
-    this.items = {};
-  }
-}
-
-export class SidebarTable extends TreeItem {
+export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
   public contextValue = 'connection.tableOrView';
   public value: string;
   public toString() {
     return this.table.name;
   }
-  public get columns() {
-    return this.items;
+
+  public get columns(): DatabaseInterface.TableColumn[] {
+    return this._columns.map(item => item.column);
   }
-  public items: SidebarColumn[] = [];
+  public get items() {
+    return this._columns;
+  }
+
+  public get snippet(): SnippetString {
+    if (!this.conn) return;
+    let snptArr: string[];
+    switch (this.conn.dialect) {
+      case DatabaseDialect.PostgreSQL:
+        snptArr = [this.table.tableDatabase, this.table.tableSchema, this.table.name];
+        break;
+      case DatabaseDialect.MySQL:
+        snptArr = [this.table.tableSchema, this.table.name];
+        break;
+      default:
+        snptArr = [this.table.name];
+        break;
+    }
+    return new SnippetString(snptArr.map((v, i) => `\${${i + 1}:${v}}`).join('.')+'$0');
+  }
+
+  public _columns: SidebarColumn[] = [];
+
   public get conn() { return this.parent.conn; }
   public get description() {
     if (typeof this.table.numberOfColumns === 'undefined')  return '';
     return `${this.table.numberOfColumns} cols`;
   }
 
-  constructor(private context: ExtensionContext, public table: DatabaseInterface.Table, public parent: SidebarDatabaseSchemaGroup) {
+  constructor(private context: ExtensionContext, public table: DatabaseInterface.Table) {
     super(table.name, (
       ConfigManager.get('tableTreeItemsExpanded', false)
         ? TreeItemCollapsibleState.Expanded
         : TreeItemCollapsibleState.Collapsed
     ));
-    this.value = table.name;
-    this.iconPath = {
-      dark: this.context.asAbsolutePath('icons/table-dark.svg'),
-      light: this.context.asAbsolutePath('icons/table-light.svg'),
-    };
+    this.value = this.table.name;
+    if (this.table.isView) {
+      this.iconPath = {
+        dark: this.context.asAbsolutePath('icons/view-dark.svg'),
+        light: this.context.asAbsolutePath('icons/view-light.svg'),
+      };
+    } else {
+      this.iconPath = {
+        dark: this.context.asAbsolutePath('icons/table-dark.svg'),
+        light: this.context.asAbsolutePath('icons/table-light.svg'),
+      };
+    }
   }
 
-  public addItem(item: DatabaseInterface.TableColumn) {
-    this.items.push(new SidebarColumn(this.context, item, this));
+  public addItem(item: SidebarColumn) {
+    item.parent = this;
+    this._columns.push(item);
+    return this;
   }
 }
 
-export class SidebarView extends SidebarTable { }
-
-export class SidebarColumn extends TreeItem {
+export class SidebarColumn extends SidebarAbstractItem<null> {
+  static icons;
   public contextValue = 'connection.column';
   public value: string;
+
+  public get items(): null { return null; }
+
+  public addItem(_: never): never {
+    throw new Error('Cannot add items to table column');
+  }
 
   public get description() {
     let typeSize = '';
@@ -209,17 +252,107 @@ export class SidebarColumn extends TreeItem {
   }
   public get conn() { return this.parent.conn; }
 
-  constructor(private context: ExtensionContext, public column: DatabaseInterface.TableColumn, public parent: SidebarTable) {
+  constructor(private context: ExtensionContext, public column: DatabaseInterface.TableColumn) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
-    this.iconPath = {
-      dark: this.context.asAbsolutePath('icons/column-dark.png'),
-      light: this.context.asAbsolutePath('icons/column-light.png'),
-    };
+    if (!SidebarColumn.icons) {
+      SidebarColumn.icons = {
+        default: {
+          dark: this.context.asAbsolutePath('icons/column-dark.svg'),
+          light: this.context.asAbsolutePath('icons/column-light.svg'),
+        },
+        primaryKey: this.context.asAbsolutePath('icons/pk.svg'),
+        foreignKey: this.context.asAbsolutePath('icons/fk.svg'),
+      }
+    }
+    this.updateIconPath();
     this.command = {
       title: 'Append to Cursor',
       command: `${EXT_NAME}.insertText`,
-      arguments: [this],
+      arguments: [`\${1:${column.columnName}}$0`],
+    };
+  }
+
+  public updateIconPath() {
+    this.iconPath = SidebarColumn.icons.default;
+    if (this.column.isPk) {
+      this.iconPath = SidebarColumn.icons.primaryKey;
+    } else if (this.column.isFk) {
+      this.iconPath = SidebarColumn.icons.foreignKey;
+    }
+  }
+}
+
+export class SidebarFunction extends SidebarAbstractItem<null> {
+  public contextValue = 'connection.function';
+  public value: string;
+
+  public get items(): null { return null; }
+
+  public addItem(_: never): never {
+    throw new Error('Cannot add items to database function');
+  }
+
+  public get conn() { return this.parent.conn; }
+
+  constructor(private context: ExtensionContext, public functionData: DatabaseInterface.Function) {
+    super(functionData.name, TreeItemCollapsibleState.None);
+    this.value = functionData.name;
+    this.iconPath = {
+      dark: this.context.asAbsolutePath('icons/function-dark.svg'),
+      light: this.context.asAbsolutePath('icons/function-light.svg'),
+    };
+    this.description = `${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || '?'}`;
+    this.tooltip = `${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || '?'}`;
+    this.value = `${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}`;
+    let args = [];
+    this.functionData.args.forEach((type, index) => {
+      args.push(`\${${index + 1}:${type}}`);
+    });
+    this.snippet = new SnippetString(`${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}(${args.join(', ')})$0`);
+    this.command = {
+      title: 'Append to Cursor',
+      command: `${EXT_NAME}.insertText`,
+      arguments: [this.snippet],
     };
   }
 }
+
+export class SidebarResourceGroup<T extends SidebarAbstractItem = SidebarAbstractItem> extends SidebarAbstractItem<T> {
+  public iconPath = ThemeIcon.Folder;
+  public contextValue = 'connection.resource_group';
+  public value: string;
+  public tree: { [name: string]: T } = {};
+  public get items() {
+    return asArray(this.tree);
+  }
+  public get description() {
+    return this.detail || `${Object.keys(this.tree).length} ${this.label.toLowerCase()}`;
+  }
+  public get conn() {
+    return this.parent.conn;
+  }
+
+  public parent: SidebarAbstractItem;
+
+  constructor(public label: string, private detail?: string) {
+    super(label, TreeItemCollapsibleState.Collapsed);
+    this.value = this.label;
+  }
+
+  public addItem(item: T) {
+    this.tree[item.value] = this.tree[item.value] || item;
+    this.tree[item.value].parent = this;
+    return this;
+  }
+
+  public reset() {
+    this.tree = {};
+  }
+}
+
+export type SidebarTreeItem = SidebarConnection
+| SidebarTableOrView
+| SidebarColumn
+| SidebarResourceGroup
+| SidebarFunction;

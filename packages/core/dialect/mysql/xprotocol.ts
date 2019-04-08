@@ -1,11 +1,12 @@
 import MySQLXLib from '@mysql/xdevapi';
 import {
   ConnectionDialect,
-  DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class MySQLX extends GenericDialect<any> implements ConnectionDialect {
   queries = Queries;
@@ -14,6 +15,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
       return this.connection;
     }
 
+    const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
     const client = MySQLXLib.getClient(
       {
         host: this.credentials.server,
@@ -22,6 +24,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
         user: this.credentials.username,
         schema: this.credentials.database,
         connectTimeout: this.credentials.connectionTimeout * 1000,
+        ssl,
       },
       {
         pooling: {
@@ -104,36 +107,10 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              name: obj.tableName,
-              isView: !!obj.isView,
-              numberOfColumns: parseInt(obj.numberOfColumns, 10),
-              tableCatalog: obj.tableCatalog,
-              tableDatabase: obj.dbName,
-              tableSchema: obj.tableSchema,
-            } as DatabaseInterface.Table;
-          })
-          .sort();
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
-            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
-            obj.tableDatabase = obj.dbName;
-            return obj as DatabaseInterface.TableColumn;
-          })
-          .sort();
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 }

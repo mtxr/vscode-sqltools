@@ -11,6 +11,32 @@ export interface FormatOptions {
    * @memberof FormatOptions
    */
   indentSize: number;
+
+  /**
+   * Reserverd word case
+   * @type {string}
+   * @default null
+   * @memberof FormatOptions
+   */
+  reservedWordCase?: 'upper' | 'lower' | null;
+}
+
+export interface ResultsOptions {
+  /**
+   * Global show records limit
+   * @type {number}
+   * @default 50
+   * @memberof ResultsOptions
+   */
+  limit: number;
+
+  /**
+   * Define where the results should show up.
+   * @type {string}
+   * @default null
+   * @memberof ResultsOptions
+   */
+  location?: 'current' | 'beside';
 }
 
 export interface Settings {
@@ -52,7 +78,7 @@ export interface Settings {
   /**
    * Languages with SQL completion activated.
    * @type {CompletionLanguages}
-   * @default ["sql", "plaintext"]
+   * @default ["sql"]
    * @memberof Settings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
@@ -71,6 +97,14 @@ export interface Settings {
    * @memberof Settings
    */
   format?: FormatOptions;
+
+  /**
+   * Results view options
+   * @type {ResultsOptions}
+   * @memberof Settings
+   */
+  results?: ResultsOptions;
+
   /**
    * Connections
    * @type {ConnectionInterface[]}
@@ -79,12 +113,6 @@ export interface Settings {
    */
   connections?: ConnectionInterface[];
 
-  /**
-   * Global show records limit
-   * @type {string}
-   * @memberof Settings
-   */
-  previewLimit?: number;
   /**
    * Default export results mode
    * @default "prompt"
@@ -99,4 +127,20 @@ export interface Settings {
    * @memberof Settings
    */
   useNodeRuntime?: null | boolean | string;
+
+  /**
+   * Columns sort order
+   * @default 'name'
+   * @type {null | string}
+   * @memberof Settings
+   */
+  sortColumns?: 'name' | 'ordinalnumber' | null;
+
+  /**
+   * Flatten groups with has only one child
+   * @default false
+   * @type {boolean}
+   * @memberof Settings
+   */
+  flattenGroupsIfOne?: boolean;
 }

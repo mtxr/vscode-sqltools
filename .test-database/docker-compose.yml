@@ -1,0 +1,23 @@
+version: '2.1'
+
+services:
+    mssql:
+      extends:
+        file: ./mssql/docker-compose.yml
+        service: db
+    mysql:
+      extends:
+        file: ./mysql/docker-compose.yml
+        service: db
+    mysql_xprotocol:
+      extends:
+        file: ./mysql/docker-compose.yml
+        service: db_xprotocol
+    # oracle:
+    #   extends:
+    #     file: ./oracle/docker-compose.yml
+    #     service: db
+    pgsql:
+      extends:
+        file: ./pgsql/docker-compose.yml
+        service: db

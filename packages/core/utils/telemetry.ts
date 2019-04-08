@@ -3,7 +3,7 @@ import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
 import Timer from '@sqltools/core/utils/timer';
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
-import SQLTools from '../plugin-api';
+import SQLTools from '@sqltools/core/plugin-api';
 import { numericVersion } from '.';
 
 export class Telemetry implements SQLTools.TelemetryInterface {
@@ -20,12 +20,13 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     AI.setup(AI_KEY)
       .setAutoCollectConsole(false)
       .setAutoCollectDependencies(false)
-      .setAutoCollectExceptions(true)
+      .setAutoCollectExceptions(false)
       .setAutoCollectPerformance(false)
       .setAutoCollectRequests(false)
       .setAutoDependencyCorrelation(false)
       .setUseDiskRetryCaching(true);
 
+    AI.defaultClient.config.samplingPercentage = 50;
     this.client = AI.defaultClient;
 
     const aiCtx = this.client.context;

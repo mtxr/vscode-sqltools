@@ -2,7 +2,6 @@ import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists } from '@sqltools/core/utils';
-import SQLToolsLanguageServer from '@sqltools/language-server/server';
 import { spawn, SpawnOptions } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -52,7 +51,7 @@ function run(
 
 export default class DependencyManager implements SQLTools.LanguageServerPlugin {
   private root: string;
-  private server: SQLToolsLanguageServer;
+  private server: SQLTools.LanguageServerInterface;
 
 
  private onRequestToInstall = async (params) => {
@@ -86,7 +85,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     console.debug('Finished installing deps');
   }
 
-  public register(server: SQLToolsLanguageServer) {
+  public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
 
     this.server.addOnInitializeHook(({ initializationOptions }) => {

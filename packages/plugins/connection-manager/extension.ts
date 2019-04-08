@@ -1,13 +1,13 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
-import { SidebarConnection, SidebarTable, SidebarView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
+import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
@@ -19,9 +19,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
 
-  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
-    this.explorer.setTreeData(conn, tables, columns);
-  }
+  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
 
   // extension commands
   private ext_refreshAll = () => {
@@ -37,11 +35,17 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_showRecords = async (node?: SidebarTable | SidebarView) => {
+  private ext_showRecords = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, ConfigManager.previewLimit);
+      let limit = 50;
+      if (ConfigManager.results && ConfigManager.results.limit) {
+        limit = ConfigManager.results.limit;
+      } else if ((<any>ConfigManager).previewLimit) { // @TODO: this is deprecated! Will be removed.
+        limit = (<any>ConfigManager).previewLimit;
+      }
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, limit);
       this.resultsWebview.updateResults(payload);
 
     } catch (e) {
@@ -49,7 +53,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_describeTable = async (node?: SidebarTable | SidebarView) => {
+  private ext_describeTable = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
       this._openResultsWebview();
@@ -128,6 +132,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.settingsWebview.show();
   }
 
+  private ext_focusOnExplorer = () => {
+    return this.explorer.focus();
+  }
+
   private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
     let id: string;
     if (connIdOrNode) {
@@ -145,24 +153,55 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     if (!res) return;
 
-    const connList = ConfigManager.connections.filter(c => getConnectionId(c) !== id);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+    const {
+      workspaceFolderValue = [],
+      workspaceValue = [],
+      globalValue = [],
+    } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+
+    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) == id);
+
+    let index = findIndex(workspaceFolderValue);
+    if (index >= 0) {
+      workspaceFolderValue.splice(index, 1);
+      return this.saveConnectionList(workspaceFolderValue, ConfigurationTarget.WorkspaceFolder);
+    }
+
+    index = findIndex(workspaceValue);
+    if (index >= 0) {
+      workspaceValue.splice(index, 1);
+      return this.saveConnectionList(workspaceValue, ConfigurationTarget.Workspace);
+    }
+
+    index = findIndex(globalValue);
+    if (index >= 0) {
+      globalValue.splice(index, 1);
+      return this.saveConnectionList(globalValue, ConfigurationTarget.Global);
+    }
+    return Promise.resolve(true);
   }
 
-  private ext_addConnection(connInfo: ConnectionInterface) {
+  private ext_addConnection = (connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
       console.warn('Nothing to do. No parameter received');
       return;
     }
-    const connList = ConfigManager.connections;
+
+    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined);
     connList.push(connInfo);
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList);
+    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
   // internal utils
-  private async _getTableName(node?: SidebarTable | SidebarView): Promise<string> {
+  private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.value) {
       await this._setConnection(node.conn as ConnectionInterface);
+      switch(node.conn.dialect) {
+        case DatabaseDialect.PostgreSQL:
+          return [node.table.tableDatabase, node.table.tableSchema, node.table.name].join('.');
+        case DatabaseDialect.MySQL:
+          return [node.table.tableSchema, node.table.name].join('.');
+      }
       return node.value;
     }
 
@@ -279,6 +318,27 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.statusBar;
   }
 
+  private async saveConnectionList(connList: ConnectionInterface[], writeTo?: ConfigurationTarget) {
+    if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
+      writeTo = ConfigurationTarget.Global;
+    }
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList, writeTo);
+  }
+
+  private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
+    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections');
+
+    const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+    if (from === ConfigurationTarget.Global) {
+      return <ConnectionInterface[]>(config.globalValue || config.defaultValue);
+    }
+    if (from === ConfigurationTarget.WorkspaceFolder) {
+      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue);
+    }
+
+    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
+  }
+
   public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
@@ -312,7 +372,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`saveResults`, this.ext_saveResults)
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
-      .registerCommand(`showRecords`, this.ext_showRecords);
+      .registerCommand(`showRecords`, this.ext_showRecords)
+      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {

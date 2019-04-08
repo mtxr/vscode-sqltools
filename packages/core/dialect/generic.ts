@@ -1,12 +1,12 @@
 import {
   ConnectionDialect,
-  DatabaseInterface,
   DialectQueries,
   ConnectionInterface,
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
 import { MissingModuleException, ElectronNotSupportedException } from '../exception';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export interface Deps {
   type: 'package' | 'npmscript';
@@ -39,6 +39,11 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   abstract getTables(): Promise<DatabaseInterface.Table[]>;
 
   abstract getColumns(): Promise<DatabaseInterface.TableColumn[]>;
+
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    console.error(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.dialect}\n####################`);
+    return Promise.resolve([]);
+  }
 
   public describeTable(table: string) {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));

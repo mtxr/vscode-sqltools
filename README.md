@@ -4,9 +4,12 @@
 
 <hr />
 
-[![Gitter](https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat)](https://gitter.im/vscode-sqltools)
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+[![Build Status](https://img.shields.io/travis/com/mtxr/vscode-sqltools/master.svg?style=flat-square)](https://travis-ci.com/mtxr/vscode-sqltools)
+[![Greenkeeper badge](https://badges.greenkeeper.io/mtxr/vscode-sqltools.svg?style=flat-square)](https://greenkeeper.io/)
+[![Gitter](https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square)](https://gitter.im/vscode-sqltools)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square)](https://www.patreon.com/mteixeira)
+[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+[![GNU General Public License](https://img.shields.io/badge/license-GPL%20v3-orange.svg?style=flat-square)](http://www.gnu.org/licenses/gpl-3.0.en.html)
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
@@ -27,9 +30,13 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 ![static/autocomplete.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/autocomplete.png)
 
-* Sidebar database explorer and setup GUI
+* Add connection wizard
 
 ![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
+
+* Sidebar database explorer
+
+![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
 
 * Export results to JSON and CSV
 

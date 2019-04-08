@@ -1,12 +1,13 @@
-import MSSQLLib from 'mssql';
+import MSSQLLib, { IResult } from 'mssql';
 
 import {
   ConnectionDialect,
-  DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import GenericDialect from '@sqltools/core/dialect/generic';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> implements ConnectionDialect {
   queries = queries;
@@ -17,10 +18,10 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       return this.connection;
     }
 
-    const { dialectOptions = { encrypt: true } } = this.credentials;
+    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || (<any>this.credentials).dialectOptions || { encrypt: true };
 
-    let encryptAttempt = typeof dialectOptions.encrypt !== 'undefined'
-      ? dialectOptions.encrypt : true;
+    let encryptAttempt = typeof mssqlOptions.encrypt !== 'undefined'
+      ? mssqlOptions.encrypt : true;
     if (typeof encrypt !== 'undefined') {
       encryptAttempt = encrypt;
     }
@@ -69,10 +70,14 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     const pool = await this.open();
     const request = pool.request();
     request.multiple = true;
-    const { recordsets, rowsAffected } = await request.query(query);
-    const queries = Utils.query.parse(query);
-    return recordsets.map((r, i): DatabaseInterface.QueryResults => {
+    const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '')).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
+    const queries = Utils.query.parse(query, 'mssql');
+    return queries.map((q, i): DatabaseInterface.QueryResults => {
+      const r = recordsets[i] || [];
       const messages = [];
+      if (error) {
+        messages.push(error.message || error.toString());
+      }
       if (typeof rowsAffected[i] === 'number')
         messages.push(`${rowsAffected[i]} rows were affected.`);
 
@@ -80,7 +85,8 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
         connId: this.getId(),
         cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
         messages,
-        query: queries[i],
+        error,
+        query: q,
         results: Array.isArray(r) ? r : [],
       };
     })
@@ -99,9 +105,9 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
               tableCatalog: obj.tableCatalog,
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -111,12 +117,16 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
-            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
-            obj.tableDatabase = obj.dbName;
-            return obj as DatabaseInterface.TableColumn;
-          })
-          .sort();
+            return <DatabaseInterface.TableColumn>{
+              ...obj,
+              isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
+              size: obj.size !== null ? parseInt(obj.size, 10) : null,
+              tableDatabase: obj.dbName,
+              isPk: (obj.constraintType || '').toLowerCase() === 'primary key',
+              isFk: (obj.constraintType || '').toLowerCase() === 'foreign key',
+              tree: obj.tree,
+            };
+          });
       });
   }
 }

@@ -5,13 +5,16 @@ import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 
-const FilterByValue = 'Filter by \'{value}\'';
-const ReRunQuery = 'Re-run this query';
-const ClearFilters = 'Clear all filters';
+const FilterByValueOption = 'Filter by \'{value}\'';
+const ReRunQueryOption = 'Re-run this query';
+const ClearFiltersOption = 'Clear all filters';
 const CopyCellOption = 'Copy Cell value';
 const CopyRowOption = 'Copy Row value';
 const SaveCSVOption = 'Save results as CSV';
 const SaveJSONOption = 'Save results as JSON';
+const OpenEditorWithValueOption = 'Open editor with\'{value}\'';
+const OpenEditorWithRowOption = 'Open editor with row';
+
 const isRegExMatcher = /^\/(.+)\/(\w+)?$/gi;
 
 function toRegEx(value: string | RegExp) {
@@ -24,17 +27,17 @@ function toRegEx(value: string | RegExp) {
     }
     return new RegExp(`(${value})`, 'gi');
   } catch (e) { }
-  return value
+  return value;
 }
 
-const FilterComponent = ({ filter, column, onChange }) => {
+const FilterComponent = ({ filter = { value: '' }, column, onChange }) => {
   return (
     <input
       type="text"
       placeholder={`Filter by ${column.id}`}
       style={{ width: '100%' }}
-      value={filter ? filter.value : ''}
-      onChange={event => onChange(event.target.value)}
+      value={filter.value}
+      onChange={event => onChange(column.id, event.target.value)}
     />
   );
 };
@@ -70,8 +73,7 @@ interface ResultsTableProps {
   connId: string;
 }
 interface ResultsTableState {
-  filtered: { [id: string]: string | RegExp };
-  tableFiltered: Filter[];
+  filtered: { [id: string]: Filter & { regex: RegExp | string } };
   clickedData: {
     value: any,
     index: number,
@@ -87,7 +89,6 @@ interface ResultsTableState {
 export default class ResultsTable extends React.PureComponent<ResultsTableProps, ResultsTableState> {
   static initialState: ResultsTableState = {
     filtered: {},
-    tableFiltered: [],
     clickedData: {
       value: undefined,
       index: -1,
@@ -120,7 +121,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         if (!this.state.filtered[r.column.id]) return <span>{v}</span>;
         return <span>
           {
-            v.replace(this.state.filtered[r.column.id], '<###>$1<###>')
+            v.replace(this.state.filtered[r.column.id].regex || this.state.filtered[r.column.id].value, '<###>$1<###>')
             .split('<###>')
             .map((str, i) => {
               if (i % 2 === 1)
@@ -198,38 +199,55 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     if (!this.state.clickedData.col) return options;
     const { clickedData } = this.state;;
     if (typeof this.state.clickedData.value !== 'undefined') {
-      options.push({ get label() { return FilterByValue.replace('{value}', clickedData.value) }, value: FilterByValue });
+      options.push({ get label() { return FilterByValueOption.replace('{value}', clickedData.value) }, value: FilterByValueOption });
       options.push('sep');
     }
-    if (this.state.tableFiltered.length > 0) {
-      options.push(ClearFilters);
+    if (Object.keys(this.state.filtered).length > 0) {
+      options.push(ClearFiltersOption);
       options.push('sep');
     }
     return options
     .concat([
-      ReRunQuery,
-      'sep',
+      { get label() { return OpenEditorWithValueOption.replace('{value}', clickedData.value) }, value: OpenEditorWithValueOption },
+      OpenEditorWithRowOption,
       CopyCellOption,
       CopyRowOption,
       'sep',
+      ReRunQueryOption,
       SaveCSVOption,
       SaveJSONOption,
     ]);
   }
 
+  onFilterChange = (id: string, value: string = '', cb?: Function) => {
+    const { filtered } = this.state;
+    if (!value) {
+      delete filtered[id];
+    } else {
+      filtered[id] = {
+        id,
+        value,
+        regex: toRegEx(value),
+      }
+    }
+    this.setState({
+      filtered
+    }, () => cb ? cb(value) : void 0);
+  }
+
   onMenuSelect = (choice: string) => {
     const { clickedData } = this.state;
     switch(choice) {
-      case FilterByValue:
-        const { filtered = {}, tableFiltered = [] } = this.state;
+      case FilterByValueOption:
+        const { filtered = {} } = this.state;
         this.setState({
-          tableFiltered: tableFiltered.filter(({ id }) => id !== clickedData.col).concat([{
-            id: clickedData.col,
-            value: clickedData.value,
-          }]),
           filtered: {
             ...filtered,
-            [clickedData.col]: toRegEx(clickedData.value),
+            [clickedData.col]: {
+              id: clickedData.col,
+              value: clickedData.value,
+              regex: clickedData.value
+            },
           },
         })
       case CopyCellOption:
@@ -238,20 +256,53 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       case CopyRowOption:
         this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
         break;
-      case ClearFilters:
-        this.setState({
-          tableFiltered: [],
-          filtered: {},
+      case ClearFiltersOption:
+        this.setState({ filtered: {} });
+        break;
+      case OpenEditorWithValueOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.insertText`,
+            args: [clickedData.value]
+          }
         });
         break;
-      case ReRunQuery:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.executeQuery`, args: [this.props.query]} });
+      case OpenEditorWithRowOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.insertText`,
+            args: [JSON.stringify(this.props.data[clickedData.index], null, 2)]
+          }
+        });
+        break;
+      case ReRunQueryOption:
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.executeQuery`,
+            args: [this.props.query]
+          }
+        });
         break;
       case SaveCSVOption:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['csv']} });
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.saveResults`,
+            args: ['csv']
+          }
+        });
         break;
       case SaveJSONOption:
-        getVscode().postMessage({ action: 'call', payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ['json']} });
+        getVscode().postMessage({
+          action: 'call',
+          payload: {
+            command: `${process.env.EXT_NAME}.saveResults`,
+            args: ['json']
+          }
+        });
         break;
     }
     this.onTableClick();
@@ -267,12 +318,17 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
   _tBodyComponent: Element = null;
 
   componentDidMount() {
-    this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
-    this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    try {
+      this.componentWillUnmount();
+    } catch (error) { };
+    setTimeout(() => {
+      this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
+      this._tBodyComponent && this._tBodyComponent.addEventListener("scroll", this.handleScroll);
+    }, 300);
   }
 
   componentWillUnmount() {
-    this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
+    this._tBodyComponent && this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
   }
 
   getSnapshotBeforeUpdate() {
@@ -335,8 +391,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           columns={cols}
           column={this.columnDefault}
           filterable
-          filtered={this.state.tableFiltered}
-          FilterComponent={FilterComponent}
+          filtered={Object.values(this.state.filtered)}
+          FilterComponent={({ column, onChange }) => <FilterComponent filter={this.state.filtered[column.id]} column={column} onChange={(id, value) => this.onFilterChange(id, value, onChange)} />}
           pageSize={this.props.paginationSize}
           showPagination={this.props.data.length > this.props.paginationSize}
           minRows={this.props.data.length === 0 ? 1 : Math.min(this.props.paginationSize, this.props.data.length)}
@@ -368,21 +424,13 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
             }
             return {};
           }}
-          onFilteredChange={filtered => {
-            this.setState({
-              tableFiltered: filtered,
-              filtered: filtered.reduce((p, c) => {
-                p[c.id] = toRegEx(String(c.value));
-                return p;
-              }, {}),
-            });
-          }}
+          onFilteredChange={() => this.componentDidMount()}
           defaultFilterMethod={(filter, row) => {
-            const exp = this.state.filtered[filter.id];
-            if (exp instanceof RegExp) {
-              return exp.test(String(row[filter.id]));
-            }
-            return String(row[filter.id]) === exp;
+            const filterData = this.state.filtered[filter.id];
+            if (!filterData || typeof row[filter.id] === 'undefined') return true;
+            const { regex, value } = filterData;
+            const position = `${row[filter.id]}`.search(regex || value);
+            return position !== -1;
           }}
           className="-striped -highlight"
           TbodyComponent={TbodyComponent}

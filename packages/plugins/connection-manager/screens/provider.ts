@@ -33,12 +33,14 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.iconsPath = Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' })
     this.viewsPath = Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
   }
+  public preserveFocus = true;
+  public wereToShow = ViewColumn.One;
   public show() {
-    if (!this.panel) {
+        if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.id,
         this.title,
-        ViewColumn.One,
+        this.wereToShow,
         {
           enableScripts: true,
           retainContextWhenHidden: true,
@@ -47,13 +49,13 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableFindWidget: true,
         },
       );
-      this.panel.iconPath = Uri.parse(`file://${this.context.asAbsolutePath('icons/database-active.svg')}`);
+      this.panel.iconPath = Uri.file(this.context.asAbsolutePath('icons/database-active.svg'));
       this.disposables.push(Disposable.from(this.panel));
       this.disposables.push(this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables));
       this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
         this.setPreviewActiveContext(webviewPanel.active);
       }));
-      this.disposables.push(this.panel.onDidDispose(this.dispose));
+      this.disposables.push(this.panel.onDidDispose(this.dispose, null, this.disposables));
       this.panel.webview.html = (this.html || this.baseHtml)
         .replace(/{{id}}/g, this.id)
         .replace(
@@ -64,7 +66,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     }
 
     this.panel.title = this.title;
-    this.panel.reveal(this.panel.viewColumn, true);
+
+    this.panel.reveal(this.wereToShow, this.preserveFocus);
     this.postMessage({ action: 'reset' });
     this.setPreviewActiveContext(true);
   }
@@ -89,6 +92,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.panel.dispose();
   }
   public dispose = () => {
+    this.hide();
     if (this.disposables.length) this.disposables.forEach((d) => d.dispose());
     this.disposables = [];
     this.panel = undefined;

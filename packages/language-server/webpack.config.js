@@ -19,10 +19,13 @@ module.exports = function getLanguageServerConfig() {
             { loader: 'babel-loader', options: babelOptions },
             { loader: 'ts-loader', options: { transpileOnly: true } },
           ],
+          exclude: /node_modules|\.test\..+/i,
         },
         {
           test: /\.js$/,
           use: [{ loader: 'babel-loader', options: babelOptions }],
+          exclude: /\.test\..+/i,
+
         },
       ],
     },

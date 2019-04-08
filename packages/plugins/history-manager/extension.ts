@@ -1,6 +1,5 @@
-import SQLTools from '@sqltools/core/plugin-api';
+import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import HistoryExplorer from './explorer';
-import { DatabaseInterface } from '@sqltools/core/interface';
 import { getNameFromId } from '@sqltools/core/utils';
 import { quickPick, insertText } from '@sqltools/core/utils/vscode';
 import { QuickPickItem, commands } from 'vscode';
@@ -62,7 +61,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
     try {
       query = query || (await this.historyMenu());
-      insertText(query, true);
+      insertText(query);
     } catch (e) {
       this.errorHandler('Coudl not edtir query.', e, `${EXT_NAME}.showOutputChannel`);
     }

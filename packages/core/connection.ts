@@ -1,17 +1,18 @@
-import { Telemetry, getConnectionId } from './utils';
+import { getConnectionId } from './utils';
 import Dialects from './dialect';
 import {
   ConnectionDialect,
-  DatabaseInterface,
   ConnectionInterface,
 } from './interface';
+import SQLTools, { DatabaseInterface } from './plugin-api';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
   private columns: DatabaseInterface.TableColumn[] = [];
+  private functions: DatabaseInterface.Function[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionInterface, private telemetry: Telemetry) {
+  constructor(credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
     this.conn = new Dialects[credentials.dialect](credentials);
   }
 
@@ -68,6 +69,16 @@ export default class Connection {
     });
   }
 
+  public getFunctions(cached: boolean = false): Promise<DatabaseInterface.Function[]> {
+    if (cached && this.columns.length > 0) {
+      return Promise.resolve(this.functions);
+    }
+    return this.conn.getFunctions().then((functions: DatabaseInterface.Function[]) => {
+      this.functions = functions;
+      return this.functions;
+    });
+  }
+
   public async  describeTable(tableName: string) {
     const info = await this.conn.describeTable(tableName);
 
@@ -77,11 +88,11 @@ export default class Connection {
     return info;
   }
   public async showRecords(tableName: string, globalLimit: number) {
-    const limit = this.conn.credentials.previewLimit || globalLimit || 10;
+    const limit = this.conn.credentials.previewLimit || globalLimit || 50;
     const records = await this.conn.showRecords(tableName, limit);
 
     if (records[0]) {
-      records[0].label = `Showing ${limit} ${tableName} records`;
+      records[0].label = `Showing ${Math.min(limit, records[0].results.length || 0)} ${tableName} records`;
     }
     return records;
   }

@@ -1,16 +1,22 @@
 import MySQLLib from 'mysql';
 import {
   ConnectionDialect,
-  DatabaseInterface,
+  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implements ConnectionDialect {
   queries = Queries;
   public open() {
     if (this.connection) {
       return this.connection;
+    }
+
+    const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
+    if (typeof ssl === 'boolean') {
+      throw new Error('SSL as boolean only supported for xprotocol. See: https://mtxr.gitbook.io/vscode-sqltools/connections/mysql#2-ssl');
     }
 
     const pool = MySQLLib.createPool({
@@ -20,7 +26,8 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       password: this.credentials.password,
       port: this.credentials.port,
       user: this.credentials.username,
-      multipleStatements: true
+      multipleStatements: true,
+      ssl
     });
 
     return new Promise<MySQLLib.Pool>((resolve, reject) => {
@@ -82,36 +89,10 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              name: obj.tableName,
-              isView: !!obj.isView,
-              numberOfColumns: parseInt(obj.numberOfColumns, 10),
-              tableCatalog: obj.tableCatalog,
-              tableDatabase: obj.dbName,
-              tableSchema: obj.tableSchema,
-            } as DatabaseInterface.Table;
-          })
-          .sort();
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            obj.isNullable = !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null;
-            obj.size = obj.size !== null ? parseInt(obj.size, 10) : null;
-            obj.tableDatabase = obj.dbName;
-            return obj as DatabaseInterface.TableColumn;
-          })
-          .sort();
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 }

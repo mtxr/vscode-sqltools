@@ -1,8 +1,9 @@
 import { Pool } from 'pg';
 import Queries from './queries';
-import { ConnectionDialect, DatabaseInterface } from '@sqltools/core/interface';
+import { ConnectionDialect, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export default class PostgreSQL extends GenericDialect<Pool> implements ConnectionDialect {
   queries = Queries;
@@ -10,6 +11,9 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     if (this.connection) {
       return this.connection;
     }
+
+    const { ssl } = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
+
     const pool = new Pool({
       database: this.credentials.database,
       host: this.credentials.server,
@@ -17,6 +21,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
       port: this.credentials.port,
       statement_timeout: this.credentials.connectionTimeout * 1000,
       user: this.credentials.username,
+      ssl,
     });
     return pool.connect()
       .then(cli => {
@@ -37,14 +42,14 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     return this.open()
       .then((conn) => conn.query(query))
       .then((results: any[] | any) => {
-        const queries = Utils.query.parse(query);
+        const queries = Utils.query.parse(query, 'pg');
         const messages = [];
         if (!Array.isArray(results)) {
           results = [results];
         }
 
         return results.map((r, i): DatabaseInterface.QueryResults => {
-          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select') {
+          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number') {
             messages.push(`${r.rowCount} rows were affected.`);
           }
           return {
@@ -71,9 +76,9 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
               tableCatalog: obj.tablecatalog,
               tableDatabase: obj.dbname,
               tableSchema: obj.tableschema,
+              tree: obj.tree,
             } as DatabaseInterface.Table;
-          })
-          .sort();
+          });
       });
   }
 
@@ -92,10 +97,26 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
               tableDatabase: obj.dbname,
               tableName: obj.tablename,
               tableSchema: obj.tableschema,
+              isPk: (obj.keytype || '').toLowerCase() === 'primary key',
+              isFk: (obj.keytype || '').toLowerCase() === 'foreign key',
               type: obj.type,
+              tree: obj.tree,
             } as DatabaseInterface.TableColumn;
-          })
-          .sort();
+          });
+      });
+  }
+
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    return this.query(this.queries.fetchFunctions)
+      .then(([queryRes]) => {
+        return queryRes.results
+          .reduce((prev, curr) => prev.concat(curr), [])
+          .map((obj) => {
+            return {
+              ...obj,
+              args: obj.args ? obj.args.split(/, */g) : [],
+            } as DatabaseInterface.TableColumn;
+          });
       });
   }
 }

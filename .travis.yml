@@ -1,39 +1,28 @@
 sudo: false
 language: node_js
+node_js:
+  - "10"
 
 cache: yarn
 
-addons:
-  apt:
-    sources:
-      - sourceline: 'ppa:ubuntu-toolchain-r/test'
-    packages:
-      - libstdc++6-4.7-dev
-
-node_js:
-  - "8"
+env:
+  - HUSKY_SKIP_INSTALL=true
 
 os:
-  # - osx
   - linux
 
 before_install:
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
-      sleep 3;
+      sleep 15;
     fi
 
 install:
+  - yarn global add codecov
   - yarn
-  - yarn add codacy-coverage
-
 script:
-  - yarn run test:lint
-  - yarn run test:unit
-
-after_script:
-  - cat ./coverage/lcov.info | ./node_modules/.bin/codacy-coverage --language typescript && echo 'Codacy coverage updated!'
-
-notifications:
-  webhooks: https://coveralls.io/webhook?repo_token=$COVERALLS_REPO_TOKEN
+  - yarn test:older --no-coverage
+  - yarn test
+after_success:
+  - codecov

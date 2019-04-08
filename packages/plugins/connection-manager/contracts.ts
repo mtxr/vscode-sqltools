@@ -1,5 +1,6 @@
 import { RequestType, RequestType0 } from 'vscode-languageserver';
-import { DatabaseInterface, ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export const GetConnectionsRequest = new RequestType<
   { connectedOnly?: boolean },
@@ -39,6 +40,7 @@ export const ConnectionDataUpdatedRequest = new RequestType<
     conn: ConnectionInterface;
     tables: DatabaseInterface.Table[];
     columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
   },
   void,
   Error,
@@ -49,6 +51,7 @@ export const GetConnectionDataRequest = new RequestType<
   {
     tables: DatabaseInterface.Table[];
     columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
   },
   Error,
   void
