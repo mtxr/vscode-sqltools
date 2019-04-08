@@ -1,8 +1,8 @@
-import { TextEditor, TextEditorEdit, commands } from 'vscode';
+import { TextEditor, TextEditorEdit, commands, SnippetString } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
-import { insertText, insertSnippet, getOrCreateEditor } from '@sqltools/core/utils/vscode';
+import { insertText, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
@@ -14,13 +14,16 @@ function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
   }
 }
 
-function insertTextHandler(node: { value: string } | string) {
+function insertTextHandler(node: { value: string, snippet?: SnippetString } | string | SnippetString) {
   if (!node) return;
-  return insertText(typeof node === 'string' ? node : node.value);
+  if (typeof node === 'string' || node instanceof SnippetString) {
+    return insertText(node);
+  }
+  return insertText(node.snippet || node.value);
 }
 
-function generateInsertQueryHandler(item: { columns: DatabaseInterface.TableColumn[], name?: string }): Promise<boolean> {
-  return insertSnippet(QueryUtils.generateInsert(item.name || item.toString(), item.columns, ConfigManager.format));
+function generateInsertQueryHandler(item: { columns: DatabaseInterface.TableColumn[], name?: string }) {
+  return insertText(new SnippetString(QueryUtils.generateInsert(item.name || item.toString(), item.columns, ConfigManager.format)));
 }
 
 function newSqlFileHandler() {

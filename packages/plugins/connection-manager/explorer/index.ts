@@ -2,7 +2,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
+import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem, SidebarFunction } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, ExtensionContext, TreeItemCollapsibleState } from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
@@ -102,11 +102,17 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  public setTreeData(
-    conn: ConnectionInterface,
-    tables: DatabaseInterface.Table[],
-    columns: DatabaseInterface.TableColumn[],
-  ) {
+  public setTreeData = ({
+    conn,
+    tables,
+    columns,
+    functions
+  }: {
+    conn: ConnectionInterface;
+    tables: DatabaseInterface.Table[];
+    columns: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
+  }) => {
     if (!conn) return;
     const connId = getConnectionId(conn);
 
@@ -114,7 +120,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
     this.tree[connId].reset();
 
-    if (!tables && !columns) {
+    if (!tables && !columns && !functions) {
       return this.refresh();
     }
 
@@ -123,6 +129,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     this.insertTables(connId, conn.dialect, tables);
 
     this.insertColumns(connId, conn.dialect, columns);
+
+    this.insertFunctions(connId, conn.dialect, functions);
+
     this.refresh();
     if (conn.isActive)
       this.setActiveConnection(conn);
@@ -188,6 +197,25 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         columns.forEach((column) => {
           const key = this.getGroup(connId, 'views', column.tableName) ? 'views' : 'tables';
           this.getOrCreatGroups(connId, dialect, `${key}/${column.tableName}`).addItem(new SidebarColumn(this.context, column));
+        });
+        break;
+    }
+  }
+
+  private insertFunctions(connId: string, dialect: DatabaseDialect, functions: DatabaseInterface.Function[]) {
+    switch (dialect) {
+      case DatabaseDialect.PostgreSQL:
+      case DatabaseDialect.MySQL:
+      // case DatabaseDialect.SQLite:
+      // case DatabaseDialect.MSSQL:
+        functions.forEach((fn) => {
+          this.getOrCreatGroups(connId, dialect, fn.tree, 1).addItem(new SidebarFunction(this.context, fn));
+        });
+        break;
+      default:
+        // old style. Compatibily
+        functions.forEach((fn) => {
+          this.getOrCreatGroups(connId, dialect, `functions/${fn.name}`).addItem(new SidebarFunction(this.context, fn));
         });
         break;
     }

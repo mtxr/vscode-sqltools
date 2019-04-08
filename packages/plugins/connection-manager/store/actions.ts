@@ -16,8 +16,15 @@ function QuerySuccess(conn: Connection, { results }: { results: DatabaseInterfac
 }
 QuerySuccess.type = 'QuerySuccess';
 
-function ConnectionData(conn: Connection, { tables, columns }: { tables: DatabaseInterface.Table[] ;columns?: DatabaseInterface.TableColumn[], }) {
-  return { type: ConnectionData.type, payload: { conn, tables, columns } };
+function ConnectionData(
+  conn: Connection,
+  data: {
+    tables: DatabaseInterface.Table[];
+    columns?: DatabaseInterface.TableColumn[];
+    functions: DatabaseInterface.Function[];
+  }
+) {
+  return { type: ConnectionData.type, payload: { conn, ...data } };
 }
 ConnectionData.type = 'ConnectionData';
 

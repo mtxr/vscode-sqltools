@@ -107,38 +107,10 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              name: obj.tableName,
-              isView: !!obj.isView,
-              numberOfColumns: parseInt(obj.numberOfColumns, 10),
-              tableCatalog: obj.tableCatalog,
-              tableDatabase: obj.dbName,
-              tableSchema: obj.tableSchema,
-              tree: obj.tree,
-            } as DatabaseInterface.Table;
-          });
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return <DatabaseInterface.TableColumn>{
-              ...obj,
-              isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
-              size: obj.size !== null ? parseInt(obj.size, 10) : null,
-              isPk: Boolean(obj.isPk),
-              isFk: Boolean(obj.isFk),
-            };
-          });
-      });
+    throw new Error('Never called! Must use parent classe');
   }
 }

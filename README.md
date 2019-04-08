@@ -36,7 +36,7 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 * Sidebar database explorer
 
-![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
+![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
 
 * Export results to JSON and CSV
 

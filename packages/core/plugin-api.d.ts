@@ -153,7 +153,22 @@ export namespace DatabaseInterface {
 
   export interface Function {
     name: string;
+    schema: string;
+    database: string;
+    signature: string;
+    args: string[];
+    resultType: string;
+    /**
+     * This is used to build the connections explorer tree
+     *
+     * @type {string}
+     * @memberof TableColumn
+     */
+    tree?: string;
+    source?: string;
   }
+
+  export type Procedure = Function;
   export interface QueryResults {
     label?: string;
     connId: string;

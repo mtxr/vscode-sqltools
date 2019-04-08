@@ -19,9 +19,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
 
-  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = ({ conn, tables, columns }) => {
-    this.explorer.setTreeData(conn, tables, columns);
-  }
+  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
 
   // extension commands
   private ext_refreshAll = () => {

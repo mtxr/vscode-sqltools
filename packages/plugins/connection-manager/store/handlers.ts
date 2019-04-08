@@ -15,7 +15,7 @@ export const onConnect = (state: ConnectionManagerState, conn: Connection): Conn
     },
     connectionInfo: {
       ...state.connectionInfo,
-      [conn.getId()]: { tables: [], columns: [] },
+      [conn.getId()]: { tables: [], columns: [], functions: [] },
     },
     lastUsedId: conn.getId(),
   };
@@ -47,14 +47,14 @@ export const onQuerySuccess = (state: ConnectionManagerState, { conn, results }:
   };
 }
 
-export const onConnectionData = (state: ConnectionManagerState, { conn, tables, columns }: { conn: Connection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[] }): ConnectionManagerState => {
+export const onConnectionData = (state: ConnectionManagerState, { conn, tables, columns, functions }: { conn: Connection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[], functions: DatabaseInterface.Function[] }): ConnectionManagerState => {
   let { connectionInfo } = state;
 
   const newState = {
     ...state,
     connectionInfo: {
       ...connectionInfo,
-      [conn.getId()]: { tables, columns },
+      [conn.getId()]: { tables, columns, functions },
     }
   };
   return newState;

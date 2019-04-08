@@ -72,5 +72,22 @@ GROUP by
   T.TABLE_CATALOG,
   T.TABLE_TYPE
 ORDER BY
-  T.TABLE_NAME;`
+  T.TABLE_NAME;`,
+  fetchFunctions: `
+SELECT
+  n.nspname AS schema,
+  f.proname AS name,
+  current_database() AS database,
+  quote_ident(n.nspname) || '.' || quote_ident(f.proname) || '(' || pg_get_function_identity_arguments(f.oid) || ')' AS signature,
+  pg_get_function_result(f.oid) AS "resultType",
+  pg_get_function_arguments(f.oid) AS args,
+  current_database() || '/' || n.nspname || '/procedures/' || f.proname AS tree,
+  f.prosrc AS source
+FROM
+  pg_catalog.pg_proc AS f
+  INNER JOIN pg_catalog.pg_namespace AS n on n.oid = f.pronamespace
+WHERE
+  n.nspname not in ('pg_catalog', 'information_schema')
+ORDER BY name
+;`,
 } as DialectQueries;
