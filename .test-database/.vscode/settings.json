@@ -4,7 +4,10 @@
   "sqltools.sortColumns": "ordinalnumber",
   "sqltools.results": {
     "limit": 100,
-    "location": "beside"
+    "location": "beside",
+    "customization": {
+      "table-cell-padding": "2px 4px"
+    }
   },
   "sqltools.format": {
     "indentSize": 2,

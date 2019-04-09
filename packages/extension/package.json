@@ -495,7 +495,7 @@
                                             "string",
                                             "null"
                                         ],
-                                        "default": "null"
+                                        "default": null
                                     }
                                 }
                             },
@@ -515,7 +515,7 @@
                                             "object",
                                             "null"
                                         ],
-                                        "default": "null"
+                                        "default": null
                                     }
                                 }
                             },
@@ -575,6 +575,21 @@
                                 "beside"
                             ],
                             "description": "Define where the results should show up."
+                        },
+                        "customization": {
+                            "type": "object",
+                            "default": {},
+                            "properties": {
+                                "font-family": {
+                                    "type":"string"
+                                },
+                                "font-size": {
+                                    "type":"string"
+                                },
+                                "table-cell-padding": {
+                                    "type":"string"
+                                }
+                            }
                         }
                     }
                 },

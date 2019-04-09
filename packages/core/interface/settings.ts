@@ -37,6 +37,17 @@ export interface ResultsOptions {
    * @memberof ResultsOptions
    */
   location?: 'current' | 'beside';
+  /**
+   * Customize results screen CSS
+   *
+   * @type {{ [varible: string]: string }}
+   * @memberof ResultsOptions
+   */
+  customization?: {
+    'font-family'?: string;
+    'font-size'?: string;
+    'table-cell-padding'?: string;
+   };
 }
 
 export interface Settings {

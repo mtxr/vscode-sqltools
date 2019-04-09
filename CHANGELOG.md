@@ -2,6 +2,23 @@
 
 ## v0.17
 
+### v0.17.12
+
+* **NEW** 🎉
+  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg.
+    ```json
+    ...
+    "sqltools.results": {
+      ...
+      "customization": {
+        "font-size": "12px",
+        "font-family": "monospace",
+        "table-cell-padding": "2px 4px"
+      }
+    },
+    ...
+    ```
+
 ### v0.17.11
 
 * **NEW** 🎉
