@@ -112,12 +112,13 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
-              name: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
+              name: obj.TABLENAME,              
               isView: !!obj.ISVIEW,
               numberOfColumns: parseInt(obj.NUMBEROFCOLUMNS, 10),
               tableCatalog: obj.TABLECATALOG,
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
+              tree: obj.TREE,
             } as DatabaseInterface.Table;
           });
       });
@@ -136,11 +137,12 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               size: obj.size !== null ? parseInt(obj.SIZE, 10) : null,
               tableCatalog: obj.TABLECATALOG,
               tableDatabase: obj.DBNAME,
-              tableName: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
+              tableName: obj.TABLENAME,              
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
-              isPk: obj.CONSTRAINTTYPE === 'P',
-              isFk: obj.CONSTRAINTTYPE === 'R'
+              isPk: obj.KEYTYPE === 'P',
+              isFk: obj.KEYTYPE === 'R',
+              tree: obj.TREE,
             } as DatabaseInterface.TableColumn;
           });
       });

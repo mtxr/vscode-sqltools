@@ -11,16 +11,21 @@ export default {
   c.data_length as "size",
   user as tablecatalog,
   c.owner as tableschema,
-  c.owner as dbname,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
   c.data_default as defaultvalue,
   c.nullable as isnullable,
-  cols.CONSTRAINT_TYPE as constraintType
+  cols.constraint_type AS keytype,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || C.owner  || '/' || (
+    CASE
+      WHEN v.TYPE = 'V' THEN 'views'
+      ELSE 'tables'
+    END
+  ) || '/' || C.TABLE_name || '/' || C.COLUMN_NAME AS tree
   from all_tab_columns c
   join (
-  select table_name, owner 
-  from all_tables
+  select table_name, owner, 'T' as type from all_tables
   union all
-  select view_name as table_name, owner from all_views
+  select view_name as table_name, owner, 'V' as type from all_views
   ) v on (c.table_name = v.table_name and c.owner = v.owner)
   left join (
   select cons.CONSTRAINT_TYPE, cols.table_name, cols.column_name, cols.owner
@@ -36,16 +41,25 @@ export default {
   table_name as tableName,
   owner AS tableSchema,
   user AS tableCatalog,
-  isview AS isView,
-  owner AS dbName,
-  num_rows AS numberOfColumns
+  CASE
+    WHEN TYPE = 'V' THEN 1
+    ELSE 0
+  END AS isView,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
+  num_rows AS numberOfColumns,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || owner  || '/' || (
+    CASE
+      WHEN TYPE = 'V' THEN 'views'
+      ELSE 'tables'
+    END
+  ) || '/' || table_name AS tree
   from (
-  select t.table_name, t.owner, user, 0 as isview, count(1) as num_rows
+  select t.table_name, t.owner, user, 'T' as type, count(1) as num_rows
   from all_tables t
   join all_tab_columns c on c.table_name = t.table_name and c.owner = t.owner
   group by t.owner, t.table_name, user
   union all
-  select v.view_name as table_name, v.owner, user, 1 as isview, count(1) as num_rows
+  select v.view_name as table_name, v.owner, user, 'V' as type, count(1) as num_rows
   from all_views v
   join all_tab_columns c on c.table_name = v.view_name and c.owner = v.owner
   group by v.owner, v.view_name, user
