@@ -5,7 +5,7 @@
 ### v0.17.12
 
 * **NEW** 🎉
-  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg.
+  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg:
     ```json
     ...
     "sqltools.results": {
@@ -18,6 +18,11 @@
     },
     ...
     ```
+  * Allow connecting to MySQL using Socket files. Issue [#163](https://github.com/mtxr/sqltools-formatter/issues/163).
+    See [https://vscode-sqltools.mteixeira.dev/connections/mysql#1-connections](https://vscode-sqltools.mteixeira.dev/connections/mysql#1-connections)
+
+* **Enhancements**
+  * Updated fetch columns query to support MySQL new versions. Issue [#173](https://github.com/mtxr/sqltools-formatter/issues/173).
 
 ### v0.17.11
 
