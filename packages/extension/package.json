@@ -389,6 +389,11 @@
                                 "type": "number",
                                 "description": "Port for connection"
                             },
+                            "socketPath": {
+                                "type": "string",
+                                "required": false,
+                                "description": "Path of socket file to connect using UNIX sockets. MySQL only for now."
+                            },
                             "database": {
                                 "type": "string",
                                 "required": false,

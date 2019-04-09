@@ -22,9 +22,10 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
     const pool = MySQLLib.createPool({
       connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
+      socketPath: this.credentials.socketPath,
       host: this.credentials.server,
-      password: this.credentials.password,
       port: this.credentials.port,
+      password: this.credentials.password,
       user: this.credentials.username,
       multipleStatements: true,
       ssl

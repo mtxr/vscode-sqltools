@@ -16,3 +16,4 @@ cache/
 *.db
 *.zip
 .test-database/oracle/docker-images-master
+.test-database/**/local*
