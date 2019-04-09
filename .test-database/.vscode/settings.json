@@ -68,7 +68,7 @@
       "dialect": "MySQL",
       "name": "MySQLX",
       "password": "root",
-      "port": 33080,
+      "port": 33070,
       "server": "localhost",
       "username": "root",
       "mysqlOptions": {
@@ -85,6 +85,29 @@
       "port": 1521,
       "username": "root",
       "server": "localhost"
-    }
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 30,
+      "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQL Socket",
+      "password": "root",
+      "socketPath": "/home/mteixeira/projects/personal/vscode-sqltools/.test-database/mysql/local-mysqld/mysqld.sock",
+      "username": "root"
+    },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 15,
+      "database": "test_db",
+      "dialect": "MySQL",
+      "name": "MySQLX Socket",
+      "socketPath": "/home/mteixeira/projects/personal/vscode-sqltools/.test-database/mysql/local-mysqld/mysqlx.sock",
+      "password": "root",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
+    },
   ]
 }

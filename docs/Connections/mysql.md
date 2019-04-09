@@ -6,7 +6,7 @@
 Connection example:
 ```json
 {
-  "name": "PGSQL",
+  "name": "MySQL",
   "server": "localhost",
   "dialect": "MySQL",
   "port": 3306,
@@ -18,13 +18,28 @@ Connection example:
 }
 ```
 
+Using a socket file example:
+```json
+{
+  "name": "MySQL",
+  "dialect": "MySQL",
+  "database": "test_db",
+  "username": "root",
+  "askForPassword": false,
+  "password": "root",
+  "connectionTimeout": 15,
+  "socketPath": "/path/to/mysqld.sock",
+}
+```
+
+
 ### 1.1 Specific Options
 
 MySQL driver specific options can be passed using `mysqlOptions` settings.
 
 ```json
 {
-  "name": "PGSQL",
+  "name": "MySQL",
   "server": "localhost",
   "dialect": "MySQL",
   "port": 5433,

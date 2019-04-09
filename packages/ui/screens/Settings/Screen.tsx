@@ -158,6 +158,27 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.connectionTimeout.visible = true;
           newState.fields.database.type = 'text';
         }
+        if (this.state.data.dialect === 'MySQL') {
+          newState.fields.useSocket.visible = true;
+        } else {
+          newState.data.useSocket = false;
+          newState.fields.useSocket.visible = false;
+          newState.fields.socketPath.visible = false;
+        }
+        this.setState(newState, this.validateFields);
+      },
+    },
+    useSocket: {
+      label: 'Use socket file?',
+      info: 'Check to connect using UNIX sockets',
+      type: 'checkbox',
+      default: false,
+      parse: bool,
+      postUpdateHook: () => {
+        const newState = Object.assign({}, this.state);
+        newState.fields.server.visible = !this.state.data.useSocket;
+        newState.fields.port.visible = !this.state.data.useSocket;
+        newState.fields.socketPath.visible = !!this.state.data.useSocket;
         this.setState(newState, this.validateFields);
       },
     },
@@ -176,6 +197,12 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         min: 1,
         max: 65535,
       },
+    },
+    socketPath: {
+      visible: false,
+      type: 'file',
+      label: 'Socket File',
+      validators: [notEmpty],
     },
     database: {
       type: 'text',
@@ -379,6 +406,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       data['password'] = data['password'] || undefined;
 
       delete data['isGlobal'];
+      delete data['useSocket'];
 
       return data;
   }

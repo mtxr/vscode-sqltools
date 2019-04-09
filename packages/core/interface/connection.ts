@@ -16,13 +16,19 @@ export interface ConnectionInterface {
    * @default "127.0.0.1
    * @memberof ConnectionInterface
    */
-  server: string;
+  server?: string;
   /**
    * Port for connection
    * @type {number}
    * @memberof ConnectionInterface
    */
   port: number;
+  /**
+   * Path of socket file to connect using UNIX sockets
+   * @type {string}
+   * @memberof ConnectionInterface
+   */
+  socketPath?: string;
   /**
    * Database name
    * @type {string}

@@ -4,7 +4,7 @@ export default {
   describeTable: 'DESCRIBE :table',
   fetchColumns: `
 SELECT
-  DISTINCT C.TABLE_NAME AS tableName,
+  C.TABLE_NAME AS tableName,
   C.COLUMN_NAME AS columnName,
   C.DATA_TYPE AS type,
   C.CHARACTER_MAXIMUM_LENGTH AS size,

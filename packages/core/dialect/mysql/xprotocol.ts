@@ -24,6 +24,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
         user: this.credentials.username,
         schema: this.credentials.database,
         connectTimeout: this.credentials.connectionTimeout * 1000,
+        socket: this.credentials.socketPath,
         ssl,
       },
       {
