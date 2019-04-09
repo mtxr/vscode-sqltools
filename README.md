@@ -44,7 +44,7 @@ Database management done right. Connection explorer, query runner, intellisense,
 
 ## Docs
 
-You can read the entire docs in the [https://mtxr.gitbook.io/vscode-sqltools/](https://mtxr.gitbook.io/vscode-sqltools/)
+You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
 
 
 ## Donate and Support

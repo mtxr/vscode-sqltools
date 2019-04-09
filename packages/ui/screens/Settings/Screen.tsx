@@ -12,6 +12,7 @@ import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
 import Syntax from '@sqltools/ui/components/Syntax';
 import getVscode from '@sqltools/ui/lib/vscode';
 import '@sqltools/ui/sass/app.scss';
+import { DOCS_ROOT_URL } from '@sqltools/core/constants';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
@@ -511,7 +512,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                           </ul>
                         </div>
                       ) : null}
-                      <div>You can find more information <a href={`https://mtxr.gitbook.io/vscode-sqltools/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
+                      <div>You can find more information <a href={`${DOCS_ROOT_URL}/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
                     </div>
                   </div>
                 </div>

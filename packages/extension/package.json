@@ -456,7 +456,7 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options for more details.",
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -506,7 +506,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details.",
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "required": false,

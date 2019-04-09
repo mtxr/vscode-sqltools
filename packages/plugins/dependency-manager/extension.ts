@@ -3,7 +3,7 @@ import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotif
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 
 export default class DependencyManger implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -44,7 +44,7 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal('https://mtxr.gitbook.io/vscode-sqltools/connections');
+          openExternal(`${DOCS_ROOT_URL}/connections`);
           break;
       }
     } catch (error) {
