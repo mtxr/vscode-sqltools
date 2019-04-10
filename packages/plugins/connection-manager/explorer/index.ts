@@ -165,6 +165,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       case DatabaseDialect.SQLite:
       case DatabaseDialect.MySQL:
       case DatabaseDialect.MSSQL:
+      case DatabaseDialect.OracleDB:
         tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
           this.getOrCreatGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.context, item));
         });
@@ -188,6 +189,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       case DatabaseDialect.SQLite:
       case DatabaseDialect.MySQL:
       case DatabaseDialect.MSSQL:
+      case DatabaseDialect.OracleDB:
         columns.forEach((column) => {
           this.getOrCreatGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.context, column));
         });

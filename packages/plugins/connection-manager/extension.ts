@@ -201,6 +201,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
           return [node.table.tableDatabase, node.table.tableSchema, node.table.name].join('.');
         case DatabaseDialect.MySQL:
           return [node.table.tableSchema, node.table.name].join('.');
+        case DatabaseDialect.OracleDB:
+          return [node.table.tableSchema, node.table.name].join('.');
       }
       return node.value;
     }
