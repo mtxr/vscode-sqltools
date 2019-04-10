@@ -1,5 +1,6 @@
 -- Extracted from w3schools
 
+-- @name create company table
 CREATE TABLE COMPANY(
     ID INT PRIMARY KEY NOT NULL,
     NAME TEXT NOT NULL,
@@ -8,6 +9,7 @@ CREATE TABLE COMPANY(
     SALARY REAL
 );
 
+-- @name create department table
 CREATE TABLE DEPARTMENT(
     ID INT PRIMARY KEY NOT NULL,
     DEPT CHAR(50) NOT NULL,

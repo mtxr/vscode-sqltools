@@ -85,10 +85,16 @@
     "contributes": {
         "languages": [{
             "id": "sql",
-            "extensions": [ ".sql" ],
+            "extensions": [ ".sql", ".dsql" ],
             "aliases": [ "SQL", "sql" ],
-            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b"
+            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
+			"configuration": "./language/language-configuration.json"
         }],
+        "grammars": [{
+			"language": "sql",
+			"scopeName": "source.sql",
+			"path": "./language/sql.tmLanguage.json"
+		}],
         "commands": [
             {
                 "title": "Connect",

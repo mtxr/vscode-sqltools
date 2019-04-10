@@ -81,6 +81,7 @@ function getExtensionConfig() {
           },
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
+        { from: path.join(__dirname, 'language'), to: path.join(outdir, 'language') },
         { from: path.join(__dirname, '..', '..', 'static/icon.png'), to: path.join(outdir, 'static/icon.png') },
         { from: path.join(__dirname, '..', '..', 'README.md'), to: path.join(outdir, 'README.md') },
         { from: path.join(__dirname, '..', '..', 'LICENSE.md'), to: path.join(outdir, 'LICENSE.md') },
