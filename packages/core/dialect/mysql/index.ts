@@ -76,7 +76,9 @@ export default class MySQL extends GenericDialect<any> implements ConnectionDial
             return {
               ...obj,
               args: obj.args ? obj.args.split(/, */g) : [],
-            } as DatabaseInterface.TableColumn;
+              database: obj.dbname,
+              schema: obj.dbschema,
+            } as DatabaseInterface.Function;
           });
       });
   }
