@@ -1,6 +1,7 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
+import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
@@ -194,17 +195,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   // internal utils
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
-    if (node && node.value) {
+    if (node && node.conn) {
       await this._setConnection(node.conn as ConnectionInterface);
-      switch(node.conn.dialect) {
-        case DatabaseDialect.PostgreSQL:
-          return [node.table.tableDatabase, node.table.tableSchema, node.table.name].join('.');
-        case DatabaseDialect.MySQL:
-          return [node.table.tableSchema, node.table.name].join('.');
-        case DatabaseDialect.OracleDB:
-          return [node.table.tableSchema, node.table.name].join('.');
-      }
-      return node.value;
+      return getTableName(node.conn.dialect, node.table);
     }
 
     const conn = await this._connect();

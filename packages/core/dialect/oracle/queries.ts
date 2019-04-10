@@ -29,7 +29,7 @@ export default {
   ) v on (c.table_name = v.table_name and c.owner = v.owner)
   left join (
   select cons.CONSTRAINT_TYPE, cols.table_name, cols.column_name, cols.owner
-  from all_cons_columns cols 
+  from all_cons_columns cols
   join all_constraints cons
   on (cons.constraint_name = cols.constraint_name AND cons.owner = cols.owner)
   where cons.CONSTRAINT_TYPE in ('P', 'R')

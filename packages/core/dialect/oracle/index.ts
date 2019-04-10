@@ -112,7 +112,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
-              name: obj.TABLENAME,              
+              name: obj.TABLENAME,
               isView: !!obj.ISVIEW,
               numberOfColumns: parseInt(obj.NUMBEROFCOLUMNS, 10),
               tableCatalog: obj.TABLECATALOG,
@@ -137,7 +137,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               size: obj.size !== null ? parseInt(obj.SIZE, 10) : null,
               tableCatalog: obj.TABLECATALOG,
               tableDatabase: obj.DBNAME,
-              tableName: obj.TABLENAME,              
+              tableName: obj.TABLENAME,
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
               isPk: obj.KEYTYPE === 'P',
@@ -148,8 +148,8 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       });
   }
 
-  public describeTable(table: string) {
-    const tableSplit = table.split('.');
-    return this.query(Utils.replacer(this.queries.describeTable, { schema: tableSplit[0], table: tableSplit[1] }));
+  public describeTable(prefixedTable: string) {
+    const [ schema, table ] = prefixedTable.split('.');
+    return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
   }
 }

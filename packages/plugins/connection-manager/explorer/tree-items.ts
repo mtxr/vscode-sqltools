@@ -1,10 +1,11 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { ConnectionInterface } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, SnippetString } from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
 
 interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T> {
   parent: SidebarItemIterface<T, A>;
@@ -172,6 +173,9 @@ export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
   public toString() {
     return this.table.name;
   }
+  public get name() {
+    return prefixedtableName(this.conn.dialect, this.table);
+  }
 
   public get columns(): DatabaseInterface.TableColumn[] {
     return this._columns.map(item => item.column);
@@ -182,18 +186,7 @@ export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
 
   public get snippet(): SnippetString {
     if (!this.conn) return;
-    let snptArr: string[];
-    switch (this.conn.dialect) {
-      case DatabaseDialect.PostgreSQL:
-        snptArr = [this.table.tableDatabase, this.table.tableSchema, this.table.name];
-        break;
-      case DatabaseDialect.MySQL:
-        snptArr = [this.table.tableSchema, this.table.name];
-        break;
-      default:
-        snptArr = [this.table.name];
-        break;
-    }
+    let snptArr = prefixedtableName(this.conn.dialect, this.table).split('.');
     return new SnippetString(snptArr.map((v, i) => `\${${i + 1}:${v}}`).join('.')+'$0');
   }
 
