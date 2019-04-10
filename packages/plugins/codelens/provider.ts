@@ -12,7 +12,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
       const queries = document.getText(range);
       const cmd: Command = {
         arguments: [queries],
-        title: 'Run Query',
+        title: 'Run Query Block',
         command: `${Constants.EXT_NAME}.executeQuery`,
       };
       return new CodeLens(range, cmd);
