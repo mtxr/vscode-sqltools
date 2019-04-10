@@ -9,7 +9,7 @@
 	"scopeName": "source.sql",
 	"patterns": [
 		{
-			"match": "^\\s*-{1,}\\s*(?:(@(name|group))(\\s+(.+))?.*)?$",
+			"match": "^\\s*-{2,}\\s*(?:(@(name|group))(\\s+(.+))?.*)?$",
 			"captures":{
 				"1": {
 					"name": "text.variable"
