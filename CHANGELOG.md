@@ -2,6 +2,13 @@
 
 ## v0.17
 
+### v0.17.13
+
+* **NEW** 🎉
+  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
+* **Enhancements**
+  * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
+
 ### v0.17.12
 
 * **NEW** 🎉
@@ -31,7 +38,8 @@
   * Allow users to set connection icons.
   * Add stored procedure listing on explorer for Postgres and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
     * ![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
-  * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/issues/71)
+  * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/i
+  * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/ssues/71)
     * You can flatten groups with only one child using the setting `sqltools.flattenGroupsIfOne`. Default to `false`
     * ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
 
