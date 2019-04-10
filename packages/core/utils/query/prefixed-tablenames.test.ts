@@ -1,0 +1,42 @@
+import getNames from './prefixed-tablenames';
+import { DatabaseDialect } from '../../interface';
+
+describe('Should generate table names base on dialects', () => {
+  it('get mysql table names', () => {
+    expect(getNames(DatabaseDialect.MySQL, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.MySQL, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.MySQL, { name: 'table', tableSchema: 'schema', isView: false })).toBe('schema.table');
+    expect(getNames(DatabaseDialect.MySQL, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'test' })).toBe('schema.table');
+  });
+
+  it('get oracledb table names', () => {
+    expect(getNames(DatabaseDialect.OracleDB, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.OracleDB, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.OracleDB, { name: 'table', tableSchema: 'schema', isView: false })).toBe('schema.table');
+    expect(getNames(DatabaseDialect.OracleDB, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'test' })).toBe('schema.table');
+  });
+
+  it('get postgresql table names', () => {
+    expect(getNames(DatabaseDialect.PostgreSQL, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.PostgreSQL, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.PostgreSQL, { name: 'table', tableSchema: 'schema', isView: false })).toBe('schema.table');
+    expect(getNames(DatabaseDialect.PostgreSQL, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'database' })).toBe('database.schema.table');
+  });
+
+  it('get other dialects table names', () => {
+    expect(getNames(null, 'table')).toBe('table');
+    expect(getNames(null, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(null, { name: 'table', tableSchema: 'schema', isView: false })).toBe('table');
+    expect(getNames(null, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'database' })).toBe('table');
+
+    expect(getNames(DatabaseDialect.SQLite, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.SQLite, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.SQLite, { name: 'table', tableSchema: 'schema', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.SQLite, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'database' })).toBe('table');
+
+    expect(getNames(DatabaseDialect.MSSQL, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.MSSQL, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.MSSQL, { name: 'table', isView: false, tableSchema: 'sa' })).toBe('table');
+    expect(getNames(DatabaseDialect.MSSQL, { name: 'table', isView: false, tableSchema: 'sa', tableDatabase: 'test' })).toBe('table');
+  });
+});
