@@ -107,7 +107,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     ...{ minResizeWidth: 11 },
       Cell: (r: CellInfo) => {
         let v = r.original[r.column.id];
-        if (v === null) return <small>(NULL)</small>;
+        if (v === null) return <small>NULL</small>;
         if (v === true) return <span>TRUE</span>;
         if (v === false) return <span>FALSE</span>;
         if (typeof v === 'object' || Array.isArray(v)) {
@@ -412,8 +412,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
                 'data-col': column.id,
                 'data-index': rowInfo.index,
               } as any;
-              if (v === true) props.className += ' td-icon green';
-              if (v === false) props.className += ' td-icon red';
+              if (v === null) props.className += ' td-null';
+              if (v === true) props.className += ' td-badge green';
+              if (v === false) props.className += ' td-badge red';
               if (column.id === this.state.clickedData.col && rowInfo && rowInfo.index === this.state.clickedData.index) {
                 props.className += ' active-cell';
               }

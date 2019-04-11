@@ -302,27 +302,28 @@ div mark {
   }
 }
 
-.rt-td.td-icon.green:before, .rt-td.td-icon.red:before {
-  content: '\00a0 ';
-  opacity: .5;
-  border-radius: 50%;
-  height: $fontSize0;
-  width: $fontSize0;
-  height: $fontSize;
-  width: $fontSize;
-  display: inline-block;
-  margin-right: 3px;
-  margin-left: 2px;
-  line-height: $fontSize0;
-  line-height: $fontSize;
+.rt-td.td-badge {
+  > span {
+    font-size: 0.8em;
+    padding: 2px;
+    border-radius: 2px;
+  }
+  &.green span {
+    background: #00b159;
+    color: #333;
+  }
+  &.red span {
+    background: #d11141;
+    color: #fafafa;
+  }
 }
 
-.rt-td.td-icon {
-  &.green:before {
-    background: #00b159;
-  }
-  &.red:before {
-    background: #d11141;
+.rt-td.td-null {
+  justify-content: space-around;
+  display: flex;
+  font-size: 0.8em;
+  > small {
+    align-self: center;
   }
 }
 
