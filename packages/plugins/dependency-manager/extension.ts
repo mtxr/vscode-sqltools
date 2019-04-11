@@ -1,15 +1,16 @@
 import { window as Win, workspace, ConfigurationTarget } from 'vscode';
-import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 
-export default class DependencyManger implements SQLTools.ExtensionPlugin {
+export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
   register(extension: SQLTools.ExtensionInterface) {
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
+    this.client.onNotification(DependeciesAreBeingInstalledNotification, param => this.jobRunning(param));
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
   }
 
@@ -50,5 +51,9 @@ Go ahead and connect!`,
     } catch (error) {
       Win.showErrorMessage(error && error.message ? error.message : error.toString());
     }
+  }
+
+  private jobRunning = async ({ moduleName, moduleVersion, conn }) =>  {
+    return Win.showInformationMessage(`We are installing "${moduleName}@${moduleVersion}" to connect to ${conn.name}. Please wait till it finishes.`);
   }
 }

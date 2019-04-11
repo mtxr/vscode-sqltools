@@ -7,6 +7,8 @@ import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
 import actions from './store/actions';
+import DependencyManager from '../dependency-manager/language-server';
+import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
@@ -127,7 +129,10 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       })
       .catch(e => {
         if (e.data && e.data.notification) {
-          this.server.sendNotification(e.data.notification, e.data.args);
+          if (DependencyManager.runningJobs.includes(e.data.args.conn.dialect)) {
+            return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
+          }
+          return void this.server.sendNotification(e.data.notification, e.data.args);
         }
         throw e;
       });
@@ -229,6 +234,9 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
       await this.openConnectionHandler({ conn: defaultConnections[0] });
     } catch (error) {
+      if (error.data && error.data.notification) {
+        return void this.server.sendNotification(error.data.notification, error.data.args);
+      }
       this.server.notifyError('Auto connect failed', error);
     }
   }
