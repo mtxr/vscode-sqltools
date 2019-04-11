@@ -4,7 +4,7 @@ import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
-import ConfigManager from '@sqltools/core/config-manager';
+import ErrorHandler from '@sqltools/extension/api/error-handler';
 
 export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -56,7 +56,7 @@ Go ahead and connect!`,
       }
     } catch (error) {
       this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-      Win.showErrorMessage(error && error.message ? error.message : error.toString());
+      ErrorHandler.create(`Failed to install dependencies for ${conn.dialect}`, (<any>console).show)(error);
     }
   }
 
