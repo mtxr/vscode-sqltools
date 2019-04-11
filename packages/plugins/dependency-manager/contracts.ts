@@ -9,4 +9,5 @@ export const InstallDepRequest = new RequestType<
 >('DependencyInstaller/install');
 
 export const MissingModuleNotification = 'DependencyInstaller/missingModule';
+export const DependeciesAreBeingInstalledNotification = 'DependencyInstaller/dependeciesAreBeingInstalledNotification';
 export const ElectronNotSupportedNotification = 'DependencyInstaller/electronNotSupported';

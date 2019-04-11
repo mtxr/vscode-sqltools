@@ -53,10 +53,10 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
   private root: string;
   private server: SQLTools.LanguageServerInterface;
 
+  public static runningJobs: string[] = [];
 
- private onRequestToInstall = async (params) => {
-    console.debug('Received request to install deps:', JSON.stringify(params));
-    const DialectClass = Dialects[params.dialect];
+  private onRequestToInstall = async ({ dialect } = { dialect: undefined }) => {
+    const DialectClass = Dialects[dialect];
     if (
       !DialectClass ||
       !DialectClass.deps ||
@@ -67,22 +67,33 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
 
     const deps: typeof GenericDialect['deps'] = DialectClass.deps;
 
-    for (let dep of deps) {
-      switch(dep.type) {
-        case 'npmscript':
-          console.debug(`Will run ${dep.name} script`);
-          await this.runNpmScript(dep.name, { env: dep.env });
-          console.debug(`Finished ${dep.name} script`);
-          break;
-        case 'package':
-          console.debug(`Will install ${dep.name} package`);
-          await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
-          console.debug(`Finished ${dep.name} script`);
-          break;
-      }
-
+    if (DependencyManager.runningJobs.includes(dialect)) {
+      return console.log(`You are already installing deps for ${dialect}`)
     }
-    console.debug('Finished installing deps');
+    DependencyManager.runningJobs.push(dialect);
+
+    console.debug('Received request to install deps:', JSON.stringify(deps));
+    try {
+      for (let dep of deps) {
+        switch(dep.type) {
+          case 'npmscript':
+            console.debug(`Will run ${dep.name} script`);
+            await this.runNpmScript(dep.name, { env: dep.env });
+            console.debug(`Finished ${dep.name} script`);
+            break;
+          case 'package':
+            console.debug(`Will install ${dep.name} package`);
+            await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
+            console.debug(`Finished ${dep.name} script`);
+            break;
+        }
+      }
+      console.debug('Finished installing deps');
+      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
+    } catch(e) {
+      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
+      throw e;
+    }
   }
 
   public register(server: SQLTools.LanguageServerInterface) {
