@@ -27,5 +27,5 @@ script:
   - yarn test:older --no-coverage
   - yarn test
 after_success:
-  - ./cc-test-reporter upload-coverage
+  - ./cc-test-reporter upload-coverage -i coverage/coverage-final.json
   - codecov
