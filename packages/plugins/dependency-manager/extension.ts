@@ -1,4 +1,4 @@
-import { window as Win, workspace, ConfigurationTarget, window, StatusBarAlignment, StatusBarItem } from 'vscode';
+import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
@@ -37,8 +37,19 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
       switch (r) {
         case installNow:
           this.installingDialects.push(conn.dialect);
-          this.updateStatusBar();
-          await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+          await window.withProgress({
+            location: ProgressLocation.Notification,
+            title: `SQLTools is installing`,
+            cancellable: false,
+          }, async (progress) => {
+            progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+            const interval = setInterval(() => {
+              progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+            }, 1000);
+            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+            clearInterval(interval);
+            return result;
+          });
           this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
           const opt = [`Connect to ${conn.name}`];
           const rr = await Win.showInformationMessage(
@@ -62,29 +73,5 @@ Go ahead and connect!`,
 
   private jobRunning = async ({ moduleName, moduleVersion, conn }) =>  {
     return Win.showInformationMessage(`We are installing "${moduleName}@${moduleVersion}" to connect to ${conn.name}. Please wait till it finishes.`);
-  }
-
-  private statusbarProgress: StatusBarItem = null;
-  private statusbarProgressTimer = null;
-
-  private updateStatusBar = (position = 0) => {
-    if (!this.statusbarProgress && this.installingDialects.length > 0) {
-      this.statusbarProgress = window.createStatusBarItem(StatusBarAlignment.Left, 0);
-    }
-    if (this.statusbarProgress) {
-      this.statusbarProgress.tooltip = `Installing dependencies for ${this.installingDialects.join(', ')}`
-      const chars = '\u2581\u2582\u2583\u2584\u2585\u2586\u2587\u2588';
-      this.statusbarProgress.text = `Installing deps ${this.installingDialects.join(', ')} [${chars.charAt(position)}]`;
-      this.statusbarProgress.show();
-      this.statusbarProgress.color = 'cyan'
-      this.statusbarProgressTimer = this.statusbarProgressTimer || setInterval(() => this.updateStatusBar(++position % chars.length), 100);
-    }
-
-    if (this.statusbarProgress && this.installingDialects.length === 0) {
-      this.statusbarProgress.dispose();
-      this.statusbarProgress = null;
-      clearInterval(this.statusbarProgressTimer);
-      this.statusbarProgressTimer = null;
-    }
   }
 }

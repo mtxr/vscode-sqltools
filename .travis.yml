@@ -12,6 +12,8 @@ os:
   - linux
 
 before_install:
+  - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+  - chmod +x ./cc-test-reporter
   - if [ $TRAVIS_OS_NAME == "linux" ]; then
       export CXX="g++-4.9" CC="gcc-4.9" DISPLAY=:99.0;
       sh -e /etc/init.d/xvfb start;
@@ -25,4 +27,5 @@ script:
   - yarn test:older --no-coverage
   - yarn test
 after_success:
+  - ./cc-test-reporter upload-coverage
   - codecov
