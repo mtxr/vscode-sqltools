@@ -23,9 +23,16 @@ before_install:
 install:
   - yarn global add codecov
   - yarn
+
+before_script:
+  - ./cc-test-reporter before-build
+
 script:
   - yarn test:older --no-coverage
   - yarn test
 after_success:
-  - ./cc-test-reporter upload-coverage -i coverage/coverage-final.json
+  - ./cc-test-reporter upload-coverage -i $HOME/build/mtxr/vscode-sqltools/coverage/coverage-final.json
   - codecov
+
+notifications:
+  email: false
