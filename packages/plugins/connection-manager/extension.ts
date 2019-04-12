@@ -339,7 +339,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.client = extension.client;
     this.context = extension.context;
     this.errorHandler = extension.errorHandler;
-    this.explorer = new ConnectionExplorer(this.context);
+    this.explorer = new ConnectionExplorer(extension);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
 
