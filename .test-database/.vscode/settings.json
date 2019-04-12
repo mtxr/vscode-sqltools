@@ -13,7 +13,7 @@
     "indentSize": 2,
     "reservedWordCase": "upper"
   },
-  "sqltools.autoConnectTo": ["SQLite"],
+  // "sqltools.autoConnectTo": ["SQLite"],
   "sqltools.flattenGroupsIfOne": false,
   "sqltools.connections": [
     {
