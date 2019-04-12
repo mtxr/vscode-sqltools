@@ -2,19 +2,25 @@
 
 ## v0.17
 
-### v0.17.13
+### v0.17.14
 
 * **NEW** 🎉
-  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
   * Add codelens to sql files. You can select file types to add code lens using `sqltools.codelensLanguages` setting. Default to `['sql']`
     * Split your query blocks using `@name` on comments. See:
     * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
 
 * **Enhancements**
-  * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
   * Installing dependecies now uses VSCode progress indicator notification to better notify user about installation.
   * `NULL` values are now centered on results table.
   * `TRUE` and `FALSE` are better displayed on results table.
+
+### v0.17.13
+
+* **NEW** 🎉
+  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
+
+* **Enhancements**
+  * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
 
 ### v0.17.12
 
