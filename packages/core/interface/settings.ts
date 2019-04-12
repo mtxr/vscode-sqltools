@@ -2,6 +2,7 @@ import { ConnectionInterface } from '@sqltools/core/interface/connection';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
+export type CodelensLanguages = string[];
 
 export interface FormatOptions {
   /**
@@ -87,7 +88,7 @@ export interface Settings {
    */
    historySize?: number;
   /**
-   * Languages with SQL completion activated.
+   * Languages with SQL completion enabled.
    * @type {CompletionLanguages}
    * @default ["sql"]
    * @memberof Settings
@@ -95,13 +96,21 @@ export interface Settings {
    */
   completionLanguages?: CompletionLanguages;
   /**
-   * Languages with SQL formatting activated.
+   * Languages with SQL formatting enabled.
    * @type {FormatLanguages}
    * @default ["sql"]
    * @memberof Settings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
   formatLanguages?: FormatLanguages;
+  /**
+   * Languages with SQL CodeLens enabled.
+   * @type {CodelensLanguages}
+   * @default ["sql"]
+   * @memberof Settings
+   * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
+   */
+  codelensLanguages?: CodelensLanguages;
   /**
    * Format document/selection options
    * @type {FormatOptions}
