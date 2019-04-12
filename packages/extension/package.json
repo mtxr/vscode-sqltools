@@ -348,14 +348,21 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "description": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL formatting activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "description": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                },
+                "sqltools.codelensLanguages": {
+                    "type": "array",
+                    "default": [
+                        "sql"
+                    ],
+                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.format": {
                     "type": "object",
