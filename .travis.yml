@@ -30,8 +30,9 @@ before_script:
 script:
   - yarn test:older --no-coverage
   - yarn test
+after_script:
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 after_success:
-  - ./cc-test-reporter upload-coverage -i $HOME/build/mtxr/vscode-sqltools/coverage/coverage-final.json
   - codecov
 
 notifications:
