@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.17.11",
+    "version": "0.17.14",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -85,10 +85,16 @@
     "contributes": {
         "languages": [{
             "id": "sql",
-            "extensions": [ ".sql" ],
+            "extensions": [ ".sql", ".dsql" ],
             "aliases": [ "SQL", "sql" ],
-            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b"
+            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
+			"configuration": "./language/language-configuration.json"
         }],
+        "grammars": [{
+			"language": "sql",
+			"scopeName": "source.sql",
+			"path": "./language/sql.tmLanguage.json"
+		}],
         "commands": [
             {
                 "title": "Connect",
@@ -342,14 +348,21 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Languages with SQL completion activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "description": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL formatting activated. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "description": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                },
+                "sqltools.codelensLanguages": {
+                    "type": "array",
+                    "default": [
+                        "sql"
+                    ],
+                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.format": {
                     "type": "object",
@@ -388,6 +401,11 @@
                             "port": {
                                 "type": "number",
                                 "description": "Port for connection"
+                            },
+                            "socketPath": {
+                                "type": "string",
+                                "required": false,
+                                "description": "Path of socket file to connect using UNIX sockets. MySQL only for now."
                             },
                             "database": {
                                 "type": "string",
@@ -456,7 +474,7 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options for more details.",
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -495,7 +513,7 @@
                                             "string",
                                             "null"
                                         ],
-                                        "default": "null"
+                                        "default": null
                                     }
                                 }
                             },
@@ -506,7 +524,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options for more details.",
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "required": false,
@@ -515,7 +533,7 @@
                                             "object",
                                             "null"
                                         ],
-                                        "default": "null"
+                                        "default": null
                                     }
                                 }
                             },
@@ -575,6 +593,21 @@
                                 "beside"
                             ],
                             "description": "Define where the results should show up."
+                        },
+                        "customization": {
+                            "type": "object",
+                            "default": {},
+                            "properties": {
+                                "font-family": {
+                                    "type":"string"
+                                },
+                                "font-size": {
+                                    "type":"string"
+                                },
+                                "table-cell-padding": {
+                                    "type":"string"
+                                }
+                            }
                         }
                     }
                 },

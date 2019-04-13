@@ -4,13 +4,13 @@ export default {
   describeTable: 'DESCRIBE :table',
   fetchColumns: `
 SELECT
-  DISTINCT C.TABLE_NAME AS tableName,
+  C.TABLE_NAME AS tableName,
   C.COLUMN_NAME AS columnName,
   C.DATA_TYPE AS type,
   C.CHARACTER_MAXIMUM_LENGTH AS size,
   C.TABLE_SCHEMA as tableSchema,
   C.TABLE_CATALOG AS tableCatalog,
-  DATABASE() as tableDatabase,
+  C.TABLE_SCHEMA as tableDatabase,
   C.COLUMN_DEFAULT as defaultValue,
   C.IS_NULLABLE as isNullable,
   C.ORDINAL_POSITION,
@@ -53,7 +53,7 @@ FROM
   AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
   AND C.TABLE_CATALOG = T.TABLE_CATALOG
 WHERE
-  C.TABLE_SCHEMA = DATABASE()
+  C.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION`,
@@ -69,7 +69,7 @@ SELECT
       ELSE 0
     END
   ) AS isView,
-  DATABASE() AS dbName,
+  T.TABLE_SCHEMA AS dbName,
   COUNT(1) AS numberOfColumns,
   CONCAT(
     T.TABLE_SCHEMA,
@@ -81,7 +81,7 @@ SELECT
       END
     ),
     '/',
-    T.TABLE_name
+    T.TABLE_NAME
   ) AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS AS C
@@ -89,7 +89,7 @@ FROM
   AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
   AND C.TABLE_CATALOG = T.TABLE_CATALOG
 WHERE
-  T.TABLE_SCHEMA = DATABASE()
+  T.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
 GROUP BY
   T.TABLE_NAME,
   T.TABLE_SCHEMA,
@@ -100,17 +100,17 @@ ORDER BY
   fetchFunctions: `
 SELECT
   f.specific_name AS name,
-  f.ROUTINE_SCHEMA,
-  f.routine_schema,
+  f.routine_schema AS dbschema,
+  f.routine_schema AS dbname,
   concat(
     case
-      WHEN routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', routine_schema, '\`')
-      ELSE routine_schema
+      WHEN f.routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_schema, '\`')
+      ELSE f.routine_schema
     end,
     '.',
     case
-      WHEN routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', routine_name, '\`')
-      ELSE routine_name
+      WHEN f.routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_name, '\`')
+      ELSE f.routine_name
     end,
     concat('(', GROUP_CONCAT(p.data_type), ')')
   ) as signature,
@@ -130,11 +130,13 @@ FROM
     AND f.routine_catalog = p.specific_catalog
   )
 WHERE
-  f.routine_schema = DATABASE()
+  f.routine_schema NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
 GROUP BY
-  f.routine_schema,
-  f.routine_catalog,
   f.specific_name,
-  f.ROUTINE_DEFINITION,
-  f.data_type;`,
+  f.routine_schema,
+  f.routine_name,
+  f.data_type,
+  f.routine_definition
+ORDER BY
+  f.specific_name;`,
 } as DialectQueries;

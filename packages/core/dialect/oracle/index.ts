@@ -6,6 +6,7 @@ import queries from './queries';
 import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 
 const OracleDBLibVersion = '3.1.1';
 export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
@@ -70,12 +71,26 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     this.unregisterPool();
   }
 
+  public simpleParse(code) {
+    // Trim empties and slash (/) from code if it exists
+    code = pipe(
+      trim,
+      trimCharsEnd("/"),
+      trim
+    )(code);
+  
+    // Trim semicolon (;) if it doesn't end with "END;" or "END <name>; etc"
+    if (!/END(\s\w*)*;$/gi.test(code)) {
+      code = trimCharsEnd(";")(code);
+    }
+    return code;
+  }
+
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();
-    const queries = query.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter(Boolean);
+    const q = this.simpleParse(query);
     const results: DatabaseInterface.QueryResults[] = [];
     try {
-      for(let q of queries) {
         let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
         const messages = [];
         if (res.rowsAffected) {
@@ -85,10 +100,10 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           connId: this.getId(),
           cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
           messages,
-          query: queries[results.length],
+          query: q,
           results: res.rows,
         });
-      }
+      
     } finally {
       if (conn) {
         try {
@@ -112,12 +127,13 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
             return {
-              name: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
+              name: obj.TABLENAME,
               isView: !!obj.ISVIEW,
               numberOfColumns: parseInt(obj.NUMBEROFCOLUMNS, 10),
               tableCatalog: obj.TABLECATALOG,
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
+              tree: obj.TREE,
             } as DatabaseInterface.Table;
           });
       });
@@ -136,18 +152,19 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
               size: obj.size !== null ? parseInt(obj.SIZE, 10) : null,
               tableCatalog: obj.TABLECATALOG,
               tableDatabase: obj.DBNAME,
-              tableName: `${obj.TABLESCHEMA}.${obj.TABLENAME}`,
+              tableName: obj.TABLENAME,
               tableSchema: obj.TABLESCHEMA,
               type: obj.TYPE,
-              isPk: obj.CONSTRAINTTYPE === 'P',
-              isFk: obj.CONSTRAINTTYPE === 'R'
+              isPk: obj.KEYTYPE === 'P',
+              isFk: obj.KEYTYPE === 'R',
+              tree: obj.TREE,
             } as DatabaseInterface.TableColumn;
           });
       });
   }
 
-  public describeTable(table: string) {
-    const tableSplit = table.split('.');
-    return this.query(Utils.replacer(this.queries.describeTable, { schema: tableSplit[0], table: tableSplit[1] }));
+  public describeTable(prefixedTable: string) {
+    const [ schema, table ] = prefixedTable.split('.');
+    return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
   }
 }

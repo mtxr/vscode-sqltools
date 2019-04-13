@@ -1,6 +1,5 @@
 import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
-import { logIfEnv } from '@sqltools/core/utils/decorators';
 import { window } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getHome } from '@sqltools/core/utils';
@@ -31,7 +30,6 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   public getParent(element: BookmarkTreeItem | BookmarkTreeGroup) {
     return element.parent || null;
   }
-  @logIfEnv()
   public refresh = (item?: BookmarkExplorerItem) => {
     this._onDidChangeTreeData.fire(item);
   }

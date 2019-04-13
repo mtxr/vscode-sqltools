@@ -18,6 +18,7 @@ import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
+import CodeLensPlugin from '@sqltools/plugins/codelens/extension';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;
@@ -257,10 +258,11 @@ export function activate(context: ExtensionContext) {
   instance = new SQLToolsExtension(context)
     .registerPlugin(FormatterPlugin)
     .registerPlugin(AutoRestartPlugin)
-    .registerPlugin(new ConnectionManagerPlugin())
-    .registerPlugin(new DependencyManagerPlugin())
-    .registerPlugin(new HistoryManagerPlugin())
-    .registerPlugin(new BookmarksManagerPlugin());
+    .registerPlugin(new ConnectionManagerPlugin)
+    .registerPlugin(new DependencyManagerPlugin)
+    .registerPlugin(new HistoryManagerPlugin)
+    .registerPlugin(new BookmarksManagerPlugin)
+    .registerPlugin(new CodeLensPlugin);
 
   return instance.activate();
 }

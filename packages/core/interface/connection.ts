@@ -16,13 +16,19 @@ export interface ConnectionInterface {
    * @default "127.0.0.1
    * @memberof ConnectionInterface
    */
-  server: string;
+  server?: string;
   /**
    * Port for connection
    * @type {number}
    * @memberof ConnectionInterface
    */
   port: number;
+  /**
+   * Path of socket file to connect using UNIX sockets
+   * @type {string}
+   * @memberof ConnectionInterface
+   */
+  socketPath?: string;
   /**
    * Database name
    * @type {string}
@@ -69,7 +75,7 @@ export interface ConnectionInterface {
    */
   previewLimit?: number;
   /**
-   * MSSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/mssql#1-1-specific-options
+   * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options
    * @deprecated replaced by mssqlOptions
    * @type {any}
    * @memberof ConnectionInterface
@@ -92,7 +98,7 @@ export interface ConnectionInterface {
   }
 
   /**
-   * PostgreSQL specific driver options. See https://mtxr.gitbook.io/vscode-sqltools/connections/postgresql#1-1-specific-options
+   * PostgreSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options
    * @type {any}
    * @memberof ConnectionInterface
    */

@@ -1,15 +1,18 @@
-import { window as Win, workspace, ConfigurationTarget } from 'vscode';
-import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation } from 'vscode';
+import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 
-export default class DependencyManger implements SQLTools.ExtensionPlugin {
+export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
+  private extension: SQLTools.ExtensionInterface;
   register(extension: SQLTools.ExtensionInterface) {
+    this.extension = extension;
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
+    this.client.onNotification(DependeciesAreBeingInstalledNotification, param => this.jobRunning(param));
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
   }
 
@@ -21,6 +24,8 @@ export default class DependencyManger implements SQLTools.ExtensionPlugin {
     if (!r) return;
     return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
   }
+
+  private installingDialects: string[] = [];
   private requestToInstall = async ({ moduleName, moduleVersion, conn }) =>  {
     const installNow = 'Install now';
     const readMore = 'Read more';
@@ -32,7 +37,21 @@ export default class DependencyManger implements SQLTools.ExtensionPlugin {
       );
       switch (r) {
         case installNow:
-          await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+          this.installingDialects.push(conn.dialect);
+          await window.withProgress({
+            location: ProgressLocation.Notification,
+            title: `SQLTools is installing`,
+            cancellable: false,
+          }, async (progress) => {
+            progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+            const interval = setInterval(() => {
+              progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+            }, 1000);
+            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+            clearInterval(interval);
+            return result;
+          });
+          this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
           const opt = [`Connect to ${conn.name}`];
           const rr = await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
@@ -44,11 +63,16 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal('https://mtxr.gitbook.io/vscode-sqltools/connections');
+          openExternal(`${DOCS_ROOT_URL}/connections`);
           break;
       }
     } catch (error) {
-      Win.showErrorMessage(error && error.message ? error.message : error.toString());
+      this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
+      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}`, error, (<any>console).show);
     }
+  }
+
+  private jobRunning = async ({ moduleName, moduleVersion, conn }) =>  {
+    return Win.showInformationMessage(`We are installing "${moduleName}@${moduleVersion}" to connect to ${conn.name}. Please wait till it finishes.`);
   }
 }

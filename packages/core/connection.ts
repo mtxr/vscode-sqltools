@@ -79,7 +79,7 @@ export default class Connection {
     });
   }
 
-  public async  describeTable(tableName: string) {
+  public async describeTable(tableName: string) {
     const info = await this.conn.describeTable(tableName);
 
     if (info[0]) {

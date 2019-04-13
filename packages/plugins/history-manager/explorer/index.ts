@@ -1,6 +1,5 @@
 import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
-import { logIfEnv } from '@sqltools/core/utils/decorators';
 import { window } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 
@@ -29,7 +28,6 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   public getParent(element: HistoryTreeItem | HistoryTreeGroup) {
     return element.parent || null;
   }
-  @logIfEnv()
   public refresh = (item?: HistoryExplorerItem) => {
     this._onDidChangeTreeData.fire(item);
   }

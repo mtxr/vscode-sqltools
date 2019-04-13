@@ -1,5 +1,5 @@
 import path from 'path';
-import { VERSION } from '@sqltools/core/constants';
+import { VERSION, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import SerializableStorage from '@sqltools/core/utils/serializable-storage';
 import { getHome } from '@sqltools/core/utils/get-home';
 import { numericVersion } from '@sqltools/core/utils';
@@ -21,7 +21,7 @@ namespace Utils {
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),
-        releaseNotes: `https://mtxr.gitbook.io/vscode-sqltools/changelog#v-${VERSION.replace(/\./g, '-')}`,
+        releaseNotes: `${DOCS_ROOT_URL}/changelog#v-${VERSION.replace(/\./g, '-')}`,
         run: new Date().getTime(),
         updated: false,
         version: VERSION,

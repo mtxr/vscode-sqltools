@@ -16,15 +16,16 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
 
     const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
     if (typeof ssl === 'boolean') {
-      throw new Error('SSL as boolean only supported for xprotocol. See: https://mtxr.gitbook.io/vscode-sqltools/connections/mysql#2-ssl');
+      throw new Error('SSL as boolean only supported for xprotocol. See: https://vscode-sqltools.mteixeira.dev/connections/mysql#2-ssl');
     }
 
     const pool = MySQLLib.createPool({
       connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
+      socketPath: this.credentials.socketPath,
       host: this.credentials.server,
-      password: this.credentials.password,
       port: this.credentials.port,
+      password: this.credentials.password,
       user: this.credentials.username,
       multipleStatements: true,
       ssl

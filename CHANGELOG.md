@@ -2,6 +2,48 @@
 
 ## v0.17
 
+### v0.17.14
+
+* **NEW** 🎉
+  * Add codelens to sql files. You can select file types to add code lens using `sqltools.codelensLanguages` setting. Default to `['sql']`
+    * Split your query blocks using `@name` on comments. See:
+    * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
+
+* **Enhancements**
+  * Installing dependecies now uses VSCode progress indicator notification to better notify user about installation.
+  * `NULL` values are now centered on results table.
+  * `TRUE` and `FALSE` are better displayed on results table.
+
+### v0.17.13
+
+* **NEW** 🎉
+  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
+
+* **Enhancements**
+  * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
+
+### v0.17.12
+
+* **NEW** 🎉
+  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg:
+    ```json
+    ...
+    "sqltools.results": {
+      ...
+      "customization": {
+        "font-size": "12px",
+        "font-family": "monospace",
+        "table-cell-padding": "2px 4px"
+      }
+    },
+    ...
+    ```
+  * Allow connecting to MySQL using Socket files. Issue [#163](https://github.com/mtxr/sqltools-formatter/issues/163).
+    See [https://vscode-sqltools.mteixeira.dev/connections/mysql#1-connections](https://vscode-sqltools.mteixeira.dev/connections/mysql#1-connections)
+
+* **Enhancements**
+  * Updated fetch columns query to support MySQL new versions. Issue [#173](https://github.com/mtxr/sqltools-formatter/issues/173).
+
 ### v0.17.11
 
 * **NEW** 🎉
@@ -9,7 +51,8 @@
   * Allow users to set connection icons.
   * Add stored procedure listing on explorer for Postgres and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
     * ![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
-  * Enhanced connection hierarchy to allo multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/issues/71)
+  * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/i
+  * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/ssues/71)
     * You can flatten groups with only one child using the setting `sqltools.flattenGroupsIfOne`. Default to `false`
     * ![static/sidebar-explorer.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/sidebar-explorer.png)
 

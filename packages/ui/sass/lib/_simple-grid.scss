@@ -21,8 +21,8 @@ body {
 }
 
 * {
-  font-family: $fallbackFontFamily;
-  font-family: $fontFamilyFallback;
+  font-family: $fontFamily0;
+  font-family: $fontFamily1;
   font-family: $fontFamily;
   line-height: $font-height;
 }

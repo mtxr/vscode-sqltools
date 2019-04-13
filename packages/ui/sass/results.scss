@@ -5,14 +5,14 @@
 $transition: all .3s ease 0s;
 
 body {
-  font-size: $fallbackFontSize;
-  font-size: $fontSizeFallback;
+  font-size: $fontSize0;
+  font-size: $fontSize1;
   font-size: $fontSize;
-  font-family: $fallbackFontFamily;
-  font-family: $fontFamilyFallback;
+  font-family: $fontFamily0;
+  font-family: $fontFamily1;
   font-family: $fontFamily;
   color: $color;
-  background: $fallbackBackgroundColor;
+  background: $backgroundColor0;
   background: $backgroundColor;
   @include full-screen();
 
@@ -27,7 +27,11 @@ pre {
 
 .query-results-container {
   display: flex;
-  flex-direction: column
+  flex-direction: column;
+}
+.query-results-container, .query-results-container * {
+  font-size: var(--sqltools-font-size);
+  font-family: var(--sqltools-font-family);
 }
 
 body,
@@ -67,7 +71,7 @@ body, #root {
   }
   .query-extras {
     width: 100%;
-    background: $fallbackBackgroundColor;
+    background: $backgroundColor0;
     background: $backgroundColor;
     flex-grow: 0;
   }
@@ -204,7 +208,7 @@ body.vscode-dark {
   .ReactTable .rt-thead.-filters select,
   .ReactTable .-pagination input,
   .ReactTable .-pagination select {
-    background: $fallbackBackgroundColor;
+    background: $backgroundColor0;
     background: $backgroundColor;
     color: $color;
     border-color: $darkThemeWhite2 !important;
@@ -298,27 +302,28 @@ div mark {
   }
 }
 
-.rt-td.td-icon.green:before, .rt-td.td-icon.red:before {
-  content: '\00a0 ';
-  opacity: .5;
-  border-radius: 50%;
-  height: $fallbackFontSize;
-  width: $fallbackFontSize;
-  height: $fontSize;
-  width: $fontSize;
-  display: inline-block;
-  margin-right: 3px;
-  margin-left: 2px;
-  line-height: $fallbackFontSize;
-  line-height: $fontSize;
+.rt-td.td-badge {
+  > span {
+    font-size: 0.8em;
+    padding: 2px;
+    border-radius: 2px;
+  }
+  &.green span {
+    background: #00b159;
+    color: #333;
+  }
+  &.red span {
+    background: #d11141;
+    color: #fafafa;
+  }
 }
 
-.rt-td.td-icon {
-  &.green:before {
-    background: #00b159;
-  }
-  &.red:before {
-    background: #d11141;
+.rt-td.td-null {
+  justify-content: space-around;
+  display: flex;
+  font-size: 0.8em;
+  > small {
+    align-self: center;
   }
 }
 
@@ -398,4 +403,11 @@ div mark {
 .ReactTable .rt-thead {
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+.ReactTable .rt-thead.-filters input, .ReactTable .rt-thead.-filters select, .ReactTable .-pagination input, .ReactTable .-pagination select,
+.ReactTable .rt-th, .ReactTable .rt-td,
+.ReactTable .rt-thead .rt-th, .ReactTable .rt-thead .rt-td {
+  padding: 5px 3px;
+  padding: var(--sqltools-table-cell-padding);
 }

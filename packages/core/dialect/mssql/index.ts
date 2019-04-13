@@ -32,7 +32,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       server: this.credentials.server,
       user: this.credentials.username,
       password: this.credentials.password,
-      domain: this.credentials.domain,
+      domain: this.credentials.domain || undefined,
       port: this.credentials.port,
       options: {
         encrypt: encryptAttempt,
@@ -41,7 +41,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
 
     await new Promise((resolve, reject) => {
       pool.on('error', reject);
-      pool.connect().then(resolve);
+      pool.connect().then(resolve).catch(reject);
     }).catch(e => {
       if (this.retryCount === 0) {
         this.retryCount++;
@@ -51,6 +51,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
           return Promise.reject(e);
         });
       }
+      return Promise.reject(e);
     });
 
     this.connection = Promise.resolve(pool);
@@ -128,5 +129,10 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
             };
           });
       });
+  }
+
+  public getFunctions() {
+    // @TODO implement functions listing for MSSQL
+    return Promise.resolve([]);
   }
 }

@@ -13,6 +13,13 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     super(context);
   }
 
+  public get cssVariables() {
+    if (!ConfigManager.results.customization) {
+      return super.cssVariables;
+    }
+    return <any>ConfigManager.results.customization;
+  }
+
   public async saveResults(filetype: 'csv' | 'json' = 'csv') {
     const { connId, activeTab } = await this.getState();
     let filters = undefined;

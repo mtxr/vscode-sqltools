@@ -12,6 +12,7 @@ import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
 import Syntax from '@sqltools/ui/components/Syntax';
 import getVscode from '@sqltools/ui/lib/vscode';
 import '@sqltools/ui/sass/app.scss';
+import { DOCS_ROOT_URL } from '@sqltools/core/constants';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
@@ -157,6 +158,27 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.connectionTimeout.visible = true;
           newState.fields.database.type = 'text';
         }
+        if (this.state.data.dialect === 'MySQL') {
+          newState.fields.useSocket.visible = true;
+        } else {
+          newState.data.useSocket = false;
+          newState.fields.useSocket.visible = false;
+          newState.fields.socketPath.visible = false;
+        }
+        this.setState(newState, this.validateFields);
+      },
+    },
+    useSocket: {
+      label: 'Use socket file?',
+      info: 'Check to connect using UNIX sockets',
+      type: 'checkbox',
+      default: false,
+      parse: bool,
+      postUpdateHook: () => {
+        const newState = Object.assign({}, this.state);
+        newState.fields.server.visible = !this.state.data.useSocket;
+        newState.fields.port.visible = !this.state.data.useSocket;
+        newState.fields.socketPath.visible = !!this.state.data.useSocket;
         this.setState(newState, this.validateFields);
       },
     },
@@ -175,6 +197,12 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         min: 1,
         max: 65535,
       },
+    },
+    socketPath: {
+      visible: false,
+      type: 'file',
+      label: 'Socket File',
+      validators: [notEmpty],
     },
     database: {
       type: 'text',
@@ -378,6 +406,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       data['password'] = data['password'] || undefined;
 
       delete data['isGlobal'];
+      delete data['useSocket'];
 
       return data;
   }
@@ -511,7 +540,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                           </ul>
                         </div>
                       ) : null}
-                      <div>You can find more information <a href={`https://mtxr.gitbook.io/vscode-sqltools/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
+                      <div>You can find more information <a href={`${DOCS_ROOT_URL}/connections/${this.state.data.dialect.toLowerCase()}`}>here</a>.</div>
                     </div>
                   </div>
                 </div>

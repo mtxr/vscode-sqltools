@@ -125,4 +125,9 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
 
     return columns;
   }
+
+  public getFunctions() {
+    // this doesn exists for SQLite. It's just to avoid watning messages
+    return Promise.resolve([]);
+  }
 }

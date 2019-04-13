@@ -5,13 +5,18 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public disposeEvent: EventEmitter<never> = new EventEmitter();
   public get onDidDispose() { return this.disposeEvent.event; }
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
+  protected cssVariables: { [name: string]: string };
   private get baseHtml(): string {
+    const cssVariables = Object.keys(this.cssVariables || {}).map(k => `--sqltools-${k}: ${this.cssVariables[k]}`).join(';');
     return `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="utf-8" />
   <title>${this.title}</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <style>
+  :root {${cssVariables}}
+  </style>
 </head>
 <body>
   <div id="root"></div>
