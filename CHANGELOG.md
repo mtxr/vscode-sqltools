@@ -4,9 +4,15 @@
 
 ### v0.17.14
 
+* **Fix** 🎉
+  * Minor fix on codelens.
+  * Allow to set connection on query block. See: [Codelens Doc](https://vscode-sqltools.mteixeira.dev/codelens)
+
+### v0.17.14
+
 * **NEW** 🎉
   * Add codelens to sql files. You can select file types to add code lens using `sqltools.codelensLanguages` setting. Default to `['sql']`
-    * Split your query blocks using `@name` on comments. See:
+    * Split your query blocks using `@block` on comments. See:
     * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
 
 * **Enhancements**

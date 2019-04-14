@@ -7,13 +7,13 @@ import * as Utils from '@sqltools/core/utils';
 export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
   private codelensDisposable: Disposable;
   private registeredLanguages: string[] = [];
-  dispose() {
+  async dispose() {
     if (!this.codelensDisposable) return;
-    this.codelensDisposable.dispose();
+    await this.codelensDisposable.dispose();
     this.codelensDisposable = null;
   }
 
-  createCodelens() {
+  async createCodelens() {
     const oldLang = this.registeredLanguages.sort(Utils.sortText);
     const newLang = ConfigManager.codelensLanguages.sort(Utils.sortText);
     const shouldRegister = newLang.length > 0 && (oldLang.join() !== newLang.join());
@@ -21,7 +21,7 @@ export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
     if (!shouldRegister) return;
 
     if(this.registeredLanguages) {
-      this.dispose();
+      await this.dispose();
     }
     this.codelensDisposable = languages.registerCodeLensProvider(
       ConfigManager.codelensLanguages.map(language => ({ language })),
@@ -32,5 +32,9 @@ export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
 
   register(extension: SQLTools.ExtensionInterface) {
     extension.context.subscriptions.push(this);
+    this.createCodelens();
+    ConfigManager.addOnUpdateHook(() => {
+      this.createCodelens();
+    });
   }
 }

@@ -35,9 +35,9 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
     try {
       item = item || (await this.bookmarksMenu());
       // Add an option for bookmark header
-      const headerText = `-- Bookmarked query
---   @name: {queryGroup}
---   @group: {queryName}\n\n`.replace('{queryName}', item.name).replace('{queryGroup}', item.parent.name);
+      const headerText = `-- @block Bookmarked query
+--   @name {queryGroup}
+--   @group {queryName}\n\n`.replace('{queryName}', item.name).replace('{queryGroup}', item.parent.name);
       insertText(`${headerText}${item.query}`, true);
     } catch (e) {
       this.errorHandler('Could not edit bookmarked query', e);

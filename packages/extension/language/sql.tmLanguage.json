@@ -9,15 +9,12 @@
 	"scopeName": "source.sql",
 	"patterns": [
 		{
-			"match": "^\\s*-{2,}\\s*(?:(@(name|group))(\\s+(.+))?.*)?$",
+			"match": "^[ \\t]*-{2,}\\s+(@[\\w_]+)\\s+(.+)?$",
 			"captures":{
 				"1": {
 					"name": "text.variable"
 				},
 				"2": {
-					"name": "punctuation.definition.block.tag.metadata"
-				},
-				"3": {
 					"name": "entity.name.type.instance.metadata"
 				}
 			}

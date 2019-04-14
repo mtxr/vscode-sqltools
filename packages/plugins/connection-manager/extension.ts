@@ -92,9 +92,19 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this._connect(true).catch(e => this.errorHandler('Error selecting connection', e));
   }
 
-  private ext_executeQuery = async (query?: string) => {
+  private ext_executeQuery = async (query?: string, connName?: string) => {
     try {
       query = query || await getSelectedText('execute query');
+      if (!connName) {
+        connName = (query.match(/@conn\s*([\w_]+)/) || [])[1];
+      }
+      if (connName) {
+        const conn = (this.getConnectionList() || []).find(c => c.name === connName);
+        if (!conn) {
+          throw new Error(`Trying to run query on '${connName}' but it does not exist.`)
+        }
+        await this._setConnection(conn);
+      }
       await this._connect();
       this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);

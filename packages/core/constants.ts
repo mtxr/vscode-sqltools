@@ -7,8 +7,7 @@ export const AI_KEY = 'd739ccec-c4e8-45e0-9d14-3b43d57a1db7';
 export const DOCS_ROOT_URL = 'https://vscode-sqltools.mteixeira.dev';
 
 // query parsing
-export const RequestVariableDefinitionRegex = new RegExp(`^\\s*(?:#{1,}|\\/{2,})\\s+@name\\s+(\\w+)\\s*$`, 'gmi');
 export const LineSplitterRegex = /\r?\n/g;
 export const CommentIdentifiersRegex = /^\s*(#|\/{2})/;
 export const FileVariableDefinitionRegex = /^\s*@([^\s=]+)\s*=\s*(.+?)\s*$/;
-export const DelimiterStartRegex = /^\s*-{2,}\s*@name.*$/;
+export const DelimiterStartRegex = /^\s*-{2,}\s*@block.*$/;
