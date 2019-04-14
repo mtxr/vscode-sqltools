@@ -2,7 +2,7 @@
 
 ## v0.17
 
-### v0.17.14
+### v0.17.15
 
 * **Fix** 🎉
   * Minor fix on codelens.
