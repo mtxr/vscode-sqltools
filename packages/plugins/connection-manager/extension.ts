@@ -250,7 +250,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     const sel = (await quickPick(connections.map((c) => {
       return <QuickPickItem>{
         description: c.isConnected ? 'Currently connected' : '',
-        detail: getConnectionDescription(c),
+        detail: (c.isConnected ? '$(zap) ' : '') + getConnectionDescription(c),
         label: c.name,
         value: getConnectionId(c)
       };

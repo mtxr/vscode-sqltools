@@ -24,6 +24,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
       .setAutoCollectPerformance(false)
       .setAutoCollectRequests(false)
       .setAutoDependencyCorrelation(false)
+      .setInternalLogging(false, false)
       .setUseDiskRetryCaching(true);
 
     AI.defaultClient.config.samplingPercentage = 50;
