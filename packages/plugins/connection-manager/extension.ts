@@ -112,9 +112,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     try {
       query = query || await getSelectedText('execute query');
       if (!connName) {
-        connName = (query.match(/@conn\s*([\w_]+)/) || [])[1];
+        connName = (query.match(/@conn\s*(.+)$/) || [])[1];
       }
-      if (connName) {
+      if (connName && connName.trim()) {
+        connName = connName.trim();
         const conn = (this.getConnectionList() || []).find(c => c.name === connName);
         if (!conn) {
           throw new Error(`Trying to run query on '${connName}' but it does not exist.`)
