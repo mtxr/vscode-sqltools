@@ -8,8 +8,9 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, ViewColumn, TextEditor } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
+import SQLToolsFSProvider from './provider';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -20,6 +21,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
 
+  private fsProvider: SQLToolsFSProvider;
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
 
   // extension commands
@@ -83,13 +85,27 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       }, (e) => this.errorHandler('Error closing connection', e));
   }
 
+  private async openConnectionFile(conn: ConnectionInterface) {
+    if (!conn) return;
+    await this.fsProvider.getConnFile(conn.name);
+    const doc = await workspace.openTextDocument(Uri.parse(`${EXT_NAME.toLowerCase()}:/${conn.name} Session.sql`).with({ query: getConnectionId(conn) }));
+    await window.showTextDocument(doc, ViewColumn.Active);
+  }
+
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
     if (connIdOrNode) {
-      const conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
+      let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
-      return this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
+      conn = await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
+      await this.openConnectionFile(conn)
+      return conn;
     }
-    this._connect(true).catch(e => this.errorHandler('Error selecting connection', e));
+    try {
+      const conn = await this._connect(true);
+      await this.openConnectionFile(conn)
+    } catch (error) {
+      this.errorHandler('Error selecting connection', error);
+    }
   }
 
   private ext_executeQuery = async (query?: string, connName?: string) => {
@@ -344,12 +360,20 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
   }
 
+  private changeTextEditorHandler = async (editor: TextEditor) => {
+    if (!editor || !editor.document || editor.document.uri.scheme !== EXT_NAME.toLowerCase()) return;
+
+    const connId = editor.document.uri.query;
+    await this.ext_selectConnection(connId);
+  }
+
   public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
     this.context = extension.context;
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer(extension);
+    this.fsProvider = new SQLToolsFSProvider(this.context);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
 
@@ -361,6 +385,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
       this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
+      workspace.registerFileSystemProvider(EXT_NAME.toLowerCase(), this.fsProvider, { isCaseSensitive: true }),
+      window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
 
     // register extension commands
