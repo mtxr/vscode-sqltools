@@ -56,7 +56,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}` :
       this.credentials.database;
     await this.lib.createPool({
-      connectString,
+      connectString: this.credentials.connectString || connectString,
       password: this.credentials.password,
       user: this.credentials.username,
       poolAlias: this.poolName
