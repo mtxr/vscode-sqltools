@@ -24,8 +24,10 @@ A clear and concise description of what you expected to happen.
 If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
- - OS: [e.g. Windows, Linux, Mac]
  - SQLTools Version [e.g. v0.17.x]
+ - VSCode Version: [e.g 1.x.y]
+ - Dialect Used: [e.g PostgreSQL, Oracle, SQLite..]
+ - OS: [e.g. Windows, Linux, Mac]
 
 **Additional context**
 Add any other context about the problem here.

@@ -71,8 +71,8 @@ export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): C
       kind: 'markdown',
     },
     kind: CompletionItemKind.Field,
-    filterText: `${col.tableName}.${col.columnName}`,
     label: col.columnName,
     sortText: `${col.tableName}.${col.columnName}`,
+
   };
 }
