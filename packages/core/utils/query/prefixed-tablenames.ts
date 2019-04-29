@@ -8,6 +8,7 @@ function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Ta
       if (table.tableDatabase)
         return [table.tableDatabase, table.tableSchema, table.name].join('.');
     case DatabaseDialect.MySQL:
+        return [`\`${table.tableSchema}\``, `\`${table.name}\``].join('.');
     case DatabaseDialect.OracleDB:
       if(table.tableSchema)
         return [table.tableSchema, table.name].join('.');
