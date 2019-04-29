@@ -2,6 +2,19 @@
 
 ## v0.17
 
+### v0.17.16
+
+* **NEW** 🎉
+  * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/issues/192)
+    * Thanks to [@zetxx](https://github.com/zetxx)
+
+* **Fix** 🎉
+  * Fix command palette not using schemas for tables. Issue [#197](https://github.com/mtxr/vscode-sqltools/issues/197)
+  * Fix MySQL escaping for database names. Issue [#196](https://github.com/mtxr/vscode-sqltools/issues/196)
+  * Fix completions too fuzzy. Issue [#193](https://github.com/mtxr/vscode-sqltools/issues/193)
+  * Fix MySQL escaping for database names. Issue [#196](https://github.com/mtxr/vscode-sqltools/issues/196)
+
+
 ### v0.17.15
 
 * **Fix** 🎉
@@ -31,7 +44,7 @@
 ### v0.17.12
 
 * **NEW** 🎉
-  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg:
+  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/vscode-sqltools/issues/174). Eg:
     ```json
     ...
     "sqltools.results": {
