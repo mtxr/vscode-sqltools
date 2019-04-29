@@ -52,14 +52,19 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
 
     this.needToInstallDependencies();
 
-    const connectString = (this.credentials.server && this.credentials.port) ?
-      `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}` :
-      this.credentials.database;
+    let { connectString } = this.credentials;
+    if (!connectString) {
+      if (this.credentials.server && this.credentials.port) {
+        connectString = `${this.credentials.server}:${this.credentials.port}/${this.credentials.database}`;
+      } else {
+        connectString = this.credentials.database;
+      }
+    }
     await this.lib.createPool({
-      connectString: this.credentials.connectString || connectString,
+      connectString,
       password: this.credentials.password,
       user: this.credentials.username,
-      poolAlias: this.poolName
+      poolAlias: this.poolName,
     });
     this.registerPool();
     return this.connection;
@@ -78,7 +83,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       trimCharsEnd("/"),
       trim
     )(code);
-  
+
     // Trim semicolon (;) if it doesn't end with "END;" or "END <name>; etc"
     if (!/END(\s\w*)*;$/gi.test(code)) {
       code = trimCharsEnd(";")(code);
@@ -103,7 +108,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           query: q,
           results: res.rows,
         });
-      
+
     } finally {
       if (conn) {
         try {

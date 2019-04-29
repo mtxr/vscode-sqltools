@@ -33,6 +33,10 @@ export function getConnectionDescription(c: ConnectionInterface): string | null 
   if (c.dialect === DatabaseDialect.SQLite) {
     return `file://${c.database}`;
   }
+
+  if (c.connectString) {
+    return c.connectString.replace(/(.+):.+@/gi, '$1@'); // removes password from string
+  }
   return [
     c.username,
     c.username ? '@' : '',

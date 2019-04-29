@@ -31,6 +31,11 @@
       }
     },
     {
+      "name": "PGSQL URI",
+      "connectString": "postgress://root:root@localhost:5433/test_db",
+      "connectionTimeout": 15,
+    },
+    {
       "name": "MSSQL",
       "server": "localhost",
       "dialect": "MSSQL",

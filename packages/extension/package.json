@@ -450,12 +450,12 @@
                                 "description": "Connection Dialect",
                                 "required": false
                             },
-			    "connectString": {
+			                "connectString": {
                                 "type": [
                                     "string",
                                     "null"
                                 ],
-                                "description": "Connect string used in oracle. https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrsconnectstring",
+                                "description": "Connect string. Supporting Oracle and PostgreSQL.",
                                 "required": false
                             },
                             "dialectOptions": {
