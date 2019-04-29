@@ -2,7 +2,7 @@
 
 ## v0.17
 
-### v0.17.16
+### v0.17.17
 
 * **NEW** 🎉
   * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/issues/192)
@@ -14,6 +14,9 @@
   * Fix completions too fuzzy. Issue [#193](https://github.com/mtxr/vscode-sqltools/issues/193)
   * Fix MySQL escaping for database names. Issue [#196](https://github.com/mtxr/vscode-sqltools/issues/196)
 
+### v0.17.16
+
+> this package contains a packing error. Please update to most recent version.
 
 ### v0.17.15
 

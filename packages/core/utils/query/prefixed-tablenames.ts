@@ -3,16 +3,20 @@ import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Table | string) {
   if (typeof table === 'string') return table.toString();
+  let items: string[] = [];
   switch(dialect) {
     case DatabaseDialect.PostgreSQL:
-      if (table.tableDatabase)
-        return [table.tableDatabase, table.tableSchema, table.name].join('.');
-    case DatabaseDialect.MySQL:
-        return [`\`${table.tableSchema}\``, `\`${table.name}\``].join('.');
+      table.tableDatabase && items.push(table.tableDatabase);
     case DatabaseDialect.OracleDB:
-      if(table.tableSchema)
-        return [table.tableSchema, table.name].join('.');
+      table.tableSchema && items.push(table.tableSchema);
+      items.push(table.name);
+      break;
+    case DatabaseDialect.MySQL:
+        table.tableSchema && items.push(`\`${table.tableSchema}\``);
+        items.push(`\`${table.name}\``);
+        break;
   }
+  if (items.length > 0) return items.join('.');
   return table.name.toString();
 }
 
