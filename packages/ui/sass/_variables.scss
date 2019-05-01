@@ -1,19 +1,20 @@
 @import './mixins';
 
-// variables with number in the end are fallback variables for old versions
-
+// fallbacks
 $backgroundColor0: var(--background-color);
-$backgroundColor: var(--vscode-editor-background);
 $color0: var(--color);
-$color: var(--vscode-editor-foreground);
 $fontFamily0: var(--font-family);
-$fontFamily1: var(--vscode-editor-font-family);
-$fontFamily: var(--vscode-font-family);
-$fontSize1: var(--vscode-editor-font-size);
+$fontFamily1: var(--vscode-editor-font-family, $fontFamily0);
 $fontSize0: var(--font-size);
-$fontSize: var(--vscode-font-size);
-$linkColor0: var(--link-color);
-$linkColor: var(--vscode-button-background);
+$fontSize1: var(--vscode-editor-font-size, $fontSize0);
+$linkColorBg0: var(--link-color);
+
+// variables with number in the end are fallback variables for old versions
+$backgroundColor: var(--vscode-editor-background, $backgroundColor0);
+$color: var(--vscode-editor-foreground, $color0);
+$fontFamily: var(--vscode-font-family, $fontFamily1);
+$fontSize: var(--vscode-font-size, $fontSize1);
+$linkColorBg: var(--vscode-button-background, $linkColorBg0);
 $linkColorFg: var(--vscode-button-foreground);
 
 $tabsHeight: 30px;
@@ -52,16 +53,11 @@ $darkThemeWhite16: rgba(255, 255, 255, 0.80);
 $radius: 3px;
 
 * {
-  font-family: $fontFamily0;
-  font-family: $fontFamily1;
   font-family: $fontFamily;
-  color: $color0;
   color: $color;
 }
 
 body {
-  font-size: $fontSize0;
-  font-size: $fontSize1;
   font-size: $fontSize;
   background: $backgroundColor;
 }
@@ -112,8 +108,7 @@ input, select, select > option {
 }
 
 .btn {
-  background: $linkColor0;
-  background: $linkColor;
+  background: $linkColorBg;
   padding: 4px 8px;
   color: $lightThemeGray16;
   border: none;

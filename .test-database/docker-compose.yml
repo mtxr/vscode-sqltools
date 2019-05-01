@@ -9,10 +9,10 @@ services:
       extends:
         file: ./mysql/docker-compose.yml
         service: db
-    mysql_xprotocol:
-      extends:
-        file: ./mysql/docker-compose.yml
-        service: db_xprotocol
+    # mysql_xprotocol:
+    #   extends:
+    #     file: ./mysql/docker-compose.yml
+    #     service: db_xprotocol
     # oracle:
     #   extends:
     #     file: ./oracle/docker-compose.yml

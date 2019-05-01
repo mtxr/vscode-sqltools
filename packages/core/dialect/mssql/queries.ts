@@ -26,7 +26,7 @@ SELECT
       END
     ),
     '/',
-    C.TABLE_name,
+    C.TABLE_NAME,
     '/',
     C.COLUMN_NAME
   ) AS tree

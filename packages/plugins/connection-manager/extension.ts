@@ -228,8 +228,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     const conn = await this._connect();
-
-    return this._pickTable(conn, 'label');
+    return this._pickTable(conn, 'value');
   }
 
   private _openResultsWebview() {
@@ -248,11 +247,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
     return quickPick(tables
       .map((table) => {
-        return { label: table.name } as QuickPickItem;
+        const prefixedTableName = getTableName(conn.dialect, table);
+        const prefixes  = prefixedTableName.split('.');
+
+        return <QuickPickItem>{
+          label: table.name,
+          value: getTableName(conn.dialect, table),
+          description: `${table.numberOfColumns} cols`,
+          detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
+        };
       }), prop, {
         matchOnDescription: true,
         matchOnDetail: true,
-
         title: `Tables in ${conn.database}`,
       });
   }

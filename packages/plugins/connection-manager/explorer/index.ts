@@ -141,7 +141,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return safeGet(this.tree, [...k].join('.tree.'));
   }
 
-  private getOrCreatGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
+  private getOrCreateGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
     let k = path.split('/');
     const hierachyNames = DialectHierarchyChildNames[dialect] || [];
     if (ignoreLasts > 0) {
@@ -168,14 +168,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDialect.MSSQL:
         case DatabaseDialect.OracleDB:
           tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
-            this.getOrCreatGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.extension.context, item));
+            this.getOrCreateGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.extension.context, item));
           });
           break;
         default:
           // old style. Compatibily
           tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
             const key = item.isView ? 'views' : 'tables';
-            this.getOrCreatGroups(connId, dialect, key).addItem(new SidebarTableOrView(this.extension.context, item));
+            this.getOrCreateGroups(connId, dialect, key).addItem(new SidebarTableOrView(this.extension.context, item));
           });
           break;
       }
@@ -196,14 +196,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDialect.MSSQL:
         case DatabaseDialect.OracleDB:
           columns.forEach((column) => {
-            this.getOrCreatGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.extension.context, column));
+            this.getOrCreateGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.extension.context, column));
           });
           break;
         default:
           // old style. Compatibily
           columns.forEach((column) => {
             const key = this.getGroup(connId, 'views', column.tableName) ? 'views' : 'tables';
-            this.getOrCreatGroups(connId, dialect, `${key}/${column.tableName}`).addItem(new SidebarColumn(this.extension.context, column));
+            this.getOrCreateGroups(connId, dialect, `${key}/${column.tableName}`).addItem(new SidebarColumn(this.extension.context, column));
           });
           break;
       }
@@ -220,13 +220,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         // case DatabaseDialect.SQLite:
         // case DatabaseDialect.MSSQL:
           functions.forEach((fn) => {
-            this.getOrCreatGroups(connId, dialect, fn.tree, 1).addItem(new SidebarFunction(this.extension.context, fn));
+            this.getOrCreateGroups(connId, dialect, fn.tree, 1).addItem(new SidebarFunction(this.extension.context, fn));
           });
           break;
         default:
           // old style. Compatibily
           functions.forEach((fn) => {
-            this.getOrCreatGroups(connId, dialect, `functions/${fn.name}`).addItem(new SidebarFunction(this.extension.context, fn));
+            this.getOrCreateGroups(connId, dialect, `functions/${fn.name}`).addItem(new SidebarFunction(this.extension.context, fn));
           });
           break;
       }

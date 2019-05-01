@@ -5,7 +5,14 @@
 - Node.js 6 or newer
 - Enable `sqltools.useNodeRuntime` setting, can be `true` or a path to the node runtime.
 
-> Extension automatically installs SQLite driver (sqlite@v4.0.6)
+```json
+// settings.json example
+{
+    "sqltools.useNodeRuntime": true
+}
+```
+
+> Extension automatically asks to install the SQLite driver (sqlite@v4.0.6)
 
 More information you cand find in [node-sqlite3](https://github.com/mapbox/node-sqlite3) repo: https://github.com/mapbox/node-sqlite3.
 

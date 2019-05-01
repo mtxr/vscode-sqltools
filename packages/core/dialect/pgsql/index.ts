@@ -1,4 +1,4 @@
-import { Pool } from 'pg';
+import { Pool, PoolConfig } from 'pg';
 import Queries from './queries';
 import { ConnectionDialect, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
@@ -14,15 +14,28 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
 
     const { ssl } = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
 
-    const pool = new Pool({
-      database: this.credentials.database,
-      host: this.credentials.server,
-      password: this.credentials.password,
-      port: this.credentials.port,
+    let poolConfig: PoolConfig = {
       statement_timeout: this.credentials.connectionTimeout * 1000,
-      user: this.credentials.username,
       ssl,
-    });
+    };
+
+    if (this.credentials.connectString) {
+      poolConfig = {
+        ...poolConfig,
+        connectionString: this.credentials.connectString
+      }
+    } else {
+      poolConfig = {
+        ...poolConfig,
+        database: this.credentials.database,
+        host: this.credentials.server,
+        password: this.credentials.password,
+        port: this.credentials.port,
+        user: this.credentials.username,
+      };
+    }
+
+    const pool = new Pool(poolConfig);
     return pool.connect()
       .then(cli => {
         cli.release();

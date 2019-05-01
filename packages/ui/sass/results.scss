@@ -5,14 +5,9 @@
 $transition: all .3s ease 0s;
 
 body {
-  font-size: $fontSize0;
-  font-size: $fontSize1;
   font-size: $fontSize;
-  font-family: $fontFamily0;
-  font-family: $fontFamily1;
   font-family: $fontFamily;
   color: $color;
-  background: $backgroundColor0;
   background: $backgroundColor;
   @include full-screen();
 
@@ -30,8 +25,8 @@ pre {
   flex-direction: column;
 }
 .query-results-container, .query-results-container * {
-  font-size: var(--sqltools-font-size);
-  font-family: var(--sqltools-font-family);
+  font-size: var(--sqltools-font-size, $fontSize);
+  font-family: var(--sqltools-font-family, $fontFamily);
 }
 
 body,
@@ -71,7 +66,6 @@ body, #root {
   }
   .query-extras {
     width: 100%;
-    background: $backgroundColor0;
     background: $backgroundColor;
     flex-grow: 0;
   }
@@ -208,7 +202,6 @@ body.vscode-dark {
   .ReactTable .rt-thead.-filters select,
   .ReactTable .-pagination input,
   .ReactTable .-pagination select {
-    background: $backgroundColor0;
     background: $backgroundColor;
     color: $color;
     border-color: $darkThemeWhite2 !important;
