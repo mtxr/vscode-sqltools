@@ -114,7 +114,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     conn: ConnectionInterface;
     password?: string;
   }): Promise<ConnectionInterface> => {
-    if (!req.conn) {
+    if (!req || !req.conn) {
       return undefined;
     }
     let c = this.getConnectionInstance(req.conn) || new Connection(req.conn, this.server.telemetry);
@@ -128,12 +128,19 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         return c.serialize();
       })
       .catch(e => {
+        e.meta = e.meta || {};
+        e.meta = {
+          dialect: req.conn.dialect,
+        };
         if (e.data && e.data.notification) {
-          if (DependencyManager.runningJobs.includes(e.data.args.conn.dialect)) {
+          if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
             return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
           }
           return void this.server.sendNotification(e.data.notification, e.data.args);
         }
+
+        this.server.telemetry.registerException(e, e.meta);
+
         throw e;
       });
   };

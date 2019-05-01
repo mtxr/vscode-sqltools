@@ -7,7 +7,7 @@ namespace ErrorHandler {
     return async (error: any): Promise<void> => {
       if (error) {
         if (error.dontNotify || (error.data && error.data.dontNotify)) return;
-        telemetry.registerException(error);
+        telemetry.registerException(error, error.meta);
         message = `${message} ${error.message ? error.message : error.toString()}`;
       }
       if (typeof yesCallbackOrCommand === 'undefined') {
