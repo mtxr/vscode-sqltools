@@ -32,7 +32,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
       return this.ext_executeQuery(query);
     } catch (e) {
-      this.errorHandler('Error running query.', e, this.ext_showOutputChannel);
+      this.errorHandler('Error running query.', e);
     }
   }
 
@@ -50,7 +50,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this.resultsWebview.updateResults(payload);
 
     } catch (e) {
-      this.errorHandler('Error while showing table records', e, this.ext_showOutputChannel);
+      this.errorHandler('Error while showing table records', e);
     }
   }
 
@@ -61,7 +61,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.updateResults(payload);
     } catch (e) {
-      this.errorHandler('Error while describing table records', e, this.ext_showOutputChannel);
+      this.errorHandler('Error while describing table records', e);
     }
   }
 
@@ -111,7 +111,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this.resultsWebview.updateResults(payload);
       return payload;
     } catch (e) {
-      this.errorHandler('Error fetching records.', e, this.ext_showOutputChannel);
+      this.errorHandler('Error fetching records.', e);
     }
   }
 

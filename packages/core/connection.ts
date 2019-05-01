@@ -5,6 +5,7 @@ import {
   ConnectionInterface,
 } from './interface';
 import SQLTools, { DatabaseInterface } from './plugin-api';
+import { decorateException } from './utils/errors';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
@@ -12,8 +13,13 @@ export default class Connection {
   private functions: DatabaseInterface.Function[] = [];
   private connected: boolean = false;
   private conn: ConnectionDialect;
-  constructor(credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
-    this.conn = new Dialects[credentials.dialect](credentials);
+  constructor(private credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
+    this.conn = new Dialects[credentials.dialect](this.credentials);
+  }
+
+  private decorateException = (e: Error) => {
+    e = decorateException(e, { conn: this.credentials });
+    return Promise.reject(e);
   }
 
   public needsPassword() {
@@ -22,7 +28,7 @@ export default class Connection {
 
   public async connect() {
     if (typeof this.conn.testConnection === 'function')
-      await this.conn.testConnection()
+      await this.conn.testConnection().catch(this.decorateException);
     else
       await this.query('SELECT 1;', true);
     this.connected = true;
@@ -46,7 +52,7 @@ export default class Connection {
   }
 
   public open() {
-    return this.conn.open();
+    return this.conn.open().catch(this.decorateException);
   }
 
   public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {
@@ -56,7 +62,7 @@ export default class Connection {
     return this.conn.getTables().then((tables: DatabaseInterface.Table[]) => {
       this.tables = tables;
       return this.tables;
-    });
+    }).catch(this.decorateException);
   }
 
   public getColumns(cached: boolean = false): Promise<DatabaseInterface.TableColumn[]> {
@@ -66,7 +72,7 @@ export default class Connection {
     return this.conn.getColumns().then((columns: DatabaseInterface.TableColumn[]) => {
       this.columns = columns;
       return this.columns;
-    });
+    }).catch(this.decorateException);
   }
 
   public getFunctions(cached: boolean = false): Promise<DatabaseInterface.Function[]> {
@@ -76,11 +82,11 @@ export default class Connection {
     return this.conn.getFunctions().then((functions: DatabaseInterface.Function[]) => {
       this.functions = functions;
       return this.functions;
-    });
+    }).catch(this.decorateException);
   }
 
   public async describeTable(tableName: string) {
-    const info = await this.conn.describeTable(tableName);
+    const info = await this.conn.describeTable(tableName).catch(this.decorateException);
 
     if (info[0]) {
       info[0].label = `Table ${tableName}`;
@@ -89,7 +95,7 @@ export default class Connection {
   }
   public async showRecords(tableName: string, globalLimit: number) {
     const limit = this.conn.credentials.previewLimit || globalLimit || 50;
-    const records = await this.conn.showRecords(tableName, limit);
+    const records = await this.conn.showRecords(tableName, limit).catch(this.decorateException);
 
     if (records[0]) {
       records[0].label = `Showing ${Math.min(limit, records[0].results.length || 0)} ${tableName} records`;
@@ -99,6 +105,7 @@ export default class Connection {
 
   public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
     return this.conn.query(query)
+      .catch(this.decorateException)
       .catch((e) => {
         if (throwIfError) throw e;
         this.telemetry.registerException(e, { dialect: this.conn.credentials.dialect });

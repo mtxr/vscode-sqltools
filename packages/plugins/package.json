@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/plugins",
-  "version": "0.17.17",
+  "version": "0.17.18",
   "description": "SQLTools Plugins",
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "GPL-3.0",

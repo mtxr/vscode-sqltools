@@ -109,9 +109,9 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   }
 
   @runIfPropIsDefined('client')
-  public registerException(error: Error, meta: { [key: string]: any } = {}) {
+  public registerException(error: Error, data: { [key: string]: any } = {}) {
     if (!error) return;
-    this.sendException(error, meta);
+    this.sendException(error, { ...((<any>error).data || {}), ...data });
   }
 
   @runIfPropIsDefined('client')

@@ -75,7 +75,7 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
       if (!item) return;
       await commands.executeCommand(`${EXT_NAME}.executeQuery`, item.query);
     } catch (e) {
-      this.errorHandler('Error while running query.', `${EXT_NAME}.showOutputChannel`, e);
+      this.errorHandler('Error while running query.', e);
     }
   }
 

@@ -150,10 +150,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
   private async registerBaseNotifications() {
     await this.client.onReady();
     const onError = ({ err = '', errMessage, message }: Partial<{ err: any, [id: string]: any }>) => {
-      ErrorHandler.create(
-        message,
-        () => this.client.outputChannel.show(),
-      )((errMessage || err.message || err).toString());
+      ErrorHandler.create(message)((errMessage || err.message || err).toString());
     };
     this.client.onNotification(
       'serverError', // @TODO: constant

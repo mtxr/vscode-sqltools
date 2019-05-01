@@ -2,6 +2,12 @@
 
 ## v0.17
 
+### v0.17.18
+
+* **Enhancements**
+  * Error messages now has an option for quick opening docs.
+  * Font fallbacks. Issue [#200](https://github.com/mtxr/vscode-sqltools/issues/200)
+
 ### v0.17.17
 
 * **NEW** 🎉

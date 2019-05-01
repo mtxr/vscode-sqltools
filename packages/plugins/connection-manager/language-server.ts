@@ -9,6 +9,7 @@ import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetCon
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
+import { decorateException } from '@sqltools/core/utils/errors';
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
@@ -128,10 +129,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         return c.serialize();
       })
       .catch(e => {
-        e.meta = e.meta || {};
-        e.meta = {
-          dialect: req.conn.dialect,
-        };
+        e = decorateException(e, { conn: req.conn });
         if (e.data && e.data.notification) {
           if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
             return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
@@ -139,7 +137,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
           return void this.server.sendNotification(e.data.notification, e.data.args);
         }
 
-        this.server.telemetry.registerException(e, e.meta);
+        this.server.telemetry.registerException(e);
 
         throw e;
       });
