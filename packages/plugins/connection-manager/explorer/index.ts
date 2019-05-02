@@ -1,5 +1,5 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAME, TREE_SEP } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionId, asArray } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem, SidebarFunction } from '@sqltools/plugins/connection-manager/explorer/tree-items';
@@ -142,7 +142,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getOrCreateGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
-    let k = path.split('/');
+    let k = path.split(TREE_SEP);
     const hierachyNames = DialectHierarchyChildNames[dialect] || [];
     if (ignoreLasts > 0) {
       k = k.slice(0, k.length - ignoreLasts);
@@ -156,7 +156,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       tree.addItem(new SidebarResourceGroup(g, hierachyNames[i]));
       created.push(g);
     });
-    return tree.tree[created.pop()];
+
+    const group = tree.tree[created.pop()];
+
+    if (!group) {
+      throw new Error(`Can't create tree '${path}' and dialect '${dialect}'`);
+    }
+
+    return group;
   }
 
   private insertTables(connId: string, dialect: DatabaseDialect, tables: DatabaseInterface.Table[]) {

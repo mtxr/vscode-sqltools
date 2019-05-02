@@ -1,9 +1,12 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE table_name = ':table'
-        AND TABLE_SCHEMA NOT IN ('pg_catalog', 'information_schema')`,
+      WHERE
+        TABLE_NAME = ':table'
+        AND TABLE_CATALOG = ':catalog'
+        AND TABLE_SCHEMA = ':schema'`,
   fetchColumns: `
 SELECT
   C.TABLE_NAME AS tableName,
@@ -16,12 +19,12 @@ SELECT
   C.COLUMN_DEFAULT AS defaultValue,
   C.IS_NULLABLE AS isNullable,
   TC.constraint_type AS keytype,
-  C.TABLE_CATALOG || '/' || C.TABLE_SCHEMA  || '/' || (
+  C.TABLE_CATALOG || '${TREE_SEP}' || C.TABLE_SCHEMA  || '${TREE_SEP}' || (
     CASE
       WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
       ELSE 'tables'
     END
-  ) || '/' || C.TABLE_name || '/' || C.COLUMN_NAME AS tree
+  ) || '${TREE_SEP}' || C.TABLE_name || '${TREE_SEP}' || C.COLUMN_NAME AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS C
   LEFT JOIN information_schema.key_column_usage KC ON KC.table_name = C.table_name
@@ -53,12 +56,12 @@ SELECT
   ) AS isView,
   T.TABLE_CATALOG AS dbName,
   COUNT(1) AS numberOfColumns,
-  T.TABLE_CATALOG || '/' || T.TABLE_SCHEMA || '/' || (
+  T.TABLE_CATALOG || '${TREE_SEP}' || T.TABLE_SCHEMA || '${TREE_SEP}' || (
     CASE
       WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
       ELSE 'tables'
     END
-  ) ||  '/' || T.TABLE_name AS tree
+  ) ||  '${TREE_SEP}' || T.TABLE_name AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS AS C
   JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
@@ -81,7 +84,7 @@ SELECT
   quote_ident(n.nspname) || '.' || quote_ident(f.proname) || '(' || pg_get_function_identity_arguments(f.oid) || ')' AS signature,
   pg_get_function_result(f.oid) AS "resultType",
   pg_get_function_arguments(f.oid) AS args,
-  current_database() || '/' || n.nspname || '/procedures/' || f.proname AS tree,
+  current_database() || '${TREE_SEP}' || n.nspname || '/procedures/' || f.proname AS tree,
   f.prosrc AS source
 FROM
   pg_catalog.pg_proc AS f

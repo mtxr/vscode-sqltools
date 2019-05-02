@@ -1,4 +1,5 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: 'SP_COLUMNS :table',
@@ -16,18 +17,18 @@ SELECT
   TC.CONSTRAINT_TYPE as constraintType,
   CONCAT(
     C.TABLE_CATALOG,
-    '/',
+  '${TREE_SEP}',
     C.TABLE_SCHEMA,
-    '/',
+  '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+  '${TREE_SEP}',
     C.TABLE_NAME,
-    '/',
+  '${TREE_SEP}',
     C.COLUMN_NAME
   ) AS tree
 FROM
@@ -68,16 +69,16 @@ SELECT
   COUNT(1) AS numberOfColumns,
   CONCAT(
     T.TABLE_CATALOG,
-    '/',
+  '${TREE_SEP}',
     T.TABLE_SCHEMA,
-    '/',
+  '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+  '${TREE_SEP}',
     T.TABLE_name
   ) AS tree
 FROM

@@ -1,4 +1,5 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: 'DESCRIBE :table',
@@ -28,16 +29,16 @@ SELECT
   ) as isFk,
   CONCAT(
     C.TABLE_SCHEMA,
-    '/',
+    '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+    '${TREE_SEP}',
     C.TABLE_name,
-    '/',
+    '${TREE_SEP}',
     C.COLUMN_NAME
   ) AS tree
 FROM
@@ -73,14 +74,14 @@ SELECT
   COUNT(1) AS numberOfColumns,
   CONCAT(
     T.TABLE_SCHEMA,
-    '/',
+    '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+    '${TREE_SEP}',
     T.TABLE_NAME
   ) AS tree
 FROM

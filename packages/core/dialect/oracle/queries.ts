@@ -1,4 +1,5 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: `select * from all_tab_columns
@@ -15,12 +16,12 @@ export default {
   c.data_default as defaultvalue,
   c.nullable as isnullable,
   cols.constraint_type AS keytype,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || C.owner  || '/' || (
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || C.owner  || '${TREE_SEP}' || (
     CASE
       WHEN v.TYPE = 'V' THEN 'views'
       ELSE 'tables'
     END
-  ) || '/' || C.TABLE_name || '/' || C.COLUMN_NAME AS tree
+  ) || '${TREE_SEP}' || C.TABLE_name || '${TREE_SEP}' || C.COLUMN_NAME AS tree
   from all_tab_columns c
   join (
   select table_name, owner, 'T' as type from all_tables
@@ -47,12 +48,12 @@ export default {
   END AS isView,
   SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
   num_rows AS numberOfColumns,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || owner  || '/' || (
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || owner  || '${TREE_SEP}' || (
     CASE
       WHEN TYPE = 'V' THEN 'views'
       ELSE 'tables'
     END
-  ) || '/' || table_name AS tree
+  ) || '${TREE_SEP}' || table_name AS tree
   from (
   select t.table_name, t.owner, user, 'T' as type, count(1) as num_rows
   from all_tables t
