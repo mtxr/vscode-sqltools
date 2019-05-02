@@ -30,7 +30,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log('Message received', {action, payload});
+    console.log(`Message received: ${action}`, ...[ payload ]);
     switch (action) {
       case 'queryResults':
         const results: DatabaseInterface.QueryResults[] = payload;
