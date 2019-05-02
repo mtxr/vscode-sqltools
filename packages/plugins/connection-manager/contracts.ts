@@ -1,4 +1,4 @@
-import { RequestType, RequestType0 } from 'vscode-languageserver';
+import { RequestType, RequestType0 } from 'vscode-jsonrpc';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 

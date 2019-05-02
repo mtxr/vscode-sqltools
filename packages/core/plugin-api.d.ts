@@ -1,5 +1,6 @@
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
-import { IConnection, RequestType, RequestType0, TextDocuments } from 'vscode-languageserver';
+import { IConnection, TextDocuments } from 'vscode-languageserver';
+import { RequestType, RequestType0 } from 'vscode-jsonrpc';
 import { ExtensionContext } from 'vscode';
 import { Store } from 'redux';
 import { Contracts } from 'applicationinsights';

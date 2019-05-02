@@ -208,6 +208,11 @@
                 }
             },
             {
+                "title": "Edit connection",
+                "command": "SQLTools.openEditConnectionScreen",
+                "category": "SQLTools Management"
+            },
+            {
                 "title": "Add new connection from arg",
                 "command": "SQLTools.addConnection",
                 "category": "SQLTools internal"
@@ -755,6 +760,11 @@
                     "command": "SQLTools.closeConnection",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connectedConnection",
                     "group": "navigation@0"
+                },
+                {
+                    "command": "SQLTools.openEditConnectionScreen",
+                    "when": "view == SQLTools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.deleteConnection",
