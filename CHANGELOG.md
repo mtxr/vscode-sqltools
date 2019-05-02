@@ -7,6 +7,7 @@
 * **Enhancements**
   * Error messages now has an option for quick opening docs.
   * Font fallbacks. Issue [#200](https://github.com/mtxr/vscode-sqltools/issues/200)
+  * Changed tree separators for explorer.
 
 ### v0.17.17
 
