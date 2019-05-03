@@ -17,6 +17,7 @@ export function decorateException(e: Error & { code?: number; data?: { [key: str
       mssqlOptions: conn.mssqlOptions,
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,
+      oracleOptions: JSON.stringify(conn.oracleOptions),
     };
   }
   return new DecoratedException<typeof e.data>(e, data);

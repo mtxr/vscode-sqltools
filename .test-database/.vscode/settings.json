@@ -90,7 +90,12 @@
       "password": "root",
       "port": 1521,
       "username": "root",
-      "server": "localhost"
+      "server": "localhost",
+      "oracleOptions": {        
+        "poolMax": 1,
+        "poolMin": 1,
+        "poolIncrement": 0
+      }
     },
     {
       "askForPassword": false,
