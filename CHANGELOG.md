@@ -46,7 +46,7 @@
 ### v0.17.13
 
 * **NEW** 🎉
-  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
+  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypearce](https://github.com/mickeypearce)
 
 * **Enhancements**
   * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
