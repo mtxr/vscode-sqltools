@@ -9,6 +9,7 @@ export function decorateException(e: Error & { code?: number; data?: { [key: str
       mssqlOptions: conn.mssqlOptions,
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,
+      oracleOptions: JSON.stringify(conn.oracleOptions),
     };
   }
   e = new ResponseError<typeof e.data>(e.code || -1, e.message, { ...e.data, ...data });
