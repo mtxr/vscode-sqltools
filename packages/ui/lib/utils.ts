@@ -3,7 +3,7 @@ export interface ValidationFunction {
   errorMessage?: string;
 }
 export function int(v) {
-  return notEmpty(v.toString()) ? parseInt(v, 10) : null;
+  return notEmpty(v) ? parseInt(v, 10) : null;
 }
 export function bool(v) {
   v = v.toString().toLowerCase();
