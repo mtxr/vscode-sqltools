@@ -91,7 +91,7 @@
       "port": 1521,
       "username": "root",
       "server": "localhost",
-      "oracleOptions": {        
+      "oracleOptions": {
         "poolMax": 1,
         "poolMin": 1,
         "poolIncrement": 0
