@@ -21,7 +21,7 @@ namespace ErrorHandler {
 
   async function output(message: string, error: ResponseError<any>) {
     const options = ['View Logs'];
-    if (error.data.dialect) {
+    if (error.data && error.data.dialect) {
       options.push('Help!');
     }
 
