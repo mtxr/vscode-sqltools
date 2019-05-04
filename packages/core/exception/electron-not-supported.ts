@@ -1,5 +1,5 @@
-import { ResponseError } from 'vscode-jsonrpc';
 import { ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { ResponseError } from 'vscode-languageserver';
 
 
 interface NotifyResponseErrorData {

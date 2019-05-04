@@ -1,5 +1,5 @@
 import { ConnectionInterface } from '../interface';
-import { ResponseError } from 'vscode-jsonrpc';
+import { ResponseError } from 'vscode-languageserver';
 
 class DecoratedException<A> extends ResponseError<A> {
   constructor(error: Error & { code?: number; data?: A }, data: A) {
@@ -17,7 +17,7 @@ export function decorateException(e: Error & { code?: number; data?: { [key: str
       mssqlOptions: conn.mssqlOptions,
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,
-      oracleOptions: JSON.stringify(conn.oracleOptions),
+      oracleOptions: conn.oracleOptions,
     };
   }
   return new DecoratedException<typeof e.data>(e, data);
