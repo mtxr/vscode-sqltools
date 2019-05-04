@@ -1,4 +1,4 @@
-import { ResponseError } from 'vscode-jsonrpc';
+import { ResponseError } from 'vscode-languageserver';
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { ConnectionInterface } from '../interface';
 
