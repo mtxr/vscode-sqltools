@@ -53,6 +53,10 @@ body, #root {
   min-height: 0;
   flex-direction: column;
   background: $lightThemeGray1 !important;
+  .syntax {
+    padding: 3px;
+    cursor: pointer;
+  }
   .results-table {
     overflow: hidden;
     height: 100%;
@@ -315,9 +319,6 @@ div mark {
   justify-content: space-around;
   display: flex;
   font-size: 0.8em;
-  > small {
-    align-self: center;
-  }
 }
 
 .text-right {
@@ -378,10 +379,14 @@ div mark {
 }
 
 .active-row {
-  background: var(--vscode-editor-inactiveSelectionBackground) !important;
+  background: var(--vscode-editor-selectionBackground) !important;
 }
 .active-cell {
   background: var(--vscode-editor-selectionHighlightBackground) !important;
+  .syntax pre {
+    text-overflow: initial;
+    word-wrap: break-word;
+  }
 }
 
 .ReactTable .rt-table {

@@ -1,6 +1,5 @@
 import React, { UIEventHandler, HTMLAttributes } from 'react';
 import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo, Filter } from 'react-table';
-import ReactDOM from 'react-dom';
 import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
@@ -136,7 +135,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         if (v === false) return <span>FALSE</span>;
         if (typeof v === 'object' || Array.isArray(v)) {
           return (
-            <div className="syntax json copy-allowed">
+            <div className="syntax json copy-allowed" data-value={v === null ? 'null' : JSON.stringify(v, null, 2)} data-col={r.column.id} data-index={r.index}>
               <pre>{JSON.stringify(v)}</pre>
             </div>
           );
@@ -176,14 +175,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     });
   }
 
-  highlightClickedRow (e, cb = (() => void 0)) {
-    let node = ReactDOM.findDOMNode(e.target) as Element & HTMLElement;
-    let i = 0;
-    while (i < 3) {
-      if (!node) return true;
-      if (node.classList.contains('copy-allowed')) break;
-      i++;
-      node = node.parentNode as Element & HTMLElement;
+  highlightClickedRow (e: React.MouseEvent<HTMLElement>, cb = (() => void 0)) {
+    let node = e.target as HTMLElement;
+    if (!node.matches('.copy-allowed')) {
+      node = node.closest('.copy-allowed') as HTMLElement;
     }
 
     const { value, index, col } = node.dataset;
@@ -205,8 +200,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     clipboardInsert(value);
   }
 
-  onTableClick = (e = undefined) => {
-
+  onTableClick = (e: React.MouseEvent<HTMLElement> = undefined) => {
     if (this.state.contextMenu.open) {
       const { clickedData, contextMenu } = ResultsTable.initialState;
       this.setState({
