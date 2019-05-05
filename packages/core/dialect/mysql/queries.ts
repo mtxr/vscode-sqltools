@@ -119,7 +119,9 @@ SELECT
   f.data_type AS resultType,
   CONCAT(
     f.routine_schema,
-    '/functions/',
+    '${TREE_SEP}',
+    'functions',
+    '${TREE_SEP}',
     f.specific_name
   ) AS tree,
   f.routine_definition AS source
