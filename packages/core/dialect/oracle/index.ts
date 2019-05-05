@@ -65,6 +65,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
       password: this.credentials.password,
       user: this.credentials.username,
       poolAlias: this.poolName,
+      ...this.credentials.oracleOptions
     });
     this.registerPool();
     return this.connection;

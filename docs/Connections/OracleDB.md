@@ -40,10 +40,10 @@ Connection example:
 
 ### 2.2 Alternative Connection Strings
 
-ConnectionString maps directly from `database` property (If you omit `server` and `port`):
+ConnectionString maps from `connectString` property:
 
 ```
-"connectionString" = database
+"connectionString" = connectString
 ```
 
 For example if you have `tnsnames.ora` file with service name defined or any other alternative connection strings:
@@ -56,9 +56,32 @@ For example if you have `tnsnames.ora` file with service name defined or any oth
   "password": "welcome",
   "askForPassword": false,
   "connectionTimeout": 15,
-  "database": "oraclpdb"
+  "connectString": "oraclpdb"
 }
 ```
+
+If you omit `server` and `port` properties, `database` can be used as an alias for `connectString`.  
+
+### 2.3 Specific Options
+
+Oracle Connection Pool specific configurations can be passed using `oracleOptions` settings:
+
+```json
+{
+  "dialect": "OracleDB",
+  "name": "oracledb2",
+  "username": "hr",
+  "password": "welcome",  
+  "connectString": "hostname:port/service_name",
+  "oracleOptions": {
+    "poolMax": 1,
+    "poolMin": 1,
+    "poolIncrement": 0
+  }
+}
+```
+
+See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrs for additonal information.
 
 ## 3. Autocompletion
 

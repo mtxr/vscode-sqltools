@@ -1,7 +1,7 @@
 .syntax {
-  background: #111;
+  background: var(--vscode-editor-background, #eaeaea);
   border-radius: $radius;
-  padding: 10px;
+  padding: 4px;
   &, * {
     line-height: 1.2;
     white-space: pre-wrap;
@@ -21,6 +21,11 @@
       color: #2196f3;
     }
   }
+
+  pre {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
 }
 
 .btn.copy-code {
@@ -33,4 +38,8 @@
   font-size: 0.6em;
   padding: 2px 4px;
   cursor: copy;
+}
+
+body.vscode-dark .syntax {
+  background: var(--vscode-editor-background, #222);
 }

@@ -1,5 +1,13 @@
 import { ConnectionInterface } from '../interface';
-import { ResponseError } from 'vscode-jsonrpc';
+import { ResponseError } from 'vscode-languageserver';
+
+class DecoratedException<A> extends ResponseError<A> {
+  constructor(error: Error & { code?: number; data?: A }, data: A) {
+    super(error.code || -1, error.message, { ...error.data, ...data });
+    this.name = error.name || 'DecoratedException';
+    this.stack = error.stack;
+  }
+}
 
 export function decorateException(e: Error & { code?: number; data?: { [key: string]: any } }, { conn }: { conn?: ConnectionInterface } = {}) {
   let data: { [key: string]: any } = {};
@@ -9,9 +17,8 @@ export function decorateException(e: Error & { code?: number; data?: { [key: str
       mssqlOptions: conn.mssqlOptions,
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,
+      oracleOptions: conn.oracleOptions,
     };
   }
-  e = new ResponseError<typeof e.data>(e.code || -1, e.message, { ...e.data, ...data });
-
-  return e;
+  return new DecoratedException<typeof e.data>(e, data);
 }

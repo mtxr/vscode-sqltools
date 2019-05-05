@@ -1,6 +1,5 @@
-import React from 'react';
+import React, { UIEventHandler, HTMLAttributes } from 'react';
 import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo, Filter } from 'react-table';
-import ReactDOM from 'react-dom';
 import Menu from './../../components/Menu';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
@@ -42,6 +41,28 @@ const FilterComponent = ({ filter = { value: '' }, column, onChange }) => {
   );
 };
 
+const TbodyComponent = React.forwardRef<any, { onScroll: UIEventHandler<HTMLDivElement> } & HTMLAttributes<any>>(({ onScroll, ...props }, ref) => {
+  for (let i = 0; i < props.children[0].length; i++) {
+    props.children[0][i] = React.cloneElement(props.children[0][i], {
+      minWidth: props.style.minWidth
+    });
+  }
+
+  return <div className="rt-tbody" id="tbody" onScroll={onScroll} ref={ref}>{props.children}</div>;
+});
+
+const TrGroupComponent = props => {
+  return (
+    <div
+      className="rt-tr-group"
+      role="rowgroup"
+      style={{ minWidth: props.minWidth }}
+    >
+      {props.children}
+    </div>
+  );
+};
+
 // @TODO: use the real column types here instead of a sample;
 const getSizeForItem = (colname: string, sample: any): Column => {
   const props: Column = {
@@ -73,6 +94,7 @@ interface ResultsTableProps {
   connId: string;
 }
 interface ResultsTableState {
+  page: number,
   filtered: { [id: string]: Filter & { regex: RegExp | string } };
   clickedData: {
     value: any,
@@ -88,6 +110,7 @@ interface ResultsTableState {
 
 export default class ResultsTable extends React.PureComponent<ResultsTableProps, ResultsTableState> {
   static initialState: ResultsTableState = {
+    page: 0,
     filtered: {},
     clickedData: {
       value: undefined,
@@ -112,7 +135,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
         if (v === false) return <span>FALSE</span>;
         if (typeof v === 'object' || Array.isArray(v)) {
           return (
-            <div className="syntax json copy-allowed">
+            <div className="syntax json copy-allowed" data-value={v === null ? 'null' : JSON.stringify(v, null, 2)} data-col={r.column.id} data-index={r.index}>
               <pre>{JSON.stringify(v)}</pre>
             </div>
           );
@@ -152,14 +175,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     });
   }
 
-  highlightClickedRow (e, cb = (() => void 0)) {
-    let node = ReactDOM.findDOMNode(e.target) as Element & HTMLElement;
-    let i = 0;
-    while (i < 3) {
-      if (!node) return true;
-      if (node.classList.contains('copy-allowed')) break;
-      i++;
-      node = node.parentNode as Element & HTMLElement;
+  highlightClickedRow (e: React.MouseEvent<HTMLElement>, cb = (() => void 0)) {
+    let node = e.target as HTMLElement;
+    if (!node.matches('.copy-allowed')) {
+      node = node.closest('.copy-allowed') as HTMLElement;
     }
 
     const { value, index, col } = node.dataset;
@@ -181,8 +200,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     clipboardInsert(value);
   }
 
-  onTableClick = (e = undefined) => {
-
+  onTableClick = (e: React.MouseEvent<HTMLElement> = undefined) => {
     if (this.state.contextMenu.open) {
       const { clickedData, contextMenu } = ResultsTable.initialState;
       this.setState({
@@ -234,6 +252,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       filtered
     }, () => cb ? cb(value) : void 0);
   }
+
+  onPageChange = (page: number) => this.setState({ page });
 
   onMenuSelect = (choice: string) => {
     const { clickedData } = this.state;
@@ -308,51 +328,39 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
     this.onTableClick();
   }
 
-  handleScroll(event) {
-    let headers = document.getElementsByClassName("rt-thead");
-    for (let i = 0; i < headers.length; i++) {
-      headers[i].scrollLeft = event.target.scrollLeft;
-    }
+  handleScroll = () => {
+    const tbody = this.tbodyRef && this.tbodyRef.current;
+    if (!tbody) return;
+    let headers = document.querySelectorAll('.rt-thead') || [];
+    headers.forEach(header => {
+      header.scrollLeft = tbody.scrollLeft
+    });
   }
 
-  _tBodyComponent: Element = null;
-
-  componentDidMount() {
-    try {
-      this.componentWillUnmount();
-    } catch (error) { };
-    setTimeout(() => {
-      this._tBodyComponent = document.getElementsByClassName("rt-tbody")[0];
-      this._tBodyComponent && this._tBodyComponent.addEventListener("scroll", this.handleScroll);
-    }, 300);
-  }
-
-  componentWillUnmount() {
-    this._tBodyComponent && this._tBodyComponent.removeEventListener("scroll", this.handleScroll);
-  }
+  tbodyRef = React.createRef<HTMLDivElement>();
 
   getSnapshotBeforeUpdate() {
     try {
-      if (document.getElementsByClassName("rt-tbody")[0]) {
-        const { scrollHeight, scrollLeft, scrollTop, scrollWidth } = document.getElementsByClassName("rt-tbody")[0];
+      const tbody = this.tbodyRef && this.tbodyRef.current;
+      if (tbody) {
+        const { scrollHeight, scrollLeft, scrollTop, scrollWidth } = tbody;
         return {
           scrollHeight, scrollLeft, scrollTop, scrollWidth
         };
       }
-    } catch (e) {
-      return null;
-    }
+    } catch (e) { }
     return null;
   }
 
   componentDidUpdate(_, __, snapshot) {
-    if (
-        snapshot !== null
-        && document.getElementsByClassName("rt-tbody")[0]
-      ) {
-      document.getElementsByClassName("rt-tbody")[0].scrollLeft = snapshot.scrollLeft;
-      document.getElementsByClassName("rt-tbody")[0].scrollTop = snapshot.scrollTop;
-    }
+    if (!snapshot) return;
+
+    const tbody = this.tbodyRef && this.tbodyRef.current;
+
+    if (!tbody) return;
+
+    tbody.scrollLeft = snapshot.scrollLeft;
+    tbody.scrollTop = snapshot.scrollTop;
   }
 
   render() {
@@ -362,27 +370,6 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       delete cols[0].width;
     }
 
-    const TbodyComponent = props => {
-      for (let i = 0; i < props.children[0].length; i++) {
-        props.children[0][i] = React.cloneElement(props.children[0][i], {
-          minWidth: props.style.minWidth
-        });
-      }
-
-      return <div className="rt-tbody">{props.children}</div>;
-    };
-
-    const TrGroupComponent = props => {
-      return (
-        <div
-          className="rt-tr-group"
-          role="rowgroup"
-          style={{ minWidth: props.minWidth }}
-        >
-          {props.children}
-        </div>
-      );
-    };
     return (
       <div onContextMenu={this.openContextMenu} onClick={this.onTableClick} className="react-table-clickable">
         <ReactTable
@@ -402,6 +389,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
               return { className: ' active-row' };
             return {};
           }}
+          onPageChange={this.onPageChange}
+          page={this.state.page}
           getTdProps={(_, rowInfo: RowInfo, column: Column) => {
             if (!rowInfo || !column) return {};
             try {
@@ -434,7 +423,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
             return position !== -1;
           }}
           className="-striped -highlight"
-          TbodyComponent={TbodyComponent}
+          TbodyComponent={(props) => <TbodyComponent {...props} onScroll={this.handleScroll} ref={this.tbodyRef} />}
           TrGroupComponent={TrGroupComponent}
           style={{
             width: '100%',
