@@ -131,8 +131,19 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       });
   }
 
-  public getFunctions() {
-    // @TODO implement functions listing for MSSQL
-    return Promise.resolve([]);
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    return this.query(this.queries.fetchFunctions)
+      .then(([queryRes]) => {
+        return queryRes.results
+          .reduce((prev, curr) => prev.concat(curr), [])
+          .map((obj) => {
+            return {
+              ...obj,
+              args: obj.args ? obj.args.split(/, */g) : [],
+              database: obj.dbName,
+              schema: obj.dbSchema,
+            } as DatabaseInterface.Function;
+          });
+      });
   }
 }

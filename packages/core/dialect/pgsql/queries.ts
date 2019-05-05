@@ -84,7 +84,7 @@ SELECT
   quote_ident(n.nspname) || '.' || quote_ident(f.proname) || '(' || pg_get_function_identity_arguments(f.oid) || ')' AS signature,
   pg_get_function_result(f.oid) AS "resultType",
   pg_get_function_arguments(f.oid) AS args,
-  current_database() || '${TREE_SEP}' || n.nspname || '/procedures/' || f.proname AS tree,
+  current_database() || '${TREE_SEP}' || n.nspname || '${TREE_SEP}' || 'procedures' || '${TREE_SEP}' || f.proname AS tree,
   f.prosrc AS source
 FROM
   pg_catalog.pg_proc AS f
