@@ -7,7 +7,7 @@ export default {
   FROM
     TABLE_COLUMNS C
   WHERE
-    C.SCHEMA_NAME = ? and C.TABLE_NAME = ?`,
+    C.SCHEMAå_NAME = ? and C.TABLE_NAME = ?`,
   fetchColumns: `
 SELECT
   C.TABLE_NAME AS tableName,

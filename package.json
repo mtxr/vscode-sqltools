@@ -45,6 +45,7 @@
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",
+    "native-ext-loader": "^2.3.0",
     "rimraf": "^2.6.3",
     "source-map-support": "^0.5.11",
     "typescript": "^3.4.1",
