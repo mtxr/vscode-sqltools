@@ -445,7 +445,8 @@
                                     "MySQL",
                                     "OracleDB",
                                     "PostgreSQL",
-                                    "SQLite"
+                                    "SQLite",
+                                    "SAPHana"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false

@@ -48,6 +48,15 @@ const availableDialects = {
     showHelperText: true,
     requirements,
   },
+  SAPHana: {
+    value: 'SAPHana',
+    text: 'SAP Hana',
+    port: 30000,
+    host: '127.0.0.1',
+    user: '<enter user>',
+    password: '<enter password>',
+    showHelperText: true
+  }
 };
 
 interface FieldWrapperProps {

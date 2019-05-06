@@ -4,6 +4,9 @@ const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
+const CopyPlugin = require('copy-webpack-plugin');
+
+
 module.exports = function getLanguageServerConfig() {
   let config = {
     name: 'languageserver',
@@ -27,8 +30,21 @@ module.exports = function getLanguageServerConfig() {
           exclude: /\.test\..+/i,
 
         },
+        {
+          test: /\.node$/,
+          loader: "native-ext-loader"
+        },
+        {
+          test: /\.dylib$/,
+          loader: "native-ext-loader"
+        }
       ],
     },
+    plugins: [
+      new CopyPlugin([
+        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'prebuilt' }
+      ]),
+    ],
     resolve: {
       extensions: ['.ts', '.js', '.json'],
       alias: {
