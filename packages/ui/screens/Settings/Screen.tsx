@@ -1,4 +1,5 @@
 import React, { ReactNode, FormEvent, ChangeEventHandler } from 'react';
+import { getConnectionId } from "@sqltools/core/utils/get-connection-stuff";
 import {
   bool,
   gtz,
@@ -100,6 +101,7 @@ interface Field {
 interface SetupState {
   loading?: boolean;
   data?: any; // tbd
+  beforeEditData?: any;
   fields: { [id: string]: Field };
   errors: { [field: string]: string };
   onSaveError?: string;
@@ -269,13 +271,24 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   };
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, payload);
+    console.log(`Message received: ${action}`, ...[ payload ]);
     switch(action) {
+      case 'editConnection':
+          this.setState({
+            beforeEditData: payload.conn,
+            loading: true,
+            data: payload.conn,
+            fields: this.baseFields,
+            errors: {},
+            onSaveError: null,
+            saved: null,
+          }, () => this.componentDidMount());
+        break;
+      case 'updateConnectionSuccess':
       case 'createConnectionSuccess':
-        const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
         const newState: SetupState = {
           loading: false,
-          data,
+          data: SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields),
           fields: this.baseFields,
           errors: {},
           onSaveError: null,
@@ -283,7 +296,8 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         };
         newState.saved = (
           <div>
-            <strong>{payload.connInfo.name}</strong> added to your settings!
+            <strong>{payload.connInfo.name}</strong>
+            {action !== 'updateConnectionSuccess' ? ' added to your settings!' : ' was updated!'}
             <a onClick={this.reset} className="btn danger" href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.deleteConnection?${JSON.stringify(payload.connInfo.id)}`)}>Delete {payload.connInfo.name}</a>
             <a onClick={this.reset} className="btn" href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.selectConnection?${JSON.stringify(payload.connInfo.id)}`)}>Connect now</a>
           </div>
@@ -291,14 +305,15 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         newState.data = SettingsScreen.generateConnData(this.state.fields);
         this.setState(newState, this.validateFields);
         break;
-
+      case 'updateConnectionError':
       case 'createConnectionError':
         this.setState({
           loading: false,
           onSaveError: ((payload && payload.message ? payload.message : payload) || '').toString(),
         });
         break;
-
+      case 'reset':
+        this.reset();
       default:
         break;
     }
@@ -308,6 +323,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
     this.setState({
       loading: true,
+      beforeEditData: undefined,
       data,
       fields: this.baseFields,
       errors: {},
@@ -372,6 +388,12 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
   public handleSubmit = (e: FormEvent) => {
     this.setState({ loading: true });
     e.preventDefault();
+    if (this.state.beforeEditData) {
+      return void getVscode().postMessage({
+        action: 'updateConnection',
+        payload: { connInfo: this.getParsedFormData(), isGlobal: this.state.data.isGlobal, editId: getConnectionId(this.state.beforeEditData) }
+      });
+    }
     getVscode().postMessage({
       action: 'createConnection',
       payload: { connInfo: this.getParsedFormData(), isGlobal: this.state.data.isGlobal }
@@ -446,6 +468,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             name={f}
             value={this.state.data[f]}
             id={`input-${f}`}
+            key={i}
             onChange={this.handleChange}
             disabled={this.state.loading}
           >
@@ -457,6 +480,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           <input
             type="file"
             id={`input-${f}`}
+            key={i}
             name={f}
             placeholder={field.label}
             onChange={this.handleChange}
@@ -476,7 +500,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
 
         if (field.type === 'checkbox') {
           fieldProps = {
-            checked: this.state.data[f],
+            checked: !!this.state.data[f],
           }
         }
 
@@ -488,6 +512,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             placeholder={field.label}
             onChange={this.handleChange}
             disabled={this.state.loading}
+            key={i}
             {...fieldProps}
           />
         );
@@ -503,7 +528,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         <form onSubmit={this.handleSubmit} className='container'>
           <div className='row'>
             <div className='col-12'>
-              <h3>Setup a new connection</h3>
+              <h3>{this.state.beforeEditData ? `Editing ${this.state.beforeEditData.name}` : 'Setup a new connection'}</h3>
             </div>
           </div>
           {((this.state.saved || this.state.onSaveError) ?
@@ -535,7 +560,9 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                     className='btn capitalize'
                     type='submit'
                     disabled={Object.keys(this.state.errors).length > 0}
-                  >Create</button>
+                  >
+                    {this.state.beforeEditData ? 'Update' : 'Create' }
+                  </button>
                 </div>
               </div>
             </div>

@@ -213,11 +213,6 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add new connection from arg",
-                "command": "SQLTools.addConnection",
-                "category": "SQLTools internal"
-            },
-            {
                 "title": "Delete connection",
                 "command": "SQLTools.deleteConnection",
                 "category": "SQLTools Management"
@@ -555,10 +550,10 @@
                                 "type": [
                                     "object",
                                     "null"
-                                ],                                
+                                ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."                                
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
@@ -715,10 +710,6 @@
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",
-                    "when": "false"
-                },
-                {
-                    "command": "SQLTools.addConnection",
                     "when": "false"
                 },
                 {
