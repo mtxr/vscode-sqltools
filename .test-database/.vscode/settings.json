@@ -33,7 +33,7 @@
     {
       "name": "PGSQL URI",
       "dialect": "PostgreSQL",
-      "connectString": "postgress://root:root@localhost:5433/test_db",
+      "connectString": "postgres://root:root@localhost:5433/test_db",
       "connectionTimeout": 15
     },
     {
