@@ -219,6 +219,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
+  private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
+    if (!connInfo) {
+      console.warn('Nothing to do. No parameter received');
+      return;
+    }
+
+    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined)
+      .filter(c => getConnectionId(c) !== oldId);
+    connList.push(connInfo);
+    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
+  }
+
   // internal utils
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.conn) {
@@ -387,6 +399,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     // register extension commands
     extension.registerCommand(`addConnection`, this.ext_addConnection)
+      .registerCommand(`updateConnection`, this.ext_updateConnection)
       .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
       .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
