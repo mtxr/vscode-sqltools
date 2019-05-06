@@ -588,7 +588,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                 </div>
               ) : null}
               <div><h5 className={this.state.data.dialect && availableDialects[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
-              <Syntax code={this.getParsedFormData()} language='json'/>
+              <Syntax code={this.getParsedFormData()} language='json' strong/>
               {Object.keys(this.state.errors).length ? (
                 <div>
                   <h5>Validations</h5>
