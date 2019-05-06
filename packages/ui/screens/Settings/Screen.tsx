@@ -14,6 +14,8 @@ import Syntax from '@sqltools/ui/components/Syntax';
 import getVscode from '@sqltools/ui/lib/vscode';
 import '@sqltools/ui/sass/app.scss';
 import { DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { FileInput } from './FileInput';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
@@ -78,7 +80,7 @@ interface Field {
   info?: string;
   values?: Array<string | { text: string; value: any }>;
   default?: any;
-  type?: string;
+  type?: 'checkbox' | 'file' | 'text' | 'number' | 'password';
   validators?: ValidationFunction[];
   postUpdateHook?: Function;
   parse?: Function;
@@ -267,7 +269,29 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             errors: {},
             onSaveError: null,
             saved: null,
-          }, () => this.componentDidMount());
+          }, () => {
+            const conn: ConnectionInterface = payload.conn;
+            switch (conn.dialect) {
+              case DatabaseDialect.SQLite:
+                this.updateField({
+                  value: this.state.data.dialect,
+                  name: 'dialect',
+                });
+            }
+
+            if (conn.socketPath) {
+              this.updateField({
+                name: 'useSocket',
+                checked: true,
+                value: true,
+              })
+              this.updateField({
+                value: this.state.data.socketPath,
+                name: 'socketPath',
+              });
+            }
+            this.componentDidMount();
+          });
         break;
       case 'updateConnectionSuccess':
       case 'createConnectionSuccess':
@@ -333,18 +357,22 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     });
   }
 
-  public handleChange: ChangeEventHandler = (e) => {
-    let { name, value, files, type, checked } = e.target as HTMLInputElement & { value: any };
+  handleChange: ChangeEventHandler = (e) => this.updateField(e.target as any);
 
-    value = type === 'checkbox' ? Boolean(checked) : value;
+  updateField = ({
+    checked,
+    value,
+    name
+  }: {
+    checked?: string | boolean;
+    value?: any;
+    name: string;
+  }) => {
+    value = this.state.fields[name].type === 'checkbox' ? Boolean(checked) : value;
 
     if (this.state.fields[name].visible === false) return this.validateFields();
-    let filePath;
-    if (this.state.fields[name].type === 'file' && files && files.length > 0) {
-      filePath = (files[0] as any).path;
-    }
 
-    const newData = { ...this.state.data, [name]: filePath || value };
+    const newData = { ...this.state.data, [name]: value };
     this.setState({ data: newData, saved: null, onSaveError: null }, () => {
       if (!this.state.fields[name].postUpdateHook) return this.validateFields();
       this.state.fields[name].postUpdateHook();
@@ -462,23 +490,23 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         );
       } else if (field.type === 'file') {
         formField = (
-          <input
-            type="file"
+          <FileInput
             id={`input-${f}`}
             key={i}
             name={f}
             placeholder={field.label}
             onChange={this.handleChange}
             disabled={this.state.loading}
+            value={this.state.data[f] || ''}
           />
         );
       } else {
         let fieldProps: any = {
-          value: this.state.data[f],
+          value: this.state.data[f] || '',
         };
         if (field.type === 'number') {
           fieldProps = {
-            value: this.state.data[f],
+            value: this.state.data[f] || '',
             ...field.minMax,
           };
         }
@@ -563,7 +591,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                         <div>
                           <strong>Requirements:</strong>
                           <ul>
-                            {(availableDialects[this.state.data.dialect].requirements || []).map(r => (<li>{r}</li>))}
+                            {(availableDialects[this.state.data.dialect].requirements || []).map(r => (<li key={r}>{r}</li>))}
                           </ul>
                         </div>
                       ) : null}

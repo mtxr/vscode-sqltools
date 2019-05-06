@@ -1,3 +1,4 @@
+import path from 'path';
 import * as query from './query';
 import commandExists from './command-exists';
 import { ConnectionInterface, DatabaseDialect } from '../interface';
@@ -9,11 +10,11 @@ export * from './get-connection-stuff';
 
 export function sortText(a: string, b: string) { return a.toString().localeCompare(b.toString()); }
 
-export function asArray(obj: any) {
+export function asArray<T>(obj: any) {
   if (Array.isArray(obj)) {
-    return obj;
+    return obj as T[];
   }
-  return Object.keys(obj).map((k) => obj[k]);
+  return Object.keys(obj).map((k) => obj[k]) as T[];
 }
 
 export function getConnectionDescription(c: ConnectionInterface): string | null {
@@ -29,8 +30,9 @@ export function getConnectionDescription(c: ConnectionInterface): string | null 
   return [
     c.username,
     c.username ? '@' : '',
-    c.server,
-    c.server && c.port ? ':' : '',
+    !c.socketPath && c.server,
+    !c.socketPath && c.server && c.port ? ':' : '',
+    c.socketPath && `socket:${path.basename(c.socketPath)}`,
     c.port,
     '/',
     c.database,
