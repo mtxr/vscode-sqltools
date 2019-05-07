@@ -34,9 +34,10 @@ module.exports = function getLanguageServerConfig() {
     },
     plugins: [
       new CopyPlugin([
-        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'prebuilt' },
-        { from: '../../node_modules/@sap/hana-client/lib', to: 'lib' },
-        { from: '../core/dialect/saphana/debug.js', to: 'lib/node_modules/debug.js' }
+        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'node_modules/@sap/hana-client/prebuilt' },
+        { from: '../../node_modules/@sap/hana-client/lib', to: 'node_modules/@sap/hana-client/lib' },
+        { from: '../../node_modules/@sap/hana-client/package.json', to: 'node_modules/@sap/hana-client/package.json' },
+        { from: '../core/dialect/saphana/debug.js', to: 'node_modules/@sap/hana-client/lib/node_modules/debug.js' }
       ]),
     ],
     resolve: {

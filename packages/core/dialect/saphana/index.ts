@@ -15,7 +15,6 @@ interface HanaClientModule {
   createClient(connOptions: object): HanaConnection;
 }
 
-
 interface HanaConnection {
   connect(handler: (err: any) => void);
   exec(query: string, handler: (err: any, row: any) => void);
@@ -24,37 +23,16 @@ interface HanaConnection {
 }
 
 export default class SAPHana extends GenericDialect<HanaConnection> implements ConnectionDialect {
-  queries = queries;
-  private schema: String;
 
-  public open(encrypt?: boolean): Promise<HanaConnection> {
+  public static deps: typeof GenericDialect['deps'] = [{
+    type: 'package',
+    name: '@sap/hana-client'
+  }];
 
+  private get lib() {
+    return __non_webpack_require__('@sap/hana-client') as HanaClientModule;
+  }
 
-var path = require('path');
-
-let hanaClient: HanaClientModule;
-let modulePath = path.join(__dirname, 'lib/index.js');
-console.info('path: ' + modulePath);
-console.log('path: ' + modulePath);
-hanaClient = eval('require')(modulePath);
-
-interface Statement {
-  exec(params: any[], handler: (err: any, row: any) => void);
-}
-
-interface HanaClientModule {
-  createClient(connOptions: object): HanaConnection;
-}
-
-
-interface HanaConnection {
-  connect(handler: (err: any) => void);
-  exec(query: string, handler: (err: any, row: any) => void);
-  disconnect();
-  prepare(query: string, handler: (err: any, statement: Statement) => void);
-}
-
-export default class SAPHana extends GenericDialect<HanaConnection> implements ConnectionDialect {
   queries = queries;
   private schema: String;
 
@@ -70,7 +48,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
       password: this.credentials.password
     };
     try {
-      let conn = hanaClient.createClient(connOptions);
+      let conn = this.lib.createClient(connOptions);
 
       this.connection = new Promise<HanaConnection>((resolve, reject) => conn.connect(err => {
         if (err) {
