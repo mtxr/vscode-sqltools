@@ -67,15 +67,12 @@ input, select, select > option {
   background: var(--vscode-settings-textInputBackground);
   border: none;
   color: var(--vscode-settings-textInputForeground);
-  padding: 4px;
+  padding: 4px 8px;
+}
+select {
+  padding: 4px 6px;
 }
 
-// .vscode-dark {
-// input, select, select > option {
-//     background: $darkThemeWhite1;
-//     border-color: $darkThemeWhite2;
-//   }
-// }
 
 .fullscreen-container {
   @include full-screen();

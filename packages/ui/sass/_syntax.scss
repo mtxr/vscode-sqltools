@@ -28,6 +28,10 @@
   }
 }
 
+.syntax.strong-bg {
+  background: rgba(0, 0, 0, 0.02);
+}
+
 .btn.copy-code {
   position: absolute;
   top: 0;
@@ -42,4 +46,7 @@
 
 body.vscode-dark .syntax {
   background: var(--vscode-editor-background, #222);
+  &.strong-bg {
+    background: rgba(255, 255, 255, 0.02);
+  }
 }

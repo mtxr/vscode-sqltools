@@ -41,7 +41,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getTreeItems() {
-    const items = asArray(this.tree);
+    const items = asArray<SidebarConnection>(this.tree);
     if (items.length === 0) {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
       addNew.command = {
@@ -56,7 +56,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     if (!element) {
       return Promise.resolve(asArray(this.getTreeItems()));
     }
-    const items: SidebarTreeItem[] = element.items;
+    const items = element.items as any[];
     if (ConfigManager.flattenGroupsIfOne && items.length === 1) {
       return this.getChildren(items[0]);
     }

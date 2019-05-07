@@ -143,6 +143,22 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.settingsWebview.show();
   }
 
+  private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {
+    let id: string;
+    if (connIdOrNode) {
+      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
+    } else {
+      const conn = await this._pickConnection();
+      id = conn ? getConnectionId(conn) : undefined;
+    }
+
+    if (!id) return;
+
+    const conn = this.explorer.getById(id);
+    this.settingsWebview.show();
+    this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
+  }
+
   private ext_focusOnExplorer = () => {
     return this.explorer.focus();
   }
@@ -199,6 +215,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined);
+    connList.push(connInfo);
+    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
+  }
+
+  private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
+    if (!connInfo) {
+      console.warn('Nothing to do. No parameter received');
+      return;
+    }
+
+    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined)
+      .filter(c => getConnectionId(c) !== oldId);
     connList.push(connInfo);
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
@@ -371,7 +399,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     // register extension commands
     extension.registerCommand(`addConnection`, this.ext_addConnection)
+      .registerCommand(`updateConnection`, this.ext_updateConnection)
       .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
+      .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
       .registerCommand(`describeFunction`, this.ext_describeFunction)
