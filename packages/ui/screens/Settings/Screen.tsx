@@ -186,7 +186,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           }
         }
 
-
         if (this.state.data.dialect === 'SAPHana') {
           newState.fields.database.label = 'Schema';
         } else {

@@ -29,14 +29,6 @@ module.exports = function getLanguageServerConfig() {
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
 
-        },
-        {
-          test: /\.node$/,
-          loader: "native-ext-loader"
-        },
-        {
-          test: /\.dylib$/,
-          loader: "native-ext-loader"
         }
       ],
     },
