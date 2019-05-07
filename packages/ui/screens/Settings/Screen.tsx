@@ -357,6 +357,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
         );
         newState.data = SettingsScreen.generateConnData(this.state.fields);
         this.setState(newState, this.validateFields);
+        document.querySelector('html').scrollTop = 0;
         break;
       case 'updateConnectionError':
       case 'createConnectionError':
