@@ -406,6 +406,5 @@ div mark {
 .ReactTable .rt-thead.-filters input, .ReactTable .rt-thead.-filters select, .ReactTable .-pagination input, .ReactTable .-pagination select,
 .ReactTable .rt-th, .ReactTable .rt-td,
 .ReactTable .rt-thead .rt-th, .ReactTable .rt-thead .rt-td {
-  padding: 5px 3px;
-  padding: var(--sqltools-table-cell-padding);
+  padding: var(--sqltools-table-cell-padding, 5px 3px);
 }
