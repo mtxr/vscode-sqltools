@@ -10,7 +10,6 @@ interface Props {
   name: string;
   id: string;
   value: string;
-  placeholder?: string;
   disabled?: boolean;
 }
 
@@ -60,7 +59,7 @@ export class FileInput extends React.Component<Props, State> {
           type="text"
           id={this.props.id}
           name={this.props.name}
-          placeholder={this.props.placeholder}
+          placeholder="Click to select a file"
           value={this.state.name}
           disabled
         />

@@ -62,6 +62,13 @@ const availableDialects = {
   }
 };
 
+const ConnectionMethod = {
+  ServerAndPort: 'Server and Port',
+  Socket: 'Socket File',
+  ConnectionString: 'Connection String',
+}
+const connectionMethods = [ConnectionMethod.ServerAndPort, ConnectionMethod.Socket, ConnectionMethod.ConnectionString];
+
 interface FieldWrapperProps {
   field: Field;
   component: ReactNode;
@@ -86,6 +93,7 @@ class FieldWrapper extends React.Component<FieldWrapperProps> {
 }
 interface Field {
   label: string;
+  placeholder?: string;
   info?: string;
   values?: Array<string | { text: string; value: any }>;
   default?: any;
@@ -157,12 +165,13 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.askForPassword.visible = false;
           newState.fields.connectionTimeout.visible = false;
           newState.fields.database.type = 'file';
+          newState.fields.connectionMethod.visible = false;
+          newState.fields.connectString.visible = false;
         } else {
           if (this.state.fields.database.type === 'file') {
             newState.data.database = undefined;
           }
           newState.data.port = (availableDialects[this.state.data.dialect] ? availableDialects[this.state.data.dialect].port : null) || availableDialects.MySQL.port;
-          newState.fields.domain.visible = this.state.data.dialect === 'MSSQL';
           newState.fields.port.visible = true;
           newState.fields.server.visible = true;
           newState.fields.username.visible = true;
@@ -170,34 +179,48 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.askForPassword.visible = true;
           newState.fields.connectionTimeout.visible = true;
           newState.fields.database.type = 'text';
+          if (!newState.fields.connectionMethod.visible) {
+            newState.data.connectionMethod = ConnectionMethod[0];
+            newState.fields.connectionMethod.visible = true;
+          }
         }
-        if (this.state.data.dialect === 'MySQL') {
-          newState.fields.useSocket.visible = true;
-        } else {
-          newState.data.useSocket = false;
-          newState.fields.useSocket.visible = false;
-          newState.fields.socketPath.visible = false;
-        }
+
 
         if (this.state.data.dialect === 'SAPHana') {
           newState.fields.database.label = 'Schema';
         } else {
           newState.fields.database.label = 'Database';
         }
+
         this.setState(newState, this.validateFields);
       },
     },
-    useSocket: {
-      label: 'Use socket file?',
-      info: 'Check to connect using UNIX sockets',
-      type: 'checkbox',
-      default: false,
-      parse: bool,
+    connectionMethod: {
+      label: 'Connection Method',
+      values: connectionMethods,
+      default: connectionMethods[0],
       postUpdateHook: () => {
         const newState = Object.assign({}, this.state);
-        newState.fields.server.visible = !this.state.data.useSocket;
-        newState.fields.port.visible = !this.state.data.useSocket;
-        newState.fields.socketPath.visible = !!this.state.data.useSocket;
+        switch (this.state.data.connectionMethod) {
+          case ConnectionMethod.ConnectionString:
+            newState.fields.server.visible = false;
+            newState.fields.port.visible = false;
+            newState.fields.socketPath.visible = false;
+            newState.fields.connectString.visible = true;
+            break;
+          case ConnectionMethod.Socket:
+            newState.fields.server.visible = false;
+            newState.fields.port.visible = false;
+            newState.fields.socketPath.visible = true;
+            newState.fields.connectString.visible = false;
+            break;
+          case ConnectionMethod.ServerAndPort:
+            newState.fields.server.visible = true;
+            newState.fields.port.visible = true;
+            newState.fields.socketPath.visible = false;
+            newState.fields.connectString.visible = false;
+            break;
+        }
         this.setState(newState, this.validateFields);
       },
     },
@@ -223,6 +246,12 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       label: 'Socket File',
       validators: [notEmpty],
     },
+    connectString: {
+      visible: false,
+      type: 'text',
+      label: 'Connection String',
+      validators: [notEmpty],
+    },
     database: {
       type: 'text',
       label: 'Database',
@@ -232,25 +261,26 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       label: 'Username',
       validators: [notEmpty],
     },
-    askForPassword: {
-      label: 'Prompt for password?',
-      values: [{ text: 'No', value: false }, { text: 'Yes', value: true }],
-      default: 'false',
-      parse: bool,
+    password: {
+      label: 'Password',
+      placeholder: 'Leave empty to be prompted',
       postUpdateHook: () => {
-        const parse = this.state.fields.askForPassword.parse;
         const newState = Object.assign({}, this.state);
-        newState.fields.password.visible = !parse(this.state.data.askForPassword);
+        if (notEmpty(this.state.data.password)) {
+          newState.fields.askForPassword.visible = false;
+        } else {
+          newState.fields.askForPassword.visible = true;
+          newState.data.askForPassword = true;
+        }
         this.setState(newState, this.validateFields);
       },
     },
-    password: {
-      label: 'Password',
-    },
-    domain: {
-      visible: false,
-      label: 'Domain',
-      info: 'For MSSQL/Azure only',
+    askForPassword: {
+      label: 'Ask password?',
+      type: 'checkbox',
+      info: 'Uncheck if you want to use empty passwords',
+      default: true,
+      parse: bool
     },
     connectionTimeout: {
       label: 'Connection Timeout',
@@ -296,9 +326,8 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
 
             if (conn.socketPath) {
               this.updateField({
-                name: 'useSocket',
-                checked: true,
-                value: true,
+                name: 'connectionMethod',
+                value: ConnectionMethod.Socket,
               })
               this.updateField({
                 value: this.state.data.socketPath,
@@ -471,7 +500,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       data['password'] = data['password'] || undefined;
 
       delete data['isGlobal'];
-      delete data['useSocket'];
+      delete data['connectionMethod'];
 
       return data;
   }
@@ -509,7 +538,6 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             id={`input-${f}`}
             key={i}
             name={f}
-            placeholder={field.label}
             onChange={this.handleChange}
             disabled={this.state.loading}
             value={this.state.data[f] || ''}
@@ -537,7 +565,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             type={field.type || 'text'}
             id={`input-${f}`}
             name={f}
-            placeholder={field.label}
+            placeholder={field.placeholder || field.label}
             onChange={this.handleChange}
             disabled={this.state.loading}
             key={i}
