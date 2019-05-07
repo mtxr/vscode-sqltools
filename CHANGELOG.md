@@ -1,5 +1,21 @@
 # Changelog
 
+## v0.18
+
+### v0.18.0
+
+* **NEW** 🎉
+  * Add options to edit connections from explorer and command palette. Issue [#185](https://github.com/mtxr/vscode-sqltools/issues/185) and PR [#209](https://github.com/mtxr/vscode-sqltools/pull/209)
+  * Add stored procedure listing on explorer for MSSQL. Oracle is coming soon. [#203](https://github.com/mtxr/sqltools-formatter/issues/203)
+  * Add pool options for Oracle. Issue [#186](https://github.com/mtxr/vscode-sqltools/issues/186) and PR [#204](https://github.com/mtxr/vscode-sqltools/pull/204)
+
+* **Enhancements**
+  * Adopted support for more `--vscode-editor-*` prefixes to webviews.
+  * Enhanced results them for JSONB in white themes. Issue [#207](https://github.com/mtxr/vscode-sqltools/issues/207)
+
+* **Fix** 🎉
+  * Fix results header not in sync with columns. Issue [#201](https://github.com/mtxr/vscode-sqltools/issues/201)
+
 ## v0.17
 
 ### v0.17.18
@@ -12,7 +28,7 @@
 ### v0.17.17
 
 * **NEW** 🎉
-  * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/issues/192)
+  * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/pull/192)
     * Thanks to [@zetxx](https://github.com/zetxx)
 
 * **Fix** 🎉

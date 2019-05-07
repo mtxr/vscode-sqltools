@@ -181,6 +181,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
       node = node.closest('.copy-allowed') as HTMLElement;
     }
 
+    if (!node) return;
+
     const { value, index, col } = node.dataset;
     if (typeof index === 'undefined' || typeof col === 'undefined') {
       return;
