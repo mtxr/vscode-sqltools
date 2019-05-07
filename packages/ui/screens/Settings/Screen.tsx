@@ -167,6 +167,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.database.type = 'file';
           newState.fields.connectionMethod.visible = false;
           newState.fields.connectString.visible = false;
+          newState.fields.socketPath.visible = false;
         } else {
           if (this.state.fields.database.type === 'file') {
             newState.data.database = undefined;
@@ -205,12 +206,20 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           case ConnectionMethod.ConnectionString:
             newState.fields.server.visible = false;
             newState.fields.port.visible = false;
+            newState.fields.database.visible = false;
+            newState.fields.username.visible = false;
+            newState.fields.password.visible = false;
+            newState.fields.askForPassword.visible = false;
             newState.fields.socketPath.visible = false;
             newState.fields.connectString.visible = true;
             break;
           case ConnectionMethod.Socket:
             newState.fields.server.visible = false;
             newState.fields.port.visible = false;
+            newState.fields.database.visible = true;
+            newState.fields.username.visible = true;
+            newState.fields.password.visible = true;
+            newState.fields.askForPassword.visible = true;
             newState.fields.socketPath.visible = true;
             newState.fields.connectString.visible = false;
             break;
@@ -219,6 +228,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             newState.fields.port.visible = true;
             newState.fields.socketPath.visible = false;
             newState.fields.connectString.visible = false;
+            newState.fields.database.visible = true;
+            newState.fields.username.visible = true;
+            newState.fields.password.visible = true;
+            newState.fields.askForPassword.visible = true;
             break;
         }
         this.setState(newState, this.validateFields);
@@ -314,26 +327,44 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             errors: {},
             onSaveError: null,
             saved: null,
-          }, () => {
+          }, async () => {
             const conn: ConnectionInterface = payload.conn;
-            switch (conn.dialect) {
-              case DatabaseDialect.SQLite:
-                this.updateField({
-                  value: this.state.data.dialect,
-                  name: 'dialect',
-                });
-            }
-
+            await this.updateField({
+              value: conn.dialect,
+              name: 'dialect',
+            });
             if (conn.socketPath) {
-              this.updateField({
-                name: 'connectionMethod',
+              await this.updateField({
                 value: ConnectionMethod.Socket,
-              })
-              this.updateField({
-                value: this.state.data.socketPath,
-                name: 'socketPath',
+                name: 'connectionMethod',
+              });
+            } else if (conn.connectString) {
+              await this.updateField({
+                value: ConnectionMethod.ConnectionString,
+                name: 'connectionMethod',
+              });
+            } else {
+              await this.updateField({
+                value: ConnectionMethod.ServerAndPort,
+                name: 'connectionMethod',
               });
             }
+
+
+            if (conn.database) {
+              // await this.updateField({
+              //   value: conn.database,
+              //   name: 'database',
+              // });
+            }
+            // Object.keys(this.baseFields).forEach(async (name) => {
+            //   if (typeof conn[name] === 'undefined') return;
+            //   await this.updateField({
+            //     value: this.state.data[name],
+            //     checked: this.state.data[name],
+            //     name,
+            //   });
+            // });
             this.componentDidMount();
           });
         break;
@@ -404,7 +435,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
 
   handleChange: ChangeEventHandler = (e) => this.updateField(e.target as any);
 
-  updateField = ({
+  updateField = async ({
     checked,
     value,
     name
@@ -418,11 +449,14 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     if (this.state.fields[name].visible === false) return this.validateFields();
 
     const newData = { ...this.state.data, [name]: value };
-    this.setState({ data: newData, saved: null, onSaveError: null }, () => {
-      if (!this.state.fields[name].postUpdateHook) return this.validateFields();
-      this.state.fields[name].postUpdateHook();
-      this.validateFields();
-    });
+    return new Promise((resolve) => {
+      this.setState({ data: newData, saved: null, onSaveError: null }, () => {
+        if (!this.state.fields[name].postUpdateHook) return this.validateFields();
+        this.state.fields[name].postUpdateHook();
+        this.validateFields();
+        return resolve();
+      });
+    })
   }
 
   public validateField(field) {
