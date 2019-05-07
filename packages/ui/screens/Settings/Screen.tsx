@@ -174,6 +174,12 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           newState.fields.useSocket.visible = false;
           newState.fields.socketPath.visible = false;
         }
+
+        if (this.state.data.dialect === 'SAPHana') {
+          newState.fields.database.label = 'Schema';
+        } else {
+          newState.fields.database.label = 'Database';
+        }
         this.setState(newState, this.validateFields);
       },
     },

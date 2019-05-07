@@ -29,20 +29,14 @@ module.exports = function getLanguageServerConfig() {
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
 
-        },
-        {
-          test: /\.node$/,
-          loader: "native-ext-loader"
-        },
-        {
-          test: /\.dylib$/,
-          loader: "native-ext-loader"
         }
       ],
     },
     plugins: [
       new CopyPlugin([
-        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'prebuilt' }
+        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'prebuilt' },
+        { from: '../../node_modules/@sap/hana-client/lib', to: 'lib' },
+        { from: '../core/dialect/saphana/debug.js', to: 'lib/node_modules/debug.js' }
       ]),
     ],
     resolve: {
