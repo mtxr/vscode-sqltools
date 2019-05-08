@@ -146,4 +146,9 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
           });
       });
   }
+
+  public describeTable(prefixedTable: string) {
+    prefixedTable.split('].[').reverse().join('], [');
+    return this.query(Utils.replacer(this.queries.describeTable, { table: prefixedTable.split(/\.(?=\[)/g).reverse().join(',') }));
+  }
 }
