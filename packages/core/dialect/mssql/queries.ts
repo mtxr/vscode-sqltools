@@ -101,8 +101,7 @@ SELECT
   concat(
     f.routine_schema,
     '.',
-    f.routine_name,
-    concat('(', STRING_AGG(p.data_type, ','), ')')
+    f.routine_name    
   ) as signature,
   STRING_AGG(p.data_type, ',') as args,
   f.data_type AS resultType,

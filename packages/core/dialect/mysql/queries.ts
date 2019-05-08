@@ -112,8 +112,7 @@ SELECT
     case
       WHEN f.routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_name, '\`')
       ELSE f.routine_name
-    end,
-    concat('(', GROUP_CONCAT(p.data_type), ')')
+    end
   ) as signature,
   GROUP_CONCAT(p.data_type) as args,
   f.data_type AS resultType,

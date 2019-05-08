@@ -89,14 +89,15 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
     if (!/END(\s\w*)*;$/gi.test(code)) {
       code = trimCharsEnd(";")(code);
     }
-    return code;
+    return  [code];
   }
 
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();
-    const q = this.simpleParse(query);
+    const queries = this.simpleParse(query);
     const results: DatabaseInterface.QueryResults[] = [];
     try {
+      for(let q of queries) {
         let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
         const messages = [];
         if (res.rowsAffected) {
@@ -109,7 +110,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
           query: q,
           results: res.rows,
         });
-
+      }
     } finally {
       if (conn) {
         try {
@@ -172,5 +173,24 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   public describeTable(prefixedTable: string) {
     const [ schema, table ] = prefixedTable.split('.');
     return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
+  }
+
+  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+    return this.query(this.queries.fetchFunctions)
+      .then(([queryRes]) => {
+        return queryRes.results
+          .reduce((prev, curr) => prev.concat(curr), [])
+          .map((obj) => {
+            return {              
+              name: obj.NAME,
+              schema: obj.DBSCHEMA,
+              database: obj.DBNAME,
+              signature: obj.SIGNATURE,
+              args: obj.ARGS ? obj.ARGS.split(/, */g) : [],                            
+              resultType: obj.RESULTTYPE,   
+              tree: obj.TREE,                         
+            } as DatabaseInterface.Function;
+          });
+      });
   }
 }

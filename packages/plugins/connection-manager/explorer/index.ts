@@ -225,7 +225,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDialect.PostgreSQL:
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
-        // case DatabaseDialect.OracleDB:
+        case DatabaseDialect.OracleDB:
           functions.forEach((fn) => {
             this.getOrCreateGroups(connId, dialect, fn.tree, 1).addItem(new SidebarFunction(this.extension.context, fn));
           });
