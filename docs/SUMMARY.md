@@ -10,4 +10,5 @@
 * [Codelens](codelens.md)
 * [Contributing](Contributing.md)
   * [Building](Contributing/Building.md)
+  * [How to add a dialect](https://github.com/mtxr/vscode-sqltools/pull/219)
 * [Changelog](../CHANGELOG.md)
