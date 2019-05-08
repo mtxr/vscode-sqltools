@@ -51,6 +51,13 @@ const availableDialects = {
     showHelperText: true,
     requirements,
   },
+  // add your dialect here
+  ExampleDialect: {
+    value: 'ExampleDialect',
+    text: 'ExampleDialect (Node Native)',
+    showHelperText: true,
+    requirements, // this is optional, but if you are using deps prop on your dialect, add the requirements to help users to use it.
+  },
 };
 
 const ConnectionMethod = {

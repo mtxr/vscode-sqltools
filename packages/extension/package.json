@@ -43,7 +43,8 @@
         "sql",
         "sqlite",
         "sqlplus",
-        "sqltools"
+        "sqltools",
+        "example-diaect"
     ],
     "galleryBanner": {
         "theme": "dark",
@@ -445,7 +446,8 @@
                                     "MySQL",
                                     "OracleDB",
                                     "PostgreSQL",
-                                    "SQLite"
+                                    "SQLite",
+                                    "ExampleDialect"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
