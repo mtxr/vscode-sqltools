@@ -2,6 +2,7 @@
 
 * [Getting Started](../README.md)
 * [Connections](Connections.md)
+  * [MSSQL/SQL Server/Azure](Connections/mssql.md)
   * [MySQL](Connections/mysql.md)
   * [Oracle Database](Connections/OracleDB.md)
   * [PostgreSQL](Connections/postgresql.md)
@@ -11,4 +12,5 @@
 * [Codelens](codelens.md)
 * [Contributing](Contributing.md)
   * [Building](Contributing/Building.md)
+  * [How to add a dialect](https://github.com/mtxr/vscode-sqltools/pull/219)
 * [Changelog](../CHANGELOG.md)
