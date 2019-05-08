@@ -2,6 +2,11 @@
 
 ## v0.18
 
+### v0.18.1
+
+* **Fix** 🎉
+  * Add escape chars for table names, schemas and catalogs. Issue [#216](https://github.com/mtxr/vscode-sqltools/issues/216)
+
 ### v0.18.0
 
 * **NEW** 🎉
