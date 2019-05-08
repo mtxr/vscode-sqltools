@@ -1,5 +1,6 @@
 ## Connections
 
+* [Example Dialect](Connections/example-dialect.md)
 * [MySQL](Connections/mysql.md)
 * [Oracle Database](Connections/OracleDB.md)
 * [PostgreSQL](Connections/postgresql.md)
