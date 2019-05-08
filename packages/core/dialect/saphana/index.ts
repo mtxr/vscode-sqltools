@@ -12,7 +12,7 @@ interface Statement {
 }
 
 interface HanaClientModule {
-  createClient(connOptions: object): HanaConnection;
+  createConnection(connOptions: object): HanaConnection;
 }
 
 interface HanaConnection {
@@ -26,7 +26,8 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
 
   public static deps: typeof GenericDialect['deps'] = [{
     type: 'package',
-    name: '@sap/hana-client'
+    name: '@sap/hana-client',
+    version: '2.4.126'
   }];
 
   private get lib() {
@@ -41,14 +42,23 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
       return this.connection;
     }
 
+    this.needToInstallDependencies();
+
     const connOptions = {
-      host: this.credentials.server,
-      port: this.credentials.port,
-      user: this.credentials.username,
-      password: this.credentials.password
-    };
+      HOST: this.credentials.server,
+      PORT: this.credentials.port,
+      UID: this.credentials.username,
+      PWD: this.credentials.password
+    }
+    if (this.credentials.connectionTimeout && this.credentials.connectionTimeout > 0) {
+      connOptions["CONNECTTIMEOUT"] = this.credentials.connectionTimeout * 1000;
+    }
+    if (encrypt) {
+      connOptions["ENCRYPT"] = true;
+    }
+
     try {
-      let conn = this.lib.createClient(connOptions);
+      let conn = this.lib.createConnection(connOptions);
 
       this.connection = new Promise<HanaConnection>((resolve, reject) => conn.connect(err => {
         if (err) {
@@ -118,7 +128,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     }
 
     let res = {
-      connId: "1",
+      connId: this.getId(),
       results: rows,
       cols: cols,
       query: query,

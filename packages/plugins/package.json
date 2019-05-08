@@ -14,8 +14,7 @@
     "@sqltools/language-server": "*",
     "@sqltools/ui": "*",
     "csv-stringify": "^5.3.0",
-    "lodash": "^4.17.11",
-    "@sap/hana-client": "^2.4.126"
+    "lodash": "^4.17.11"
   },
   "scripts": {
     "test": "(cd ../.. && cross-env TESTS_PATH_FILTER=packages/plugins yarn test)",

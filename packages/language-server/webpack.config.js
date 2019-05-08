@@ -4,9 +4,6 @@ const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
-const CopyPlugin = require('copy-webpack-plugin');
-
-
 module.exports = function getLanguageServerConfig() {
   let config = {
     name: 'languageserver',
@@ -32,14 +29,6 @@ module.exports = function getLanguageServerConfig() {
         }
       ],
     },
-    plugins: [
-      new CopyPlugin([
-        { from: '../../node_modules/@sap/hana-client/prebuilt', to: 'node_modules/@sap/hana-client/prebuilt' },
-        { from: '../../node_modules/@sap/hana-client/lib', to: 'node_modules/@sap/hana-client/lib' },
-        { from: '../../node_modules/@sap/hana-client/package.json', to: 'node_modules/@sap/hana-client/package.json' },
-        { from: '../core/dialect/saphana/debug.js', to: 'node_modules/@sap/hana-client/lib/node_modules/debug.js' }
-      ]),
-    ],
     resolve: {
       extensions: ['.ts', '.js', '.json'],
       alias: {
@@ -55,6 +44,7 @@ module.exports = function getLanguageServerConfig() {
     externals: {
       sqlite3: 'commonjs sqlite3',
       oracledb: 'commonjs oracledb',
+      hanaclient: 'commonjs @sap/hana-client'
     },
   };
 
