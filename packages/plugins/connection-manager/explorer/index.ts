@@ -174,6 +174,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
         case DatabaseDialect.OracleDB:
+        case DatabaseDialect.SAPHana:
           tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
             this.getOrCreateGroups(connId, dialect, item.tree, 1).addItem(new SidebarTableOrView(this.extension.context, item));
           });
@@ -202,6 +203,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
         case DatabaseDialect.OracleDB:
+        case DatabaseDialect.SAPHana:
           columns.forEach((column) => {
             this.getOrCreateGroups(connId, dialect, column.tree, 1).addItem(new SidebarColumn(this.extension.context, column));
           });
