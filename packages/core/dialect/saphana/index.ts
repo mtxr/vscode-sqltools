@@ -28,7 +28,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     type: 'package',
     name: '@sap/hana-client',
     version: '2.4.126',
-    args: ['--registry=https://npm.sap.com']
+    args: ['--@sap:registry=https://npm.sap.com']
   }];
 
   private get lib() {
