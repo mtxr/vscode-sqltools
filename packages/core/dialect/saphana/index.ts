@@ -145,7 +145,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     }
 
     return resolve([{
-      connId: "1",
+      connId: this.getId(),
       error: err,
       results: [],
       cols: [],
