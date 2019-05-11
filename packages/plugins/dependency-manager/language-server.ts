@@ -82,8 +82,9 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
             console.debug(`Finished ${dep.name} script`);
             break;
           case 'package':
-            console.debug(`Will install ${dep.name} package`);
-            await this.install(`${dep.name}${dep.version ? `@${dep.version}` : ''}`, { env: dep.env });
+            console.debug(`Will install ${dep.name} package`, dep.args || '');
+            const args = [`${dep.name}${dep.version ? `@${dep.version}` : ''}`].concat(dep.args || [])
+            await this.install(args, { env: dep.env });
             console.debug(`Finished ${dep.name} script`);
             break;
         }

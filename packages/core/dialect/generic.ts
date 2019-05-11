@@ -13,6 +13,7 @@ export interface Deps {
   name: string;
   version?: string;
   env?: { [id: string]: string };
+  args?: string[], // extra arguments to be passaged to packag managers
 }
 
 export default abstract class GenericDialect<ConnectionType extends any> implements ConnectionDialect {
