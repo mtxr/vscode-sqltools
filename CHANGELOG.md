@@ -2,7 +2,17 @@
 
 ## v0.18
 
-### v0.18.0
+### v0.18.2 - (May 9, 2019)
+
+* **Fix** 🎉
+  * Add stored procedure listing on explorer for Oracle. Issue [#208](https://github.com/mtxr/vscode-sqltools/issues/208)
+
+### v0.18.1 - (May 8, 2019)
+
+* **Fix** 🎉
+  * Add escape chars for table names, schemas and catalogs. Issue [#216](https://github.com/mtxr/vscode-sqltools/issues/216)
+
+### v0.18.0 - (May 7, 2019)
 
 * **NEW** 🎉
   * Add options to edit connections from explorer and command palette. Issue [#185](https://github.com/mtxr/vscode-sqltools/issues/185) and PR [#209](https://github.com/mtxr/vscode-sqltools/pull/209)
@@ -18,14 +28,14 @@
 
 ## v0.17
 
-### v0.17.18
+### v0.17.18 - (May 2, 2019)
 
 * **Enhancements**
   * Error messages now has an option for quick opening docs.
   * Font fallbacks. Issue [#200](https://github.com/mtxr/vscode-sqltools/issues/200)
   * Changed tree separators for explorer.
 
-### v0.17.17
+### v0.17.17 - (april 29, 2019)
 
 * **NEW** 🎉
   * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/pull/192)
@@ -41,7 +51,7 @@
 
 > this package contains a packing error. Please update to most recent version.
 
-### v0.17.15
+### v0.17.15 - (April 14, 2019)
 
 * **Fix** 🎉
   * Minor fix on codelens.

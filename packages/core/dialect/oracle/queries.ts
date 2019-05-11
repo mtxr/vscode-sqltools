@@ -66,4 +66,28 @@ export default {
   group by v.owner, v.view_name, user
   )
   where owner = user`,
+  fetchFunctions: `select
+  nvl(p.procedure_name, p.object_name) as name,
+  p.owner as dbschema,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
+  p.owner ||'.'||p.object_name || case when p.procedure_name is not null then '.'||p.procedure_name else null end  
+  as signature,
+  RTRIM(XMLAGG(XMLELEMENT(a,data_type,',').EXTRACT('//text()') ORDER BY position).GetClobVal(),',') as args,
+  to_clob(listagg(case when a.argument_name is null then data_type else null end, ',') within group (order by position)) as resulttype,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || p.owner || '${TREE_SEP}' 
+  || decode(p.object_type, 'PACKAGE', 'packages', 'FUNCTION', 'functions', 'PROCEDURE', 'procedures')
+  || '${TREE_SEP}' || p.object_name 
+  || case when p.procedure_name is not null then '${TREE_SEP}' || p.procedure_name  else null end
+  as tree,
+  '' as source
+  from all_procedures p
+  join all_arguments a on (a.owner = p.owner and ((a.object_name = p.object_name) or (p.procedure_name = a.object_name and p.object_name = a.package_name)))
+  where p.object_type in ('FUNCTION','PROCEDURE','PACKAGE') 
+  and not (p.object_type = 'PACKAGE' and p.procedure_name is null) 
+  and p.owner = user    
+  group by 
+  p.owner,
+  p.object_type,
+  p.object_name,
+  p.procedure_name`,
 } as DialectQueries;
