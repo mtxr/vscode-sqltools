@@ -44,7 +44,7 @@ module.exports = function getLanguageServerConfig() {
     externals: {
       sqlite3: 'commonjs sqlite3',
       oracledb: 'commonjs oracledb',
-      hanaclient: 'commonjs @sap/hana-client'
+      '@sap/hana-client': 'commonjs @sap/hana-client'
     },
   };
 
