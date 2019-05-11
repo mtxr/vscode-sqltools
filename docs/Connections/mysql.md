@@ -57,8 +57,7 @@ MySQL driver specific options can be passed using `mysqlOptions` settings.
 | Option key  | Default Value | Allowed Values |
 | ------------- | ------------- | ------------- |
 | ssl  | `null`  | See section [SSL](#2-ssl) |
-
-
+| ssl  | `null`  | See section [SSL](#2-ssl) |
 
 ### 2. SSL
 
@@ -71,3 +70,27 @@ If you are connecting using XProtocol, see:
 
 https://dev.mysql.com/doc/dev/connector-nodejs/8.0/tutorial-Secure_Sessions.html
 
+
+
+## Know Errors and How to Fix
+
+### ER_NOT_SUPPORTED_AUTH_MODE
+
+See issue [#195](https://github.com/mtxr/vscode-sqltools/issues/195).
+
+This error can be probably fixed using `mysqlOptions`. See:
+
+```json
+[
+  {
+    ...
+    "dialect": "MySQL",
+    "port": 33060, // Yes, changin port might help. Take a look at MySQL ports section in https://mysqlserverteam.com/mysql-guide-to-ports/
+    "mysqlOptions": {
+      "authProtocol": "xprotocol",
+      "ssl": true
+    }
+  }
+]
+...
+```

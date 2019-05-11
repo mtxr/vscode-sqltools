@@ -51,7 +51,6 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
     ErrorHandler.setTelemetryClient(this.telemetry);
-    ErrorHandler.setOutputFn(window.showErrorMessage);
     this.context.subscriptions.push(
       workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
@@ -227,8 +226,8 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     return this.decorateAndRegisterCommand(command, handler, 'registerTextEditorCommand');
   }
 
-  public errorHandler = (message: string, error: any, yesCallbackOrCommand?: Function | string) => {
-    return ErrorHandler.create(message, yesCallbackOrCommand)(error);
+  public errorHandler = (message: string, error: any) => {
+    return ErrorHandler.create(message)(error);
   }
 
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {

@@ -132,4 +132,9 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
           });
       });
   }
+
+  public describeTable(prefixedTable: string) {
+    const [ catalog, schema, table ] = prefixedTable.split('.');
+    return this.query(Utils.replacer(this.queries.describeTable, { catalog, schema, table }));
+  }
 }

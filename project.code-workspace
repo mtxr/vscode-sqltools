@@ -30,5 +30,6 @@
       "**/bower_components": true,
       "**/.vscode-test": true
     },
+    "typescript.tsdk": "root/node_modules/typescript/lib",
   }
 }

@@ -1,4 +1,5 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: `select * from all_tab_columns
@@ -15,12 +16,12 @@ export default {
   c.data_default as defaultvalue,
   c.nullable as isnullable,
   cols.constraint_type AS keytype,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || C.owner  || '/' || (
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || C.owner  || '${TREE_SEP}' || (
     CASE
       WHEN v.TYPE = 'V' THEN 'views'
       ELSE 'tables'
     END
-  ) || '/' || C.TABLE_name || '/' || C.COLUMN_NAME AS tree
+  ) || '${TREE_SEP}' || C.TABLE_name || '${TREE_SEP}' || C.COLUMN_NAME AS tree
   from all_tab_columns c
   join (
   select table_name, owner, 'T' as type from all_tables
@@ -47,12 +48,12 @@ export default {
   END AS isView,
   SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
   num_rows AS numberOfColumns,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') || '/' || owner  || '/' || (
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || owner  || '${TREE_SEP}' || (
     CASE
       WHEN TYPE = 'V' THEN 'views'
       ELSE 'tables'
     END
-  ) || '/' || table_name AS tree
+  ) || '${TREE_SEP}' || table_name AS tree
   from (
   select t.table_name, t.owner, user, 'T' as type, count(1) as num_rows
   from all_tables t
@@ -65,4 +66,28 @@ export default {
   group by v.owner, v.view_name, user
   )
   where owner = user`,
+  fetchFunctions: `select
+  nvl(p.procedure_name, p.object_name) as name,
+  p.owner as dbschema,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
+  p.owner ||'.'||p.object_name || case when p.procedure_name is not null then '.'||p.procedure_name else null end  
+  as signature,
+  RTRIM(XMLAGG(XMLELEMENT(a,data_type,',').EXTRACT('//text()') ORDER BY position).GetClobVal(),',') as args,
+  to_clob(listagg(case when a.argument_name is null then data_type else null end, ',') within group (order by position)) as resulttype,
+  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || p.owner || '${TREE_SEP}' 
+  || decode(p.object_type, 'PACKAGE', 'packages', 'FUNCTION', 'functions', 'PROCEDURE', 'procedures')
+  || '${TREE_SEP}' || p.object_name 
+  || case when p.procedure_name is not null then '${TREE_SEP}' || p.procedure_name  else null end
+  as tree,
+  '' as source
+  from all_procedures p
+  join all_arguments a on (a.owner = p.owner and ((a.object_name = p.object_name) or (p.procedure_name = a.object_name and p.object_name = a.package_name)))
+  where p.object_type in ('FUNCTION','PROCEDURE','PACKAGE') 
+  and not (p.object_type = 'PACKAGE' and p.procedure_name is null) 
+  and p.owner = user    
+  group by 
+  p.owner,
+  p.object_type,
+  p.object_name,
+  p.procedure_name`,
 } as DialectQueries;

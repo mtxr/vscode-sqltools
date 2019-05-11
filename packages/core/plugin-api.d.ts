@@ -38,7 +38,7 @@ export declare namespace SQLTools {
     registerInfoMessage(message: string, value?: string): any;
     registerException(
       error: Error,
-      meta?: {
+      data?: {
         [key: string]: any;
       }
     ): void;
@@ -74,7 +74,7 @@ export declare namespace SQLTools {
     addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<CommandSuccessEvent>): this;
     registerCommand(command: string, handler: Function): this;
     registerTextEditorCommand(command: string, handler: Function): this;
-    errorHandler(message: string, error: any, yesCallbackOrCommand?: Function | string): any;
+    errorHandler(message: string, error: any): any;
   }
   interface LanguageServerInterface<S = Store> {
     listen(): void;

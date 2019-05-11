@@ -1,4 +1,5 @@
 import { DialectQueries } from '@sqltools/core/interface';
+import { TREE_SEP } from '../../constants';
 
 export default {
   describeTable: 'SP_COLUMNS :table',
@@ -16,18 +17,18 @@ SELECT
   TC.CONSTRAINT_TYPE as constraintType,
   CONCAT(
     C.TABLE_CATALOG,
-    '/',
+  '${TREE_SEP}',
     C.TABLE_SCHEMA,
-    '/',
+  '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+  '${TREE_SEP}',
     C.TABLE_NAME,
-    '/',
+  '${TREE_SEP}',
     C.COLUMN_NAME
   ) AS tree
 FROM
@@ -68,16 +69,16 @@ SELECT
   COUNT(1) AS numberOfColumns,
   CONCAT(
     T.TABLE_CATALOG,
-    '/',
+  '${TREE_SEP}',
     T.TABLE_SCHEMA,
-    '/',
+  '${TREE_SEP}',
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ),
-    '/',
+  '${TREE_SEP}',
     T.TABLE_name
   ) AS tree
 FROM
@@ -92,4 +93,56 @@ GROUP by
   T.TABLE_TYPE
 ORDER BY
   T.TABLE_NAME;`,
+  fetchFunctions: `
+SELECT
+  f.specific_name AS name,
+  f.routine_schema AS dbSchema,
+  f.routine_catalog AS dbName,
+  concat(
+    f.routine_schema,
+    '.',
+    f.routine_name    
+  ) as signature,
+  STRING_AGG(p.data_type, ',') as args,
+  f.data_type AS resultType,
+  CONCAT(
+    f.routine_catalog,
+    '${TREE_SEP}',
+    f.routine_schema,
+    '${TREE_SEP}',
+    (
+      CASE
+        WHEN f.routine_type = 'PROCEDURE' THEN 'procedures'
+        ELSE 'functions'
+      END
+    ),
+    '${TREE_SEP}',
+    f.specific_name
+  ) AS tree,
+  f.routine_definition AS source
+FROM
+  information_schema.routines AS f
+  LEFT JOIN information_schema.parameters AS p ON (
+    f.specific_name = p.specific_name
+    AND f.routine_schema = p.specific_schema
+    AND f.routine_catalog = p.specific_catalog
+  )
+WHERE
+  f.routine_schema NOT IN (
+    'information_schema',
+    'performance_schema',
+    'mysql',
+    'sys'
+  )
+GROUP BY
+  f.routine_catalog,
+  f.specific_name,
+  f.routine_schema,
+  f.routine_name,
+  f.data_type,
+  f.routine_type,
+  f.routine_definition
+ORDER BY
+  f.specific_name;
+`
 } as DialectQueries;

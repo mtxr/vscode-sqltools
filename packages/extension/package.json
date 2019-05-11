@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.17.17",
+    "version": "0.18.2",
     "publisher": "mtxr",
     "license": "GPL-3.0",
     "preview": false,
@@ -208,9 +208,9 @@
                 }
             },
             {
-                "title": "Add new connection from arg",
-                "command": "SQLTools.addConnection",
-                "category": "SQLTools internal"
+                "title": "Edit connection",
+                "command": "SQLTools.openEditConnectionScreen",
+                "category": "SQLTools Management"
             },
             {
                 "title": "Delete connection",
@@ -445,7 +445,8 @@
                                     "MySQL",
                                     "OracleDB",
                                     "PostgreSQL",
-                                    "SQLite"
+                                    "SQLite",
+                                    "SAPHana"
                                 ],
                                 "description": "Connection Dialect",
                                 "required": false
@@ -544,6 +545,15 @@
                                         "default": null
                                     }
                                 }
+                            },
+                            "oracleOptions": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": {},
+                                "required": false,
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
@@ -703,10 +713,6 @@
                     "when": "false"
                 },
                 {
-                    "command": "SQLTools.addConnection",
-                    "when": "false"
-                },
-                {
                     "command": "SQLTools.saveResults",
                     "when": "sqltools.Results.active"
                 },
@@ -755,6 +761,11 @@
                     "command": "SQLTools.closeConnection",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connectedConnection",
                     "group": "navigation@0"
+                },
+                {
+                    "command": "SQLTools.openEditConnectionScreen",
+                    "when": "view == SQLTools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
+                    "group": "navigation@1"
                 },
                 {
                     "command": "SQLTools.deleteConnection",
