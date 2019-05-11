@@ -32,7 +32,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
       return this.ext_executeQuery(query);
     } catch (e) {
-      this.errorHandler('Error running query.', e, this.ext_showOutputChannel);
+      this.errorHandler('Error running query.', e);
     }
   }
 
@@ -50,7 +50,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this.resultsWebview.updateResults(payload);
 
     } catch (e) {
-      this.errorHandler('Error while showing table records', e, this.ext_showOutputChannel);
+      this.errorHandler('Error while showing table records', e);
     }
   }
 
@@ -61,7 +61,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.updateResults(payload);
     } catch (e) {
-      this.errorHandler('Error while describing table records', e, this.ext_showOutputChannel);
+      this.errorHandler('Error while describing table records', e);
     }
   }
 
@@ -92,16 +92,26 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this._connect(true).catch(e => this.errorHandler('Error selecting connection', e));
   }
 
-  private ext_executeQuery = async (query?: string) => {
+  private ext_executeQuery = async (query?: string, connName?: string) => {
     try {
       query = query || await getSelectedText('execute query');
+      if (!connName) {
+        connName = (query.match(/@conn\s*([\w_]+)/) || [])[1];
+      }
+      if (connName) {
+        const conn = (this.getConnectionList() || []).find(c => c.name === connName);
+        if (!conn) {
+          throw new Error(`Trying to run query on '${connName}' but it does not exist.`)
+        }
+        await this._setConnection(conn);
+      }
       await this._connect();
       this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
       this.resultsWebview.updateResults(payload);
       return payload;
     } catch (e) {
-      this.errorHandler('Error fetching records.', e, this.ext_showOutputChannel);
+      this.errorHandler('Error fetching records.', e);
     }
   }
 
@@ -131,6 +141,22 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_openAddConnectionScreen = () => {
     return this.settingsWebview.show();
+  }
+
+  private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {
+    let id: string;
+    if (connIdOrNode) {
+      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
+    } else {
+      const conn = await this._pickConnection();
+      id = conn ? getConnectionId(conn) : undefined;
+    }
+
+    if (!id) return;
+
+    const conn = this.explorer.getById(id);
+    this.settingsWebview.show();
+    this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
   }
 
   private ext_focusOnExplorer = () => {
@@ -193,6 +219,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
+  private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
+    if (!connInfo) {
+      console.warn('Nothing to do. No parameter received');
+      return;
+    }
+
+    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined)
+      .filter(c => getConnectionId(c) !== oldId);
+    connList.push(connInfo);
+    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
+  }
+
   // internal utils
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.conn) {
@@ -201,8 +239,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     const conn = await this._connect();
-
-    return this._pickTable(conn, 'label');
+    return this._pickTable(conn, 'value');
   }
 
   private _openResultsWebview() {
@@ -221,11 +258,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
     return quickPick(tables
       .map((table) => {
-        return { label: table.name } as QuickPickItem;
+        const prefixedTableName = getTableName(conn.dialect, table);
+        const prefixes  = prefixedTableName.split('.');
+
+        return <QuickPickItem>{
+          label: table.name,
+          value: getTableName(conn.dialect, table),
+          description: `${table.numberOfColumns} cols`,
+          detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
+        };
       }), prop, {
         matchOnDescription: true,
         matchOnDetail: true,
-
         title: `Tables in ${conn.database}`,
       });
   }
@@ -240,7 +284,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     const sel = (await quickPick(connections.map((c) => {
       return <QuickPickItem>{
         description: c.isConnected ? 'Currently connected' : '',
-        detail: getConnectionDescription(c),
+        detail: (c.isConnected ? '$(zap) ' : '') + getConnectionDescription(c),
         label: c.name,
         value: getConnectionId(c)
       };
@@ -355,7 +399,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     // register extension commands
     extension.registerCommand(`addConnection`, this.ext_addConnection)
+      .registerCommand(`updateConnection`, this.ext_updateConnection)
       .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
+      .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
       .registerCommand(`describeFunction`, this.ext_describeFunction)

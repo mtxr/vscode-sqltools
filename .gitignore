@@ -17,3 +17,4 @@ cache/
 *.zip
 .test-database/oracle/docker-images-master
 .test-database/**/local*
+.DS_Store

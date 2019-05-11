@@ -33,11 +33,6 @@ export default class Selector {
     return requestRanges;
   }
 
-  public static getRequestVariableDefinitionName(text: string): string {
-    const matched = text.match(Constants.RequestVariableDefinitionRegex);
-    return matched && matched[1];
-  }
-
   public static isVariableDefinitionLine(line: string): boolean {
     return Constants.FileVariableDefinitionRegex.test(line);
   }

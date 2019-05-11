@@ -4,6 +4,7 @@ import { clipboardInsert } from '../lib/utils';
 interface SyntaxProps {
   language?: string;
   code: any;
+  strong?: boolean;
 }
 
 interface SyntaxState {
@@ -45,7 +46,7 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
       <div className='relative'>
         <div
           id={this.id}
-          className={`syntax ${this.props.language}`}
+          className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}
           dangerouslySetInnerHTML={{ __html: this.renderCode(this.props.code) }}
         ></div>
         <button className='btn copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>

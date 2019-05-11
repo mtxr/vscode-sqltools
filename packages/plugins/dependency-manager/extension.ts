@@ -63,12 +63,12 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/connections`);
+          openExternal(`${DOCS_ROOT_URL}/connections/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {
       this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}`, error, (<any>console).show);
+      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}`, error);
     }
   }
 

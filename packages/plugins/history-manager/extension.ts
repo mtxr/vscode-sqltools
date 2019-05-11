@@ -50,7 +50,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       query = query || (await this.historyMenu());
       return commands.executeCommand(`${EXT_NAME}.executeQuery`, query, false);
     } catch (e) {
-      this.errorHandler('Error while running query.', e, `${EXT_NAME}.showOutputChannel`);
+      this.errorHandler('Error while running query.', e);
     }
   }
 
@@ -63,7 +63,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       query = query || (await this.historyMenu());
       insertText(query);
     } catch (e) {
-      this.errorHandler('Coudl not edtir query.', e, `${EXT_NAME}.showOutputChannel`);
+      this.errorHandler('Could not edit query.', e);
     }
   }
 

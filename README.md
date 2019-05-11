@@ -70,14 +70,16 @@ Our supporters:
 
 Our donators:
 
-- Hector Bentancor
-- Trung Nguyen
-- Bogdan Bursuc
-- Meirion Morris
-- Alexander Krylkov
-- Oleksandr Akhtyrskiy
-- Justin Webber
-- Alejandro Dunogent
+- Hector Bentancor (?)
+- Trung Nguyen (?)
+- Bogdan Bursuc ([@bogh](https://github.com/bogh))
+- Meirion Morris ([@mwmorris](https://github.com/mwmorris))
+- Alexander Krylkov (?)
+- Oleksandr Akhtyrskiy (?)
+- Justin Webber (?)
+- Alejandro Dunogent (?)
+- Ran Sagy ([@ransagy](https://github.com/ransagy))
+- Scott Wilson ([@omiba](https://github.com/omiba))
 
 > Want to donate? [Click here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8).
 

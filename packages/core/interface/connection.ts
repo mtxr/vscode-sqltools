@@ -2,6 +2,7 @@ import { DatabaseDialect } from './dialect';
 import { ClientConfig } from 'pg';
 import { ConnectionConfig } from 'mysql';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { IPoolAttributes } from 'oracledb';
 
 export interface ConnectionInterface {
   /**
@@ -75,6 +76,13 @@ export interface ConnectionInterface {
    */
   previewLimit?: number;
   /**
+   * Oracle specific driver options. See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrsconnectstring
+   * @type {string}
+   * @default null
+   * @memberof ConnectionInterface
+   */
+  connectString?: string;
+  /**
    * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options
    * @deprecated replaced by mssqlOptions
    * @type {any}
@@ -105,6 +113,14 @@ export interface ConnectionInterface {
   pgOptions?: {
     ssl?: ClientConfig['ssl'];
   }
+
+  /**
+   * OracleDB specific driver options (pool). See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrs
+   * @type {IPoolAttributes}
+   * @memberof ConnectionInterface
+   */
+  oracleOptions?: IPoolAttributes
+
   /**
    * Connection domain (for MSSQL/Azure only)
    * @type {string}

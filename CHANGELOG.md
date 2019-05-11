@@ -1,12 +1,67 @@
 # Changelog
 
+## v0.18
+
+### v0.18.2 - (May 9, 2019)
+
+* **Fix** 🎉
+  * Add stored procedure listing on explorer for Oracle. Issue [#208](https://github.com/mtxr/vscode-sqltools/issues/208)
+
+### v0.18.1 - (May 8, 2019)
+
+* **Fix** 🎉
+  * Add escape chars for table names, schemas and catalogs. Issue [#216](https://github.com/mtxr/vscode-sqltools/issues/216)
+
+### v0.18.0 - (May 7, 2019)
+
+* **NEW** 🎉
+  * Add options to edit connections from explorer and command palette. Issue [#185](https://github.com/mtxr/vscode-sqltools/issues/185) and PR [#209](https://github.com/mtxr/vscode-sqltools/pull/209)
+  * Add stored procedure listing on explorer for MSSQL. Oracle is coming soon. [#203](https://github.com/mtxr/sqltools-formatter/issues/203)
+  * Add pool options for Oracle. Issue [#186](https://github.com/mtxr/vscode-sqltools/issues/186) and PR [#204](https://github.com/mtxr/vscode-sqltools/pull/204)
+
+* **Enhancements**
+  * Adopted support for more `--vscode-editor-*` prefixes to webviews.
+  * Enhanced results them for JSONB in white themes. Issue [#207](https://github.com/mtxr/vscode-sqltools/issues/207)
+
+* **Fix** 🎉
+  * Fix results header not in sync with columns. Issue [#201](https://github.com/mtxr/vscode-sqltools/issues/201)
+
 ## v0.17
+
+### v0.17.18 - (May 2, 2019)
+
+* **Enhancements**
+  * Error messages now has an option for quick opening docs.
+  * Font fallbacks. Issue [#200](https://github.com/mtxr/vscode-sqltools/issues/200)
+  * Changed tree separators for explorer.
+
+### v0.17.17 - (april 29, 2019)
+
+* **NEW** 🎉
+  * Add support for connections string for PostgreSQL and Oracle. PR [#192](https://github.com/mtxr/vscode-sqltools/pull/192)
+    * Thanks to [@zetxx](https://github.com/zetxx)
+
+* **Fix** 🎉
+  * Fix command palette not using schemas for tables. Issue [#197](https://github.com/mtxr/vscode-sqltools/issues/197)
+  * Fix MySQL escaping for database names. Issue [#196](https://github.com/mtxr/vscode-sqltools/issues/196)
+  * Fix completions too fuzzy. Issue [#193](https://github.com/mtxr/vscode-sqltools/issues/193)
+  * Fix MySQL escaping for database names. Issue [#196](https://github.com/mtxr/vscode-sqltools/issues/196)
+
+### v0.17.16
+
+> this package contains a packing error. Please update to most recent version.
+
+### v0.17.15 - (April 14, 2019)
+
+* **Fix** 🎉
+  * Minor fix on codelens.
+  * Allow to set connection on query block. See: [Codelens Doc](https://vscode-sqltools.mteixeira.dev/codelens)
 
 ### v0.17.14
 
 * **NEW** 🎉
   * Add codelens to sql files. You can select file types to add code lens using `sqltools.codelensLanguages` setting. Default to `['sql']`
-    * Split your query blocks using `@name` on comments. See:
+    * Split your query blocks using `@block` on comments. See:
     * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
 
 * **Enhancements**
@@ -17,7 +72,7 @@
 ### v0.17.13
 
 * **NEW** 🎉
-  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypierce](https://github.com/mickeypierce)
+  * Enhanced connection hierarchy to allow multiple schemas and databases for Oracle, thanks to [@mickeypearce](https://github.com/mickeypearce)
 
 * **Enhancements**
   * Generate insert queries now includes database and schema prefixes accordingly with the dialect.
@@ -25,7 +80,7 @@
 ### v0.17.12
 
 * **NEW** 🎉
-  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/sqltools-formatter/issues/174). Eg:
+  * Add some options to customize results screen. Issue [#174](https://github.com/mtxr/vscode-sqltools/issues/174). Eg:
     ```json
     ...
     "sqltools.results": {

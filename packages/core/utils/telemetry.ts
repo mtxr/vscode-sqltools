@@ -24,6 +24,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
       .setAutoCollectPerformance(false)
       .setAutoCollectRequests(false)
       .setAutoDependencyCorrelation(false)
+      .setInternalLogging(false, false)
       .setUseDiskRetryCaching(true);
 
     AI.defaultClient.config.samplingPercentage = 50;
@@ -108,9 +109,9 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   }
 
   @runIfPropIsDefined('client')
-  public registerException(error: Error, meta: { [key: string]: any } = {}) {
+  public registerException(error: Error, data: { [key: string]: any } = {}) {
     if (!error) return;
-    this.sendException(error, meta);
+    this.sendException(error, { ...((<any>error).data || {}), ...data });
   }
 
   @runIfPropIsDefined('client')

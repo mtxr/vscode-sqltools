@@ -2,17 +2,32 @@ import { DatabaseDialect } from '@sqltools/core/interface';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Table | string) {
-  if (typeof table === 'string') return table.toString();
+  let items: string[] = [];
+  let tableObj = typeof table === 'string' ? <DatabaseInterface.Table>{ name: table } : table;
   switch(dialect) {
+    case DatabaseDialect.SQLite:
+      return `"${tableObj.name}"`;
     case DatabaseDialect.PostgreSQL:
-      if (table.tableDatabase)
-        return [table.tableDatabase, table.tableSchema, table.name].join('.');
-    case DatabaseDialect.MySQL:
+      tableObj.tableDatabase && items.push(`"${tableObj.tableDatabase}"`);
+      tableObj.tableSchema && items.push(`"${tableObj.tableSchema}"`);
+      items.push(`"${tableObj.name}"`);
+      break;
     case DatabaseDialect.OracleDB:
-      if(table.tableSchema)
-        return [table.tableSchema, table.name].join('.');
+      tableObj.tableSchema && items.push(tableObj.tableSchema);
+      items.push(tableObj.name);
+      break;
+    case DatabaseDialect.MySQL:
+        tableObj.tableSchema && items.push(`\`${tableObj.tableSchema}\``);
+        items.push(`\`${tableObj.name}\``);
+        break;
+    case DatabaseDialect.MSSQL:
+      tableObj.tableCatalog && items.push(`[${tableObj.tableCatalog}]`);
+      tableObj.tableSchema && items.push(`[${tableObj.tableSchema}]`);
+      items.push(`[${tableObj.name}]`);
+      break;
   }
-  return table.name.toString();
+  if (items.length > 0) return items.join('.');
+  return tableObj.name.toString();
 }
 
 export default prefixedtableName;

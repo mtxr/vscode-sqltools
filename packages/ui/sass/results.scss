@@ -5,14 +5,9 @@
 $transition: all .3s ease 0s;
 
 body {
-  font-size: $fontSize0;
-  font-size: $fontSize1;
   font-size: $fontSize;
-  font-family: $fontFamily0;
-  font-family: $fontFamily1;
   font-family: $fontFamily;
   color: $color;
-  background: $backgroundColor0;
   background: $backgroundColor;
   @include full-screen();
 
@@ -30,8 +25,8 @@ pre {
   flex-direction: column;
 }
 .query-results-container, .query-results-container * {
-  font-size: var(--sqltools-font-size);
-  font-family: var(--sqltools-font-family);
+  font-size: var(--sqltools-font-size, $fontSize);
+  font-family: var(--sqltools-font-family, $fontFamily);
 }
 
 body,
@@ -58,6 +53,10 @@ body, #root {
   min-height: 0;
   flex-direction: column;
   background: $lightThemeGray1 !important;
+  .syntax {
+    padding: 3px;
+    cursor: pointer;
+  }
   .results-table {
     overflow: hidden;
     height: 100%;
@@ -71,7 +70,6 @@ body, #root {
   }
   .query-extras {
     width: 100%;
-    background: $backgroundColor0;
     background: $backgroundColor;
     flex-grow: 0;
   }
@@ -208,7 +206,6 @@ body.vscode-dark {
   .ReactTable .rt-thead.-filters select,
   .ReactTable .-pagination input,
   .ReactTable .-pagination select {
-    background: $backgroundColor0;
     background: $backgroundColor;
     color: $color;
     border-color: $darkThemeWhite2 !important;
@@ -322,9 +319,6 @@ div mark {
   justify-content: space-around;
   display: flex;
   font-size: 0.8em;
-  > small {
-    align-self: center;
-  }
 }
 
 .text-right {
@@ -385,10 +379,14 @@ div mark {
 }
 
 .active-row {
-  background: var(--vscode-editor-inactiveSelectionBackground) !important;
+  background: var(--vscode-editor-selectionBackground) !important;
 }
 .active-cell {
   background: var(--vscode-editor-selectionHighlightBackground) !important;
+  .syntax pre {
+    text-overflow: initial;
+    word-wrap: break-word;
+  }
 }
 
 .ReactTable .rt-table {
@@ -408,6 +406,5 @@ div mark {
 .ReactTable .rt-thead.-filters input, .ReactTable .rt-thead.-filters select, .ReactTable .-pagination input, .ReactTable .-pagination select,
 .ReactTable .rt-th, .ReactTable .rt-td,
 .ReactTable .rt-thead .rt-th, .ReactTable .rt-thead .rt-td {
-  padding: 5px 3px;
-  padding: var(--sqltools-table-cell-padding);
+  padding: var(--sqltools-table-cell-padding, 5px 3px);
 }

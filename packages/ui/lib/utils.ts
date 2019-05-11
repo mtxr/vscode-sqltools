@@ -3,9 +3,10 @@ export interface ValidationFunction {
   errorMessage?: string;
 }
 export function int(v) {
-  return notEmpty(v.toString()) ? parseInt(v, 10) : null;
+  return notEmpty(v) ? parseInt(v, 10) : null;
 }
 export function bool(v) {
+  if (typeof v === 'undefined') return false;
   v = v.toString().toLowerCase();
   return v === '1' || v === 'true' || v === 'yes' || v === 'y';
 }
