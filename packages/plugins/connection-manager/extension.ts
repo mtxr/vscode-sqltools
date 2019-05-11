@@ -86,6 +86,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private async openConnectionFile(conn: ConnectionInterface) {
+    if (!ConfigManager.autoOpenSessionFiles) return;
     if (!conn) return;
     await this.fsProvider.getConnFile(conn.name);
     const doc = await workspace.openTextDocument(Uri.parse(`${EXT_NAME.toLowerCase()}:/${conn.name} Session.sql`).with({ query: getConnectionId(conn) }));

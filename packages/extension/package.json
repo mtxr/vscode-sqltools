@@ -43,7 +43,9 @@
         "sql",
         "sqlite",
         "sqlplus",
-        "sqltools"
+        "sqltools",
+        "sap",
+        "saphana"
     ],
     "galleryBanner": {
         "theme": "dark",
@@ -674,6 +676,11 @@
                     "type": "boolean",
                     "default": false,
                     "description": "Flatten groups with has only one child"
+                },
+                "sqltools.autoOpenSessionFiles": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Auto open session file when connect"
                 }
             }
         },
