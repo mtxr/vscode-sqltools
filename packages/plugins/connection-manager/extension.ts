@@ -8,9 +8,10 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, ViewColumn, TextEditor } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
-import SQLToolsFSProvider from './provider';
+import path from 'path';
+import CodeLensPlugin from '../codelens/extension';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -20,8 +21,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private context: ExtensionContext;
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
+  private attachedFilesMap = {};
+  private codeLensPlugin: CodeLensPlugin;
 
-  private fsProvider: SQLToolsFSProvider;
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
 
   // extension commands
@@ -85,25 +87,41 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       }, (e) => this.errorHandler('Error closing connection', e));
   }
 
+  private async updateAttachedConnectionsMap(fileUri: Uri, connId?: string) {
+    if (!connId) {
+      delete this.attachedFilesMap[fileUri.toString()];
+    } else {
+      this.attachedFilesMap[fileUri.toString()] = connId;
+    }
+    await this.context.workspaceState.update('attachedFilesMap', this.attachedFilesMap);
+    this.codeLensPlugin.reset();
+    this.changeTextEditorHandler(window.activeTextEditor);
+  }
+
+  public getAttachedConnection(fileUri: Uri) {
+    return this.attachedFilesMap[fileUri.toString()];
+  }
+
   private async openConnectionFile(conn: ConnectionInterface) {
     if (!ConfigManager.autoOpenSessionFiles) return;
     if (!conn) return;
-    await this.fsProvider.getConnFile(conn.name);
-    const doc = await workspace.openTextDocument(Uri.parse(`${EXT_NAME.toLowerCase()}:/${conn.name} Session.sql`).with({ query: getConnectionId(conn) }));
-    await window.showTextDocument(doc, ViewColumn.Active);
+    const fileUri = Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`);
+    this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
+    await window.showTextDocument(Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`));
   }
 
-  private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string) => {
+  private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
     if (connIdOrNode) {
       let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
       conn = await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
-      await this.openConnectionFile(conn)
+      if (trySessionFile) await this.openConnectionFile(conn);
       return conn;
     }
     try {
       const conn = await this._connect(true);
-      await this.openConnectionFile(conn)
+      if (trySessionFile) await this.openConnectionFile(conn);
+      return conn;
     } catch (error) {
       this.errorHandler('Error selecting connection', error);
     }
@@ -396,11 +414,32 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
   }
 
-  private changeTextEditorHandler = async (editor: TextEditor) => {
-    if (!editor || !editor.document || editor.document.uri.scheme !== EXT_NAME.toLowerCase()) return;
+  private ext_attachFileToConnection = async (fileUri: Uri) => {
+    if (!fileUri) return;
 
-    const connId = editor.document.uri.query;
-    await this.ext_selectConnection(connId);
+    const conn = await this._pickConnection();
+    if (!conn) return;
+    this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
+  }
+
+  private ext_detachConnectionFromFile = async (fileUri: Uri) => {
+    if (!fileUri) return;
+    const doc = workspace.textDocuments.find(doc => doc.uri.toString() === fileUri.toString());
+    if (!doc) return;
+
+    this.updateAttachedConnectionsMap(fileUri);
+  }
+
+  private changeTextEditorHandler = async (editor: TextEditor) => {
+    if (!editor || !editor.document) return;
+
+    const connId = this.getAttachedConnection(editor.document.uri);
+    if (!connId) {
+      return commands.executeCommand('setContext', `sqltools.file.connectionAttached`, false);
+    }
+
+    await this.ext_selectConnection(connId, editor.document.uri.scheme === EXT_NAME.toLocaleLowerCase());
+    await commands.executeCommand('setContext', `sqltools.file.connectionAttached`, true);
   }
 
   public register(extension: SQLTools.ExtensionInterface) {
@@ -409,7 +448,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.context = extension.context;
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer(extension);
-    this.fsProvider = new SQLToolsFSProvider(this.context);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
 
@@ -421,7 +459,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       workspace.onDidCloseTextDocument(this.ext_refreshAll),
       workspace.onDidOpenTextDocument(this.ext_refreshAll),
       this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
-      workspace.registerFileSystemProvider(EXT_NAME.toLowerCase(), this.fsProvider, { isCaseSensitive: true }),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
 
@@ -442,11 +479,25 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
       .registerCommand(`showRecords`, this.ext_showRecords)
-      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer);
+      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
+      .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
+      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {
       this._updateStatusBar();
     });
+
+    if (window.activeTextEditor) {
+      setTimeout(() => {
+        this.changeTextEditorHandler(window.activeTextEditor);
+      }, 5000);
+    }
+  }
+
+  constructor(extension: SQLTools.ExtensionInterface) {
+    this.attachedFilesMap = extension.context.workspaceState.get('attachedFilesMap', {});
+    this.codeLensPlugin = new CodeLensPlugin;
+    extension.registerPlugin(this.codeLensPlugin);
   }
 }
