@@ -1,5 +1,5 @@
 Todo:
+  - Insert queries should consider columns ordinal position
   - Allow to add to auto connect using explorer
-  - Allow to remove from auto connect using explorer
   - Allow to open Bookmarks file
   - Add option to refresh query results with hotkey or button
