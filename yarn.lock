@@ -959,10 +959,10 @@
   resolved "https://registry.yarnpkg.com/@types/normalize-package-data/-/normalize-package-data-2.4.0.tgz#e486d0d97396d79beedd0a6e33f4534ff6b4973e"
   integrity sha512-f5j5b/Gf71L+dbqxIpQ4Z2WlmI/mPJ0fOkGGmFgtb6sAu97EPczzbS3/tJKxmcYDj55OX6ssqwDAWOHIYDRDGA==
 
-"@types/oracledb@^1.11.34":
-  version "1.11.34"
-  resolved "https://registry.yarnpkg.com/@types/oracledb/-/oracledb-1.11.34.tgz#631a317a298447bee26b5dbc65c0a6cd88f8a7e4"
-  integrity sha512-7cgZaKEfYcPPTScxxCoYoLxmmhM/PBobGBfxE3RGzRJl8YKhkyGKyExFu8fTOpF2cPgdfh83NGKBVX7prWzb+Q==
+"@types/oracledb@^3.1.0":
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/@types/oracledb/-/oracledb-3.1.0.tgz#7f8758426715820e481e7ed6e2b3efca3e1ef4dd"
+  integrity sha512-ndFzb6wCtZPvN9ro1CeToD4nsj9H0cspC4dKnLts2uZmYN70b1xfoI94GsVT4q4VFGQ2GnMkefsf5MfBBADHcQ==
   dependencies:
     "@types/node" "*"
 

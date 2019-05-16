@@ -4,7 +4,7 @@
   "description": "UI components for SQLTools",
   "main": "noop.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@sqltools/core": "*",

@@ -3,7 +3,7 @@
   "version": "0.18.2",
   "description": "SQLTools Plugins",
   "author": "Matheus Teixeira <me@mteixeira.me>",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "private": true,
   "engines": {
     "vscode": "^1.30.0"
