@@ -1,7 +1,7 @@
 import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { DISPLAY_NAME, EXT_NAME } from '@sqltools/core/constants';
 import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists, Telemetry } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands } from 'vscode';
@@ -114,11 +114,12 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
         if (typeof language === 'string') {
           agg.push({ language, scheme: 'untitled' });
           agg.push({ language, scheme: 'file' });
+          agg.push({ language, scheme: 'sqltools' });
         } else {
           agg.push(language);
         }
         return agg;
-      }, []);
+      }, [{ scheme: EXT_NAME.toLowerCase(), language: undefined }]);
 
     return {
       documentSelector: selector,
@@ -127,7 +128,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
         extensionPath: this.context.extensionPath,
       },
       synchronize: {
-        configurationSection: 'sqltools',
+        configurationSection: EXT_NAME.toLowerCase(),
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: error => {
