@@ -1,5 +1,5 @@
 import { ConnectionInterface } from '@sqltools/core/interface';
-import { RequestType } from 'vscode-languageserver';
+import { RequestType } from 'vscode-languageserver-protocol';
 
 export const InstallDepRequest = new RequestType<
   { dialect: ConnectionInterface['dialect'] },
