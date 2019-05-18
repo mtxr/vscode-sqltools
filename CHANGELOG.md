@@ -1,5 +1,17 @@
 # Changelog
 
+## v0.19
+
+### v0.19.0 - (May XX, 2019) - WIP
+
+* **NEW** 🎉
+  * Multiple connections with session files. PR [#188](https://github.com/mtxr/vscode-sqltools/pull/188)
+    * Read the docs: [Sessions and Multiple Connections](https://vscode-sqltools.mteixeira.dev/session-multiple-connections)
+  * Added support for SAP Hana, thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#215](https://github.com/mtxr/vscode-sqltools/pull/215)
+
+* **DOCS Updates**
+  * Add SSL example to PostgreSQL docs. thanks to [@lawrencegripper](https://github.com/lawrencegripper). PR [#223](https://github.com/mtxr/vscode-sqltools/pull/223)
+
 ## v0.18
 
 ### v0.18.2 - (May 9, 2019)
@@ -65,7 +77,7 @@
     * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
 
 * **Enhancements**
-  * Installing dependecies now uses VSCode progress indicator notification to better notify user about installation.
+  * Installing dependencies now uses VSCode progress indicator notification to better notify user about installation.
   * `NULL` values are now centered on results table.
   * `TRUE` and `FALSE` are better displayed on results table.
 
@@ -104,7 +116,7 @@
 * **NEW** 🎉
   * Add command `SQLTools.focusOnExplorer` to focus on explorer.
   * Allow users to set connection icons.
-  * Add stored procedure listing on explorer for Postgres and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
+  * Add stored procedure listing on explorer for PostgreSQL and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
     * ![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
   * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/i
   * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/ssues/71)
@@ -114,8 +126,8 @@
 * **Enhancements**
   * Insert query generator includes column name and type on placeholders.
   * Improved query parser for better handling MSSQL queries.
-  * Identifing table prefix words for suggestions.
-  * Changed the icon on sugestions if it`s a view to make it visually different of a table.
+  * Identifying table prefix words for suggestions.
+  * Changed the icon on suggestions if it`s a view to make it visually different of a table.
   * Sorting column names by table name on suggestions.
 
 * **Fixes**
@@ -126,7 +138,7 @@
 
 * **Enhancements**
   * Improved query multiple statements parser
-  * Add ssl support for MySQL. Thanks to @MOZGIII.
+  * Add ssl support for MySQL. Thanks to [@MOZGIII](http://github.com/MOZGIII).
   * Ignoring comments on Query History tree view
 
 ### v0.17.9
@@ -140,7 +152,7 @@
 * **Fixes**
   - Fixes Icon Paths on windows. Issue #151
   - Allow empty password. Issue #150
-  - Fixes clutered database tree view. Issue #139
+  - Fixes cluttered database tree view. Issue #139
 
 ### v0.17.7
 
@@ -155,7 +167,7 @@
 
 * **NEW** 🎉
   * Added option to open results rows/values in editor. Issue #140.
-  * Added SSL support for postgres via `pgOptions` connection setting. Issue #141
+  * Added SSL support for PostgreSQL via `pgOptions` connection setting. Issue #141
   * Deprecating `dialectOptions` in favor of `[dialect]Options` settings.
 
 * **Fixes**
@@ -164,7 +176,7 @@
 ### v0.17.5
 
 * **Fixes**
-  - Fixed formater when formatting query with $1 parameters
+  - Fixed formatter when formatting query with $1 parameters
   - Fixed #136 scroll issue
 
 ### v0.17.4
@@ -185,7 +197,7 @@
 
 * **NEW** 🎉
   * Added support for SQLite. #51
-  * Added support for Oracle Database. #13
+  * Added support for Oracle Database, thanks to [@mickeypearce](https://github.com/mickeypearce). #13
   * Added History Explorer on sidebar
   * Added Bookmarks Explorer on sidebar
   * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\).
@@ -205,7 +217,7 @@
     * `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
     * `SQLTools.runFromInput` command was renamed to `SQLTools.executeFromInput`
     * `SQLTools.editFromHistory` command was renamed to `SQLTools.editHistory`
-  * _**Settngs**_:
+  * _**Settings**_:
     * `sqltools.logging` and `sqltools.logLevel` were removed.
     * **Fixes**
       * This settings were ported from Sublime Text version but were never used here.

@@ -41,7 +41,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
   public show() {
-        if (!this.panel) {
+    if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.id,
         this.title,
@@ -70,7 +70,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
             .toString());
     }
 
-    this.panel.title = this.title;
+    this.updatePanelName();
 
     this.panel.reveal(this.wereToShow, this.preserveFocus);
     this.postMessage({ action: 'reset' });
@@ -141,5 +141,9 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       }, 200);
       this.panel.webview.postMessage({ action: 'getState' });
     })
+  }
+
+  public updatePanelName () {
+    this.panel.title = this.title;
   }
 }
