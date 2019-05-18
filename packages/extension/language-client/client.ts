@@ -103,11 +103,11 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
     };
     let selector = [];
     if (ConfigManager.completionLanguages){
-      selector.concat(ConfigManager.completionLanguages);
+      selector = selector.concat(ConfigManager.completionLanguages);
     }
 
     if (ConfigManager.formatLanguages) {
-      selector.concat(ConfigManager.formatLanguages);
+      selector = selector.concat(ConfigManager.formatLanguages);
     }
 
     selector = selector.reduce((agg, language) => {
