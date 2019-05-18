@@ -2,6 +2,7 @@
   "sqltools.telemetry": true,
   "sqltools.useNodeRuntime": true,
   "sqltools.sortColumns": "ordinalnumber",
+  "sqltools.autoOpenSessionFiles": true,
   "sqltools.results": {
     "limit": 100,
     "location": "beside",

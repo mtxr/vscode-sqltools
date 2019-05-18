@@ -8,6 +8,7 @@
   * [PostgreSQL](Connections/postgresql.md)
   * [SQLite](Connections/SQLite.md)
   * [SAP HANA](Connections/SAPHANA.md)
+* [Sessions and Multiple Connections](session-multiple-connections.md)
 * [Executing Queries](executing-queries.md)
 * [Codelens](codelens.md)
 * [Contributing](Contributing.md)
