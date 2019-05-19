@@ -47,7 +47,7 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15,
-      "dialectOptions": {
+      "mssqlOptions": {
         "encrypt": false
       }
     },

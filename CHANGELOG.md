@@ -12,6 +12,10 @@
 * **DOCS Updates**
   * Add SSL example to PostgreSQL docs. thanks to [@lawrencegripper](https://github.com/lawrencegripper). PR [#223](https://github.com/mtxr/vscode-sqltools/pull/223)
 
+* **Breaking Changes**
+  * Remove deprecated (v0.17.7) `sqltools.previewLimit` in favor of `sqltools.results.limit`.
+  * Remove deprecated (v0.17.6) `sqltools.connections[].dialectOptions` in favor of `sqltools.connections[].mssqlOptions`, `sqltools.connections[].pgOptions`, `sqltools.connections[].mysqlOptions` and `sqltools.connections[].oracleOptions`.
+
 ## v0.18
 
 ### v0.18.2 - (May 9, 2019)
