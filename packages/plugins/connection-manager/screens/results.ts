@@ -4,6 +4,7 @@ import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provid
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
+import { getNameFromId } from '@sqltools/core/utils';
 
 export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
@@ -60,6 +61,13 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return super.show();
   }
   updateResults(payload: DatabaseInterface.QueryResults[]) {
+    this.title = 'SQLTools Results';
+    try {
+      if (payload && payload.length > 0) {
+        this.title = `${getNameFromId(payload[0].connId)} Results`;
+      }
+    } catch (error) {}
+    this.updatePanelName();
     this.postMessage({ action: 'queryResults', payload });
   }
 

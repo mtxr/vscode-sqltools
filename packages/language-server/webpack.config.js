@@ -26,7 +26,7 @@ module.exports = function getLanguageServerConfig() {
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
 
-        },
+        }
       ],
     },
     resolve: {
@@ -44,6 +44,7 @@ module.exports = function getLanguageServerConfig() {
     externals: {
       sqlite3: 'commonjs sqlite3',
       oracledb: 'commonjs oracledb',
+      '@sap/hana-client': 'commonjs @sap/hana-client'
     },
   };
 

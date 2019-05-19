@@ -1,10 +1,10 @@
 {
   "name": "@sqltools/language-server",
-  "version": "0.18.0",
+  "version": "0.18.2",
   "description": "SQLTools Language Server",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@sqltools/core": "*",
@@ -13,7 +13,7 @@
     "vscode-languageserver": "^5.3.0-next.1"
   },
   "devDependencies": {
-    "@babel/core": "7.4.0",
+    "@babel/core": "7.4.4",
     "@babel/plugin-proposal-object-rest-spread": "^7.3.4",
     "@babel/plugin-transform-spread": "^7.2.2",
     "@babel/preset-env": "^7.3.4",

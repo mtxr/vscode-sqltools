@@ -295,14 +295,14 @@ export class SidebarFunction extends SidebarAbstractItem<null> {
       dark: this.context.asAbsolutePath('icons/function-dark.svg'),
       light: this.context.asAbsolutePath('icons/function-light.svg'),
     };
-    this.description = `${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || '?'}`;
-    this.tooltip = `${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || '?'}`;
-    this.value = `${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}`;
+    this.description = `${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
+    this.tooltip = `${this.functionData.signature}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
+    this.value = `${this.functionData.signature}`;
     let args = [];
     this.functionData.args.forEach((type, index) => {
       args.push(`\${${index + 1}:${type}}`);
     });
-    this.snippet = new SnippetString(`${this.functionData.schema ? (this.functionData.schema + '.') : ''}${this.functionData.name}(${args.join(', ')})$0`);
+    this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')})$0`);
     this.command = {
       title: 'Append to Cursor',
       command: `${EXT_NAME}.insertText`,

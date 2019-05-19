@@ -163,4 +163,13 @@ export interface Settings {
    * @memberof Settings
    */
   flattenGroupsIfOne?: boolean;
+
+  /**
+   * Auto open session file when connect
+   * @default true
+   * @type {boolean}
+   * @memberof Settings
+   */
+  autoOpenSessionFiles?: boolean;
+
 }

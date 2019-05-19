@@ -18,7 +18,11 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       return this.connection;
     }
 
-    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || (<any>this.credentials).dialectOptions || { encrypt: true };
+    if ((<any>this.credentials).dialectOptions) { // Will be removed on version 0.20
+      console.warn(`dialectOptions is deprecated. Use mssqlOptions instead.`);
+    }
+
+    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || { encrypt: true };
 
     let encryptAttempt = typeof mssqlOptions.encrypt !== 'undefined'
       ? mssqlOptions.encrypt : true;
@@ -145,5 +149,10 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
             } as DatabaseInterface.Function;
           });
       });
+  }
+
+  public describeTable(prefixedTable: string) {
+    prefixedTable.split('].[').reverse().join('], [');
+    return this.query(Utils.replacer(this.queries.describeTable, { table: prefixedTable.split(/\.(?=\[)/g).reverse().join(',') }));
   }
 }

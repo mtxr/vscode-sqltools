@@ -51,6 +51,15 @@ const availableDialects = {
     showHelperText: true,
     requirements,
   },
+  SAPHana: {
+    value: 'SAPHana',
+    text: 'SAP Hana',
+    port: 30000,
+    host: '127.0.0.1',
+    user: '<enter user>',
+    password: '<enter password>',
+    showHelperText: true
+  },
   // add your dialect here
   ExampleDialect: {
     value: 'ExampleDialect',
@@ -182,6 +191,13 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
             newState.data.connectionMethod = ConnectionMethod[0];
             newState.fields.connectionMethod.visible = true;
           }
+        }
+
+
+        if (this.state.data.dialect === 'SAPHana') {
+          newState.fields.database.label = 'Schema';
+        } else {
+          newState.fields.database.label = 'Database';
         }
 
         this.setState(newState, this.validateFields);

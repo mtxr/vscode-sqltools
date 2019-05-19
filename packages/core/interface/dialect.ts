@@ -12,5 +12,6 @@ export enum DatabaseDialect {
   MySQL = 'MySQL',
   PostgreSQL = 'PostgreSQL',
   SQLite = 'SQLite',
-  OracleDB = 'OracleDB'
+  OracleDB = 'OracleDB',
+  SAPHana = 'SAPHana'
 }

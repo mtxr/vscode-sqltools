@@ -1,10 +1,10 @@
 {
   "name": "@sqltools/core",
-  "version": "0.18.0",
+  "version": "0.18.2",
   "description": "SQLTools Core Files",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "private": true,
   "dependencies": {
     "@mysql/xdevapi": "^8.0.15",
@@ -22,7 +22,7 @@
     "@types/jest": "^24.0.11",
     "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
-    "@types/oracledb": "^1.11.34",
+    "@types/oracledb": "^3.1.0",
     "@types/pg": "^7.4.13",
     "@types/redux": "^3.6.0",
     "@types/sqlite3": "^3.1.5",

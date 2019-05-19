@@ -2,6 +2,7 @@
   "sqltools.telemetry": true,
   "sqltools.useNodeRuntime": true,
   "sqltools.sortColumns": "ordinalnumber",
+  "sqltools.autoOpenSessionFiles": true,
   "sqltools.results": {
     "limit": 100,
     "location": "beside",
@@ -46,7 +47,7 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15,
-      "dialectOptions": {
+      "mssqlOptions": {
         "encrypt": false
       }
     },
@@ -120,5 +121,16 @@
         "authProtocol": "xprotocol"
       }
     },
+    {
+      "askForPassword": false,
+      "connectionTimeout": 30,
+      "database": "98D27766B06E45F9A78EA36D5D6C3A5B",
+      "dialect": "SAPHana",
+      "name": "Hana",
+      "password": "Tg6cdRmULar3.yQcw4kVh.SeFNaF._iPaWLFdDvB94_C2jNnVB25reG63nSUkMs.DPFllAJHKwsRCRz1qtgGQrc4t81H8eLpGq3pUsMi9IUrwWZoabdLUHM3FHyhEOee",
+      "port": 30041,
+      "server": "127.0.0.1",
+      "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123"
+    }
   ]
 }
