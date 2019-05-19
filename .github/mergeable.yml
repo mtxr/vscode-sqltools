@@ -8,3 +8,7 @@ mergeable:
       - do: label
         must_exclude:
           regex: 'tutorial'
+      - do: assignee
+        min:
+          count: 1
+          message: 'Missing assignee'
