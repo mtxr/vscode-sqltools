@@ -471,25 +471,6 @@
                                 "description": "Connect string. Supporting Oracle and PostgreSQL.",
                                 "required": false
                             },
-                            "dialectOptions": {
-                                "type": [
-                                    "null",
-                                    "object"
-                                ],
-                                "description": "Dialect driver options. Deprecated. Will be removed on v0.18",
-                                "required": false,
-                                "default": {},
-                                "properties": {
-                                    "encrypt": {
-                                        "type": [
-                                            "boolean",
-                                            "null"
-                                        ],
-                                        "default": null,
-                                        "description": "Encrypt connection"
-                                    }
-                                }
-                            },
                             "mssqlOptions": {
                                 "type": [
                                     "null",
@@ -640,11 +621,6 @@
                             }
                         }
                     }
-                },
-                "sqltools.previewLimit": {
-                    "type": "number",
-                    "deprecationMessage": "Use `sqltools.results.limit` instead. Will be removed in the future",
-                    "description": "Global show records limit"
                 },
                 "sqltools.tableTreeItemsExpanded": {
                     "type": "boolean",
