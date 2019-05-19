@@ -110,9 +110,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     await window.showTextDocument(Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`));
   }
 
-  private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
+  private ext_selectConnection = async (connIdOrNode?: any | string, trySessionFile = true) => {
     if (connIdOrNode) {
-      let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
+      let conn = connIdOrNode.conn ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
       conn = await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
       if (trySessionFile) await this.openConnectionFile(conn);
