@@ -101,9 +101,16 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
         version: VSCodeVersion,
       },
     };
-    const selector = ConfigManager.completionLanguages
-      .concat(ConfigManager.formatLanguages)
-      .reduce((agg, language) => {
+    let selector = [];
+    if (ConfigManager.completionLanguages){
+      selector = selector.concat(ConfigManager.completionLanguages);
+    }
+
+    if (ConfigManager.formatLanguages) {
+      selector = selector.concat(ConfigManager.formatLanguages);
+    }
+
+    selector = selector.reduce((agg, language) => {
         if (typeof language === 'string') {
           agg.push({ language, scheme: 'untitled' });
           agg.push({ language, scheme: 'file' });
