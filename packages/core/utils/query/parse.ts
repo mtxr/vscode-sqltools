@@ -5,6 +5,9 @@
 
 class QueryParser {
   static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): Array<string> {
+    if (dialect === 'mssql') {
+      query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
+    }
     const delimiter: string = ';';
     var queries: Array<string> = [];
     var flag = true;
