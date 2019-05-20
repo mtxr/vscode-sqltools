@@ -32,12 +32,12 @@ export interface ResultsOptions {
   limit: number;
 
   /**
-   * Define where the results should show up.
+   * Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn
    * @type {string}
-   * @default null
+   * @default 'next'
    * @memberof ResultsOptions
    */
-  location?: 'current' | 'beside';
+  location?: 'current' | 'next' | 'end' | number;
   /**
    * Customize results screen CSS
    *

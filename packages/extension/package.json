@@ -597,13 +597,14 @@
                             "default": 50
                         },
                         "location": {
-                            "type": "string",
-                            "default": "active",
+                            "type": ["string", "number"],
+                            "default": "next",
                             "enum": [
-                                "active",
-                                "beside"
+                                "next",
+                                "current",
+                                "end"
                             ],
-                            "description": "Define where the results should show up."
+                            "description": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
                         },
                         "customization": {
                             "type": "object",

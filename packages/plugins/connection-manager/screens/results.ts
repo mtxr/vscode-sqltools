@@ -46,17 +46,25 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   show() {
-    this.wereToShow = vscode.ViewColumn.Active;
     this.preserveFocus = false;
-
-    if (vscode.window.activeTextEditor) {
-      this.wereToShow = vscode.window.activeTextEditor.viewColumn;
-    }
-        if (ConfigManager.results) {
-      if (ConfigManager.results.location === 'beside') {
-        this.wereToShow = vscode.ViewColumn.Beside;
-        this.preserveFocus = true;
-      }
+    this.wereToShow = null;
+    switch (ConfigManager.results.location) {
+      case 'active': // fallback older version
+      case 'current':
+        this.wereToShow = vscode.window.activeTextEditor.viewColumn;
+        break;
+      case 'end':
+        this.wereToShow = vscode.ViewColumn.Three;
+        break;
+      case 'beside': // fallback
+      default:
+        if (typeof ConfigManager.results.location === 'number' && ConfigManager.results.location >= -1 && ConfigManager.results.location <= 9 && ConfigManager.results.location !== 0) {
+          this.wereToShow = ConfigManager.results.location;
+        } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
+            this.wereToShow = vscode.ViewColumn.Two;
+        } else {
+            this.wereToShow = vscode.ViewColumn.Three;
+        }
     }
 
     return super.show();
