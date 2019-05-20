@@ -12,6 +12,7 @@ import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBa
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
+import { getHome } from '@sqltools/core/utils';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -103,9 +104,22 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private async openConnectionFile(conn: ConnectionInterface) {
     if (!ConfigManager.autoOpenSessionFiles) return;
     if (!conn) return;
-    const fileUri = Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`);
+    let baseFolder: Uri;
+
+    if (window.activeTextEditor && window.activeTextEditor.document.uri && workspace.getWorkspaceFolder(window.activeTextEditor.document.uri)) {
+      baseFolder = workspace.getWorkspaceFolder(window.activeTextEditor.document.uri).uri;
+    }
+
+    if (!baseFolder && workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+      baseFolder = workspace.workspaceFolders && workspace.workspaceFolders[0].uri;
+    }
+
+    if (!baseFolder) {
+      baseFolder = Uri.file(path.join(getHome(), '.SQLTools'));
+    }
+    const fileUri = Uri.parse(`untitled:${path.join(baseFolder.fsPath, `${conn.name} Session.sql`)}`);
     this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
-    await window.showTextDocument(Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`));
+    await window.showTextDocument(fileUri);
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
