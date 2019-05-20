@@ -1,9 +1,15 @@
-import { Pool, PoolConfig } from 'pg';
+import { Pool, PoolConfig, types } from 'pg';
 import Queries from './queries';
 import { ConnectionDialect, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+
+const TIMESTAMPTZ_OID = 1184
+const TIMESTAMP_OID = 1114
+const rawValue = (v: string) => v;
+types.setTypeParser(TIMESTAMPTZ_OID, rawValue);
+types.setTypeParser(TIMESTAMP_OID, rawValue);
 
 export default class PostgreSQL extends GenericDialect<Pool> implements ConnectionDialect {
   queries = Queries;
