@@ -134,7 +134,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
   }
 
   public describeTable(prefixedTable: string) {
-    const [ catalog, schema, table ] = prefixedTable.split('.');
+    const [ catalog, schema, table ] = prefixedTable.split('.').map(v => v.replace(/^("(.+)")$/g, '$2'));
     return this.query(Utils.replacer(this.queries.describeTable, { catalog, schema, table }));
   }
 }

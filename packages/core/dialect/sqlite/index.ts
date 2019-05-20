@@ -130,4 +130,8 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
     // this doesn exists for SQLite. It's just to avoid watning messages
     return Promise.resolve([]);
   }
+
+  public describeTable(prefixedTable: string) {
+    return super.describeTable(prefixedTable.replace(/^("(.+)")$/g, '$2'));
+  }
 }
