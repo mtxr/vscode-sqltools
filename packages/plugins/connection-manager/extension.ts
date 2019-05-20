@@ -125,17 +125,17 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_executeQuery = async (query?: string, connName?: string) => {
+  private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
       query = query || await getSelectedText('execute query');
-      if (!connName) {
-        connName = (query.match(/@conn\s*(.+)$/) || [])[1];
+      if (!connNameOrId) {
+        connNameOrId = (query.match(/@conn\s*(.+)$/) || [])[1];
       }
-      if (connName && connName.trim()) {
-        connName = connName.trim();
-        const conn = (this.getConnectionList() || []).find(c => c.name === connName);
+      if (connNameOrId && connNameOrId.trim()) {
+        connNameOrId = connNameOrId.trim();
+        const conn = this.getConnectionList().find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
-          throw new Error(`Trying to run query on '${connName}' but it does not exist.`)
+          throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
         await this._setConnection(conn);
       }
@@ -399,17 +399,17 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
-    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections');
+    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || [];
 
     const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
     if (from === ConfigurationTarget.Global) {
-      return <ConnectionInterface[]>(config.globalValue || config.defaultValue);
+      return <ConnectionInterface[]>(config.globalValue || config.defaultValue) || [];
     }
     if (from === ConfigurationTarget.WorkspaceFolder) {
-      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue);
+      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue) || [];
     }
 
-    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
+    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue) || [];
   }
 
   private ext_attachFileToConnection = async (fileUri: Uri) => {
