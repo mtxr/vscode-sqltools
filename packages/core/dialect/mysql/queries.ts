@@ -141,4 +141,42 @@ GROUP BY
   f.routine_definition
 ORDER BY
   f.specific_name;`,
+  fetchFunctionsV55Older: `
+SELECT
+  f.specific_name AS name,
+  f.routine_schema AS dbschema,
+  f.routine_schema AS dbname,
+  concat(
+    case
+      WHEN f.routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_schema, '\`')
+      ELSE f.routine_schema
+    end,
+    '.',
+    case
+      WHEN f.routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_name, '\`')
+      ELSE f.routine_name
+    end
+  ) as signature,
+  f.data_type AS resultType,
+  CONCAT(
+    f.routine_schema,
+    '${TREE_SEP}',
+    'functions',
+    '${TREE_SEP}',
+    f.specific_name
+  ) AS tree,
+  f.routine_definition AS source
+FROM
+  information_schema.routines AS f
+WHERE
+  f.routine_schema NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
+GROUP BY
+  f.specific_name,
+  f.routine_schema,
+  f.routine_name,
+  f.data_type,
+  f.routine_definition
+ORDER BY
+  f.specific_name;
+`
 } as DialectQueries;
