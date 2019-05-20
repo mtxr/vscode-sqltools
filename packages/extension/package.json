@@ -900,6 +900,6 @@
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/plugins": "*",
-        "vscode-languageclient": "^5.2.1"
+        "vscode-languageclient": "5.2.1"
     }
 }

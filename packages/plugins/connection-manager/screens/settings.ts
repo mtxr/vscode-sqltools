@@ -1,14 +1,19 @@
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
-import { commands, ExtensionContext } from 'vscode';
+import { commands, ExtensionContext, Uri } from 'vscode';
+import path from 'path';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
   protected title: string = 'SQLTools Settings';
 
   constructor(context: ExtensionContext) {
-    super(context);
+    super(
+      context,
+      Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
+      Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
+    );
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {
         case 'createConnection':

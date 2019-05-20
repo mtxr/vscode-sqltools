@@ -1,13 +1,18 @@
-import path from 'path';
 import { Uri, commands, Disposable, EventEmitter, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
-  public get onDidDispose() { return this.disposeEvent.event; }
+  public get onDidDispose() {
+    return this.disposeEvent.event;
+  }
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
   protected cssVariables: { [name: string]: string };
   private get baseHtml(): string {
     const cssVariables = Object.keys(this.cssVariables || {}).map(k => `--sqltools-${k}: ${this.cssVariables[k]}`).join(';');
+    const extRoot = Uri.file(this.context.asAbsolutePath('.'))
+    .with({ scheme: 'vscode-resource' })
+    .toString();
+
     return `<!DOCTYPE html>
 <html>
 <head>
@@ -20,8 +25,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 </head>
 <body>
   <div id="root"></div>
-  <script src="{{extRoot}}/ui/vendor.js" type="text/javascript" charset="UTF-8"></script>
-  <script src="{{extRoot}}/ui/{{id}}.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="${extRoot}/ui/vendor.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="${extRoot}/ui/${this.id}.js" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
   }
@@ -31,13 +36,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   private panel: WebviewPanel;
   private disposables: Disposable[] = [];
   private messageCb;
-  private iconsPath: Uri;
-  private viewsPath: Uri;
 
-  public constructor(private context: ExtensionContext) {
-    this.iconsPath = Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' })
-    this.viewsPath = Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
-  }
+  public constructor(private context: ExtensionContext, private iconsPath: Uri, private viewsPath: Uri) {}
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
   public show() {
@@ -61,13 +61,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         this.setPreviewActiveContext(webviewPanel.active);
       }));
       this.disposables.push(this.panel.onDidDispose(this.dispose, null, this.disposables));
-      this.panel.webview.html = (this.html || this.baseHtml)
-        .replace(/{{id}}/g, this.id)
-        .replace(
-          /{{extRoot}}/g,
-          Uri.file(this.context.asAbsolutePath('.'))
-            .with({ scheme: 'vscode-resource' })
-            .toString());
+      this.panel.webview.html = this.html || this.baseHtml;
     }
 
     this.updatePanelName();

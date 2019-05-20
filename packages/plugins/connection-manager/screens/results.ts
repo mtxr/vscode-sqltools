@@ -2,16 +2,17 @@ import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
-import vscode from 'vscode';
+import vscode, { Uri } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { getNameFromId } from '@sqltools/core/utils';
+import path from 'path';
 
-export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
+class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
-  constructor(context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface) {
-    super(context);
+  constructor(context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface, iconsPath: Uri, viewsPath: Uri) {
+    super(context, iconsPath, viewsPath);
   }
 
   public get cssVariables() {
@@ -73,4 +74,30 @@ export default class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   wereToShow = vscode.ViewColumn.Active;
   preserveFocus = false;
+}
+
+export default class ResultsWebviewManager {
+  private resultsMap: { [id: string]: ResultsWebview } = {};
+  private iconsPath: Uri;
+  private viewsPath: Uri;
+
+  constructor(private context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface) {
+    this.iconsPath = Uri.file(path.join(this.context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
+    this.viewsPath = Uri.file(path.join(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
+  }
+
+  dispose() {
+    return Promise.all(Object.keys(this.resultsMap).map(id => this.resultsMap[id].dispose()));
+  }
+
+  private createForId(connId: string) {
+    this.resultsMap[connId] = new ResultsWebview(this.context, this.client, this.iconsPath, this.viewsPath);
+    return this.resultsMap[connId];
+  }
+
+  get(connId: string) {
+    if (!connId) throw new Error('Missing connection id to create results view');
+
+    return this.resultsMap[connId] || this.createForId(connId);
+  }
 }
