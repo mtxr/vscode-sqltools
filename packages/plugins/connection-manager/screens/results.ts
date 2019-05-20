@@ -51,14 +51,16 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     switch (ConfigManager.results.location) {
       case 'active': // fallback older version
       case 'current':
-        this.wereToShow = vscode.window.activeTextEditor.viewColumn;
+        this.wereToShow = vscode.ViewColumn.Active;
         break;
       case 'end':
         this.wereToShow = vscode.ViewColumn.Three;
         break;
       case 'beside': // fallback
       default:
-        if (typeof ConfigManager.results.location === 'number' && ConfigManager.results.location >= -1 && ConfigManager.results.location <= 9 && ConfigManager.results.location !== 0) {
+        if (!vscode.window.activeTextEditor) {
+          this.wereToShow = vscode.ViewColumn.One;
+        } else if (ConfigManager.results && typeof ConfigManager.results.location === 'number' && ConfigManager.results.location >= -1 && ConfigManager.results.location <= 9 && ConfigManager.results.location !== 0) {
           this.wereToShow = ConfigManager.results.location;
         } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
             this.wereToShow = vscode.ViewColumn.Two;
