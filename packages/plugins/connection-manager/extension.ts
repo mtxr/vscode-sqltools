@@ -427,15 +427,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private ext_attachFileToConnection = async (fileUri: Uri) => {
-    if (!fileUri) return;
+    if (!fileUri && !window.activeTextEditor) return;
+    fileUri = fileUri || window.activeTextEditor.document.uri;
 
     const conn = await this._pickConnection();
     if (!conn) return;
     this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
+    window.showTextDocument(fileUri);
   }
 
   private ext_detachConnectionFromFile = async (fileUri: Uri) => {
-    if (!fileUri) return;
+    if (!fileUri && !window.activeTextEditor) return;
+    fileUri = fileUri || window.activeTextEditor.document.uri;
     const doc = workspace.textDocuments.find(doc => doc.uri.toString() === fileUri.toString());
     if (!doc) return;
 

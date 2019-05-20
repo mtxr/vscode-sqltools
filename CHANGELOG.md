@@ -2,6 +2,15 @@
 
 ## v0.19
 
+### v0.19.1 - (May 20, 2019)
+
+* **NEW** 🎉
+  * Add attach and detach commands to the command palette. Issue [#237](https://github.com/mtxr/vscode-sqltools/issues/237)
+
+* **Fix** 🎉
+  * Fixed session files when no folder is open. Issue [#236](https://github.com/mtxr/vscode-sqltools/issues/236)
+
+
 ### v0.19.0 - (May 20, 2019)
 
 * **NEW** 🎉
