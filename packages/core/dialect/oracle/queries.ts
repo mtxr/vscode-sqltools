@@ -67,27 +67,43 @@ export default {
   )
   where owner = user`,
   fetchFunctions: `select
-  nvl(p.procedure_name, p.object_name) as name,
-  p.owner as dbschema,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') as dbname,
-  p.owner ||'.'||p.object_name || case when p.procedure_name is not null then '.'||p.procedure_name else null end  
-  as signature,
-  RTRIM(XMLAGG(XMLELEMENT(a,data_type,',').EXTRACT('//text()') ORDER BY position).GetClobVal(),',') as args,
-  to_clob(listagg(case when a.argument_name is null then data_type else null end, ',') within group (order by position)) as resulttype,
-  SYS_CONTEXT ('USERENV', 'DB_NAME') || '${TREE_SEP}' || p.owner || '${TREE_SEP}' 
-  || decode(p.object_type, 'PACKAGE', 'packages', 'FUNCTION', 'functions', 'PROCEDURE', 'procedures')
-  || '${TREE_SEP}' || p.object_name 
-  || case when p.procedure_name is not null then '${TREE_SEP}' || p.procedure_name  else null end
+  nvl(procedure_name, object_name) as name,
+  owner as dbschema,
+  sys_context ('USERENV', 'DB_NAME') as dbname,
+  owner ||'.'||object_name || case when procedure_name is not null then '.'||procedure_name else null end as signature,
+  replace(
+  rtrim(xmlagg(case when argument_name is null then null else xmlelement(a, argument_name || '=>' || ora_type, ','
+  ).extract('//text()') end order by position).getclobval(), ',' ),
+  '=&gt;', '=>') as args,
+  listagg(case when argument_name is null then ora_type else null end, ',') within group (order by position) as resulttype,
+  sys_context ('USERENV', 'DB_NAME') || '${TREE_SEP}' || owner || '${TREE_SEP}'
+    || decode(object_type, 'PACKAGE', 'packages', 'FUNCTION', 'functions', 'PROCEDURE', 'procedures')
+    || '${TREE_SEP}' || object_name 
+    || case when procedure_name is not null then '${TREE_SEP}' || procedure_name  else null end
   as tree,
   '' as source
+from (
+  select p.procedure_name, p.object_name, p.owner, p.object_type,
+  sys_context ('USERENV', 'DB_NAME') as dbname,
+  a.data_type, a.argument_name, a.position,
+  case when a.type_name is not null 
+    then a.type_owner || '.' || a.type_name 
+    || case when a.type_subname is not null
+      then '.' || a.type_subname
+      end
+    when a.pls_type is not null 
+      then a.pls_type
+    else a.data_type 
+  end ora_type  
   from all_procedures p
   join all_arguments a on (a.owner = p.owner and ((a.object_name = p.object_name) or (p.procedure_name = a.object_name and p.object_name = a.package_name)))
   where p.object_type in ('FUNCTION','PROCEDURE','PACKAGE') 
   and not (p.object_type = 'PACKAGE' and p.procedure_name is null) 
-  and p.owner = user    
-  group by 
-  p.owner,
-  p.object_type,
-  p.object_name,
-  p.procedure_name`,
+  and p.owner = user
+)
+group by
+  owner,
+  object_type,
+  object_name,
+  procedure_name`,
 } as DialectQueries;
