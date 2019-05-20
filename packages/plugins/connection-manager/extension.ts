@@ -8,7 +8,7 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
@@ -440,6 +440,13 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     await commands.executeCommand('setContext', `sqltools.file.connectionAttached`, true);
   }
 
+  private onDidOpenOrCloseTextDocument = (doc: TextDocument) => {
+    if (doc && doc.uri && doc.isClosed) {
+      this.updateAttachedConnectionsMap(doc.uri);
+    }
+    return this.ext_refreshAll();
+  }
+
   public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
@@ -454,8 +461,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       (this.resultsWebview = new ResultsWebviewManager(this.context, this.client)),
       (this.settingsWebview = new SettingsWebview(this.context)),
       this._updateStatusBar(),
-      workspace.onDidCloseTextDocument(this.ext_refreshAll),
-      workspace.onDidOpenTextDocument(this.ext_refreshAll),
+      workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
+      workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
       this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
