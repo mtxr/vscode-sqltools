@@ -245,12 +245,17 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public setActiveConnection(c: ConnectionInterface) {
+    if (!c) return;
+
+    const item = this.tree[getConnectionId(c)];
+    if (!item) return;
+ 
+    if (item.isActive) return;
+
     Object.values(this.tree).forEach(item => {
       if (item.isActive) item.deactivate();
     });
-    if (!c) return;
-    const item = this.tree[getConnectionId(c)];
-    if (!item) return;
+    
     item.activate();
     if (this.treeView.visible && Object.keys(item.tree).length > 0) {
       this.treeView.reveal(Object.values(item.tree)[0], { select: false, focus: false });

@@ -63,7 +63,7 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
     this.command = {
       title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
-      arguments: [this.conn.name], 
+      arguments: [this], 
     };
 
     if (!SidebarConnection.icons) {
