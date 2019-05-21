@@ -5,6 +5,9 @@
 
 class QueryParser {
   static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): Array<string> {
+    if (dialect === 'mssql') {
+      query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
+    }
     const delimiter: string = ';';
     var queries: Array<string> = [];
     var flag = true;
@@ -114,7 +117,15 @@ class QueryParser {
           }
         }
       }
-      if (dialect === 'mssql' && char.toLowerCase() === 'g' && charArray[index + 1] && charArray[index + 1].toLowerCase() === 'o') {
+      if (
+        dialect === 'mssql'
+        && char.toLowerCase() === 'g'
+        && `${charArray[index + 1] || ''}`.toLowerCase() === 'o'
+        && (
+          typeof charArray[index + 2] !== 'undefined'
+          && /go\b/gi.test(`${char}${charArray[index + 1]}${charArray[index + 2]}`)
+        )
+      ) {
         char = `${char}${charArray[index + 1]}`;
       }
 

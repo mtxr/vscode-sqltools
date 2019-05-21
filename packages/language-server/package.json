@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/language-server",
-  "version": "0.18.2",
+  "version": "0.19.1",
   "description": "SQLTools Language Server",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
@@ -10,7 +10,7 @@
     "@sqltools/core": "*",
     "@sqltools/plugins": "*",
     "redux": "^4.0.1",
-    "vscode-languageserver": "^5.3.0-next.1"
+    "vscode-languageserver": "5.2.1"
   },
   "devDependencies": {
     "@babel/core": "7.4.4",

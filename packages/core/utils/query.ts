@@ -1,6 +1,6 @@
 import { Settings } from '../interface';
 import { format } from '@sqltools/plugins/formatter/utils';
-import multipleQueiesParse from './query/parse';
+import multipleQueriesParse from './query/parse';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 /**
@@ -13,7 +13,7 @@ import { DatabaseInterface } from '@sqltools/core/plugin-api';
  * @returns {string[]}
  */
 export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): string[] {
-  return multipleQueiesParse(query, dialect);
+  return multipleQueriesParse(query, dialect);
   // return fixedQuery.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim()).map(v => `${v};`);
 }
 /**

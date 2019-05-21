@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.18.2",
+    "version": "0.19.1",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -597,13 +597,14 @@
                             "default": 50
                         },
                         "location": {
-                            "type": "string",
-                            "default": "active",
+                            "type": ["string", "number"],
+                            "default": "next",
                             "enum": [
-                                "active",
-                                "beside"
+                                "next",
+                                "current",
+                                "end"
                             ],
-                            "description": "Define where the results should show up."
+                            "description": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
                         },
                         "customization": {
                             "type": "object",
@@ -707,11 +708,11 @@
                 },
                 {
                     "command": "SQLTools.attachFileToConnection",
-                    "when": "false"
+                    "when": "!sqltools.file.connectionAttached && editorLangId == sql"
                 },
                 {
                     "command": "SQLTools.detachConnectionFromFile",
-                    "when": "false"
+                    "when": "sqltools.file.connectionAttached && editorLangId == sql"
                 },
                 {
                     "command": "SQLTools.saveResults",
@@ -867,6 +868,13 @@
                     "group": "sqltools@0",
                     "when": "sqltools.file.connectionAttached && editorLangId == sql"
                 }
+            ],
+            "explorer/context": [
+                {
+                    "command": "SQLTools.attachFileToConnection",
+                    "group": "sqltools@0",
+                    "when": "resourceLangId == sql"
+                }
             ]
         }
     },
@@ -900,6 +908,6 @@
     "dependencies": {
         "@sqltools/core": "*",
         "@sqltools/plugins": "*",
-        "vscode-languageclient": "^5.2.1"
+        "vscode-languageclient": "5.2.1"
     }
 }

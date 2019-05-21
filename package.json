@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.18.2",
+  "version": "0.19.1",
   "publisher": "mtxr",
   "license": "MIT",
   "main": "../dist/extension.js",

@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/ui",
-  "version": "0.18.2",
+  "version": "0.19.1",
   "description": "UI components for SQLTools",
   "main": "noop.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",

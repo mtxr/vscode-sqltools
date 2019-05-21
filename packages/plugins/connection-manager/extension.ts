@@ -6,16 +6,17 @@ import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
-import ResultsWebview from '@sqltools/plugins/connection-manager/screens/results';
+import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
+import { getHome } from '@sqltools/core/utils';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
-  public resultsWebview: ResultsWebview;
+  public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
   public statusBar: StatusBarItem;;
   private context: ExtensionContext;
@@ -47,11 +48,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       let limit = 50;
       if (ConfigManager.results && ConfigManager.results.limit) {
         limit = ConfigManager.results.limit;
-      } else if ((<any>ConfigManager).previewLimit) { // @TODO: this is deprecated! Will be removed.
-        limit = (<any>ConfigManager).previewLimit;
       }
       const payload = await this._runConnectionCommandWithArgs('showRecords', table, limit);
-      this.resultsWebview.updateResults(payload);
+      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
 
     } catch (e) {
       this.errorHandler('Error while showing table records', e);
@@ -63,7 +62,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const table = await this._getTableName(node);
       this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
-      this.resultsWebview.updateResults(payload);
+      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
     }
@@ -105,9 +104,22 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private async openConnectionFile(conn: ConnectionInterface) {
     if (!ConfigManager.autoOpenSessionFiles) return;
     if (!conn) return;
-    const fileUri = Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`);
+    let baseFolder: Uri;
+
+    if (window.activeTextEditor && window.activeTextEditor.document.uri && workspace.getWorkspaceFolder(window.activeTextEditor.document.uri)) {
+      baseFolder = workspace.getWorkspaceFolder(window.activeTextEditor.document.uri).uri;
+    }
+
+    if (!baseFolder && workspace.workspaceFolders && workspace.workspaceFolders.length > 0) {
+      baseFolder = workspace.workspaceFolders && workspace.workspaceFolders[0].uri;
+    }
+
+    if (!baseFolder) {
+      baseFolder = Uri.file(path.join(getHome(), '.SQLTools'));
+    }
+    const fileUri = Uri.parse(`untitled:${path.join(baseFolder.fsPath, `${conn.name} Session.sql`)}`);
     this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
-    await window.showTextDocument(Uri.parse(`untitled:${path.join(workspace.rootPath, `${conn.name} Session.sql`)}`));
+    await window.showTextDocument(fileUri);
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
@@ -127,24 +139,24 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_executeQuery = async (query?: string, connName?: string) => {
+  private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
       query = query || await getSelectedText('execute query');
-      if (!connName) {
-        connName = (query.match(/@conn\s*(.+)$/) || [])[1];
+      if (!connNameOrId) {
+        connNameOrId = (query.match(/@conn\s*(.+)$/) || [])[1];
       }
-      if (connName && connName.trim()) {
-        connName = connName.trim();
-        const conn = (this.getConnectionList() || []).find(c => c.name === connName);
+      if (connNameOrId && connNameOrId.trim()) {
+        connNameOrId = connNameOrId.trim();
+        const conn = this.getConnectionList().find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
-          throw new Error(`Trying to run query on '${connName}' but it does not exist.`)
+          throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
         await this._setConnection(conn);
       }
       await this._connect();
       this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
-      this.resultsWebview.updateResults(payload);
+      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
       return payload;
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
@@ -158,7 +170,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_showOutputChannel = () => (<any>console).show();
 
-  private ext_saveResults = async (filetype: 'csv' | 'json') => {
+  private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
     if (mode === 'prompt') {
@@ -172,7 +184,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     if (!mode) return;
 
-    return this.resultsWebview.saveResults(mode);
+    return this.resultsWebview.get(connId || this.explorer.getActive().id).saveResults(mode);
   }
 
   private ext_openAddConnectionScreen = () => {
@@ -278,8 +290,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this._pickTable(conn, 'value');
   }
 
-  private _openResultsWebview() {
-    this.resultsWebview.show();
+  private _openResultsWebview(connId?: string) {
+    this.resultsWebview.get(connId || this.explorer.getActive().id).show();
   }
   private _connect = async (force = false): Promise<ConnectionInterface> => {
     if (!force && this.explorer.getActive()) {
@@ -401,29 +413,32 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
-    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections');
+    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || [];
 
     const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
     if (from === ConfigurationTarget.Global) {
-      return <ConnectionInterface[]>(config.globalValue || config.defaultValue);
+      return <ConnectionInterface[]>(config.globalValue || config.defaultValue) || [];
     }
     if (from === ConfigurationTarget.WorkspaceFolder) {
-      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue);
+      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue) || [];
     }
 
-    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue);
+    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue) || [];
   }
 
   private ext_attachFileToConnection = async (fileUri: Uri) => {
-    if (!fileUri) return;
+    if (!fileUri && !window.activeTextEditor) return;
+    fileUri = fileUri || window.activeTextEditor.document.uri;
 
     const conn = await this._pickConnection();
     if (!conn) return;
     this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
+    window.showTextDocument(fileUri);
   }
 
   private ext_detachConnectionFromFile = async (fileUri: Uri) => {
-    if (!fileUri) return;
+    if (!fileUri && !window.activeTextEditor) return;
+    fileUri = fileUri || window.activeTextEditor.document.uri;
     const doc = workspace.textDocuments.find(doc => doc.uri.toString() === fileUri.toString());
     if (!doc) return;
 
@@ -442,6 +457,13 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     await commands.executeCommand('setContext', `sqltools.file.connectionAttached`, true);
   }
 
+  private onDidOpenOrCloseTextDocument = (doc: TextDocument) => {
+    if (doc && doc.uri && doc.isClosed) {
+      this.updateAttachedConnectionsMap(doc.uri);
+    }
+    return this.ext_refreshAll();
+  }
+
   public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
@@ -453,11 +475,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     // extension stuff
     this.context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebview(this.context, this.client)),
+      (this.resultsWebview = new ResultsWebviewManager(this.context, this.client)),
       (this.settingsWebview = new SettingsWebview(this.context)),
       this._updateStatusBar(),
-      workspace.onDidCloseTextDocument(this.ext_refreshAll),
-      workspace.onDidOpenTextDocument(this.ext_refreshAll),
+      workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
+      workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
       this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );

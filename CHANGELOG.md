@@ -2,12 +2,27 @@
 
 ## v0.19
 
-### v0.19.0 - (May XX, 2019) - WIP
+### v0.19.1 - (May 20, 2019)
+
+* **NEW** 🎉
+  * Add attach and detach commands to the command palette. Issue [#237](https://github.com/mtxr/vscode-sqltools/issues/237)
+
+* **Fix** 🎉
+  * Fixed session files when no folder is open. Issue [#236](https://github.com/mtxr/vscode-sqltools/issues/236)
+
+
+### v0.19.0 - (May 20, 2019)
 
 * **NEW** 🎉
   * Multiple connections with session files. PR [#188](https://github.com/mtxr/vscode-sqltools/pull/188)
     * Read the docs: [Sessions and Multiple Connections](https://vscode-sqltools.mteixeira.dev/session-multiple-connections)
   * Added support for SAP Hana, thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#215](https://github.com/mtxr/vscode-sqltools/pull/215)
+  * Multiple results screens, one per connection. PR [#234](https://github.com/mtxr/vscode-sqltools/pull/234)
+
+* **Fix** 🎉
+  * Fixed timestamps to be raw from server. Issue [#231](https://github.com/mtxr/vscode-sqltools/issues/231)
+  * Fixed besides results locations leaving empty space. Issue [#211](https://github.com/mtxr/vscode-sqltools/issues/211)
+  * Fixed GO delimiter breaking queries on results screen. Issue [#226](https://github.com/mtxr/vscode-sqltools/issues/226)
 
 * **DOCS Updates**
   * Add SSL example to PostgreSQL docs. thanks to [@lawrencegripper](https://github.com/lawrencegripper). PR [#223](https://github.com/mtxr/vscode-sqltools/pull/223)

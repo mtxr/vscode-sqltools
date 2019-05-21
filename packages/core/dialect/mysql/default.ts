@@ -28,7 +28,8 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       password: this.credentials.password,
       user: this.credentials.username,
       multipleStatements: true,
-      ssl
+      ssl,
+      dateStrings: true
     });
 
     return new Promise<MySQLLib.Pool>((resolve, reject) => {

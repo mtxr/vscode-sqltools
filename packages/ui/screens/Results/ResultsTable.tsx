@@ -304,7 +304,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.executeQuery`,
-            args: [this.props.query]
+            args: [this.props.query, this.props.connId]
           }
         });
         break;
@@ -313,7 +313,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['csv']
+            args: ['csv', this.props.connId]
           }
         });
         break;
@@ -322,7 +322,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['json']
+            args: ['json', this.props.connId]
           }
         });
         break;
