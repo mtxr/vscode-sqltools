@@ -25,7 +25,7 @@ MSSQL driver specific options can be passed using `pgOptions` settings.
 ```json
 {
   "name": "MSSQL",
-  "server": "localhost",
+  "server": "localhost", // You can use 'localhost\\instance' to connect to named instance
   "dialect": "MSSQL",
   "port": 1433,
   "database": "test_db",
