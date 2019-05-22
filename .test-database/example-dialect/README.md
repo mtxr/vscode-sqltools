@@ -1,4 +1,4 @@
-# Tesing your dialect
+# Testing your dialect
 
 Inside of this directory you should add the files used for testing and development purposes.
 
