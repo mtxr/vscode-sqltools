@@ -289,7 +289,7 @@ export class SidebarFunction extends SidebarAbstractItem<null> {
 
   public get conn() { return this.parent.conn; }
 
-  constructor( context: ExtensionContext, public functionData: DatabaseInterface.Function) {
+  constructor(context: ExtensionContext, public functionData: DatabaseInterface.Function) {
     super(functionData.name, TreeItemCollapsibleState.None);
     this.value = functionData.name;
     this.iconPath = {
