@@ -51,7 +51,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   private get filePath() {
-    return path.join(this.context.asAbsolutePath('Bookmarks.json'));
+    return path.join(this.asAbsolutePath('Bookmarks.json'));
   }
 
   /**
@@ -120,7 +120,10 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     return fs.writeFileSync(this.filePath, JSON.stringify(data));
   }
 
-  constructor(private context: ExtensionContext) {
+  private asAbsolutePath: ExtensionContext['asAbsolutePath'];
+
+  constructor(context: ExtensionContext) {
+    this.asAbsolutePath = context.asAbsolutePath;
     this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAME}/bookmarksExplorer`, { treeDataProvider: this });
     context.subscriptions.push(this.treeView);
     this.readFromFile();
