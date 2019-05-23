@@ -81,9 +81,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         this.tree[getConnectionId(conn)] = new SidebarConnection(this.extension.context, conn);
         changed.push({ conn, action: 'added' });
       }
-      if (conn.isActive) {
-        this.setActiveConnection(conn);
-      } else {
+      if (!conn.isActive) {
         this.tree[getConnectionId(conn)].deactivate();
       }
       keys.push(getConnectionId(conn));
@@ -249,13 +247,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
     const item = this.tree[getConnectionId(c)];
     if (!item) return;
- 
+
     if (item.isActive) return;
 
-    Object.values(this.tree).forEach(item => {
-      if (item.isActive) item.deactivate();
+    Object.values(this.tree).forEach(treeItem => {
+      if (treeItem.isActive) treeItem.deactivate();
     });
-    
+
     item.activate();
     if (this.treeView.visible && Object.keys(item.tree).length > 0) {
       this.treeView.reveal(Object.values(item.tree)[0], { select: false, focus: false });
