@@ -41,7 +41,7 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
   }
 
   private _isActive = false;
-  
+
   public get isConnected() {
     return this.conn.isConnected;
   }
