@@ -34,8 +34,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_executeFromInput = async () => {
     try {
-      const query = await readInput('Query', `Type the query to run on ${this.explorer.getActive().name}`);
-      return this.ext_executeQuery(query);
+      const conn = this.explorer.getActive() ? this.explorer.getActive() : await this._pickConnection(true);
+      if (!conn) {
+        return;
+      }
+      const query = await readInput('Query', `Type the query to run on ${conn.name}`);
+      return this.ext_executeQuery(query, getConnectionId(conn));
     } catch (e) {
       this.errorHandler('Error running query.', e);
     }
