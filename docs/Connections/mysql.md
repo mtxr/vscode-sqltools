@@ -57,7 +57,7 @@ MySQL driver specific options can be passed using `mysqlOptions` settings.
 | Option key  | Default Value | Allowed Values |
 | ------------- | ------------- | ------------- |
 | ssl  | `null`  | See section [SSL](#2-ssl) |
-| ssl  | `null`  | See section [SSL](#2-ssl) |
+| authProtocol  | `default`  | `xprotocol`,`default` |
 
 ### 2. SSL
 
