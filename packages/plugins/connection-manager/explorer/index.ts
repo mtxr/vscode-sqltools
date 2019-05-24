@@ -1,7 +1,7 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, TREE_SEP } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
-import { getConnectionId, asArray } from '@sqltools/core/utils';
+import { getConnectionId, asArray, getNameFromId } from '@sqltools/core/utils';
 import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem, SidebarFunction } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState } from 'vscode';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
@@ -136,32 +136,36 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getGroup(...k: string[]): SidebarAbstractItem {
-    return safeGet(this.tree, [...k].join('.tree.'));
+    return safeGet(this.tree, k.reduce((agg, v, i) => ([ ...agg, v, ...(i === k.length - 1 ? [] : ['tree'])]), []));
   }
 
   private getOrCreateGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
-    let k = path.split(TREE_SEP);
-    const hierachyNames = DialectHierarchyChildNames[dialect] || [];
-    if (ignoreLasts > 0) {
-      k = k.slice(0, k.length - ignoreLasts);
+    try {
+      let k = path.split(TREE_SEP);
+      const hierachyNames = DialectHierarchyChildNames[dialect] || [];
+      if (ignoreLasts > 0) {
+        k = k.slice(0, k.length - ignoreLasts);
+      }
+      const treeRef = this.getGroup(connId, ...k);
+      if(treeRef) return treeRef;
+      let created = [];
+      let tree: SidebarAbstractItem = null;
+      k.forEach((g, i) => {
+        tree = this.getGroup(connId, ...created);
+        tree.addItem(new SidebarResourceGroup(g, hierachyNames[i]));
+        created.push(g);
+      });
+
+      const group = tree.tree[created.pop()];
+
+      if (!group) {
+        throw new Error(`Can't create tree '${path}' to dialect '${getNameFromId(connId || '') || connId}'`);
+      }
+
+      return group;
+    } catch (error) {
+      throw new Error(`Can't create tree '${path}' to dialect '${getNameFromId(connId || '') || connId}'`);
     }
-    const treeRef = this.getGroup(connId, ...k);
-    if(treeRef) return treeRef;
-    let created = [];
-    let tree: SidebarAbstractItem = null;
-    k.forEach((g, i) => {
-      tree = this.getGroup(connId, ...created);
-      tree.addItem(new SidebarResourceGroup(g, hierachyNames[i]));
-      created.push(g);
-    });
-
-    const group = tree.tree[created.pop()];
-
-    if (!group) {
-      throw new Error(`Can't create tree '${path}' and dialect '${dialect}'`);
-    }
-
-    return group;
   }
 
   private insertTables(connId: string, dialect: DatabaseDialect, tables: DatabaseInterface.Table[]) {
