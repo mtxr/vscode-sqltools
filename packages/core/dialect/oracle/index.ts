@@ -26,7 +26,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
 
   private get lib(): typeof OracleDBLib {
     const oracledb = __non_webpack_require__('oracledb');
-    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB];
+    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB, oracledb.NUMBER];
     return oracledb;
   }
 
