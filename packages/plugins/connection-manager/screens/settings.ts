@@ -29,7 +29,7 @@ export default class SettingsWebview extends WebviewProvider {
   private updateConnection = async ({ connInfo, isGlobal, editId }) => {
     console.log({ connInfo, isGlobal, editId });
 
-    if (connInfo.database) {
+    if (connInfo.dialect === 'SQLite' && connInfo.database) {
       connInfo.database = path.relative(workspace.rootPath, connInfo.database);
     }
 
@@ -45,7 +45,7 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private createConnection = async ({ connInfo, isGlobal }) => {
-    if (connInfo.database) {
+    if (connInfo.dialect === 'SQLite' && connInfo.database) {
       connInfo.database = path.relative(workspace.rootPath, connInfo.database);
     }
 
