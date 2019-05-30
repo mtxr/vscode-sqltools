@@ -72,24 +72,24 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     }
     DependencyManager.runningJobs.push(dialect);
 
-    console.debug('Received request to install deps:', JSON.stringify(deps));
+    console.log('Received request to install deps:', JSON.stringify(deps));
     try {
       for (let dep of deps) {
         switch(dep.type) {
           case 'npmscript':
-            console.debug(`Will run ${dep.name} script`);
+            console.log(`Will run ${dep.name} script`);
             await this.runNpmScript(dep.name, { env: dep.env });
-            console.debug(`Finished ${dep.name} script`);
+            console.log(`Finished ${dep.name} script`);
             break;
           case 'package':
-            console.debug(`Will install ${dep.name} package`, dep.args || '');
+            console.log(`Will install ${dep.name} package`, dep.args || '');
             const args = [`${dep.name}${dep.version ? `@${dep.version}` : ''}`].concat(dep.args || [])
             await this.install(args, { env: dep.env });
-            console.debug(`Finished ${dep.name} script`);
+            console.log(`Finished ${dep.name} script`);
             break;
         }
       }
-      console.debug('Finished installing deps');
+      console.log('Finished installing deps');
       DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
     } catch(e) {
       DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);

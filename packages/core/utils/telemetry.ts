@@ -137,7 +137,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     message: string,
     value: string = 'Dismissed'
   ): void {
-    console.debug(`Message: ${message}`);
+    console.log(`Message: ${message}`);
     this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
   }
 
@@ -146,7 +146,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     name: string,
     properties?: { [key: string]: string }
   ): void {
-    console.debug(`Event: ${name}`, properties || '');
+    console.log(`Event: ${name}`, properties || '');
     this.client.trackEvent({ name: this.prefixed(name), properties });
   }
 
