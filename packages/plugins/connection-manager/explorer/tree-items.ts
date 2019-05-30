@@ -301,7 +301,12 @@ export class SidebarFunction extends SidebarAbstractItem<null> {
     this.value = `${this.functionData.signature}`;
     let args = [];
     this.functionData.args.forEach((type, index) => {
-      args.push(`\${${index + 1}:${type}}`);
+      const [argName, argType] = type.split('=>');
+      if (argType && argType.trim()) {
+        args.push(`${argName} => \${${index + 1}:${argType}}`);
+      } else {
+        args.push(`\${${index + 1}:${type}}`);
+      }
     });
     this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')})$0`);
     this.command = {
