@@ -69,11 +69,11 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.panel.reveal(this.wereToShow, this.preserveFocus);
     this.postMessage({ action: 'reset' });
     this.setPreviewActiveContext(true);
-    if (process.env.NODE_ENV === 'development') {
-      setTimeout(() => {
-        commands.executeCommand('workbench.action.webview.openDeveloperTools');
-      }, 1000);
-    }
+    // if (process.env.NODE_ENV === 'development') {
+    //   setTimeout(() => {
+    //     commands.executeCommand('workbench.action.webview.openDeveloperTools');
+    //   }, 1000);
+    // }
   }
 
   private onDidReceiveMessage = ({ action, payload, ...rest}) => {

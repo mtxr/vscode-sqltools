@@ -175,6 +175,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_showOutputChannel = () => (<any>console).show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
+    connId = typeof connId === 'string' ? connId : undefined;
     filetype = typeof filetype === 'string' ? filetype : undefined;
     let mode: any = filetype || ConfigManager.defaultExportType;
     if (mode === 'prompt') {
