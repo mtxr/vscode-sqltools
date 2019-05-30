@@ -330,54 +330,60 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     console.log(`Message received: ${action}`, ...[ payload ]);
     switch(action) {
       case 'editConnection':
-          this.setState({
-            beforeEditData: payload.conn,
-            loading: true,
-            data: payload.conn,
-            fields: this.baseFields,
-            errors: {},
-            onSaveError: null,
-            saved: null,
-          }, async () => {
-            const conn: ConnectionInterface = payload.conn;
-            await this.updateField({
-              value: conn.dialect,
-              name: 'dialect',
-            });
-            if (conn.socketPath) {
-              await this.updateField({
-                value: ConnectionMethod.Socket,
-                name: 'connectionMethod',
-              });
-            } else if (conn.connectString) {
-              await this.updateField({
-                value: ConnectionMethod.ConnectionString,
-                name: 'connectionMethod',
-              });
-            } else {
-              await this.updateField({
-                value: ConnectionMethod.ServerAndPort,
-                name: 'connectionMethod',
-              });
-            }
-
-
-            if (conn.database) {
-              // await this.updateField({
-              //   value: conn.database,
-              //   name: 'database',
-              // });
-            }
-            // Object.keys(this.baseFields).forEach(async (name) => {
-            //   if (typeof conn[name] === 'undefined') return;
-            //   await this.updateField({
-            //     value: this.state.data[name],
-            //     checked: this.state.data[name],
-            //     name,
-            //   });
-            // });
-            this.componentDidMount();
+        this.setState({
+          beforeEditData: payload.conn,
+          loading: true,
+          data: payload.conn,
+          fields: this.baseFields,
+          errors: {},
+          onSaveError: null,
+          saved: null,
+        }, async () => {
+          const conn: ConnectionInterface = payload.conn;
+          await this.updateField({
+            value: conn.dialect,
+            name: 'dialect',
           });
+          if (conn.port) {
+            await this.updateField({
+              value: conn.port,
+              name: 'port',
+            });
+          }
+          if (conn.socketPath) {
+            await this.updateField({
+              value: ConnectionMethod.Socket,
+              name: 'connectionMethod',
+            });
+          } else if (conn.connectString) {
+            await this.updateField({
+              value: ConnectionMethod.ConnectionString,
+              name: 'connectionMethod',
+            });
+          } else {
+            await this.updateField({
+              value: ConnectionMethod.ServerAndPort,
+              name: 'connectionMethod',
+            });
+          }
+
+
+          // if (conn.database) {
+          //   await this.updateField({
+          //     value: conn.database,
+          //     name: 'database',
+          //   });
+          // }
+          // Object.keys(this.baseFields).forEach(async (name) => {
+          //   if (typeof conn[name] === 'undefined') return;
+          //   await this.updateField({
+          //     value: this.state.data[name],
+          //     checked: this.state.data[name],
+          //     name,
+          //   });
+          // });
+          this.componentDidMount();
+        });
         break;
       case 'updateConnectionSuccess':
       case 'createConnectionSuccess':
@@ -468,7 +474,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     const newData = { ...this.state.data, [name]: value };
     return new Promise((resolve) => {
       this.setState({ data: newData, saved: null, onSaveError: null }, () => {
-        if (!this.state.fields[name].postUpdateHook) return this.validateFields();
+        if (!this.state.fields[name].postUpdateHook) {
+          this.validateFields();
+          return resolve();
+        };
         this.state.fields[name].postUpdateHook();
         this.validateFields();
         return resolve();
