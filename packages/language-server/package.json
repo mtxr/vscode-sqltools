@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/language-server",
-  "version": "0.19.2",
+  "version": "0.19.3",
   "description": "SQLTools Language Server",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
