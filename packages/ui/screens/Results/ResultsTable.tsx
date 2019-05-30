@@ -416,7 +416,6 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
             }
             return {};
           }}
-          onFilteredChange={() => this.componentDidMount()}
           defaultFilterMethod={(filter, row) => {
             const filterData = this.state.filtered[filter.id];
             if (!filterData || typeof row[filter.id] === 'undefined') return true;
