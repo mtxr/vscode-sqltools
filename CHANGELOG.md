@@ -2,6 +2,15 @@
 
 ## v0.19
 
+### v0.19.2 - (May 24, 2019)
+
+* **Fix** 🎉
+  * Fixed explorer tree when tree items have dots. Issue [#242](https://github.com/mtxr/vscode-sqltools/issues/242)
+  * Hiding sqlite_sequence from explorer. Issue [#152](https://github.com/mtxr/vscode-sqltools/issues/152)
+
+* **Enhancements**
+  * Enhanced speed removing cycle references. thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#233](https://github.com/mtxr/vscode-sqltools/pull/233)
+
 ### v0.19.1 - (May 20, 2019)
 
 * **NEW** 🎉
