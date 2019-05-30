@@ -17,6 +17,16 @@ import { DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { FileInput } from './FileInput';
 
+const relativeToWorkspace = (file: string, workspaces: string[] = []) => {
+  if (!file) return file;
+
+  const workspaceFolder = workspaces.find(w => file.startsWith(w));
+  if (workspaceFolder) {
+    return file.replace(workspaceFolder, '');
+  }
+  return file;
+}
+
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
 ];
@@ -116,6 +126,7 @@ interface SetupState {
   errors: { [field: string]: string };
   onSaveError?: string;
   saved?: JSX.Element;
+  workspaces: string[]
 }
 
 const storage = { data: {}, setItem: undefined, getItem: undefined, removeItem: undefined };
@@ -371,6 +382,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       case 'updateConnectionSuccess':
       case 'createConnectionSuccess':
         const newState: SetupState = {
+          workspaces: [],
           loading: false,
           data: SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields),
           fields: this.baseFields,
@@ -397,6 +409,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           onSaveError: ((payload && payload.message ? payload.message : payload) || '').toString(),
         });
         break;
+      case 'setWorkspaces':
+          this.setState({
+            workspaces: payload || []
+          });
       case 'reset':
         this.reset();
       default:
@@ -421,6 +437,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     super(props);
     const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
     this.state = {
+      workspaces: [],
       loading: true,
       data,
       fields: this.baseFields,
@@ -524,7 +541,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       .filter(k => this.state.fields[k].visible || typeof this.state.fields[k].visible === 'undefined');
   }
 
-  public getParsedFormData() {
+  public getParsedFormData(workspaces: string[] = []) {
     const data = this.getVisibleFields()
       .reduce((d, k) => {
         const parse = this.state.fields[k].parse || ((v) => (v === '' ? null : v));
@@ -533,6 +550,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       }, {});
 
       data['password'] = data['password'] || undefined;
+
+      if (data['dialect'] === DatabaseDialect.SQLite) {
+        data['database'] = relativeToWorkspace(data['database'], workspaces)
+      }
 
       delete data['isGlobal'];
       delete data['connectionMethod'];
@@ -679,7 +700,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                 </div>
               ) : null}
               <div><h5 className={this.state.data.dialect && availableDialects[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
-              <Syntax code={this.getParsedFormData()} language='json' strong/>
+              <Syntax code={this.getParsedFormData(this.state.workspaces)} language='json' strong/>
               {Object.keys(this.state.errors).length ? (
                 <div>
                   <h5>Validations</h5>

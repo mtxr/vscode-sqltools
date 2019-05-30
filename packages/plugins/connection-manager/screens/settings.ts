@@ -9,7 +9,7 @@ const relativeToWorkspace = (file: string) => {
   const fileUri = Uri.file(file);
   const workspaceFolder = workspace.getWorkspaceFolder(fileUri);
   if (workspaceFolder) {
-    return path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath);
+    return `.${path.sep}${path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath)}`;
   }
   return file;
 }
@@ -66,5 +66,11 @@ export default class SettingsWebview extends WebviewProvider {
         }
         this.postMessage({ action: 'createConnectionError', payload });
     });
+  }
+
+  public show() {
+    const res = super.show();
+    this.postMessage({ action: 'setWorkspaces', payload: (workspace.workspaceFolders || []).map(w => `${w.uri.fsPath}${path.sep}`) })
+    return res;
   }
 }
