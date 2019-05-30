@@ -300,15 +300,15 @@ export class SidebarFunction extends SidebarAbstractItem<null> {
     this.tooltip = `${this.functionData.signature}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
     this.value = `${this.functionData.signature}`;
     let args = [];
-    this.functionData.args.forEach((type, index) => {      
+    this.functionData.args.forEach((type, index) => {
       const [argName, argType] = type.split('=>');
-      if (argType !== null) {        
+      if (argType && argType.trim()) {
         args.push(`${argName} => \${${index + 1}:${argType}}`);
       } else {
         args.push(`\${${index + 1}:${type}}`);
-      }      
+      }
     });
-    this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')});$0`);
+    this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')})$0`);
     this.command = {
       title: 'Append to Cursor',
       command: `${EXT_NAME}.insertText`,
