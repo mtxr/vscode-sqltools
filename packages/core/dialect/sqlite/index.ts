@@ -7,7 +7,7 @@ import GenericDialect from '../generic';
 import queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-const SQLite3Version = '4.0.6';
+const SQLite3Version = '4.0.8';
 
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 

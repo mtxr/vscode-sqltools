@@ -13,14 +13,15 @@ class NotifyResponseError extends ResponseError<NotifyResponseErrorData> {
 }
 
 export class MissingModuleException extends NotifyResponseError {
-  constructor(moduleName: string, moduleVersion: string = 'latest', conn: ConnectionInterface) {
-    super(1000, `Missing module "${moduleName}@${moduleVersion}". Need to install and compile.`, {
+  constructor(moduleName: string, moduleVersion: string = 'latest', conn: ConnectionInterface, mustUpgrade = false) {
+    super(1000, `Missing module "${moduleName}@${moduleVersion}". Need to ${mustUpgrade ? 'upgrade' : 'install'}.`, {
       notification: MissingModuleNotification,
       dontNotify: true,
       args: {
         conn,
         moduleName,
         moduleVersion,
+        action: mustUpgrade ? 'upgrade' : 'install'
       }
     });
   }

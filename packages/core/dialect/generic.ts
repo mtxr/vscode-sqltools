@@ -60,16 +60,19 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
     }
     if (this.deps && this.deps.length > 0) {
       this.deps.forEach(dep => {
+        let mustUpgrade = false;
         switch (dep.type) {
           case 'package':
             try {
-              __non_webpack_require__(dep.name);
+              delete __non_webpack_require__.cache[__non_webpack_require__.resolve(dep.name + '/package.json')];
               const { version } = __non_webpack_require__(dep.name + '/package.json');
               if (dep.version && version !== dep.version) {
-                throw new Error('Version not matching');
+                mustUpgrade = true;
+                throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
               }
+              __non_webpack_require__(dep.name);
             } catch(e) {
-              throw new MissingModuleException(dep.name, dep.version, this.credentials);
+              throw new MissingModuleException(dep.name, dep.version, this.credentials, mustUpgrade);
             }
             break;
         }

@@ -26,13 +26,13 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
   }
 
   private installingDialects: string[] = [];
-  private requestToInstall = async ({ moduleName, moduleVersion, conn }) =>  {
+  private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) =>  {
     const installNow = 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
     try {
-      const r = await Win.showInformationMessage(
-        `You need "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
+      const r = action === 'upgrade' ? installNow : await Win.showInformationMessage(
+        `You need to ${action} "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
         ...options,
       );
       switch (r) {
@@ -40,7 +40,7 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
           this.installingDialects.push(conn.dialect);
           await window.withProgress({
             location: ProgressLocation.Notification,
-            title: `SQLTools is installing`,
+            title: `SQLTools is ${action === 'upgrade' ? 'upgrading deps' : 'installing'}`,
             cancellable: false,
           }, async (progress) => {
             progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
