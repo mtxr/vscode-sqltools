@@ -3,6 +3,16 @@ import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import { commands, ExtensionContext, Uri, workspace } from 'vscode';
 import path from 'path';
+import { DatabaseDialect } from '@sqltools/core/interface';
+
+const relativeToWorkspace = (file: string) => {
+  const fileUri = Uri.file(file);
+  const workspaceFolder = workspace.getWorkspaceFolder(fileUri);
+  if (workspaceFolder) {
+    return path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath);
+  }
+  return file;
+}
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
@@ -27,10 +37,8 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private updateConnection = async ({ connInfo, isGlobal, editId }) => {
-    console.log({ connInfo, isGlobal, editId });
-
-    if (connInfo.dialect === 'SQLite' && connInfo.database) {
-      connInfo.database = path.relative(workspace.rootPath, connInfo.database);
+    if (connInfo.dialect === DatabaseDialect.SQLite) {
+      connInfo.database = relativeToWorkspace(connInfo.database);
     }
 
     commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, isGlobal ? 'Global' : undefined)
@@ -45,8 +53,8 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private createConnection = async ({ connInfo, isGlobal }) => {
-    if (connInfo.dialect === 'SQLite' && connInfo.database) {
-      connInfo.database = path.relative(workspace.rootPath, connInfo.database);
+    if (connInfo.dialect === DatabaseDialect.SQLite) {
+      connInfo.database = relativeToWorkspace(connInfo.database);
     }
 
     commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, isGlobal ? 'Global' : undefined)
