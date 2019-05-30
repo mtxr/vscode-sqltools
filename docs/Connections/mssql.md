@@ -25,7 +25,7 @@ MSSQL driver specific options can be passed using `pgOptions` settings.
 ```json
 {
   "name": "MSSQL",
-  "server": "localhost",
+  "server": "localhost", // You can use 'localhost\\instance' to connect to named instance
   "dialect": "MSSQL",
   "port": 1433,
   "database": "test_db",
@@ -33,7 +33,7 @@ MSSQL driver specific options can be passed using `pgOptions` settings.
   "askForPassword": false,
   "password": "root(!)Password",
   "connectionTimeout": 15,
-  "dialectOptions": {
+  "mssqlOptions": {
     ... // options
   }
 ```
@@ -42,3 +42,8 @@ MSSQL driver specific options can be passed using `pgOptions` settings.
 | ------------- | ------------- | ------------- |
 | encrypt  | `true`  | See https://github.com/tediousjs/node-mssql/tree/v4.3.1#tedious |
 
+## Breaking changes
+
+### v0.19.x
+
+* Remove deprecated (v0.17.6) `sqltools.connections[].dialectOptions` in favor of `sqltools.connections[].mssqlOptions`.

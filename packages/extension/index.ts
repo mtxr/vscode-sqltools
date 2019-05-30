@@ -18,7 +18,6 @@ import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import CodeLensPlugin from '@sqltools/plugins/codelens/extension';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private telemetry: Telemetry;
@@ -186,14 +185,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     if (!evt.command) return;
     if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
 
-    console.debug(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
+    console.log(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
   }
   private onDidRunCommandSuccessfullyHandler = (evt: SQLTools.CommandSuccessEvent): void => {
     if (!evt.command) return;
     if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
 
-    console.debug(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
+    console.log(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
@@ -254,14 +253,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 let instance: SQLToolsExtension;
 export function activate(context: ExtensionContext) {
   if (instance) return;
-  instance = new SQLToolsExtension(context)
+  instance = new SQLToolsExtension(context);
+  instance
     .registerPlugin(FormatterPlugin)
     .registerPlugin(AutoRestartPlugin)
-    .registerPlugin(new ConnectionManagerPlugin)
+    .registerPlugin(new ConnectionManagerPlugin(instance))
     .registerPlugin(new DependencyManagerPlugin)
     .registerPlugin(new HistoryManagerPlugin)
-    .registerPlugin(new BookmarksManagerPlugin)
-    .registerPlugin(new CodeLensPlugin);
+    .registerPlugin(new BookmarksManagerPlugin);
 
   return instance.activate();
 }

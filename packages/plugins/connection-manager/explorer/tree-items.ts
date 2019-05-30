@@ -57,8 +57,9 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
     return undefined;
   }
 
-  constructor(private context: ExtensionContext, public conn: ConnectionInterface) {
+  constructor(context: ExtensionContext, public conn: ConnectionInterface) {
     super(conn.name, TreeItemCollapsibleState.None);
+
     this.command = {
       title: 'Connect',
       command: `${EXT_NAME}.selectConnection`,
@@ -67,14 +68,14 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
 
     if (!SidebarConnection.icons) {
       SidebarConnection.icons = {
-        active: this.context.asAbsolutePath('icons/database-active.svg'),
+        active: context.asAbsolutePath('icons/database-active.svg'),
         connected: {
-          dark: this.context.asAbsolutePath('icons/database-dark.svg'),
-          light: this.context.asAbsolutePath('icons/database-light.svg'),
+          dark: context.asAbsolutePath('icons/database-dark.svg'),
+          light: context.asAbsolutePath('icons/database-light.svg'),
         },
         disconnected: {
-          dark: this.context.asAbsolutePath('icons/database-disconnected-dark.svg'),
-          light: this.context.asAbsolutePath('icons/database-disconnected-light.svg'),
+          dark: context.asAbsolutePath('icons/database-disconnected-dark.svg'),
+          light: context.asAbsolutePath('icons/database-disconnected-light.svg'),
         }
       }
     }
@@ -198,7 +199,7 @@ export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
     return `${this.table.numberOfColumns} cols`;
   }
 
-  constructor(private context: ExtensionContext, public table: DatabaseInterface.Table) {
+  constructor(context: ExtensionContext, public table: DatabaseInterface.Table) {
     super(table.name, (
       ConfigManager.get('tableTreeItemsExpanded', false)
         ? TreeItemCollapsibleState.Expanded
@@ -207,13 +208,13 @@ export class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
     this.value = this.table.name;
     if (this.table.isView) {
       this.iconPath = {
-        dark: this.context.asAbsolutePath('icons/view-dark.svg'),
-        light: this.context.asAbsolutePath('icons/view-light.svg'),
+        dark: context.asAbsolutePath('icons/view-dark.svg'),
+        light: context.asAbsolutePath('icons/view-light.svg'),
       };
     } else {
       this.iconPath = {
-        dark: this.context.asAbsolutePath('icons/table-dark.svg'),
-        light: this.context.asAbsolutePath('icons/table-light.svg'),
+        dark: context.asAbsolutePath('icons/table-dark.svg'),
+        light: context.asAbsolutePath('icons/table-light.svg'),
       };
     }
   }
@@ -245,17 +246,17 @@ export class SidebarColumn extends SidebarAbstractItem<null> {
   }
   public get conn() { return this.parent.conn; }
 
-  constructor(private context: ExtensionContext, public column: DatabaseInterface.TableColumn) {
+  constructor(context: ExtensionContext, public column: DatabaseInterface.TableColumn) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
     if (!SidebarColumn.icons) {
       SidebarColumn.icons = {
         default: {
-          dark: this.context.asAbsolutePath('icons/column-dark.svg'),
-          light: this.context.asAbsolutePath('icons/column-light.svg'),
+          dark: context.asAbsolutePath('icons/column-dark.svg'),
+          light: context.asAbsolutePath('icons/column-light.svg'),
         },
-        primaryKey: this.context.asAbsolutePath('icons/pk.svg'),
-        foreignKey: this.context.asAbsolutePath('icons/fk.svg'),
+        primaryKey: context.asAbsolutePath('icons/pk.svg'),
+        foreignKey: context.asAbsolutePath('icons/fk.svg'),
       }
     }
     this.updateIconPath();
@@ -288,12 +289,12 @@ export class SidebarFunction extends SidebarAbstractItem<null> {
 
   public get conn() { return this.parent.conn; }
 
-  constructor(private context: ExtensionContext, public functionData: DatabaseInterface.Function) {
+  constructor(context: ExtensionContext, public functionData: DatabaseInterface.Function) {
     super(functionData.name, TreeItemCollapsibleState.None);
     this.value = functionData.name;
     this.iconPath = {
-      dark: this.context.asAbsolutePath('icons/function-dark.svg'),
-      light: this.context.asAbsolutePath('icons/function-light.svg'),
+      dark: context.asAbsolutePath('icons/function-dark.svg'),
+      light: context.asAbsolutePath('icons/function-light.svg'),
     };
     this.description = `${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
     this.tooltip = `${this.functionData.signature}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;

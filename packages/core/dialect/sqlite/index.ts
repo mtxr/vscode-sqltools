@@ -7,7 +7,7 @@ import GenericDialect from '../generic';
 import queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-const SQLite3Version = '4.0.6';
+const SQLite3Version = '4.0.8';
 
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 
@@ -129,5 +129,9 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
   public getFunctions() {
     // this doesn exists for SQLite. It's just to avoid watning messages
     return Promise.resolve([]);
+  }
+
+  public describeTable(prefixedTable: string) {
+    return super.describeTable(prefixedTable.replace(/^("(.+)")$/g, '$2'));
   }
 }

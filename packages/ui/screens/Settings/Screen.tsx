@@ -17,6 +17,16 @@ import { DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { FileInput } from './FileInput';
 
+const relativeToWorkspace = (file: string, workspaces: string[] = []) => {
+  if (!file) return file;
+
+  const workspaceFolder = workspaces.find(w => file.startsWith(w));
+  if (workspaceFolder) {
+    return file.replace(workspaceFolder, '');
+  }
+  return file;
+}
+
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
 ];
@@ -116,6 +126,7 @@ interface SetupState {
   errors: { [field: string]: string };
   onSaveError?: string;
   saved?: JSX.Element;
+  workspaces: string[]
 }
 
 const storage = { data: {}, setItem: undefined, getItem: undefined, removeItem: undefined };
@@ -319,58 +330,65 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     console.log(`Message received: ${action}`, ...[ payload ]);
     switch(action) {
       case 'editConnection':
-          this.setState({
-            beforeEditData: payload.conn,
-            loading: true,
-            data: payload.conn,
-            fields: this.baseFields,
-            errors: {},
-            onSaveError: null,
-            saved: null,
-          }, async () => {
-            const conn: ConnectionInterface = payload.conn;
-            await this.updateField({
-              value: conn.dialect,
-              name: 'dialect',
-            });
-            if (conn.socketPath) {
-              await this.updateField({
-                value: ConnectionMethod.Socket,
-                name: 'connectionMethod',
-              });
-            } else if (conn.connectString) {
-              await this.updateField({
-                value: ConnectionMethod.ConnectionString,
-                name: 'connectionMethod',
-              });
-            } else {
-              await this.updateField({
-                value: ConnectionMethod.ServerAndPort,
-                name: 'connectionMethod',
-              });
-            }
-
-
-            if (conn.database) {
-              // await this.updateField({
-              //   value: conn.database,
-              //   name: 'database',
-              // });
-            }
-            // Object.keys(this.baseFields).forEach(async (name) => {
-            //   if (typeof conn[name] === 'undefined') return;
-            //   await this.updateField({
-            //     value: this.state.data[name],
-            //     checked: this.state.data[name],
-            //     name,
-            //   });
-            // });
-            this.componentDidMount();
+        this.setState({
+          beforeEditData: payload.conn,
+          loading: true,
+          data: payload.conn,
+          fields: this.baseFields,
+          errors: {},
+          onSaveError: null,
+          saved: null,
+        }, async () => {
+          const conn: ConnectionInterface = payload.conn;
+          await this.updateField({
+            value: conn.dialect,
+            name: 'dialect',
           });
+          if (conn.port) {
+            await this.updateField({
+              value: conn.port,
+              name: 'port',
+            });
+          }
+          if (conn.socketPath) {
+            await this.updateField({
+              value: ConnectionMethod.Socket,
+              name: 'connectionMethod',
+            });
+          } else if (conn.connectString) {
+            await this.updateField({
+              value: ConnectionMethod.ConnectionString,
+              name: 'connectionMethod',
+            });
+          } else {
+            await this.updateField({
+              value: ConnectionMethod.ServerAndPort,
+              name: 'connectionMethod',
+            });
+          }
+
+
+          // if (conn.database) {
+          //   await this.updateField({
+          //     value: conn.database,
+          //     name: 'database',
+          //   });
+          // }
+          // Object.keys(this.baseFields).forEach(async (name) => {
+          //   if (typeof conn[name] === 'undefined') return;
+          //   await this.updateField({
+          //     value: this.state.data[name],
+          //     checked: this.state.data[name],
+          //     name,
+          //   });
+          // });
+          this.componentDidMount();
+        });
         break;
       case 'updateConnectionSuccess':
       case 'createConnectionSuccess':
         const newState: SetupState = {
+          workspaces: [],
           loading: false,
           data: SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields),
           fields: this.baseFields,
@@ -397,6 +415,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
           onSaveError: ((payload && payload.message ? payload.message : payload) || '').toString(),
         });
         break;
+      case 'setWorkspaces':
+          this.setState({
+            workspaces: payload || []
+          });
       case 'reset':
         this.reset();
       default:
@@ -421,6 +443,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     super(props);
     const data = SettingsScreen.loadLocal() || SettingsScreen.generateConnData(this.baseFields);
     this.state = {
+      workspaces: [],
       loading: true,
       data,
       fields: this.baseFields,
@@ -451,7 +474,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
     const newData = { ...this.state.data, [name]: value };
     return new Promise((resolve) => {
       this.setState({ data: newData, saved: null, onSaveError: null }, () => {
-        if (!this.state.fields[name].postUpdateHook) return this.validateFields();
+        if (!this.state.fields[name].postUpdateHook) {
+          this.validateFields();
+          return resolve();
+        };
         this.state.fields[name].postUpdateHook();
         this.validateFields();
         return resolve();
@@ -524,7 +550,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       .filter(k => this.state.fields[k].visible || typeof this.state.fields[k].visible === 'undefined');
   }
 
-  public getParsedFormData() {
+  public getParsedFormData(workspaces: string[] = []) {
     const data = this.getVisibleFields()
       .reduce((d, k) => {
         const parse = this.state.fields[k].parse || ((v) => (v === '' ? null : v));
@@ -533,6 +559,10 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
       }, {});
 
       data['password'] = data['password'] || undefined;
+
+      if (data['dialect'] === DatabaseDialect.SQLite) {
+        data['database'] = relativeToWorkspace(data['database'], workspaces)
+      }
 
       delete data['isGlobal'];
       delete data['connectionMethod'];
@@ -679,7 +709,7 @@ export default class SettingsScreen extends React.Component<{}, SetupState> {
                 </div>
               ) : null}
               <div><h5 className={this.state.data.dialect && availableDialects[this.state.data.dialect].showHelperText ? '' : 'no-margin-top'}>Preview</h5></div>
-              <Syntax code={this.getParsedFormData()} language='json' strong/>
+              <Syntax code={this.getParsedFormData(this.state.workspaces)} language='json' strong/>
               {Object.keys(this.state.errors).length ? (
                 <div>
                   <h5>Validations</h5>

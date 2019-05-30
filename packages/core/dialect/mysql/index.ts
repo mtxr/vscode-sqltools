@@ -67,19 +67,30 @@ export default class MySQL extends GenericDialect<any> implements ConnectionDial
       });
   }
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
-    return this.driver.query(this.queries.fetchFunctions)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              ...obj,
-              args: obj.args ? obj.args.split(/, */g) : [],
-              database: obj.dbname,
-              schema: obj.dbschema,
-            } as DatabaseInterface.Function;
-          });
-      });
+  private version55Older: boolean;
+
+  public async getFunctions(): Promise<DatabaseInterface.Function[]> {
+    let functions;
+    if (this.version55Older === true) {
+      functions = await this.driver.query(this.queries.fetchFunctionsV55Older);
+    } else {
+      try {
+        functions = await this.driver.query(this.queries.fetchFunctions);
+      } catch (error) {
+        functions = await this.driver.query(this.queries.fetchFunctionsV55Older);
+        this.version55Older = true;
+      }
+    }
+
+    return functions[0].results
+      .reduce((prev, curr) => prev.concat(curr), [])
+      .map((obj) => {
+        return {
+          ...obj,
+          args: obj.args ? obj.args.split(/, */g) : [],
+          database: obj.dbname,
+          schema: obj.dbschema,
+        } as DatabaseInterface.Function;
+      })
   }
 }

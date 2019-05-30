@@ -1,0 +1,14 @@
+version: 2
+mergeable:
+  - when: pull_request.*
+    validate:
+      - do: title
+        must_exclude:
+          regex: (\[(wip|example)\]|\b(wip|example)\b)
+      - do: label
+        must_exclude:
+          regex: 'tutorial'
+      - do: assignee
+        min:
+          count: 1
+          message: 'Missing assignee'

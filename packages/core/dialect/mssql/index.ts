@@ -18,7 +18,11 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       return this.connection;
     }
 
-    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || (<any>this.credentials).dialectOptions || { encrypt: true };
+    if ((<any>this.credentials).dialectOptions) { // Will be removed on version 0.20
+      console.warn(`dialectOptions is deprecated. Use mssqlOptions instead.`);
+    }
+
+    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || { encrypt: true };
 
     let encryptAttempt = typeof mssqlOptions.encrypt !== 'undefined'
       ? mssqlOptions.encrypt : true;
@@ -71,7 +75,8 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     const pool = await this.open();
     const request = pool.request();
     request.multiple = true;
-    const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '')).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
+    query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
+    const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
     const queries = Utils.query.parse(query, 'mssql');
     return queries.map((q, i): DatabaseInterface.QueryResults => {
       const r = recordsets[i] || [];

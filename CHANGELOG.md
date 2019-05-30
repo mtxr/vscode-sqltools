@@ -1,5 +1,57 @@
 # Changelog
 
+## v0.19
+
+### v0.19.3 - (May 30, 2019)
+
+* **NEW** 🎉
+  * Upgrade SQLite lib to 4.0.8 to support NodeJS v12. Issue [#256](https://github.com/mtxr/vscode-sqltools/issues/256)
+  * Add/edit SQLite connections will be relative to workspace. Thanks to [@mitchellsimoens](https://github.com/mitchellsimoens). PR [#255](https://github.com/mtxr/vscode-sqltools/pull/255)
+
+* **Fix** 🎉
+  * Fixed edit connection not using existing port. Issue [#224](https://github.com/mtxr/vscode-sqltools/issues/224)
+  * Fixed column filtering breaking results screen. Issue [#251](https://github.com/mtxr/vscode-sqltools/issues/251)
+  * Fixed results screen taking focus after running query. Issue [#254](https://github.com/mtxr/vscode-sqltools/issues/254)
+  * Fixed saving results using editor button. Issue [#257](https://github.com/mtxr/vscode-sqltools/issues/257)
+
+### v0.19.2 - (May 24, 2019)
+
+* **Fix** 🎉
+  * Fixed explorer tree when tree items have dots. Issue [#242](https://github.com/mtxr/vscode-sqltools/issues/242)
+  * Hiding sqlite_sequence from explorer. Issue [#152](https://github.com/mtxr/vscode-sqltools/issues/152)
+
+* **Enhancements**
+  * Enhanced speed removing cycle references. Thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#233](https://github.com/mtxr/vscode-sqltools/pull/233)
+
+### v0.19.1 - (May 20, 2019)
+
+* **NEW** 🎉
+  * Add attach and detach commands to the command palette. Issue [#237](https://github.com/mtxr/vscode-sqltools/issues/237)
+
+* **Fix** 🎉
+  * Fixed session files when no folder is open. Issue [#236](https://github.com/mtxr/vscode-sqltools/issues/236)
+
+
+### v0.19.0 - (May 20, 2019)
+
+* **NEW** 🎉
+  * Multiple connections with session files. PR [#188](https://github.com/mtxr/vscode-sqltools/pull/188)
+    * Read the docs: [Sessions and Multiple Connections](https://vscode-sqltools.mteixeira.dev/session-multiple-connections)
+  * Added support for SAP Hana, thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#215](https://github.com/mtxr/vscode-sqltools/pull/215)
+  * Multiple results screens, one per connection. PR [#234](https://github.com/mtxr/vscode-sqltools/pull/234)
+
+* **Fix** 🎉
+  * Fixed timestamps to be raw from server. Issue [#231](https://github.com/mtxr/vscode-sqltools/issues/231)
+  * Fixed besides results locations leaving empty space. Issue [#211](https://github.com/mtxr/vscode-sqltools/issues/211)
+  * Fixed GO delimiter breaking queries on results screen. Issue [#226](https://github.com/mtxr/vscode-sqltools/issues/226)
+
+* **DOCS Updates**
+  * Add SSL example to PostgreSQL docs. Thanks to [@lawrencegripper](https://github.com/lawrencegripper). PR [#223](https://github.com/mtxr/vscode-sqltools/pull/223)
+
+* **Breaking Changes**
+  * Remove deprecated (v0.17.7) `sqltools.previewLimit` in favor of `sqltools.results.limit`.
+  * Remove deprecated (v0.17.6) `sqltools.connections[].dialectOptions` in favor of `sqltools.connections[].mssqlOptions`, `sqltools.connections[].pgOptions`, `sqltools.connections[].mysqlOptions` and `sqltools.connections[].oracleOptions`.
+
 ## v0.18
 
 ### v0.18.2 - (May 9, 2019)
@@ -65,7 +117,7 @@
     * ![static/codelens.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/codelens.png)
 
 * **Enhancements**
-  * Installing dependecies now uses VSCode progress indicator notification to better notify user about installation.
+  * Installing dependencies now uses VSCode progress indicator notification to better notify user about installation.
   * `NULL` values are now centered on results table.
   * `TRUE` and `FALSE` are better displayed on results table.
 
@@ -104,7 +156,7 @@
 * **NEW** 🎉
   * Add command `SQLTools.focusOnExplorer` to focus on explorer.
   * Allow users to set connection icons.
-  * Add stored procedure listing on explorer for Postgres and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
+  * Add stored procedure listing on explorer for PostgreSQL and MySQL. Oracle is coming soon. [#74](https://github.com/mtxr/sqltools-formatter/issues/74)
     * ![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
   * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/i
   * Enhanced connection hierarchy to allow multiple schemas and databases for PostgreSQL, MySQL, SQLite and MSSQL. Oracle is coming soon. Issue [#71](https://github.com/mtxr/sqltools-formatter/ssues/71)
@@ -114,8 +166,8 @@
 * **Enhancements**
   * Insert query generator includes column name and type on placeholders.
   * Improved query parser for better handling MSSQL queries.
-  * Identifing table prefix words for suggestions.
-  * Changed the icon on sugestions if it`s a view to make it visually different of a table.
+  * Identifying table prefix words for suggestions.
+  * Changed the icon on suggestions if it`s a view to make it visually different of a table.
   * Sorting column names by table name on suggestions.
 
 * **Fixes**
@@ -126,7 +178,7 @@
 
 * **Enhancements**
   * Improved query multiple statements parser
-  * Add ssl support for MySQL. Thanks to @MOZGIII.
+  * Add ssl support for MySQL. Thanks to [@MOZGIII](http://github.com/MOZGIII).
   * Ignoring comments on Query History tree view
 
 ### v0.17.9
@@ -140,7 +192,7 @@
 * **Fixes**
   - Fixes Icon Paths on windows. Issue #151
   - Allow empty password. Issue #150
-  - Fixes clutered database tree view. Issue #139
+  - Fixes cluttered database tree view. Issue #139
 
 ### v0.17.7
 
@@ -155,7 +207,7 @@
 
 * **NEW** 🎉
   * Added option to open results rows/values in editor. Issue #140.
-  * Added SSL support for postgres via `pgOptions` connection setting. Issue #141
+  * Added SSL support for PostgreSQL via `pgOptions` connection setting. Issue #141
   * Deprecating `dialectOptions` in favor of `[dialect]Options` settings.
 
 * **Fixes**
@@ -164,7 +216,7 @@
 ### v0.17.5
 
 * **Fixes**
-  - Fixed formater when formatting query with $1 parameters
+  - Fixed formatter when formatting query with $1 parameters
   - Fixed #136 scroll issue
 
 ### v0.17.4
@@ -185,7 +237,7 @@
 
 * **NEW** 🎉
   * Added support for SQLite. #51
-  * Added support for Oracle Database. #13
+  * Added support for Oracle Database, thanks to [@mickeypearce](https://github.com/mickeypearce). #13
   * Added History Explorer on sidebar
   * Added Bookmarks Explorer on sidebar
   * MySQL Xdevapi: Added support to MySQL XDEVAPI. It fixes `ER_NOT_SUPPORTED_AUTH_MODE: Client does not support authentication protocol` error. \(Experimental\).
@@ -205,7 +257,7 @@
     * `SQLTools.refreshSidebar` command was renamed to `SQLTools.refreshAll`
     * `SQLTools.runFromInput` command was renamed to `SQLTools.executeFromInput`
     * `SQLTools.editFromHistory` command was renamed to `SQLTools.editHistory`
-  * _**Settngs**_:
+  * _**Settings**_:
     * `sqltools.logging` and `sqltools.logLevel` were removed.
     * **Fixes**
       * This settings were ported from Sublime Text version but were never used here.

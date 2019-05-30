@@ -13,14 +13,20 @@ FROM
 ORDER BY
   cid ASC`,
   fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-  fetchTables: `SELECT
-      name AS tableName,
-      type,
-      type || 's' || '${TREE_SEP}' || name AS tree
-    FROM
-      sqlite_master
-    WHERE type = 'table' OR type = 'view'
-    ORDER BY
-      name;`,
+  fetchTables: `
+SELECT
+  name AS tableName,
+  type,
+  type || 's' || '${TREE_SEP}' || name AS tree
+FROM
+  sqlite_master
+WHERE
+  (
+    type = 'table'
+    OR type = 'view'
+  )
+  AND tableName NOT LIKE 'sqlite_%'
+ORDER BY
+  name;`,
   listFks: `PRAGMA foreign_key_list(:table);`
 } as DialectQueries;

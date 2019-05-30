@@ -2,9 +2,10 @@
   "sqltools.telemetry": true,
   "sqltools.useNodeRuntime": true,
   "sqltools.sortColumns": "ordinalnumber",
+  "sqltools.autoOpenSessionFiles": true,
   "sqltools.results": {
     "limit": 100,
-    "location": "beside",
+    "location": "next",
     "customization": {
       "table-cell-padding": "2px 4px"
     }
@@ -46,7 +47,7 @@
       "askForPassword": false,
       "password": "root(!)Password",
       "connectionTimeout": 15,
-      "dialectOptions": {
+      "mssqlOptions": {
         "encrypt": false
       }
     },

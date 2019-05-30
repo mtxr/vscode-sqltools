@@ -2,9 +2,9 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.18.2",
+  "version": "0.19.3",
   "publisher": "mtxr",
-  "license": "GPL-3.0",
+  "license": "MIT",
   "main": "../dist/extension.js",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
