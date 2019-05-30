@@ -46,7 +46,6 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   show() {
-    this.preserveFocus = false;
     this.wereToShow = null;
     switch (ConfigManager.results.location) {
       case 'active': // fallback older version
@@ -83,7 +82,6 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   wereToShow = vscode.ViewColumn.Active;
-  preserveFocus = false;
 }
 
 export default class ResultsWebviewManager {
