@@ -6,6 +6,8 @@ import * as Utils from '@sqltools/core/utils';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import Queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import fs from 'fs';
+
 export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implements ConnectionDialect {
   queries = Queries;
   public open() {
@@ -14,6 +16,12 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
     }
 
     const mysqlOptions: any = this.credentials.mysqlOptions || {};
+    if (typeof mysqlOptions.ssl === 'object') {
+      ['ca', 'cert', 'crl', 'key', 'pfx'].forEach((k) => {
+        if (!mysqlOptions.ssl[k]) return;
+        mysqlOptions.ssl[k] = fs.readFileSync(mysqlOptions.ssl[k]);
+      });
+    }
 
     const pool = MySQLLib.createPool({
       connectTimeout: this.credentials.connectionTimeout * 1000,
