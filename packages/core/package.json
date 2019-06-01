@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/core",
-  "version": "0.19.3",
+  "version": "0.19.4",
   "description": "SQLTools Core Files",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
