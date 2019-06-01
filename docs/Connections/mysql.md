@@ -66,6 +66,7 @@ Extra options can be used as defined in the connectors documentation.
 * For MySQL xprotocol
   * See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
 
+They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/dialect/mysql/index.ts .
 
 ## Know Errors and How to Fix
 

@@ -18,26 +18,26 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
       return this.connection;
     }
 
-    const { ssl } = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
+    const pgOptions: any = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
 
     let poolConfig: PoolConfig = {
       statement_timeout: this.credentials.connectionTimeout * 1000,
-      ssl,
+      ...pgOptions,
     };
 
     if (this.credentials.connectString) {
       poolConfig = {
+        connectionString: this.credentials.connectString,
         ...poolConfig,
-        connectionString: this.credentials.connectString
       }
     } else {
       poolConfig = {
-        ...poolConfig,
         database: this.credentials.database,
         host: this.credentials.server,
         password: this.credentials.password,
         port: this.credentials.port,
         user: this.credentials.username,
+        ...poolConfig,
       };
     }
 
