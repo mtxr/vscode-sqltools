@@ -13,7 +13,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
   queries = queries;
 
   private retryCount = 0;
-  public async open(encrypt?: boolean) {
+  public async open(encryptOverride?: boolean) {
     if (this.connection) {
       return this.connection;
     }
@@ -22,12 +22,12 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       console.warn(`dialectOptions is deprecated. Use mssqlOptions instead.`);
     }
 
-    const mssqlOptions: ConnectionInterface['mssqlOptions'] = this.credentials.mssqlOptions || { encrypt: true };
+    const { encrypt, ...mssqlOptions }: any = this.credentials.mssqlOptions || { encrypt: true };
 
-    let encryptAttempt = typeof mssqlOptions.encrypt !== 'undefined'
-      ? mssqlOptions.encrypt : true;
-    if (typeof encrypt !== 'undefined') {
-      encryptAttempt = encrypt;
+    let encryptAttempt = typeof encrypt !== 'undefined'
+      ? encrypt : true;
+    if (typeof encryptOverride !== 'undefined') {
+      encryptAttempt = encryptOverride;
     }
 
     const pool = new MSSQLLib.ConnectionPool({
@@ -38,9 +38,11 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       password: this.credentials.password,
       domain: this.credentials.domain || undefined,
       port: this.credentials.port,
+      ...mssqlOptions,
       options: {
+        ...((mssqlOptions || {}).options || {}),
         encrypt: encryptAttempt,
-      }
+      },
     } as MSSQLLib.config);
 
     await new Promise((resolve, reject) => {

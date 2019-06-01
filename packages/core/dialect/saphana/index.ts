@@ -2,7 +2,6 @@
 import {
   ConnectionDialect
 } from '@sqltools/core/interface';
-import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
@@ -89,13 +88,9 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     this.connection = null;
   }
 
-  public async testConnection?() {
-    return this.open().then(conn => conn.exec('select 1 from dummy;', (err, rows) => rows));
-  }
-
   public query(query: string, args?): Promise<DatabaseInterface.QueryResults[]> {
     return this.open().then(conn => {
-      return new Promise<DatabaseInterface.QueryResults[]>((resolve, reject) => {
+      return new Promise<DatabaseInterface.QueryResults[]>((resolve) => {
         if (args) {
           conn.prepare(query, (err, statement) => {
             if (err) {

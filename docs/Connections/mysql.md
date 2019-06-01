@@ -49,28 +49,24 @@ MySQL driver specific options can be passed using `mysqlOptions` settings.
   "password": "root",
   "connectionTimeout": 15,
   "mysqlOptions": {
-    ... // options
+    ... // options See section 2. mysqlOptions
   }
 }
 ```
 
-| Option key  | Default Value | Allowed Values |
-| ------------- | ------------- | ------------- |
-| ssl  | `null`  | See section [SSL](#2-ssl) |
-| authProtocol  | `default`  | `xprotocol`,`default` |
 
-### 2. SSL
+### 2. mysqlOptions
 
-If you are using default protocol, see:
+We have 2 options of connectors for MySQL. You can chose which one to use by change the setting `mysqlOptions.authProtocol`. The allowed values are `default` and `xprotocol`, we use `default` by default since is the most often used.
 
-https://www.npmjs.com/package/mysql#ssl-options
+Extra options can be used as defined in the connectors documentation.
 
+* For MySQL default protocol
+  * See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
+* For MySQL xprotocol
+  * See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
 
-If you are connecting using XProtocol, see:
-
-https://dev.mysql.com/doc/dev/connector-nodejs/8.0/tutorial-Secure_Sessions.html
-
-
+They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/dialect/mysql/index.ts .
 
 ## Know Errors and How to Fix
 
@@ -85,7 +81,7 @@ This error can be probably fixed using `mysqlOptions`. See:
   {
     ...
     "dialect": "MySQL",
-    "port": 33060, // Yes, changin port might help. Take a look at MySQL ports section in https://mysqlserverteam.com/mysql-guide-to-ports/
+    "port": 33060, // Take a look at MySQL ports section in https://mysqlserverteam.com/mysql-guide-to-ports/
     "mysqlOptions": {
       "authProtocol": "xprotocol",
       "ssl": true

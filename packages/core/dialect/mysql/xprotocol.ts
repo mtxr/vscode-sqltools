@@ -15,7 +15,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
       return this.connection;
     }
 
-    const { ssl } = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
+    const mysqlOptions = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
     const client = MySQLXLib.getClient(
       {
         host: this.credentials.server,
@@ -25,7 +25,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
         schema: this.credentials.database,
         connectTimeout: this.credentials.connectionTimeout * 1000,
         socket: this.credentials.socketPath,
-        ssl,
+        ...mysqlOptions
       },
       {
         pooling: {
