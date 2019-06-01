@@ -9,7 +9,7 @@ import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 
 const OracleDBLibVersion = '3.1.1';
-export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> implements ConnectionDialect {
+export default class OracleDB extends GenericDialect<OracleDBLib.Connection> implements ConnectionDialect {
   public static deps: typeof GenericDialect['deps'] = [{
     type: 'package',
     name: 'oracledb',
@@ -19,7 +19,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
   public static poolMap = new Map<string, boolean>();
   public get connection() {
     if (!this.poolCreated) return;
-    return this.lib.getConnection(this.poolName) as Promise<OracleDBLib.IConnection>;
+    return this.lib.getConnection(this.poolName) as Promise<OracleDBLib.Connection>;
   }
 
   queries = queries
@@ -181,14 +181,14 @@ export default class OracleDB extends GenericDialect<OracleDBLib.IConnection> im
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            return {              
+            return {
               name: obj.NAME,
               schema: obj.DBSCHEMA,
               database: obj.DBNAME,
               signature: obj.SIGNATURE,
-              args: obj.ARGS ? obj.ARGS.split(/, */g) : [],                            
-              resultType: obj.RESULTTYPE,   
-              tree: obj.TREE,                         
+              args: obj.ARGS ? obj.ARGS.split(/, */g) : [],
+              resultType: obj.RESULTTYPE,
+              tree: obj.TREE,
             } as DatabaseInterface.Function;
           });
       });

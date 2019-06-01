@@ -33,6 +33,7 @@
     "typescript.tsdk": "root/node_modules/typescript/lib",
     "cSpell.words": [
       "jsonb",
+      "oracledb",
       "postgre",
       "sql",
       "sqltools",

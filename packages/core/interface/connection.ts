@@ -2,7 +2,7 @@ import { DatabaseDialect } from './dialect';
 import { ClientConfig } from 'pg';
 import { ConnectionConfig } from 'mysql';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
-import { IPoolAttributes } from 'oracledb';
+import { PoolAttributes } from 'oracledb';
 
 export interface ConnectionInterface {
   /**
@@ -116,10 +116,10 @@ export interface ConnectionInterface {
 
   /**
    * OracleDB specific driver options (pool). See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrs
-   * @type {IPoolAttributes}
+   * @type {PoolAttributes}
    * @memberof ConnectionInterface
    */
-  oracleOptions?: IPoolAttributes
+  oracleOptions?: PoolAttributes
 
   /**
    * Connection domain (for MSSQL/Azure only)
