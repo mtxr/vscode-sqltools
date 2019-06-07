@@ -2,7 +2,6 @@ import MSSQLLib, { IResult } from 'mssql';
 
 import {
   ConnectionDialect,
-  ConnectionInterface,
 } from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';

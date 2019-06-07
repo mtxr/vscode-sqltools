@@ -2,12 +2,16 @@
 
 ## v0.19
 
+### v0.19.5 - (June 7, 2019)
+
+* **NEW** 🎉
+  * Add support for AWS Redshift. Issue [#264](https://github.com/mtxr/vscode-sqltools/issues/264)
+
 ### v0.19.4 - (June 1, 2019)
 
 * **NEW** 🎉
   * Dialect configs extended to match connector options. Issue [#235](https://github.com/mtxr/vscode-sqltools/issues/235)
   * Oracle data types in stored procedures. Thanks to [@mickeypearce](https://github.com/mickeypearce). PR [#260](https://github.com/mtxr/vscode-sqltools/pull/260)
-
 
 ### v0.19.3 - (May 30, 2019)
 
