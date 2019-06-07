@@ -23,6 +23,13 @@ describe('Should generate table names base on dialects', () => {
     expect(getNames(DatabaseDialect.PostgreSQL, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'database' })).toBe('"database"."schema"."table"');
   });
 
+  it('get redshift table names', () => {
+    expect(getNames(DatabaseDialect['AWS Redshift'], 'table')).toBe('"table"');
+    expect(getNames(DatabaseDialect['AWS Redshift'], { name: 'table', isView: false })).toBe('"table"');
+    expect(getNames(DatabaseDialect['AWS Redshift'], { name: 'table', tableSchema: 'schema', isView: false })).toBe('"schema"."table"');
+    expect(getNames(DatabaseDialect['AWS Redshift'], { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'database' })).toBe('"database"."schema"."table"');
+  });
+
   it('get mssql/azure table names', () => {
     expect(getNames(DatabaseDialect.MSSQL, 'table')).toBe('[table]');
     expect(getNames(DatabaseDialect.MSSQL, { name: 'table', isView: false })).toBe('[table]');

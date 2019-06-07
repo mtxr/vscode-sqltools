@@ -106,7 +106,7 @@ export interface ConnectionInterface {
   }
 
   /**
-   * PostgreSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options
+   * PostgreSQL/Redshift specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options
    * @type {any}
    * @memberof ConnectionInterface
    */

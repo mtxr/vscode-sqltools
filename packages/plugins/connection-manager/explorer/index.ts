@@ -10,6 +10,7 @@ import safeGet from 'lodash/get';
 
 const DialectHierarchyChildNames = {
   [DatabaseDialect.PostgreSQL]: ['Database', 'Schema'],
+  [DatabaseDialect['AWS Redshift']]: ['Database', 'Schema'],
 }
 
 
@@ -172,6 +173,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     try {
       switch (dialect) {
         case DatabaseDialect.PostgreSQL:
+        case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.SQLite:
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
@@ -201,6 +203,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
       switch (dialect) {
         case DatabaseDialect.PostgreSQL:
+        case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.SQLite:
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
@@ -227,6 +230,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     try {
       switch (dialect) {
         case DatabaseDialect.PostgreSQL:
+        case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.MySQL:
         case DatabaseDialect.MSSQL:
         case DatabaseDialect.OracleDB:

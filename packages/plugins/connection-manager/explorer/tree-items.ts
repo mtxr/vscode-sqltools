@@ -34,7 +34,7 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
   public tree: { [id: string]: SidebarResourceGroup } = {};
 
   public get items() {
-    return asArray(this.tree);
+    return asArray<SidebarResourceGroup>(this.tree);
   }
   public get description() {
     return getConnectionDescription(this.conn);
@@ -323,7 +323,7 @@ export class SidebarResourceGroup<T extends SidebarAbstractItem = SidebarAbstrac
   public value: string;
   public tree: { [name: string]: T } = {};
   public get items() {
-    return asArray(this.tree);
+    return asArray<T>(this.tree);
   }
   public get description() {
     return this.detail || `${Object.keys(this.tree).length} ${this.label.toLowerCase()}`;

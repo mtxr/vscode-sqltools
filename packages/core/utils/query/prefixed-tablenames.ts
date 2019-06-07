@@ -8,6 +8,7 @@ function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Ta
     case DatabaseDialect.SQLite:
       return `"${tableObj.name}"`;
     case DatabaseDialect.PostgreSQL:
+    case DatabaseDialect['AWS Redshift']:
       tableObj.tableDatabase && items.push(`"${tableObj.tableDatabase}"`);
       tableObj.tableSchema && items.push(`"${tableObj.tableSchema}"`);
       items.push(`"${tableObj.name}"`);

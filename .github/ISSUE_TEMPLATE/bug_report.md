@@ -26,7 +26,7 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
  - SQLTools Version [e.g. v0.17.x]
  - VSCode Version: [e.g 1.x.y]
- - Dialect Used: [e.g PostgreSQL, Oracle, SQLite..]
+ - Dialect Used: [e.g PostgreSQL, Oracle, SQLite, MySQL, Redshift..]
  - OS: [e.g. Windows, Linux, Mac]
 
 **Additional context**

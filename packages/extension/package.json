@@ -37,6 +37,7 @@
         "oracledb",
         "postgres",
         "postgresql",
+        "redshift",
         "rdbms",
         "dbms",
         "sql server",
@@ -457,6 +458,7 @@
                                     "MySQL",
                                     "OracleDB",
                                     "PostgreSQL",
+                                    "AWS Redshift",
                                     "SQLite",
                                     "SAPHana"
                                 ],
@@ -468,7 +470,7 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Connect string. Supporting Oracle and PostgreSQL.",
+                                "description": "Connect string. Support for Oracle, PostgreSQL and AWS Redshift.",
                                 "required": false
                             },
                             "mssqlOptions": {

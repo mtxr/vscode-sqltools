@@ -47,6 +47,11 @@ const availableDialects = {
     value: 'PostgreSQL',
     text: 'PostgreSQL',
   },
+  'AWS Redshift': {
+    port: 5432,
+    value: 'AWS Redshift',
+    text: 'AWS Redshift',
+  },
   OracleDB: {
     port: 1521,
     value: 'OracleDB',

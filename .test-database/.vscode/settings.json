@@ -18,6 +18,17 @@
   "sqltools.flattenGroupsIfOne": false,
   "sqltools.connections": [
     {
+      "name": "AWS Redshift",
+      "server": "localhost",
+      "dialect": "AWS Redshift",
+      "port": 5433,
+      "database": "test_db",
+      "username": "root",
+      "askForPassword": false,
+      "password": "root",
+      "connectionTimeout": 15
+    },
+    {
       "name": "PGSQL",
       "server": "localhost",
       "dialect": "PostgreSQL",
