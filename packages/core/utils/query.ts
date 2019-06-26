@@ -57,3 +57,7 @@ export function generateInsert(
   .replace(/'\${(\d+):([\w\s]+):((int|bool|num|real)[\w\s]*)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
   .concat('$0');
 }
+
+export function extractConnName(query: string) {
+  return ((query.match(/@conn\s*(.+)$/m) || [])[1] || '').trim() || null;
+}

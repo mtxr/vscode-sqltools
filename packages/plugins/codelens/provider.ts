@@ -3,6 +3,7 @@ import * as Constants from '@sqltools/core/constants';
 import Selector from '@sqltools/core/utils/vscode/selector';
 import { getNameFromId } from '@sqltools/core/utils';
 import SQLTools from '@sqltools/core/plugin-api';
+import { extractConnName } from '@sqltools/core/utils/query';
 
 export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   private _onDidChangeCodeLenses = new EventEmitter<void>();
@@ -16,7 +17,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
     const lines: string[] = document.getText().split(Constants.LineSplitterRegex);
     const requestRanges: [number, number][] = Selector.getQueryRanges(lines);
-    const defaultConn = (document.getText(new Range(0, 0, 1, 0)).match(/@conn\s*(.+)$/) || [])[1];
+    const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
     const lenses: CodeLens[] = [];
     const attachedId = this.context.workspaceState.get('attachedFilesMap', {})[document.uri.toString()];
     if (attachedId) {
@@ -32,7 +33,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     requestRanges.forEach(([blockStart, blockEnd]) => {
       const range = new Range(blockStart, 0, blockEnd, 0);
       const queries = document.getText(range);
-      const connName = (queries.match(/@conn\s*(.+)$/) || [])[1];
+      const connName = extractConnName(queries);
       const runCmd: Command = {
         arguments: [queries, (connName || defaultConn || '').trim() || undefined].filter(Boolean),
         title: `Run query block on ${(connName || defaultConn || 'active connection').trim()}`,
