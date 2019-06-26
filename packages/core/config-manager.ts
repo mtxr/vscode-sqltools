@@ -19,7 +19,6 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
 }
 
 function update(newSettings: typeof settings) {
-  console.log('Configs reloaded!');
   settings = newSettings;
   if (!settings.inspect) {
     // inspect implementation for language server.

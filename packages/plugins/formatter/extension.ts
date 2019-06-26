@@ -1,3 +1,4 @@
+import logger from '@sqltools/core/log/vscode';
 import { TextEditor, TextEditorEdit, commands, SnippetString } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { format } from './utils';
@@ -10,7 +11,7 @@ function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit): void {
     edit.replace(editor.selection, format(editor.document.getText(editor.selection), ConfigManager.format));
     commands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
   } catch (error) {
-    console.error('Error formatting query.', error);
+    logger.error('Error formatting query.', error);
   }
 }
 

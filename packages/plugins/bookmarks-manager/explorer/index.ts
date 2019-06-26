@@ -1,3 +1,4 @@
+import logger from '@sqltools/core/log/vscode';
 import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
@@ -88,7 +89,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
       })
 
     } catch(e) {
-      console.error('Error reading bookmarks:', e);
+      logger.error('Error reading bookmarks:', e);
     }
   }
 

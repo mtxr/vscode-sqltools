@@ -1,3 +1,4 @@
+import logger from '@sqltools/core/log/vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
@@ -172,7 +173,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  private ext_showOutputChannel = () => (<any>console).show();
+  private ext_showOutputChannel = () => (<any>logger).show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     connId = typeof connId === 'string' ? connId : undefined;
@@ -263,7 +264,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_addConnection = (connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      console.warn('Nothing to do. No parameter received');
+      logger.warn('Nothing to do. No parameter received');
       return;
     }
 
@@ -274,7 +275,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      console.warn('Nothing to do. No parameter received');
+      logger.warn('Nothing to do. No parameter received');
       return;
     }
 

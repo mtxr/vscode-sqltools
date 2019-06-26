@@ -69,4 +69,4 @@ class OutputChannelLogger implements Console {
   }
 }
 
-global.console = new OutputChannelLogger();
+export default new OutputChannelLogger();

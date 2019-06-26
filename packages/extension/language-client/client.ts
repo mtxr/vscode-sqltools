@@ -1,3 +1,4 @@
+import logger from '@sqltools/core/log/vscode';
 import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
@@ -12,6 +13,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
   private _telemetry = new Telemetry({
+    logger,
     product: 'language-client',
   });
 
