@@ -14,6 +14,7 @@ import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetCon
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
+import { extractConnName } from '@sqltools/core/utils/query';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -148,7 +149,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     try {
       query = query || await getSelectedText('execute query');
       if (!connNameOrId) {
-        connNameOrId = (query.match(/@conn\s*(.+)$/) || [])[1];
+        connNameOrId = extractConnName(query);
       }
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
