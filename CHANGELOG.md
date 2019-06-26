@@ -2,6 +2,13 @@
 
 ## v0.19
 
+### v0.19.6 - (June 26, 2019)
+
+* **Fix** 🎉
+  * Codelens conneciton switch. Issue [#270](https://github.com/mtxr/vscode-sqltools/issues/270)
+  * Bookmarked query changed on edit. Issue [#278](https://github.com/mtxr/vscode-sqltools/issues/278)
+  * SQLTools blocking output of test cases for other extensions. Issue [#273](https://github.com/mtxr/vscode-sqltools/issues/273)
+
 ### v0.19.5 - (June 7, 2019)
 
 * **NEW** 🎉
