@@ -26,8 +26,11 @@ export async function getSelectedText(action = 'proceed', fullText = false) {
   }
   return query;
 }
-export async function insertText(text: string | SnippetString, forceCreate = false) {
+export async function insertText(text: string | SnippetString, forceCreate = false, insertAsText = false) {
   const editor = await getOrCreateEditor(forceCreate);
+  if (typeof text === 'string' && insertAsText) {
+    return void Promise.all(editor.selections.map(cursor => editor.edit(e => e.insert(cursor.active, text))));
+  }
   await Promise.all(editor.selections.map(cursor => editor.insertSnippet(text instanceof SnippetString ? text : new SnippetString(`\${1:${text}}$0`), cursor.active)));
 }
 
