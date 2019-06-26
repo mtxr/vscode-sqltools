@@ -1,4 +1,4 @@
-import './patch-console';
+import logger from '@sqltools/core/log/vscode';
 import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
@@ -31,12 +31,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   public activate() {
     const activationTimer = new Timer();
     ConfigManager.addOnUpdateHook(() => {
+      logger.log('Settings updated!');
       if (this.telemetry) {
         if (ConfigManager.telemetry) this.telemetry.enable();
         else this.telemetry.disable();
       }
     });
     this.telemetry = new Telemetry({
+      logger,
       product: 'extension',
       vscodeInfo: {
         sessId: VSCodeEnv.sessionId,
@@ -59,8 +61,8 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
 
-    if ((<any>console).outputChannel) {
-      this.context.subscriptions.push((<any>console).outputChannel);
+    if ((<any>logger).outputChannel) {
+      this.context.subscriptions.push((<any>logger).outputChannel);
     }
     this.loadPlugins();
     activationTimer.end();
@@ -185,14 +187,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     if (!evt.command) return;
     if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
 
-    console.log(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
+    logger.log(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
   }
   private onDidRunCommandSuccessfullyHandler = (evt: SQLTools.CommandSuccessEvent): void => {
     if (!evt.command) return;
     if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
 
-    console.log(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
+    logger.log(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
@@ -232,7 +234,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
     this.context.subscriptions.push(
       commands[type](`${EXT_NAME}.${command}`, async (...args) => {
-        console.info(`Executing ${EXT_NAME}.${command}`)
+        logger.info(`Executing ${EXT_NAME}.${command}`)
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);

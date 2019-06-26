@@ -22,6 +22,7 @@ export declare namespace SQLTools {
     version?: string;
   }
   interface TelemetryArgs {
+    logger?: Console;
     product: Product;
     enableTelemetry?: boolean;
     vscodeInfo?: VSCodeInfo;
