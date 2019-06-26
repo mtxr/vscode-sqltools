@@ -70,7 +70,9 @@ They will be passed to the pool constructor directly. See https://github.com/mtx
 
 ## Know Errors and How to Fix
 
-### ER_NOT_SUPPORTED_AUTH_MODE
+### MySQL 8 and ER_NOT_SUPPORTED_AUTH_MODE
+
+MySQL 8 is available using xprotocol.
 
 See issue [#195](https://github.com/mtxr/vscode-sqltools/issues/195).
 
