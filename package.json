@@ -36,7 +36,7 @@
     "test:upcontainers": "bash ./.test-database/start-dbs.sh"
   },
   "dependencies": {
-    "husky": "^2.0.0"
+    "husky": "^3.0.0"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
