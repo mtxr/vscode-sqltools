@@ -49,3 +49,9 @@
     }
   }
 }
+.vscode-high-contrast {
+  .message .btn:not(.danger) {
+    background: var(--vscode-editorInfo-border);
+    border: 1px solid var (--vscode-editorInfo-border);
+  }
+}

@@ -65,7 +65,7 @@ body {
 input, select, select > option {
   border-radius: 0;
   background: var(--vscode-settings-textInputBackground);
-  border: none;
+  border: 1px solid var(--vscode-input-border);
   color: var(--vscode-settings-textInputForeground);
   padding: 4px 8px;
 }
@@ -104,11 +104,11 @@ select {
   cursor: pointer;
 }
 
-.btn {
+.btn, button {
   background: $linkColorBg;
   padding: 4px 8px;
-  color: $lightThemeGray16;
-  border: none;
+  color: $linkColorFg;
+  border: 1px solid var(--vscode-input-border);
   text-transform: uppercase;
   cursor: pointer;
   &:disabled,
@@ -118,11 +118,6 @@ select {
   }
 }
 
-.vscode-dark {
-  .btn {
-    color: $darkThemeWhite16;
-  }
-}
 .backdrop {
     position: fixed;
     top: 0;
