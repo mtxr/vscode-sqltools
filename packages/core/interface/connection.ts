@@ -57,6 +57,12 @@ export interface ConnectionInterface {
    */
   askForPassword?: boolean;
   /**
+   * Show given schema objects only
+   * @type {boolean}
+   * @memberof ConnectionInterface
+   */
+  local?: boolean;
+  /**
    * Connection Dialect"
    * @type {DatabaseDialect}
    * @memberof ConnectionInterface

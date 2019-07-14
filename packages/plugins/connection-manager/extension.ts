@@ -5,7 +5,7 @@ import { ConnectionInterface } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
+import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -69,6 +69,57 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
+    } catch (e) {
+      this.errorHandler('Error while describing table records', e);
+    }
+  }
+
+  private ext_describeCurrent = async () => {
+    try {
+      let activeEditor = await getOrCreateEditor();
+      if (!activeEditor) {
+          return;
+      }
+      let text = activeEditor.document.getText(); 
+      let line = activeEditor.selection.active.line;
+      let eol = activeEditor.document.eol === 2 ? "\r\n" : "\n";
+      let tests = text.split(eol);
+      let currentLine = tests[line];
+      let col = activeEditor.selection.active.character;
+      let startCol = 0;
+      for (let i = col; i >= 0; i--) {
+        let curLine = currentLine[i] || "";
+        if (curLine == " " || curLine == "," || curLine == "(" || curLine == ")" || curLine == "'") {
+          startCol = i + 1;
+          break;
+        }
+      }
+      let endCol = currentLine.length;
+      for (let i = col; i < currentLine.length; i++) {
+        let curLine = currentLine[i] || "";
+        if (curLine == " " || curLine == "," || curLine == "(" || curLine == ")" || curLine == "'") {
+          endCol = i;
+          break;
+        } 
+      }
+      let query = "";
+      for (let q = startCol; q < endCol; q++) {
+        query = query + currentLine[q];
+      }
+      const conn = await this._connect();
+      const s = await this.client.sendRequest(GetConnectionDataRequest, { conn });
+      let table = s.tables.find(p => p.name == query);
+      if (table != null) {
+        this._openResultsWebview();
+        const payload = await this._runConnectionCommandWithArgs('describeTable', getTableName(conn.dialect, table));
+        this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
+      } else {
+        let func = s.functions.find(p => p.name == query);
+        if (func != null) {
+          const payload = await this._runConnectionCommandWithArgs('describeFunction', func.signature);
+        }
+      }
+      
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
     }
@@ -182,6 +233,38 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
     }
+  }
+  
+  private ext_executeCurrentQuery = async () => {
+    let activeEditor = await getOrCreateEditor();
+    if (!activeEditor) {
+        return;
+    }
+    let text = activeEditor.document.getText(); 
+    let line = activeEditor.selection.active.line;
+    let eol = activeEditor.document.eol === 2 ? "\r\n" : "\n";
+    let tests = text.split(eol);
+    let startLine = 0;
+    for (let i = line; i >= 0; i--) {
+      let curLine = tests[i] || "";
+      if (curLine.trim() == "") {
+        startLine = i + 1;
+        break;
+      }
+    }
+    let endLine = tests.length;
+    for (let i = line; i < tests.length; i++) {
+      let curLine = tests[i] || "";
+      if (curLine.trim() == "") {
+        endLine = i;
+        break;
+      } 
+    }
+    let query = "";
+    for (let q = startLine; q < endLine; q++) {
+      query = query + tests[q] + eol;
+    }
+    return this.ext_executeQuery(query); 
   }
 
   private ext_executeQueryFromFile = async () => {
@@ -513,10 +596,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
+      .registerCommand(`describeCurrent`, this.ext_describeCurrent)
       .registerCommand(`describeFunction`, this.ext_describeFunction)
       .registerCommand(`describeTable`, this.ext_describeTable)
       .registerCommand(`executeFromInput`, this.ext_executeFromInput)
       .registerCommand(`executeQuery`, this.ext_executeQuery)
+      .registerCommand(`executeCurrentQuery`, this.ext_executeCurrentQuery)
       .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
       .registerCommand(`refreshAll`, this.ext_refreshAll)
       .registerCommand(`saveResults`, this.ext_saveResults)
