@@ -834,6 +834,16 @@
                     "group": "navigation@2"
                 },
                 {
+                    "title": "Describe Current Object",
+                    "command": "SQLTools.describeCurrent",
+                    "category": "SQLTools Connection"
+                },
+                {
+                    "title": "Run Current Query",
+                    "command": "SQLTools.executeCurrentQuery",
+                    "category": "SQLTools Connection"
+                },
+                {
                     "command": "SQLTools.generateInsertQuery",
                     "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
                     "group": "navigation@3"
