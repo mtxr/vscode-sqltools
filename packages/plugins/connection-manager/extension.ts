@@ -123,9 +123,24 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (!baseFolder) {
       baseFolder = Uri.file(path.join(getHome(), '.SQLTools'));
     }
-    const fileUri = Uri.parse(`untitled:${path.join(baseFolder.fsPath, `${conn.name} Session.sql`)}`);
-    this.updateAttachedConnectionsMap(fileUri, getConnectionId(conn));
+    const sessionFilePath = path.join(baseFolder.fsPath, `${conn.name} Session.sql`);
+    try {
+      this.updateAttachedConnectionsMap(
+        await this.openSessionFileWithProtocol(sessionFilePath, 'file'),
+        getConnectionId(conn)
+      );
+    } catch(e) {
+      this.updateAttachedConnectionsMap(
+        await this.openSessionFileWithProtocol(sessionFilePath),
+        getConnectionId(conn)
+      );
+    }
+  }
+
+  private async openSessionFileWithProtocol(uri: string, scheme: 'untitled' | 'file' = 'untitled') {
+    const fileUri = Uri.parse(`untitled:${uri}`).with({ scheme });
     await window.showTextDocument(fileUri);
+    return fileUri;
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {

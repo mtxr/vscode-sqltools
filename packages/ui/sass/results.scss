@@ -179,10 +179,12 @@ body, #root {
 .ReactTable .rt-thead.-filters input,
 .ReactTable .rt-thead.-filters select,
 .ReactTable .-pagination input,
-.ReactTable .-pagination select {
+.ReactTable .-pagination select,
+.ReactTable .-pagination .-btn {
   border-radius: 0;
   background: $lightThemeGray1;
-  border-color: $lightThemeGray2;
+  border: 1px solid var(--vscode-input-border);
+  color: 1px solid var(--vscode-input-foreground);
 }
 
 .tabs {
@@ -201,15 +203,7 @@ body, #root {
   }
 }
 
-body.vscode-dark {
-  .ReactTable .rt-thead.-filters input,
-  .ReactTable .rt-thead.-filters select,
-  .ReactTable .-pagination input,
-  .ReactTable .-pagination select {
-    background: $backgroundColor;
-    color: $color;
-    border-color: $darkThemeWhite2 !important;
-  }
+body.vscode-dark, body.vscode-high-contrast {
   .tabs {
     border-bottom-color: $darkThemeWhite1 !important;
     li {
@@ -243,7 +237,6 @@ body.vscode-dark {
       display: block;
       width: 100%;
       height: 100%;
-      border: 0;
       border-radius: 0px;
       padding: 6px;
       font-size: 1em;
