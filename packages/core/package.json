@@ -12,7 +12,7 @@
     "command-exists": "^1.2.8",
     "mssql": "^5.0.5",
     "mysql": "^2.16.0",
-    "pg": "^7.8.1",
+    "pg": "^7.11.0",
     "vscode": "^1.1.30",
     "vscode-languageclient": "5.2.1",
     "vscode-languageserver": "5.2.1"
@@ -23,7 +23,7 @@
     "@types/mssql": "^4.0.12",
     "@types/mysql": "^2.15.5",
     "@types/oracledb": "^3.1.0",
-    "@types/pg": "^7.4.13",
+    "@types/pg": "^7.4.14",
     "@types/redux": "^3.6.0",
     "@types/sqlite3": "^3.1.5",
     "@types/webpack-env": "^1.13.8",
