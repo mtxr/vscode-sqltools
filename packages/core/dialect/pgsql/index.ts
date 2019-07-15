@@ -21,7 +21,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     const pgOptions: any = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
 
     let poolConfig: PoolConfig = {
-      statement_timeout: this.credentials.connectionTimeout * 1000,
+      // statement_timeout: parseInt(`${this.credentials.connectionTimeout || 0}`, 10) * 1000,
       ...pgOptions,
     };
 

@@ -253,7 +253,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
-      query = query || await getSelectedText('execute query');
+      query = typeof query === 'string' ? query : await getSelectedText('execute query');
       if (!connNameOrId) {
         connNameOrId = extractConnName(query);
       }

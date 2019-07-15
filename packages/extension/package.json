@@ -118,7 +118,7 @@
                 }
             },
             {
-                "title": "Create From Selection",
+                "title": "Bookmark Selected Query",
                 "command": "SQLTools.bookmarkSelection",
                 "category": "SQLTools Bookmarks"
             },
@@ -168,7 +168,7 @@
                 "category": "SQLTools Connection"
             },
             {
-                "title": "Format Sql (For Any Document)",
+                "title": "Format Selected Query For Any Document",
                 "command": "SQLTools.formatSql",
                 "category": "SQLTools"
             },
@@ -188,7 +188,7 @@
                 "category": "SQLTools Connection"
             },
             {
-                "title": "Show Output Channel (Logs)",
+                "title": "Show Output Channel Logs",
                 "command": "SQLTools.showOutputChannel",
                 "category": "SQLTools Management"
             },
@@ -272,12 +272,12 @@
                 }
             },
             {
-                "title": "SQLTools: Attach Connection To This File",
+                "title": "Attach Connection To This File",
                 "command": "SQLTools.attachFileToConnection",
                 "category": "SQLTools Internal"
             },
             {
-                "title": "SQLTools: Detach Connection From File",
+                "title": "Detach Connection From File",
                 "command": "SQLTools.detachConnectionFromFile",
                 "category": "SQLTools Internal"
             }
@@ -879,6 +879,21 @@
                     "command": "SQLTools.detachConnectionFromFile",
                     "group": "sqltools@0",
                     "when": "sqltools.file.connectionAttached && editorLangId == sql"
+                },
+                {
+                    "command": "SQLTools.formatSql",
+                    "group": "sqltools@2",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.executeQuery",
+                    "group": "sqltools@01",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.bookmarkSelection",
+                    "group": "sqltools@3",
+                    "when": "editorHasSelection"
                 }
             ],
             "explorer/context": [
@@ -899,7 +914,7 @@
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
-        "@babel/cli": "^7.1.2",
+        "@babel/cli": "^7.5.0",
         "@types/jest": "^24.0.11",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
