@@ -93,13 +93,27 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     return  [code];
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string, params: DatabaseInterface.Parameters = {}): Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();
     const queries = this.simpleParse(query);
+    let realParams:OracleDBLib.BindParameters = {};
+    for (let p in params) {
+      if (params.hasOwnProperty(p)) {
+        let paramValue = params[p];
+        let oraType = OracleDBLib.STRING;
+        if (paramValue.type == DatabaseInterface.ParameterKind.Date) {
+          oraType = OracleDBLib.DATE;
+        } else if (paramValue.type == DatabaseInterface.ParameterKind.Number) {
+          oraType = OracleDBLib.NUMBER;
+        }
+        realParams[p] = { type: oraType, dir: OracleDBLib.BIND_IN, val: paramValue.value };
+      }
+    }
+    
     const results: DatabaseInterface.QueryResults[] = [];
     try {
       for(let q of queries) {
-        let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
+        let res = await conn.execute(q, realParams, { outFormat: this.lib.OBJECT });
         const messages = [];
         if (res.rowsAffected) {
           messages.push(`${res.rowsAffected} rows were affected.`);

@@ -3,7 +3,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
-import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
+import SQLTools,  { RequestHandler, DatabaseInterface } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
@@ -194,6 +194,46 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return fileUri;
   }
 
+  static parseSqlParams(sql: string): string[] {
+    let result: string[] = [];
+    let matches = sql.match(/(?::|@)([a-zA-Z][a-zA-Z0-9_]*)/g);
+    if (matches) {
+        matches.forEach((k, i) => {
+            let par = k.substr(1).toUpperCase().trim();
+            if (par != "MI" && par != "SS" && result.indexOf(par) === -1) {
+                result.push(par);
+            }
+        });
+    }
+    return result;
+  }
+
+  static parseSqlValues(sql: string): DatabaseInterface.Parameters {
+    let result: DatabaseInterface.Parameters = {};
+    let matches = sql.match(/(?:%)([a-zA-Z][a-zA-Z0-9_]*=.*)/g);
+    if (matches) {
+      matches.forEach((k) => {
+        let val = k.substr(1).toUpperCase().trim();
+        let spl = val.split('=');
+        let paramName = spl[0];
+        let paramValue: any = spl[1];
+        let theType = DatabaseInterface.ParameterKind.Number;
+        if (paramValue.startsWith('\'') || paramValue.startsWith('\"') ) {
+          theType = DatabaseInterface.ParameterKind.String;
+        } else {
+          let val = parseFloat(paramValue);
+          if (val === NaN) {
+            theType = DatabaseInterface.ParameterKind.Date;
+          } else {
+            paramValue = val;
+          }
+        }
+        result[paramName] = { type: theType, value: paramValue };
+      });
+    }
+    return result;
+  }
+
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
     if (connIdOrNode) {
       let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
@@ -227,7 +267,15 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       }
       await this._connect();
       this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('query', query);
+      let parseParams = ConnectionManagerPlugin.parseSqlParams(query);
+      let params: DatabaseInterface.Parameters = {};
+      if (parseParams.length > 0) {
+        let paramValues = ConnectionManagerPlugin.parseSqlValues(query);
+        for (let param of parseParams){
+          params[param] = { type: paramValues[param].type, value: paramValues[param].value || null} ;
+        }
+      }
+      const payload = await this._runConnectionCommandWithArgs('query', query, params);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
       return payload;
     } catch (e) {
@@ -236,9 +284,14 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
   
   private ext_executeCurrentQuery = async () => {
+    
     let activeEditor = await getOrCreateEditor();
     if (!activeEditor) {
         return;
+    }
+    
+    if (!activeEditor.selection.isEmpty) {
+      return this.ext_executeQuery();
     }
     let text = activeEditor.document.getText(); 
     let line = activeEditor.selection.active.line;

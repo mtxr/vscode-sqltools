@@ -153,6 +153,16 @@
                 "category": "SQLTools History"
             },
             {
+                "title": "Describe Current Object",
+                "command": "SQLTools.describeCurrent",
+                "category": "SQLTools Connection"
+            },
+            {
+                "title": "Run Current Query",
+                "command": "SQLTools.executeCurrentQuery",
+                "category": "SQLTools Connection"
+            },
+            {
                 "title": "Describe Table",
                 "command": "SQLTools.describeTable",
                 "category": "SQLTools Connection"
@@ -785,16 +795,6 @@
                     "command": "SQLTools.describeTable",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connection.tableOrView",
                     "group": "navigation@2"
-                },
-                {
-                    "title": "Describe Current Object",
-                    "command": "SQLTools.describeCurrent",
-                    "category": "SQLTools Connection"
-                },
-                {
-                    "title": "Run Current Query",
-                    "command": "SQLTools.executeCurrentQuery",
-                    "category": "SQLTools Connection"
                 },
                 {
                     "command": "SQLTools.generateInsertQuery",

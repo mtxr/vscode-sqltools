@@ -1,7 +1,7 @@
 import {
   ConnectionDialect,
   DialectQueries,
-  ConnectionInterface,
+  ConnectionInterface
 } from '@sqltools/core/interface';
 import Dialects from '@sqltools/core/dialect';
 import * as Utils from '@sqltools/core/utils';
@@ -35,7 +35,7 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
 
-  abstract query(query: string): Promise<DatabaseInterface.QueryResults[]>;
+  abstract query(query: string, params?: DatabaseInterface.Parameters): Promise<DatabaseInterface.QueryResults[]>;
 
   abstract getTables(): Promise<DatabaseInterface.Table[]>;
 

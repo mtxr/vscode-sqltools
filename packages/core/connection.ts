@@ -30,7 +30,7 @@ export default class Connection {
     if (typeof this.conn.testConnection === 'function')
       await this.conn.testConnection().catch(this.decorateException);
     else
-      await this.query('SELECT 1;', true);
+      await this.query('SELECT 1;', {}, true);
     this.connected = true;
   }
 
@@ -103,8 +103,8 @@ export default class Connection {
     return records;
   }
 
-  public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
-    return this.conn.query(query)
+  public query(query: string, params: DatabaseInterface.Parameters = {},  throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
+    return this.conn.query(query, params)
       .catch(this.decorateException)
       .catch((e) => {
         if (throwIfError) throw e;

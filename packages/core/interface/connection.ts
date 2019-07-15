@@ -176,7 +176,7 @@ export interface ConnectionDialect {
   getFunctions(): Promise<DatabaseInterface.Function[]>;
   describeTable(tableName: string): Promise<DatabaseInterface.QueryResults[]>;
   showRecords(tableName: string, limit: number): Promise<DatabaseInterface.QueryResults[]>;
-  query(query: string): Promise<DatabaseInterface.QueryResults[]>;
+  query(query: string, params?: DatabaseInterface.Parameters): Promise<DatabaseInterface.QueryResults[]>;
   testConnection?(): Promise<void>;
 }
 
