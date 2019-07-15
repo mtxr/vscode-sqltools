@@ -2,6 +2,11 @@
 
 ## v0.19
 
+### vnext - (xxx, 2019)
+
+* **NEW** 🎉
+  * Add run, bookmark and format selected query to context menu
+
 ### v0.19.6 - (June 26, 2019)
 
 * **Fix** 🎉
