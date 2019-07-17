@@ -13,7 +13,7 @@
     "vscode-languageserver": "5.2.1"
   },
   "devDependencies": {
-    "@babel/core": "7.5.0",
+    "@babel/core": "7.5.5",
     "@babel/plugin-proposal-object-rest-spread": "^7.5.0",
     "@babel/plugin-transform-spread": "^7.2.2",
     "@babel/preset-env": "^7.5.0",
