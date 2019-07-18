@@ -93,7 +93,9 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     return  [code];
   }
 
-  public async query(query: string, params: DatabaseInterface.Parameters = {}): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string, params: DatabaseInterface.Parameters = {}, maxRows: number = this.credentials.previewLimit): 
+      Promise<DatabaseInterface.QueryResults[]> {
+        console.time(query.substr(0, 10));
     const conn = await this.open();
     const queries = this.simpleParse(query);
     let realParams:OracleDBLib.BindParameters = {};
@@ -113,7 +115,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     const results: DatabaseInterface.QueryResults[] = [];
     try {
       for(let q of queries) {
-        let res = await conn.execute(q, realParams, { outFormat: this.lib.OBJECT });
+        let res = await conn.execute(q, realParams, { outFormat: this.lib.OBJECT, maxRows: maxRows || undefined});
         const messages = [];
         if (res.rowsAffected) {
           messages.push(`${res.rowsAffected} rows were affected.`);
@@ -135,6 +137,8 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         }
       }
     }
+    
+    console.timeEnd(query.substr(0, 10));
     return results;
   }
 
@@ -143,7 +147,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables)
+    return this.query(this.queries.fetchTables,{}, 0)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -162,7 +166,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns)
+    return this.query(this.queries.fetchColumns,{}, 0)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -186,12 +190,27 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
   }
 
   public describeTable(prefixedTable: string) {
-    const [ schema, table ] = prefixedTable.split('.');
-    return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
+    return this.query(this.queries.describeTable, { "thetable": {type: DatabaseInterface.ParameterKind.String, value: prefixedTable } }, 0);
+  }
+  
+  public async getDDL(object: string): Promise<string[]> {
+    await this.query(
+      `begin
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'EMIT_SCHEMA',false);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'SEGMENT_CREATION',false);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.SESSION_TRANSFORM,'CONSTRAINTS_AS_ALTER',true);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'SQLTERMINATOR', true);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'PRETTY', true);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'SEGMENT_ATTRIBUTES', false);
+        DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'STORAGE', false);
+      end;`
+    );
+    let res = await this.query(queriesLocal.getDDL, { "theobject": {type: DatabaseInterface.ParameterKind.String, value: object } }, 0);
+    return res[0].results.map(p => p.DDL);
   }
 
   public getFunctions(): Promise<DatabaseInterface.Function[]> {
-    return this.query(this.queries.fetchFunctions)
+    return this.query(this.queries.fetchFunctions,{}, 0)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])

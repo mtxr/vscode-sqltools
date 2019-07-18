@@ -84,6 +84,10 @@ export default class Connection {
       return this.functions;
     }).catch(this.decorateException);
   }
+  public async getDDL(tableName: string) {
+    const info = await this.conn.getDDL(tableName).catch(this.decorateException);
+    return info;
+  }
 
   public async describeTable(tableName: string) {
     const info = await this.conn.describeTable(tableName).catch(this.decorateException);

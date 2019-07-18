@@ -5,7 +5,7 @@ import { ConnectionInterface } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools,  { RequestHandler, DatabaseInterface } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/core/utils/vscode';
+import { getSelectedText, quickPick, readInput, getOrCreateEditor, insertText } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -108,15 +108,22 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       }
       const conn = await this._connect();
       const s = await this.client.sendRequest(GetConnectionDataRequest, { conn });
-      let table = s.tables.find(p => p.name == query);
+      let table = s.tables.find(p => p.name.toUpperCase() == query.toUpperCase());
+      let columns = [];
       if (table != null) {
         this._openResultsWebview();
         const payload = await this._runConnectionCommandWithArgs('describeTable', getTableName(conn.dialect, table));
         this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
-      } else {
-        let func = s.functions.find(p => p.name == query);
-        if (func != null) {
-          const payload = await this._runConnectionCommandWithArgs('describeFunction', func.signature);
+        columns = payload[0].results.map(p => p.COLUMN_NAME);
+      }
+      let ddl: string[] = await this._runConnectionCommandWithArgs('getDDL', query.toUpperCase());
+      if (ddl.length > 0) {
+        for (let p of ddl) {
+          let text = p;
+          if (columns.length > 0) {
+            text = `/* ${query.toUpperCase()}\n${columns.join(", ")}\n${columns.map(p => "A." + p).join(", ")}\n*/\n${p}`;
+          }
+          await insertText(text, true, true);
         }
       }
       
@@ -220,6 +227,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         let theType = DatabaseInterface.ParameterKind.Number;
         if (paramValue.startsWith('\'') || paramValue.startsWith('\"') ) {
           theType = DatabaseInterface.ParameterKind.String;
+          paramValue = paramValue.replace(/\'/g, "").replace(/\"/g, "");
         } else {
           let val = parseFloat(paramValue);
           if (val === NaN) {
@@ -619,7 +627,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (doc && doc.uri && doc.isClosed) {
       this.updateAttachedConnectionsMap(doc.uri);
     }
-    return this.ext_refreshAll();
+    // return this.ext_refreshAll();
   }
 
   public register(extension: SQLTools.ExtensionInterface) {

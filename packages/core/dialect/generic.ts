@@ -49,6 +49,10 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   public describeTable(table: string) {
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
+  
+  public async getDDL(object: string): Promise<string[]> {
+    return [];
+  }
 
   public showRecords(table: string, limit: number) {
     return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
