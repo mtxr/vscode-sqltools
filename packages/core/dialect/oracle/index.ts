@@ -111,7 +111,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         realParams[p] = { type: oraType, dir: OracleDBLib.BIND_IN, val: val };
       }
     }
-    
+
     console.time(query.substr(0, 10));
     const results: DatabaseInterface.QueryResults[] = [];
     try {
@@ -123,7 +123,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         }
         results.push({
           connId: this.getId(),
-          cols: (res.rows && res.rows.length) > 0 ? Object.keys(res.rows[0]) : [],
+          cols: res.metaData.map(p => p.name),
           messages,
           query: q,
           results: res.rows,

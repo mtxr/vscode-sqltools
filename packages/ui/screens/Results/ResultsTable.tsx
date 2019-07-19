@@ -266,8 +266,7 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
     this.gridElement.style.height = newHeight;
     this.dv = new Data.DataView();
     this.dv.setItems(data);
-    this.grid = new Grid(this.gridElement, this.dv, columns,
-      {
+    this.grid = new Grid(this.gridElement, this.dv, columns, {
         enableCellNavigation: true, enableColumnReorder: true, forceFitColumns: false,
         enableRowSelection: true, showHeaderRow: true, explicitInitialization: true
       });
