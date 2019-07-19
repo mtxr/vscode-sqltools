@@ -112,7 +112,6 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
       }
     }
 
-    console.time(query.substr(0, 10));
     const results: DatabaseInterface.QueryResults[] = [];
     try {
       for(let q of queries) {
@@ -123,7 +122,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         }
         results.push({
           connId: this.getId(),
-          cols: res.metaData.map(p => p.name),
+          cols: (res.metaData || []).map(p => p.name),
           messages,
           query: q,
           results: res.rows,
@@ -137,7 +136,6 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
           console.log(e);
         }
       }
-      console.timeEnd(query.substr(0, 10));
     }
     
     return results;
@@ -206,7 +204,10 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'STORAGE', false);
       end;`
     );
-    let res = await this.query(queriesLocal.getDDL, { "theobject": {type: DatabaseInterface.ParameterKind.String, value: object, orig: null } }, 0);
+    console.log("GETDDL");
+    let res = await this.query(queriesLocal.getDDL, { "theobject": 
+      {type: DatabaseInterface.ParameterKind.String, value: object, orig: null } }, 0);
+      console.log(res);
     return res[0].results.map(p => p.DDL);
   }
 

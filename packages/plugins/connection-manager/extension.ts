@@ -126,13 +126,16 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
         columns = payload[0].results.map(p => p.COLUMN_NAME);
       }
+      let ddlText = "";
+      if (columns.length > 0) {
+        ddlText = `/* ${query.toUpperCase()}\n${columns.join(", ")}\n${columns.map(p => "A." + p).join(", ")}\n*/\n`;
+      }
       let ddl: string[] = res[0];
       for (let p of ddl) {
-        let text = p;
-        if (columns.length > 0) {
-          text = `/* ${query.toUpperCase()}\n${columns.join(", ")}\n${columns.map(p => "A." + p).join(", ")}\n*/\n${p}`;
-        }
-        await insertText(text, true, true);
+        ddlText = ddlText + "\n" + p;
+      }
+      if (ddlText != "") {
+        await insertText(ddlText, true, true);
       }
       
     } catch (e) {
