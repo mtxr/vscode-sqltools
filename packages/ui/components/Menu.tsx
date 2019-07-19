@@ -9,7 +9,7 @@ const Option = ({ value, label, onSelect, command = undefined }) => command
 export default ({ x, y, open, onSelect, options = [], width = 200 }) => {
   if (!open || options.length === 0)
     return null;
-  return (<div className="context-menu" style={{ top: `${y}px`, left: `${Math.max(x - width, 15)}px`, width: `${width}px` }}>
+  return (<div className="context-menu" style={{ top: `${y}px`, left: `${Math.max(x - width, 15)}px`, width: `${width}px`, zIndex:9 }}>
     {options.map((opt, index) => {
       if (opt === 'sep' || opt.value === 'sep') {
         return <Separator key={index}/>

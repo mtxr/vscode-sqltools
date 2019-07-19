@@ -3,6 +3,27 @@
 @import './../../../node_modules/react-table/react-table';
 
 $transition: all .3s ease 0s;
+#thegrid * {
+    color: #333
+}
+
+#thegrid {
+    background: white
+}
+
+input.editor-text {
+    box-sizing: border-box;
+    font-size: 13.3px;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    left: 0;
+    top: 0;
+    border: 0;
+    margin: 0;
+    background: transparent;
+    padding: 9px 10px 9px 10px;
+}
 
 body {
   font-size: $fontSize;

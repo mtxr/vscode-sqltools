@@ -9,7 +9,7 @@ import { getSelectedText, quickPick, readInput, getOrCreateEditor, insertText } 
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, Position } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
@@ -28,7 +28,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private codeLensPlugin: CodeLensPlugin;
 
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
-
+  
   // extension commands
   private ext_refreshAll = () => {
     return this.client.sendRequest(RefreshAllRequest);
@@ -110,21 +110,29 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       const s = await this.client.sendRequest(GetConnectionDataRequest, { conn });
       let table = s.tables.find(p => p.name.toUpperCase() == query.toUpperCase());
       let columns = [];
+      let tasks = [this._runConnectionCommandWithArgs('getDDL', query.toUpperCase())];
       if (table != null) {
+        tasks.push(this._runConnectionCommandWithArgs('describeTable', getTableName(conn.dialect, table))),
+        tasks.push(this._runConnectionCommandWithArgs('showRecords', getTableName(conn.dialect, table), 50));
         this._openResultsWebview();
-        const payload = await this._runConnectionCommandWithArgs('describeTable', getTableName(conn.dialect, table));
+      }
+      let res = await Promise.all(tasks);
+      if (table != null) {
+        let payload = res[1];
+        let payload2 = res[2];
+        payload.push(payload2[0]);
+        payload[0].label = `${payload[0].results.length} Columns`;
+        payload[1].label = `${payload[1].results.length} Rows`;
         this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
         columns = payload[0].results.map(p => p.COLUMN_NAME);
       }
-      let ddl: string[] = await this._runConnectionCommandWithArgs('getDDL', query.toUpperCase());
-      if (ddl.length > 0) {
-        for (let p of ddl) {
-          let text = p;
-          if (columns.length > 0) {
-            text = `/* ${query.toUpperCase()}\n${columns.join(", ")}\n${columns.map(p => "A." + p).join(", ")}\n*/\n${p}`;
-          }
-          await insertText(text, true, true);
+      let ddl: string[] = res[0];
+      for (let p of ddl) {
+        let text = p;
+        if (columns.length > 0) {
+          text = `/* ${query.toUpperCase()}\n${columns.join(", ")}\n${columns.map(p => "A." + p).join(", ")}\n*/\n${p}`;
         }
+        await insertText(text, true, true);
       }
       
     } catch (e) {
@@ -220,23 +228,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     let matches = sql.match(/(?:%)([a-zA-Z][a-zA-Z0-9_]*=.*)/g);
     if (matches) {
       matches.forEach((k) => {
-        let val = k.substr(1).toUpperCase().trim();
-        let spl = val.split('=');
-        let paramName = spl[0];
-        let paramValue: any = spl[1];
-        let theType = DatabaseInterface.ParameterKind.Number;
-        if (paramValue.startsWith('\'') || paramValue.startsWith('\"') ) {
-          theType = DatabaseInterface.ParameterKind.String;
-          paramValue = paramValue.replace(/\'/g, "").replace(/\"/g, "");
-        } else {
-          let val = parseFloat(paramValue);
-          if (val === NaN) {
-            theType = DatabaseInterface.ParameterKind.Date;
-          } else {
-            paramValue = val;
-          }
-        }
-        result[paramName] = { type: theType, value: paramValue };
+        let val1 = k.substr(1).toUpperCase().trim();
+        let spl = val1.split('=');
+        result[spl[0]] = ConnectionManagerPlugin.parseValue(spl[1]);
       });
     }
     return result;
@@ -259,7 +253,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
+  private ext_executeQuery = async (query?: string, connNameOrId?: string, queryLine: number = 0) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
       if (!connNameOrId) {
@@ -279,10 +273,24 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       let params: DatabaseInterface.Parameters = {};
       if (parseParams.length > 0) {
         let paramValues = ConnectionManagerPlugin.parseSqlValues(query);
+        let missingParams: { param: string, val: any }[] = [];
         for (let param of parseParams){
-          params[param] = { type: paramValues[param].type, value: paramValues[param].value || null} ;
+          if (paramValues.hasOwnProperty(param)) {
+            params[param] = { type: paramValues[param].type, value: paramValues[param].value || null, orig: null } ;
+            this.context.globalState.update(`SQLTools.Param.${param}`, paramValues[param].orig);
+          } else {
+            let val1 = this.context.globalState.get<string>(`SQLTools.Param.${param}`);
+            params[param] = ConnectionManagerPlugin.parseValue(val1 || 'null');
+            missingParams.push({param, val: params[param].value});
+          }
+        }
+        if (missingParams.length > 0) {
+          let editor = await getOrCreateEditor();
+          let paramsText = missingParams.map(p => `--%${p.param}=${p.val}`).join("\n");
+          editor.edit(e => e.insert(new Position(queryLine, 0), paramsText + "\n"));
         }
       }
+      
       const payload = await this._runConnectionCommandWithArgs('query', query, params);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
       return payload;
@@ -325,7 +333,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     for (let q = startLine; q < endLine; q++) {
       query = query + tests[q] + eol;
     }
-    return this.ext_executeQuery(query); 
+    return this.ext_executeQuery(query, undefined, startLine);
   }
 
   private ext_executeQueryFromFile = async () => {
@@ -443,6 +451,23 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .filter(c => getConnectionId(c) !== oldId);
     connList.push(connInfo);
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
+  }
+
+  private static parseValue(paramValue: string) {
+    let theType = DatabaseInterface.ParameterKind.Number;
+    let val: any = null;
+    const stringVal = paramValue.toString();
+    if (stringVal.startsWith('\'') || stringVal.startsWith('\"') || stringVal == "null"  || stringVal == "") {
+      theType = DatabaseInterface.ParameterKind.String;
+      val = stringVal.replace(/\'/g, "").replace(/\"/g, "");
+    } else if (stringVal.indexOf("/") > 0 || stringVal.indexOf(":") > 0 || stringVal.indexOf("-") > 0  ) {
+      theType = DatabaseInterface.ParameterKind.Date;
+      val = stringVal;
+    } else {
+      theType = DatabaseInterface.ParameterKind.Number;
+      val = parseFloat(stringVal);
+    }
+    return { type: theType, value: val, orig: paramValue };
   }
 
   // internal utils

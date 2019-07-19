@@ -10,7 +10,8 @@
     "@sqltools/core": "*",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "react-table": "6.8.6"
+    "react-table": "6.8.6",
+    "slickgrid-es6": "^3.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.0",

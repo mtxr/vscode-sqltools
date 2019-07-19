@@ -27,13 +27,20 @@ module.exports = exports = function getWebviewConfig() {
         },
         {
           test: /\.scss$/,
-          use: ['style-loader', 'css-loader', 'sass-loader'],
+          use: ['style-loader', 'css-loader', {
+              loader: 'sass-loader',
+              options: {
+                  data: '@import "slick.grid.variables.scss";',
+                  includePaths: ['node_modules/slickgrid-es6/dist']
+              }
+          }],
         },
+        { test: /\.(png|gif|txt)$/, loader: "url-loader?limit=100000" }
       ],
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass'],
-      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
+      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules'), 'node_modules/slickgrid-es6/dist'],
     },
     optimization: {
       splitChunks: {

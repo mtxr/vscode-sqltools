@@ -1,342 +1,170 @@
-import React, { UIEventHandler, HTMLAttributes } from 'react';
-import ReactTable, { ReactTableDefaults, GlobalColumn, Column, CellInfo, RowInfo, Filter } from 'react-table';
-import Menu from './../../components/Menu';
-import { clipboardInsert } from '@sqltools/ui/lib/utils';
-import getVscode from '../../lib/vscode';
+import React from "react";
+import { Grid, Plugins, Data } from "slickgrid-es6";
 
-const FilterByValueOption = 'Filter by \'{value}\'';
-const ReRunQueryOption = 'Re-run this query';
-const ClearFiltersOption = 'Clear all filters';
-const CopyCellOption = 'Copy Cell value';
-const CopyRowOption = 'Copy Row value';
-const SaveCSVOption = 'Save results as CSV';
-const SaveJSONOption = 'Save results as JSON';
-const OpenEditorWithValueOption = 'Open editor with\'{value}\'';
-const OpenEditorWithRowOption = 'Open editor with row';
+import Menu from "./../../components/Menu";
+import { clipboardInsert } from "@sqltools/ui/lib/utils";
+import getVscode from "../../lib/vscode";
+import "slick.grid.variables.scss";
+import "slick.grid.scss";
+import "slick-default-theme.scss";
+import ReactDOM from "react-dom";
 
-const isRegExMatcher = /^\/(.+)\/(\w+)?$/gi;
+const FilterByValueOption = "Filter by '{value}'";
+const ReRunQueryOption = "Re-run this query";
+const ClearFiltersOption = "Clear all filters";
+const CopyCellOption = "Copy Cell value";
+const CopyRowOption = "Copy Row value";
+const SaveCSVOption = "Save results as CSV";
+const SaveJSONOption = "Save results as JSON";
+const OpenEditorWithValueOption = "Open editor with'{value}'";
+const OpenEditorWithRowOption = "Open editor with row";
 
-function toRegEx(value: string | RegExp) {
-  if (value instanceof RegExp) return value;
-  try {
-    if (isRegExMatcher.test(value)) {
-      try {
-        return eval(value.replace(isRegExMatcher, '/($1)/$2'));
-      } catch(ee) {}
-    }
-    return new RegExp(`(${value})`, 'gi');
-  } catch (e) { }
-  return value;
-}
-
-const FilterComponent = ({ filter = { value: '' }, column, onChange }) => {
-  return (
-    <input
-      type="text"
-      placeholder={`Filter by ${column.id}`}
-      style={{ width: '100%' }}
-      value={filter.value}
-      onChange={event => onChange(column.id, event.target.value)}
-    />
-  );
-};
-
-const TbodyComponent = React.forwardRef<any, { onScroll: UIEventHandler<HTMLDivElement> } & HTMLAttributes<any>>(({ onScroll, ...props }, ref) => {
-  for (let i = 0; i < props.children[0].length; i++) {
-    props.children[0][i] = React.cloneElement(props.children[0][i], {
-      minWidth: props.style.minWidth
-    });
-  }
-
-  return <div className="rt-tbody" id="tbody" onScroll={onScroll} ref={ref}>{props.children}</div>;
-});
-
-const TrGroupComponent = props => {
-  return (
-    <div
-      className="rt-tr-group"
-      role="rowgroup"
-      style={{ minWidth: props.minWidth }}
-    >
-      {props.children}
-    </div>
-  );
-};
-
-// @TODO: use the real column types here instead of a sample;
-const getSizeForItem = (colname: string, sample: any): Column => {
-  const props: Column = {
-    Header: colname,
-    accessor: colname,
-  };
-  if (typeof sample === 'undefined') {
-    props.width = 100;
-  } else if (
-    sample instanceof Date
-  ) {
-    props.width = 200;
-  } else if (typeof sample === 'number') {
-    props.width = 100;
-    props.className = 'text-right';
-  } else if (typeof sample === 'boolean') {
-    props.width = 75;
-    props.className = 'text-center';
-  }
-
-  return props;
-}
-
-interface ResultsTableProps {
+interface IResultsTableProps {
   cols: string[];
   data: any[];
   paginationSize: number; // add setting to change
   query: string;
   connId: string;
 }
-interface ResultsTableState {
-  page: number,
-  filtered: { [id: string]: Filter & { regex: RegExp | string } };
-  clickedData: {
-    value: any,
-    index: number,
-    col: string,
-  };
-  contextMenu: {
-    x: number,
-    y: number,
-    open: boolean,
-  };
+interface IFilterProps {
+  columnFilters: { [id: string]: any };
+  columnId: any;
+  dv: Slick.Data.DataView<any>;
+}
+interface IResultsTableState {
+  clickedData: { value: any, index: number, col: string };
+  contextMenu: { x: number, y: number, open: boolean };
 }
 
-export default class ResultsTable extends React.PureComponent<ResultsTableProps, ResultsTableState> {
-  static initialState: ResultsTableState = {
-    page: 0,
-    filtered: {},
-    clickedData: {
-      value: undefined,
-      index: -1,
-      col: undefined,
-    },
-    contextMenu: {
-      x: undefined,
-      y: undefined,
-      open: false,
-    }
+class Filter extends React.PureComponent<IFilterProps>  {
+  handleChange = ({target}) => {
+    let dv = this.props.dv;
+    let columnFilters = this.props.columnFilters;
+    let columnId = this.props.columnId;
+    const value = target.value.trim();
+    updateFilters(value, columnFilters, columnId, dv);
+  }
+
+  render() {
+    return <input defaultValue={this.props.columnFilters[this.props.columnId]} type="text"
+                  className="editor-text" style={{background: "white"}} onChange={this.handleChange} />;
+  }
+}
+
+export default class ResultsTable extends React.PureComponent<IResultsTableProps, IResultsTableState> {
+  static initialState: IResultsTableState = {
+    clickedData: { value: undefined, index: -1, col: undefined },
+    contextMenu: { x: undefined, y: undefined, open: false }
   };
   state = ResultsTable.initialState;
+  gridElement: HTMLDivElement = null;
+  gridSizer: HTMLDivElement = null;
+  theCanvas = null;
+  grid: Slick.Grid<any> = null;
+  dv: Slick.Data.DataView<any> = null;
+  columnFilters = {};
 
-  columnDefault: Partial<GlobalColumn> = {
-    ...ReactTableDefaults.column,
-    ...{ minResizeWidth: 11 },
-      Cell: (r: CellInfo) => {
-        let v = r.original[r.column.id];
-        if (v === null) return <small>NULL</small>;
-        if (v === true) return <span>TRUE</span>;
-        if (v === false) return <span>FALSE</span>;
-        if (typeof v === 'object' || Array.isArray(v)) {
-          return (
-            <div className="syntax json copy-allowed" data-value={v === null ? 'null' : JSON.stringify(v, null, 2)} data-col={r.column.id} data-index={r.index}>
-              <pre>{JSON.stringify(v)}</pre>
-            </div>
-          );
-        }
-        v = String(v);
-        if (!this.state.filtered[r.column.id]) return <span>{v}</span>;
-        return <span>
-          {
-            v.replace(this.state.filtered[r.column.id].regex || this.state.filtered[r.column.id].value, '<###>$1<###>')
-            .split('<###>')
-            .map((str, i) => {
-              if (i % 2 === 1)
-                return (
-                  <mark key={i} className="filter-highlight">
-                    {str}
-                  </mark>
-                );
-              if (str.trim().length === 0) return null;
-              return <span key={i}>{str}</span>;
-            })
-          }
-        </span>
-      },
-  };
-
-  openContextMenu = (e) => {
-    const { pageX, pageY } = e;
-
-    this.highlightClickedRow(e, () => {
-      this.setState({
-        contextMenu: {
-          open: true,
-          x: pageX,
-          y: pageY,
-        }
-      });
-    });
+  openContextMenu = (e: { pageX: any; pageY: any; }) => {
+    this.setState({ contextMenu: { open: true, x: e.pageX, y: e.pageY } });
   }
 
-  highlightClickedRow (e: React.MouseEvent<HTMLElement>, cb = (() => void 0)) {
-    let node = e.target as HTMLElement;
-    if (!node.matches('.copy-allowed')) {
-      node = node.closest('.copy-allowed') as HTMLElement;
-    }
-
-    if (!node) return;
-
-    const { value, index, col } = node.dataset;
-    if (typeof index === 'undefined' || typeof col === 'undefined') {
-      return;
-    }
-
-    this.setState({
-      clickedData: {
-        value,
-        col,
-        index: parseInt(index),
-      },
-    }, () => cb());
-  }
-
-  clipboardInsert(value) {
-    value = typeof value ==='string' ? value : JSON.stringify(value, null, 2);
+  clipboardInsert(value: string) {
+    value = typeof value === "string" ? value : JSON.stringify(value, null, 2);
     clipboardInsert(value);
   }
 
-  onTableClick = (e: React.MouseEvent<HTMLElement> = undefined) => {
+  onTableClick = () => {
     if (this.state.contextMenu.open) {
-      const { clickedData, contextMenu } = ResultsTable.initialState;
-      this.setState({
-        clickedData,
-        contextMenu,
-      });
-    } else if (e) {
-      this.highlightClickedRow(e);
+      const { contextMenu } = ResultsTable.initialState;
+      this.setState({ contextMenu });
     }
   }
 
   tableContextOptions = (): any[] => {
     const options: any[] = [];
-    if (!this.state.clickedData.col) return options;
-    const { clickedData } = this.state;;
-    if (typeof this.state.clickedData.value !== 'undefined') {
-      options.push({ get label() { return FilterByValueOption.replace('{value}', clickedData.value) }, value: FilterByValueOption });
-      options.push('sep');
+    if (!this.state.clickedData.col) { return options; }
+    const { clickedData } = this.state;
+    if (typeof this.state.clickedData.value !== "undefined") {
+      options.push({ get label() { return FilterByValueOption.replace("{value}", clickedData.value); }, value: FilterByValueOption });
+      options.push("sep");
     }
-    if (Object.keys(this.state.filtered).length > 0) {
+    if (Object.keys(this.columnFilters).length > 0) {
       options.push(ClearFiltersOption);
-      options.push('sep');
+      options.push("sep");
     }
     return options
-    .concat([
-      { get label() { return OpenEditorWithValueOption.replace('{value}', clickedData.value) }, value: OpenEditorWithValueOption },
-      OpenEditorWithRowOption,
-      CopyCellOption,
-      CopyRowOption,
-      'sep',
-      ReRunQueryOption,
-      SaveCSVOption,
-      SaveJSONOption,
-    ]);
+      .concat([
+        { get label() { return OpenEditorWithValueOption.replace("{value}", clickedData.value); }, value: OpenEditorWithValueOption },
+        OpenEditorWithRowOption,
+        CopyCellOption,
+        CopyRowOption,
+        "sep",
+        ReRunQueryOption,
+        SaveCSVOption,
+        SaveJSONOption,
+      ]);
   }
-
-  onFilterChange = (id: string, value: string = '', cb?: Function) => {
-    const { filtered } = this.state;
-    if (!value) {
-      delete filtered[id];
-    } else {
-      filtered[id] = {
-        id,
-        value,
-        regex: toRegEx(value),
-      }
-    }
-    this.setState({
-      filtered
-    }, () => cb ? cb(value) : void 0);
-  }
-
-  onPageChange = (page: number) => this.setState({ page });
 
   onMenuSelect = (choice: string) => {
-    const { clickedData } = this.state;
-    switch(choice) {
+    const data = this.state.clickedData;
+    switch (choice) {
       case FilterByValueOption:
-        const { filtered = {} } = this.state;
-        this.setState({
-          filtered: {
-            ...filtered,
-            [clickedData.col]: {
-              id: clickedData.col,
-              value: clickedData.value,
-              regex: clickedData.value
-            },
-          },
-        })
+          let headerCol = this.grid.getHeaderRowColumn(data.col);
+          let editor = (headerCol as HTMLElement).getElementsByClassName("editor-text")[0] as HTMLInputElement;
+          editor.value = data.value;
+          updateFilters(data.value, this.columnFilters, data.col, this.dv);
+        break;
       case CopyCellOption:
-        this.clipboardInsert(clickedData.value);
+        this.clipboardInsert(data.value);
         break;
       case CopyRowOption:
-        this.clipboardInsert(this.props.data[clickedData.index] || 'Failed');
+        this.clipboardInsert(this.dv.getItemByIdx(data.index) || "Failed");
         break;
       case ClearFiltersOption:
-        this.setState({ filtered: {} });
+        let header = this.grid.getHeaderRow();
+        let editors = (header as HTMLElement).getElementsByClassName("editor-text");
+        for (let editor of Array.from(editors)) {
+          (editor as HTMLInputElement).value = null;
+        }
+        this.columnFilters = {};
+        this.dv.refresh();
         break;
       case OpenEditorWithValueOption:
         getVscode().postMessage({
-          action: 'call',
-          payload: {
-            command: `${process.env.EXT_NAME}.insertText`,
-            args: [clickedData.value]
-          }
+          action: "call",
+          payload: { command: `${process.env.EXT_NAME}.insertText`, args: [data.value] }
         });
         break;
       case OpenEditorWithRowOption:
         getVscode().postMessage({
-          action: 'call',
+          action: "call",
           payload: {
             command: `${process.env.EXT_NAME}.insertText`,
-            args: [JSON.stringify(this.props.data[clickedData.index], null, 2)]
+            args: [JSON.stringify(this.dv.getItemByIdx(data.index), null, 2)]
           }
         });
         break;
       case ReRunQueryOption:
         getVscode().postMessage({
-          action: 'call',
-          payload: {
-            command: `${process.env.EXT_NAME}.executeQuery`,
-            args: [this.props.query, this.props.connId]
-          }
+          action: "call",
+          payload: { command: `${process.env.EXT_NAME}.executeQuery`, args: [this.props.query, this.props.connId] }
         });
         break;
       case SaveCSVOption:
         getVscode().postMessage({
-          action: 'call',
-          payload: {
-            command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['csv', this.props.connId]
-          }
+          action: "call",
+          payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ["csv", this.props.connId] }
         });
         break;
       case SaveJSONOption:
         getVscode().postMessage({
-          action: 'call',
-          payload: {
-            command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['json', this.props.connId]
-          }
+          action: "call",
+          payload: { command: `${process.env.EXT_NAME}.saveResults`, args: ["json", this.props.connId] }
         });
         break;
     }
-    this.onTableClick();
-  }
-
-  handleScroll = () => {
-    const tbody = this.tbodyRef && this.tbodyRef.current;
-    if (!tbody) return;
-    let headers = document.querySelectorAll('.rt-thead') || [];
-    headers.forEach(header => {
-      header.scrollLeft = tbody.scrollLeft
-    });
+    const { contextMenu } = ResultsTable.initialState;
+    this.setState({ contextMenu });
   }
 
   tbodyRef = React.createRef<HTMLDivElement>();
@@ -350,89 +178,144 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps,
           scrollHeight, scrollLeft, scrollTop, scrollWidth
         };
       }
-    } catch (e) { }
+    } catch (e) { /**/ }
     return null;
   }
 
-  componentDidUpdate(_, __, snapshot) {
-    if (!snapshot) return;
+  componentDidMount() {
+    this.init();
+  }
+
+  componentDidUpdate(previousProps: any, __: any, snapshot: { scrollLeft: number; scrollTop: number; }) {
+    if (previousProps.data != this.props.data) {
+      this.init();
+    }
+    if (!snapshot) { return; }
 
     const tbody = this.tbodyRef && this.tbodyRef.current;
 
-    if (!tbody) return;
+    if (!tbody) { return; }
 
     tbody.scrollLeft = snapshot.scrollLeft;
     tbody.scrollTop = snapshot.scrollTop;
+
   }
 
   render() {
-    const firstRow = (this.props.data[0] || {});
-    const cols = this.props.cols.map<Column>(c => getSizeForItem(c, firstRow[c]));
-    if (cols.length > 0 && cols.length < 8) {
-      delete cols[0].width;
+    let thestyle = { width: "100%" };
+    let thestyle2 = { top: "0px", bottom: "95px", width: 0, position: "absolute" as "absolute" };
+    return (<div onContextMenu={this.openContextMenu} onClick={this.onTableClick} >
+      <div id="thegrid" ref={grid => this.gridElement = grid} style={thestyle} className="slickgrid-container"></div>
+      <Menu {...this.state.contextMenu} width={250} onSelect={this.onMenuSelect} options={this.tableContextOptions()} />
+      <div id="myGridSizer" ref={gridSizer => this.gridSizer = gridSizer} style={thestyle2}></div></div>);
+  }
+
+  getTextWidth(text: string) {
+    let context = null;
+    if (!this.theCanvas) {
+      this.theCanvas = document.createElement("canvas");
+      context = this.theCanvas.getContext("2d");
+      let container = document.querySelector(".query-results-container");
+      let compStyle = getComputedStyle(container);
+      let fontSize = compStyle.getPropertyValue("font-size");
+      let fontName = compStyle.getPropertyValue("font-family");
+      context.font = fontSize + " " + fontName;
+    } else {
+      context = this.theCanvas.getContext("2d");
+    }
+    return context.measureText(text).width;
+  }
+
+  init() {
+    if (this.grid != null) {
+      this.grid.destroy();
+    }
+    window.onresize = () => {
+      let newHeight = this.gridSizer.offsetHeight + "px";
+      this.gridElement.style.height = newHeight;
+      if (this.grid != null) {
+        this.grid.resizeCanvas();
+      }
+    };
+
+    let data = this.props.data.slice(0);
+    let i = 1;
+    for (let p of data) {
+      p.id = i++;
     }
 
-    return (
-      <div onContextMenu={this.openContextMenu} onClick={this.onTableClick} className="react-table-clickable">
-        <ReactTable
-          noDataText="Query didn't return any results."
-          data={this.props.data}
-          columns={cols}
-          column={this.columnDefault}
-          filterable
-          filtered={Object.values(this.state.filtered)}
-          FilterComponent={({ column, onChange }) => <FilterComponent filter={this.state.filtered[column.id]} column={column} onChange={(id, value) => this.onFilterChange(id, value, onChange)} />}
-          pageSize={this.props.paginationSize}
-          showPagination={this.props.data.length > this.props.paginationSize}
-          minRows={this.props.data.length === 0 ? 1 : Math.min(this.props.paginationSize, this.props.data.length)}
-          getTrProps={(_, rowInfo: RowInfo) => {
-            if (!rowInfo) return {};
-            if (rowInfo && rowInfo.index === this.state.clickedData.index)
-              return { className: ' active-row' };
-            return {};
-          }}
-          onPageChange={this.onPageChange}
-          page={this.state.page}
-          getTdProps={(_, rowInfo: RowInfo, column: Column) => {
-            if (!rowInfo || !column) return {};
-            try {
-              const v = rowInfo.original[column.id];
-              const props = {
-                className: 'copy-allowed',
-                'data-value': v === null ? 'null' : v,
-                'data-col': column.id,
-                'data-index': rowInfo.index,
-              } as any;
-              if (v === null) props.className += ' td-null';
-              if (v === true) props.className += ' td-badge green';
-              if (v === false) props.className += ' td-badge red';
-              if (column.id === this.state.clickedData.col && rowInfo && rowInfo.index === this.state.clickedData.index) {
-                props.className += ' active-cell';
-              }
+    let columns = [];
+    for (let col of this.props.cols) {
+      let width = this.getTextWidth(col) + 20;
+      for (let p of data) {
+        let curWidth = this.getTextWidth(p[col]) + 20;
+        if (curWidth > width) {
+          width = curWidth;
+        }
+      }
+      if (width < 50) { width = 50; }
+      if (width > 300) { width = 300; }
+      columns.push(({ id: col, name: col, field: col, sortable: true, visible: true, width: width }));
+    }
+    let newHeight = this.gridSizer.offsetHeight + "px";
+    this.gridElement.style.height = newHeight;
+    this.dv = new Data.DataView();
+    this.dv.setItems(data);
+    this.grid = new Grid(this.gridElement, this.dv, columns,
+      { enableCellNavigation: true, enableColumnReorder: true, forceFitColumns: false,
+        enableRowSelection: true, showHeaderRow: true, explicitInitialization: true });
 
-              return props;
-            } catch (e) {
-              /** */
-            }
-            return {};
-          }}
-          defaultFilterMethod={(filter, row) => {
-            const filterData = this.state.filtered[filter.id];
-            if (!filterData || typeof row[filter.id] === 'undefined') return true;
-            const { regex, value } = filterData;
-            const position = `${row[filter.id]}`.search(regex || value);
-            return position !== -1;
-          }}
-          className="-striped -highlight"
-          TbodyComponent={(props) => <TbodyComponent {...props} onScroll={this.handleScroll} ref={this.tbodyRef} />}
-          TrGroupComponent={TrGroupComponent}
-          style={{
-            width: '100%',
-            height: '100%'
-          }}
-        />
-        <Menu {...this.state.contextMenu} width={250} onSelect={this.onMenuSelect} options={this.tableContextOptions()} />
-      </div>
-    );
+    this.grid.setSelectionModel(new Plugins.RowSelectionModel({ selectActiveRow: true }));
+    this.grid.onSort.subscribe((e, args) => {
+      const comparer = (a, b) =>  ((a[args.sortCol.field] || 0) > (b[args.sortCol.field] || 0)) ? 1 : -1;
+      this.dv.sort(comparer, args.sortAsc);
+    });
+
+    this.grid.onHeaderRowCellRendered.subscribe((_e, {node, column}) => {
+      ReactDOM.render(<Filter columnId={column.id} columnFilters={this.columnFilters} dv={this.dv}/>, node);
+      node.classList.add("slick-editable");
+    });
+
+    this.dv.onRowCountChanged.subscribe(() => {
+      this.grid.updateRowCount();
+      this.grid.render();
+    });
+
+    this.dv.onRowsChanged.subscribe((_e, {rows}) => {
+      this.grid.invalidateRows(rows);
+      this.grid.render();
+    });
+
+    this.dv.setFilter(item => {
+      let pass = true;
+      for (let key in item) {
+        if (item.hasOwnProperty(key)) {
+          if (key in this.columnFilters && this.columnFilters[key].length && key !== "health") {
+            pass = pass && (String(item[key]).match(new RegExp(this.columnFilters[key], "ig")) ? true : false);
+          }
+        }
+      }
+      return pass;
+    });
+
+    this.grid.onActiveCellChanged.subscribe( (_e, args) => {
+      let rowIndex = args.row;
+      let colIndex = args.cell;
+      let col = this.grid.getColumns()[colIndex].field;
+      let val = this.dv.getItems()[rowIndex][col];
+      this.setState({ clickedData: { value: val, col: col, index: rowIndex } });
+    });
+
+    this.grid.init();
   }
 }
+
+function updateFilters(value: any, columnFilters: any, columnId: any, dv: Slick.Data.DataView<any>) {
+  if (value.length) {
+    columnFilters[columnId] = value;
+  } else {
+    delete columnFilters[columnId];
+  }
+  dv.refresh();
+}
+

@@ -95,7 +95,6 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
 
   public async query(query: string, params: DatabaseInterface.Parameters = {}, maxRows: number = this.credentials.previewLimit): 
       Promise<DatabaseInterface.QueryResults[]> {
-        console.time(query.substr(0, 10));
     const conn = await this.open();
     const queries = this.simpleParse(query);
     let realParams:OracleDBLib.BindParameters = {};
@@ -103,15 +102,17 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
       if (params.hasOwnProperty(p)) {
         let paramValue = params[p];
         let oraType = OracleDBLib.STRING;
+        let val = paramValue.value;
         if (paramValue.type == DatabaseInterface.ParameterKind.Date) {
-          oraType = OracleDBLib.DATE;
+          oraType = OracleDBLib.STRING;
         } else if (paramValue.type == DatabaseInterface.ParameterKind.Number) {
           oraType = OracleDBLib.NUMBER;
         }
-        realParams[p] = { type: oraType, dir: OracleDBLib.BIND_IN, val: paramValue.value };
+        realParams[p] = { type: oraType, dir: OracleDBLib.BIND_IN, val: val };
       }
     }
     
+    console.time(query.substr(0, 10));
     const results: DatabaseInterface.QueryResults[] = [];
     try {
       for(let q of queries) {
@@ -136,9 +137,9 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
           console.log(e);
         }
       }
+      console.timeEnd(query.substr(0, 10));
     }
     
-    console.timeEnd(query.substr(0, 10));
     return results;
   }
 
@@ -190,7 +191,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
   }
 
   public describeTable(prefixedTable: string) {
-    return this.query(this.queries.describeTable, { "thetable": {type: DatabaseInterface.ParameterKind.String, value: prefixedTable } }, 0);
+    return this.query(this.queries.describeTable, { "thetable": {type: DatabaseInterface.ParameterKind.String, value: prefixedTable, orig: null } }, 0);
   }
   
   public async getDDL(object: string): Promise<string[]> {
@@ -205,7 +206,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         DBMS_METADATA.SET_TRANSFORM_PARAM(DBMS_METADATA.session_transform, 'STORAGE', false);
       end;`
     );
-    let res = await this.query(queriesLocal.getDDL, { "theobject": {type: DatabaseInterface.ParameterKind.String, value: object } }, 0);
+    let res = await this.query(queriesLocal.getDDL, { "theobject": {type: DatabaseInterface.ParameterKind.String, value: object, orig: null } }, 0);
     return res[0].results.map(p => p.DDL);
   }
 

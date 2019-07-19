@@ -124,6 +124,7 @@ export namespace DatabaseInterface {
   export interface ParameterValue {
     type: ParameterKind;
     value: any;
+    orig: any;
   }
   
   export interface Database {
