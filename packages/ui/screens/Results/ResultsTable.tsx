@@ -37,17 +37,18 @@ interface IResultsTableState {
 }
 
 class Filter extends React.PureComponent<IFilterProps>  {
-  handleChange = ({target}) => {
+  handleChange = ({ target }) => {
     let dv = this.props.dv;
     let columnFilters = this.props.columnFilters;
     let columnId = this.props.columnId;
+
     const value = target.value.trim();
     updateFilters(value, columnFilters, columnId, dv);
   }
 
   render() {
     return <input defaultValue={this.props.columnFilters[this.props.columnId]} type="text"
-                  className="editor-text" style={{background: "white"}} onChange={this.handleChange} />;
+      className="editor-text" style={{ background: "white" }} onChange={this.handleChange} />;
   }
 }
 
@@ -109,10 +110,10 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
     const data = this.state.clickedData;
     switch (choice) {
       case FilterByValueOption:
-          let headerCol = this.grid.getHeaderRowColumn(data.col);
-          let editor = (headerCol as HTMLElement).getElementsByClassName("editor-text")[0] as HTMLInputElement;
-          editor.value = data.value;
-          updateFilters(data.value, this.columnFilters, data.col, this.dv);
+        let headerCol = this.grid.getHeaderRowColumn(data.col);
+        let editor = (headerCol as HTMLElement).getElementsByClassName("editor-text")[0] as HTMLInputElement;
+        editor.value = data.value;
+        updateFilters(data.value, this.columnFilters, data.col, this.dv);
         break;
       case CopyCellOption:
         this.clipboardInsert(data.value);
@@ -124,9 +125,13 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
         let header = this.grid.getHeaderRow();
         let editors = (header as HTMLElement).getElementsByClassName("editor-text");
         for (let editor of Array.from(editors)) {
-          (editor as HTMLInputElement).value = null;
+          (editor as HTMLInputElement).value = "";
         }
-        this.columnFilters = {};
+        for (let p in this.columnFilters) {
+          if (this.columnFilters.hasOwnProperty(p)) {
+            delete this.columnFilters[p];
+          }
+        }
         this.dv.refresh();
         break;
       case OpenEditorWithValueOption:
@@ -262,17 +267,19 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
     this.dv = new Data.DataView();
     this.dv.setItems(data);
     this.grid = new Grid(this.gridElement, this.dv, columns,
-      { enableCellNavigation: true, enableColumnReorder: true, forceFitColumns: false,
-        enableRowSelection: true, showHeaderRow: true, explicitInitialization: true });
+      {
+        enableCellNavigation: true, enableColumnReorder: true, forceFitColumns: false,
+        enableRowSelection: true, showHeaderRow: true, explicitInitialization: true
+      });
 
     this.grid.setSelectionModel(new Plugins.RowSelectionModel({ selectActiveRow: true }));
-    this.grid.onSort.subscribe((e, args) => {
-      const comparer = (a, b) =>  ((a[args.sortCol.field] || 0) > (b[args.sortCol.field] || 0)) ? 1 : -1;
+    this.grid.onSort.subscribe((_e, args) => {
+      const comparer = (a: { [x: string]: any; }, b: { [x: string]: any; }) => sort(a[args.sortCol.field], b[args.sortCol.field]);
       this.dv.sort(comparer, args.sortAsc);
     });
 
-    this.grid.onHeaderRowCellRendered.subscribe((_e, {node, column}) => {
-      ReactDOM.render(<Filter columnId={column.id} columnFilters={this.columnFilters} dv={this.dv}/>, node);
+    this.grid.onHeaderRowCellRendered.subscribe((_e, { node, column }) => {
+      ReactDOM.render(<Filter columnId={column.id} columnFilters={this.columnFilters} dv={this.dv} />, node);
       node.classList.add("slick-editable");
     });
 
@@ -281,7 +288,7 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
       this.grid.render();
     });
 
-    this.dv.onRowsChanged.subscribe((_e, {rows}) => {
+    this.dv.onRowsChanged.subscribe((_e, { rows }) => {
       this.grid.invalidateRows(rows);
       this.grid.render();
     });
@@ -298,12 +305,16 @@ export default class ResultsTable extends React.PureComponent<IResultsTableProps
       return pass;
     });
 
-    this.grid.onActiveCellChanged.subscribe( (_e, args) => {
-      let rowIndex = args.row;
-      let colIndex = args.cell;
-      let col = this.grid.getColumns()[colIndex].field;
-      let val = this.dv.getItems()[rowIndex][col];
-      this.setState({ clickedData: { value: val, col: col, index: rowIndex } });
+    this.grid.onActiveCellChanged.subscribe((_e, args) => {
+      let gridcol = (this.grid.getColumns()[args.cell]);
+      if (gridcol == null) {
+        console.log({ msg: "Column not found", args });
+      } else {
+        let col = gridcol.field;
+        let node = this.grid.getCellNode(args.row, args.cell);
+        let val = node.innerText;
+        this.setState({ clickedData: { value: val, col: col, index: args.row } });
+      }
     });
 
     this.grid.init();
@@ -319,3 +330,17 @@ function updateFilters(value: any, columnFilters: any, columnId: any, dv: Slick.
   dv.refresh();
 }
 
+function sort(a: any, b: any): number {
+  if (a === b) { return 0; }
+  if (a == null) { return -1; }
+  if (b == null) { return 1; }
+
+  if (!isNaN(a) && !isNaN(b)) {
+    let flA = parseFloat(a);
+    let flB = parseFloat(b);
+    if (flA.toString() !== "NaN" && flB.toString() !== "NaN") {
+      return flA - flB;
+    }
+  }
+  return ((a || "") > (b || "")) ? 1 : -1;
+}
