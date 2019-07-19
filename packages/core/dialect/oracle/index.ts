@@ -207,7 +207,6 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     console.log("GETDDL");
     let res = await this.query(queriesLocal.getDDL, { "theobject": 
       {type: DatabaseInterface.ParameterKind.String, value: object, orig: null } }, 0);
-      console.log(res);
     return res[0].results.map(p => p.DDL);
   }
 
