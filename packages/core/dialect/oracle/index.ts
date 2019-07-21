@@ -50,7 +50,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     if (this.poolCreated) {
       return this.connection;
     }
-    this.queries = this.credentials.local ? queriesLocal : queries; 
+    this.queries = this.credentials.local ? queriesLocal : queries;
     this.needToInstallDependencies();
 
     let { connectString } = this.credentials;
@@ -93,22 +93,22 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     return  [code];
   }
 
-  public async query(query: string, params: DatabaseInterface.Parameters = {}, maxRows: number = this.credentials.previewLimit): 
+  public async query(query: string, params: DatabaseInterface.Parameters = {}, maxRows: number = this.credentials.previewLimit):
       Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();
     const queries = this.simpleParse(query);
-    let realParams:OracleDBLib.BindParameters = {};
+    let realParams: OracleDBLib.BindParameters = {};
     for (let p in params) {
       if (params.hasOwnProperty(p)) {
         let paramValue = params[p];
-        let oraType = OracleDBLib.STRING;
+        let oraType = this.lib.STRING;
         let val = paramValue.value;
         if (paramValue.type == DatabaseInterface.ParameterKind.Date) {
-          oraType = OracleDBLib.STRING;
+          oraType = this.lib.STRING;
         } else if (paramValue.type == DatabaseInterface.ParameterKind.Number) {
-          oraType = OracleDBLib.NUMBER;
+          oraType = this.lib.NUMBER;
         }
-        realParams[p] = { type: oraType, dir: OracleDBLib.BIND_IN, val: val };
+        realParams[p] = { type: oraType, dir: this.lib.BIND_IN, val: val };
       }
     }
 
@@ -137,7 +137,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         }
       }
     }
-    
+
     return results;
   }
 
@@ -182,7 +182,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
               type: obj.TYPE,
               isPk: obj.KEYTYPE === 'P',
               isFk: obj.KEYTYPE === 'R',
-              tree: obj.TREE, 
+              tree: obj.TREE,
             } as DatabaseInterface.TableColumn;
           });
       });
@@ -191,7 +191,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
   public describeTable(prefixedTable: string) {
     return this.query(this.queries.describeTable, { "thetable": {type: DatabaseInterface.ParameterKind.String, value: prefixedTable, orig: null } }, 0);
   }
-  
+
   public async getDDL(object: string): Promise<string[]> {
     await this.query(
       `begin
@@ -205,7 +205,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
       end;`
     );
     console.log("GETDDL");
-    let res = await this.query(queriesLocal.getDDL, { "theobject": 
+    let res = await this.query(queriesLocal.getDDL, { "theobject":
       {type: DatabaseInterface.ParameterKind.String, value: object, orig: null } }, 0);
     return res[0].results.map(p => p.DDL);
   }
