@@ -927,6 +927,7 @@
         "style-loader": "^0.23.1",
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",
+        "url-loader": "^2.1.0",
         "typescript": "^3.4.1",
         "vscode": "^1.1.30",
         "webpack": "^4.35.0",
