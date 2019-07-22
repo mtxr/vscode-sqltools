@@ -41,7 +41,7 @@ export default ({ cols, error, query, messages, results = [], connId }: QueryRes
   return (
     <div className="result">
       {table}
-      <Drawer open={showMessagess} onClose={() => setShowMessages(false)} anchor="right" className="messages-drawer">
+      <Drawer open={showMessagess} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer">
         <List dense component="ul" subheader={<ListSubheader>Messages</ListSubheader>}>
           {(messages.length > 0 ? messages : ['No messages to show.']).map((m, i) => (
             <ListItem component="li" className={'message ' + (error ? 'error' : '')} key={i}>

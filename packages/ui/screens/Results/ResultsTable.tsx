@@ -192,9 +192,11 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
 
   tableContextOptions = (row: any, column: Table.DataCellProps['column']): any[] => {
     const options: any[] = [];
-    const cellValue = row[column.name];
-    if (typeof cellValue !== 'undefined') {
-      options.push({ label: MenuActions.FilterByValueOption.replace('{value}', cellValue), value: MenuActions.FilterByValueOption });
+    let cellValue = row[column.name];
+    const cellValueIsObject = cellValue.toString() === '[object Object]';
+    const replaceString = cellValueIsObject ? 'Cell Value' : `'${cellValue}'`;
+    if (typeof cellValue !== 'undefined' && !cellValueIsObject) {
+      options.push({ label: MenuActions.FilterByValueOption.replace('{contextAction}', replaceString), value: MenuActions.FilterByValueOption });
       options.push('sep');
     }
     if (this.state.filters.length > 0) {
@@ -203,9 +205,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
     }
     return options
     .concat([
-      { label: MenuActions.OpenEditorWithValueOption.replace('{value}', cellValue), value: MenuActions.OpenEditorWithValueOption },
+      { label: MenuActions.OpenEditorWithValueOption.replace('{contextAction}', replaceString), value: MenuActions.OpenEditorWithValueOption },
       MenuActions.OpenEditorWithRowOption,
-      MenuActions.CopyCellOption,
+      { label: MenuActions.CopyCellOption.replace('{contextAction}', replaceString), value: MenuActions.CopyCellOption },
       MenuActions.CopyRowOption,
       MenuActions.Divider,
       MenuActions.ReRunQueryOption,

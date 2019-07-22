@@ -54,3 +54,7 @@ body, #root {
     background: var(--vscode-editor-selectionBackground) !important;
   }
 }
+
+#messages-drawer .MuiDrawer-paper {
+  width: 50%;
+}
