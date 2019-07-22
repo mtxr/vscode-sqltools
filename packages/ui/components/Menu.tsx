@@ -1,23 +1,38 @@
 import React from 'react';
+import MenuItem from '@material-ui/core/MenuItem';
+import { Divider, Menu } from '@material-ui/core';
 
-const Separator = () => (<div className="context-menu-separator"></div>);
-
-const Option = ({ value, label, onSelect, command = undefined }) => command
-  ? (<a href={`command:${command}`} onClick={() => onSelect(value)} className="context-menu-option">{label}</a>) // @TODO: test if this is working
-  : (<div onClick={() => onSelect(value)} className="context-menu-option">{label}</div>);
-
-export default ({ x, y, open, onSelect, options = [], width = 200 }) => {
-  if (!open || options.length === 0)
-    return null;
-  return (<div className="context-menu" style={{ top: `${y}px`, left: `${Math.max(x - width, 15)}px`, width: `${width}px` }}>
-    {options.map((opt, index) => {
-      if (opt === 'sep' || opt.value === 'sep') {
-        return <Separator key={index}/>
-      }
-      if (typeof opt === 'string') {
-        return <Option value={opt} label={opt} onSelect={onSelect} key={index}/>
-      }
-      return <Option value={opt.value || opt.label} label={opt.label} onSelect={onSelect} command={opt.command} key={index}/>
-    })}
-    </div>);
+export default ({ position, onSelect, open, options = [], width = 200 }) => {
+  if (!open) return null;
+  const { pageX, pageY } = position || {} as any;
+  return (
+    <Menu
+      anchorReference='anchorPosition'
+      open={open}
+      onClose={() => onSelect(null)}
+      disablePortal
+      keepMounted
+      getContentAnchorEl={null}
+      anchorPosition={{
+        top: pageY,
+        left: pageX
+      }}
+      PaperProps={{
+        style: {
+          width,
+        },
+      }}
+    >
+      {options.map((opt, index) => {
+        if (opt === 'sep' || opt.value === 'sep') {
+          return <Divider key={index} variant="fullWidth" component="li" />;
+        }
+        return (
+          <MenuItem key={opt.value || opt.label || opt} onClick={() => onSelect(opt.value || opt.label || opt)}>
+            {opt.label || opt}
+          </MenuItem>
+        );
+      })}
+    </Menu>
+  );
 };

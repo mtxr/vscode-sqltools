@@ -7,10 +7,14 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@material-ui/core": "^4.2.1",
+    "@material-ui/icons": "^4.2.1",
     "@sqltools/core": "*",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
-    "react-table": "6.8.6"
+    "@devexpress/dx-react-core": "^2.0.1",
+    "@devexpress/dx-react-grid": "^2.0.1",
+    "@devexpress/dx-react-grid-material-ui": "^2.0.1"
   },
   "devDependencies": {
     "@babel/cli": "^7.5.5",
@@ -20,7 +24,6 @@
     "@types/jest": "^24.0.11",
     "@types/react": "^16.8.7",
     "@types/react-dom": "^16.8.2",
-    "@types/react-table": "^6.7.22",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",

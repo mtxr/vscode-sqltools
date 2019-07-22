@@ -6,38 +6,46 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { Tabs, Tab } from '@material-ui/core';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
-  state: QueryResultsState = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
+  state: QueryResultsState = {
+    connId: null,
+    isLoaded: false,
+    resultMap: {},
+    queries: [],
+    error: null,
+    activeTab: null,
+  };
 
   saveState = (data, cb = () => {}) => {
     this.setState(data, () => {
       cb();
       getVscode().setState(this.state);
     });
-  }
+  };
 
   componentWillMount() {
-    window.addEventListener('message', (ev) => {
+    window.addEventListener('message', ev => {
       return this.messagesHandler(ev.data as WebviewMessageType);
     });
   }
 
-  toggle(query: QueryResultsState['queries'][number]) {
+  toggle(queryIndex: number) {
     this.saveState({
-      activeTab: query,
+      activeTab: queryIndex,
     });
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, ...[ payload ]);
+    console.log(`Message received: ${action}`, ...[payload]);
     switch (action) {
       case 'queryResults':
         const results: DatabaseInterface.QueryResults[] = payload;
         const queries = [];
         const resultMap = {};
         let connId: string;
-        (Array.isArray(results) ? results : [results]).forEach((r) => {
+        (Array.isArray(results) ? results : [results]).forEach(r => {
           connId = r.connId;
           queries.push(r.query);
           resultMap[r.query] = r;
@@ -48,7 +56,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           queries,
           resultMap,
           error: null,
-          activeTab: queries[0],
+          activeTab: 0,
         });
         break;
       case 'reset':
@@ -61,7 +69,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
       default:
         break;
     }
-  }
+  };
 
   render() {
     if (!this.state.isLoaded) {
@@ -74,23 +82,25 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         </div>
       );
     }
-    const tabs = this.state.queries.map((query: string) => (
-      <li
-        title={query}
-        key={query}
-        onClick={() => this.toggle(query)}
-        className={'truncate ' + (this.state.activeTab === query ? 'active' : '')}
-      >
-        {(this.state.resultMap[query] &&  this.state.resultMap[query].label) || query}
-      </li>
+    const tabs = this.state.queries.map((query: string, index: number) => (
+      <Tab
+        label={(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+        key={index}
+      />
     ));
-
     return (
-      <div className='query-results-container fullscreen-container'>
-        <ul className='tabs'>{tabs}</ul>
-        <QueryResult
-          {...this.state.resultMap[this.state.activeTab]}
-        />
+      <div className="query-results-container fullscreen-container">
+        <Tabs
+          value={this.state.activeTab}
+          onChange={(_e, index) => this.toggle(index)}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="scrollable"
+          scrollButtons="on"
+        >
+          {tabs}
+        </Tabs>
+        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} />
       </div>
     );
   }
