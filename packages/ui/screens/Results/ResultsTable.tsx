@@ -7,7 +7,8 @@ import {
   IntegratedFiltering,
   DataTypeProvider,
 } from '@devexpress/dx-react-grid';
-import { Grid, VirtualTable, TableHeaderRow, TableFilterRow, Table } from '@devexpress/dx-react-grid-material-ui';
+
+import { Grid, VirtualTable, TableHeaderRow, TableFilterRow, Table, TableColumnResizing } from '@devexpress/dx-react-grid-material-ui';
 import Code from '@material-ui/icons/Code';
 import { toRegEx } from '@sqltools/ui/lib/utils';
 import { ResultsTableProps } from './lib/ResultsTableProps';
@@ -24,11 +25,47 @@ const FilterIcon = ({ type, ...restProps }) => {
   return <TableFilterRow.Icon type={type} {...restProps} />;
 };
 
+const ValueRender = ({ value }) => {
+  {
+    if (value === null) return <small>NULL</small>;
+    if (value === true) return <span>TRUE</span>;
+    if (value === false) return <span>FALSE</span>;
+    if (typeof value === 'object' || Array.isArray(value)) {
+      return (
+        <div className="syntax json" data-value={value === null ? 'null' : JSON.stringify(value, null, 2)}>
+          <pre>{JSON.stringify(value)}</pre>
+        </div>
+      );
+    }
+    value = String(value);
+    return <span>{value}</span>;
+    // DISABLE! Performance issues here
+    // return <span>
+    //   {
+    //     value.replace(this.state.filtered[r.column.id].regex || this.state.filtered[r.column.id].value, '<###>$1<###>')
+    //     .split('<###>')
+    //     .map((str, i) => {
+    //       if (i % 2 === 1)
+    //         return (
+    //           <mark key={i} className="filter-highlight">
+    //             {str}
+    //           </mark>
+    //         );
+    //       if (str.trim().length === 0) return null;
+    //       return <span key={i}>{str}</span>;
+    //     })
+    //   }
+    // </span>
+  }
+}
+
 const TableCell = (openContextMenu: ResultsTable['openContextMenu']) => (props: Table.DataCellProps) => (
   <Table.Cell
     {...props}
     onContextMenu={e => openContextMenu(e, props.row, props.column, props.tableRow.key)}
-  />
+  >
+    <ValueRender value={props.value} />
+  </Table.Cell>
 );
 
 const TableRow = (selectedRow) => (props: Table.DataRowProps) => (
@@ -40,7 +77,7 @@ const TableRow = (selectedRow) => (props: Table.DataRowProps) => (
 
 const GridRoot = (props) => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }}/>;
 
-const columnExtensions = cols => cols.map(columnName => ({ columnName, predicate: filterPredicate }));
+const generateColumnExtensions = generateColumnExtensions => generateColumnExtensions.map(columnName => ({ columnName, predicate: filterPredicate, width: 150 }));
 
 export default class ResultsTable extends React.PureComponent<ResultsTableProps> {
   state = {
@@ -180,7 +217,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   render() {
     const { rows, columns, columnNames } = this.props;
     const { filters } = this.state;
-
+    const columnExtensions = generateColumnExtensions(columnNames);
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
         <Grid rows={rows} columns={columns} getRowId={getRowId} rootComponent={GridRoot}>
@@ -194,8 +231,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
             filters={filters}
             onFiltersChange={this.changeFilters}
           />
-          <IntegratedFiltering columnExtensions={columnExtensions(columnNames)} />
+          <IntegratedFiltering columnExtensions={columnExtensions} />
           <VirtualTable height="100%" cellComponent={TableCell(this.openContextMenu)} rowComponent={TableRow(this.state.contextMenu.rowKey)}/>
+          <TableColumnResizing defaultColumnWidths={columnExtensions} />
           <TableHeaderRow showSortingControls />
           <TableFilterRow
             showFilterSelector
