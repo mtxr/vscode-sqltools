@@ -2,15 +2,18 @@
 
 ## v0.19
 
-### vnext - (xxx, 2019)
+### v0.19.7 - (July 24, 2019)
 
 * **NEW** 🎉
   * Add run, bookmark and format selected query to context menu
+* **Fix** 🎉
+  * Reopen existing session file when reconnecting. Issue [#283](https://github.com/mtxr/vscode-sqltools/issues/283)
+  * Small changes on high contrast themes. Issue [#286](https://github.com/mtxr/vscode-sqltools/issues/286)
 
 ### v0.19.6 - (June 26, 2019)
 
 * **Fix** 🎉
-  * Codelens conneciton switch. Issue [#270](https://github.com/mtxr/vscode-sqltools/issues/270)
+  * Codelens connection switch. Issue [#270](https://github.com/mtxr/vscode-sqltools/issues/270)
   * Bookmarked query changed on edit. Issue [#278](https://github.com/mtxr/vscode-sqltools/issues/278)
   * SQLTools blocking output of test cases for other extensions. Issue [#273](https://github.com/mtxr/vscode-sqltools/issues/273)
 
