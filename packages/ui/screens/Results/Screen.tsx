@@ -6,7 +6,7 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
-import { Tabs, Tab } from '@material-ui/core';
+import { Tabs, Tab, Typography } from '@material-ui/core';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state: QueryResultsState = {
@@ -84,7 +84,11 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     }
     const tabs = this.state.queries.map((query: string, index: number) => (
       <Tab
-        label={(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+        label={(
+          <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
+            {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+          </Typography>
+        )}
         key={index}
       />
     ));

@@ -1,12 +1,13 @@
 import React from 'react';
 import MenuItem from '@material-ui/core/MenuItem';
-import { Divider, Menu } from '@material-ui/core';
+import { Divider, Menu, Typography } from '@material-ui/core';
 
 export default ({ position, onSelect, open, options = [], width = 200 }) => {
   if (!open) return null;
   const { pageX, pageY } = position || {} as any;
   return (
     <Menu
+      id="context-menu"
       anchorReference='anchorPosition'
       open={open}
       onClose={() => onSelect(null)}
@@ -29,7 +30,9 @@ export default ({ position, onSelect, open, options = [], width = 200 }) => {
         }
         return (
           <MenuItem key={opt.value || opt.label || opt} onClick={() => onSelect(opt.value || opt.label || opt)}>
+            <Typography variant="inherit" noWrap>
             {opt.label || opt}
+            </Typography>
           </MenuItem>
         );
       })}

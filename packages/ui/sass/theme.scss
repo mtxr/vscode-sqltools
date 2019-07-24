@@ -1,0 +1,42 @@
+@import './variables';
+
+// overrides MUI
+
+.MuiPaper-root.MuiMenu-paper {
+  background-color: var(--vscode-menu-background);
+  color: var(--vscode-menu-foreground);
+}
+
+.MuiMenuItem-root {
+  min-height: auto;
+}
+.MuiList-padding {
+  padding: 4px 0px;
+}
+
+.MuiMenuItem-gutters {
+  padding: 4px 24px;
+}
+.MuiListItem-root.Mui-selected,
+.MuiListItem-root.Mui-selected:hover,
+.MuiMenuItem-gutters:hover {
+  background: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+.MuiDivider-root {
+  background-color: var(--vscode-menu-separatorBackground);
+  margin: 4px 0;
+  opacity: 0.4;
+}
+
+.MuiListItemIcon-root {
+  color: inherit;
+}
+
+.MuiListItemText-root {
+  margin: 0;
+}
+
+.MuiPaper-rounded {
+  border-radius: 1px;
+}

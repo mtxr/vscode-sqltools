@@ -6,9 +6,19 @@ import {
   FilteringState,
   IntegratedFiltering,
   DataTypeProvider,
+  PagingState,
+  IntegratedPaging,
 } from '@devexpress/dx-react-grid';
 
-import { Grid, VirtualTable, TableHeaderRow, TableFilterRow, Table, TableColumnResizing } from '@devexpress/dx-react-grid-material-ui';
+import {
+  Grid,
+  VirtualTable,
+  TableHeaderRow,
+  TableFilterRow,
+  Table,
+  TableColumnResizing,
+  PagingPanel,
+} from '@devexpress/dx-react-grid-material-ui';
 import Code from '@material-ui/icons/Code';
 import { toRegEx } from '@sqltools/ui/lib/utils';
 import { ResultsTableProps } from './lib/ResultsTableProps';
@@ -91,10 +101,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
     }
   }
 
-  changeFilters = filters => {
-    Object.keys(filters).forEach(k => {
-      if (filters[k].operation !== 'regex') return;
-      filters[k].regex = toRegEx(filters[k].value);
+  changeFilters = (filters = []) => {
+    filters = filters.map(filter => {
+      if (filter.operation !== 'regex') return filter;
+      filter.regex = toRegEx(filter.value);
     });
     this.setState({ filters });
   }
@@ -193,7 +203,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   tableContextOptions = (row: any, column: Table.DataCellProps['column']): any[] => {
     const options: any[] = [];
     let cellValue = row[column.name];
-    const cellValueIsObject = cellValue.toString() === '[object Object]';
+    const cellValueIsObject = cellValue && cellValue.toString() === '[object Object]';
     const replaceString = cellValueIsObject ? 'Cell Value' : `'${cellValue}'`;
     if (typeof cellValue !== 'undefined' && !cellValueIsObject) {
       options.push({ label: MenuActions.FilterByValueOption.replace('{contextAction}', replaceString), value: MenuActions.FilterByValueOption });
@@ -234,6 +244,11 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
             onFiltersChange={this.changeFilters}
           />
           <IntegratedFiltering columnExtensions={columnExtensions} />
+          <PagingState
+            defaultCurrentPage={0}
+            pageSize={50}
+          />
+          <IntegratedPaging />
           <VirtualTable height="100%" cellComponent={TableCell(this.openContextMenu)} rowComponent={TableRow(this.state.contextMenu.rowKey)}/>
           <TableColumnResizing defaultColumnWidths={columnExtensions} />
           <TableHeaderRow showSortingControls />
@@ -242,6 +257,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
             iconComponent={FilterIcon}
             messages={{ regex: 'RegEx' } as any}
           />
+          <PagingPanel />
         </Grid>
         <Menu
           open={Boolean(this.state.contextMenu.row)}

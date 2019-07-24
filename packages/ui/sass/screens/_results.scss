@@ -1,0 +1,29 @@
+@import '../variables';
+@import '../lib/core-theme';
+
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
+.query-results-container {
+  display: flex;
+  flex-direction: column;
+}
+.query-results-container, .query-results-container * {
+  font-size: var(--sqltools-font-size, $fontSize);
+  font-family: var(--sqltools-font-family, $fontFamily);
+}
+
+.result {
+  flex-grow: 1;
+  height: 0;
+
+  .selected-row {
+    background: var(--vscode-editor-selectionBackground) !important;
+  }
+}
+
+#messages-drawer .MuiDrawer-paper {
+  width: 50%;
+}
