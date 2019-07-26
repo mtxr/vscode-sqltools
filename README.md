@@ -94,6 +94,35 @@ Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscod
 
 By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
 
+## Troubleshooting
+
+**`ER_NOT_SUPPORTED_AUTH_MODE` with MySQL 8.0**
+
+Ensure you've set `authProtocol` to `xprotocol`, and add a trailing `0` to the port. Example configuration:
+
+```json
+{
+  "sqltools.connections": [
+    {
+      "askForPassword": true,
+      "connectionTimeout": 30,
+      "dialect": "MySQL",
+      "name": "LocalHost",
+      "port": 33060,
+      "server": "127.0.0.1",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
+    }
+  ]
+}
+```
+
+Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
+
+By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
+
 <hr />
 
 Icon made by [Freepik](https://www.freepik.com/) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)
