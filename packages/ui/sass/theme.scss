@@ -2,6 +2,12 @@
 
 // overrides MUI
 
+.MuiPaper-root, .MuiTable-root {
+  border-collapse: collapse;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
 .MuiPaper-root.MuiMenu-paper {
   background-color: var(--vscode-menu-background);
   color: var(--vscode-menu-foreground);
@@ -39,4 +45,89 @@
 
 .MuiPaper-rounded {
   border-radius: 1px;
+}
+
+.MuiDrawer-paper.MuiPaper-root {
+  background-color: var(--vscode-sideBar-background);
+  color: var(--vscode-sideBar-foreground);
+  .MuiList-padding {
+    padding: 0;
+  }
+
+  .MuiListSubheader-root {
+    background: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarTitle-foreground);
+    text-transform: uppercase;
+    font-weight: bold;
+    line-height: 22px;
+  }
+}
+
+.MuiTab-root,
+.MuiTabs-root {
+  min-height: 36px;
+}
+
+.MuiTab-textColorPrimary {
+  color: var(--vscode-tab-inactiveForeground);
+  background: var(--vscode-tab-inactiveBackground);
+
+  &.Mui-selected {
+    color: var(--vscode-tab-activeForeground);
+    background: var(--vscode-tab-activeBackground);
+  }
+}
+
+.MuiTabs-indicator {
+  background-color: var(--vscode-tab-activeModifiedBorder);
+}
+
+.MuiTableCell-root {
+  padding: var(--sqltool-table-cell-padding, 2px 4px) !important;
+  font-size: $fontSize;
+  font-weight: normal;
+}
+
+.MuiInput-root {
+  margin: 0 !important;
+}
+
+.MuiTableRow-root {
+  .MuiIconButton-root {
+    padding: 0 2px;
+  }
+
+  .MuiInputBase-input {
+    height: 1em;
+    padding: 2px;
+  }
+  .MuiInput-underline {
+    &::before,
+    &:after {
+      display: none;
+    }
+  }
+}
+.filterCell {
+  padding: 0;
+  background: var(--vscode-input-background);
+  > div > *, .MuiInputBase-input::placeholder {
+    color: var(--vscode-input-foreground) !important;
+  }
+
+  &.active {
+    color: var(--vscode-input-placeholderForeground);
+    background: var(--vscode-inputOption-activeBackground);
+  }
+}
+
+.MuiTableCell-head:not(.filterCell) {
+  font-weight: bold;
+  color: inherit;
+}
+
+.MuiTableCell-body, .MuiTableCell-root {
+  color: inherit;
+  border: 1px solid var(--vscode-editor-lineHighlightBorder);
+
 }

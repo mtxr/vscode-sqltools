@@ -30,6 +30,16 @@ import Menu from '../../components/Menu';
 
 const getRowId = row => row.id || JSON.stringify(row);
 
+const TableFilterRowCell = (props: TableFilterRow.CellProps) => (console.log(props),
+  <TableFilterRow.Cell {...props} className={'filterCell ' + (props.filter && typeof props.filter.value !== 'undefined' ? 'active' : '')}/>
+);
+
+const PagingPanelContainer = (buttons: React.ReactNode) => (props: PagingPanel.ContainerProps) => (
+  <div className='resultsPagination'>
+    {buttons}
+    <div className='paginator'><PagingPanel.Container {...props}/></div>
+  </div>
+)
 const FilterIcon = ({ type, ...restProps }) => {
   if (type === 'regex') return <Code {...restProps} />;
   return <TableFilterRow.Icon type={type} {...restProps} />;
@@ -227,37 +237,36 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   }
 
   render() {
-    const { rows, columns, columnNames } = this.props;
+    const { rows, columns, columnNames, pageSize, openDrawerButton } = this.props;
     const { filters } = this.state;
     const columnExtensions = generateColumnExtensions(columnNames);
+    const showPagination = true;//rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
         <Grid rows={rows} columns={columns} getRowId={getRowId} rootComponent={GridRoot}>
-          <DataTypeProvider
-            for={columnNames}
-            availableFilterOperations={availableFilterOperations}
-          />
+          <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
           <SortingState />
           <IntegratedSorting />
-          <FilteringState
-            filters={filters}
-            onFiltersChange={this.changeFilters}
-          />
+          <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
           <IntegratedFiltering columnExtensions={columnExtensions} />
-          <PagingState
-            defaultCurrentPage={0}
-            pageSize={50}
+          {showPagination && [
+            <PagingState key={0} defaultCurrentPage={0} pageSize={pageSize} />,
+            <IntegratedPaging key={1} />,
+          ]}
+          <VirtualTable
+            height="100%"
+            cellComponent={TableCell(this.openContextMenu)}
+            rowComponent={TableRow(this.state.contextMenu.rowKey)}
           />
-          <IntegratedPaging />
-          <VirtualTable height="100%" cellComponent={TableCell(this.openContextMenu)} rowComponent={TableRow(this.state.contextMenu.rowKey)}/>
-          <TableColumnResizing defaultColumnWidths={columnExtensions} />
+          <TableColumnResizing columnWidths={columnExtensions} />
           <TableHeaderRow showSortingControls />
           <TableFilterRow
+            cellComponent={TableFilterRowCell}
             showFilterSelector
             iconComponent={FilterIcon}
             messages={{ regex: 'RegEx' } as any}
           />
-          <PagingPanel />
+          {showPagination && <PagingPanel containerComponent={PagingPanelContainer(openDrawerButton)} />}
         </Grid>
         <Menu
           open={Boolean(this.state.contextMenu.row)}

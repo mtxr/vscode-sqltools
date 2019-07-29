@@ -86,18 +86,28 @@
         "onCommand:SQLTools.selectConnection"
     ],
     "contributes": {
-        "languages": [{
-            "id": "sql",
-            "extensions": [ ".sql", ".dsql" ],
-            "aliases": [ "SQL", "sql" ],
-            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
-			"configuration": "./language/language-configuration.json"
-        }],
-        "grammars": [{
-			"language": "sql",
-			"scopeName": "source.sql",
-			"path": "./language/sql.tmLanguage.json"
-		}],
+        "languages": [
+            {
+                "id": "sql",
+                "extensions": [
+                    ".sql",
+                    ".dsql"
+                ],
+                "aliases": [
+                    "SQL",
+                    "sql"
+                ],
+                "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
+                "configuration": "./language/language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "sql",
+                "scopeName": "source.sql",
+                "path": "./language/sql.tmLanguage.json"
+            }
+        ],
         "commands": [
             {
                 "title": "Connect",
@@ -465,7 +475,7 @@
                                 "description": "Connection Dialect",
                                 "required": false
                             },
-			                "connectString": {
+                            "connectString": {
                                 "type": [
                                     "string",
                                     "null"
@@ -599,7 +609,10 @@
                             "default": 50
                         },
                         "location": {
-                            "type": ["string", "number"],
+                            "type": [
+                                "string",
+                                "number"
+                            ],
                             "default": "next",
                             "enum": [
                                 "next",
@@ -613,13 +626,14 @@
                             "default": {},
                             "properties": {
                                 "font-family": {
-                                    "type":"string"
+                                    "type": "string"
                                 },
                                 "font-size": {
-                                    "type":"string"
+                                    "type": "string"
                                 },
                                 "table-cell-padding": {
-                                    "type":"string"
+                                    "type": "string",
+                                    "default": "2px 4px"
                                 }
                             }
                         }
@@ -910,9 +924,9 @@
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
         "css-loader": "^3.0.0",
-        "mini-css-extract-plugin": "^0.8.0",
-        "jest-cli": "^24.5.0",
         "jest": "^24.5.0",
+        "jest-cli": "^24.5.0",
+        "mini-css-extract-plugin": "^0.8.0",
         "node-sass": "^4.11.0",
         "optimize-css-assets-webpack-plugin": "^5.0.3",
         "sass-loader": "^7.1.0",

@@ -1,9 +1,8 @@
 import React, { ReactNode, useState } from 'react';
 import ResultsTable from './ResultsTable';
 import ErrorIcon from '@sqltools/ui/components/ErrorIcon';
-import { Drawer, List, ListSubheader, ListItem, ListItemText } from '@material-ui/core';
-import Fab from '@material-ui/core/Fab';
-import InfoIcon from '@material-ui/icons/Info';
+import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@material-ui/core';
+import Syntax from '../../components/Syntax';
 
 interface QueryResultProps {
   connId: string;
@@ -12,9 +11,10 @@ interface QueryResultProps {
   results: any[];
   error?: boolean;
   query?: string;
+  pageSize: number;
 }
-export default ({ cols, error, query, messages, results = [], connId }: QueryResultProps) => {
-  const [showMessagess, setShowMessages ] = useState(false);
+export default ({ cols, error, query, messages, results = [], connId, pageSize }: QueryResultProps) => {
+  const [ showMessagess, setShowMessages ] = useState(false);
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
 
@@ -35,13 +35,30 @@ export default ({ cols, error, query, messages, results = [], connId }: QueryRes
       <div>Query with errors. Please, check the error below.</div>
     </div>
   ) : (
-    <ResultsTable columns={columns} rows={results || []} query={query} connId={connId} columnNames={cols} />
+    <ResultsTable
+      columns={columns}
+      rows={results || []}
+      query={query}
+      connId={connId}
+      columnNames={cols}
+      pageSize={pageSize}
+      openDrawerButton={
+        <Button onClick={() => setShowMessages(!showMessagess)} className={'action-button' + (showMessagess ? 'active' : '')}>
+          Query Details
+        </Button>
+      }
+    />
   );
 
   return (
     <div className="result">
       {table}
       <Drawer open={showMessagess} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer">
+        <List dense component="ul" subheader={<ListSubheader>Query</ListSubheader>}>
+          <ListItem component="li" className={'message ' + (error ? 'error' : '')}>
+            <Syntax code={query} language='sql' strong/>
+          </ListItem>
+        </List>
         <List dense component="ul" subheader={<ListSubheader>Messages</ListSubheader>}>
           {(messages.length > 0 ? messages : ['No messages to show.']).map((m, i) => (
             <ListItem component="li" className={'message ' + (error ? 'error' : '')} key={i}>
@@ -50,9 +67,6 @@ export default ({ cols, error, query, messages, results = [], connId }: QueryRes
           ))}
         </List>
       </Drawer>
-      <Fab size="small" style={{ position: 'absolute', bottom: 30, right: 30 }} onClick={() => setShowMessages(!showMessagess)}>
-        <InfoIcon />
-      </Fab>
     </div>
   );
 };

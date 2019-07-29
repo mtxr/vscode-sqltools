@@ -27,6 +27,16 @@
     overflow: hidden;
   }
 }
+.syntax-container {
+  .btn {
+    display: none;
+  }
+  &:hover {
+    .btn {
+      display: initial;
+    }
+  }
+}
 
 .syntax.strong-bg {
   background: rgba(0, 0, 0, 0.02);

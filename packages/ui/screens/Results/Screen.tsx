@@ -16,6 +16,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     queries: [],
     error: null,
     activeTab: null,
+    pageSize: 50,
   };
 
   saveState = (data, cb = () => {}) => {
@@ -82,18 +83,9 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         </div>
       );
     }
-    const tabs = this.state.queries.map((query: string, index: number) => (
-      <Tab
-        label={(
-          <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
-            {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
-          </Typography>
-        )}
-        key={index}
-      />
-    ));
-    return (
-      <div className="query-results-container fullscreen-container">
+    let tabs = null;
+    if (this.state.queries.length > 1) {
+      tabs = (
         <Tabs
           value={this.state.activeTab}
           onChange={(_e, index) => this.toggle(index)}
@@ -102,9 +94,25 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           variant="scrollable"
           scrollButtons="on"
         >
-          {tabs}
+          {this.state.queries.map((query: string, index: number) => (
+            <Tab
+              disableFocusRipple
+              disableRipple
+              label={
+                <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
+                  {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+                </Typography>
+              }
+              key={index}
+            />
+          ))}
         </Tabs>
-        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} />
+      );
+    }
+    return (
+      <div className="query-results-container fullscreen-container">
+        {tabs}
+        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} pageSize={this.state.pageSize}/>
       </div>
     );
   }
