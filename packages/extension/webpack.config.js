@@ -129,11 +129,11 @@ module.exports = () => {
       __dirname: false,
     };
 
+    config.optimization = config.optimization || {};
     if (isProduction) {
-      config.optimization = config.optimization || {};
-      config.optimization.minimize = false;
+      config.optimization.minimize = true;
     } else {
-      delete config.optimization;
+      config.optimization.minimize = false;
     }
     config.devtool = false;
     config.mode = isProduction ? 'production' : 'development';

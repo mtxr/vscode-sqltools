@@ -8,4 +8,5 @@ export default interface QueryResultsState {
   resultMap: {
     [query: string]: DatabaseInterface.QueryResults;
   };
+  pageSize: number;
 }
