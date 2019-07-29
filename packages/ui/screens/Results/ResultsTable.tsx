@@ -30,7 +30,7 @@ import Menu from '../../components/Menu';
 
 const getRowId = row => row.id || JSON.stringify(row);
 
-const TableFilterRowCell = (props: TableFilterRow.CellProps) => (console.log(props),
+const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
   <TableFilterRow.Cell {...props} className={'filterCell ' + (props.filter && typeof props.filter.value !== 'undefined' ? 'active' : '')}/>
 );
 
@@ -166,7 +166,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.insertText`,
-            args: [contextMenu.row[contextMenu.column.name]]
+            args: [`${contextMenu.row[contextMenu.column.name]}`]
           }
         });
         break;

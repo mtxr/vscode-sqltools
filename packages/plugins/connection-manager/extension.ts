@@ -50,7 +50,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_showRecords = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
-      this._openResultsWebview();
+      await this._openResultsWebview();
       let limit = 50;
       if (ConfigManager.results && ConfigManager.results.limit) {
         limit = ConfigManager.results.limit;
@@ -66,7 +66,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_describeTable = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
-      this._openResultsWebview();
+      await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
     } catch (e) {
@@ -175,7 +175,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         await this._setConnection(conn);
       }
       await this._connect();
-      this._openResultsWebview();
+      await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
       return payload;
@@ -313,7 +313,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private _openResultsWebview(connId?: string) {
-    this.resultsWebview.get(connId || this.explorer.getActive().id).show();
+    return this.resultsWebview.get(connId || this.explorer.getActive().id).show();
   }
   private _connect = async (force = false): Promise<ConnectionInterface> => {
     if (!force && this.explorer.getActive()) {

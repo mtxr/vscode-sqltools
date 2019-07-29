@@ -32,6 +32,10 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     });
   }
 
+  componentDidMount() {
+    getVscode().postMessage({ action: 'viewReady', payload: true });
+  }
+
   toggle(queryIndex: number) {
     this.saveState({
       activeTab: queryIndex,

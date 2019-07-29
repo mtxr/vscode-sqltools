@@ -2,7 +2,7 @@ import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
-import vscode, { Uri } from 'vscode';
+import vscode, { Uri, commands } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { getNameFromId } from '@sqltools/core/utils';
 import path from 'path';
@@ -11,8 +11,25 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = 'SQLTools Results';
 
+  protected isOpen = false;
+
   constructor(context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface, iconsPath: Uri, viewsPath: Uri) {
     super(context, iconsPath, viewsPath);
+
+    this.onDidDispose(() => {
+      this.isOpen = false;
+    });
+
+    this.setMessageCallback(({ action, payload }) => {
+      switch (action) {
+        case 'viewReady':
+          this.isOpen = payload;
+          commands.executeCommand('workbench.action.webview.openDeveloperTools');
+          break;
+        default:
+        break;
+      }
+    });
   }
 
   public get cssVariables() {
@@ -45,7 +62,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
-  show() {
+  async show() {
     this.wereToShow = null;
     switch (ConfigManager.results.location) {
       case 'active': // fallback older version
@@ -68,7 +85,21 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
         }
     }
 
-    return super.show();
+    await super.show();
+
+    return new Promise((resolve, reject) => {
+      let count = 0;
+      let interval = setInterval(() => {
+        if (this.isOpen) {
+          clearInterval(interval);
+          return resolve();
+        }
+        if (count >= 5) {
+          clearInterval(interval);
+          return reject(new Error('Can\'t open results screen'));
+        }
+      }, 500);
+    });
   }
   updateResults(payload: DatabaseInterface.QueryResults[]) {
     this.title = 'SQLTools Results';
