@@ -70,25 +70,30 @@ They will be passed to the pool constructor directly. See https://github.com/mtx
 
 ## Know Errors and How to Fix
 
-### MySQL 8 and ER_NOT_SUPPORTED_AUTH_MODE
+### MySQL 8 and `ER_NOT_SUPPORTED_AUTH_MODE`
 
-MySQL 8 is available using xprotocol.
+Potential solutions:
 
-See issue [#195](https://github.com/mtxr/vscode-sqltools/issues/195).
+* Ensure you've set `authProtocol` to `xprotocol`
+* Add a trailing `0` to the `port`. See the [MySQL Guide to Ports](https://mysqlserverteam.com/mysql-guide-to-ports/)
 
-This error can be probably fixed using `mysqlOptions`. See:
+Example configuration:
 
 ```json
-[
-  {
-    ...
-    "dialect": "MySQL",
-    "port": 33060, // Take a look at MySQL ports section in https://mysqlserverteam.com/mysql-guide-to-ports/
-    "mysqlOptions": {
-      "authProtocol": "xprotocol",
-      "ssl": true
+{
+  "sqltools.connections": [
+    {
+      "askForPassword": true,
+      "connectionTimeout": 30,
+      "dialect": "MySQL",
+      "name": "LocalHost",
+      "port": 33060,
+      "server": "127.0.0.1",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
     }
-  }
-]
-...
+  ]
+}
 ```
