@@ -25,8 +25,13 @@ pre {
   }
 }
 
-#messages-drawer .MuiDrawer-paper {
-  width: 50%;
+#messages-drawer {
+  .MuiDrawer-paper {
+    width: 50%;
+  }
+  &.width-75pct .MuiDrawer-paper {
+    width: 75%;
+  }
 }
 
 .resultsPagination {
@@ -65,6 +70,8 @@ pre {
     border: 1px solid var(--vscode-inputOption-activeBorder);
   }
 
+}
+.queryError, .resultsPagination {
   .action-button {
     background: var(--vscode-button-background);
     color: var(--vscode-button-foreground);

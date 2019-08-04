@@ -27,19 +27,25 @@ import { availableFilterOperations, MenuActions } from './constants';
 import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 import Menu from '../../components/Menu';
+import ErrorIcon from '../../components/ErrorIcon';
 
 const getRowId = row => row.id || JSON.stringify(row);
 
 const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
-  <TableFilterRow.Cell {...props} className={'filterCell ' + (props.filter && typeof props.filter.value !== 'undefined' ? 'active' : '')}/>
+  <TableFilterRow.Cell
+    {...props}
+    className={'filterCell ' + (props.filter && typeof props.filter.value !== 'undefined' ? 'active' : '')}
+  />
 );
 
 const PagingPanelContainer = (buttons: React.ReactNode) => (props: PagingPanel.ContainerProps) => (
-  <div className='resultsPagination'>
+  <div className="resultsPagination">
     {buttons}
-    <div className='paginator'><PagingPanel.Container {...props}/></div>
+    <div className="paginator">
+      <PagingPanel.Container {...props} />
+    </div>
   </div>
-)
+);
 const FilterIcon = ({ type, ...restProps }) => {
   if (type === 'regex') return <Code {...restProps} />;
   return <TableFilterRow.Icon type={type} {...restProps} />;
@@ -77,27 +83,22 @@ const ValueRender = ({ value }) => {
     //   }
     // </span>
   }
-}
+};
 
 const TableCell = (openContextMenu: ResultsTable['openContextMenu']) => (props: Table.DataCellProps) => (
-  <Table.Cell
-    {...props}
-    onContextMenu={e => openContextMenu(e, props.row, props.column, props.tableRow.key)}
-  >
+  <Table.Cell {...props} onContextMenu={e => openContextMenu(e, props.row, props.column, props.tableRow.key)}>
     <ValueRender value={props.value} />
   </Table.Cell>
 );
 
-const TableRow = (selectedRow) => (props: Table.DataRowProps) => (
-  <Table.Row
-    {...props}
-    className={selectedRow === props.tableRow.key ? 'selected-row' : undefined}
-  />
+const TableRow = selectedRow => (props: Table.DataRowProps) => (
+  <Table.Row {...props} className={selectedRow === props.tableRow.key ? 'selected-row' : undefined} />
 );
 
-const GridRoot = (props) => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }}/>;
+const GridRoot = props => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }} />;
 
-const generateColumnExtensions = generateColumnExtensions => generateColumnExtensions.map(columnName => ({ columnName, predicate: filterPredicate, width: 150 }));
+const generateColumnExtensions = generateColumnExtensions =>
+  generateColumnExtensions.map(columnName => ({ columnName, predicate: filterPredicate, width: 150 }));
 
 export default class ResultsTable extends React.PureComponent<ResultsTableProps> {
   state = {
@@ -107,9 +108,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
       rowKey: null,
       column: null,
       options: [],
-      position: {}
-    }
-  }
+      position: {},
+    },
+  };
 
   changeFilters = (filters = []) => {
     filters = filters.map(filter => {
@@ -117,9 +118,14 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
       filter.regex = toRegEx(filter.value);
     });
     this.setState({ filters });
-  }
+  };
 
-  openContextMenu = (e: React.MouseEvent<HTMLElement> = undefined, row: any, column: Table.DataCellProps['column'], rowKey: any) => {
+  openContextMenu = (
+    e: React.MouseEvent<HTMLElement> = undefined,
+    row: any,
+    column: Table.DataCellProps['column'],
+    rowKey: any
+  ) => {
     const options = this.tableContextOptions(row, column);
     if (!options || options.length === 0) return;
     this.setState({
@@ -130,15 +136,15 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         options,
         position: {
           pageX: e.pageX,
-          pageY: e.pageY
-        }
-      }
+          pageY: e.pageY,
+        },
+      },
     });
-  }
+  };
 
   onMenuSelect = (choice: string) => {
     const { contextMenu } = this.state;
-    switch(choice) {
+    switch (choice) {
       case MenuActions.FilterByValueOption:
         const { filters = [] } = this.state;
         const filterIndex = filters.findIndex(filter => filter.columnName === contextMenu.column.name);
@@ -147,10 +153,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           columnName: contextMenu.column.name,
           operation: 'equal',
           value: contextMenu.row[contextMenu.column.name],
-        })
+        });
         this.setState({
           filters,
-        })
+        });
         break;
       case MenuActions.CopyCellOption:
         clipboardInsert(contextMenu.row[contextMenu.column.name]);
@@ -166,8 +172,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.insertText`,
-            args: [`${contextMenu.row[contextMenu.column.name]}`]
-          }
+            args: [`${contextMenu.row[contextMenu.column.name]}`],
+          },
         });
         break;
       case MenuActions.OpenEditorWithRowOption:
@@ -175,8 +181,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.insertText`,
-            args: [JSON.stringify(contextMenu.row, null, 2)]
-          }
+            args: [JSON.stringify(contextMenu.row, null, 2)],
+          },
         });
         break;
       case MenuActions.ReRunQueryOption:
@@ -184,8 +190,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.executeQuery`,
-            args: [this.props.query, this.props.connId]
-          }
+            args: [this.props.query, this.props.connId],
+          },
         });
         break;
       case MenuActions.SaveCSVOption:
@@ -193,8 +199,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['csv', this.props.connId]
-          }
+            args: ['csv', this.props.connId],
+          },
         });
         break;
       case MenuActions.SaveJSONOption:
@@ -202,13 +208,13 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
           action: 'call',
           payload: {
             command: `${process.env.EXT_NAME}.saveResults`,
-            args: ['json', this.props.connId]
-          }
+            args: ['json', this.props.connId],
+          },
         });
         break;
     }
-    this.setState({ contextMenu: { } });
-  }
+    this.setState({ contextMenu: {} });
+  };
 
   tableContextOptions = (row: any, column: Table.DataCellProps['column']): any[] => {
     const options: any[] = [];
@@ -216,65 +222,100 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
     const cellValueIsObject = cellValue && cellValue.toString() === '[object Object]';
     const replaceString = cellValueIsObject ? 'Cell Value' : `'${cellValue}'`;
     if (typeof cellValue !== 'undefined' && !cellValueIsObject) {
-      options.push({ label: MenuActions.FilterByValueOption.replace('{contextAction}', replaceString), value: MenuActions.FilterByValueOption });
+      options.push({
+        label: MenuActions.FilterByValueOption.replace('{contextAction}', replaceString),
+        value: MenuActions.FilterByValueOption,
+      });
       options.push('sep');
     }
     if (this.state.filters.length > 0) {
       options.push(MenuActions.ClearFiltersOption);
       options.push(MenuActions.Divider);
     }
-    return options
-    .concat([
-      { label: MenuActions.OpenEditorWithValueOption.replace('{contextAction}', replaceString), value: MenuActions.OpenEditorWithValueOption },
+    return options.concat([
+      {
+        label: MenuActions.OpenEditorWithValueOption.replace('{contextAction}', replaceString),
+        value: MenuActions.OpenEditorWithValueOption,
+      },
       MenuActions.OpenEditorWithRowOption,
-      { label: MenuActions.CopyCellOption.replace('{contextAction}', replaceString), value: MenuActions.CopyCellOption },
+      {
+        label: MenuActions.CopyCellOption.replace('{contextAction}', replaceString),
+        value: MenuActions.CopyCellOption,
+      },
       MenuActions.CopyRowOption,
       MenuActions.Divider,
       MenuActions.ReRunQueryOption,
       MenuActions.SaveCSVOption,
       MenuActions.SaveJSONOption,
     ]);
-  }
+  };
+
+  renderError = (openDrawerButton: React.ReactNode) => (
+    <div
+      className='queryError'
+      style={{
+        flexGrow: 1,
+        textAlign: 'center',
+        alignItems: 'center',
+        flexDirection: 'column',
+        display: 'flex',
+        justifyContent: 'center',
+        height: '100%'
+      }}
+    >
+      <div>
+        <ErrorIcon />
+      </div>
+      <div style={{ margin: '30px' }}>Query with errors. Please, check the error below.</div>
+      <div>{openDrawerButton}</div>
+    </div>
+  );
 
   render() {
-    const { rows, columns, columnNames, pageSize, openDrawerButton } = this.props;
+    const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
     const { filters } = this.state;
     const columnExtensions = generateColumnExtensions(columnNames);
-    const showPagination = true;//rows.length > pageSize;
+    const showPagination = true; //rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
-        <Grid rows={rows} columns={columns} getRowId={getRowId} rootComponent={GridRoot}>
-          <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
-          <SortingState />
-          <IntegratedSorting />
-          <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
-          <IntegratedFiltering columnExtensions={columnExtensions} />
-          {showPagination && [
-            <PagingState key={0} defaultCurrentPage={0} pageSize={pageSize} />,
-            <IntegratedPaging key={1} />,
-          ]}
-          <VirtualTable
-            height="100%"
-            cellComponent={TableCell(this.openContextMenu)}
-            rowComponent={TableRow(this.state.contextMenu.rowKey)}
-          />
-          <TableColumnResizing columnWidths={columnExtensions} />
-          <TableHeaderRow showSortingControls />
-          <TableFilterRow
-            cellComponent={TableFilterRowCell}
-            showFilterSelector
-            iconComponent={FilterIcon}
-            messages={{ regex: 'RegEx' } as any}
-          />
-          {showPagination && <PagingPanel containerComponent={PagingPanelContainer(openDrawerButton)} />}
-        </Grid>
-        <Menu
-          open={Boolean(this.state.contextMenu.row)}
-          width={250}
-          position={this.state.contextMenu.position}
-          onSelect={this.onMenuSelect}
-          options={this.state.contextMenu.options}
-        />
+        {error ? (
+          this.renderError(openDrawerButton)
+        ) : (
+          <>
+            <Grid rows={rows} columns={columns} getRowId={getRowId} rootComponent={GridRoot}>
+              <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
+              <SortingState />
+              <IntegratedSorting />
+              <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
+              <IntegratedFiltering columnExtensions={columnExtensions} />
+              {showPagination && [
+                <PagingState key={0} defaultCurrentPage={0} pageSize={pageSize} />,
+                <IntegratedPaging key={1} />,
+              ]}
+              <VirtualTable
+                height="100%"
+                cellComponent={TableCell(this.openContextMenu)}
+                rowComponent={TableRow(this.state.contextMenu.rowKey)}
+              />
+              <TableColumnResizing columnWidths={columnExtensions} />
+              <TableHeaderRow showSortingControls />
+              <TableFilterRow
+                cellComponent={TableFilterRowCell}
+                showFilterSelector
+                iconComponent={FilterIcon}
+                messages={{ regex: 'RegEx' } as any}
+              />
+              {showPagination && <PagingPanel containerComponent={PagingPanelContainer(openDrawerButton)} />}
+            </Grid>
+            <Menu
+              open={Boolean(this.state.contextMenu.row)}
+              width={250}
+              position={this.state.contextMenu.position}
+              onSelect={this.onMenuSelect}
+              options={this.state.contextMenu.options}
+            />
+          </>
+        )}
       </Paper>
     );
   }

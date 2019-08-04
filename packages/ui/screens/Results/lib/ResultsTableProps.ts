@@ -1,6 +1,7 @@
 import { Column } from '@devexpress/dx-react-grid';
 import { ReactNode } from 'react';
 export interface ResultsTableProps {
+  error: boolean;
   columns: Column[];
   columnNames: string[];
   rows: {

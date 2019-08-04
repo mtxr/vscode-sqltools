@@ -2,7 +2,7 @@ import React from 'react';
 
 export default () => (
   <div
-    style={{ width: '50px', height: '50px', marginBottom: '30px' }}
+    style={{ width: '50px', height: '50px'}}
     dangerouslySetInnerHTML={{
       __html: `
 <svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
