@@ -235,8 +235,8 @@
                 "command": "SQLTools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
                 "icon": {
-                    "light": "icons/plus-light.svg",
-                    "dark": "icons/plus-dark.svg"
+                    "light": "icons/add-light.svg",
+                    "dark": "icons/add-dark.svg"
                 }
             },
             {
@@ -253,8 +253,8 @@
                 "command": "SQLTools.newSqlFile",
                 "category": "SQLTools",
                 "icon": {
-                    "light": "icons/file-light.svg",
-                    "dark": "icons/file-dark.svg"
+                    "light": "icons/new-sql-file-light.svg",
+                    "dark": "icons/new-sql-file-dark.svg"
                 }
             },
             {
