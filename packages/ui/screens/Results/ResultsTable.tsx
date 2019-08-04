@@ -114,8 +114,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
 
   changeFilters = (filters = []) => {
     filters = filters.map(filter => {
-      if (filter.operation !== 'regex') return filter;
-      filter.regex = toRegEx(filter.value);
+      if (filter.operation === 'regex')
+        filter.regex = toRegEx(filter.value);
+      return filter;
     });
     this.setState({ filters });
   };
