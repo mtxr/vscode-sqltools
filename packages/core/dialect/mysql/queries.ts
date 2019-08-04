@@ -85,10 +85,10 @@ SELECT
     T.TABLE_NAME
   ) AS tree
 FROM
-  INFORMATION_SCHEMA.COLUMNS AS C
-  JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+  INFORMATION_SCHEMA.TABLES AS T
+  LEFT JOIN INFORMATION_SCHEMA.COLUMNS AS C ON C.TABLE_NAME = T.TABLE_NAME
   AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-  AND C.TABLE_CATALOG = T.TABLE_CATALOG
+  AND (C.TABLE_CATALOG IS NULL OR C.TABLE_CATALOG = T.TABLE_CATALOG)
 WHERE
   T.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
 GROUP BY
@@ -157,7 +157,6 @@ SELECT
       ELSE f.routine_name
     end
   ) as signature,
-  f.data_type AS resultType,
   CONCAT(
     f.routine_schema,
     '${TREE_SEP}',
@@ -174,7 +173,6 @@ GROUP BY
   f.specific_name,
   f.routine_schema,
   f.routine_name,
-  f.data_type,
   f.routine_definition
 ORDER BY
   f.specific_name;

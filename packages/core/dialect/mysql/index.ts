@@ -7,6 +7,8 @@ import Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import compareVersions from 'compare-versions';
+
 export default class MySQL extends GenericDialect<any> implements ConnectionDialect {
   queries = Queries;
   private driver: GenericDialect<any>;
@@ -67,20 +69,12 @@ export default class MySQL extends GenericDialect<any> implements ConnectionDial
       });
   }
 
-  private version55Older: boolean;
-
   public async getFunctions(): Promise<DatabaseInterface.Function[]> {
-    let functions;
-    if (this.version55Older === true) {
-      functions = await this.driver.query(this.queries.fetchFunctionsV55Older);
-    } else {
-      try {
-        functions = await this.driver.query(this.queries.fetchFunctions);
-      } catch (error) {
-        functions = await this.driver.query(this.queries.fetchFunctionsV55Older);
-        this.version55Older = true;
-      }
-    }
+    const functions = await (
+      await this.is55OrNewer()
+        ? this.driver.query(this.queries.fetchFunctions)
+        : this.driver.query(this.queries.fetchFunctionsV55Older)
+    );
 
     return functions[0].results
       .reduce((prev, curr) => prev.concat(curr), [])
@@ -92,5 +86,18 @@ export default class MySQL extends GenericDialect<any> implements ConnectionDial
           schema: obj.dbschema,
         } as DatabaseInterface.Function;
       })
+  }
+
+  mysqlVersion: string = null;
+
+  private async getVersion() {
+    if (this.mysqlVersion) return Promise.resolve(this.mysqlVersion);
+    this.mysqlVersion = await this.query(`SHOW variables WHERE variable_name = 'version'`).then(([res]) => res.results[0].Value);
+    return this.mysqlVersion;
+  }
+
+  private async is55OrNewer() {
+    await this.getVersion();
+    return compareVersions.compare(this.mysqlVersion, '5.5.0', '>=');
   }
 }
