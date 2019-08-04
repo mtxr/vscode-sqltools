@@ -10,7 +10,6 @@
       "args": [
         "${workspaceRoot}/.test-database/.",
         "--extensionDevelopmentPath=${workspaceRoot}/../dist",
-        "-p"
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
