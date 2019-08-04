@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 import { ExtensionContext, ThemeIcon, TreeItem, TreeItemCollapsibleState, Uri, SnippetString } from 'vscode';
@@ -68,7 +68,10 @@ export class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<
 
     if (!SidebarConnection.icons) {
       SidebarConnection.icons = {
-        active: context.asAbsolutePath('icons/database-active.svg'),
+        active: {
+          dark: context.asAbsolutePath('icons/database-active-dark.svg'),
+          light: context.asAbsolutePath('icons/database-active-light.svg')
+        },
         connected: {
           dark: context.asAbsolutePath('icons/database-dark.svg'),
           light: context.asAbsolutePath('icons/database-light.svg'),
@@ -255,8 +258,14 @@ export class SidebarColumn extends SidebarAbstractItem<null> {
           dark: context.asAbsolutePath('icons/column-dark.svg'),
           light: context.asAbsolutePath('icons/column-light.svg'),
         },
-        primaryKey: context.asAbsolutePath('icons/pk.svg'),
-        foreignKey: context.asAbsolutePath('icons/fk.svg'),
+        primaryKey: {
+          dark: context.asAbsolutePath('icons/pk-dark.svg'),
+          light: context.asAbsolutePath('icons/pk-lightk.svg'),
+        },
+        foreignKey: {
+          dark: context.asAbsolutePath('icons/fk-dark.svg'),
+          light: context.asAbsolutePath('icons/fk-light.svg'),
+        },
       }
     }
     this.updateIconPath();
