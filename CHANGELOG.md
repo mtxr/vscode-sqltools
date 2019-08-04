@@ -1,5 +1,15 @@
 # Changelog
 
+## v(next) - (someday, 2019)
+
+* **NEW** 🎉
+  * Upgrades on results screen. Moved from react-table to @dx/react-grid to support new enhancements. PR [#12](https://github.com/mtxr/vscode-sqltools/pull/297)
+* **Fix** 🎉
+  * Fix beautify server variables for MSSQL. Issue [mtxr/sqltools-formatter/#12](https://github.com/mtxr/sqltools-formatter/issues/12)
+  * Fix listing functions in MySQL older then 5.5. Issue [#304](https://github.com/mtxr/vscode-sqltools/issues/304)
+  * Fix escaping columns on SQLite. Issue [#309](https://github.com/mtxr/vscode-sqltools/issues/309)
+  * Fix regex search on results window. Issue [#302](https://github.com/mtxr/vscode-sqltools/issues/302)
+
 ## v0.19
 
 ### v0.19.7 - (July 24, 2019)
