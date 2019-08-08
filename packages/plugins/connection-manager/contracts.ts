@@ -1,15 +1,15 @@
-import { RequestType, RequestType0, NotificationType } from 'vscode-languageserver-protocol';
+import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 export const GetConnectionsRequest = new RequestType<
-  { connectedOnly?: boolean },
+  { connectedOnly?: boolean, sort?: 'connectedFirst' | 'name', connId?: string },
   ConnectionInterface[],
   Error,
   void
 >('connection/GetConnectionsRequest');
-export const RefreshAllRequest = new RequestType0<void, Error, void>(
-  'connection/RefreshAllRequest'
+export const RefreshTreeRequest = new RequestType<{ connIds?: string[] }, void, Error, void>(
+  'connection/RefreshTreeRequest'
 );
 export const GetConnectionPasswordRequest = new RequestType<
   { conn: ConnectionInterface },

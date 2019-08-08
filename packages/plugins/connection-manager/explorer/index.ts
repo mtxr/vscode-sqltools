@@ -2,8 +2,14 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, TREE_SEP } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import { getConnectionId, asArray, getNameFromId } from '@sqltools/core/utils';
-import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, SidebarResourceGroup, SidebarAbstractItem, SidebarFunction } from '@sqltools/plugins/connection-manager/explorer/tree-items';
-import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState } from 'vscode';
+import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
+import SidebarFunction from "@sqltools/plugins/connection-manager/explorer/SidebarFunction";
+import SidebarColumn from "@sqltools/plugins/connection-manager/explorer/SidebarColumn";
+import SidebarTableOrView from "@sqltools/plugins/connection-manager/explorer/SidebarTableOrView";
+import SidebarResourceGroup from "@sqltools/plugins/connection-manager/explorer/SidebarResourceGroup";
+import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
+import SidebarAbstractItem from "@sqltools/plugins/connection-manager/explorer/SidebarAbstractItem";
+import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands } from 'vscode';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
 import logger from '@sqltools/core/log/vscode';
@@ -53,11 +59,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
     return items;
   }
-  public getChildren(element?: SidebarTreeItem): ProviderResult<SidebarTreeItem[]> {
+  public async getChildren(element?: SidebarTreeItem) {
     if (!element) {
       return Promise.resolve(asArray(this.getTreeItems()));
     }
-    const items = element.items as any[];
+    const items = (<any>element).getChildren ? await (<any>element).getChildren() : element.items as any[];
     if (ConfigManager.flattenGroupsIfOne && items.length === 1) {
       return this.getChildren(items[0]);
     }
@@ -78,14 +84,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     const changed: { conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[] = [];
 
     connections.forEach((conn) => {
-      if (this.tree[getConnectionId(conn)] && this.tree[getConnectionId(conn)].updateCreds(conn)) {
-        changed.push({ conn, action: 'changed' });
-      } else {
+      if (!this.tree[getConnectionId(conn)]) {
         this.tree[getConnectionId(conn)] = new SidebarConnection(this.extension.context, conn);
         changed.push({ conn, action: 'added' });
-      }
-      if (!conn.isActive) {
-        this.tree[getConnectionId(conn)].deactivate();
+      } else if (this.tree[getConnectionId(conn)].updateCreds(conn)) {
+        changed.push({ conn, action: 'changed' });
       }
       keys.push(getConnectionId(conn));
     });
@@ -97,8 +100,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         delete this.tree[k];
       });
     }
-    this.refresh();
     if (changed.length > 0) {
+      this.refresh();
       this._onConnectionDidChange.fire(changed);
     }
   }
@@ -122,7 +125,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     this.tree[connId].reset();
 
     if (!tables && !columns && !functions) {
-      return this.refresh();
+      return;
     }
 
     this.insertTables(connId, conn.dialect, tables);
@@ -131,9 +134,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
     this.insertFunctions(connId, conn.dialect, functions);
 
-    this.refresh();
-    if (conn.isActive)
-      this.setActiveConnection(conn);
+    this.refresh(this.tree[connId]);
   }
 
   private getGroup(...k: string[]): SidebarAbstractItem {
@@ -250,30 +251,19 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  public setActiveConnection(c: ConnectionInterface) {
+  public async focusActiveConnection(c: ConnectionInterface) {
     if (!c) return;
 
     const item = this.tree[getConnectionId(c)];
-    if (!item) return;
+    if (!item || item.isActive) return;
 
-    if (item.isActive) return;
+    await this.updateTreeRoot();
 
-    Object.values(this.tree).forEach(treeItem => {
-      if (treeItem.isActive) treeItem.deactivate();
-    });
-
-    item.activate();
     if (this.treeView.visible && Object.keys(item.tree).length > 0) {
       this.treeView.reveal(Object.values(item.tree)[0], { select: false, focus: false });
       this.treeView.reveal(item);
     }
     this.refresh(item);
-  }
-
-  public disconnect(c: ConnectionInterface) {
-    if (!this.tree[getConnectionId(c)]) return;
-    this.tree[getConnectionId(c)].disconnect();
-    this.refresh(this.tree[getConnectionId(c)]);
   }
 
   public getById(id: string) {
@@ -287,12 +277,15 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     });
   }
 
+  public updateTreeRoot = async () => {
+    const connections: ConnectionInterface[] = await commands.executeCommand(`${EXT_NAME}.getConnectionStatus`);
+    this.setConnections(connections);
+  }
+
   public constructor(private extension: SQLTools.ExtensionInterface) {
     this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this });
-    ConfigManager.addOnUpdateHook(() => {
-      this.setConnections(ConfigManager.connections);
-    });
-    this.setConnections(ConfigManager.connections);
+    ConfigManager.addOnUpdateHook(this.updateTreeRoot);
+    this.updateTreeRoot();
     this.extension.context.subscriptions.push(this.treeView);
   }
 }

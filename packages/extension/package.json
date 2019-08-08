@@ -240,8 +240,8 @@
                 }
             },
             {
-                "title": "Refresh Sidebar",
-                "command": "SQLTools.refreshAll",
+                "title": "Refresh",
+                "command": "SQLTools.refreshTree",
                 "category": "SQLTools Sidebar",
                 "icon": {
                     "light": "icons/refresh-light.svg",
@@ -720,6 +720,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.refreshTree",
+                    "when": "false"
+                },
+                {
                     "command": "SQLTools.generateInsertQuery",
                     "when": "false"
                 },
@@ -760,7 +764,7 @@
                     "group": "navigation@2"
                 },
                 {
-                    "command": "SQLTools.refreshAll",
+                    "command": "SQLTools.refreshTree",
                     "when": "view == SQLTools/connectionExplorer",
                     "group": "navigation@3"
                 },
@@ -778,6 +782,11 @@
                 },
                 {
                     "command": "SQLTools.closeConnection",
+                    "when": "view == SQLTools/connectionExplorer && viewItem == connectedConnection",
+                    "group": "navigation@0"
+                },
+                {
+                    "command": "SQLTools.refreshTree",
                     "when": "view == SQLTools/connectionExplorer && viewItem == connectedConnection",
                     "group": "navigation@0"
                 },

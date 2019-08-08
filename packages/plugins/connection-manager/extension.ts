@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqlt
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
@@ -31,8 +31,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
 
   // extension commands
-  private ext_refreshAll = () => {
-    return this.client.sendRequest(RefreshAllRequest);
+  private ext_refreshTree = (connIdOrTreeItem: SidebarConnection | string | string[]) => {
+    connIdOrTreeItem = connIdOrTreeItem instanceof SidebarConnection ? connIdOrTreeItem.getId() : connIdOrTreeItem;
+    connIdOrTreeItem = Array.isArray(connIdOrTreeItem) ? connIdOrTreeItem : [connIdOrTreeItem].filter(Boolean);
+
+    return this.client.sendRequest(RefreshTreeRequest, { connIds: connIdOrTreeItem.length ? connIdOrTreeItem : null });
   }
 
   private ext_testConnection = async (c: ConnectionInterface) => {
@@ -96,12 +99,15 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       return;
     }
 
-    return this.client.sendRequest(DisconnectRequest, { conn })
-      .then(async () => {
-        this.client.telemetry.registerInfoMessage('Connection closed!');
-        this.explorer.disconnect(conn as ConnectionInterface);
-        this._updateStatusBar();
-      }, (e) => this.errorHandler('Error closing connection', e));
+    try {
+      await this.client.sendRequest(DisconnectRequest, { conn })
+      this.client.telemetry.registerInfoMessage('Connection closed!');
+      await this.explorer.updateTreeRoot();
+      this._updateStatusBar();
+
+    } catch (e) {
+      return this.errorHandler('Error closing connection', e);
+    }
   }
 
   private async updateAttachedConnectionsMap(fileUri: Uri, connId?: string) {
@@ -168,7 +174,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       if (trySessionFile) await this.openConnectionFile(conn);
       return conn;
     } catch (error) {
-      this.errorHandler('Error selecting connection', error);
+      return this.errorHandler('Error selecting connection', error);
     }
   }
 
@@ -357,8 +363,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       });
   }
 
+  private ext_getConnectionStatus = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
+    return this.client.sendRequest(GetConnectionsRequest, { connectedOnly, connId, sort });
+  }
   private async _pickConnection(connectedOnly = false): Promise<ConnectionInterface> {
-    const connections: ConnectionInterface[] = await this.client.sendRequest(GetConnectionsRequest, { connectedOnly });
+    const connections: ConnectionInterface[] = await this.ext_getConnectionStatus({ connectedOnly });
 
     if (connections.length === 0 && connectedOnly) return this._pickConnection();
 
@@ -415,7 +424,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         { conn: c, password },
       );
     }
-    this.explorer.setActiveConnection(c);
+    await this.explorer.focusActiveConnection(c);
     this._updateStatusBar();
     return this.explorer.getActive();
   }
@@ -493,10 +502,16 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private onDidOpenOrCloseTextDocument = (doc: TextDocument) => {
-    if (doc && doc.uri && doc.isClosed) {
-      this.updateAttachedConnectionsMap(doc.uri);
+    if (
+      !doc
+      || !doc.uri
+      || doc.uri.scheme === 'output'
+      || doc.uri.scheme === 'git'
+    ) return;
+    if (doc.isClosed) {
+      return this.updateAttachedConnectionsMap(doc.uri);
     }
-    return this.ext_refreshAll();
+    this.explorer.updateTreeRoot();
   }
 
   private notifications: {
@@ -574,7 +589,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       this._updateStatusBar(),
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
       workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
-      this.explorer.onConnectionDidChange(() => this.ext_refreshAll()),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
 
@@ -590,7 +604,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`executeFromInput`, this.ext_executeFromInput)
       .registerCommand(`executeQuery`, this.ext_executeQuery)
       .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
-      .registerCommand(`refreshAll`, this.ext_refreshAll)
+      .registerCommand(`refreshTree`, this.ext_refreshTree)
       .registerCommand(`saveResults`, this.ext_saveResults)
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
@@ -598,6 +612,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
+      .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile);
 
     // hooks

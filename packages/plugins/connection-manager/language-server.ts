@@ -5,7 +5,7 @@ import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plug
 import { getConnectionId } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -83,12 +83,19 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     };
   };
 
-  private refreshConnectionHandler: RequestHandler<typeof RefreshAllRequest> = async () => {
+  private refreshConnectionHandler: RequestHandler<typeof RefreshTreeRequest> = async ({ connIds } = {}) => {
     const { activeConnections } = this.server.store.getState();
-    await Promise.all(Object.keys(activeConnections).map(c => this._loadConnectionData(activeConnections[c])));
+    let toRefresh = Object.keys(activeConnections);
+    if(connIds) {
+      toRefresh = toRefresh.filter(c => connIds.includes(c));
+    }
+    await Promise.all(toRefresh.map(c => {
+      console.log(`Refreshing ${(<Connection>activeConnections[c]).getName()}`)
+      return this._loadConnectionData(activeConnections[c]);
+    }));
   };
 
-  private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }): Promise<void> => {
+  private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }) => {
     if (!conn) {
       return undefined;
     }
@@ -111,6 +118,18 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return null;
   };
 
+  private serializarConnectionState = (conn: ConnectionInterface) => {
+    const instance = this.getConnectionInstance(conn);
+    const { lastUsedId } = this.server.store.getState();
+    if (instance) {
+      return {
+        ...instance.serialize(),
+        isActive: instance.getId() === lastUsedId,
+      };
+    }
+    return conn;
+  }
+
   private openConnectionHandler: RequestHandler<typeof ConnectRequest> = async (req: {
     conn: ConnectionInterface;
     password?: string;
@@ -122,8 +141,9 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     let progressBase;
     try {
       if (c) {
+        this.server.store.dispatch(actions.Connect(c));
         await this._loadConnectionData(c);
-        return c.serialize();
+        return this.serializarConnectionState(req.conn);
       }
       c = new Connection(req.conn, this.server.telemetry);
       progressBase = {
@@ -139,7 +159,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       await c.connect()
       await this._loadConnectionData(c);
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
-      return c.serialize();
+      return this.serializarConnectionState(req.conn);
     } catch (e) {
       this.server.store.dispatch(actions.Disconnect(c));
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
@@ -192,17 +212,27 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     }
   };
 
-  private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
+  private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connId, connectedOnly, sort = 'connectedFirst' } = {}) => {
     let connList = this.connections;
 
+    if (connId) return connList.filter(c => c.id === connId);
+    
     if (connectedOnly) connList = connList.filter(c => c.isConnected);
 
-    return connList
-      .sort((a, b) => {
-        if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
-        if (a.isConnected && !b.isConnected) return -1;
-        if (!a.isConnected && b.isConnected) return 1;
-      });
+    switch (sort) {
+      case 'name':
+      return connList
+        .sort((a, b) => a.name.localeCompare(b.name));
+      case 'connectedFirst':
+      default:
+        return connList
+        .sort((a, b) => {
+          if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
+          if (a.isConnected && !b.isConnected) return -1;
+          if (!a.isConnected && b.isConnected) return 1;
+        });
+
+    }
   }
 
   public register(server: SQLTools.LanguageServerInterface) {
@@ -211,7 +241,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
     this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
     this.server.onRequest(GetConnectionDataRequest, this.getTablesAndColumnsHandler);
-    this.server.onRequest(RefreshAllRequest, this.refreshConnectionHandler);
+    this.server.onRequest(RefreshTreeRequest, this.refreshConnectionHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
     this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
     this.server.onRequest(ConnectRequest, this.openConnectionHandler);
@@ -228,7 +258,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return Promise.all([conn.getTables(), conn.getColumns(), conn.getFunctions()])
       .then(async ([tables, columns, functions ]) => {
         this.server.store.dispatch(actions.ConnectionData(conn, { tables, columns, functions }))
-        return this._updateSidebar({ conn: conn.serialize(), tables, columns, functions });
+        return this._updateSidebar({ conn: this.serializarConnectionState(conn.serialize()), tables, columns, functions });
       })
       .catch(e => {
         this.server.notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
@@ -256,7 +286,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     const defaultConnections: ConnectionInterface[] = [];
     const { lastUsedId, activeConnections } = this.server.store.getState();
     if (lastUsedId && activeConnections[lastUsedId]) {
-      defaultConnections.push(activeConnections[lastUsedId].serialize());
+      defaultConnections.push(this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
     }
     if (defaultConnections.length === 0
       && (
