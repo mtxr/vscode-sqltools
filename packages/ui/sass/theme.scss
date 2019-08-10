@@ -131,3 +131,14 @@
   border: 1px solid var(--vscode-editor-lineHighlightBorder);
 
 }
+
+.MuiTableSortLabel-root,
+.MuiTableSortLabel-root:hover,
+.MuiTableSortLabel-root.MuiTableSortLabel-active,
+.MuiTableSortLabel-root.MuiTableSortLabel-active:hover,
+.MuiTableSortLabel-root.MuiTableSortLabel-active.MuiTableSortLabel-root.MuiTableSortLabel-active {
+  color: inherit;
+  .MuiTableSortLabel-icon {
+    color: inherit;
+  }
+}
