@@ -13,7 +13,7 @@
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
     "@sqltools/ui": "*",
-    "csv-stringify": "^5.3.0",
+    "csv-stringify": "^5.3.2",
     "lodash": "^4.17.13",
     "rimraf": "^2.6.3"
   },
