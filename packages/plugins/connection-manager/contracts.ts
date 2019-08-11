@@ -1,4 +1,4 @@
-import { RequestType, RequestType0 } from 'vscode-languageserver-protocol';
+import { RequestType, RequestType0, NotificationType } from 'vscode-languageserver-protocol';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
@@ -63,3 +63,20 @@ export const SaveResultsRequest = new RequestType<
   Error,
   void
 >('connection/SaveResultsRequest');
+
+
+// @TODO: later this will be replace by the native library when available
+export interface ProgressNotificationStartParams {
+  title: string;
+  message: string;
+  id: string;
+};
+export const ProgressNotificationStart = new NotificationType<ProgressNotificationStartParams, void>('sqltools/window/progress/start');
+
+export interface ProgressNotificationCompleteParams {
+  title?: string;
+  message?: string;
+  id: string;
+};
+export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>('sqltools/window/progress/complete');
+

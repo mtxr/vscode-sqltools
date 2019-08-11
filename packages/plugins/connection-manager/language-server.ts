@@ -5,7 +5,7 @@ import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plug
 import { getConnectionId } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -121,14 +121,21 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     let c = this.getConnectionInstance(req.conn) || new Connection(req.conn, this.server.telemetry);
 
     if (req.password) c.setPassword(req.password);
+    const progressBase = {
+      id: `progress:${c.getId()}`,
+      title: c.getName(),
+    }
+    this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
     return c
       .connect()
       .then(async () => {
         this.server.store.dispatch(actions.Connect(c));
         await this._loadConnectionData(c);
+        this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
         return c.serialize();
       })
       .catch(e => {
+        this.server.sendNotification(ProgressNotificationComplete, progressBase);
         e = decorateException(e, { conn: req.conn });
         if (e.data && e.data.notification) {
           if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
