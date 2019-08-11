@@ -71,7 +71,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       } else {
         window.showInformationMessage('Node runtime not found. Using default as a fallback.');
       }
-    } else if (useNodeRuntime === true) {
+    } else if (useNodeRuntime) {
       if (commandExists('node')) {
         runtime = 'node';
       } else {
@@ -83,12 +83,21 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       module: serverModule,
       transport: TransportKind.ipc,
       runtime,
+      options: {
+        env: {
+          IS_NODE_RUNTIME: useNodeRuntime ? 1 : 0,
+        },
+      }
     };
 
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
-
     return {
-      debug: { ...runOptions, options: debugOptions },
+      debug: {
+        ...runOptions,
+        options: {
+          ...runOptions.options,
+          execArgv: ['--nolazy', '--inspect=6010']
+        }
+      },
       run: runOptions,
     };
   }

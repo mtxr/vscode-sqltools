@@ -1,4 +1,4 @@
-import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation } from 'vscode';
+import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
 import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
@@ -22,7 +22,13 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
       'Enable now',
     );
     if (!r) return;
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
+    await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
+    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
+    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
+    const res = await Win.showInformationMessage(
+      '\'sqltools.useNodeRuntime\' enabled. You must reload VSCode to take effect.', 'Reload now');
+    if (!res) return;
+    commands.executeCommand('workbench.action.reloadWindow');
   }
 
   private installingDialects: string[] = [];

@@ -76,6 +76,14 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   }
 
   public listen() {
+    console.log(
+`
+===============================
+SQLTools Server started!
+Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
+ExecPath: ${process.execPath}
+===============================
+`)
     this._server.listen();
     return this;
   }
