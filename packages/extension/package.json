@@ -663,6 +663,11 @@
                     "default": false,
                     "description": "Enable node runtime usage."
                 },
+                "sqltools.languageServerEnv": {
+                    "type": "object",
+                    "default": {},
+                    "description": "Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH..."
+                },
                 "sqltools.sortColumns": {
                     "type": [
                         "null",

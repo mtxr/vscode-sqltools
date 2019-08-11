@@ -28,9 +28,16 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
     this.registerBaseNotifications();
 
     const useNodeRuntimePrevValue = ConfigManager.useNodeRuntime;
+    const languageServerEnvPrevValue = JSON.stringify(ConfigManager.languageServerEnv);
     ConfigManager.addOnUpdateHook(async () => {
       if (ConfigManager.useNodeRuntime !== useNodeRuntimePrevValue) {
         const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
+        if (!res) return;
+        commands.executeCommand('workbench.action.reloadWindow');
+      }
+
+      if (JSON.stringify(ConfigManager.languageServerEnv) !== languageServerEnvPrevValue) {
+        const res = await window.showWarningMessage('New language server environment variables set. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
       }
@@ -85,6 +92,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       runtime,
       options: {
         env: {
+          ...(ConfigManager.languageServerEnv || {}),
           IS_NODE_RUNTIME: useNodeRuntime ? 1 : 0,
         },
       }
@@ -137,6 +145,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       initializationOptions: {
         telemetry: telemetryArgs,
         extensionPath: this.context.extensionPath,
+        userEnvVars: ConfigManager.languageServerEnv
       },
       synchronize: {
         configurationSection: EXT_NAME.toLowerCase(),

@@ -37,6 +37,15 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
         ...params.initializationOptions.telemetry,
       });
     }
+    if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
+      console.log(
+        `
+===============================
+User defined env vars:
+${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
+===============================
+`);
+    }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
       (opts, hook) => {
