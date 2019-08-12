@@ -2,6 +2,11 @@
 
 ## v0.20
 
+### v0.20.1 - (August 12, 2019)
+
+* **Fix**
+  * Minor fix on webpack config causing MySQL connections not to work. Issue [#325](https://github.com/mtxr/vscode-sqltools/issues/325)
+
 ### v0.20.0 - (August 11, 2019)
 
 * **NEW** 🎉
@@ -10,7 +15,7 @@
   * Added option `sqltools.languageServerEnv` to allow user to add environment variables to the language server. Issue [#281](https://github.com/mtxr/vscode-sqltools/issues/281)
   * Adde connection in progress indicator. Issue [#229](https://github.com/mtxr/vscode-sqltools/issues/229)
 
-* **Fix** 🎉
+* **Fix**
   * Fix beautify server variables for MSSQL. Issue [mtxr/sqltools-formatter/#12](https://github.com/mtxr/sqltools-formatter/issues/12)
   * Fix listing functions in MySQL older then 5.5. Issue [#304](https://github.com/mtxr/vscode-sqltools/issues/304)
   * Fix escaping columns on SQLite. Issue [#309](https://github.com/mtxr/vscode-sqltools/issues/309)
