@@ -110,6 +110,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
       options: [],
       position: {},
     },
+    columnExtensions: null,
   };
 
   changeFilters = (filters = []) => {
@@ -217,6 +218,10 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
     this.setState({ contextMenu: {} });
   };
 
+  updateWidths = (columnExtensions) => {
+    this.setState({ columnExtensions });
+  }
+
   tableContextOptions = (row: any, column: Table.DataCellProps['column']): any[] => {
     const options: any[] = [];
     let cellValue = row[column.name];
@@ -275,7 +280,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   render() {
     const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
     const { filters } = this.state;
-    const columnExtensions = generateColumnExtensions(columnNames);
+    const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames);
     const showPagination = true; //rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
@@ -298,7 +303,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
                 cellComponent={TableCell(this.openContextMenu)}
                 rowComponent={TableRow(this.state.contextMenu.rowKey)}
               />
-              <TableColumnResizing columnWidths={columnExtensions} />
+              <TableColumnResizing columnWidths={columnExtensions} onColumnWidthsChange={this.updateWidths} />
               <TableHeaderRow showSortingControls />
               <TableFilterRow
                 cellComponent={TableFilterRowCell}
