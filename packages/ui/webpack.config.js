@@ -1,7 +1,5 @@
 const path = require('path');
-const TerserJSPlugin = require('terser-webpack-plugin');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
-const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
 
@@ -62,7 +60,6 @@ module.exports = exports = function getWebviewConfig() {
       modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
     },
     optimization: {
-      minimizer: !IS_DEV ? [new TerserJSPlugin({}), new OptimizeCSSAssetsPlugin({})] : undefined,
       splitChunks: {
         cacheGroups: {
           commons: {

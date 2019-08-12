@@ -28,9 +28,16 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
     this.registerBaseNotifications();
 
     const useNodeRuntimePrevValue = ConfigManager.useNodeRuntime;
+    const languageServerEnvPrevValue = JSON.stringify(ConfigManager.languageServerEnv);
     ConfigManager.addOnUpdateHook(async () => {
       if (ConfigManager.useNodeRuntime !== useNodeRuntimePrevValue) {
         const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
+        if (!res) return;
+        commands.executeCommand('workbench.action.reloadWindow');
+      }
+
+      if (JSON.stringify(ConfigManager.languageServerEnv) !== languageServerEnvPrevValue) {
+        const res = await window.showWarningMessage('New language server environment variables set. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
       }
@@ -71,7 +78,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       } else {
         window.showInformationMessage('Node runtime not found. Using default as a fallback.');
       }
-    } else if (useNodeRuntime === true) {
+    } else if (useNodeRuntime) {
       if (commandExists('node')) {
         runtime = 'node';
       } else {
@@ -83,12 +90,22 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       module: serverModule,
       transport: TransportKind.ipc,
       runtime,
+      options: {
+        env: {
+          ...(ConfigManager.languageServerEnv || {}),
+          IS_NODE_RUNTIME: useNodeRuntime ? 1 : 0,
+        },
+      }
     };
 
-    const debugOptions = { execArgv: ['--nolazy', '--inspect=6010'] };
-
     return {
-      debug: { ...runOptions, options: debugOptions },
+      debug: {
+        ...runOptions,
+        options: {
+          ...runOptions.options,
+          execArgv: ['--nolazy', '--inspect=6010']
+        }
+      },
       run: runOptions,
     };
   }
@@ -128,6 +145,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       initializationOptions: {
         telemetry: telemetryArgs,
         extensionPath: this.context.extensionPath,
+        userEnvVars: ConfigManager.languageServerEnv
       },
       synchronize: {
         configurationSection: EXT_NAME.toLowerCase(),

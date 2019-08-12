@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.19.7",
+  "version": "0.20.0",
   "publisher": "mtxr",
   "license": "MIT",
   "main": "../dist/extension.js",
@@ -37,7 +37,7 @@
     "test:upcontainers": "bash ./.test-database/start-dbs.sh"
   },
   "dependencies": {
-    "husky": "^3.0.0"
+    "husky": "^3.0.3"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

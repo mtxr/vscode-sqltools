@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/language-server",
-  "version": "0.19.7",
+  "version": "0.20.0",
   "description": "SQLTools Language Server",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
@@ -18,7 +18,7 @@
     "@babel/plugin-transform-spread": "^7.2.2",
     "@babel/preset-env": "^7.5.5",
     "@types/jest": "^24.0.11",
-    "@types/node": "^12.0.0",
+    "@types/node": "^12.7.1",
     "babel-loader": "^8.0.5",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",

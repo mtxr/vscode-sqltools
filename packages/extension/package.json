@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.19.7",
+    "version": "0.20.0",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -663,6 +663,11 @@
                     "default": false,
                     "description": "Enable node runtime usage."
                 },
+                "sqltools.languageServerEnv": {
+                    "type": "object",
+                    "default": {},
+                    "description": "Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH..."
+                },
                 "sqltools.sortColumns": {
                     "type": [
                         "null",
@@ -923,14 +928,13 @@
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
-        "css-loader": "^3.0.0",
+        "css-loader": "^3.2.0",
         "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
         "mini-css-extract-plugin": "^0.8.0",
         "node-sass": "^4.11.0",
         "optimize-css-assets-webpack-plugin": "^5.0.3",
-        "sass-loader": "^7.1.0",
-        "style-loader": "^0.23.1",
+        "sass-loader": "^7.2.0",
         "terser-webpack-plugin": "^1.3.0",
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",

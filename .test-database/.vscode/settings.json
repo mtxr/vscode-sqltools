@@ -5,7 +5,7 @@
   "sqltools.autoOpenSessionFiles": true,
   "sqltools.results": {
     "limit": 100,
-    "location": "next",
+    "location": "current",
     "customization": {
       "table-cell-padding": "2px 4px"
     }
@@ -143,5 +143,8 @@
       "server": "127.0.0.1",
       "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123"
     }
-  ]
+  ],
+  "sqltools.languageServerEnv": {
+    "EXAMPLE_VARIABLE": "VALUE"
+  }
 }

@@ -94,3 +94,21 @@ To enable autocompletion in PL/SQL files add:
 to `settings.json`.
 
 NOTE: You must have installed support for `plsql` language files.
+
+
+## 4. 32bit drivers and ORACLE_HOME environment variable
+
+If you want to use 32bits drivers or set a different ORACLE_HOME to be used with the node driver, you can achieve this using the `sqltools.languageServerEnv`.
+
+
+```json
+{
+  ...
+  "sqltools.languageServerEnv": {
+    "ORACLE_HOME": "YOUR PATH HERE"
+  },
+  ...
+}
+```
+
+For more information, please, read [#281](https://github.com/mtxr/vscode-sqltools/issues/281)

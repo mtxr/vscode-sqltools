@@ -13,7 +13,7 @@ interface QueryResultProps {
   pageSize: number;
 }
 export default ({ cols, error, query, messages, results = [], connId, pageSize }: QueryResultProps) => {
-  const [showMessagess, setShowMessages] = useState(false);
+  const [showMessages, setShowMessages] = useState(error);
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
 
@@ -29,16 +29,16 @@ export default ({ cols, error, query, messages, results = [], connId, pageSize }
         error={error}
         openDrawerButton={
           <Button
-            onClick={() => setShowMessages(!showMessagess)}
-            className={'action-button' + (showMessagess ? 'active' : '')}
+            onClick={() => setShowMessages(!showMessages)}
+            className={'action-button' + (showMessages ? 'active' : '')}
           >
             Query Details
           </Button>
         }
       />
-      <Drawer open={showMessagess} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
+      <Drawer open={showMessages} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
         <List dense component="ul" subheader={<ListSubheader>Query</ListSubheader>}>
-          <ListItem component="li" className={'message ' + (error ? 'error' : '')}>
+          <ListItem component="li" className={'query ' + (error ? 'error' : '')}>
             <Syntax code={query} language="sql" strong />
           </ListItem>
         </List>
