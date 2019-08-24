@@ -5,13 +5,11 @@ import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-const TIMESTAMPTZ_OID = 1184
-const TIMESTAMP_OID = 1114
-const DATE_OID = 1082
 const rawValue = (v: string) => v;
-types.setTypeParser(TIMESTAMPTZ_OID, rawValue);
-types.setTypeParser(TIMESTAMP_OID, rawValue);
-types.setTypeParser(DATE_OID, rawValue);
+
+types.setTypeParser(types.builtins.TIMESTAMP, rawValue);
+types.setTypeParser(types.builtins.TIMESTAMPTZ, rawValue);
+types.setTypeParser(types.builtins.DATE, rawValue);
 
 export default class PostgreSQL extends GenericDialect<Pool> implements ConnectionDialect {
   queries = Queries;
