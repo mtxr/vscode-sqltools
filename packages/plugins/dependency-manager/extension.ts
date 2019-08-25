@@ -74,7 +74,7 @@ Go ahead and connect!`,
       }
     } catch (error) {
       this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}`, error);
+      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}:`, error);
     }
   }
 

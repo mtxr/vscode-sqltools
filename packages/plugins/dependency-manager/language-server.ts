@@ -11,8 +11,8 @@ function run(
   command: string,
   args?: ReadonlyArray<string>,
   options: SpawnOptions = {}
-): Promise<{ stdout?: string; stderr?: string; code: number }> {
-  return new Promise<{ stdout?: string; stderr?: string; code: number }>(
+) {
+  return new Promise<{ message: string, stdout?: string; stderr?: string; code: number }>(
     (resolve, reject) => {
       options.env = {
         ...process.env,
@@ -22,27 +22,32 @@ function run(
       const child = spawn(command, args, { cwd: __dirname, ...options });
       let stderr = '';
       let stdout = '';
+      let output = '';
 
-      if (!options.stdio) {
-        child.stdout.on('data', chunk => {
-          stdout += chunk.toString();
-        });
-        child.stderr.on('data', chunk => {
-          stderr += chunk.toString();
-        });
-      }
+      child.stdout.on('data', chunk => {
+        stdout += chunk.toString();
+        output += chunk.toString();
+        process.stdout.write(chunk);
+      });
+      child.stderr.on('data', chunk => {
+        stderr += chunk.toString();
+        output += chunk.toString();
+        process.stderr.write(chunk);
+      });
 
       child.on('exit', code => {
         if (code !== 0) {
           return reject({
             code,
-            stderr
+            stderr,
+            message: output
           });
         }
         return resolve({
           code,
           stdout,
-          stderr
+          stderr,
+          message: output,
         });
       });
     }
@@ -91,7 +96,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
       }
       console.log('Finished installing deps');
       DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
-    } catch(e) {
+    } catch (e) {
       DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
       throw e;
     }
@@ -116,7 +121,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     if (!commandExists('npm')) {
       throw new Error('You need to install node@6 or newer and npm first to install dependencies. Install it and restart to continue.');
     }
-    return run('npm', args, { cwd: this.root, shell: true, stdio: [ process.stdin, process.stdout, process.stderr ], ...options });
+    return run('npm', args, { cwd: this.root, shell: true, ...options });
   }
 
   get npmVersion() {
