@@ -2,6 +2,11 @@
 
 ## v0.20
 
+### v0.20.2 - (August 15, 2019)
+
+* **Fix**
+  * Minor fix on MariaDB version checking. Issue [#332](https://github.com/mtxr/vscode-sqltools/issues/332)
+
 ### v0.20.1 - (August 12, 2019)
 
 * **Fix**

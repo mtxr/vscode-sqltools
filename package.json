@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "publisher": "mtxr",
   "license": "MIT",
   "main": "../dist/extension.js",
@@ -45,7 +45,7 @@
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
     "typescript": "^3.4.1",
     "vsce": "^1.58.0"

@@ -97,7 +97,11 @@ export default class MySQL extends GenericDialect<any> implements ConnectionDial
   }
 
   private async is55OrNewer() {
-    await this.getVersion();
-    return compareVersions.compare(this.mysqlVersion, '5.5.0', '>=');
+    try {
+      await this.getVersion();
+      return compareVersions.compare(this.mysqlVersion, '5.5.0', '>=');
+    } catch (error) {
+      return true;
+    }
   }
 }
