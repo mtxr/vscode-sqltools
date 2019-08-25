@@ -33,6 +33,8 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       user: this.credentials.username,
       multipleStatements: true,
       dateStrings: true,
+      bigNumberStrings: true,
+      supportBigNumbers: true,
       ...mysqlOptions
     });
 
