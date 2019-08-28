@@ -44,7 +44,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
 
     this.needToInstallDependencies();
 
-    const connOptions = {
+    let connOptions = {
       HOST: this.credentials.server,
       PORT: this.credentials.port,
       UID: this.credentials.username,
@@ -53,14 +53,12 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     if (this.credentials.connectionTimeout && this.credentials.connectionTimeout > 0) {
       connOptions["CONNECTTIMEOUT"] = this.credentials.connectionTimeout * 1000;
     }
-
-    let hanaOptions = this.credentials["hanaOptions"];
-    if (hanaOptions) {
-      for (let opt in hanaOptions) {
-        connOptions[opt] = hanaOptions[opt];
-      }
-    }
-
+    
+    connOptions = {
+      ...connOptions,
+      ...(this.credentials["hanaOptions"] || {}),
+    };
+    
     try {
       let conn = this.lib.createConnection(connOptions);
 
