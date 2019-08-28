@@ -37,14 +37,14 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   queries = queries;
   private schema: String;
 
-  public open(encrypt?: boolean): Promise<HanaConnection> {
+  public open(): Promise<HanaConnection> {
     if (this.connection) {
       return this.connection;
     }
 
     this.needToInstallDependencies();
 
-    const connOptions = {
+    let connOptions = {
       HOST: this.credentials.server,
       PORT: this.credentials.port,
       UID: this.credentials.username,
@@ -53,10 +53,12 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     if (this.credentials.connectionTimeout && this.credentials.connectionTimeout > 0) {
       connOptions["CONNECTTIMEOUT"] = this.credentials.connectionTimeout * 1000;
     }
-    if (encrypt) {
-      connOptions["ENCRYPT"] = true;
-    }
-
+    
+    connOptions = {
+      ...connOptions,
+      ...(this.credentials["hanaOptions"] || {}),
+    };
+    
     try {
       let conn = this.lib.createConnection(connOptions);
 
@@ -70,7 +72,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
             if (err) {
               reject(err);
             }
-            console.log("Connection to SAP Hana succedded!");
+            console.log("Connection to SAP Hana succeeded!");
             resolve(conn);
           });
       }));
