@@ -153,7 +153,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables, [this.schema])
+    return this.query(this.queries.fetchTables, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -172,7 +172,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns, [this.schema])
+    return this.query(this.queries.fetchColumns, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -200,6 +200,15 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public describeTable(prefixedTable: string) {
-    return this.query(this.queries.describeTable, [this.schema, prefixedTable]);
+    return new Promise(resolve => {
+      this.query(this.queries.describeTable, [this.schema, prefixedTable]).then(queryRes => {
+        if (queryRes[0].results.length == 0) {
+          this.query(this.queries.describeView, [this.schema, prefixedTable]).then(res => resolve(res));
+        } else {
+          resolve(queryRes);
+        }
+      })
+    });
   }
+  
 }
