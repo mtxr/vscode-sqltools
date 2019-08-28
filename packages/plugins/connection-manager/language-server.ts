@@ -5,7 +5,7 @@ import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plug
 import { getConnectionId } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -118,29 +118,43 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     if (!req || !req.conn) {
       return undefined;
     }
-    let c = this.getConnectionInstance(req.conn) || new Connection(req.conn, this.server.telemetry);
-
-    if (req.password) c.setPassword(req.password);
-    return c
-      .connect()
-      .then(async () => {
-        this.server.store.dispatch(actions.Connect(c));
+    let c = this.getConnectionInstance(req.conn);
+    let progressBase;
+    try {
+      if (c) {
         await this._loadConnectionData(c);
         return c.serialize();
-      })
-      .catch(e => {
-        e = decorateException(e, { conn: req.conn });
-        if (e.data && e.data.notification) {
-          if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
-            return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
-          }
-          return void this.server.sendNotification(e.data.notification, e.data.args);
+      }
+      c = new Connection(req.conn, this.server.telemetry);
+      progressBase = {
+        id: `progress:${c.getId()}`,
+        title: c.getName(),
+      }
+
+      if (req.password) c.setPassword(req.password);
+
+      this.server.store.dispatch(actions.Connect(c));
+
+      this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
+      await c.connect()
+      await this._loadConnectionData(c);
+      this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
+      return c.serialize();
+    } catch (e) {
+      this.server.store.dispatch(actions.Disconnect(c));
+      progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
+      e = decorateException(e, { conn: req.conn });
+      if (e.data && e.data.notification) {
+        if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
+          return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
         }
+        return void this.server.sendNotification(e.data.notification, e.data.args);
+      }
 
-        this.server.telemetry.registerException(e);
+      this.server.telemetry.registerException(e);
 
-        throw e;
-      });
+      throw e;
+    }
   };
 
   private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {

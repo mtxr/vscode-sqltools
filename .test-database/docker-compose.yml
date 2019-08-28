@@ -9,6 +9,10 @@ services:
       extends:
         file: ./mysql/docker-compose.yml
         service: db
+    mysqlv5:
+      extends:
+        file: ./mysql/docker-compose.yml
+        service: dbv5
     # mysql_xprotocol:
     #   extends:
     #     file: ./mysql/docker-compose.yml

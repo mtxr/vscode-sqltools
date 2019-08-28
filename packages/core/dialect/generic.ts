@@ -55,7 +55,7 @@ export default abstract class GenericDialect<ConnectionType extends any> impleme
   }
 
   protected needToInstallDependencies() {
-    if (!process.release.sourceUrl.startsWith('https://nodejs.org')) {
+    if (parseInt(process.env['IS_NODE_RUNTIME'] || '0') !== 1) {
       throw new ElectronNotSupportedException();
     }
     if (this.deps && this.deps.length > 0) {

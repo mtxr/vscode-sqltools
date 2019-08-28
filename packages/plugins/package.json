@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/plugins",
-  "version": "0.19.6",
+  "version": "0.20.2",
   "description": "SQLTools Plugins",
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "MIT",
@@ -13,8 +13,8 @@
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
     "@sqltools/ui": "*",
-    "csv-stringify": "^5.3.0",
-    "lodash": "^4.17.11",
+    "csv-stringify": "^5.3.2",
+    "lodash": "^4.17.13",
     "rimraf": "^2.6.3"
   },
   "scripts": {

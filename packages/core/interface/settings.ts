@@ -171,5 +171,11 @@ export interface Settings {
    * @memberof Settings
    */
   autoOpenSessionFiles?: boolean;
-
+  /**
+   * Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH...
+   * @default {}
+   * @type {{ [id: string]: string }}
+   * @memberof Settings
+   */
+  languageServerEnv?: { [id: string]: string };
 }

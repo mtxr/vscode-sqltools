@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.19.6",
+  "version": "0.20.2",
   "publisher": "mtxr",
   "license": "MIT",
   "main": "../dist/extension.js",
@@ -28,6 +28,7 @@
     "prewatch": "yarn run clean",
     "watch": "yarn workspace @sqltools/extension watch",
     "compile": "yarn workspace @sqltools/formatter build && yarn workspace @sqltools/extension compile",
+    "postcompile": "rimraf -rf ../dist/ui/theme.js || exit 0",
     "compile:preview": "yarn workspace @sqltools/extension compile:preview",
     "package:preview": "yarn run compile:preview && (cd ../dist && vsce package --yarn)",
     "package": "cross-env NODE_ENV=production yarn run compile && (cd ../dist && cross-env NODE_ENV=production vsce package --yarn)",
@@ -36,7 +37,7 @@
     "test:upcontainers": "bash ./.test-database/start-dbs.sh"
   },
   "dependencies": {
-    "husky": "^3.0.0"
+    "husky": "^3.0.3"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
@@ -44,7 +45,7 @@
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",
-    "rimraf": "^2.6.3",
+    "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
     "typescript": "^3.4.1",
     "vsce": "^1.58.0"

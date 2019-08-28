@@ -30,6 +30,7 @@ export function inRange(max, min) {
 
 
 export const clipboardInsert = (value, format = 'text/plain') => {
+  value = typeof value === 'string' ? value : JSON.stringify(value, null, 2);
   const listener = function(e: ClipboardEvent) {
     e.clipboardData.setData(format, value);
     e.preventDefault();
@@ -37,4 +38,19 @@ export const clipboardInsert = (value, format = 'text/plain') => {
   document.addEventListener('copy', listener);
   document.execCommand('copy');
   document.removeEventListener('copy', listener);
+}
+
+const isRegExMatcher = /^\/(.+)\/(\w+)?$/gi;
+
+export function toRegEx(value: string | RegExp) {
+  if (value instanceof RegExp) return value;
+  try {
+    if (isRegExMatcher.test(value)) {
+      try {
+        return eval(value.replace(isRegExMatcher, '/($1)/$2'));
+      } catch(ee) {}
+    }
+    return new RegExp(value, 'gi');
+  } catch (e) { }
+  return value;
 }

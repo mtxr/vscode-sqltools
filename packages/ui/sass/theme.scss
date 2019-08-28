@@ -1,0 +1,161 @@
+@import './variables';
+
+// overrides MUI
+
+.MuiPaper-root, .MuiTable-root {
+  border-collapse: collapse;
+  background-color: var(--vscode-editor-background);
+  color: var(--vscode-editor-foreground);
+}
+
+.MuiPaper-root.MuiMenu-paper {
+  background-color: var(--vscode-menu-background);
+  color: var(--vscode-menu-foreground);
+}
+
+.MuiMenuItem-root {
+  min-height: auto;
+}
+.MuiList-padding {
+  padding: 4px 0px;
+}
+
+.MuiMenuItem-gutters {
+  padding: 4px 24px;
+}
+.MuiListItem-root.Mui-selected,
+.MuiListItem-root.Mui-selected:hover,
+.MuiMenuItem-gutters:hover {
+  background: var(--vscode-menu-selectionBackground);
+  color: var(--vscode-menu-selectionForeground);
+}
+.MuiListItem-root {
+  flex-direction: column;
+  align-items: initial;
+
+  &.message {
+    &:not(:last-child):not(:first-child):after {
+      content: '';
+      opacity: .5;
+      border-bottom: 1px solid var(--vscode-sideBarSectionHeader-background);
+      margin: 4px -16px -4px -16px;
+    }
+    &.error {
+      color: var(--vscode-list-errorForeground);
+    }
+  }
+}
+
+.MuiDivider-root {
+  background-color: var(--vscode-menu-separatorBackground);
+  margin: 4px 0;
+  opacity: 0.4;
+}
+
+.MuiListItemIcon-root {
+  color: inherit;
+}
+
+.MuiListItemText-root {
+  margin: 0;
+}
+
+.MuiPaper-rounded {
+  border-radius: 1px;
+}
+
+.MuiDrawer-paper.MuiPaper-root {
+  background-color: var(--vscode-sideBar-background);
+  color: var(--vscode-editor-foreground);
+  .MuiList-padding {
+    padding: 0;
+  }
+
+  .MuiListSubheader-root {
+    background: var(--vscode-sideBarSectionHeader-background);
+    color: var(--vscode-sideBarTitle-foreground);
+    text-transform: uppercase;
+    font-weight: bold;
+    line-height: 22px;
+  }
+}
+
+.MuiTab-root,
+.MuiTabs-root {
+  min-height: 36px;
+}
+
+.MuiTab-textColorPrimary {
+  color: var(--vscode-tab-inactiveForeground);
+  background: var(--vscode-tab-inactiveBackground);
+
+  &.Mui-selected {
+    color: var(--vscode-tab-activeForeground);
+    background: var(--vscode-tab-activeBackground);
+  }
+}
+
+.MuiTabs-indicator {
+  background-color: var(--vscode-tab-activeModifiedBorder);
+}
+
+.MuiTableCell-root {
+  padding: var(--sqltool-table-cell-padding, 2px 4px) !important;
+  font-size: $fontSize;
+  font-weight: normal;
+}
+
+.MuiInput-root {
+  margin: 0 !important;
+}
+
+.MuiTableRow-root {
+  .MuiIconButton-root {
+    padding: 0 2px;
+  }
+
+  .MuiInputBase-input {
+    height: 1em;
+    padding: 2px;
+  }
+  .MuiInput-underline {
+    &::before,
+    &:after {
+      display: none;
+    }
+  }
+}
+.filterCell {
+  padding: 0;
+  background: var(--vscode-input-background);
+  > div > *, .MuiInputBase-input::placeholder {
+    color: var(--vscode-input-foreground) !important;
+  }
+
+  &.active {
+    color: var(--vscode-input-placeholderForeground);
+    background: var(--vscode-inputOption-activeBackground);
+  }
+}
+
+.MuiTableCell-head:not(.filterCell) {
+  font-weight: bold;
+  color: inherit;
+}
+
+.MuiTableCell-body, .MuiTableCell-root {
+  color: inherit;
+  border: 1px solid var(--vscode-editor-lineHighlightBorder);
+
+}
+
+.MuiTableSortLabel-root,
+.MuiTableSortLabel-root:hover,
+.MuiTableSortLabel-root.MuiTableSortLabel-active,
+.MuiTableSortLabel-root.MuiTableSortLabel-active:hover,
+.MuiTableSortLabel-root.MuiTableSortLabel-active.MuiTableSortLabel-root.MuiTableSortLabel-active {
+  color: inherit;
+  .MuiTableSortLabel-icon {
+    color: inherit;
+  }
+}

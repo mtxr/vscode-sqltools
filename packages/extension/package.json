@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.19.6",
+    "version": "0.20.2",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -86,18 +86,28 @@
         "onCommand:SQLTools.selectConnection"
     ],
     "contributes": {
-        "languages": [{
-            "id": "sql",
-            "extensions": [ ".sql", ".dsql" ],
-            "aliases": [ "SQL", "sql" ],
-            "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
-			"configuration": "./language/language-configuration.json"
-        }],
-        "grammars": [{
-			"language": "sql",
-			"scopeName": "source.sql",
-			"path": "./language/sql.tmLanguage.json"
-		}],
+        "languages": [
+            {
+                "id": "sql",
+                "extensions": [
+                    ".sql",
+                    ".dsql"
+                ],
+                "aliases": [
+                    "SQL",
+                    "sql"
+                ],
+                "firstLine": "^[\\s\\t]*--[\\s\\t]*\\b[sS][qQ][lL]\\b",
+                "configuration": "./language/language-configuration.json"
+            }
+        ],
+        "grammars": [
+            {
+                "language": "sql",
+                "scopeName": "source.sql",
+                "path": "./language/sql.tmLanguage.json"
+            }
+        ],
         "commands": [
             {
                 "title": "Connect",
@@ -118,7 +128,7 @@
                 }
             },
             {
-                "title": "Create From Selection",
+                "title": "Bookmark Selected Query",
                 "command": "SQLTools.bookmarkSelection",
                 "category": "SQLTools Bookmarks"
             },
@@ -158,7 +168,7 @@
                 "category": "SQLTools Connection"
             },
             {
-                "title": "Format Sql (For Any Document)",
+                "title": "Format Selected Query For Any Document",
                 "command": "SQLTools.formatSql",
                 "category": "SQLTools"
             },
@@ -178,7 +188,7 @@
                 "category": "SQLTools Connection"
             },
             {
-                "title": "Show Output Channel (Logs)",
+                "title": "Show Output Channel Logs",
                 "command": "SQLTools.showOutputChannel",
                 "category": "SQLTools Management"
             },
@@ -262,12 +272,12 @@
                 }
             },
             {
-                "title": "SQLTools: Attach Connection To This File",
+                "title": "Attach Connection To This File",
                 "command": "SQLTools.attachFileToConnection",
                 "category": "SQLTools Internal"
             },
             {
-                "title": "SQLTools: Detach Connection From File",
+                "title": "Detach Connection From File",
                 "command": "SQLTools.detachConnectionFromFile",
                 "category": "SQLTools Internal"
             }
@@ -465,7 +475,7 @@
                                 "description": "Connection Dialect",
                                 "required": false
                             },
-			                "connectString": {
+                            "connectString": {
                                 "type": [
                                     "string",
                                     "null"
@@ -599,7 +609,10 @@
                             "default": 50
                         },
                         "location": {
-                            "type": ["string", "number"],
+                            "type": [
+                                "string",
+                                "number"
+                            ],
                             "default": "next",
                             "enum": [
                                 "next",
@@ -613,13 +626,14 @@
                             "default": {},
                             "properties": {
                                 "font-family": {
-                                    "type":"string"
+                                    "type": "string"
                                 },
                                 "font-size": {
-                                    "type":"string"
+                                    "type": "string"
                                 },
                                 "table-cell-padding": {
-                                    "type":"string"
+                                    "type": "string",
+                                    "default": "2px 4px"
                                 }
                             }
                         }
@@ -648,6 +662,11 @@
                     ],
                     "default": false,
                     "description": "Enable node runtime usage."
+                },
+                "sqltools.languageServerEnv": {
+                    "type": "object",
+                    "default": {},
+                    "description": "Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH..."
                 },
                 "sqltools.sortColumns": {
                     "type": [
@@ -869,6 +888,21 @@
                     "command": "SQLTools.detachConnectionFromFile",
                     "group": "sqltools@0",
                     "when": "sqltools.file.connectionAttached && editorLangId == sql"
+                },
+                {
+                    "command": "SQLTools.formatSql",
+                    "group": "sqltools@2",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.executeQuery",
+                    "group": "sqltools@01",
+                    "when": "editorHasSelection"
+                },
+                {
+                    "command": "SQLTools.bookmarkSelection",
+                    "group": "sqltools@3",
+                    "when": "editorHasSelection"
                 }
             ],
             "explorer/context": [
@@ -889,17 +923,19 @@
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
-        "@babel/cli": "^7.1.2",
+        "@babel/cli": "^7.5.5",
         "@types/jest": "^24.0.11",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
-        "css-loader": "^3.0.0",
+        "css-loader": "^3.2.0",
         "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
+        "mini-css-extract-plugin": "^0.8.0",
         "node-sass": "^4.11.0",
-        "sass-loader": "^7.1.0",
-        "style-loader": "^0.23.1",
+        "optimize-css-assets-webpack-plugin": "^5.0.3",
+        "sass-loader": "^7.2.0",
+        "terser-webpack-plugin": "^1.3.0",
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",
         "typescript": "^3.4.1",

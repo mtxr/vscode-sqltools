@@ -1,12 +1,11 @@
 import formatter from '@sqltools/formatter/src/sqlFormatter';
 
-// Issue #99. Waiting 3rd party
-function nonLatinQuickFix(query: string) {
-  return query.replace(/([^\x00-\x7F]) /gi, '$1');
-}
-
 const dollarRegex = /\$([^\s]+)/gi;
-
+/**
+ * Format query with vscode snippet parameters
+ * @param query
+ * @param originalQuery
+ */
 function fixParameters(query: string, originalQuery: string) {
   if (!dollarRegex.test(originalQuery)) return query;
   const matches = originalQuery.match(dollarRegex) || [];
@@ -19,8 +18,8 @@ function fixParameters(query: string, originalQuery: string) {
 
 export function format(query: string, formatOptions: Partial<{ indentSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
   const { reservedWordCase = null, indentSize = 2 } = formatOptions;
-  return fixParameters(nonLatinQuickFix(formatter.format(query, {
+  return fixParameters(formatter.format(query, {
     indent: ' '.repeat(indentSize),
     reservedWordCase,
-  })), query);
+  }), query);
 }

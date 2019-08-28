@@ -28,5 +28,5 @@ WHERE
   AND tableName NOT LIKE 'sqlite_%'
 ORDER BY
   name;`,
-  listFks: `PRAGMA foreign_key_list(:table);`
+  listFks: `PRAGMA foreign_key_list(\':table\');`
 } as DialectQueries;

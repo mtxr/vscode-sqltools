@@ -1,11 +1,49 @@
 # Changelog
 
+## v0.20
+
+### v0.20.2 - (August 15, 2019)
+
+* **Fix**
+  * Minor fix on MariaDB version checking. Issue [#332](https://github.com/mtxr/vscode-sqltools/issues/332)
+
+### v0.20.1 - (August 12, 2019)
+
+* **Fix**
+  * Minor fix on webpack config causing MySQL connections not to work. Issue [#325](https://github.com/mtxr/vscode-sqltools/issues/325)
+
+### v0.20.0 - (August 11, 2019)
+
+* **NEW** 🎉
+  * Upgrades on results screen UI. Moved from react-table to @dx/react-grid to support new enhancements. PR [#12](https://github.com/mtxr/vscode-sqltools/pull/297)
+* **Enhancements**
+  * Added option `sqltools.languageServerEnv` to allow user to add environment variables to the language server. Issue [#281](https://github.com/mtxr/vscode-sqltools/issues/281)
+  * Adde connection in progress indicator. Issue [#229](https://github.com/mtxr/vscode-sqltools/issues/229)
+
+* **Fix**
+  * Fix beautify server variables for MSSQL. Issue [mtxr/sqltools-formatter/#12](https://github.com/mtxr/sqltools-formatter/issues/12)
+  * Fix listing functions in MySQL older then 5.5. Issue [#304](https://github.com/mtxr/vscode-sqltools/issues/304)
+  * Fix escaping columns on SQLite. Issue [#309](https://github.com/mtxr/vscode-sqltools/issues/309)
+  * Fix regex search on results window. Issue [#302](https://github.com/mtxr/vscode-sqltools/issues/302)
+  * Fix oracledb/sqlite dependencies and node runtime message on new VSCode versions. Issue [#318](https://github.com/mtxr/vscode-sqltools/issues/318)
+  * Fix bookmarks snippet in wrong order. Issue [#258](https://github.com/mtxr/vscode-sqltools/issues/258)
+  * Minor fixes on MySQL v5 or older connections. Issue [#304](https://github.com/mtxr/vscode-sqltools/issues/304)
+  * Minor fixes on MySQL escaping tables names code. Issue [#309](https://github.com/mtxr/vscode-sqltools/issues/309)
+
 ## v0.19
+
+### v0.19.7 - (July 24, 2019)
+
+* **NEW** 🎉
+  * Add run, bookmark and format selected query to context menu
+* **Fix** 🎉
+  * Reopen existing session file when reconnecting. Issue [#283](https://github.com/mtxr/vscode-sqltools/issues/283)
+  * Small changes on high contrast themes. Issue [#286](https://github.com/mtxr/vscode-sqltools/issues/286)
 
 ### v0.19.6 - (June 26, 2019)
 
 * **Fix** 🎉
-  * Codelens conneciton switch. Issue [#270](https://github.com/mtxr/vscode-sqltools/issues/270)
+  * Codelens connection switch. Issue [#270](https://github.com/mtxr/vscode-sqltools/issues/270)
   * Bookmarked query changed on edit. Issue [#278](https://github.com/mtxr/vscode-sqltools/issues/278)
   * SQLTools blocking output of test cases for other extensions. Issue [#273](https://github.com/mtxr/vscode-sqltools/issues/273)
 

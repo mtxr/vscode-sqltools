@@ -6,7 +6,7 @@ import { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem, 
 import { EventEmitter, ProviderResult, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState } from 'vscode';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
-
+import logger from '@sqltools/core/log/vscode';
 
 const DialectHierarchyChildNames = {
   [DatabaseDialect.PostgreSQL]: ['Database', 'Schema'],
@@ -69,6 +69,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
   public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
+    logger.debug(`Connection explorer updated. ${item ? `Updated ${item.label}` : ''}`.trim());
+
   }
 
   public setConnections(connections: (ConnectionInterface)[]) {
@@ -122,8 +124,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     if (!tables && !columns && !functions) {
       return this.refresh();
     }
-
-    if (!this.tree[connId]) return;
 
     this.insertTables(connId, conn.dialect, tables);
 

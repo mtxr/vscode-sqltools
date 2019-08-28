@@ -1,0 +1,82 @@
+@import '../variables';
+@import '../lib/core-theme';
+
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
+.query-results-container {
+  display: flex;
+  flex-direction: column;
+}
+.query-results-container, .query-results-container * {
+  font-size: var(--sqltools-font-size, $fontSize);
+  font-family: var(--sqltools-font-family, $fontFamily);
+}
+
+.result {
+  flex-grow: 1;
+  height: 0;
+
+  .selected-row {
+    background: var(--vscode-editor-selectionBackground) !important;
+    color: var(--vscode-editor-selectionForeground) !important;
+  }
+}
+
+#messages-drawer {
+  .MuiDrawer-paper {
+    width: 50%;
+  }
+  &.width-75pct .MuiDrawer-paper {
+    width: 75%;
+  }
+}
+
+.resultsPagination {
+  border-top: 1px solid var(--vscode-editor-lineHighlightBorder);
+  padding: 2px 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .paginator > div {
+    padding: 0 !important;
+  }
+
+  .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    color: inherit;
+    border-radius: 0;
+    border: 1px solid transparent;
+    padding: 2px 6px;
+
+    &:hover {
+      border: 1px solid var(--vscode-button-hoverBackground);
+      background: var(--vscode-button-hoverBackground);
+    }
+  }
+  .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .MuiIconButton-root {
+    padding: 4px;
+  }
+
+  button[class*="Pagination-activeButton"], .MuiButton-root.active, .MuiIconButton-root.active {
+    color: var(--vscode-input-placeholderForeground);
+    background: var(--vscode-inputOption-activeBackground);
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+  }
+
+}
+.queryError, .resultsPagination {
+  .action-button {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    &:hover {
+      background: var(--vscode-button-hoverBackground);
+    }
+  }
+}

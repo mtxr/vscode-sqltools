@@ -1,7 +1,7 @@
-import React, { ReactNode } from 'react';
-import Collapsible from '@sqltools/ui/components/Collpsible';
+import React, { useState } from 'react';
 import ResultsTable from './ResultsTable';
-import ErrorIcon from '@sqltools/ui/components/ErrorIcon';
+import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@material-ui/core';
+import Syntax from '../../components/Syntax';
 
 interface QueryResultProps {
   connId: string;
@@ -10,47 +10,46 @@ interface QueryResultProps {
   results: any[];
   error?: boolean;
   query?: string;
+  pageSize: number;
 }
-export default ({ cols, error, query, messages, results = [], connId }: QueryResultProps) => {
-  const table: string | ReactNode = error ? (
-    <div
-      style={{
-        flexGrow: 1,
-        textAlign: 'center',
-        alignItems: 'center',
-        flexDirection: 'column',
-        display: 'flex',
-        justifyContent: 'center',
-      }}
-    >
-      <div>
-        <ErrorIcon />
-      </div>
-      <div>Query with errors. Please, check the error below.</div>
-    </div>
-  ) : (
-    <ResultsTable cols={!cols || cols.length === 0 ? [''] : cols} data={results || []} paginationSize={50} query={query} connId={connId} />
-  );
+export default ({ cols, error, query, messages, results = [], connId, pageSize }: QueryResultProps) => {
+  const [showMessages, setShowMessages] = useState(error);
+  cols = !cols || cols.length === 0 ? [''] : cols;
+  const columns = cols.map(title => ({ name: title, title }));
 
   return (
     <div className="result">
-      <div className="results-table">
-        {table}
-      </div>
-      <div className="query-extras">
-        <Collapsible title="View Query">
-          <pre>{query}</pre>
-        </Collapsible>
-        <Collapsible title={`Messages (${messages.length})`} open={results.length === 0}>
-          <div className="messages">
-            {(messages.length > 0 ? messages : ['No messages to show.']).map((m, i) => (
-              <div key={i} className={'message ' + (error ? 'error' : '')}>
-                {m}
-              </div>
-            ))}
-          </div>
-        </Collapsible>
-      </div>
+      <ResultsTable
+        columns={columns}
+        rows={results || []}
+        query={query}
+        connId={connId}
+        columnNames={cols}
+        pageSize={pageSize}
+        error={error}
+        openDrawerButton={
+          <Button
+            onClick={() => setShowMessages(!showMessages)}
+            className={'action-button' + (showMessages ? 'active' : '')}
+          >
+            Query Details
+          </Button>
+        }
+      />
+      <Drawer open={showMessages} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
+        <List dense component="ul" subheader={<ListSubheader>Query</ListSubheader>}>
+          <ListItem component="li" className={'query ' + (error ? 'error' : '')}>
+            <Syntax code={query} language="sql" strong />
+          </ListItem>
+        </List>
+        <List dense component="ul" subheader={<ListSubheader>Messages</ListSubheader>}>
+          {(messages.length > 0 ? messages : ['No messages to show.']).map((m, i) => (
+            <ListItem component="li" className={'message ' + (error ? 'error' : '')} key={i}>
+              <ListItemText primary={m} />
+            </ListItem>
+          ))}
+        </List>
+      </Drawer>
     </div>
   );
 };

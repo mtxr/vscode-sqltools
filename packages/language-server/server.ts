@@ -37,6 +37,15 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
         ...params.initializationOptions.telemetry,
       });
     }
+    if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
+      console.log(
+        `
+===============================
+User defined env vars:
+${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
+===============================
+`);
+    }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
       (opts, hook) => {
@@ -76,6 +85,14 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   }
 
   public listen() {
+    console.log(
+`
+===============================
+SQLTools Server started!
+Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
+ExecPath: ${process.execPath}
+===============================
+`)
     this._server.listen();
     return this;
   }

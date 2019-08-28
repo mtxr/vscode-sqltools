@@ -5,11 +5,11 @@ import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-const TIMESTAMPTZ_OID = 1184
-const TIMESTAMP_OID = 1114
 const rawValue = (v: string) => v;
-types.setTypeParser(TIMESTAMPTZ_OID, rawValue);
-types.setTypeParser(TIMESTAMP_OID, rawValue);
+
+types.setTypeParser(types.builtins.TIMESTAMP, rawValue);
+types.setTypeParser(types.builtins.TIMESTAMPTZ, rawValue);
+types.setTypeParser(types.builtins.DATE, rawValue);
 
 export default class PostgreSQL extends GenericDialect<Pool> implements ConnectionDialect {
   queries = Queries;
@@ -21,7 +21,7 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
     const pgOptions: any = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
 
     let poolConfig: PoolConfig = {
-      statement_timeout: this.credentials.connectionTimeout * 1000,
+      // statement_timeout: parseInt(`${this.credentials.connectionTimeout || 0}`, 10) * 1000,
       ...pgOptions,
     };
 

@@ -6,38 +6,51 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { Tabs, Tab, Typography } from '@material-ui/core';
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
-  state: QueryResultsState = { connId: null, isLoaded: false, resultMap: {}, queries: [], error: null, activeTab: null };
+  state: QueryResultsState = {
+    connId: null,
+    isLoaded: false,
+    resultMap: {},
+    queries: [],
+    error: null,
+    activeTab: null,
+    pageSize: 50,
+  };
 
   saveState = (data, cb = () => {}) => {
     this.setState(data, () => {
       cb();
       getVscode().setState(this.state);
     });
-  }
+  };
 
   componentWillMount() {
-    window.addEventListener('message', (ev) => {
+    window.addEventListener('message', ev => {
       return this.messagesHandler(ev.data as WebviewMessageType);
     });
   }
 
-  toggle(query: QueryResultsState['queries'][number]) {
+  componentDidMount() {
+    getVscode().postMessage({ action: 'viewReady', payload: true });
+  }
+
+  toggle(queryIndex: number) {
     this.saveState({
-      activeTab: query,
+      activeTab: queryIndex,
     });
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, ...[ payload ]);
+    console.log(`Message received: ${action}`, ...[payload]);
     switch (action) {
       case 'queryResults':
         const results: DatabaseInterface.QueryResults[] = payload;
         const queries = [];
         const resultMap = {};
         let connId: string;
-        (Array.isArray(results) ? results : [results]).forEach((r) => {
+        (Array.isArray(results) ? results : [results]).forEach(r => {
           connId = r.connId;
           queries.push(r.query);
           resultMap[r.query] = r;
@@ -48,7 +61,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           queries,
           resultMap,
           error: null,
-          activeTab: queries[0],
+          activeTab: 0,
         });
         break;
       case 'reset':
@@ -61,7 +74,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
       default:
         break;
     }
-  }
+  };
 
   render() {
     if (!this.state.isLoaded) {
@@ -74,23 +87,36 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         </div>
       );
     }
-    const tabs = this.state.queries.map((query: string) => (
-      <li
-        title={query}
-        key={query}
-        onClick={() => this.toggle(query)}
-        className={'truncate ' + (this.state.activeTab === query ? 'active' : '')}
-      >
-        {(this.state.resultMap[query] &&  this.state.resultMap[query].label) || query}
-      </li>
-    ));
-
+    let tabs = null;
+    if (this.state.queries.length > 1) {
+      tabs = (
+        <Tabs
+          value={this.state.activeTab}
+          onChange={(_e, index) => this.toggle(index)}
+          indicatorColor="primary"
+          textColor="primary"
+          variant="scrollable"
+          scrollButtons="on"
+        >
+          {this.state.queries.map((query: string, index: number) => (
+            <Tab
+              disableFocusRipple
+              disableRipple
+              label={
+                <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
+                  {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+                </Typography>
+              }
+              key={index}
+            />
+          ))}
+        </Tabs>
+      );
+    }
     return (
-      <div className='query-results-container fullscreen-container'>
-        <ul className='tabs'>{tabs}</ul>
-        <QueryResult
-          {...this.state.resultMap[this.state.activeTab]}
-        />
+      <div className="query-results-container fullscreen-container">
+        {tabs}
+        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} pageSize={this.state.pageSize}/>
       </div>
     );
   }

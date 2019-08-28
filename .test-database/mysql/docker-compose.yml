@@ -18,3 +18,20 @@ services:
       - 33070:33060
     volumes:
       - ./local-mysqld:/var/run/mysqld:Z
+
+  dbv5:
+    container_name: sqltools_mysqlv5
+    image: vsamov/mysql-5.1.73
+    restart: unless-stopped
+    # command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: test_db
+      MYSQL_USER: user
+      MYSQL_PASSWORD: user
+
+    ports:
+      - 3308:3306
+      - 33080:33060
+    volumes:
+      - ./local-mysqldv5:/var/run/mysqld:Z

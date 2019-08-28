@@ -8,7 +8,7 @@ import GenericDialect from '../generic';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 
-const OracleDBLibVersion = '3.1.1';
+const OracleDBLibVersion = '4.0.0';
 export default class OracleDB extends GenericDialect<OracleDBLib.Connection> implements ConnectionDialect {
   public static deps: typeof GenericDialect['deps'] = [{
     type: 'package',
@@ -98,7 +98,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     const results: DatabaseInterface.QueryResults[] = [];
     try {
       for(let q of queries) {
-        let res = await conn.execute(q, [], { outFormat: this.lib.OBJECT });
+        let res = await conn.execute(q, [], { outFormat: this.lib.OUT_FORMAT_OBJECT });
         const messages = [];
         if (res.rowsAffected) {
           messages.push(`${res.rowsAffected} rows were affected.`);

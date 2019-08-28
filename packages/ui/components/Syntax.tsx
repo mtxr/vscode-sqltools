@@ -38,12 +38,14 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
       .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
       .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
     }
-
+    if (typeof code === 'string') {
+      return code;
+    }
     return JSON.stringify(code);
   }
   public render() {
     return (
-      <div className='relative'>
+      <div className='relative syntax-container'>
         <div
           id={this.id}
           className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}

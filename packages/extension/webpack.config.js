@@ -3,6 +3,8 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const getWebviewConfig = require('../ui/webpack.config');
 const getLanguageServerConfig = require('../language-server/webpack.config');
+const TerserJSPlugin = require('terser-webpack-plugin');
+const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const extPkgJson = require('./package.json');
 const corePkgJson = require('./../core/package.json');
@@ -129,11 +131,15 @@ module.exports = () => {
       __dirname: false,
     };
 
+    config.optimization = config.optimization || {};
     if (isProduction) {
-      config.optimization = config.optimization || {};
-      config.optimization.minimize = false;
+      config.optimization.minimize = true;
+      config.optimization.minimizer = [
+        new TerserJSPlugin({ terserOptions: { mangle: false, keep_classnames: true } }), // mangle false else mysql blow ups with "PROTOCOL_INCORRECT_PACKET_SEQUENCE"
+        new OptimizeCSSAssetsPlugin({})
+      ]
     } else {
-      delete config.optimization;
+      config.optimization.minimize = false;
     }
     config.devtool = false;
     config.mode = isProduction ? 'production' : 'development';

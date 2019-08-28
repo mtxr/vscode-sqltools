@@ -9,12 +9,13 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest } from './contracts';
+import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
 import { extractConnName } from '@sqltools/core/utils/query';
+import { CancellationTokenSource } from 'vscode-jsonrpc';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -50,7 +51,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_showRecords = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
-      this._openResultsWebview();
+      await this._openResultsWebview();
       let limit = 50;
       if (ConfigManager.results && ConfigManager.results.limit) {
         limit = ConfigManager.results.limit;
@@ -66,7 +67,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_describeTable = async (node?: SidebarTableOrView) => {
     try {
       const table = await this._getTableName(node);
-      this._openResultsWebview();
+      await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
     } catch (e) {
@@ -162,7 +163,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
-      query = query || await getSelectedText('execute query');
+      query = typeof query === 'string' ? query : await getSelectedText('execute query');
       if (!connNameOrId) {
         connNameOrId = extractConnName(query);
       }
@@ -175,7 +176,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         await this._setConnection(conn);
       }
       await this._connect();
-      this._openResultsWebview();
+      await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
       return payload;
@@ -313,7 +314,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
 
   private _openResultsWebview(connId?: string) {
-    this.resultsWebview.get(connId || this.explorer.getActive().id).show();
+    return this.resultsWebview.get(connId || this.explorer.getActive().id).show();
   }
   private _connect = async (force = false): Promise<ConnectionInterface> => {
     if (!force && this.explorer.getActive()) {
@@ -486,6 +487,63 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.ext_refreshAll();
   }
 
+  private notifications: {
+    [id: string]: {
+      progress: Progress<any>,
+      tokenSource: CancellationTokenSource,
+      interval: NodeJS.Timeout,
+      resolve: Function,
+      reject: Function,
+    }
+  } = {};
+  private handler_progressStart = (params: ProgressNotificationStartParams) => {
+    const tokenSource = new CancellationTokenSource();
+    window.withProgress({
+      location: ProgressLocation.Notification,
+      title: params.title,
+      cancellable: false,
+    }, (progress) => {
+      return new Promise((resolve, reject) => {
+        progress.report({ message: params.message });
+        let executions = 60;
+        const complete = fn => () => {
+          delete this.notifications[params.id];
+          clearInterval(interval);
+          return fn();
+        }
+        const interval = setInterval(() => {
+          if (tokenSource.token.isCancellationRequested) {
+            return complete(resolve)();
+          }
+          executions--;
+          if (executions === 0) {
+            return complete(reject)();
+          }
+        }, 500);
+        const notification: typeof ConnectionManagerPlugin.prototype.notifications[string] = {
+          progress,
+          tokenSource,
+          interval,
+          resolve: complete(resolve),
+          reject: complete(reject),
+        }
+        this.notifications[params.id] = notification;
+      });
+    });
+  }
+
+  private handler_progressComplete = (params: ProgressNotificationCompleteParams) => {
+    if (!this.notifications[params.id]) return;
+    if (!params.message) {
+      return this.notifications[params.id].tokenSource.cancel();
+    }
+    clearInterval(this.notifications[params.id].interval);
+    this.notifications[params.id].progress.report({ message: params.message, increment: 100 });
+    setTimeout(() => {
+      this.notifications[params.id].resolve();
+    }, 3000);
+  }
+
   public register(extension: SQLTools.ExtensionInterface) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
@@ -494,6 +552,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.explorer = new ConnectionExplorer(extension);
 
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
+    this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
+    this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
 
     // extension stuff
     this.context.subscriptions.push(
