@@ -37,14 +37,14 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   queries = queries;
   private schema: String;
 
-  public open(encrypt?: boolean): Promise<HanaConnection> {
+  public open(): Promise<HanaConnection> {
     if (this.connection) {
       return this.connection;
     }
 
     this.needToInstallDependencies();
 
-    const connOptions = {
+    let connOptions = {
       HOST: this.credentials.server,
       PORT: this.credentials.port,
       UID: this.credentials.username,
@@ -53,10 +53,12 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
     if (this.credentials.connectionTimeout && this.credentials.connectionTimeout > 0) {
       connOptions["CONNECTTIMEOUT"] = this.credentials.connectionTimeout * 1000;
     }
-    if (encrypt) {
-      connOptions["ENCRYPT"] = true;
-    }
-
+    
+    connOptions = {
+      ...connOptions,
+      ...(this.credentials["hanaOptions"] || {}),
+    };
+    
     try {
       let conn = this.lib.createConnection(connOptions);
 
@@ -70,7 +72,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
             if (err) {
               reject(err);
             }
-            console.log("Connection to SAP Hana succedded!");
+            console.log("Connection to SAP Hana succeeded!");
             resolve(conn);
           });
       }));
@@ -151,7 +153,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.query(this.queries.fetchTables, [this.schema])
+    return this.query(this.queries.fetchTables, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -170,7 +172,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.query(this.queries.fetchColumns, [this.schema])
+    return this.query(this.queries.fetchColumns, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -198,6 +200,15 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public describeTable(prefixedTable: string) {
-    return this.query(this.queries.describeTable, [this.schema, prefixedTable]);
+    return new Promise(resolve => {
+      this.query(this.queries.describeTable, [this.schema, prefixedTable]).then(queryRes => {
+        if (queryRes[0].results.length == 0) {
+          this.query(this.queries.describeView, [this.schema, prefixedTable]).then(res => resolve(res));
+        } else {
+          resolve(queryRes);
+        }
+      })
+    });
   }
+  
 }
