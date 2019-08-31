@@ -25,3 +25,13 @@ body {
     display: none;
   }
 }
+
+hr {
+  border: none;
+  border-top: 1px solid $lightThemeGray4;
+}
+.vscode-dark {
+  hr {
+    border-top: 1px solid $darkThemeWhite4;
+  }
+}

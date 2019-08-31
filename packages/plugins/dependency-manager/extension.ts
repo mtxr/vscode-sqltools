@@ -32,7 +32,8 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
   }
 
   private installingDialects: string[] = [];
-  private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) =>  {
+  private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
+    conn = conn || {};
     const installNow = 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
@@ -58,7 +59,7 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
             return result;
           });
           this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-          const opt = [`Connect to ${conn.name}`];
+          const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
 Go ahead and connect!`,

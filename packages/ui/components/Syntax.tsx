@@ -5,6 +5,8 @@ interface SyntaxProps {
   language?: string;
   code: any;
   strong?: boolean;
+  allowCopy?: boolean;
+  style: React.CSSProperties;
 }
 
 interface SyntaxState {
@@ -45,13 +47,13 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
   }
   public render() {
     return (
-      <div className='relative syntax-container'>
+      <div className='relative syntax-container' style={this.props.style}>
         <div
           id={this.id}
           className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}
           dangerouslySetInnerHTML={{ __html: this.renderCode(this.props.code) }}
         ></div>
-        <button className='btn copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>
+        {this.props.allowCopy && <button className='btn copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>}
       </div>
     );
   }

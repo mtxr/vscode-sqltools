@@ -160,4 +160,11 @@ export default class Connection {
       isConnected: this.isConnected(),
     };
   }
+
+  public static async testConnection(credentials: ConnectionInterface, telemetry: SQLTools.TelemetryInterface) {
+    const testConn = new Connection(credentials, telemetry);
+    await testConn.connect();
+    await testConn.close();
+    return true;
+  }
 }

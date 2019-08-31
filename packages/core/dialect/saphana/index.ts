@@ -200,7 +200,7 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   }
 
   public describeTable(prefixedTable: string) {
-    return new Promise(resolve => {
+    return new Promise<DatabaseInterface.QueryResults[]>(resolve => {
       this.query(this.queries.describeTable, [this.schema, prefixedTable]).then(queryRes => {
         if (queryRes[0].results.length == 0) {
           this.query(this.queries.describeView, [this.schema, prefixedTable]).then(res => resolve(res));

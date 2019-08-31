@@ -25,6 +25,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   <link rel="stylesheet" type="text/css" href="${extRoot}/ui/vendor.css">
   <link rel="stylesheet" type="text/css" href="${extRoot}/ui/commons.css">
   <link rel="stylesheet" type="text/css" href="${extRoot}/ui/${this.id}.css">
+  <link rel="stylesheet" type="text/css" href="${extRoot}/ui/${this.id}.css">
+  <script type="text/javascript" charset="UTF-8">window.extRoot = ${JSON.stringify(extRoot)};</script>
 </head>
 <body>
   <link rel="stylesheet" type="text/css" href="${extRoot}/ui/theme.css">
@@ -83,6 +85,9 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         break;
       case 'call':
         commands.executeCommand(payload.command, ...(payload.args || []));
+        break;
+      case 'viewReady':
+        process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
         break;
     }
     if (this.messageCb) {

@@ -7,6 +7,7 @@ import SAPHana from './saphana';
 const dialects = {
   MSSQL,
   MySQL,
+  MariaDB: MySQL, // alias
   PostgreSQL,
   'AWS Redshift': PostgreSQL, // alias
   OracleDB,
