@@ -28,6 +28,7 @@ import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 import Menu from '../../components/Menu';
 import ErrorIcon from '../../components/ErrorIcon';
+import get from 'lodash/get';
 
 const getRowId = row => row.id || JSON.stringify(row);
 
@@ -57,10 +58,9 @@ const ValueRender = ({ value }) => {
     if (value === true) return <span>TRUE</span>;
     if (value === false) return <span>FALSE</span>;
     if (typeof value === 'object' || Array.isArray(value)) {
+      const objString = JSON.stringify(value, null, 2);
       return (
-        <div className="syntax json" data-value={value === null ? 'null' : JSON.stringify(value, null, 2)}>
-          <pre>{JSON.stringify(value)}</pre>
-        </div>
+        <pre className="syntax json" data-value={value === null ? 'null' : objString}>{objString}</pre>
       );
     }
     value = String(value);
@@ -97,8 +97,20 @@ const TableRow = selectedRow => (props: Table.DataRowProps) => (
 
 const GridRoot = props => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }} />;
 
-const generateColumnExtensions = generateColumnExtensions =>
-  generateColumnExtensions.map(columnName => ({ columnName, predicate: filterPredicate, width: 150 }));
+const generateColumnExtensions = (colNames, rows) =>
+  colNames.map(columnName => ({
+    columnName,
+    predicate: filterPredicate,
+    width: Math.min(Math.max(
+      20,
+      JSON.stringify(get(rows, [0, columnName], '')).length - 2,
+      JSON.stringify(get(rows, [1, columnName], '')).length - 2,
+      JSON.stringify(get(rows, [2, columnName], '')).length - 2,
+      JSON.stringify(get(rows, [3, columnName], '')).length - 2,
+      JSON.stringify(get(rows, [4, columnName], '')).length - 2
+    ) * 7.5, 600)
+  })
+);
 
 export default class ResultsTable extends React.PureComponent<ResultsTableProps> {
   state = {
@@ -225,7 +237,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   tableContextOptions = (row: any, column: Table.DataCellProps['column']): any[] => {
     const options: any[] = [];
     let cellValue = row[column.name];
-    const cellValueIsObject = cellValue && cellValue.toString() === '[object Object]';
+    const cellValueIsObject = cellValue && (Array.isArray(cellValue) || cellValue.toString() === '[object Object]');
     const replaceString = cellValueIsObject ? 'Cell Value' : `'${cellValue}'`;
     if (typeof cellValue !== 'undefined' && !cellValueIsObject) {
       options.push({
@@ -280,7 +292,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   render() {
     const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
     const { filters } = this.state;
-    const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames);
+    const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
     const showPagination = true; //rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>

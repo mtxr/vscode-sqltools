@@ -106,8 +106,8 @@
 }
 
 .MuiInput-root {
-  margin: 0 !important;
-}
+  margin: 0 !important
+;}
 
 .MuiTableRow-root {
   .MuiIconButton-root {
@@ -146,7 +146,11 @@
 .MuiTableCell-body, .MuiTableCell-root {
   color: inherit;
   border: 1px solid var(--vscode-editor-lineHighlightBorder);
-
+  .syntax {
+    font-family: var(--vscode-editor-font-family, var(--font-family));
+    height: 300px;
+    overflow: auto;
+  }
 }
 
 .MuiTableSortLabel-root,
