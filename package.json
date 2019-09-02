@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.20.2",
+  "version": "0.20.3",
   "publisher": "mtxr",
   "license": "MIT",
   "main": "../dist/extension.js",
@@ -48,7 +48,7 @@
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
     "typescript": "^3.4.1",
-    "vsce": "^1.58.0"
+    "vsce": "^1.66.0"
   },
   "husky": {
     "hooks": {

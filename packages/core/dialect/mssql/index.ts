@@ -1,5 +1,4 @@
-import MSSQLLib, { IResult } from 'mssql';
-
+import MSSQLLib, { IResult, Binary } from 'mssql';
 import {
   ConnectionDialect,
 } from '@sqltools/core/interface';
@@ -81,6 +80,14 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     const queries = Utils.query.parse(query, 'mssql');
     return queries.map((q, i): DatabaseInterface.QueryResults => {
       const r = recordsets[i] || [];
+      const columnNames = [];
+      const bufferCols = [];
+      Object.values((<any>r).columns || []).forEach((col: any) => {
+        columnNames.push(col.name);
+        if (col && col.type && col.type.name === Binary.name) {
+          bufferCols.push(col.name);
+        }
+      })
       const messages = [];
       if (error) {
         messages.push(error.message || error.toString());
@@ -90,11 +97,18 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
 
       return {
         connId: this.getId(),
-        cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
+        cols: columnNames,
         messages,
         error,
         query: q,
-        results: Array.isArray(r) ? r : [],
+        results: Array.isArray(r) ? r.map((row) => {
+          bufferCols.forEach(c => {
+            try {
+              row[c] = `0x${Buffer.from(row[c]).toString('hex').toUpperCase()}`
+            } catch (_ee) {}
+          })
+          return row;
+        }) : [],
       };
     })
   }
