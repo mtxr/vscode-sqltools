@@ -2,6 +2,18 @@
 
 ## v0.20
 
+### v0.20.3 - (August 31, 2019)
+
+* **Enhancements**
+  * Better rendering for JSON fields on results screen. Issue [#327](https://github.com/mtxr/vscode-sqltools/issues/327)
+  * Add connection options to SAP Hana. Special thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#346](https://github.com/mtxr/vscode-sqltools/pull/346)
+  * Support views for SAP Hana. Special thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#347](https://github.com/mtxr/vscode-sqltools/pull/347)
+  * Oracle driver updated to v4. Thanks to [@mickeypearce](https://github.com/mickeypearce). PR [#310](https://github.com/mtxr/vscode-sqltools/pull/310)
+
+* **Fix**
+  * Fix click connection on explorer triggering to connect twice. Issue [#328](https://github.com/mtxr/vscode-sqltools/issues/328)
+  * Fix bigint casting/rounding issue for MySQL 5.7. Issue [#334](https://github.com/mtxr/vscode-sqltools/issues/334)
+
 ### v0.20.2 - (August 15, 2019)
 
 * **Fix**
