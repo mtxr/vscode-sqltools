@@ -60,11 +60,6 @@
             "href": "https://travis-ci.com/mtxr/vscode-sqltools"
         },
         {
-            "description": "Greenkeeper badge",
-            "url": "https://badges.greenkeeper.io/mtxr/vscode-sqltools.svg?style=flat-square",
-            "href": "https://greenkeeper.io/"
-        },
-        {
             "description": "Gitter",
             "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
             "href": "https://gitter.im/vscode-sqltools"
