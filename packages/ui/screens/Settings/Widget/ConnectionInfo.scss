@@ -20,10 +20,16 @@ img.selected-driver-icon {
     max-width: 300px;
     box-sizing: border-box;
     width: 100%;
+    input, select {
+      border: 1px solid transparent;
+    }
     > small, > input:not([type='checkbox']):not([type='number']) {
       box-sizing: border-box;
       display: block;
       width: 100%;
+    }
+    > input[type='checkbox'] {
+      display: inline-block;
     }
   }
 

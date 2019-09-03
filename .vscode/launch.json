@@ -8,7 +8,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceRoot}/.test-database/.",
+        "${workspaceRoot}/.test-database/project.code-workspace",
         "--extensionDevelopmentPath=${workspaceRoot}/../dist",
       ],
       "stopOnEntry": false,
@@ -37,20 +37,6 @@
         "${workspaceRoot}/../dist/*.js"
       ],
       "protocol": "inspector"
-    },
-    // {
-    //     "type": "node",
-    //     "request": "launch",
-    //     "name": "Run Client Tests",
-    //     "program": "${workspaceRoot}/node_modules/jest/bin/jest.js",
-    //     "cwd": "${workspaceRoot}/.test-database/.",
-    //     "env": { "NODE_ENV": "development" },
-    //     "args": [
-    //         "--i",
-    //         "--coverage",
-    //         "--config=${workspaceRoot}/jest.json",
-    //         "--no-cache"
-    //     ]
-    // }
+    }
   ]
 }

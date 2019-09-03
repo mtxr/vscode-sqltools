@@ -27,6 +27,7 @@ interface SettingsScreenState {
   errors: {[id: string]: boolean};
   action: 'create' | 'update' | 'updateConnectionSuccess' | 'createConnectionSuccess';
   saved?: boolean;
+  globalSetting?: boolean;
 }
 
 export default class SettingsScreen extends React.Component<{}, SettingsScreenState> {
@@ -42,6 +43,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
           step: Step.CONNECTION_INFO,
           externalMessage: null,
           externalMessageType: null,
+          globalSetting: payload.globalSetting,
           defaultMethod: (
             conn.socketPath ? ConnectionMethod.SocketFile : (
               conn.connectString ? ConnectionMethod.ConnectionString : ConnectionMethod.ServerAndPort
@@ -104,6 +106,8 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
     });
   }
 
+  toggleGlobal = globalSetting => this.setState({ globalSetting });
+
   updateConnectionSettings = (options: { [key: string]: any } = {}, cb?: any) => this.setState({
     connectionSettings: {
       ...this.state.connectionSettings,
@@ -153,7 +157,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
           payload: {
             editId,
             connInfo,
-            // isGlobal: this.state.data.isGlobal // @TODO
+            globalSetting: !!this.state.globalSetting
           }
         });
       });
@@ -207,6 +211,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
               submit={this.submitSettings}
               testConnection={this.testConnection}
               state={this.state}
+              toggleGlobal={this.toggleGlobal}
             />
           )}
           {step === Step.CONNECTION_CREATED && (

@@ -38,13 +38,13 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private updateConnection = async ({ connInfo, isGlobal, editId }) => {
+  private updateConnection = async ({ connInfo, globalSetting, editId }) => {
     if (connInfo.dialect === DatabaseDialect.SQLite) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-    return commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, isGlobal ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'updateConnectionSuccess', payload: { isGlobal, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: 'updateConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
@@ -53,13 +53,13 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private createConnection = async ({ connInfo, isGlobal }) => {
+  private createConnection = async ({ connInfo, globalSetting }) => {
     if (connInfo.dialect === DatabaseDialect.SQLite) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-    return commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, isGlobal ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'createConnectionSuccess', payload: { isGlobal, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: 'createConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
