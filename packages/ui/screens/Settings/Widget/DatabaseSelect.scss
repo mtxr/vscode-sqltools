@@ -1,0 +1,21 @@
+.db-item {
+  max-width: 250px
+};
+.db-item > div {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 130px;
+  cursor: pointer;
+  justify-content: center;
+
+  div, img {
+    font-weight: bold;
+    text-align: center;
+  }
+
+  &:hover {
+    background: var(--vscode-menu-selectionBackground);
+    color: var(--vscode-menu-selectionForeground);
+  }
+}

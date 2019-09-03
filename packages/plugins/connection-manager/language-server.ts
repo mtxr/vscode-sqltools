@@ -5,7 +5,7 @@ import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plug
 import { getConnectionId } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -157,6 +157,41 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     }
   };
 
+  private testConnectionHandler: RequestHandler<typeof TestConnectionRequest> = async (req: {
+    conn: ConnectionInterface;
+    password?: string;
+  }): Promise<ConnectionInterface> => {
+    if (!req || !req.conn) {
+      return undefined;
+    }
+    const progressBase = {
+      id: `progress:testingConnection`,
+      title: req.conn.name,
+    }
+    try {
+      this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Testing connection....' });
+      const creds = {
+        ...req.conn,
+        password: req.conn.password || req.password,
+      }
+      await Connection.testConnection(creds, this.server.telemetry);
+      this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connection test successful!' });
+      return req.conn;
+    } catch (e) {
+      progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
+      e = decorateException(e, { conn: req.conn });
+      if (e.data && e.data.notification) {
+        if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
+          return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
+        }
+        delete e.data.args.conn;
+        this.server.sendNotification(e.data.notification, e.data.args);
+        return e.data;
+      }
+      throw e;
+    }
+  };
+
   private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connectedOnly } = {}) => {
     let connList = this.connections;
 
@@ -180,6 +215,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
     this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
     this.server.onRequest(ConnectRequest, this.openConnectionHandler);
+    this.server.onRequest(TestConnectionRequest, this.testConnectionHandler);
     this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler);
     this.server.addOnDidChangeConfigurationHooks(this._autoConnectIfActive);
   }

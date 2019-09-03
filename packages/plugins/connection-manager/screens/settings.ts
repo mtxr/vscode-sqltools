@@ -30,20 +30,21 @@ export default class SettingsWebview extends WebviewProvider {
           return this.createConnection(payload);
         case 'updateConnection':
           return this.updateConnection(payload);
+        case 'testConnection':
+          return this.testConnection(payload);
         default:
         break;
       }
     });
   }
 
-  private updateConnection = async ({ connInfo, isGlobal, editId }) => {
+  private updateConnection = async ({ connInfo, globalSetting, editId }) => {
     if (connInfo.dialect === DatabaseDialect.SQLite) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-
-    commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, isGlobal ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'updateConnectionSuccess', payload: { isGlobal, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: 'updateConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
@@ -52,14 +53,13 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private createConnection = async ({ connInfo, isGlobal }) => {
+  private createConnection = async ({ connInfo, globalSetting }) => {
     if (connInfo.dialect === DatabaseDialect.SQLite) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-
-    commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, isGlobal ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'createConnectionSuccess', payload: { isGlobal, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: 'createConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
@@ -68,9 +68,22 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  public show() {
-    const res = super.show();
-    this.postMessage({ action: 'setWorkspaces', payload: (workspace.workspaceFolders || []).map(w => `${w.uri.fsPath}${path.sep}`) })
-    return res;
+  private testConnection = async ({ connInfo }) => {
+    if (connInfo.dialect === DatabaseDialect.SQLite) {
+      connInfo.database = relativeToWorkspace(connInfo.database);
+    }
+    return commands.executeCommand(`${EXT_NAME}.testConnection`, connInfo)
+    .then((res: any) => {
+      if (res && res.notification) {
+        const message = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
+        return this.postMessage({ action: 'testConnectionWarning', payload: { message } });
+      }
+      this.postMessage({ action: 'testConnectionSuccess', payload: { connInfo } });
+    }, (payload = {}) => {
+      payload = {
+        message: (payload.message || payload || '').toString(),
+      }
+      this.postMessage({ action: 'testConnectionError', payload });
+    });
   }
 }

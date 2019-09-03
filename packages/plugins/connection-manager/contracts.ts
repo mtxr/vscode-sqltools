@@ -29,6 +29,12 @@ export const ConnectRequest = new RequestType<
   Error,
   void
 >('connection/ConnectRequest');
+export const TestConnectionRequest = new RequestType<
+  { conn: ConnectionInterface; password?: string },
+  ConnectionInterface,
+  Error,
+  void
+>('connection/TestConnectionRequest');
 export const DisconnectRequest = new RequestType<
   { conn: ConnectionInterface },
   void,

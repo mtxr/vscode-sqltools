@@ -1,0 +1,56 @@
+img.selected-driver-icon {
+  float: right;
+}
+
+.field {
+  margin-top: 12px;
+  margin-bottom: 18px;
+  max-width: 80%;
+  display: flex;
+  line-height: 23px;
+
+  > label {
+    font-weight: bold;
+    display: block;
+    flex-grow: 0;
+    width: 150px;
+  }
+
+  > div {
+    max-width: 300px;
+    box-sizing: border-box;
+    width: 100%;
+    input, select {
+      border: 1px solid transparent;
+    }
+    > small, > input:not([type='checkbox']):not([type='number']) {
+      box-sizing: border-box;
+      display: block;
+      width: 100%;
+    }
+    > input[type='checkbox'] {
+      display: inline-block;
+    }
+  }
+
+  &.has-error {
+    input, select {
+      border: 1px solid var(--vscode-inputValidation-errorBorder);
+    }
+  }
+}
+
+.message {
+  border-radius: 4px;
+  padding: 4px;
+  display: inline-block;
+  &.message-error {
+    background: rgba(255, 0, 0, 0.4)
+  }
+  &.message-success {
+    background: rgba(0, 255, 0, 0.4)
+  }
+  &.message-warning {
+    background: rgba(255, 255, 0, 0.4)
+  }
+}

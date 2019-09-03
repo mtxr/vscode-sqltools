@@ -28,7 +28,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
       encryptAttempt = encryptOverride;
     }
 
-    const pool = new MSSQLLib.ConnectionPool({
+    const pool = new MSSQLLib.ConnectionPool(this.credentials.connectString || {
       database: this.credentials.database,
       connectionTimeout: this.credentials.connectionTimeout * 1000,
       server: this.credentials.server,
@@ -41,7 +41,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
         ...((mssqlOptions || {}).options || {}),
         encrypt: encryptAttempt,
       },
-    } as MSSQLLib.config);
+    });
 
     await new Promise((resolve, reject) => {
       pool.on('error', reject);

@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqlt
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshAllRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
@@ -33,6 +33,17 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   // extension commands
   private ext_refreshAll = () => {
     return this.client.sendRequest(RefreshAllRequest);
+  }
+
+  private ext_testConnection = async (c: ConnectionInterface) => {
+    let password = null;
+
+    if (c.askForPassword) password = await this._askForPassword(c);
+    if (c.askForPassword && password === null) return;
+    return this.client.sendRequest(
+      TestConnectionRequest,
+      { conn: c, password },
+    );
   }
 
   private ext_executeFromInput = async () => {
@@ -226,6 +237,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (!id) return;
 
     const conn = this.explorer.getById(id);
+    conn.id = conn.id || getConnectionId(conn);
     this.settingsWebview.show();
     this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
   }
@@ -585,6 +597,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`showRecords`, this.ext_showRecords)
       .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
+      .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile);
 
     // hooks

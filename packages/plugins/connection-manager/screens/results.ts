@@ -24,7 +24,6 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       switch (action) {
         case 'viewReady':
           this.isOpen = payload;
-          process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
           break;
         default:
         break;

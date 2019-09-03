@@ -99,6 +99,13 @@ select {
     display: none;
     width: 100vw;
     height: 100vh;
+    align-content: center;
+    > * {
+      margin: auto;
+    }
+    .MuiCircularProgress-colorPrimary {
+      color: $lightThemeGray10;
+    }
 }
 
 .loading {
@@ -111,41 +118,22 @@ select {
   display: block;
 
   .backdrop {
-    display: block;
+    display: flex;
   }
-
-  div.spinner,
-  div.spinner:after {
-    border-radius: 50%;
-    width: 10em;
-    height: 10em;
-  }
-  div.spinner {
-    margin: auto;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    font-size: 10px;
-    position: absolute;
-    text-indent: -9999em;
-    border-top: 1.1em solid $lightThemeGray4;
-    border-right: 1.1em solid $lightThemeGray4;
-    border-bottom: 1.1em solid $lightThemeGray4;
-    border-left: 1.1em solid #ffffff;
-    transform: translate3d(0, -50%, 0);
-    animation: load8 1.1s infinite linear;
-  }
-
 }
 .vscode-dark .loading {
   .backdrop {
     background: $lightThemeGray10;
+    .MuiCircularProgress-colorPrimary {
+      color: $darkThemeWhite10;
+    }
   }
-  div.spinner {
-    border-top: 1.1em solid $darkThemeWhite4;
-    border-right: 1.1em solid $darkThemeWhite4;
-    border-bottom: 1.1em solid $darkThemeWhite4;
+}
+
+.blur {
+  transition: $transition;
+  &.blur-active {
+    filter: blur(5px);
   }
 }
 
@@ -169,10 +157,6 @@ select {
 .no-padding-bottom { padding-bottom: 0 !important; }
 .no-padding-left { padding-left: 0 !important; }
 .no-padding-right { padding-right: 0 !important; }
-
-.row.no-margin-first-top .col-* {
-  margin-top: 0 !important;
-}
 
 .relative {
   position: relative !important;
