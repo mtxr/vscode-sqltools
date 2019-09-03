@@ -28,11 +28,13 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
         delete newSettings.connectString;
         newSettings.port = availableDialects[settings.dialect].port;
         newSettings.server = 'localhost';
+        newSettings.askForPassword = true;
         break;
       case ConnectionMethod.SocketFile:
         delete newSettings.server;
         delete newSettings.port;
         delete newSettings.connectString;
+        newSettings.askForPassword = true;
         break;
       case ConnectionMethod.ConnectionString:
         delete newSettings.socketPath;
@@ -42,6 +44,7 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
         delete newSettings.username;
         delete newSettings.password;
         delete newSettings.database;
+        delete newSettings.askForPassword;
         break;
     }
     updateSettings(newSettings, () => setMethod(method));

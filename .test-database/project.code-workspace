@@ -164,6 +164,16 @@
         "port": 30041,
         "server": "127.0.0.1",
         "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123"
+      },
+      {
+        "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
+        "dialect": "MSSQL",
+        "name": "MSSQL ConnectionString"
+      },
+      {
+        "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
+        "dialect": "MSSQL",
+        "name": "MSSQL ConnectionString schema"
       }
     ],
     "sqltools.languageServerEnv": {

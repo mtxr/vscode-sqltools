@@ -17,6 +17,7 @@ export default class MySQLX extends GenericDialect<any> implements ConnectionDia
 
     const mysqlOptions = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
     const client = MySQLXLib.getClient(
+      this.credentials.connectString ||
       {
         host: this.credentials.server,
         password: this.credentials.password,

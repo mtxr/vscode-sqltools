@@ -23,7 +23,7 @@ export default class MySQLDefault extends GenericDialect<MySQLLib.Pool> implemen
       });
     }
 
-    const pool = MySQLLib.createPool({
+    const pool = MySQLLib.createPool(this.credentials.connectString || {
       connectTimeout: this.credentials.connectionTimeout * 1000,
       database: this.credentials.database,
       socketPath: this.credentials.socketPath,
