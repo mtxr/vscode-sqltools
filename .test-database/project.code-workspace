@@ -18,6 +18,9 @@
     },
     {
       "path": "oracle"
+    },
+    {
+      "path": "cql"
     }
   ],
   "settings": {
@@ -174,6 +177,26 @@
         "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
         "dialect": "MSSQL",
         "name": "MSSQL ConnectionString schema"
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 15,
+        "dialect": "Cassandra",
+        "name": "CQL Cassandra",
+        "password": "cassandra",
+        "port": 9043,
+        "server": "localhost",
+        "username": "cassandra"
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 15,
+        "dialect": "Cassandra",
+        "name": "CQL Scylla",
+        "password": "cassandra",
+        "port": 9044,
+        "server": "localhost",
+        "username": "cassandra"
       }
     ],
     "sqltools.languageServerEnv": {

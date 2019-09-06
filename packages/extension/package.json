@@ -27,6 +27,8 @@
         "Other"
     ],
     "keywords": [
+        "cassandra",
+        "cql",
         "database",
         "db",
         "dba",
@@ -460,6 +462,7 @@
                                 "type": "string",
                                 "enum": [
                                     "AWS Redshift",
+                                    "Cassandra",
                                     "MariaDB",
                                     "MSSQL",
                                     "MySQL",

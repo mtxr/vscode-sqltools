@@ -1034,6 +1034,14 @@
   dependencies:
     "@babel/types" "^7.3.0"
 
+"@types/cassandra-driver@^4.1.1":
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/@types/cassandra-driver/-/cassandra-driver-4.1.1.tgz#f01ccc2831d395964674d5340f699f5b3a6207f2"
+  integrity sha512-QkErSsiMKbF7Tk38c2G3pptMIgX9sfKDSYvHPEq2z5Wi/wjg0rjpKxL4EePyMeCROjGSHApDDl0H6jRy3xtmxQ==
+  dependencies:
+    "@types/long" "*"
+    "@types/node" "*"
+
 "@types/command-exists@^1.2.0":
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/command-exists/-/command-exists-1.2.0.tgz#d97e0ed10097090e4ab0367ed425b0312fad86f3"
@@ -1089,6 +1097,11 @@
   version "4.14.138"
   resolved "https://registry.yarnpkg.com/@types/lodash/-/lodash-4.14.138.tgz#34f52640d7358230308344e579c15b378d91989e"
   integrity sha512-A4uJgHz4hakwNBdHNPdxOTkYmXNgmUAKLbXZ7PKGslgeV0Mb8P3BlbYfPovExek1qnod4pDfRbxuzcVs3dlFLg==
+
+"@types/long@*":
+  version "4.0.0"
+  resolved "https://registry.yarnpkg.com/@types/long/-/long-4.0.0.tgz#719551d2352d301ac8b81db732acb6bdc28dbdef"
+  integrity sha512-1w52Nyx4Gq47uuu0EVcsHBxZFJgurQ+rTKS3qMHxR1GY2T8c2AJYd6vZoZ9q1rupaDjU0yT+Jc2XTyXkjeMA+Q==
 
 "@types/minimatch@*":
   version "3.0.3"
@@ -2134,6 +2147,13 @@ caseless@~0.12.0:
   version "0.12.0"
   resolved "https://registry.yarnpkg.com/caseless/-/caseless-0.12.0.tgz#1b681c21ff84033c826543090689420d187151dc"
   integrity sha1-G2gcIf+EAzyCZUMJBolCDRhxUdw=
+
+cassandra-driver@^4.1.0:
+  version "4.1.0"
+  resolved "https://registry.yarnpkg.com/cassandra-driver/-/cassandra-driver-4.1.0.tgz#e13482289020596258d60026b3fcbd5570dcab00"
+  integrity sha512-MHI8PcCCaPEa9DKsP+L6MsokrK5Twhu4UBb3reyEAezB0XFhu7DnjDcfWuDHpzmuCY3OSmgskO1pnoz1GsRIIA==
+  dependencies:
+    long "^2.2.0"
 
 chalk@2.4.2, chalk@^2.0.0, chalk@^2.0.1, chalk@^2.3.0, chalk@^2.4.1, chalk@^2.4.2:
   version "2.4.2"
@@ -5083,6 +5103,11 @@ lodash@^4.0.0, lodash@^4.15.0, lodash@^4.17.10, lodash@^4.17.11, lodash@^4.17.13
   version "4.17.15"
   resolved "https://registry.yarnpkg.com/lodash/-/lodash-4.17.15.tgz#b447f6670a0455bbfeedd11392eff330ea097548"
   integrity sha512-8xOcRHvCjnocdS5cpwXQXVzmmh5e5+saE2QGoeQmbKmRS6J3VQppPOIt0MnmE+4xlZoumy0GPG0D0MVIQbNA1A==
+
+long@^2.2.0:
+  version "2.4.0"
+  resolved "https://registry.yarnpkg.com/long/-/long-2.4.0.tgz#9fa180bb1d9500cdc29c4156766a1995e1f4524f"
+  integrity sha1-n6GAux2VAM3CnEFWdmoZleH0Uk8=
 
 loose-envify@^1.0.0, loose-envify@^1.1.0, loose-envify@^1.4.0:
   version "1.4.0"

@@ -14,6 +14,7 @@ function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Ta
       items.push(`"${tableObj.name}"`);
       break;
     case DatabaseDialect.OracleDB:
+    case DatabaseDialect.Cassandra:
       tableObj.tableSchema && items.push(tableObj.tableSchema);
       items.push(tableObj.name);
       break;

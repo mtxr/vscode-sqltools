@@ -25,3 +25,11 @@ services:
       extends:
         file: ./pgsql/docker-compose.yml
         service: db
+    cql_cassandra:
+      extends:
+        file: ./cql/docker-compose.yml
+        service: db_cassandra
+    cql_scylla:
+      extends:
+        file: ./cql/docker-compose.yml
+        service: db_scylla

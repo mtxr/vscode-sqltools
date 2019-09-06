@@ -6,6 +6,7 @@ import postgresqlIcon from './../icons/postgresql.png';
 import redshiftIcon from './../icons/redshift.png';
 import sapHanaIcon from './../icons/sap_hana.png';
 import sqliteIcon from './../icons/sqlite.png';
+import cassandraIcon from './../icons/cassandra.png';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
@@ -132,7 +133,19 @@ const availableDialects: { [name: string]: Dialect } = {
       const props = genericRequiredFields(setting);
       return props;
     }
-  }
+  },
+  Cassandra: {
+    port: 9042,
+    value: 'Cassandra',
+    text: 'Cassandra',
+    experimental: true,
+    showHelperText: true,
+    icon: cassandraIcon,
+    requiredProps: () => {
+      const props = { name: true, server: true, port: true, username: true };
+      return props;
+    }
+  },
 };
 
 export const orderedDialeact = Object.keys(availableDialects).map(key => availableDialects[key]).sort((a, b) => a.text.localeCompare(b.text));

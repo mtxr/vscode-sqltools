@@ -1,0 +1,17 @@
+# Use cassandra/cassandra user/password credentials
+version: '2.1'
+
+services:
+  db_cassandra:
+    container_name: sqltools_cql_cassandra
+    image: cassandra
+    restart: unless-stopped
+    ports:
+      - '9043:9042'
+  
+  db_scylla:
+    container_name: sqltools_cql_scylla
+    image: scylladb/scylla
+    restart: unless-stopped
+    ports:
+      - '9044:9042'

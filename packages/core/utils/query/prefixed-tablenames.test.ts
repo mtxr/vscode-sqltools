@@ -38,6 +38,13 @@ describe('Should generate table names base on dialects', () => {
     expect(getNames(DatabaseDialect.MSSQL, { name: 'table', isView: false, tableSchema: 'sa', tableCatalog: 'test' })).toBe('[test].[sa].[table]');
   });
 
+  it('get cassandra table names', () => {
+    expect(getNames(DatabaseDialect.Cassandra, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.Cassandra, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.Cassandra, { name: 'table', tableSchema: 'schema', isView: false })).toBe('schema.table');
+    expect(getNames(DatabaseDialect.Cassandra, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'test' })).toBe('schema.table');
+  });
+
   it('get other dialects table names', () => {
     expect(getNames(null, 'table')).toBe('table');
     expect(getNames(null, { name: 'table', isView: false })).toBe('table');
