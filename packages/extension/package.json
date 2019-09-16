@@ -57,11 +57,6 @@
     "icon": "static/icon.png",
     "badges": [
         {
-            "description": "Build Status",
-            "url": "https://github.com/mtxr/vscode-sqltools/workflows/Node%20CI/badge.svg",
-            "href": "https://github.com/mtxr/vscode-sqltools/actions"
-        },
-        {
             "description": "Gitter",
             "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg",
             "href": "https://gitter.im/vscode-sqltools"
