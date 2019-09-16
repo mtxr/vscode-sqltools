@@ -58,23 +58,28 @@
     "badges": [
         {
             "description": "Build Status",
-            "url": "https://img.shields.io/travis/com/mtxr/vscode-sqltools/master.svg?style=flat-square",
-            "href": "https://travis-ci.com/mtxr/vscode-sqltools"
+            "url": "https://github.com/mtxr/vscode-sqltools/workflows/Node%20CI/badge.svg",
+            "href": "https://github.com/mtxr/vscode-sqltools/actions"
         },
         {
             "description": "Gitter",
-            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
+            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg",
             "href": "https://gitter.im/vscode-sqltools"
         },
         {
             "description": "Patreon Support",
-            "url": "https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square&logo=patreon",
+            "url": "https://img.shields.io/badge/patreon-support-blue.svg?logo=patreon",
             "href": "https://www.patreon.com/mteixeira"
         },
         {
             "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square&logo=paypal",
+            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?logo=paypal",
             "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
+        },
+        {
+            "description": "LICENSE",
+            "url": "https://img.shields.io/github/license/mtxr/vscode-sqltools",
+            "href": "https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md"
         }
     ],
     "activationEvents": [

@@ -7,7 +7,6 @@ import GenericDialect from '../generic';
 import Queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { TREE_SEP } from '../../constants';
-import { rows } from 'mssql';
 
 interface CQLBatch {
   query: string,

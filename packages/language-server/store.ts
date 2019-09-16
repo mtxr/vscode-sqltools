@@ -11,7 +11,7 @@ const initialState: State = {
   ...ConnectionManagerPlugin.ConnectionManagerState,
 };
 
-function registerActionHandler<S = State>(type: string, handler: ActionHandler<S>) {
+function registerActionHandler<S extends State = State>(type: string, handler: ActionHandler<S>) {
   let actionHandler = handler;
   if (actionHandlers[type]) {
     const currentHandler = <typeof handler>actionHandlers[type];

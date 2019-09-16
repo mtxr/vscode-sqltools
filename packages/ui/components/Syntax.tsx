@@ -6,7 +6,7 @@ interface SyntaxProps {
   code: any;
   strong?: boolean;
   allowCopy?: boolean;
-  style: React.CSSProperties;
+  style?: React.CSSProperties;
 }
 
 interface SyntaxState {
