@@ -31,7 +31,7 @@ jobs:
         yarn
 
     - name: test & build
-    - env:
+      env:
         HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
