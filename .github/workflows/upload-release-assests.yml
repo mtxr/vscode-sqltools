@@ -1,0 +1,45 @@
+# https://code.visualstudio.com/api/working-with-extensions/continuous-integration
+
+name: ReleaseAssets
+
+on: [release]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x]
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        ref: ${{ github.ref }}
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - env:
+        HUSKY_SKIP_INSTALL: "true"
+        CXX: "g++-4.9"
+        CC: "gcc-4.9"
+        DISPLAY: :99.0
+      run: |
+        /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
+        yarn
+
+    - name: crete package
+      env:
+        HUSKY_SKIP_INSTALL: "true"
+        CXX: "g++-4.9"
+        CC: "gcc-4.9"
+        DISPLAY: :99.0
+      run: |
+        yarn run package
+
+    - name: Upload to Release
+      uses: JasonEtco/upload-to-release@v0.1.1
+      with:
+        args: ../dist/*.vsix
