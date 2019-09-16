@@ -1,6 +1,6 @@
 # https://code.visualstudio.com/api/working-with-extensions/continuous-integration
 
-name: Node CI
+name: ReleaseAssets
 
 on: [release]
 
