@@ -22,10 +22,9 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
       env:
-        HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
-        DISPLAY: :99.0
+        DISPLAY: ":99.0"
       run: |
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         yarn
@@ -35,7 +34,7 @@ jobs:
         HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
-        DISPLAY: :99.0
+        DISPLAY: ":99.0"
       run: |
         yarn run package
 
