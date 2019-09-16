@@ -42,5 +42,5 @@ jobs:
       uses: JasonEtco/upload-to-release@v0.1.1
       with:
         args: ../dist/*.vsix
-    - env:
+      env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
