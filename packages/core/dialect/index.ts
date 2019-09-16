@@ -4,6 +4,8 @@ import OracleDB from './oracle';
 import PostgreSQL from './pgsql';
 import SQLite from './sqlite';
 import SAPHana from './saphana';
+import CQL from './cql';
+
 const dialects = {
   MSSQL,
   MySQL,
@@ -12,7 +14,8 @@ const dialects = {
   'AWS Redshift': PostgreSQL, // alias
   OracleDB,
   SQLite,
-  SAPHana
+  SAPHana,
+  'Cassandra': CQL,
 };
 
 export default dialects;

@@ -3,6 +3,7 @@ import { ClientConfig } from 'pg';
 import { ConnectionConfig } from 'mysql';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { PoolAttributes } from 'oracledb';
+import { ClientOptions as CQLClientOptions } from 'cassandra-driver';
 
 export interface ConnectionInterface {
   /**
@@ -14,7 +15,7 @@ export interface ConnectionInterface {
   /**
    * Server address
    * @type {string}
-   * @default "127.0.0.1
+   * @default "127.0.0.1"
    * @memberof ConnectionInterface
    */
   server?: string;
@@ -35,7 +36,7 @@ export interface ConnectionInterface {
    * @type {string}
    * @memberof ConnectionInterface
    */
-  database: string;
+  database?: string;
   /**
    * Database username
    * @type {string}
@@ -50,20 +51,20 @@ export interface ConnectionInterface {
    */
   password?: string;
   /**
-   * Ask for password instead of set it in your settings"
+   * Ask for password instead of set it in your settings
    * @type {boolean}
    * @default false
    * @memberof ConnectionInterface
    */
   askForPassword?: boolean;
   /**
-   * Connection Dialect"
+   * Connection Dialect
    * @type {DatabaseDialect}
    * @memberof ConnectionInterface
    */
   dialect: DatabaseDialect;
   /**
-   * Connection timeout in seconds"
+   * Connection timeout in seconds
    * @type {number}
    * @default 30
    * @memberof ConnectionInterface
@@ -71,7 +72,7 @@ export interface ConnectionInterface {
   connectionTimeout?: number;
   /**
    * Connection show records limit
-   * @type {string}
+   * @type {number}
    * @memberof ConnectionInterface
    */
   previewLimit?: number;
@@ -120,6 +121,13 @@ export interface ConnectionInterface {
    * @memberof ConnectionInterface
    */
   oracleOptions?: PoolAttributes
+
+  /**
+   * Cassandra specific driver options. See https://docs.datastax.com/en/developer/nodejs-driver/4.1/api/type.ClientOptions/
+   * @type {CQLClientOptions}
+   * @memberof ConnectionInterface
+   */
+  cqlOptions?: CQLClientOptions;
 
   /**
    * Connection domain (for MSSQL/Azure only)

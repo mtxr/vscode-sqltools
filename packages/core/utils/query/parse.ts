@@ -4,7 +4,7 @@
  */
 
 class QueryParser {
-  static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' = 'mysql'): Array<string> {
+  static parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): Array<string> {
     if (dialect === 'mssql') {
       query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
     }

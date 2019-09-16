@@ -18,7 +18,7 @@ const ConnectionMethods = [
 ];
 
 
-const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', defaultMethod = ConnectionMethod.ServerAndPort, errors = {} }) => {
+const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', dbFieldRequired = true, defaultMethod = ConnectionMethod.ServerAndPort, allowChangeMethod = true, errors = {} }) => {
   const [ method, setMethod ] = useState(defaultMethod || ConnectionMethod.ServerAndPort);
   const changeMethod = method => {
     const newSettings = settings;
@@ -58,12 +58,15 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
         value={settings.name}
         hasError={hasError.name}
       />
-      <Select
-        label='Connection Method*'
-        options={ConnectionMethods}
-        value={method}
-        onChange={changeMethod}
-      />
+      {
+        allowChangeMethod &&
+        <Select
+          label='Connection Method*'
+          options={ConnectionMethods}
+          value={method}
+          onChange={changeMethod}
+        />
+      }
       {
         method === ConnectionMethod.ServerAndPort &&
         <Text
@@ -96,7 +99,7 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
       {
         method !== ConnectionMethod.ConnectionString &&
         <Text
-        label={`${dbFieldName}*`}
+        label={`${dbFieldName}${dbFieldRequired ? '*' : ''}`}
         onChange={database => updateSettings({ database })}
         value={settings.database}
         hasError={hasError.database}

@@ -15,5 +15,6 @@ export enum DatabaseDialect {
   'AWS Redshift' = 'AWS Redshift',
   SQLite = 'SQLite',
   OracleDB = 'OracleDB',
-  SAPHana = 'SAPHana'
+  SAPHana = 'SAPHana',
+  Cassandra = 'Cassandra',
 }

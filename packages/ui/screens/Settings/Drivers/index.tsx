@@ -4,6 +4,7 @@ import PostgreSQL from './PostgreSQL';
 import OracleDB from './OracleDB';
 import SQLite from './SQLite';
 import SAPHana from './SAPHana';
+import CQL from './CQL';
 
 const DriversSettings = {
   MySQL,
@@ -14,6 +15,7 @@ const DriversSettings = {
   OracleDB,
   SQLite,
   SAPHana,
+  'Cassandra': CQL
 };
 
 export default DriversSettings;
