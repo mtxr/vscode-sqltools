@@ -21,7 +21,7 @@ jobs:
       uses: actions/setup-node@v1
       with:
         node-version: ${{ matrix.node-version }}
-      env:
+    - env:
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
@@ -30,7 +30,7 @@ jobs:
         yarn
 
     - name: create package
-      env:
+    - env:
         HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
@@ -42,5 +42,5 @@ jobs:
       uses: JasonEtco/upload-to-release@v0.1.1
       with:
         args: ../dist/*.vsix
-      env:
+    - env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
