@@ -30,14 +30,14 @@ jobs:
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         yarn
 
-    - name: test & build
+    - name: crete package
       env:
         HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: :99.0
       run: |
-        yarn test --no-coverage
+        yarn run package
 
     - uses: JasonEtco/upload-to-release@master
       with:
