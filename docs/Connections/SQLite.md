@@ -14,7 +14,7 @@
 
 > Extension automatically asks to install the SQLite driver (sqlite@v4.0.6)
 
-More information you cand find in [node-sqlite3](https://github.com/mapbox/node-sqlite3) repo: https://github.com/mapbox/node-sqlite3.
+More information you can find in [node-sqlite3](https://github.com/mapbox/node-sqlite3) repo: https://github.com/mapbox/node-sqlite3.
 
 ## 2. Connections
 

@@ -12,7 +12,7 @@ For full reference, see [SAP Documentation](https://help.sap.com/viewer/0eec0d68
 
 ```json
 {
-  "name": "<your prefered name>",
+  "name": "<your preferred name>",
   "dialect": "SAPHana",
   "database": "<the schema you want to connect to>", 
   "username": "<user-name",
@@ -42,7 +42,7 @@ ConnectionString maps from `connectString` property:
 
 ```json
 {
-  "name": "<your prefered name>",
+  "name": "<your preferred name>",
   "dialect": "SAPHana",
   "connectString": "<see docs>" // Example: "connectString": "HOST=myServer;PORT=30015;UID=MyUser;PWD=MyPassword"
 }

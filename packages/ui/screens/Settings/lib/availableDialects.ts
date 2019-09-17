@@ -9,7 +9,7 @@ import sqliteIcon from './../icons/sqlite.png';
 import cassandraIcon from './../icons/cassandra.png';
 
 const requirements = [
-  'Node 6 or newer. 7 or newer is prefered.',
+  'Node 6 or newer. 7 or newer is preferred.',
 ];
 
 interface Dialect {
@@ -148,6 +148,6 @@ const availableDialects: { [name: string]: Dialect } = {
   },
 };
 
-export const orderedDialeact = Object.keys(availableDialects).map(key => availableDialects[key]).sort((a, b) => a.text.localeCompare(b.text));
+export const orderedDialect = Object.keys(availableDialects).map(key => availableDialects[key]).sort((a, b) => a.text.localeCompare(b.text));
 
 export default availableDialects;

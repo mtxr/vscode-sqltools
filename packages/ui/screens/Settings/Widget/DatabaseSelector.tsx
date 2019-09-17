@@ -1,5 +1,5 @@
 import React from 'react';
-import { orderedDialeact } from '../lib/availableDialects';
+import { orderedDialect } from '../lib/availableDialects';
 import Container from '@material-ui/core/Container';
 import Grid from '@material-ui/core/Grid';
 
@@ -11,7 +11,7 @@ const DatabaseSelector = ({ onSelect, selected }) => (
     <hr/>
     <Container maxWidth='sm'>
       <Grid container spacing={2} autoCapitalize='center'>
-        {orderedDialeact.map(dialect => (
+        {orderedDialect.map(dialect => (
           <Grid item key={dialect.value} xs={3} className={`db-item ${selected === dialect.value ? 'selected' : ''}`}>
             <div onClick={() => onSelect(dialect)}>
               <img src={`${(window as any).extRoot}/${dialect.icon}`} />
