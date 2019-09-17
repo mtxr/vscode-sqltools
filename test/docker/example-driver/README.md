@@ -1,4 +1,4 @@
-# Testing your dialect
+# Testing your driver
 
 Inside of this directory you should add the files used for testing and development purposes.
 

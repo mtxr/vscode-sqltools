@@ -6,7 +6,7 @@ import PostgreSQL from './pgsql';
 import SQLite from './sqlite';
 import SAPHana from './saphana';
 import CQL from './cql';
-import ExampleDialect from './example-dialect';
+import ExampleDriver from './example-driver';
 
 const Drivers = {
   DB2,
@@ -19,7 +19,7 @@ const Drivers = {
   SQLite,
   SAPHana,
   'Cassandra': CQL,
-  ExampleDialect, // add your dialect here to make it availeble for usage
+  ExampleDriver, // add your driver here to make it availeble for usage
 };
 
 export default Drivers;

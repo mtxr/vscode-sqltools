@@ -572,7 +572,7 @@
                                     "PostgreSQL",
                                     "SAPHana",
                                     "SQLite",
-                                    "ExampleDialect"
+                                    "ExampleDriver"
                                 ],
                                 "description": "Connection Driver",
                                 "required": false
