@@ -1,5 +1,5 @@
 import { DriverQueries } from '@sqltools/core/interface';
-import { TREE_SEP } from '../../constants'; // use this separator to create the tree for columns, tables and functions
+import { TREE_SEP } from '@sqltools/core/constants'; // use this separator to create the tree for columns, tables and functions
 
 /**
  * This file define the queries you need to fetch all connection data that SQLTools support.
