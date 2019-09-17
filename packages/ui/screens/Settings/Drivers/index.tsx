@@ -5,6 +5,7 @@ import OracleDB from './OracleDB';
 import SQLite from './SQLite';
 import SAPHana from './SAPHana';
 import CQL from './CQL';
+import ExampleDialect from './ExampleDialect';
 
 const DriversSettings = {
   MySQL,
@@ -15,7 +16,8 @@ const DriversSettings = {
   OracleDB,
   SQLite,
   SAPHana,
-  'Cassandra': CQL
+  'Cassandra': CQL,
+  ExampleDialect,
 };
 
 export default DriversSettings;

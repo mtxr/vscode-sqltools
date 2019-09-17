@@ -7,6 +7,7 @@ import redshiftIcon from './../icons/redshift.png';
 import sapHanaIcon from './../icons/sap_hana.png';
 import sqliteIcon from './../icons/sqlite.png';
 import cassandraIcon from './../icons/cassandra.png';
+import exampleDialectIcon from './../icons/mysql.png';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is prefered.',
@@ -141,6 +142,16 @@ const availableDialects: { [name: string]: Dialect } = {
     experimental: true,
     showHelperText: true,
     icon: cassandraIcon,
+    requiredProps: () => {
+      const props = { name: true, server: true, port: true, username: true };
+      return props;
+    }
+  },
+  ExampleDialect: {
+    port: 9042,
+    value: 'ExampleDialect',
+    text: 'ExampleDialect',
+    icon: exampleDialectIcon,
     requiredProps: () => {
       const props = { name: true, server: true, port: true, username: true };
       return props;
