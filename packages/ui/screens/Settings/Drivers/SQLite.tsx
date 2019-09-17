@@ -8,6 +8,6 @@ const SQLite = ({ settings, updateSettings }) => (
     <FileInput label='Database File*' onChange={database => updateSettings({ database })} value={settings.database} />
   </>
 );
-// @TODO: add driver specifv settings here
+// @TODO: add driver specific settings here
 
 export default SQLite;
