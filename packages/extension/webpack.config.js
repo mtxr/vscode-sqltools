@@ -27,9 +27,9 @@ const devDependencies = Object.assign(
 );
 
 // defintions
-const EXT_NAME = process.env.PREVIEW ? 'SQLToolsPreview' : 'SQLTools';
-const DISPLAY_NAME = process.env.PREVIEW ? 'SQLTools (Beta)' : 'SQLTools';
-const EXT_ID = process.env.PREVIEW ? 'sqltools-preview' : 'sqltools';
+const EXT_NAME = 'SQLTools';
+const DISPLAY_NAME = EXT_NAME;
+const EXT_ID = 'sqltools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
 const outdir = path.resolve(rootdir, '..', 'dist');
@@ -58,11 +58,6 @@ function getExtensionConfig() {
           to: path.join(outdir, 'package.json'),
           transform: (content) => {
             content = JSON.parse(content.toString())
-            content.name = EXT_ID;
-            content.displayName = DISPLAY_NAME;
-            if (process.env.PREVIEW) {
-              content.preview = true;
-            }
             Object.keys(content.scripts || {}).forEach(k => {
               if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
                 delete content.scripts[k];
@@ -77,16 +72,23 @@ function getExtensionConfig() {
                 delete content.devDependencies[k];
               });
 
-            return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2)
-              .replace(/SQLTools\./g, `${EXT_NAME}.`)
-              .replace(/SQLTools\//g, `${EXT_NAME}/`);
+            return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2);
+          },
+        },
+        {
+          from: path.join(__dirname, '..', '..', 'README.md'),
+          to: path.join(outdir, 'README.md'),
+          transform: (content) => {
+            content = content.toString();
+            const hrPos = content.indexOf('<hr');
+            content = `# ${EXT_NAME} extension for Visual Studio Code\n${content.substring(hrPos).replace(/^<hr * \/>/, '')}`;
+            return content;
           },
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
         { from: path.join(__dirname, 'language'), to: path.join(outdir, 'language') },
         { from: path.join(__dirname, '..', '..', 'static/icon.png'), to: path.join(outdir, 'static/icon.png') },
         { from: path.join(__dirname, '..', '..', '.vscodeignore'), to: path.join(outdir, '.vscodeignore'), toType: 'file' },
-        { from: path.join(__dirname, '..', '..', 'README.md'), to: path.join(outdir, 'README.md') },
         { from: path.join(__dirname, '..', '..', 'LICENSE.md'), to: path.join(outdir, 'LICENSE.md') },
         { from: path.join(__dirname, '..', '..', 'CHANGELOG.md'), to: path.join(outdir, 'CHANGELOG.md') },
       ]),

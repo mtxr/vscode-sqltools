@@ -925,7 +925,6 @@
     "scripts": {
         "vscode:prepublish": "yarn run compile",
         "compile": "cross-env NODE_ENV=production ./node_modules/.bin/webpack",
-        "compile:preview": "env PREVIEW=1 yarn run compile",
         "watch": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --watch --info-verbosity verbose",
         "postinstall": "yarn run vscode-install",
         "postversion": "vsce publish && git push && git push --tags"
