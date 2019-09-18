@@ -66,7 +66,7 @@ export default class ExampleDriver extends AbstractDriver<ExampleDriver.Connecti
   }
 
   /**
-   * This method should run queries even with multiple statments. Eg.: SELECT 1; SELECT 2;
+   * This method should run queries even with multiple statements. Eg.: SELECT 1; SELECT 2;
    */
   public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const conn = await this.open();

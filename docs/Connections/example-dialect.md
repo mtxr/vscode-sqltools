@@ -7,7 +7,7 @@
 
 > Extension automatically asks to install the example-dialect driver (example-dialect@v1.0.0)
 
-More information you cand find at ...
+More information you can find at ...
 
 ## 2. Connections
 

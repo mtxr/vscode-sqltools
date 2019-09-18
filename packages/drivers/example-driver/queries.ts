@@ -6,7 +6,7 @@ import { TREE_SEP } from '@sqltools/core/constants'; // use this separator to cr
  */
 export default {
   /**
-   * This query should return all infomation (or the most common) about an specific table.
+   * This query should return all information (or the most common) about an specific table.
    */
   describeTable: 'DESCRIBE :table',
   /**
