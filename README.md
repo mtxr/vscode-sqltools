@@ -11,6 +11,20 @@
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
+## Supported Drivers
+
+* AWS Redshift
+* Cassandra
+* MariaDB
+* MSSQL
+* MySQL
+* OracleDB
+* PostgreSQL
+* SAPHana
+* SQLite
+
+Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
+
 ## Features
 
 * SQL Format (Beautifier)

@@ -1,0 +1,396 @@
+diff --git a/.test-database/example-dialect/README.md b/.test-database/example-dialect/README.md
+new file mode 100644
+index 0000000..1282f86
+--- /dev/null
++++ b/.test-database/example-dialect/README.md
+@@ -0,0 +1,7 @@
++# Testing your dialect
++
++Inside of this directory you should add the files used for testing and development purposes.
++
++See the other directories to have an idea. If possible, I suggest to use docker and add some docket compose file.
++
++In the future I'll setup Travis CI to run database tests with the extension.
+diff --git a/docs/Connections.md b/docs/Connections.md
+index ff5a49c..730059a 100644
+--- a/docs/Connections.md
++++ b/docs/Connections.md
+@@ -3,6 +3,7 @@
+ * [AWS Redshift](Connections/aws-redshift.md)
+ * [Cassandra](Connections/cql.md)
+ * [MSSQL/SQL Server/Azure](Connections/mssql.md)
++* [Example Dialect](Connections/example-dialect.md)
+ * [MySQL](Connections/mysql.md)
+ * [Oracle Database](Connections/OracleDB.md)
+ * [PostgreSQL](Connections/postgresql.md)
+diff --git a/docs/Connections/example-dialect.md b/docs/Connections/example-dialect.md
+new file mode 100644
+index 0000000..6abd302
+--- /dev/null
++++ b/docs/Connections/example-dialect.md
+@@ -0,0 +1,25 @@
++# Example Dialect Start Guide
++
++## 1. Prerequisites
++
++- Requirement 1
++- Requirement 2
++
++> Extension automatically asks to install the example-dialect driver (example-dialect@v1.0.0)
++
++More information you can find at ...
++
++## 2. Connections
++
++### 2.1 Example Dialect's Easy Connect Syntax
++
++Example Dialect's connections ....:
++
++```json
++{
++  "name": "ExampleDialect",
++  "dialect": "ExampleDialect",
++  ...
++  "connectionTimeout": 15
++}
++```
+diff --git a/docs/SUMMARY.md b/docs/SUMMARY.md
+index fe6d39b..03a5049 100644
+--- a/docs/SUMMARY.md
++++ b/docs/SUMMARY.md
+@@ -9,6 +9,7 @@
+   * [PostgreSQL](Connections/postgresql.md)
+   * [SAP HANA](Connections/SAPHANA.md)
+   * [SQLite](Connections/SQLite.md)
++  * [Example Dialect](Connection/example-dialect.md)
+ * [Sessions and Multiple Connections](session-multiple-connections.md)
+ * [Executing Queries](executing-queries.md)
+ * [Codelens](codelens.md)
+diff --git a/packages/core/dialect/example-dialect/index.ts b/packages/core/dialect/example-dialect/index.ts
+new file mode 100644
+index 0000000..9296c8d
+--- /dev/null
++++ b/packages/core/dialect/example-dialect/index.ts
+@@ -0,0 +1,142 @@
++/**
++ * This is an example of a fake dialect.
++ * You can base on this file to create a new one.
++ *
++ * The functions have signatures for result object, try to keep it as short as possible and stick to the result interface.
++ * If you need, feel free to create all internal functions you need, just mark it as private.
++ */
++
++import {
++  ConnectionDialect,
++} from '@sqltools/core/interface';
++import * as Utils from '@sqltools/core/utils';
++import GenericDialect from '../generic';
++import queries from './queries';
++import { DatabaseInterface } from '@sqltools/core/plugin-api';
++
++/**
++ * you can use this or the deps prop to work with the driver.
++ *
++ * If your driver is not pure JS, consider using deps prop instead.
++ */
++import ExampleDialectLib from 'example-dialect-lib';
++
++
++export default class ExampleDialect extends GenericDialect<ExampleDialectLib.Connection> implements ConnectionDialect {
++
++  /**
++   * If you set this prop, the driver will be installed by the user on first run.
++   * If your driver is pure JS, you can just import it and pack it together with the extension
++   */
++  public static deps: typeof GenericDialect['deps'] = [{
++    type: 'package',
++    name: 'example-dialect-lib',
++    version: '1.0.0',
++  }];
++
++
++  queries = queries;
++
++  private get lib() {
++    return __non_webpack_require__('example-dialect-driver');
++  }
++
++  public async open() {
++    // if connection is already open, reuse
++    if (this.connection) {
++      return this.connection;
++    }
++
++    this.needToInstallDependencies();
++
++    const conn = await this.lib.connect();
++    // const conn = await this.lib.createPool();
++    // const conn = await this.lib.open();
++    this.connection = Promise.resolve(conn);
++    return this.connection;
++  }
++
++  public async close() {
++    if (!this.connection) return Promise.resolve();
++    const conn = await this.connection
++    await this.close();
++    // await this.destroy();
++    // await this.finish();
++    this.connection = null;
++  }
++
++  /**
++   * This method should run queries even with multiple statements. Eg.: SELECT 1; SELECT 2;
++   */
++  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
++    const conn = await this.open();
++    const results: DatabaseInterface.QueryResults[] = [];
++
++    const res = await conn.query(query);
++
++    // base on `res`, add items on results array and return
++    return results;
++  }
++
++  public getTables(): Promise<DatabaseInterface.Table[]> {
++    return this.query(this.queries.fetchTables)
++      .then(([queryRes]) => {
++        return queryRes.results
++          .reduce((prev, curr) => prev.concat(curr), [])
++          .map((obj) => {
++            return {
++              name: obj.tablename,
++              isView: !!obj.isview,
++              numberOfColumns: parseInt(obj.numberofcolumns, 10),
++              tableCatalog: obj.tablecatalog,
++              tableDatabase: obj.dbname,
++              tableSchema: obj.tableschema,
++              tree: obj.tree,
++            } as DatabaseInterface.Table;
++          });
++      });
++  }
++
++  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
++    return this.query(this.queries.fetchColumns)
++      .then(([queryRes]) => {
++        return queryRes.results
++          .reduce((prev, curr) => prev.concat(curr), [])
++          .map((obj) => {
++            return {
++              columnName: obj.columnname,
++              defaultValue: obj.defaultvalue,
++              isNullable: !!obj.isnullable ? obj.isnullable.toString() === 'yes' : null,
++              size: obj.size !== null ? parseInt(obj.size, 10) : null,
++              tableCatalog: obj.tablecatalog,
++              tableDatabase: obj.dbname,
++              tableName: obj.tablename,
++              tableSchema: obj.tableschema,
++              isPk: (obj.keytype || '').toLowerCase() === 'primary key',
++              isFk: (obj.keytype || '').toLowerCase() === 'foreign key',
++              type: obj.type,
++              tree: obj.tree,
++            } as DatabaseInterface.TableColumn;
++          });
++      });
++  }
++
++  public getFunctions(): Promise<DatabaseInterface.Function[]> {
++    return this.query(this.queries.fetchFunctions)
++      .then(([queryRes]) => {
++        return queryRes.results
++          .reduce((prev, curr) => prev.concat(curr), [])
++          .map((obj) => {
++            return {
++              ...obj,
++              args: obj.args ? obj.args.split(/, */g) : [],
++            } as DatabaseInterface.TableColumn;
++          });
++      });
++  }
++
++  public describeTable(prefixedTable: string) {
++    const [ catalog, schema, table ] = prefixedTable.split('.');
++    return this.query(Utils.replacer(this.queries.describeTable, { catalog, schema, table }));
++  }
++}
+\ No newline at end of file
+diff --git a/packages/core/dialect/example-dialect/queries.ts b/packages/core/dialect/example-dialect/queries.ts
+new file mode 100644
+index 0000000..ae8ee56
+--- /dev/null
++++ b/packages/core/dialect/example-dialect/queries.ts
+@@ -0,0 +1,60 @@
++import { DialectQueries } from '@sqltools/core/interface';
++
++/**
++ * This file define the queries you need to fetch all connection data that SQLTools support.
++ */
++export default {
++  /**
++   * This query should return all information (or the most common) about an specific table.
++   */
++  describeTable: 'DESCRIBE :table',
++  /**
++   * This functions should return all columns we have in the connection. It's used on explorer, intellisense, query generators etc.
++   *
++   * It should return data to create an object later with the interface DatabaseInterface.TableColumn. Take a look at that interface to see at do you need to fetch for each column.
++   */
++  fetchColumns: `
++SELECT
++  tableName,
++  columnName,
++  type,
++  size,
++  tableSchema,
++  tableCatalog,
++  tableDatabase,
++  defaultValue,
++  isNullable,
++  ordinal_position,
++  isPk,
++  isFk,
++  tree
++FROM
++  information_table
++WHERE
++  conditions
++ORDER BY
++  tableName,
++  ordinal_position`,
++  /**
++   * It's like an SELECT ALL from the table, but we should add a safe limit to avoid query to runs forever.
++   */
++  fetchRecords: 'SELECT * FROM :table LIMIT :limit',
++  /** Same as fetch column, but for tables. Will be used to create an object like DatabaseInterface.Table */
++  fetchTables: `
++SELECT
++  tableName,
++  tableSchema,
++  tableCatalog,
++  isView,
++  dbName,
++  COUNT(1) AS numberOfColumns,
++  tree
++FROM
++  information_table
++WHERE
++  conditions
++ORDER BY
++  tableName;`,
++  /** Same as fetch column, but for functions/procedures. Will be used to create an object like DatabaseInterface.Function */
++  fetchFunctions: `SELECT ALL my functions`,
++} as DialectQueries;
+\ No newline at end of file
+diff --git a/packages/core/dialect/index.ts b/packages/core/dialect/index.ts
+index 29d2b9a..e71f41c 100644
+--- a/packages/core/dialect/index.ts
++++ b/packages/core/dialect/index.ts
+@@ -5,6 +5,7 @@ import PostgreSQL from './pgsql';
+ import SQLite from './sqlite';
+ import SAPHana from './saphana';
+ import CQL from './cql';
++import ExampleDialect from './example-dialect';
+ 
+ const dialects = {
+   MSSQL,
+@@ -16,6 +17,7 @@ const dialects = {
+   SQLite,
+   SAPHana,
+   'Cassandra': CQL,
++  ExampleDialect, // add your dialect here to make it available for usage
+ };
+ 
+ export default dialects;
+diff --git a/packages/extension/package.json b/packages/extension/package.json
+index a16f01f..2f309d2 100644
+--- a/packages/extension/package.json
++++ b/packages/extension/package.json
+@@ -48,7 +48,8 @@
+         "sqlplus",
+         "sqltools",
+         "sap",
+-        "saphana"
++        "saphana",
++        "example-dialect"
+     ],
+     "galleryBanner": {
+         "theme": "dark",
+@@ -469,7 +470,8 @@
+                                     "OracleDB",
+                                     "PostgreSQL",
+                                     "SAPHana",
+-                                    "SQLite"
++                                    "SQLite",
++                                    "ExampleDialect"
+                                 ],
+                                 "description": "Connection Dialect",
+                                 "required": false
+diff --git a/packages/ui/screens/Settings/Drivers/ExampleDialect.tsx b/packages/ui/screens/Settings/Drivers/ExampleDialect.tsx
+new file mode 100644
+index 0000000..029cf38
+--- /dev/null
++++ b/packages/ui/screens/Settings/Drivers/ExampleDialect.tsx
+@@ -0,0 +1,9 @@
++import React from 'react';
++import GenericSettings from './lib/GenericSettings';
++
++const ExampleDialect = ({ settings, updateSettings, ...props }) => (
++  <GenericSettings settings={settings} updateSettings={updateSettings} {...props}/>
++);
++// @TODO: add driver specific settings here
++
++export default ExampleDialect;
+\ No newline at end of file
+diff --git a/packages/ui/screens/Settings/Drivers/index.tsx b/packages/ui/screens/Settings/Drivers/index.tsx
+index 7f3dc6a..10cd301 100644
+--- a/packages/ui/screens/Settings/Drivers/index.tsx
++++ b/packages/ui/screens/Settings/Drivers/index.tsx
+@@ -5,6 +5,7 @@ import OracleDB from './OracleDB';
+ import SQLite from './SQLite';
+ import SAPHana from './SAPHana';
+ import CQL from './CQL';
++import ExampleDialect from './ExampleDialect';
+ 
+ const DriversSettings = {
+   MySQL,
+@@ -15,7 +16,8 @@ const DriversSettings = {
+   OracleDB,
+   SQLite,
+   SAPHana,
+-  'Cassandra': CQL
++  'Cassandra': CQL,
++  ExampleDialect,
+ };
+ 
+ export default DriversSettings;
+\ No newline at end of file
+diff --git a/packages/ui/screens/Settings/lib/availableDialects.ts b/packages/ui/screens/Settings/lib/availableDialects.ts
+index 336b683..15ee34b 100644
+--- a/packages/ui/screens/Settings/lib/availableDialects.ts
++++ b/packages/ui/screens/Settings/lib/availableDialects.ts
+@@ -7,6 +7,7 @@ import redshiftIcon from './../icons/redshift.png';
+ import sapHanaIcon from './../icons/sap_hana.png';
+ import sqliteIcon from './../icons/sqlite.png';
+ import cassandraIcon from './../icons/cassandra.png';
++import exampleDialectIcon from './../icons/example_dialect.png';
+ 
+ const requirements = [
+   'Node 6 or newer. 7 or newer is preferred.',
+@@ -146,6 +147,16 @@ const availableDialects: { [name: string]: Dialect } = {
+       return props;
+     }
+   },
++  ExampleDialect: {
++    port: 9042,
++    value: 'ExampleDialect',
++    text: 'ExampleDialect',
++    icon: exampleDialectIcon,
++    requiredProps: () => {
++      const props = { name: true, server: true, port: true, username: true };
++      return props;
++    }
++  },
+ };
+ 
+ export const orderedDialect = Object.keys(availableDialects).map(key => availableDialects[key]).sort((a, b) => a.text.localeCompare(b.text));

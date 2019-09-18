@@ -34,7 +34,9 @@
     "package": "cross-env NODE_ENV=production yarn run compile && (cd ../dist && cross-env NODE_ENV=production vsce package --yarn)",
     "publish": "yarn run package && cd ../dist && vsce publish --yarn",
     "postinstall": "git submodule update --init --recursive && yarn workspace @sqltools/formatter install",
-    "test:upcontainers": "bash ./.test-database/start-dbs.sh"
+    "test:upcontainers": "bash ./.test-database/start-dbs.sh",
+    "add-driver": "node ./tools/add-driver.js",
+    "add-driver:refresh": "git diff origin/master..origin/add-driver-example > ./tools/add-new.diff"
   },
   "dependencies": {
     "husky": "^3.0.3"
@@ -45,6 +47,7 @@
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",
+    "minimist": "^1.2.0",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
     "typescript": "^3.4.1",
