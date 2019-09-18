@@ -25,7 +25,7 @@ index ff5a49c..730059a 100644
  * [PostgreSQL](Connections/postgresql.md)
 diff --git a/docs/Connections/example-dialect.md b/docs/Connections/example-dialect.md
 new file mode 100644
-index 0000000..932564e
+index 0000000..6abd302
 --- /dev/null
 +++ b/docs/Connections/example-dialect.md
 @@ -0,0 +1,25 @@
@@ -68,7 +68,7 @@ index fe6d39b..03a5049 100644
  * [Codelens](codelens.md)
 diff --git a/packages/core/dialect/example-dialect/index.ts b/packages/core/dialect/example-dialect/index.ts
 new file mode 100644
-index 0000000..e0e5abe
+index 0000000..9296c8d
 --- /dev/null
 +++ b/packages/core/dialect/example-dialect/index.ts
 @@ -0,0 +1,142 @@
@@ -217,7 +217,7 @@ index 0000000..e0e5abe
 \ No newline at end of file
 diff --git a/packages/core/dialect/example-dialect/queries.ts b/packages/core/dialect/example-dialect/queries.ts
 new file mode 100644
-index 0000000..ee24dc7
+index 0000000..ae8ee56
 --- /dev/null
 +++ b/packages/core/dialect/example-dialect/queries.ts
 @@ -0,0 +1,60 @@
@@ -283,7 +283,7 @@ index 0000000..ee24dc7
 +} as DialectQueries;
 \ No newline at end of file
 diff --git a/packages/core/dialect/index.ts b/packages/core/dialect/index.ts
-index 29d2b9a..e533828 100644
+index 29d2b9a..e71f41c 100644
 --- a/packages/core/dialect/index.ts
 +++ b/packages/core/dialect/index.ts
 @@ -5,6 +5,7 @@ import PostgreSQL from './pgsql';
@@ -303,7 +303,7 @@ index 29d2b9a..e533828 100644
  
  export default dialects;
 diff --git a/packages/extension/package.json b/packages/extension/package.json
-index a16f01f..8a85607 100644
+index a16f01f..2f309d2 100644
 --- a/packages/extension/package.json
 +++ b/packages/extension/package.json
 @@ -48,7 +48,8 @@
@@ -366,7 +366,7 @@ index 7f3dc6a..10cd301 100644
  export default DriversSettings;
 \ No newline at end of file
 diff --git a/packages/ui/screens/Settings/lib/availableDialects.ts b/packages/ui/screens/Settings/lib/availableDialects.ts
-index 9898e48..1d4a919 100644
+index 336b683..15ee34b 100644
 --- a/packages/ui/screens/Settings/lib/availableDialects.ts
 +++ b/packages/ui/screens/Settings/lib/availableDialects.ts
 @@ -7,6 +7,7 @@ import redshiftIcon from './../icons/redshift.png';
