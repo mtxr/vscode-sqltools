@@ -35,7 +35,8 @@
     "publish": "yarn run package && cd ../dist && vsce publish --yarn",
     "postinstall": "git submodule update --init --recursive && yarn workspace @sqltools/formatter install",
     "test:upcontainers": "bash ./.test-database/start-dbs.sh",
-    "add-driver": "node ./tools/add-driver.js"
+    "add-driver": "node ./tools/add-driver.js",
+    "add-driver:refresh": "git diff origin/master..origin/add-driver-example > ./tools/add-new.diff"
   },
   "dependencies": {
     "husky": "^3.0.3"
