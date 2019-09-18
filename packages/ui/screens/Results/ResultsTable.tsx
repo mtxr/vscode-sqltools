@@ -30,8 +30,6 @@ import Menu from '../../components/Menu';
 import ErrorIcon from '../../components/ErrorIcon';
 import get from 'lodash/get';
 
-const getRowId = row => row.id || JSON.stringify(row);
-
 const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
   <TableFilterRow.Cell
     {...props}
@@ -293,14 +291,14 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
     const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
     const { filters } = this.state;
     const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
-    const showPagination = true; //rows.length > pageSize;
+    const showPagination = rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
         {error ? (
           this.renderError(openDrawerButton)
         ) : (
           <>
-            <Grid rows={rows} columns={columns} getRowId={getRowId} rootComponent={GridRoot}>
+            <Grid rows={rows} columns={columns} rootComponent={GridRoot}>
               <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
               <SortingState />
               <IntegratedSorting />

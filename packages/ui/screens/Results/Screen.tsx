@@ -19,18 +19,17 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     pageSize: 50,
   };
 
+  constructor(props) {
+    super(props);
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as WebviewMessageType));
+  }
+
   saveState = (data, cb = () => {}) => {
     this.setState(data, () => {
       cb();
       getVscode().setState(this.state);
     });
   };
-
-  componentWillMount() {
-    window.addEventListener('message', ev => {
-      return this.messagesHandler(ev.data as WebviewMessageType);
-    });
-  }
 
   componentDidMount() {
     getVscode().postMessage({ action: 'viewReady', payload: true });

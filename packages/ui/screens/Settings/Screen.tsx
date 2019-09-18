@@ -101,9 +101,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
 
   constructor(props) {
     super(props);
-    window.addEventListener('message', (ev) => {
-      return this.messagesHandler(ev.data as WebviewMessageType);
-    });
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as WebviewMessageType));
   }
 
   toggleGlobal = globalSetting => this.setState({ globalSetting });
@@ -115,7 +113,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
     }
   }, () => this.validateSettings(cb))
 
-  public componentDidMount() {
+  componentDidMount() {
     this.setState({ loading: false });
     getVscode().postMessage({ action: 'viewReady', payload: true });
   }
