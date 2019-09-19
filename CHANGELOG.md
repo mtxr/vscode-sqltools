@@ -5,6 +5,7 @@
 ### v0.21.0 - (September 19, 2019)
 
 * **New** 🎉
+  * New Icons! Using outline icons design to match VSCode icons.
   * New connection assistant! PR [#368](https://github.com/mtxr/vscode-sqltools/pull/368)
     * Added possibility to test connections before saving. Issue [#184](https://github.com/mtxr/vscode-sqltools/issues/184)
   * Add new drivers tool! PR [#387](https://github.com/mtxr/vscode-sqltools/pull/387)
