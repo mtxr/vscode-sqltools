@@ -58,6 +58,7 @@ function getExtensionConfig() {
           to: path.join(outdir, 'package.json'),
           transform: (content) => {
             content = JSON.parse(content.toString())
+            content.name = EXT_ID;
             Object.keys(content.scripts || {}).forEach(k => {
               if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
                 delete content.scripts[k];
