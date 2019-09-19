@@ -1,5 +1,22 @@
 # Changelog
 
+## v0.21
+
+### v0.21.0 - (September 19, 2019)
+
+* **New** 🎉
+  * New connection assistant! PR [#368](https://github.com/mtxr/vscode-sqltools/pull/368)
+    * Added possibility to test connections before saving. Issue [#184](https://github.com/mtxr/vscode-sqltools/issues/184)
+  * Add new drivers tool! PR [#387](https://github.com/mtxr/vscode-sqltools/pull/387)
+    * Now it will be easier to add new drivers. Check out the [docs](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers).
+
+* **Enhancements**
+  * Displaying rowversion for SQL Server as HEX. Issue [#344](https://github.com/mtxr/vscode-sqltools/issues/344)
+  * Revamp some Connection Explorer code to make it faster. This is the first step of [#322](https://github.com/mtxr/vscode-sqltools/issues/322)
+
+* **Fixes**
+  * SQL Server connect string fixed some bug scenarios . Issue [#356](https://github.com/mtxr/vscode-sqltools/issues/356)
+
 ## v0.20
 
 ### v0.20.3 - (August 31, 2019)
