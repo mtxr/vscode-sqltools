@@ -10,6 +10,7 @@
     * Added possibility to test connections before saving. Issue [#184](https://github.com/mtxr/vscode-sqltools/issues/184)
   * Add new drivers tool! PR [#387](https://github.com/mtxr/vscode-sqltools/pull/387)
     * Now it will be easier to add new drivers. Check out the [docs](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers).
+  * Added Cassandra driver! Special thanks to [@EpicEric](https://github.com/EpicEric). PR [#379](https://github.com/mtxr/vscode-sqltools/pull/379)
 
 * **Enhancements**
   * Displaying rowversion for SQL Server as HEX. Issue [#344](https://github.com/mtxr/vscode-sqltools/issues/344)
