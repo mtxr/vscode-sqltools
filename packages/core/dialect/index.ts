@@ -8,7 +8,7 @@ import SAPHana from './saphana';
 import CQL from './cql';
 
 const dialects = {
-	DB2,
+  DB2,
   MSSQL,
   MySQL,
   MariaDB: MySQL, // alias
