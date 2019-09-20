@@ -76,8 +76,7 @@ describe('generateInsert query', () => {
   const generated = generateInsert('tablename', [
     { type: 'integer', tableName: 'tablename', columnName: 'col1', isNullable: false },
   ]);
-  const expected = `INSERT INTO
-  tablename (col1)
+  const expected = `INSERT INTO tablename (col1)
 VALUES
   (\${1:col1:integer});$0`;
   expect(generated).toBe(expected);
