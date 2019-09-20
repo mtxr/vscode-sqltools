@@ -30,6 +30,7 @@
     "@types/redux": "^3.6.0",
     "@types/sqlite3": "^3.1.5",
     "@types/webpack-env": "^1.13.8",
+    "ibm_db": "^2.6.1",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",

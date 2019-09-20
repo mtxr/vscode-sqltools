@@ -8,6 +8,7 @@ export interface DialectQueries {
 }
 
 export enum DatabaseDialect {
+	DB2 = 'DB2',
   MSSQL = 'MSSQL',
   MySQL = 'MySQL',
   MariaDB = 'MariaDB',

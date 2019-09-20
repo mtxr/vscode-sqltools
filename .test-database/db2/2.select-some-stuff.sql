@@ -1,0 +1,3 @@
+SELECT 1 as one from SYSIBM.SYSDUMMY1;
+
+SELECT 2 as two from SYSIBM.SYSDUMMY1;

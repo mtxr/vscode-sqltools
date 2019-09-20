@@ -2,6 +2,13 @@ import getNames from './prefixed-tablenames';
 import { DatabaseDialect } from '../../interface';
 
 describe('Should generate table names base on dialects', () => {
+  it('get db2 table names', () => {
+    expect(getNames(DatabaseDialect.DB2, 'table')).toBe('table');
+    expect(getNames(DatabaseDialect.DB2, { name: 'table', isView: false })).toBe('table');
+    expect(getNames(DatabaseDialect.DB2, { name: 'table', tableSchema: 'schema', isView: false })).toBe('schema.table');
+    expect(getNames(DatabaseDialect.DB2, { name: 'table', isView: false, tableSchema: 'schema', tableDatabase: 'test' })).toBe('schema.table');
+  });
+  
   it('get mysql table names', () => {
     expect(getNames(DatabaseDialect.MySQL, 'table')).toBe('`table`');
     expect(getNames(DatabaseDialect.MySQL, { name: 'table', isView: false })).toBe('`table`');

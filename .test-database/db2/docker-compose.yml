@@ -1,0 +1,20 @@
+# Use root/example as user/password credentials
+version: '2.1'
+
+services:
+  db:
+    container_name: sqltools_db2
+    image: ibmcom/db2
+    privileged: true
+    environment:
+      LICENSE : accept
+      DB2INSTANCE : db2inst1
+      DB2INST1_PASSWORD : passw0rd123
+      DBNAME : testdb
+      # SAMPLEDB : true
+      # ENABLE_ORACLE_COMPATIBILITY : false
+    volumes:
+      - /home/db2inst1/db2:/database
+    ports:
+      - "29022:22"
+      - "50000:50000"

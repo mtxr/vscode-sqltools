@@ -5,6 +5,9 @@
       "name": "root"
     },
     {
+      "path": "db2"
+    },
+    {
       "path": "pgsql"
     },
     {
@@ -177,6 +180,15 @@
         "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
         "dialect": "MSSQL",
         "name": "MSSQL ConnectionString schema"
+      },
+      {
+        "database": "mydb",
+        "dialect": "DB2",
+        "name": "DB2 - localhost",
+        "password": "password",
+        "port": 50000,
+        "username": "db2inst1",
+        "server": "localhost"
       },
       {
         "askForPassword": false,

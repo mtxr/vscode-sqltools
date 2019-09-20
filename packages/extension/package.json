@@ -31,8 +31,10 @@
         "cql",
         "database",
         "db",
+        "db2",
         "dba",
         "formatter",
+        "ibm_db",
         "mssql",
         "mysql",
         "oracle",
@@ -462,6 +464,7 @@
                                 "type": "string",
                                 "enum": [
                                     "AWS Redshift",
+                                    "DB2",
                                     "Cassandra",
                                     "MariaDB",
                                     "MSSQL",

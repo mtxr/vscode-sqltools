@@ -1,0 +1,12 @@
+-- Extracted from w3schools
+--#SET TERMINATOR @
+
+-- Create table 'ZIPCODES'
+CREATE TABLE ZIPCODES (
+   ZIPCODE varchar(8) NOT NULL 
+  ,ADDRESS1 vargraphic(255) NOT NULL 
+  ,ADDRESS2 vargraphic(255) NOT NULL DEFAULT ''
+  ,ADDRESS3 vargraphic(255) NOT NULL DEFAULT ''
+) ;
+CREATE INDEX I_ZIPCODES_ZIPCODE ON ZIPCODES (ZIPCODE) CLUSTER ;
+

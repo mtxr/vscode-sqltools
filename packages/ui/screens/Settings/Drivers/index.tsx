@@ -1,3 +1,4 @@
+import DB2 from './DB2';
 import MySQL from './MySQL';
 import MSSQL from './MSSQL';
 import PostgreSQL from './PostgreSQL';
@@ -7,6 +8,7 @@ import SAPHana from './SAPHana';
 import CQL from './CQL';
 
 const DriversSettings = {
+  DB2,
   MySQL,
   MariaDB: MySQL,
   MSSQL,
