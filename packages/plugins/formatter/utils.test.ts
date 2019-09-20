@@ -4,15 +4,13 @@ it('Format simple select query', () => {
   expect(format('SELECT * FROM user;')).toEqual(
 `SELECT
   *
-FROM
-  user;`
+FROM user;`
   );
 });
 
 it('Format simple update query', () => {
   expect(format('UPDATE user SET password_requested_at = NULL, confirmation_token = NULL;')).toEqual(
-`UPDATE
-  user
+`UPDATE user
 SET
   password_requested_at = NULL,
   confirmation_token = NULL;`
@@ -31,8 +29,7 @@ and 1 = 1`)).toEqual(
 `select
   t.column1 Кириллица_cyrilic_alias,
   t.column2 Latin_alias
-from
-  db_table t
+from db_table t
 where
   a >= some_date1 -- from
   and a < some_date2 -- to
@@ -60,8 +57,7 @@ it('Format query with dollar parameters', () => {
   expect(format(`select * from a where id = $1`)).toEqual(
 `select
   *
-from
-  a
+from a
 where
   id = $1`
   );
@@ -69,8 +65,7 @@ where
 
 it('Format vscode query snippet', () => {
   expect(format("INSERT INTO  access_token (created, id, scopes, ttl, userid) VALUES  ('${1:timestamp with time zone}', '${2:text}', '${3:text}', '${4:integer}', '${5:integer}');")).toEqual(
-`INSERT INTO
-  access_token (created, id, scopes, ttl, userid)
+`INSERT INTO access_token (created, id, scopes, ttl, userid)
 VALUES
   (
     '\${1:timestamp with time zone}',
