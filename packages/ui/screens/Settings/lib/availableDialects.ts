@@ -1,3 +1,4 @@
+import db2Icon from './../icons/db2.png';
 import mariadbIcon from './../icons/mariadb.png';
 import mssqlIcon from './../icons/mssql.png';
 import mysqlIcon from './../icons/mysql.png';
@@ -47,6 +48,19 @@ const genericRequiredFields = setting => {
 };
 
 const availableDialects: { [name: string]: Dialect } = {
+  DB2: {
+    port: 50000,
+    value: 'DB2',
+    text: 'DB2 (Node Native)',
+    experimental: true,
+    showHelperText: true,
+    requirements,
+    icon: db2Icon,
+    requiredProps: setting => {
+      const props = genericRequiredFields(setting);
+      return props;
+    }
+  },
   MySQL: {
     port: 3306,
     value: 'MySQL',

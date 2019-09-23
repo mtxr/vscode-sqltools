@@ -173,6 +173,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private insertTables(connId: string, dialect: DatabaseDialect, tables: DatabaseInterface.Table[]) {
     try {
       switch (dialect) {
+        case DatabaseDialect.DB2:
         case DatabaseDialect.PostgreSQL:
         case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.SQLite:
@@ -204,6 +205,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         columns = columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
       } else if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'ordinalnumber') { /* it's already sorted by position */}
       switch (dialect) {
+        case DatabaseDialect.DB2:
         case DatabaseDialect.PostgreSQL:
         case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.SQLite:
@@ -232,6 +234,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private insertFunctions(connId: string, dialect: DatabaseDialect, functions: DatabaseInterface.Function[]) {
     try {
       switch (dialect) {
+        case DatabaseDialect.DB2:
         case DatabaseDialect.PostgreSQL:
         case DatabaseDialect['AWS Redshift']:
         case DatabaseDialect.MySQL:

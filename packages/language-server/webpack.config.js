@@ -42,6 +42,7 @@ module.exports = function getLanguageServerConfig() {
       libraryTarget: 'commonjs2',
     },
     externals: {
+      ibm_db: 'commonjs ibm_db',
       sqlite3: 'commonjs sqlite3',
       oracledb: 'commonjs oracledb',
       '@sap/hana-client': 'commonjs @sap/hana-client'

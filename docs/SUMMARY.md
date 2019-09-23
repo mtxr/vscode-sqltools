@@ -3,6 +3,7 @@
 * [Getting Started](../README.md)
 * [Connections](Connections.md)
   * [AWS Redshift](Connections/aws-redshift.md)
+  * [DB2](Connections/db2.md)
   * [MSSQL/SQL Server/Azure](Connections/mssql.md)
   * [MySQL](Connections/mysql.md)
   * [Oracle Database](Connections/OracleDB.md)
