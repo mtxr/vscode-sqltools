@@ -106,7 +106,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
 
   toggleGlobal = globalSetting => this.setState({ globalSetting });
 
-  updateConnectionSettings = (options: { [key: string]: any } = {}, cb?: any) => this.setState({
+  updateConnectionSettings = (options: Partial<ConnectionInterface> = {}, cb?: any) => this.setState({
     connectionSettings: {
       ...this.state.connectionSettings,
       ...options,
@@ -129,6 +129,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
       dialect: dialect.value,
       port: dialect.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || dialect.port || null),
       server: dialect.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
+      askForPassword: dialect.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
     }, () => this.setState({ step: Step.CONNECTION_INFO }));
 
   }

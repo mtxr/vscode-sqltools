@@ -6,12 +6,8 @@ import path from 'path';
 import { DatabaseDialect } from '@sqltools/core/interface';
 
 const relativeToWorkspace = (file: string) => {
-  const fileUri = Uri.file(file);
-  const workspaceFolder = workspace.getWorkspaceFolder(fileUri);
-  if (workspaceFolder) {
-    return `.${path.sep}${path.relative(workspaceFolder.uri.fsPath, fileUri.fsPath)}`;
-  }
-  return file;
+  const fileUri = workspace.asRelativePath(Uri.file(file), true);
+  return file === fileUri ? file : `.${path.sep}${fileUri}`;
 }
 
 export default class SettingsWebview extends WebviewProvider {
