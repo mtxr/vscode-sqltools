@@ -50,7 +50,7 @@ const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, testConnection, 
           </button>
         </div>
       </form>
-      {<pre>{JSON.stringify(connectionSettings, null, 2)}</pre>}
+      {/* {<pre>{JSON.stringify(connectionSettings, null, 2)}</pre>} */}
       {/* {<pre>{JSON.stringify(errors, null, 2)}</pre>} */}
       {/* {<pre>{JSON.stringify(state, null, 2)}</pre>} */}
     </>

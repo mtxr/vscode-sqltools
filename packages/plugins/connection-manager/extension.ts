@@ -1,7 +1,7 @@
 import logger from '@sqltools/core/log/vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
@@ -41,7 +41,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_testConnection = async (c: ConnectionInterface) => {
     let password = null;
 
-    if (c.askForPassword) password = await this._askForPassword(c);
+    if (c.dialect !== DatabaseDialect.SQLite && c.askForPassword) password = await this._askForPassword(c);
     if (c.askForPassword && password === null) return;
     return this.client.sendRequest(
       TestConnectionRequest,
