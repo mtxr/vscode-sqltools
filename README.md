@@ -58,6 +58,28 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 
 You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
 
+## How To Contribute
+
+Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
+
+Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
+
+### Drivers/Dialects Main Maintainers
+
+Special thanks to this amazing developers keep the project running:
+
+- Extension Core/Language Server: [@mtxr](https://github.com/mtxr)
+* AWS Redshift: [@mtxr](https://github.com/mtxr)
+* Cassandra: [@EpicEric](https://github.com/EpicEric)
+* MariaDB: ***Seeking for help***
+* MSSQL: ***Seeking for help***
+* MySQL: ***Seeking for help***
+* OracleDB: [@mickeypearce](https://github.com/mickeypearce)
+* PostgreSQL: [@mtxr](https://github.com/mtxr)
+* SAPHana: [ariel-bentu](https://github.com/ariel-bentu)
+* SQLite: ***Seeking for help***
+
+> I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
 
 ## Donate and Support
 
@@ -68,10 +90,6 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
-
-## Special Thanks
-
-All the amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️.
 
 Our supporters:
 
