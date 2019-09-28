@@ -6,6 +6,7 @@ import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import get from 'lodash/get';
 
 export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> implements ConnectionDialect {
   queries = queries;
@@ -27,6 +28,12 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
     if (typeof encryptOverride !== 'undefined') {
       encryptAttempt = encryptOverride;
     }
+
+    if (this.credentials.askForPassword && get(mssqlOptions, 'authentication.type') && get(mssqlOptions, 'authentication.options.userName')) {
+      mssqlOptions.authentication.options.password = mssqlOptions.authentication.options.password || this.credentials.password;
+      this.credentials.password = null;
+    }
+
 
     const pool = new MSSQLLib.ConnectionPool(this.credentials.connectString || {
       database: this.credentials.database,
