@@ -59,9 +59,9 @@
     "icon": "static/icon.png",
     "badges": [
         {
-            "description": "Gitter",
-            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
-            "href": "https://gitter.im/vscode-sqltools"
+            "description": "Docs",
+            "url": "https://img.shields.io/badge/docs-here-blueviolet?style=flat-square",
+            "href": "https://vscode-sqltools.mteixeira.dev"
         },
         {
             "description": "Patreon Support",
@@ -72,6 +72,11 @@
             "description": "PayPal Donate",
             "url": "https://img.shields.io/badge/paypal-donate-blue.svg?logo=paypal?style=flat-square",
             "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
+        },
+        {
+            "description": "Gitter",
+            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
+            "href": "https://gitter.im/vscode-sqltools"
         },
         {
             "description": "LICENSE",
@@ -384,7 +389,7 @@
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/codelens"
+                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
                 },
                 "sqltools.format": {
                     "type": "object",

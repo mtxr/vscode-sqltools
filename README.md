@@ -4,6 +4,7 @@
 
 <hr />
 
+[![Docs](https://img.shields.io/badge/docs-here-blueviolet?style=flat-square)](https://vscode-sqltools.mteixeira.dev)
 [![Gitter](https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square)](https://gitter.im/vscode-sqltools)
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
@@ -11,48 +12,39 @@
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
+## Features
+
+Some feature provide by SQLTools:
+
+* Beautifier/Formatter
+* Query runner, history and bookmarks
+* Connection explorer
+* Query generators (INSERT only)
+
+Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/features)
+
 ## Supported Drivers
 
-* AWS Redshift
-* Cassandra
-* MariaDB
-* MSSQL
-* MySQL
-* OracleDB
-* PostgreSQL
-* SAPHana
-* SQLite
+|Driver||Main Maintainer(s)|
+|-|-|-|
+|AWS Redshift|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/redshift.png)|[@mtxr](https://github.com/mtxr)|
+|Cassandra|![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/cassandra.png)|[@EpicEric](https://github.com/EpicEric)|
+|MariaDB|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mariadb.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|Microsoft SQL Server|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mssql.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|MySQL|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mysql.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|OracleDB|![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/oracle.png)|[@mickeypearce](https://github.com/mickeypearce)|
+|PostgreSQL|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/postgresql.png)|[@mtxr](https://github.com/mtxr)|
+|SAPHana|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sap_hana.png)|[ariel-bentu](https://github.com/ariel-bentu)|
+|SQLite|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sqlite.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+
+
+Special thanks to this amazing developers that keep the project running!
 
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
-## Features
 
-* SQL Format (Beautifier)
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+b</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+b</kbd>
-  * or using the standard VSCode Format Document/selection
-* Bookmark query
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+q</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>q</kbd>
-* Delete Bookmarked query
-  * __Win/Linux__: <kbd>ctrl+e</kbd> <kbd>ctrl+r</kbd>
-  * __OSX__: <kbd>cmd+e</kbd> <kbd>cmd+r</kbd>
-* Edit Bookmarked query
-* Auto complete for Table names and columns
+> I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
 
-![static/autocomplete.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/autocomplete.png)
-
-* Add connection wizard
-
-![static/add_new_connection_ui.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/add_new_connection_ui.gif)
-
-* Sidebar database explorer
-
-![static/stored-procedures.png](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/stored-procedures.png)
-
-* Export results to JSON and CSV
-
-![static/export-results.gif](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/export-results.gif)
 
 ## Docs
 
@@ -64,22 +56,6 @@ Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/
 
 Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
-### Drivers/Dialects Main Maintainers
-
-Special thanks to this amazing developers keep the project running:
-
-- Extension Core/Language Server: [@mtxr](https://github.com/mtxr)
-* AWS Redshift: [@mtxr](https://github.com/mtxr)
-* Cassandra: [@EpicEric](https://github.com/EpicEric)
-* MariaDB: ***Seeking for help***
-* MSSQL: ***Seeking for help***
-* MySQL: ***Seeking for help***
-* OracleDB: [@mickeypearce](https://github.com/mickeypearce)
-* PostgreSQL: [@mtxr](https://github.com/mtxr)
-* SAPHana: [ariel-bentu](https://github.com/ariel-bentu)
-* SQLite: ***Seeking for help***
-
-> I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
 
 ## Donate and Support
 
@@ -91,28 +67,31 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
-Our supporters:
 
-- Benyamin Limanto ([@benyaminl](https://github.com/benyaminl))
-- Kornei Dontsov ([@KorneiDontsov](https://github.com/KorneiDontsov))
+Our donators and supporters:
+<table>
+  <tr>
+    <td>Alejandro Dunogent</td>
+    <td>Alexander Krylkov</td>
+    <td>Benyamin Limanto (<a href="https://github.com/benyaminl)">@benyaminl</a>)</td>
+    <td>Bogdan Bursuc (<a href="https://github.com/bogh)">@bogh</a>)</td>
+  </tr>
+  <tr>
+    <td>Hector Bentancor</td>
+    <td>Justin Webber</td>
+    <td>Kornei Dontsov (<a href="https://github.com/KorneiDontsov)">@KorneiDontsov</a>)</td>
+    <td>Meirion Morris (<a href="https://github.com/mwmorris)">@mwmorris</a>)</td>
+  </tr>
+  </tr>
+  </td>
+    <td>Oleksandr Akhtyrskiy</td>
+    <td>Ran Sagy (<a href="https://github.com/ransagy)">@ransagy</a>)</td>
+    <td>Scott Wilson (<a href="https://github.com/omiba)">@omiba</a>)</td>
+    <td>Trung Nguyen</td>
+    <td>
+  </tr>
+</table>
 
-> Want to support? [Click here](https://www.patreon.com/mteixeira).
-
-
-Our donators:
-
-- Hector Bentancor (?)
-- Trung Nguyen (?)
-- Bogdan Bursuc ([@bogh](https://github.com/bogh))
-- Meirion Morris ([@mwmorris](https://github.com/mwmorris))
-- Alexander Krylkov (?)
-- Oleksandr Akhtyrskiy (?)
-- Justin Webber (?)
-- Alejandro Dunogent (?)
-- Ran Sagy ([@ransagy](https://github.com/ransagy))
-- Scott Wilson ([@omiba](https://github.com/omiba))
-
-> Want to donate? [Click here](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8).
 
 ## Changelog
 
