@@ -83,7 +83,6 @@ Our donators and supporters:
     <td>Meirion Morris (<a href="https://github.com/mwmorris)">@mwmorris</a>)</td>
   </tr>
   </tr>
-  </td>
     <td>Oleksandr Akhtyrskiy</td>
     <td>Ran Sagy (<a href="https://github.com/ransagy)">@ransagy</a>)</td>
     <td>Scott Wilson (<a href="https://github.com/omiba)">@omiba</a>)</td>

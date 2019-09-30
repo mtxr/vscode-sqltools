@@ -123,7 +123,7 @@
 
 * **NEW** 🎉
   * Multiple connections with session files. PR [#188](https://github.com/mtxr/vscode-sqltools/pull/188)
-    * Read the docs: [Sessions and Multiple Connections](https://vscode-sqltools.mteixeira.dev/session-multiple-connections)
+    * Read the docs: [Sessions and Multiple Connections](https://vscode-sqltools.mteixeira.dev/features/sessions-and-multiple-connections)
   * Added support for SAP Hana, thanks to [@ariel-bentu](https://github.com/ariel-bentu). PR [#215](https://github.com/mtxr/vscode-sqltools/pull/215)
   * Multiple results screens, one per connection. PR [#234](https://github.com/mtxr/vscode-sqltools/pull/234)
 
@@ -194,7 +194,7 @@
 
 * **Fix** 🎉
   * Minor fix on codelens.
-  * Allow to set connection on query block. See: [Codelens Doc](https://vscode-sqltools.mteixeira.dev/codelens)
+  * Allow to set connection on query block. See: [Codelens Doc](https://vscode-sqltools.mteixeira.dev/features/codelens)
 
 ### v0.17.14
 

@@ -4,5 +4,7 @@ structure:
   readme: ../README.md
   summary: summary.md
 
-# redirects:
-#   help: ./support.md
+redirects:
+  sessions-and-multiple-connections: ./features/sessions-and-multiple-connections.md
+  codelens: ./features/codelens.md
+  executing-queries: features/executing-queries.md
