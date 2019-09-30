@@ -21,6 +21,3 @@ You have 3 methods to execute queries. Run from selection, run from bookmarks, r
 1. Select `SQLTools History: Run` from command palette.
 2. Pick the query you want from list.
 3. Wait the results to show up.
-
-
-
