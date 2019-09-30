@@ -178,4 +178,21 @@ export interface Settings {
    * @memberof Settings
    */
   languageServerEnv?: { [id: string]: string };
+
+  queryParams: {
+    /**
+     * Enables query parameter checking
+     * @memberof Settings['queryParams']
+     * @default true
+     * @type {boolean}
+     */
+    enableReplace: boolean;
+    /**
+     * RegEx used to identify query parameters
+     * @memberof Settings['queryParams']
+     * @default "\\$[\\d]+|\\$\\[[\\d\\w]+\\]"
+     * @type {string}
+     */
+    regex: string;
+  };
 }

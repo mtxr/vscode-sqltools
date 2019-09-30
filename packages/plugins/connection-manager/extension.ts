@@ -14,7 +14,7 @@ import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetCon
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
-import { extractConnName } from '@sqltools/core/utils/query';
+import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
@@ -178,6 +178,39 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
+  private replaceParams = async (query: string) => {
+    const queryParamsCfg = ConfigManager.queryParams;
+
+    if (!queryParamsCfg || !queryParamsCfg.enableReplace) return query;
+
+    const params = getQueryParameters(query, queryParamsCfg.regex);
+    if (params.length > 0) {
+      await new Promise((resolve, reject) => {
+        const ib = window.createInputBox();
+        ib.step = 1;
+        ib.totalSteps = params.length;
+        ib.ignoreFocusOut = true;
+        ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
+        ib.prompt = 'Remember to escape values if neeeded.'
+        ib.onDidAccept(() => {
+          const r = new RegExp(params[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
+          query = query.replace(r, `'${ib.value}'`);
+          ib.step++;
+          if (ib.step > ib.totalSteps) {
+            ib.hide();
+            return resolve();
+          }
+          ib.value = '';
+          ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
+        });
+        ib.onDidHide(() =>ib.step === ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
+        ib.show();
+      });
+    }
+
+    return query;
+  }
+
   private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
@@ -193,6 +226,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         await this._setConnection(conn);
       }
       await this._connect();
+
+      query = await this.replaceParams(query);
       await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('query', query);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);

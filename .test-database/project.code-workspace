@@ -213,6 +213,7 @@
     ],
     "sqltools.languageServerEnv": {
       "EXAMPLE_VARIABLE": "VALUE"
-    }
+    },
+    "sqltools.queryParams.enableReplace": true
   }
 }

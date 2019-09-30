@@ -404,6 +404,18 @@
                         }
                     }
                 },
+                "sqltools.queryParams.enableReplace": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Enables query parameter checking",
+                    "required": false
+                },
+                "sqltools.queryParams.regex": {
+                    "type": "string",
+                    "default": "\\$[\\d]+|\\$\\[[\\d\\w]+\\]",
+                    "description": "RegEx used to identify query parameters",
+                    "required": true
+                },
                 "sqltools.connections": {
                     "type": "array",
                     "title": "Connections",
