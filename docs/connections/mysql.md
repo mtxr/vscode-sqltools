@@ -1,3 +1,8 @@
+---
+name: MySQL
+menu: Connection Drivers
+route: /connections/mysql
+---
 
 # MySQL Start Guide
 

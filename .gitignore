@@ -19,3 +19,5 @@ cache/
 .test-database/**/local*
 .DS_Store
 .npmrc
+.docz
+public

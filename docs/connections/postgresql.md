@@ -1,3 +1,8 @@
+---
+name: PostgreSQL
+menu: Connection Drivers
+route: /connections/postgresql
+---
 
 # PostgreSQL Start Guide
 

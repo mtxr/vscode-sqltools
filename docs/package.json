@@ -1,0 +1,16 @@
+{
+  "name": "@sqltools/docs",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "scripts": {
+    "docz:dev": "docz dev",
+    "docz:build": "docz build"
+  },
+  "devDependencies": {
+    "docz": "^2.0.0-rc.48",
+    "favicons-webpack-plugin": "^1.0.2",
+    "react": "^16.10.1",
+    "react-dom": "^16.10.1"
+  }
+}

@@ -1,3 +1,9 @@
+---
+name: IBM DB2
+menu: Connection Drivers
+route: /connections/db2
+---
+
 # DB2 Start Guide
 
 ## 1. Prerequisites

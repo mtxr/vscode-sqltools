@@ -1,5 +1,13 @@
+---
+name: Getting Started
+menu: Welcome
+route: /
+---
+
 <p align="center">
-<img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.png" />
+<center>
+  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.png" />
+</center>
 </p>
 
 <hr />
@@ -12,7 +20,7 @@
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
-## Features
+### Features
 
 Some feature provide by SQLTools:
 
@@ -21,21 +29,21 @@ Some feature provide by SQLTools:
 * Connection explorer
 * Query generators (INSERT only)
 
-Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/features)
+Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev).
 
-## Supported Drivers
+### Supported Drivers
 
 |Driver||Main Maintainer(s)|
 |-|-|-|
-|AWS Redshift|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/redshift.png)|[@mtxr](https://github.com/mtxr)|
-|Cassandra|![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/cassandra.png)|[@EpicEric](https://github.com/EpicEric)|
-|MariaDB|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mariadb.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|Microsoft SQL Server|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mssql.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|MySQL|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mysql.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|OracleDB|![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/oracle.png)|[@mickeypearce](https://github.com/mickeypearce)|
-|PostgreSQL|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/postgresql.png)|[@mtxr](https://github.com/mtxr)|
-|SAPHana|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sap_hana.png)|[ariel-bentu](https://github.com/ariel-bentu)|
-|SQLite|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sqlite.png)|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/redshift.png)|AWS Redshift|[@mtxr](https://github.com/mtxr)|
+|![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/cassandra.png)|Cassandra|[@EpicEric](https://github.com/EpicEric)|
+|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mariadb.png)|MariaDB|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mssql.png)|Microsoft SQL Server|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mysql.png)|MySQL|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/oracle.png)|OracleDB|[@mickeypearce](https://github.com/mickeypearce)|
+|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/postgresql.png)|PostgreSQL|[@mtxr](https://github.com/mtxr)|
+|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sap_hana.png)|SAPHana|[ariel-bentu](https://github.com/ariel-bentu)|
+|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sqlite.png)|SQLite|[@mtxr](https://github.com/mtxr) - ***looking for help***|
 
 
 Special thanks to this amazing developers that keep the project running!
@@ -46,18 +54,18 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 > I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
 
 
-## Docs
+### Docs
 
 You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
 
-## How To Contribute
+### How To Contribute
 
 Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
 Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
 
-## Donate and Support
+### Donate and Support
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
@@ -82,21 +90,20 @@ Our donators and supporters:
     <td>Kornei Dontsov (<a href="https://github.com/KorneiDontsov)">@KorneiDontsov</a>)</td>
     <td>Meirion Morris (<a href="https://github.com/mwmorris)">@mwmorris</a>)</td>
   </tr>
-  </tr>
+  <tr>
     <td>Oleksandr Akhtyrskiy</td>
     <td>Ran Sagy (<a href="https://github.com/ransagy)">@ransagy</a>)</td>
     <td>Scott Wilson (<a href="https://github.com/omiba)">@omiba</a>)</td>
     <td>Trung Nguyen</td>
-    <td>
   </tr>
 </table>
 
 
-## Changelog
+### Changelog
 
-See changelog [here](CHANGELOG.md)
+See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
 
-## Feedback
+### Feedback
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 

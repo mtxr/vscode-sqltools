@@ -1,3 +1,8 @@
+---
+menu: Connection Drivers
+route: /connections/aws-redshift
+name: AWS Redshift
+---
 
 # AWS Redshift Start Guide
 

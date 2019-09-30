@@ -1,5 +1,10 @@
+---
+name: MSSQL, SQL Server, Azure
+menu: Connection Drivers
+route: /connections/mssql
+---
 
-# SQL Server/Azure Start Guide
+# Microsoft SQL Server/Azure Start Guide
 
 ## 1. Connections
 

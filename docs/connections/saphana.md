@@ -1,3 +1,9 @@
+---
+name: SAP Hana
+menu: Connection Drivers
+route: /connections/saphana
+---
+
 # SAP HANA Start Guide
 
 ## 1. Prerequisites

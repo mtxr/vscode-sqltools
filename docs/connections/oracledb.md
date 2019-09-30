@@ -1,3 +1,8 @@
+---
+name: Oracle DB
+menu: Connection Drivers
+route: /connections/oracle
+---
 
 # Oracle Start Guide
 

@@ -1,4 +1,12 @@
-## Pre-requesites
+---
+name: Building
+menu: Contributing
+route: /contributing/building
+---
+
+# Building the project
+
+### Pre-requesites
 
 Make sure you have node, npm and yarn installed.
 

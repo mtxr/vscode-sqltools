@@ -1,3 +1,9 @@
+---
+name: Codelens
+menu: Features
+route: /features/codelens
+---
+
 # Codelens
 
 Since v0.17.15 you can run queries using VSCode Codelens.

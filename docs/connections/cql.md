@@ -1,3 +1,8 @@
+---
+name: Cassandra (CQL)
+menu: Connection Drivers
+route: /connections/cassandra
+---
 
 # Cassandra Start Guide
 

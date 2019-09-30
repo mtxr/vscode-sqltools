@@ -1,3 +1,9 @@
+---
+name: Support New Drivers
+menu: Contributing
+route: /contributing/support-new-drivers
+---
+
 # Support new Drivers
 
 > This page still under construction

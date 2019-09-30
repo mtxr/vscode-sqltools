@@ -1,3 +1,9 @@
+---
+name: Changelog
+menu: Welcome
+route: /changelog
+---
+
 # Changelog
 
 ## v0.21

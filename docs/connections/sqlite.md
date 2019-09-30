@@ -1,3 +1,9 @@
+---
+name: SQLite
+menu: Connection Drivers
+route: /connections/sqlite
+---
+
 # SQLite Start Guide
 
 ## 1. Prerequisites

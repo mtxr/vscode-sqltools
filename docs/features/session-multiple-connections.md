@@ -1,10 +1,16 @@
-## Sessions and Multiple Connections
+---
+name: Sessions and Multiple Connections
+menu: Features
+route: /features/sessions-and-multiple-connections
+---
+
+# Sessions and Multiple Connections
 
 Sometimes is very useful to have SQL files attached to different connections.
 
 On version v0.19 session files were introduced along with the ability of attaching and detaching connections from files.
 
-### Session files
+## Session files
 
 Session files are file that are attached to a connection.
 

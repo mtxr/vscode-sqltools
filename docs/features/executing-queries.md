@@ -1,3 +1,9 @@
+---
+name: Executing Queries
+menu: Features
+route: /connections/executing-queries
+---
+
 # Executing Queries
 
 You have 3 methods to execute queries. Run from selection, run from bookmarks, run from history.
