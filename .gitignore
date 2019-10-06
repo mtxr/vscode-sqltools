@@ -21,3 +21,4 @@ cache/
 .npmrc
 .docz
 public
+.cache
