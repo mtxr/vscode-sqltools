@@ -174,6 +174,7 @@ export default class CQLDialect extends GenericDialect<CassandraLib.Client> impl
         type: obj.type,
         isNullable: obj.kind === 'regular',
         isPk: obj.kind !== 'regular',
+        isPartitionKey: obj.kind === 'partition_key',
         tableSchema: obj.keyspace_name,
         tree: [obj.keyspace_name, 'tables', obj.table_name, obj.column_name].join(TREE_SEP)
       };
