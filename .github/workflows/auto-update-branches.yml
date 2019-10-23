@@ -21,6 +21,8 @@ jobs:
 
     - name: Update branch add-driver-example
       run: |
+        git config --global user.email "bot@mteixeira.dev"
+        git config --global user.name "bot@mtxr"
         git remote add auto https://mtxr:${GITHUB_TOKEN}@github.com/mtxr/vscode-sqltools.git
         git pull auto master
         git push auto add-driver-example
