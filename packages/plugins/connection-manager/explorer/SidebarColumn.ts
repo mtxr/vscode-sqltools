@@ -12,7 +12,7 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
   }
   public get description() {
     let typeSize = '';
-    if (this.column.size !== null) {
+    if (typeof this.column.size !== 'undefined' && this.column.size !== null) {
       typeSize = `(${this.column.size})`;
     }
     return `${(this.column.type || '').toUpperCase()}${typeSize}`;
@@ -35,6 +35,10 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
           dark: context.asAbsolutePath('icons/fk-dark.svg'),
           light: context.asAbsolutePath('icons/fk-light.svg'),
         },
+        partitionKey: {
+          dark: context.asAbsolutePath('icons/partition-key-dark.svg'),
+          light: context.asAbsolutePath('icons/partition-key-light.svg'),
+        },
       };
     }
     this.updateIconPath();
@@ -46,7 +50,10 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
   }
   public updateIconPath() {
     this.iconPath = SidebarColumn.icons.default;
-    if (this.column.isPk) {
+    if (this.column.isPartitionKey) {
+      this.iconPath = SidebarColumn.icons.partitionKey;
+    }
+    else if (this.column.isPk) {
       this.iconPath = SidebarColumn.icons.primaryKey;
     }
     else if (this.column.isFk) {

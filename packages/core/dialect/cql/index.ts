@@ -153,12 +153,20 @@ export default class CQLDialect extends GenericDialect<CassandraLib.Client> impl
   }
 
   public async getTables(): Promise<DatabaseInterface.Table[]> {
-    const [queryResults] = await this.query(this.queries.fetchTables);
+    const [queryResults, numberOfColumnsResults] = await this.query(this.queries.fetchTables);
+    const numberOfColumnsMap: {string: {string: number}} = numberOfColumnsResults.results.reduce((prev, curr) => prev.concat(curr), []).reduce((acc, obj: any) => {
+      if (typeof acc[obj.keyspace_name] === 'undefined') {
+        acc[obj.keyspace_name] = {};
+      }
+      acc[obj.keyspace_name][obj.table_name] = parseInt(JSON.parse(obj.count), 10);
+      return acc;
+    }, {});
     return queryResults.results.reduce((prev, curr) => prev.concat(curr), []).map((obj: any) => {
       const table: DatabaseInterface.Table = {
         name: obj.table_name,
         isView: false,
         tableSchema: obj.keyspace_name,
+        numberOfColumns: numberOfColumnsMap[obj.keyspace_name] ? numberOfColumnsMap[obj.keyspace_name][obj.table_name] : undefined,
         tree: [obj.keyspace_name, 'tables', obj.table_name].join(TREE_SEP)
       };
       return table;
@@ -174,6 +182,7 @@ export default class CQLDialect extends GenericDialect<CassandraLib.Client> impl
         type: obj.type,
         isNullable: obj.kind === 'regular',
         isPk: obj.kind !== 'regular',
+        isPartitionKey: obj.kind === 'partition_key',
         tableSchema: obj.keyspace_name,
         tree: [obj.keyspace_name, 'tables', obj.table_name, obj.column_name].join(TREE_SEP)
       };
