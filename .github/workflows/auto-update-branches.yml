@@ -23,8 +23,7 @@ jobs:
       run: |
         git config --global user.email "bot@mteixeira.dev"
         git config --global user.name "bot@mtxr"
-        git remote add auto https://mtxr:${GITHUB_TOKEN}@github.com/mtxr/vscode-sqltools.git
-        git pull auto master
-        git push auto add-driver-example
+        git remote add botorigin https://mtxr:${GITHUB_TOKEN}@github.com/mtxr/vscode-sqltools.git
+        git rebase botorigin/add-driver-example
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
