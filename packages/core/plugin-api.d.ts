@@ -140,6 +140,7 @@ export namespace DatabaseInterface {
     tableCatalog?: string;
     defaultValue?: string;
     isNullable: boolean;
+    isPartitionKey?: boolean;
     isPk?: boolean;
     isFk?: boolean;
     columnKey?: string;

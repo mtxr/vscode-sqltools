@@ -1061,6 +1061,11 @@
     "@types/minimatch" "*"
     "@types/node" "*"
 
+"@types/ibm_db@^2.0.5":
+  version "2.0.5"
+  resolved "https://registry.yarnpkg.com/@types/ibm_db/-/ibm_db-2.0.5.tgz#6804bb7f4b3ed5018ed2db54755ac37ae482f9cb"
+  integrity sha512-Tb4CRJ4xz+iwixGMjV0WJ5612WZBot/zwYMti/kRmnSLM6K0Wk57yuw+hyjAq9NJp5rY9tHQVzhDzkxh9QuQqQ==
+
 "@types/istanbul-lib-coverage@*", "@types/istanbul-lib-coverage@^2.0.0":
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/@types/istanbul-lib-coverage/-/istanbul-lib-coverage-2.0.1.tgz#42995b446db9a48a11a07ec083499a860e9138ff"

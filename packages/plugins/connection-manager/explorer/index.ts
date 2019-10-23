@@ -17,6 +17,7 @@ import logger from '@sqltools/core/log/vscode';
 const DialectHierarchyChildNames = {
   [DatabaseDialect.PostgreSQL]: ['Database', 'Schema'],
   [DatabaseDialect['AWS Redshift']]: ['Database', 'Schema'],
+  [DatabaseDialect.Cassandra]: ['Keyspace'],
 }
 
 
