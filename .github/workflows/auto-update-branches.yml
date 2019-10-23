@@ -1,0 +1,26 @@
+name: Update Branches
+
+on:
+  push:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [10.x]
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        ref: add-driver-example
+
+    - name: Update branch add-driver-example
+      run: |
+        git remote add auto https://mtxr:${{secrets.GITHUB_TOKEN}}@github.com/mtxr/vscode-sqltools.git
+        git pull auto master
+        git push auto add-driver-example
