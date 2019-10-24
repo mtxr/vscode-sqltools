@@ -22,3 +22,5 @@ Steps:
 - After changing the files, test it and submit a PR to be reviewed.
 
 If you need help, to hesitate to submit an issue with your doubts. I'll be glad to help!
+
+You can see the changes required to add a new driver comparing branches `add-driver-example` and `master`. See the [comparison of master and add-driver-example](https://github.com/mtxr/vscode-sqltools/compare/master...add-driver-example).
