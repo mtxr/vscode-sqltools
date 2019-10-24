@@ -25,7 +25,7 @@ jobs:
         git config --global user.name "bot@mtxr"
         git remote add botorigin https://mtxr:${GITHUB_TOKEN}@github.com/mtxr/vscode-sqltools.git
         git fetch botorigin
-        git merge --ff-only botorigin/master
-        git push botorigin add-driver-example
+        git rebase botorigin/master
+        git push --force botorigin add-driver-example
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

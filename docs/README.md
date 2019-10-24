@@ -4,11 +4,11 @@ menu: Welcome
 route: /
 ---
 
-<p align="center">
 <center>
-  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.png" />
-</center>
+<p align="center">
+  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.svg?sanitize=true" />
 </p>
+</center>
 
 <hr />
 
@@ -78,6 +78,7 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 
 Our donators and supporters:
 <table>
+  <tbody>
   <tr>
     <td>Alejandro Dunogent</td>
     <td>Alexander Krylkov</td>
@@ -96,6 +97,7 @@ Our donators and supporters:
     <td>Scott Wilson (<a href="https://github.com/omiba)">@omiba</a>)</td>
     <td>Trung Nguyen</td>
   </tr>
+  </tbody>
 </table>
 
 
