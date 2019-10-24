@@ -51,7 +51,7 @@
         "sqltools",
         "sap",
         "saphana",
-        "example-dialect"
+        "example-driver"
     ],
     "galleryBanner": {
         "theme": "dark",
