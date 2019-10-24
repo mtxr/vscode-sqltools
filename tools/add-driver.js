@@ -32,6 +32,30 @@ const applyPatch = async contents => {
   });
 };
 
+const getDiffContents = async () => {
+  // git diff origin/master..origin/add-driver-example
+  return new Promise((resolve, reject) => {
+    const sp = spawn('git', ['diff', 'origin/master..origin/add-driver-example']);
+    const output = {
+      stdout: '',
+      stderr: '',
+      full: '',
+    };
+    sp.stdout.on('data', data => {
+      output.stdout += data.toString();
+      output.full += data.toString();
+    });
+    sp.stderr.on('data', data => {
+      output.stderr += data.toString();
+      output.full += data.toString();
+    });
+    sp.stdin.end();
+    sp.on('exit', code => {
+      code === 0 ? resolve(output.stdout) : reject({ code, output });
+    });
+  });
+}
+
 const camelCase = str => str
     .replace(/(?:^\w|[A-Z]|\b\w)/g, (word, index) => index == 0 ? word.toLowerCase() : word.toUpperCase())
     .replace(/\s+/g, '')
@@ -56,20 +80,17 @@ const replaceName = (name, contents) => {
     .replace(/example dialect/gi, name);
 };
 
-let diffContents = fs.readFileSync(path.join(__dirname, 'add-new.diff')).toString();
-
-if (name) {
-  diffContents = replaceName(name, diffContents);
-}
-applyPatch(diffContents)
-.then(() => {
-  console.log('OK!')
-})
-.catch(error => {
-  if (error && typeof error.code === 'number' && error.output && error.output.full) {
-    console.error(error.output.full)
-    return process.exit(error.code)
-  }
-  console.error(error)
-  process.exit(1)
-})
+getDiffContents()
+  .then(contents => name ? replaceName(name, contents) : contents)
+  .then(applyPatch)
+  .then(() => {
+    console.log('OK!')
+  })
+  .catch(error => {
+    if (error && typeof error.code === 'number' && error.output && error.output.full) {
+      console.error(error.output.full)
+      return process.exit(error.code)
+    }
+    console.error(error)
+    process.exit(1)
+  })
