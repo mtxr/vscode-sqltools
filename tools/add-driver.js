@@ -35,7 +35,7 @@ const applyPatch = async contents => {
 const getDiffContents = async () => {
   // git diff origin/master..origin/add-driver-example
   return new Promise((resolve, reject) => {
-    const sp = spawn('git', ['diff', 'origin/master..origin/add-driver-example']);
+    const sp = spawn('git', ['diff', 'origin/master...origin/add-driver-example']);
     const output = {
       stdout: '',
       stderr: '',

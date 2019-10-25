@@ -13,7 +13,7 @@ export const Logo = () => {
   return (
     <Flex aligmItems="center" sx={logo}>
       <Link to="/">
-        <img src={`https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero-dark.svg?sanitize=true`} />
+        <img src={`https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero-dark.svg?sanitize=true`} alt="SQLTools"/>
       </Link>
     </Flex>
   )

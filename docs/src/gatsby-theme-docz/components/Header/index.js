@@ -1,19 +1,14 @@
 /** @jsx jsx */
-import { jsx, Box, Flex, useColorMode } from 'theme-ui'
+import { jsx, Box, Flex } from 'theme-ui'
 import { useConfig, useCurrentDoc } from 'docz'
 
 import * as styles from './styles'
-import { Edit, Sun, Github } from 'gatsby-theme-docz/src/components/Icons'
+import { Edit, Github } from 'gatsby-theme-docz/src/components/Icons'
 import { Logo } from '../Logo'
 
 export const Header = () => {
   const config = useConfig()
   const { edit = true, ...doc } = useCurrentDoc()
-  const [colorMode, setColorMode] = useColorMode()
-
-  const toggleColorMode = () => {
-    setColorMode(colorMode === 'light' ? 'dark' : 'light')
-  }
 
   return (
     <div sx={styles.wrapper} data-testid={'header'}>

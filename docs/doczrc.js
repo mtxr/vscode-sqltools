@@ -10,8 +10,7 @@ const header = {
   text: 'white'
 };
 
-module.exports = exports.default = {
-  theme: path.resolve(__dirname, 'src/gatsby-theme-docz/index.js'),
+export default {
   title: 'SQLTools',
   description: 'SQLTools for VSCode',
   menu: [
@@ -27,7 +26,7 @@ module.exports = exports.default = {
     },
   ],
   typescript: true,
-  public: '/assets',
+  public: PUBLIC,// '/assets',
   themeConfig: {
     colors: {
       inlineCodeBg: '#e5e5e5',
@@ -79,15 +78,16 @@ module.exports = exports.default = {
       }
     }
   },
+  htmlContext: {
+    favicon: '/public/favicon.png',
+  },
   gatsbyRemarkPlugins: [
     { resolve: 'gatsby-remark-code-titles' },
-    // { resolve: 'gatsby-remark-embed-video' },
-    // 'gatsby-remark-responsive-iframe',
     {
       resolve: `gatsby-remark-vscode`,
       options: {
         injectStyles: false,
       },
     },
-  ],
-};
+  ]
+}
