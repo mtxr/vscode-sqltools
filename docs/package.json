@@ -4,13 +4,21 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "docz:dev": "docz dev",
+    "docz:dev": "docz dev --port=1234",
     "docz:build": "docz build"
   },
   "devDependencies": {
     "docz": "^2.0.0-rc.48",
-    "favicons-webpack-plugin": "^1.0.2",
+    "dotenv": "^8.1.0",
+    "gatsby-plugin-favicon": "^3.1.6",
+    "gatsby-plugin-google-tagmanager": "^2.1.12",
+    "gatsby-remark-code-titles": "^1.1.0",
+    "gatsby-remark-embed-video": "^2.0.0",
+    "gatsby-remark-prismjs": "^3.3.16",
+    "gatsby-remark-responsive-iframe": "^2.2.20",
+    "gatsby-remark-vscode": "^1.2.1",
     "react": "^16.10.1",
-    "react-dom": "^16.10.1"
+    "react-dom": "^16.10.1",
+    "theme-ui": "^0.2.43"
   }
 }

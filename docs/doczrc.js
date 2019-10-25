@@ -1,30 +1,87 @@
-import * as path from 'path';
+const path = require('path');
 
 const PUBLIC = path.resolve(__dirname, 'assets');
 
-export default {
+const header = {
+  bg: '#993861',
+  border: 'transparent',
+  text: 'white'
+};
+
+module.exports = exports.default = {
   title: 'SQLTools',
   description: 'SQLTools for VSCode',
   menu: [
     {
       name: 'Welcome',
-      menu: ['Getting Started', 'Changelog']
+      menu: ['Getting Started', 'Changelog'],
     },
     'Features',
     'Connection Drivers',
     {
-      name:'Contributing',
-      menu: ['How to contribute to SQLTools']
-    }
+      name: 'Contributing',
+      menu: ['How to contribute to SQLTools'],
+    },
   ],
   typescript: true,
   public: '/assets',
-  htmlContext: {
-    favicon: 'https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/icon.png',
+  themeConfig: {
+    colors: {
+      inlineCodeBg: '#e5e5e5',
+      border: 'transparent',
+      header,
+      sidebar: {
+        bg: '#00000008',
+      },
+      modes: {
+        dark: {
+          inlineCodeBg: '#060606',
+          background: '#1a1d23',
+          border: 'transparent',
+          header,
+          sidebar: {
+            bg: '#FFFFFF08',
+          },
+        }
+      },
+    },
+    styles: {
+      root: {
+        fontSize: 'medium'
+      },
+      a: {
+        fill: 'primary'
+      },
+      inlineCode: {
+        fontSize: '.85em',
+        padding: '0.15em 0.2em',
+        borderRadius: '0.2em',
+        bg: 'inlineCodeBg',
+      },
+      pre: {
+        paddingLeft: 0,
+        '::after': {
+          background: '#ffffff08',
+          width: '2.5em',
+          content: `' '`,
+          height: '100%',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          zIndex: 0,
+        }
+      }
+    }
   },
-  onCreateWebpackChain: config => {
-    config.resolve.alias.set('@assets', PUBLIC);
-
-    return config;
-  },
+  gatsbyRemarkPlugins: [
+    { resolve: 'gatsby-remark-code-titles' },
+    { resolve: 'gatsby-remark-embed-video' },
+    // 'gatsby-remark-responsive-iframe',
+    {
+      resolve: `gatsby-remark-vscode`,
+      options: {
+        injectStyles: false,
+      },
+    },
+  ],
 };
