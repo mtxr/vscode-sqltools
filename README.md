@@ -104,7 +104,3 @@ See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 
 By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
-
-<hr />
-
-Icon made by [Freepik](https://www.freepik.com/) from [www.flaticon.com](https://www.flaticon.com/) is licensed by [CC 3.0 BY](http://creativecommons.org/licenses/by/3.0/)

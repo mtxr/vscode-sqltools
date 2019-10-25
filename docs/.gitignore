@@ -4,3 +4,5 @@ public
 
 # dependencies
 node_modules
+
+!public/favicon.png

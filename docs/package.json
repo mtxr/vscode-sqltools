@@ -10,22 +10,23 @@
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build && ls -hal .docz/dist"
+    "docz:build": "docz build"
   },
   "dependencies": {
-    "@emotion/core": "^10.0.14",
-    "@emotion/styled": "^10.0.14",
+    "docz-plugin-netlify": "^1.1.4",
+    "docz": "^1.2.0",
+    "docz-core": "^1.2.0",
+    "docz-theme-default": "^1.2.0",
+    "styled-components": "^4.4.0",
     "gatsby-plugin-offline": "^2.2.7",
-    "gatsby-remark-vscode": "^1.2.1",
     "gatsby-remark-code-titles": "^1.1.0",
-    "docz": "2.0.0-rc.64",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "scheduler": "^0.15.0",
-    "theme-ui": "^0.2.43"
+    "gatsby-remark-vscode": "^1.2.1",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
+    "scheduler": "^0.15.0"
   },
   "devDependencies": {
-    "@types/react": "^16.8.23",
+    "@types/react": "^16.8.13",
     "@types/react-dom": "^16.8.4"
   }
 }
