@@ -10,7 +10,8 @@ import './styles.css';
 
 const bsaeComponents = {
   ...components,
-  inlineCode: Code.InlineCode
+  inlineCode: Code.InlineCode,
+  Code: Code,
 }
 
 const Theme = ({ children }) => {

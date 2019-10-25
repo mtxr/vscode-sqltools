@@ -5,7 +5,7 @@
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build"
+    "docz:build": "docz build && ls -hal .docz/dist"
   },
   "devDependencies": {
     "docz": "^2.0.0-rc.48",
