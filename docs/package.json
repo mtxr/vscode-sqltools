@@ -10,10 +10,9 @@
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build"
+    "docz:build": "docz build && cp _redirects dist/."
   },
   "dependencies": {
-    "docz-plugin-netlify": "^1.1.4",
     "docz": "^1.2.0",
     "docz-core": "^1.2.0",
     "docz-theme-default": "^1.2.0",
