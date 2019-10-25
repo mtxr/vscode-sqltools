@@ -1,0 +1,40 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "target": "es2017",
+    "module": "es2015",
+    "moduleResolution": "node",
+    "inlineSourceMap": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react",
+    "strict": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "strictPropertyInitialization": true,
+    "noImplicitThis": true,
+    "alwaysStrict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": false,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "traceResolution": false,
+    "listEmittedFiles": false,
+    "listFiles": false,
+    "pretty": true,
+    "lib": ["es2017", "dom"],
+    "declaration": false,
+    "baseUrl": "./",
+    "rootDir": "./",
+    "outDir": "dist",
+    "typeRoots": ["node_modules/@types", "src/types"],
+    "paths": {
+      "@fonts/*": ["public/fonts/*"],
+      "@images/*": ["public/images/*"],
+      "@components/*": ["src/theme/components/*"],
+      "@styles/*": ["src/theme/styles/*"]
+    }
+  },
+  "include": ["public/*", "src/**/*"],
+  "exclude": ["node_modules/**"]
+}
