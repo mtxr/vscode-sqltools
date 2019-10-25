@@ -6,7 +6,18 @@ route: /changelog
 
 # Changelog
 
+
 ## v0.21
+
+### v0.21.1 - (October 25, 2019)
+
+* **Enhancements**
+  * Improve Cassandra visualization. Issue [#420](https://github.com/mtxr/vscode-sqltools/pull/420)
+  * SQLite paths for remote development. Issue [#421](https://github.com/mtxr/vscode-sqltools/issues/421)
+  * Support for Azure Active Directory login. Issue [#421](https://github.com/mtxr/vscode-sqltools/issues/375)
+
+* **Fixes**
+  * SQLite asking for passwords. Issue [#396](https://github.com/mtxr/vscode-sqltools/issues/396)
 
 ### v0.21.0 - (September 19, 2019)
 
