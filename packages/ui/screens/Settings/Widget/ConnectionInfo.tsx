@@ -5,7 +5,7 @@ import './ConnectionInfo.scss';
 import DriverSettings from './../Drivers';
 import Checkbox from '../Fields/Checkbox';
 
-const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelative, testConnection, state: { connectionSettings, errors = {}, defaultMethod = null, ...state } }) => {
+const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelative, testConnection, openConnectionFile, state: { connectionSettings, errors = {}, defaultMethod = null, ...state } }) => {
   const SelectedDriverSettings = DriverSettings[connectionSettings.dialect] || (() => null) as any;
   return (
     <>
@@ -49,6 +49,15 @@ const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelativ
           >
             Test Connection
           </button>
+          {!`${state.action || 'create'}`.startsWith('create') && <button
+            className='btn'
+            disabled={Object.keys(errors).length > 0}
+            onClick={openConnectionFile}
+            style={{ float: 'right' }}
+            type="button"
+          >
+            Open settings file
+          </button>}
         </div>
       </form>
       {/* {<pre>{JSON.stringify(connectionSettings, null, 2)}</pre>} */}

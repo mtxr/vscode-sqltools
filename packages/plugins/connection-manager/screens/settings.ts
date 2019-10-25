@@ -30,6 +30,8 @@ export default class SettingsWebview extends WebviewProvider {
           return this.updateConnection(payload);
         case 'testConnection':
           return this.testConnection(payload);
+        case 'openConnectionFile':
+          this.openConnectionFile(payload);
         default:
         break;
       }
@@ -83,5 +85,13 @@ export default class SettingsWebview extends WebviewProvider {
       }
       this.postMessage({ action: 'testConnectionError', payload });
     });
+  }
+
+  private openConnectionFile = async ({ connInfo, openGlobal }) => {
+    if (openGlobal) {
+      return commands.executeCommand('workbench.action.openSettingsJson');
+    }
+
+    // @TODO check which file stores the connections
   }
 }

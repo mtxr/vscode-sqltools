@@ -967,7 +967,7 @@
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",
         "typescript": "^3.4.1",
-        "vscode": "^1.1.30",
+        "vscode": "^1.1.36",
         "webpack": "^4.35.0",
         "webpack-cli": "^3.3.5"
     },
