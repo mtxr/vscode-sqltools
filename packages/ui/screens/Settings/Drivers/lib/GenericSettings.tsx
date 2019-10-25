@@ -91,7 +91,7 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
         method === ConnectionMethod.SocketFile &&
         <FileInput
           label="Socket File*"
-          onChange={socketPath => updateSettings({ socketPath })}
+          onChange={({ file: socketPath }) => updateSettings({ socketPath })}
           value={settings.socketPath}
           hasError={hasError.socketPath}
         />

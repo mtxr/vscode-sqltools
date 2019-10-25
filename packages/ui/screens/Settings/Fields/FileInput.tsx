@@ -3,6 +3,7 @@ import React from 'react';
 interface State {
   value: string;
   name: string;
+  useRaw: boolean;
 }
 
 interface Props {
@@ -25,11 +26,11 @@ class FileInput extends React.Component<Props, State> {
           name = name.substring(1);
       }
     }
-    this.state = { value, name };
+    this.state = { value, name, useRaw: false };
   }
 
   onChange = () => {
-    return this.props.onChange(this.state.value);
+    return this.props.onChange({ file: this.state.value, transformToRelative: !this.state.useRaw });
   };
 
   onChangeFile = () => {
@@ -39,8 +40,11 @@ class FileInput extends React.Component<Props, State> {
     this.setState({
       value,
       name,
+      useRaw: false
     }, this.onChange);
   }
+
+  onTypePath = (value) => this.setState({ value, name: value, useRaw: true }, this.onChange);
 
   fileField = React.createRef<HTMLInputElement>();
 
@@ -48,27 +52,34 @@ class FileInput extends React.Component<Props, State> {
     return (
       <div className={`field ${this.props.hasError ? 'has-error' : ''}`}>
         <label>{this.props.label}</label>
-        <div style={{ position: 'relative', display: 'flex' }} title={this.state.value}>
+        <div style={{ display: 'flex' }} title={this.state.value}>
           <input
             style={{ flex: 1 }}
             type="text"
-            placeholder="Click to select a file"
+            placeholder="File or remote path"
             value={this.state.name || ''}
-            disabled
+            onChange={e => this.onTypePath(e.target.value || '')}
+            disabled={this.props.disabled || false}
           />
-          <input
-            style={{
-              opacity: 0,
-              position: 'absolute',
-              flex: 1,
-              cursor: 'pointer',
-              width: '100%',
-              padding: '4px 0',
-            }}
-            type="file"
-            ref={this.fileField}
-            onChange={this.onChangeFile}
-          />
+          <button type="button" style={{ position: 'relative' }}>
+            <input
+              style={{
+                opacity: 0,
+                position: 'absolute',
+                flex: 1,
+                cursor: 'pointer',
+                width: '100%',
+                top: 0,
+                bottom: 0,
+                left: 0,
+                right: 0,
+              }}
+              type="file"
+              ref={this.fileField}
+              onChange={this.onChangeFile}
+            />
+            Select file
+          </button>
         </div>
       </div>
     );

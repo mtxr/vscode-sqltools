@@ -7,7 +7,9 @@ import { DatabaseDialect } from '@sqltools/core/interface';
 
 const relativeToWorkspace = (file: string) => {
   const fileUri = workspace.asRelativePath(Uri.file(file), true);
-  return file === fileUri ? file : `.${path.sep}${fileUri}`;
+  if (file === fileUri) return file;
+  if (fileUri.startsWith('/') || fileUri.startsWith('.//')) return file;
+  return `.${path.sep}${fileUri}`;
 }
 
 export default class SettingsWebview extends WebviewProvider {
@@ -34,8 +36,8 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private updateConnection = async ({ connInfo, globalSetting, editId }) => {
-    if (connInfo.dialect === DatabaseDialect.SQLite) {
+  private updateConnection = async ({ connInfo, globalSetting, transformToRelative, editId }) => {
+    if (connInfo.dialect === DatabaseDialect.SQLite && transformToRelative) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
     return commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
@@ -49,8 +51,8 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private createConnection = async ({ connInfo, globalSetting }) => {
-    if (connInfo.dialect === DatabaseDialect.SQLite) {
+  private createConnection = async ({ connInfo, globalSetting, transformToRelative }) => {
+    if (connInfo.dialect === DatabaseDialect.SQLite && transformToRelative) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
     return commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)

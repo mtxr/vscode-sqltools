@@ -5,7 +5,7 @@ import './ConnectionInfo.scss';
 import DriverSettings from './../Drivers';
 import Checkbox from '../Fields/Checkbox';
 
-const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, testConnection, state: { connectionSettings, errors = {}, defaultMethod = null, ...state } }) => {
+const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelative, testConnection, state: { connectionSettings, errors = {}, defaultMethod = null, ...state } }) => {
   const SelectedDriverSettings = DriverSettings[connectionSettings.dialect] || (() => null) as any;
   return (
     <>
@@ -18,6 +18,7 @@ const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, testConnection, 
           updateSettings={updateSettings}
           defaultMethod={defaultMethod}
           errors={errors}
+          toggleUseRelative={toggleUseRelative}
         />
         {`${state.action || 'create'}`.startsWith('create') && <Checkbox
           label='Save To Global Settings?'

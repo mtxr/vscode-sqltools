@@ -28,6 +28,7 @@ interface SettingsScreenState {
   action: 'create' | 'update' | 'updateConnectionSuccess' | 'createConnectionSuccess';
   saved?: boolean;
   globalSetting?: boolean;
+  transformToRelative?: boolean;
 }
 
 export default class SettingsScreen extends React.Component<{}, SettingsScreenState> {
@@ -106,6 +107,8 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
 
   toggleGlobal = globalSetting => this.setState({ globalSetting });
 
+  toggleUseRelative = transformToRelative => this.setState({ transformToRelative });
+
   updateConnectionSettings = (options: Partial<ConnectionInterface> = {}, cb?: any) => this.setState({
     connectionSettings: {
       ...this.state.connectionSettings,
@@ -156,7 +159,8 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
           payload: {
             editId,
             connInfo,
-            globalSetting: !!this.state.globalSetting
+            globalSetting: !!this.state.globalSetting,
+            transformToRelative: this.state.transformToRelative
           }
         });
       });
@@ -211,6 +215,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
               testConnection={this.testConnection}
               state={this.state}
               toggleGlobal={this.toggleGlobal}
+              toggleUseRelative={this.toggleUseRelative}
             />
           )}
           {step === Step.CONNECTION_CREATED && (

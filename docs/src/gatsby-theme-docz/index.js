@@ -15,7 +15,6 @@ const bsaeComponents = {
 
 const Theme = ({ children }) => {
   const config = useConfig();
-  console.log(config)
   return (
     <ThemeProvider theme={config.themeConfig}>
       <ComponentsProvider components={bsaeComponents}>
