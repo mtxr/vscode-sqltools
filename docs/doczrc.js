@@ -2,8 +2,10 @@ const path = require('path');
 
 const PUBLIC = path.resolve(__dirname, 'assets');
 
+const primary = 'rgb(5, 4, 49)';
+
 const header = {
-  bg: '#993861',
+  bg: primary,
   border: 'transparent',
   text: 'white'
 };
@@ -32,6 +34,7 @@ module.exports = exports.default = {
       header,
       sidebar: {
         bg: '#00000008',
+        navLinkActive: '#4D4BA9',
       },
       modes: {
         dark: {
@@ -60,6 +63,8 @@ module.exports = exports.default = {
       },
       pre: {
         paddingLeft: 0,
+        fontSize: '1em',
+        lineHeight: '1.3',
         '::after': {
           background: '#ffffff08',
           width: '2.5em',
@@ -75,7 +80,7 @@ module.exports = exports.default = {
   },
   gatsbyRemarkPlugins: [
     { resolve: 'gatsby-remark-code-titles' },
-    { resolve: 'gatsby-remark-embed-video' },
+    // { resolve: 'gatsby-remark-embed-video' },
     // 'gatsby-remark-responsive-iframe',
     {
       resolve: `gatsby-remark-vscode`,
