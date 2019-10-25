@@ -11,6 +11,7 @@ const header = {
 };
 
 module.exports = exports.default = {
+  theme: path.resolve(__dirname, 'src/gatsby-theme-docz/index.js'),
   title: 'SQLTools',
   description: 'SQLTools for VSCode',
   menu: [
