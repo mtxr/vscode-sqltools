@@ -1,5 +1,5 @@
 /** @jsx jsx */
-import React from 'react';
+// import React from 'react';
 import { jsx, Styled } from 'theme-ui';
 
 export const Code = ({ className, ...props }) => {
