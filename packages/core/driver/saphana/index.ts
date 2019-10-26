@@ -5,6 +5,7 @@ import {
 import queries from './queries';
 import AbstractDriver from '@sqltools/core/driver/abstract';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import sqltoolsRequire from '../../utils/sqltools-require';
 
 interface Statement {
   exec(params: any[], handler: (err: any, row: any) => void);
@@ -31,7 +32,7 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
   }];
 
   private get lib() {
-    return __non_webpack_require__('@sap/hana-client') as HanaClientModule;
+    return sqltoolsRequire('@sap/hana-client') as HanaClientModule;
   }
 
   queries = queries;

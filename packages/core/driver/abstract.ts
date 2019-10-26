@@ -7,6 +7,7 @@ import Drivers from '@sqltools/core/driver';
 import * as Utils from '@sqltools/core/utils';
 import { MissingModuleException, ElectronNotSupportedException } from '../exception';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import sqltoolsRequire from '../utils/sqltools-require';
 
 export interface Deps {
   type: 'package' | 'npmscript';
@@ -64,13 +65,13 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
         switch (dep.type) {
           case 'package':
             try {
-              delete __non_webpack_require__.cache[__non_webpack_require__.resolve(dep.name + '/package.json')];
-              const { version } = __non_webpack_require__(dep.name + '/package.json');
+              delete sqltoolsRequire.cache[sqltoolsRequire.resolve(dep.name + '/package.json')];
+              const { version } = sqltoolsRequire(dep.name + '/package.json');
               if (dep.version && version !== dep.version) {
                 mustUpgrade = true;
                 throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
               }
-              __non_webpack_require__(dep.name);
+              sqltoolsRequire(dep.name);
             } catch(e) {
               throw new MissingModuleException(dep.name, dep.version, this.credentials, mustUpgrade);
             }

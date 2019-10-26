@@ -1,7 +1,7 @@
 import Drivers from '@sqltools/core/driver';
 import AbstractDriver from '@sqltools/core/driver/abstract';
 import SQLTools from '@sqltools/core/plugin-api';
-import { commandExists } from '@sqltools/core/utils';
+import { commandExists, getDataPath } from '@sqltools/core/utils';
 import { spawn, SpawnOptions } from 'child_process';
 import fs from 'fs';
 import path from 'path';
@@ -119,9 +119,9 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
 
   private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
     if (!commandExists('npm')) {
-      throw new Error('You need to install node@6 or newer and npm first to install dependencies. Install it and restart to continue.');
+      throw new Error('You need to install node@6 or newer and npm/yarn first to install dependencies. Install it and restart to continue.');
     }
-    return run('npm', args, { cwd: this.root, shell: true, ...options });
+    return run('npm', args, { cwd: getDataPath(), shell: true, ...options });
   }
 
   get npmVersion() {

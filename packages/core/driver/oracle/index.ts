@@ -7,6 +7,7 @@ import OracleDBLib from 'oracledb';
 import AbstractDriver from '../abstract';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
+import sqltoolsRequire from '../../utils/sqltools-require';
 
 const OracleDBLibVersion = '4.0.0';
 export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> implements ConnectionDriver {
@@ -25,7 +26,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
   queries = queries
 
   private get lib(): typeof OracleDBLib {
-    const oracledb = __non_webpack_require__('oracledb');
+    const oracledb = sqltoolsRequire('oracledb');
     oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB, oracledb.NUMBER];
     return oracledb;
   }

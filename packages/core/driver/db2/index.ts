@@ -4,6 +4,7 @@ import queries from './queries';
 import * as db2Lib from 'ibm_db';
 import AbstractDriver from '../abstract';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import sqltoolsRequire from '../../utils/sqltools-require';
 
 const D2BLibVersion = '2.6.1';
 export default class DB2 extends AbstractDriver<db2Lib.Database> implements ConnectionDriver {
@@ -17,7 +18,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
   queries = queries
 
   private get lib(): typeof db2Lib.Pool {
-    const dbLib = __non_webpack_require__('ibm_db').Pool;
+    const dbLib = sqltoolsRequire('ibm_db').Pool;
     return dbLib;
   }
 

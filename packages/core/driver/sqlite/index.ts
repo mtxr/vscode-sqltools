@@ -6,6 +6,7 @@ import SQLiteLib from 'sqlite3';
 import AbstractDriver from '../abstract';
 import queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import sqltoolsRequire from '../../utils/sqltools-require';
 
 const SQLite3Version = '4.0.8';
 
@@ -21,7 +22,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database> implement
   queries = queries;
 
   private get lib() {
-    return __non_webpack_require__('sqlite3') as SQLiteLib.sqlite3;
+    return sqltoolsRequire('sqlite3') as SQLiteLib.sqlite3;
   }
 
   public async open() {

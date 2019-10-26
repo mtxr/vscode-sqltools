@@ -16,6 +16,10 @@ if (!fs.existsSync(SQLTOOLS_PATHS.cache)) {
   fs.mkdirSync(SQLTOOLS_PATHS.cache);
 }
 
+if (!fs.existsSync(getDataPath('node_modules'))) {
+  fs.mkdirSync(getDataPath('node_modules'));
+}
+
 /**
    * Get user home path
    *
