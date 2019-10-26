@@ -3,8 +3,18 @@ import path from 'path';
 import fs from 'fs';
 import EnvironmentException from './../exception/environment';
 
-const SQLTOOLS_PATHS = envPaths('vscode-sqltools');
+const SQLTOOLS_PATHS = envPaths('vscode-sqltools', { suffix: null });
 let home: string;
+
+if (!fs.existsSync(SQLTOOLS_PATHS.config)) {
+  fs.mkdirSync(SQLTOOLS_PATHS.config);
+}
+if (!fs.existsSync(SQLTOOLS_PATHS.data)) {
+  fs.mkdirSync(SQLTOOLS_PATHS.data);
+}
+if (!fs.existsSync(SQLTOOLS_PATHS.cache)) {
+  fs.mkdirSync(SQLTOOLS_PATHS.cache);
+}
 
 /**
    * Get user home path
@@ -38,12 +48,12 @@ export function getCachePath(...args: string[]) {
 export function migrateFilesToNewPaths() {
   const toMigrate = [
     {
-      from: path.resolve(getHome(), '.sqltools-setup'),
+      from: getHome('.sqltools-setup'),
       to: getConfigPath(RUNNING_INFO_FILENAME),
       migrated: false,
     },
     {
-      from: path.resolve(getHome(), '.SQLTools'),
+      from: getHome('.SQLTools'),
       to: getDataPath(SESSION_FILES_DIRNAME)
     }
   ];
