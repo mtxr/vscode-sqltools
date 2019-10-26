@@ -31,7 +31,7 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
     commands.executeCommand('workbench.action.reloadWindow');
   }
 
-  private installingDialects: string[] = [];
+  private installingDrivers: string[] = [];
   private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
     conn = conn || {};
     const installNow = 'Install now';
@@ -44,21 +44,21 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
       );
       switch (r) {
         case installNow:
-          this.installingDialects.push(conn.dialect);
+          this.installingDrivers.push(conn.driver);
           await window.withProgress({
             location: ProgressLocation.Notification,
             title: `SQLTools is ${action === 'upgrade' ? 'upgrading deps' : 'installing'}`,
             cancellable: false,
           }, async (progress) => {
-            progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+            progress.report({ message: `${this.installingDrivers.join(', ')} dependencies` });
             const interval = setInterval(() => {
-              progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
+              progress.report({ message: `${this.installingDrivers.join(', ')} dependencies` });
             }, 1000);
-            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.driver });
             clearInterval(interval);
             return result;
           });
-          this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
+          this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
@@ -70,12 +70,12 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/connections/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/connections/${conn.driver ? conn.driver.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {
-      this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}:`, error);
+      this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
+      this.extension.errorHandler(`Failed to install dependencies for ${conn.driver}:`, error);
     }
   }
 

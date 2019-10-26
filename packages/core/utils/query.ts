@@ -8,12 +8,12 @@ import { DatabaseInterface } from '@sqltools/core/plugin-api';
  *
  * @export
  * @param {string} query
- * @param {('pg' | 'mysql' | 'mssql')} [dialect='mysql']
+ * @param {('pg' | 'mysql' | 'mssql')} [driver='mysql']
  * @param {string} [delimiter=';']
  * @returns {string[]}
  */
-export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): string[] {
-  return multipleQueriesParse(query, dialect);
+export function parse(query: string, driver: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): string[] {
+  return multipleQueriesParse(query, driver);
   // return fixedQuery.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim()).map(v => `${v};`);
 }
 /**

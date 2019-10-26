@@ -21,7 +21,7 @@ namespace ErrorHandler {
 
   async function output(message: string, error: ResponseError<any>) {
     const options = ['View Logs'];
-    if (error.data && error.data.dialect) {
+    if (error.data && error.data.driver) {
       options.push('Help!');
     }
 
@@ -30,7 +30,7 @@ namespace ErrorHandler {
         commands.executeCommand(`${EXT_NAME}.showOutputChannel`);
         break;
       case 'Help!':
-        openExternal(`${DOCS_ROOT_URL}/connections/${error.data.dialect.toLowerCase()}#${typeof error.code === 'string' ? error.code : error.name}`);
+        openExternal(`${DOCS_ROOT_URL}/connections/${error.data.driver.toLowerCase()}#${typeof error.code === 'string' ? error.code : error.name}`);
         break;
     }
   }

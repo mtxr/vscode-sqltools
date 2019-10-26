@@ -1,10 +1,10 @@
 import logger from '@sqltools/core/log/vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { ConnectionInterface, DatabaseDriver } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
-import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
@@ -41,7 +41,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_testConnection = async (c: ConnectionInterface) => {
     let password = null;
 
-    if (c.dialect !== DatabaseDialect.SQLite && c.askForPassword) password = await this._askForPassword(c);
+    if (c.driver !== DatabaseDriver.SQLite && c.askForPassword) password = await this._askForPassword(c);
     if (c.askForPassword && password === null) return;
     return this.client.sendRequest(
       TestConnectionRequest,
@@ -310,7 +310,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       globalValue = [],
     } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
 
-    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) == id);
+    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === id);
 
     let index = findIndex(workspaceFolderValue);
     if (index >= 0) {
@@ -359,7 +359,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.conn) {
       await this._setConnection(node.conn as ConnectionInterface);
-      return getTableName(node.conn.dialect, node.table);
+      return getTableName(node.conn.driver, node.table);
     }
 
     const conn = await this._connect();
@@ -382,12 +382,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
     return quickPick(tables
       .map((table) => {
-        const prefixedTableName = getTableName(conn.dialect, table);
+        const prefixedTableName = getTableName(conn.driver, table);
         const prefixes  = prefixedTableName.split('.');
 
         return <QuickPickItem>{
           label: table.name,
-          value: getTableName(conn.dialect, table),
+          value: getTableName(conn.driver, table),
           description: `${table.numberOfColumns} cols`,
           detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
         };
@@ -488,21 +488,21 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
       writeTo = ConfigurationTarget.Global;
     }
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList, writeTo);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', migrateConnectionSettings(connList), writeTo);
   }
 
   private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
-    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || [];
+    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || []);
 
     const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
     if (from === ConfigurationTarget.Global) {
-      return <ConnectionInterface[]>(config.globalValue || config.defaultValue) || [];
+      return migrateConnectionSettings(<ConnectionInterface[]>(config.globalValue || config.defaultValue) || []);
     }
     if (from === ConfigurationTarget.WorkspaceFolder) {
-      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue) || [];
+      return migrateConnectionSettings(<ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue) || []);
     }
 
-    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue) || [];
+    return migrateConnectionSettings(<ConnectionInterface[]>(config.workspaceValue || config.defaultValue) || []);
   }
 
   private ext_attachFileToConnection = async (fileUri: Uri) => {

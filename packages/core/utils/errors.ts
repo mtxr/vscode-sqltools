@@ -11,9 +11,9 @@ class DecoratedException<A> extends ResponseError<A> {
 
 export function decorateException(e: Error & { code?: number; data?: { [key: string]: any } }, { conn }: { conn?: ConnectionInterface } = {}) {
   let data: { [key: string]: any } = {};
-  if (conn && conn.dialect) {
-    data.dialect = conn.dialect;
-    data.dialectOptions = {
+  if (conn && conn.driver) {
+    data.driver = conn.driver;
+    data.driverOptions = {
       mssqlOptions: conn.mssqlOptions,
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,

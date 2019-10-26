@@ -1,7 +1,7 @@
 import { getConnectionId } from './utils';
-import Dialects from './dialect';
+import Drivers from './driver';
 import {
-  ConnectionDialect,
+  ConnectionDriver,
   ConnectionInterface,
 } from './interface';
 import SQLTools, { DatabaseInterface } from './plugin-api';
@@ -12,9 +12,9 @@ export default class Connection {
   private columns: DatabaseInterface.TableColumn[] = [];
   private functions: DatabaseInterface.Function[] = [];
   private connected: boolean = false;
-  private conn: ConnectionDialect;
+  private conn: ConnectionDriver;
   constructor(private credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
-    this.conn = new Dialects[credentials.dialect](this.credentials);
+    this.conn = new Drivers[credentials.driver](this.credentials);
   }
 
   private decorateException = (e: Error) => {
@@ -108,7 +108,7 @@ export default class Connection {
       .catch(this.decorateException)
       .catch((e) => {
         if (throwIfError) throw e;
-        this.telemetry.registerException(e, { dialect: this.conn.credentials.dialect });
+        this.telemetry.registerException(e, { driver: this.conn.credentials.driver });
         let message = '';
         if (typeof e === 'string') {
           message = e;
@@ -145,8 +145,8 @@ export default class Connection {
     return this.conn.credentials.database;
   }
 
-  public getDialect() {
-    return this.conn.credentials.dialect;
+  public getDriver() {
+    return this.conn.credentials.driver;
   }
 
   public getId() {

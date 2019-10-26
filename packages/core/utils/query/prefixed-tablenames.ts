@@ -1,29 +1,29 @@
-import { DatabaseDialect } from '@sqltools/core/interface';
+import { DatabaseDriver } from '@sqltools/core/interface';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-function prefixedtableName(dialect: DatabaseDialect, table: DatabaseInterface.Table | string) {
+function prefixedtableName(driver: DatabaseDriver, table: DatabaseInterface.Table | string) {
   let items: string[] = [];
   let tableObj = typeof table === 'string' ? <DatabaseInterface.Table>{ name: table } : table;
-  switch(dialect) {
-    case DatabaseDialect.SQLite:
+  switch(driver) {
+    case DatabaseDriver.SQLite:
       return `"${tableObj.name}"`;
-    case DatabaseDialect.PostgreSQL:
-    case DatabaseDialect['AWS Redshift']:
+    case DatabaseDriver.PostgreSQL:
+    case DatabaseDriver['AWS Redshift']:
       tableObj.tableDatabase && items.push(`"${tableObj.tableDatabase}"`);
       tableObj.tableSchema && items.push(`"${tableObj.tableSchema}"`);
       items.push(`"${tableObj.name}"`);
       break;
-    case DatabaseDialect.DB2:
-    case DatabaseDialect.OracleDB:
-    case DatabaseDialect.Cassandra:
+    case DatabaseDriver.DB2:
+    case DatabaseDriver.OracleDB:
+    case DatabaseDriver.Cassandra:
       tableObj.tableSchema && items.push(tableObj.tableSchema);
       items.push(tableObj.name);
       break;
-    case DatabaseDialect.MySQL:
+    case DatabaseDriver.MySQL:
         tableObj.tableSchema && items.push(`\`${tableObj.tableSchema}\``);
         items.push(`\`${tableObj.name}\``);
         break;
-    case DatabaseDialect.MSSQL:
+    case DatabaseDriver.MSSQL:
       tableObj.tableCatalog && items.push(`[${tableObj.tableCatalog}]`);
       tableObj.tableSchema && items.push(`[${tableObj.tableSchema}]`);
       items.push(`[${tableObj.name}]`);

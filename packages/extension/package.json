@@ -375,21 +375,21 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.codelensLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
+                    "markdownDescription": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
                 },
                 "sqltools.format": {
                     "type": "object",
@@ -477,7 +477,7 @@
                                 "required": false,
                                 "default": false
                             },
-                            "dialect": {
+                            "driver": {
                                 "type": "string",
                                 "enum": [
                                     "AWS Redshift",
@@ -491,8 +491,13 @@
                                     "SAPHana",
                                     "SQLite"
                                 ],
-                                "description": "Connection Dialect",
+                                "description": "Connection Driver",
                                 "required": false
+                            },
+                            "dialect": {
+                                "type": "string",
+                                "description": "Connection Driver",
+                                "deprecationMessage": "***DEPRECATED*** Replaced by `driver` property. Use `driver` property instead."
                             },
                             "connectString": {
                                 "type": [
@@ -507,7 +512,7 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -557,7 +562,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "required": false,
@@ -577,7 +582,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
@@ -638,7 +643,7 @@
                                 "current",
                                 "end"
                             ],
-                            "description": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
+                            "markdownDescription": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
                         },
                         "customization": {
                             "type": "object",

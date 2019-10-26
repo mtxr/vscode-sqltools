@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import Text from '../../Fields/Text';
 import Checkbox from '../../Fields/Checkbox';
 import Select from '../../Fields/Select';
-import availableDialects from '../../lib/availableDialects';
+import availableDrivers from '../../lib/availableDrivers';
 import FileInput from '../../Fields/FileInput';
 
 enum ConnectionMethod {
@@ -26,7 +26,7 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
       case ConnectionMethod.ServerAndPort:
         delete newSettings.socketPath;
         delete newSettings.connectString;
-        newSettings.port = availableDialects[settings.dialect].port;
+        newSettings.port = availableDrivers[settings.driver].port;
         newSettings.server = 'localhost';
         newSettings.askForPassword = true;
         break;

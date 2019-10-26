@@ -1,17 +1,17 @@
 import React from 'react';
 import get from 'lodash/get';
-import availableDialects from '../lib/availableDialects';
+import availableDrivers from '../lib/availableDrivers';
 import './ConnectionInfo.scss';
 import DriverSettings from './../Drivers';
 import Checkbox from '../Fields/Checkbox';
 
 const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelative, testConnection, state: { connectionSettings, errors = {}, defaultMethod = null, ...state } }) => {
-  const SelectedDriverSettings = DriverSettings[connectionSettings.dialect] || (() => null) as any;
+  const SelectedDriverSettings = DriverSettings[connectionSettings.driver] || (() => null) as any;
   return (
     <>
       <h5>Connection Settings</h5>
       <hr/>
-      {get(availableDialects, [connectionSettings.dialect, 'icon']) && <img className={'selected-driver-icon'} src={`${(window as any).extRoot}/${get(availableDialects, [connectionSettings.dialect, 'icon'])}`} />}
+      {get(availableDrivers, [connectionSettings.driver, 'icon']) && <img className={'selected-driver-icon'} src={`${(window as any).extRoot}/${get(availableDrivers, [connectionSettings.driver, 'icon'])}`} />}
       <form onSubmit={submit}>
         <SelectedDriverSettings
           settings={connectionSettings}

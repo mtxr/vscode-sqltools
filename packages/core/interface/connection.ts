@@ -1,4 +1,4 @@
-import { DatabaseDialect } from './dialect';
+import { DatabaseDriver } from './driver';
 import { ClientConfig } from 'pg';
 import { ConnectionConfig } from 'mysql';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
@@ -58,11 +58,11 @@ export interface ConnectionInterface {
    */
   askForPassword?: boolean;
   /**
-   * Connection Dialect
-   * @type {DatabaseDialect}
+   * Connection driver
+   * @type {DatabaseDriver}
    * @memberof ConnectionInterface
    */
-  dialect: DatabaseDialect;
+  driver: DatabaseDriver;
   /**
    * Connection timeout in seconds
    * @type {number}
@@ -168,7 +168,7 @@ export interface ConnectionInterface {
   };
 }
 
-export interface ConnectionDialect {
+export interface ConnectionDriver {
   connection: any;
   credentials: ConnectionInterface;
   open(): Promise<any>;

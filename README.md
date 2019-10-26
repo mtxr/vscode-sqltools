@@ -45,7 +45,7 @@ Special thanks to this amazing developers that keep the project running!
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
 
-> I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
+> I'm looking for maintainers for each driver, if you are interested on maintain/test any driver, please contact me. https://mteixeira.dev
 
 
 ### Docs

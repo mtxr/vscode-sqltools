@@ -2,7 +2,7 @@ import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
 import { ConnectionInterface,} from '@sqltools/core/interface';
 import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plugin-api';
-import { getConnectionId } from '@sqltools/core/utils';
+import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest } from './contracts';
@@ -16,6 +16,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   private get connections() {
     const { activeConnections, lastUsedId } = this.server.store.getState();
     return (ConfigManager.connections || []).map(conn => {
+      conn = migrateConnectionSetting(conn);
       conn.isActive = getConnectionId(conn) === lastUsedId;
       conn.isConnected = !!activeConnections[getConnectionId(conn)];
 
@@ -165,7 +166,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
-        if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
+        if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
           return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
         }
         return void this.server.sendNotification(e.data.notification, e.data.args);
@@ -201,7 +202,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
-        if (req.conn.dialect && DependencyManager.runningJobs.includes(req.conn.dialect)) {
+        if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
           return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
         }
         delete e.data.args.conn;

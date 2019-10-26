@@ -1,6 +1,6 @@
 import React from 'react';
 import get from 'lodash/get';
-import availableDialects from '../lib/availableDialects';
+import availableDrivers from '../lib/availableDrivers';
 import './ConnectionCreated.scss';
 import Syntax from '../../../components/Syntax';
 
@@ -10,7 +10,7 @@ const ConnectionCreated = ({ settings, action, reset }) => {
     <>
       <h5>Review connection details</h5>
       <hr/>
-      {get(availableDialects, [settings.dialect, 'icon']) && <img className={'selected-driver-icon'} src={`${(window as any).extRoot}/${get(availableDialects, [settings.dialect, 'icon'])}`} />}
+      {get(availableDrivers, [settings.driver, 'icon']) && <img className={'selected-driver-icon'} src={`${(window as any).extRoot}/${get(availableDrivers, [settings.driver, 'icon'])}`} />}
       <div style={{ minHeight: '150px' }}>
         <h5>
           {action === 'createConnectionSuccess' && `${settings.name} added to your settings!`}

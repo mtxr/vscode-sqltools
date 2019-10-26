@@ -1,5 +1,5 @@
-import Dialects from '@sqltools/core/dialect';
-import GenericDialect from '@sqltools/core/dialect/generic';
+import Drivers from '@sqltools/core/driver';
+import AbstractDriver from '@sqltools/core/driver/abstract';
 import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists } from '@sqltools/core/utils';
 import { spawn, SpawnOptions } from 'child_process';
@@ -60,22 +60,22 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
 
   public static runningJobs: string[] = [];
 
-  private onRequestToInstall = async ({ dialect } = { dialect: undefined }) => {
-    const DialectClass = Dialects[dialect];
+  private onRequestToInstall = async ({ driver } = { driver: undefined }) => {
+    const DriverClass = Drivers[driver];
     if (
-      !DialectClass ||
-      !DialectClass.deps ||
-      DialectClass.deps.length === 0
+      !DriverClass ||
+      !DriverClass.deps ||
+      DriverClass.deps.length === 0
     ) {
       throw new Error('Nothing to install. Request is invalid.');
     }
 
-    const deps: typeof GenericDialect['deps'] = DialectClass.deps;
+    const deps: typeof AbstractDriver['deps'] = DriverClass.deps;
 
-    if (DependencyManager.runningJobs.includes(dialect)) {
-      return console.log(`You are already installing deps for ${dialect}`)
+    if (DependencyManager.runningJobs.includes(driver)) {
+      return console.log(`You are already installing deps for ${driver}`)
     }
-    DependencyManager.runningJobs.push(dialect);
+    DependencyManager.runningJobs.push(driver);
 
     console.log('Received request to install deps:', JSON.stringify(deps));
     try {
@@ -95,9 +95,9 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
         }
       }
       console.log('Finished installing deps');
-      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
+      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== driver);
     } catch (e) {
-      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== dialect);
+      DependencyManager.runningJobs = DependencyManager.runningJobs.filter(v => v !== driver);
       throw e;
     }
   }

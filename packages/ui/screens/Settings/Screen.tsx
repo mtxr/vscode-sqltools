@@ -3,8 +3,8 @@ import Loading from '@sqltools/ui/components/Loading';
 import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
 import { ConnectionInterface } from '@sqltools/core/interface';
 import { Container } from '@material-ui/core';
-import DatabaseSelector from './Widget/DatabaseSelector';
-import availableDialects from './lib/availableDialects';
+import DriverSelector from './Widget/DriverSelector';
+import availableDrivers from './lib/availableDrivers';
 import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
 import getVscode from '@sqltools/ui/lib/vscode';
@@ -127,18 +127,18 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
     } catch (e) { /**/ }
   }
 
-  driverSelector = (dialect: (typeof availableDialects)[string]) => {
+  driverSelector = (driver: (typeof availableDrivers)[string]) => {
     this.updateConnectionSettings({
-      dialect: dialect.value,
-      port: dialect.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || dialect.port || null),
-      server: dialect.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
-      askForPassword: dialect.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
+      driver: driver.value,
+      port: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || driver.port || null),
+      server: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
+      askForPassword: driver.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
     }, () => this.setState({ step: Step.CONNECTION_INFO }));
 
   }
 
   validateSettings = (cb = undefined) => {
-    const requiredFields = availableDialects[this.state.connectionSettings.dialect].requiredProps(this.state.connectionSettings);
+    const requiredFields = availableDrivers[this.state.connectionSettings.driver].requiredProps(this.state.connectionSettings);
     Object.keys(this.state.connectionSettings).forEach(key => {
       if (typeof this.state.connectionSettings[key] === 'undefined') return;
       if (this.state.connectionSettings[key] === null) return;
@@ -188,7 +188,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
         <Container maxWidth='md' className={`blur ${this.state.loading ? 'blur-active' : ''}`}>
           <h3>
             Connection Assistant
-            <small style={{ float: 'right' }}>
+            <small style={{ float: 'right' }} className='stepper'>
               {
                 this.state.step - 1 >= Step.CONNECTION_TYPE
                 && <a onClick={() => this.goTo(this.state.step - 1)}>{'<'}</a>
@@ -196,16 +196,16 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
               Step {this.state.step}/{totalSteps}
               {
                 this.state.step + 1 <= Step.CONNECTION_CREATED
-                && this.state.connectionSettings.dialect
+                && this.state.connectionSettings.driver
                 && (this.state.step + 1 !== Step.CONNECTION_CREATED || this.state.saved)
                 && <a onClick={() => this.goTo(this.state.step + 1)}>{'>'}</a>
               }
             </small>
           </h3>
           {step === Step.CONNECTION_TYPE && (
-            <DatabaseSelector
+            <DriverSelector
               onSelect={this.driverSelector}
-              selected={this.state.connectionSettings['dialect']}
+              selected={this.state.connectionSettings['driver']}
             />
           )}
           {step === Step.CONNECTION_INFO && (
