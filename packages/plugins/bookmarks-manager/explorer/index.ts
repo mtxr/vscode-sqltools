@@ -3,9 +3,8 @@ import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscod
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { getHome } from '@sqltools/core/utils';
+import { getDataPath } from '@sqltools/core/utils/persistence';
 import fs from 'fs';
-import path from 'path';
 
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
 
@@ -48,11 +47,11 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   private get oldFilePath() {
-    return path.join(getHome(), `.Bookmarks.SQLToolsStorage.json`);
+    return this.asAbsolutePath('Bookmarks.json');
   }
 
   private get filePath() {
-    return path.join(this.asAbsolutePath('Bookmarks.json'));
+    return getDataPath('Bookmarks.json');
   }
 
   /**
@@ -63,14 +62,6 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     if (!fs.existsSync(this.oldFilePath)) return;
     try {
       fs.renameSync(this.oldFilePath, this.filePath);
-      let data = {};
-      try {
-        data = JSON.parse(fs.readFileSync(this.filePath).toString('utf8'))
-      } catch (error) {}
-      const Bookmarks = {
-        Ungrouped: data,
-      };
-      fs.writeFileSync(this.filePath, JSON.stringify(Bookmarks));
     } catch (e) {}
   }
 

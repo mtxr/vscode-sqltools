@@ -19,8 +19,8 @@ export default class SettingsWebview extends WebviewProvider {
   constructor(context: ExtensionContext) {
     super(
       context,
-      Uri.file(path.join(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
-      Uri.file(path.join(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
+      Uri.file(path.resolve(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
+      Uri.file(path.resolve(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
     );
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {

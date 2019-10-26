@@ -28,3 +28,7 @@ export function migrateConnectionSettings(connections: ConnectionInterface[]): C
 
   return (<ConnectionInterface[]>connections).map(migrateConnectionSetting);
 }
+
+export function getSessionBasename(connName: string) {
+  return `${connName}.session.sql`;
+}

@@ -2,7 +2,7 @@ import path from 'path';
 import * as query from './query';
 import commandExists from './command-exists';
 import { ConnectionInterface, DatabaseDriver } from '../interface';
-export * from './get-home';
+export * from './persistence';
 export * from './replacer';
 export * from './telemetry';
 export * from './timer';

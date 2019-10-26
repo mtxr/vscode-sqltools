@@ -2,9 +2,10 @@ import logger from '@sqltools/core/log/vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDriver } from '@sqltools/core/interface';
+import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
-import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
@@ -13,7 +14,6 @@ import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBa
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
-import { getHome } from '@sqltools/core/utils';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 
@@ -139,9 +139,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     if (!baseFolder) {
-      baseFolder = Uri.file(path.join(getHome(), '.SQLTools'));
+      baseFolder = Uri.file(getDataPath(SESSION_FILES_DIRNAME));
     }
-    const sessionFilePath = path.join(baseFolder.fsPath, `${conn.name} Session.sql`);
+    const sessionFilePath = path.resolve(baseFolder.fsPath, getSessionBasename(conn.name));
     try {
       this.updateAttachedConnectionsMap(
         await this.openSessionFileWithProtocol(sessionFilePath, 'file'),

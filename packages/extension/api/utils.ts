@@ -1,8 +1,7 @@
-import path from 'path';
 import { VERSION, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import SerializableStorage from '@sqltools/core/utils/serializable-storage';
-import { getHome } from '@sqltools/core/utils/get-home';
 import { numericVersion } from '@sqltools/core/utils';
+import { getConfigPath, RUNNING_INFO_FILENAME } from '@sqltools/core/utils/persistence';
 
 let setup: SerializableStorage<any, string>;
 
@@ -17,7 +16,7 @@ namespace Utils {
     if (setup) {
       return setup.getContent();
     }
-    setup = new SerializableStorage<any, string>(path.join(getHome(), '.sqltools-setup'));
+    setup = new SerializableStorage<any, string>(getConfigPath(RUNNING_INFO_FILENAME));
     const localConfig = {
       current: {
         numericVersion: numericVersion(VERSION),

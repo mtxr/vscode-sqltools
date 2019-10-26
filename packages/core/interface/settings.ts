@@ -179,7 +179,7 @@ export interface Settings {
    */
   languageServerEnv?: { [id: string]: string };
 
-  queryParams: {
+  queryParams?: {
     /**
      * Enables query parameter checking
      * @memberof Settings['queryParams']

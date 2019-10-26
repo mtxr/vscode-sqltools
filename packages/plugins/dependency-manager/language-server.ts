@@ -111,7 +111,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     });
 
     try {
-      fs.mkdirSync(path.join(this.root, 'node_modules'))
+      fs.mkdirSync(path.resolve(this.root, 'node_modules'))
     } catch (error) {};
 
     this.server.onRequest(InstallDepRequest, this.onRequestToInstall);

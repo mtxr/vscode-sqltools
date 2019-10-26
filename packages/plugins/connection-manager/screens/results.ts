@@ -120,8 +120,8 @@ export default class ResultsWebviewManager {
   private viewsPath: vscode.Uri;
 
   constructor(private context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface) {
-    this.iconsPath = vscode.Uri.file(path.join(this.context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
-    this.viewsPath = vscode.Uri.file(path.join(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
+    this.iconsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
+    this.viewsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }
 
   dispose() {

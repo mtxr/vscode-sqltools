@@ -1,3 +1,4 @@
+import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
 import logger from '@sqltools/core/log/vscode';
 import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
@@ -255,6 +256,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 let instance: SQLToolsExtension;
 export function activate(context: ExtensionContext) {
   if (instance) return;
+  migrateFilesToNewPaths();
   instance = new SQLToolsExtension(context);
   instance
     .registerPlugin(FormatterPlugin)
