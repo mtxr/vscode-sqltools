@@ -3,12 +3,13 @@ import { ConnectionInterface } from '@sqltools/core/interface';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 import { ExtensionContext, TreeItemCollapsibleState, Uri, commands } from 'vscode';
+import { getIconPathForDriver } from '@sqltools/core/utils/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
-  public static icons;
+  public static icons: { [driver: string]: { active: SidebarAbstractItem['iconPath']; connected: SidebarAbstractItem['iconPath']; disconnected: SidebarAbstractItem['iconPath'] } } = {};
   public parent = null;
 
   public get contextValue() {
@@ -61,31 +62,48 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
 
   constructor(context: ExtensionContext, public conn: ConnectionInterface) {
     super(conn.name, TreeItemCollapsibleState.None);
-    if (!SidebarConnection.icons) {
-      SidebarConnection.icons = {
-        active: {
-          dark: context.asAbsolutePath('icons/database-active-dark.svg'),
-          light: context.asAbsolutePath('icons/database-active-light.svg')
-        },
-        connected: {
-          dark: context.asAbsolutePath('icons/database-dark.svg'),
-          light: context.asAbsolutePath('icons/database-light.svg'),
-        },
-        disconnected: {
-          dark: context.asAbsolutePath('icons/database-disconnected-dark.svg'),
-          light: context.asAbsolutePath('icons/database-disconnected-light.svg'),
-        }
-      };
+    try {
+      
+      if (!SidebarConnection.icons.default) {
+        SidebarConnection.icons.defaut = {
+          active: {
+            dark: context.asAbsolutePath('icons/database-active-dark.svg'),
+            light: context.asAbsolutePath('icons/database-active-light.svg')
+          },
+          connected: {
+            dark: context.asAbsolutePath('icons/database-dark.svg'),
+            light: context.asAbsolutePath('icons/database-light.svg'),
+          },
+          disconnected: {
+            dark: context.asAbsolutePath('icons/database-disconnected-dark.svg'),
+            light: context.asAbsolutePath('icons/database-disconnected-light.svg'),
+          }
+        };
+      }
+  
+      if (!SidebarConnection.icons[conn.driver]) {
+        SidebarConnection.icons[conn.driver] = {
+          active: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'active'))),
+          connected: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'default'))),
+          disconnected: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'inactive'))),
+        };
+      }
+    } catch (error) {
+      console.log(error);
     }
   }
   public get iconPath() {
-    if (this.isActive) {
-      return get(this, 'conn.icons.active') ? Uri.parse(this.conn.icons.active) : SidebarConnection.icons.active;
+    try {
+      if (this.isActive) {
+        return this.getIcon('active');
+      }
+      else if (this.contextValue === 'connectedConnection') {
+        return this.getIcon('connected');
+      }
+      return this.getIcon('disconnected');
+    } catch (error) {
+      console.log(error);
     }
-    else if (this.contextValue === 'connectedConnection') {
-      return get(this, 'conn.icons.connected') ? Uri.parse(this.conn.icons.connected) : SidebarConnection.icons.connected;;
-    }
-    return get(this, 'conn.icons.disconnected') ? Uri.parse(this.conn.icons.disconnected) : SidebarConnection.icons.disconnected;;
   }
   public getId() {
     return getConnectionId(this.conn);
@@ -127,5 +145,13 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
       this.reset();
     }
     return true;
+  }
+
+  private getIcon = (type: 'active' | 'connected' | 'disconnected') => {
+    if (get(this, ['conn', 'icons', type])) {
+      return Uri.parse(this.conn.icons[type]);
+    }
+
+    return SidebarConnection.icons[this.conn.driver][type];
   }
 }

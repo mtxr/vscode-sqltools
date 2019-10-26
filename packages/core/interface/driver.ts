@@ -8,14 +8,14 @@ export interface DriverQueries {
 }
 
 export enum DatabaseDriver {
+  'AWS Redshift' = 'AWS Redshift',
+  Cassandra = 'Cassandra',
   DB2 = 'DB2',
+  MariaDB = 'MariaDB',
   MSSQL = 'MSSQL',
   MySQL = 'MySQL',
-  MariaDB = 'MariaDB',
-  PostgreSQL = 'PostgreSQL',
-  'AWS Redshift' = 'AWS Redshift',
-  SQLite = 'SQLite',
   OracleDB = 'OracleDB',
+  PostgreSQL = 'PostgreSQL',
   SAPHana = 'SAPHana',
-  Cassandra = 'Cassandra',
+  SQLite = 'SQLite',
 }

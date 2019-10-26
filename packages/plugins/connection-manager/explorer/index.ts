@@ -20,6 +20,10 @@ const DriverHierarchyChildNames = {
   [DatabaseDriver.Cassandra]: ['Keyspace'],
 }
 
+const connectedTreeItem = new TreeItem('Connected', TreeItemCollapsibleState.Collapsed);
+connectedTreeItem.id = 'CONNECTED'
+const notConnectedTreeItem = new TreeItem('Not Connected', TreeItemCollapsibleState.Collapsed);
+notConnectedTreeItem.id = 'DISCONNECTED';
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
@@ -58,7 +62,23 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       };
       return [addNew];
     }
-    return items;
+
+    const connected = [];
+    const notConnected = [];
+    items.forEach(item => {
+      if (item.isConnected) {
+        connected.push(item);
+      } else {
+        notConnected.push(item);
+      }
+    });
+
+    connectedTreeItem.description = `${connected.length.toString()} connections`;
+    (<any>connectedTreeItem).items = connected;
+    notConnectedTreeItem.description = `${notConnected.length.toString()} connections`;
+    (<any>notConnectedTreeItem).items = notConnected;
+
+    return [connectedTreeItem, notConnectedTreeItem];
   }
   public async getChildren(element?: SidebarTreeItem) {
     if (!element) {

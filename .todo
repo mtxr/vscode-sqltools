@@ -1,4 +1,5 @@
 Todo:
+  - Update add driver tool. Rename to `Example Driver`
   - Insert queries should consider columns ordinal position
   - Allow to add to auto connect using explorer
   - Allow to open Bookmarks file

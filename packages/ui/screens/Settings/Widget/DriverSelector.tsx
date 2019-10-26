@@ -11,7 +11,7 @@ const DriverSelector = ({ onSelect, selected }) => (
     <hr/>
     <Container maxWidth='sm'>
       <Grid container spacing={2} autoCapitalize='center'>
-        {orderedDrivers.map(driver => (
+        {orderedDrivers.map(driver => (console.log(driver),
           <Grid item key={driver.value} xs={3} className={`db-item ${selected === driver.value ? 'selected' : ''}`}>
             <div onClick={() => onSelect(driver)}>
               <img src={`${(window as any).extRoot}/${driver.icon}`} />

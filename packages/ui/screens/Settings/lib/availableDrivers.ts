@@ -1,14 +1,5 @@
-import db2Icon from './../icons/db2.png';
-import mariadbIcon from './../icons/mariadb.png';
-import mssqlIcon from './../icons/mssql.png';
-import mysqlIcon from './../icons/mysql.png';
-import oracleIcon from './../icons/oracle.png';
-import postgresqlIcon from './../icons/postgresql.png';
-import redshiftIcon from './../icons/redshift.png';
-import sapHanaIcon from './../icons/sap_hana.png';
-import sqliteIcon from './../icons/sqlite.png';
-import cassandraIcon from './../icons/cassandra.png';
 import { DatabaseDriver } from '@sqltools/core/interface';
+import { getIconPathForDriver } from '@sqltools/core/utils/driver';
 
 const requirements = [
   'Node 6 or newer. 7 or newer is preferred.',
@@ -52,11 +43,11 @@ const availableDrivers: { [name: string]: Driver } = {
   DB2: {
     port: 50000,
     value: DatabaseDriver['DB2'],
+    icon: getIconPathForDriver(DatabaseDriver['DB2']),
     text: 'DB2 (Node Native)',
     experimental: true,
     showHelperText: true,
     requirements,
-    icon: db2Icon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -65,8 +56,8 @@ const availableDrivers: { [name: string]: Driver } = {
   MySQL: {
     port: 3306,
     value: DatabaseDriver['MySQL'],
+    icon: getIconPathForDriver(DatabaseDriver['MySQL']),
     text: 'MySQL',
-    icon: mysqlIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -75,8 +66,8 @@ const availableDrivers: { [name: string]: Driver } = {
   MariaDB: {
     port: 3306,
     value: DatabaseDriver['MariaDB'],
+    icon: getIconPathForDriver(DatabaseDriver['MariaDB']),
     text: 'MariaDB',
-    icon: mariadbIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -85,8 +76,8 @@ const availableDrivers: { [name: string]: Driver } = {
   MSSQL: {
     port: 1433,
     value: DatabaseDriver['MSSQL'],
+    icon: getIconPathForDriver(DatabaseDriver['MSSQL']),
     text: 'MSSQL',
-    icon: mssqlIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -95,8 +86,8 @@ const availableDrivers: { [name: string]: Driver } = {
   PostgreSQL: {
     port: 5432,
     value: DatabaseDriver['PostgreSQL'],
+    icon: getIconPathForDriver(DatabaseDriver['PostgreSQL']),
     text: 'PostgreSQL',
-    icon: postgresqlIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -105,8 +96,8 @@ const availableDrivers: { [name: string]: Driver } = {
   'AWS Redshift': {
     port: 5432,
     value: DatabaseDriver['AWS Redshift'],
+    icon: getIconPathForDriver(DatabaseDriver['AWS Redshift']),
     text: 'AWS Redshift',
-    icon: redshiftIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -115,11 +106,11 @@ const availableDrivers: { [name: string]: Driver } = {
   OracleDB: {
     port: 1521,
     value: DatabaseDriver['OracleDB'],
+    icon: getIconPathForDriver(DatabaseDriver['OracleDB']),
     text: 'OracleDB (Node Native)',
     experimental: true,
     showHelperText: true,
     requirements,
-    icon: oracleIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
 
@@ -128,11 +119,11 @@ const availableDrivers: { [name: string]: Driver } = {
   },
   SQLite: {
     value: DatabaseDriver['SQLite'],
+    icon: getIconPathForDriver(DatabaseDriver['SQLite']),
     text: 'SQLite (Node Native)',
     port: null,
     showHelperText: true,
     requirements,
-    icon: sqliteIcon,
     requiredProps: () => {
       const props = { name: true, driver: true, database: true };
       return props;
@@ -140,10 +131,10 @@ const availableDrivers: { [name: string]: Driver } = {
   },
   SAPHana: {
     value: DatabaseDriver['SAPHana'],
+    icon: getIconPathForDriver(DatabaseDriver['SAPHana']),
     text: 'SAP Hana',
     port: 30000,
     showHelperText: true,
-    icon: sapHanaIcon,
     requiredProps: setting => {
       const props = genericRequiredFields(setting);
       return props;
@@ -152,10 +143,10 @@ const availableDrivers: { [name: string]: Driver } = {
   Cassandra: {
     port: 9042,
     value: DatabaseDriver['Cassandra'],
+    icon: getIconPathForDriver(DatabaseDriver['Cassandra']),
     text: 'Cassandra',
     experimental: true,
     showHelperText: true,
-    icon: cassandraIcon,
     requiredProps: () => {
       const props = { name: true, server: true, port: true, username: true };
       return props;
