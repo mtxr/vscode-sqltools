@@ -1,1 +1,1 @@
-docs/src/pages/changelog.mdx
+## See https://vscode-sqltools.mteixeira.dev/changelog
