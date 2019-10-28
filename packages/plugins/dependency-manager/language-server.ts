@@ -1,58 +1,10 @@
 import Dialects from '@sqltools/core/dialect';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import SQLTools from '@sqltools/core/plugin-api';
-import { commandExists } from '@sqltools/core/utils';
-import { spawn, SpawnOptions } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { InstallDepRequest } from './contracts';
-
-function run(
-  command: string,
-  args?: ReadonlyArray<string>,
-  options: SpawnOptions = {}
-) {
-  return new Promise<{ message: string, stdout?: string; stderr?: string; code: number }>(
-    (resolve, reject) => {
-      options.env = {
-        ...process.env,
-        NODE_VERSION: process.versions.node,
-        ...options.env,
-      };
-      const child = spawn(command, args, { cwd: __dirname, ...options });
-      let stderr = '';
-      let stdout = '';
-      let output = '';
-
-      child.stdout.on('data', chunk => {
-        stdout += chunk.toString();
-        output += chunk.toString();
-        process.stdout.write(chunk);
-      });
-      child.stderr.on('data', chunk => {
-        stderr += chunk.toString();
-        output += chunk.toString();
-        process.stderr.write(chunk);
-      });
-
-      child.on('exit', code => {
-        if (code !== 0) {
-          return reject({
-            code,
-            stderr,
-            message: output
-          });
-        }
-        return resolve({
-          code,
-          stdout,
-          stderr,
-          message: output,
-        });
-      });
-    }
-  );
-}
+import npm from './lib/package-manager/npm';
 
 export default class DependencyManager implements SQLTools.LanguageServerPlugin {
   private root: string;
@@ -83,13 +35,13 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
         switch(dep.type) {
           case 'npmscript':
             console.log(`Will run ${dep.name} script`);
-            await this.runNpmScript(dep.name, { env: dep.env });
+            await npm.run(dep.name, { env: dep.env, cwd: this.root });
             console.log(`Finished ${dep.name} script`);
             break;
           case 'package':
             console.log(`Will install ${dep.name} package`, dep.args || '');
             const args = [`${dep.name}${dep.version ? `@${dep.version}` : ''}`].concat(dep.args || [])
-            await this.install(args, { env: dep.env });
+            await npm.install(args, { env: dep.env, cwd: this.root });
             console.log(`Finished ${dep.name} script`);
             break;
         }
@@ -115,26 +67,5 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     } catch (error) {};
 
     this.server.onRequest(InstallDepRequest, this.onRequestToInstall);
-  }
-
-  private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
-    if (!commandExists('npm')) {
-      throw new Error('You need to install node@6 or newer and npm first to install dependencies. Install it and restart to continue.');
-    }
-    return run('npm', args, { cwd: this.root, shell: true, ...options });
-  }
-
-  get npmVersion() {
-    return this.npm(['--version']).then(({ stdout }) =>
-      stdout.replace('\n', '')
-    );
-  }
-
-  public async install(args: string | string[], options: SpawnOptions = {}) {
-    return this.npm(['install', ...(Array.isArray(args) ? args : [args]) ], options);
-  }
-
-  public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
-    return this.npm(['run', scriptName ], options);
   }
 }
