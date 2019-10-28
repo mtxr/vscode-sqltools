@@ -388,7 +388,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         return <QuickPickItem>{
           label: table.name,
           value: getTableName(conn.dialect, table),
-          description: `${table.numberOfColumns} cols`,
+          description: typeof table.numberOfColumns !== 'undefined' ? `${table.numberOfColumns} cols` : '',
           detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
         };
       }), prop, {
