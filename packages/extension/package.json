@@ -708,6 +708,32 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Auto open session file when connect"
+                },
+                "sqltools.dependencyManager": {
+                    "type": "object",
+                    "description": "Dependency manager settings",
+                    "default": {
+                        "packageManager": "npm",
+                        "installArgs": ["install"],
+                        "runScriptArgs": ["run"]
+                    },
+                    "properties": {
+                        "packageManager": {
+                            "type": "string",
+                            "markdownDescription": "Package manager name or path. Eg. yarn, npm or absolute paths like /usr/bin/npm",
+                            "default": "npm"
+                        },
+                        "installArgs": {
+                            "type": "array",
+                            "description": "Array of args passed when installing. If you use yarn, this shoud be set to `[\"add\"]`",
+                            "default": ["install"]
+                        },
+                        "runScriptArgs": {
+                            "type": "array",
+                            "description": "Array of args passed when runnning npm scripts.",
+                            "default": ["run"]
+                        }
+                    }
                 }
             }
         },

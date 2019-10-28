@@ -1,6 +1,6 @@
 import { spawn, SpawnOptions } from 'child_process';
 
-function run(
+function execPromise(
   command: string,
   args?: ReadonlyArray<string>,
   options: SpawnOptions = {}
@@ -47,4 +47,4 @@ function run(
   );
 }
 
-export default run;
+export default execPromise;
