@@ -46,7 +46,6 @@ export default {
   },
   // mdPlugins: [codeTitlesPlugin],
   onCreateWebpackChain: config => {
-    console.log(config);
     config.resolve.alias
       .set('@fonts', `${PUBLIC}/fonts`)
       .set('@images', `${PUBLIC}/images`)

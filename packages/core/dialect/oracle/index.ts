@@ -116,7 +116,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
         try {
           await conn.close();
         } catch (e) {
-          console.log(e);
+          console.error(e);
         }
       }
     }
