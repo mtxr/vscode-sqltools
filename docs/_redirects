@@ -1,2 +1,2 @@
-/connections/*  /driver/:splat 200!
+/connections/*  /driver/:splat 301
 /*  /index.html  200!
