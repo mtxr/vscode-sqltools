@@ -14,18 +14,20 @@
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
-### Features
+You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
 
-Some feature provide by SQLTools:
+## Features
+
+Some feature provided by SQLTools:
 
 * Beautifier/Formatter
 * Query runner, history and bookmarks
 * Connection explorer
 * Query generators (INSERT only)
 
-Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev).
+Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/features).
 
-### Supported Drivers
+## Supported Drivers
 
 |Driver||Main Maintainer(s)|
 |-|-|-|
@@ -47,19 +49,14 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 
 > I'm looking for maintainers for each dialect/drivers, if you are interested on maintain/test a dialect, please contact me. https://mteixeira.dev
 
-
-### Docs
-
-You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
-
-### How To Contribute
+## Contributing
 
 Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
 Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
 
-### Donate and Support
+## Donate and Support
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
@@ -98,11 +95,11 @@ Our donators and supporters:
 </table>
 
 
-### Changelog
+## Changelog
 
 See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
 
-### Feedback
+## Feedback
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 

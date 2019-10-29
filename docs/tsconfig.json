@@ -28,6 +28,7 @@
     "rootDir": "./",
     "outDir": "dist",
     "typeRoots": ["node_modules/@types", "src/types"],
+    "resolveJsonModule": true,
     "paths": {
       "@fonts/*": ["public/fonts/*"],
       "@images/*": ["public/images/*"],

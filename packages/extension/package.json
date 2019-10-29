@@ -347,7 +347,7 @@
                     ],
                     "default": [],
                     "required": false,
-                    "description": "Name of the connection to auto connect on start",
+                    "markdownDescription": "Name(s) of the connection to auto connect on start",
                     "items": {
                         "type": "string"
                     }
@@ -375,21 +375,27 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL completion enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "items": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Languages with SQL formatting enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.codelensLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
+                    "items": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Languages with SQL codelens enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers.\n\nMore info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
                 },
                 "sqltools.format": {
                     "type": "object",
@@ -423,7 +429,7 @@
                 },
                 "sqltools.connections": {
                     "type": "array",
-                    "title": "Connections",
+                    "markdownDescription": "Connections list",
                     "default": [],
                     "items": {
                         "type": "object",
@@ -526,6 +532,7 @@
                                     "object",
                                     "null"
                                 ],
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mysql#2-mysqloptions for more details.",
                                 "default": {},
                                 "required": false,
                                 "properties": {
