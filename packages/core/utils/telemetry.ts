@@ -6,6 +6,23 @@ import { version as AIVersion } from 'applicationinsights/package.json';
 import SQLTools from '@sqltools/core/plugin-api';
 import { numericVersion } from '.';
 
+const IGNORE_ERRORS_REGEX = new RegExp(`(${[
+  'ENOTFOUND',
+  'ENOTFOUND',
+  'ECONNREFUSED',
+  'ER_CANNOT_LOAD_FROM_TABLE_V2',
+  'ER_ACCESS_DENIED_ERROR',
+  'does not exist',
+  'ER_PARSE_ERROR',
+  'ER_BAD_FIELD_ERROR',
+  'ER_BAD_DB_ERROR',
+  'ER_NO_SUCH_TABLE',
+  'SQLITE_CANTOPEN',
+  'syntax error',
+  'already exists',
+  'ECONNRESET'
+].join('|')})`, 'gi');
+
 export class Telemetry implements SQLTools.TelemetryInterface {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
   public static enabled: Boolean;
@@ -17,7 +34,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     return `${this.product}:${key}`;
   }
 
-  private createClient() {
+  private createClient = () => {
     AI.setup(AI_KEY)
       .setAutoCollectConsole(false)
       .setAutoCollectDependencies(false)
@@ -78,21 +95,21 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     this.updateOpts(opts);
   }
 
-  public updateOpts(opts: SQLTools.TelemetryArgs) {
+  public updateOpts = (opts: SQLTools.TelemetryArgs) => {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
     if (opts.enableTelemetry === true) this.enable();
     else if (opts.enableTelemetry === false)this.disable();
   }
 
-  public enable(): void {
+  public enable = (): void => {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
     this.logger.info('Telemetry enabled!');
     this.createClient();
   }
 
-  public disable(): void {
+  public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     AI.dispose();
@@ -113,19 +130,10 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   @runIfPropIsDefined('client')
   public registerException(error: Error, data: { [key: string]: any } = {}) {
     if (!error) return;
-    this.sendException(error, { ...((<any>error).data || {}), ...data });
-  }
+    const errStr = (error && error.message ? error.message : '').toLocaleLowerCase();
+    if (IGNORE_ERRORS_REGEX.test(errStr)) return;
 
-  @runIfPropIsDefined('client')
-  public registerErrorMessage(
-    message,
-    error?: Error,
-    value: string = 'Dismissed'
-  ) {
-    this.registerMessage(Telemetry.SeveriryLevel.Error, message, value);
-    if (error) {
-      this.registerException(error, { message });
-    }
+    this.sendException(error, { ...((<any>error).data || {}), ...data });
   }
 
   @runIfPropIsDefined('client')
