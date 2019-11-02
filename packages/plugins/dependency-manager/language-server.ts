@@ -28,7 +28,8 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
       !DialectClass.deps ||
       DialectClass.deps.length === 0
     ) {
-      throw new Error('Nothing to install. Request is invalid.');
+      console.log(`Nothing to install for ${dialect}. Request is invalid.`);
+      throw new Error(`Nothing to install for ${dialect}. Request is invalid.`);
     }
 
     const deps: typeof GenericDialect['deps'] = DialectClass.deps;

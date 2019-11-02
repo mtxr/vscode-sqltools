@@ -54,7 +54,10 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
             const interval = setInterval(() => {
               progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
             }, 1000);
-            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect }).then(result => result, err => {
+              clearInterval(interval);
+              return Promise.reject(err);
+            });
             clearInterval(interval);
             return result;
           });
