@@ -47,7 +47,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public constructor(private context: ExtensionContext, private iconsPath: Uri, private viewsPath: Uri) {}
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
-  public show = () => {
+  public show() {
     if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.id,

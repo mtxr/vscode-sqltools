@@ -77,7 +77,7 @@ function getExtensionConfig() {
           },
         },
         {
-          from: path.join(__dirname, '..', '..', 'docs', 'README.md'),
+          from: path.join(__dirname, '..', '..', 'README.md'),
           to: path.join(outdir, 'README.md'),
           transform: (content) => {
             content = content.toString();

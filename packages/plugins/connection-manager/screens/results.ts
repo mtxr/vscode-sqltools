@@ -61,7 +61,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
-  show = async () => {
+  show() {
     this.wereToShow = null;
     switch (ConfigManager.results.location) {
       case 'active': // fallback older version
@@ -84,7 +84,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
         }
     }
 
-    await super.show();
+    super.show();
 
     return new Promise((resolve, reject) => {
       let count = 0;
