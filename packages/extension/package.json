@@ -18,7 +18,7 @@
     "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
-        "vscode": "^1.30.0"
+        "vscode": "^1.36.0"
     },
     "categories": [
         "Programming Languages",
@@ -235,8 +235,13 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add Name To Cursor",
+                "title": "Add Name(s) To Cursor",
                 "command": "SQLTools.insertText",
+                "category": "SQLTools Sidebar"
+            },
+            {
+                "title": "Copy Name(s)",
+                "command": "SQLTools.copyTextFromTreeItem",
                 "category": "SQLTools Sidebar"
             },
             {
@@ -292,6 +297,12 @@
                 "key": "ctrl+e ctrl+b",
                 "mac": "cmd+e cmd+b",
                 "when": "editorTextFocus && !editorReadonly"
+            },
+            {
+                "command": "SQLTools.copyTextFromTreeItem",
+                "key": "ctrl+c",
+                "mac": "cmd+c",
+                "when": "focusedView == SQLTools/connectionExplorer && sideBarFocus"
             },
             {
                 "command": "SQLTools.executeQuery",
@@ -776,6 +787,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "SQLTools.copyTextFromTreeItem",
+                    "when": "false"
+                },
+                {
                     "command": "SQLTools.refreshTree",
                     "when": "false"
                 },
@@ -873,8 +888,13 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView)/ && !sqltools.Results.active",
-                    "group": "navigation"
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "group": "sqltools.connectionExplorer.edit@0"
+                },
+                {
+                    "command": "SQLTools.copyTextFromTreeItem",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {
                     "command": "SQLTools.selectConnection",
@@ -985,6 +1005,7 @@
     "devDependencies": {
         "@babel/cli": "^7.5.5",
         "@types/jest": "^24.0.11",
+        "@types/vscode": "^1.36.0",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
@@ -1000,7 +1021,7 @@
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",
         "typescript": "^3.4.1",
-        "vscode": "^1.1.30",
+        "vscode": "^1.1.36",
         "webpack": "^4.35.0",
         "webpack-cli": "^3.3.5"
     },

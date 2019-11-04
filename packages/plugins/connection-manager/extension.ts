@@ -530,6 +530,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.updateAttachedConnectionsMap(fileUri);
   }
 
+  private ext_copyTextFromTreeItem = async () => {
+    const nodes = this.explorer.getSelection();
+    if (!nodes || nodes.length === 0) return;
+    return commands.executeCommand(`${EXT_NAME}.copyText`, null, nodes);
+  }
+
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
@@ -654,7 +660,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
-      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile);
+      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
+      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {
