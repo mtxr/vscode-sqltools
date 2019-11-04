@@ -13,7 +13,7 @@ interface QueryResultProps {
   pageSize: number;
 }
 export default ({ cols, error, query, messages, results = [], connId, pageSize }: QueryResultProps) => {
-  const [showMessages, setShowMessages] = useState(error);
+  const [showMessages, setShowMessages] = useState(error || (results.length === 0 && messages.length > 0));
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
 
