@@ -283,6 +283,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
   }
 
+  private ext_openSettings = async () => {
+    // TEMP SOlUTION
+    // in the future this should open correct json file to edit connections
+    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
+  }
+
   private ext_focusOnExplorer = () => {
     return this.explorer.focus();
   }
@@ -632,6 +638,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`updateConnection`, this.ext_updateConnection)
       .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
       .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
+      .registerCommand(`openSettings`, this.ext_openSettings)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
       .registerCommand(`describeFunction`, this.ext_describeFunction)

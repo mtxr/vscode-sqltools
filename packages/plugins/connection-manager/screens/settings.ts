@@ -31,7 +31,7 @@ export default class SettingsWebview extends WebviewProvider {
         case 'testConnection':
           return this.testConnection(payload);
         case 'openConnectionFile':
-          this.openConnectionFile(payload);
+          this.openConnectionFile();
         default:
         break;
       }
@@ -87,11 +87,7 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private openConnectionFile = async ({ connInfo, openGlobal }) => {
-    if (openGlobal) {
-      return commands.executeCommand('workbench.action.openSettingsJson');
-    }
-
-    // @TODO check which file stores the connections
+  private openConnectionFile = async () => {
+    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
   }
 }

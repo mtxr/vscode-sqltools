@@ -32,7 +32,7 @@ const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelativ
             {state.externalMessage}
           </span>
         </div>}
-        <div style={{ paddingTop: '12px', paddingBottom: '18px' }}>
+        <div style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
           <button
             className='btn connect'
             type='submit'
@@ -49,15 +49,18 @@ const ConnectionInfo = ({ updateSettings, submit, toggleGlobal, toggleUseRelativ
           >
             Test Connection
           </button>
-          {!`${state.action || 'create'}`.startsWith('create') && <button
-            className='btn'
-            disabled={Object.keys(errors).length > 0}
+          {!`${state.action || 'create'}`.startsWith('create') && Object.keys(errors).length === 0 && <a
             onClick={openConnectionFile}
-            style={{ float: 'right' }}
-            type="button"
+            style={{
+              float: 'right',
+              cursor: 'pointer',
+              textDecoration: 'underline',
+              color: 'inherit',
+              marginRight: '2em'
+            }}
           >
-            Open settings file
-          </button>}
+            Open settings
+          </a>}
         </div>
       </form>
       {/* {<pre>{JSON.stringify(connectionSettings, null, 2)}</pre>} */}

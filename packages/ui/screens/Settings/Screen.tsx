@@ -181,15 +181,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
 
   goTo = (step: Step) => this.setState({ step });
 
-  openConnectionFile = () => {
-    getVscode().postMessage({
-      action: 'openConnectionFile',
-      payload: {
-        openGlobal: this.state.globalSetting,
-        connInfo: this.state.connectionSettings,
-      }
-    });
-  }
+  openConnectionFile = () => getVscode().postMessage({ action: 'openConnectionFile' });
 
   public render() {
     const { step } = this.state;

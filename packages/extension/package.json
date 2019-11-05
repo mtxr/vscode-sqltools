@@ -230,6 +230,11 @@
                 "category": "SQLTools Management"
             },
             {
+                "title": "Open settings",
+                "command": "SQLTools.openSettings",
+                "category": "SQLTools Management"
+            },
+            {
                 "title": "Delete Connection",
                 "command": "SQLTools.deleteConnection",
                 "category": "SQLTools Management"
@@ -817,6 +822,11 @@
                     "command": "SQLTools.openEditConnectionScreen",
                     "when": "view == SQLTools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "SQLTools.openSettings",
+                    "when": "view == SQLTools/connectionExplorer && viewItem == connection",
+                    "group": "sqltools.dbExplorer.edit@0"
                 },
                 {
                     "command": "SQLTools.deleteConnection",
