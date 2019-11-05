@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.21.0",
+    "version": "0.21.1",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -18,7 +18,7 @@
     "author": "Matheus Teixeira <me@mteixeira.me>",
     "private": true,
     "engines": {
-        "vscode": "^1.30.0"
+        "vscode": "^1.36.0"
     },
     "categories": [
         "Programming Languages",
@@ -240,8 +240,13 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Add Name To Cursor",
+                "title": "Add Name(s) To Cursor",
                 "command": "SQLTools.insertText",
+                "category": "SQLTools Sidebar"
+            },
+            {
+                "title": "Copy Name(s)",
+                "command": "SQLTools.copyTextFromTreeItem",
                 "category": "SQLTools Sidebar"
             },
             {
@@ -299,6 +304,12 @@
                 "when": "editorTextFocus && !editorReadonly"
             },
             {
+                "command": "SQLTools.copyTextFromTreeItem",
+                "key": "ctrl+c",
+                "mac": "cmd+c",
+                "when": "focusedView == SQLTools/connectionExplorer && sideBarFocus"
+            },
+            {
                 "command": "SQLTools.executeQuery",
                 "key": "ctrl+e ctrl+e",
                 "mac": "cmd+e cmd+e",
@@ -352,7 +363,7 @@
                     ],
                     "default": [],
                     "required": false,
-                    "description": "Name of the connection to auto connect on start",
+                    "markdownDescription": "Name(s) of the connection to auto connect on start",
                     "items": {
                         "type": "string"
                     }
@@ -380,21 +391,27 @@
                     "items": {
                         "type": "string"
                     },
-                    "description": "Languages with SQL completion enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL completion enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL formatting enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
+                    "items": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Languages with SQL formatting enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.codelensLanguages": {
                     "type": "array",
                     "default": [
                         "sql"
                     ],
-                    "description": "Languages with SQL codelens enabled. You can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers. More info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
+                    "items": {
+                        "type": "string"
+                    },
+                    "markdownDescription": "Languages with SQL codelens enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers.\n\nMore info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
                 },
                 "sqltools.format": {
                     "type": "object",
@@ -428,7 +445,7 @@
                 },
                 "sqltools.connections": {
                     "type": "array",
-                    "title": "Connections",
+                    "markdownDescription": "Connections list",
                     "default": [],
                     "items": {
                         "type": "object",
@@ -531,6 +548,7 @@
                                     "object",
                                     "null"
                                 ],
+                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mysql#2-mysqloptions for more details.",
                                 "default": {},
                                 "required": false,
                                 "properties": {
@@ -713,6 +731,32 @@
                     "type": "boolean",
                     "default": true,
                     "description": "Auto open session file when connect"
+                },
+                "sqltools.dependencyManager": {
+                    "type": "object",
+                    "description": "Dependency manager settings",
+                    "default": {
+                        "packageManager": "npm",
+                        "installArgs": ["install"],
+                        "runScriptArgs": ["run"]
+                    },
+                    "properties": {
+                        "packageManager": {
+                            "type": "string",
+                            "markdownDescription": "Package manager name or path. Eg. yarn, npm or absolute paths like /usr/bin/npm",
+                            "default": "npm"
+                        },
+                        "installArgs": {
+                            "type": "array",
+                            "description": "Array of args passed when installing. If you use yarn, this shoud be set to `[\"add\"]`",
+                            "default": ["install"]
+                        },
+                        "runScriptArgs": {
+                            "type": "array",
+                            "description": "Array of args passed when runnning npm scripts.",
+                            "default": ["run"]
+                        }
+                    }
                 }
             }
         },
@@ -745,6 +789,10 @@
             "commandPalette": [
                 {
                     "command": "SQLTools.insertText",
+                    "when": "false"
+                },
+                {
+                    "command": "SQLTools.copyTextFromTreeItem",
                     "when": "false"
                 },
                 {
@@ -850,8 +898,13 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView)/ && !sqltools.Results.active",
-                    "group": "navigation"
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "group": "sqltools.connectionExplorer.edit@0"
+                },
+                {
+                    "command": "SQLTools.copyTextFromTreeItem",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {
                     "command": "SQLTools.selectConnection",
@@ -962,6 +1015,7 @@
     "devDependencies": {
         "@babel/cli": "^7.5.5",
         "@types/jest": "^24.0.11",
+        "@types/vscode": "^1.36.0",
         "babel-loader": "^8.0.4",
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",

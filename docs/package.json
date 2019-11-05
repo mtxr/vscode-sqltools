@@ -1,24 +1,32 @@
 {
   "name": "@sqltools/docs",
   "version": "1.0.0",
-  "main": "index.js",
+  "files": [
+    "src/",
+    "doczrc.js",
+    "tsconfig.json",
+    "package.json"
+  ],
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build"
+    "docz:build": "docz build && cp _redirects dist/."
+  },
+  "dependencies": {
+    "docz": "^1.2.0",
+    "docz-core": "^1.2.0",
+    "docz-theme-default": "^1.2.0",
+    "gatsby-plugin-offline": "^2.2.7",
+    "@mdx-js/runtime": "^1.5.1",
+    "react": "^16.8.3",
+    "react-dom": "^16.8.3",
+    "scheduler": "^0.15.0",
+    "styled-components": "^4.4.0",
+    "react-feather": "^2.0.3"
   },
   "devDependencies": {
-    "docz": "^2.0.0-rc.48",
-    "dotenv": "^8.1.0",
-    "gatsby-plugin-favicon": "^3.1.6",
-    "gatsby-plugin-google-tagmanager": "^2.1.12",
-    "gatsby-remark-code-titles": "^1.1.0",
-    "gatsby-remark-embed-video": "^2.0.0",
-    "gatsby-remark-prismjs": "^3.3.16",
-    "gatsby-remark-responsive-iframe": "^2.2.20",
-    "gatsby-remark-vscode": "^1.2.1",
-    "react": "^16.10.1",
-    "react-dom": "^16.10.1",
-    "theme-ui": "^0.2.43"
+    "@types/react": "^16.8.13",
+    "@types/react-dom": "^16.8.4",
+    "@types/styled-components": "^4.1.20"
   }
 }

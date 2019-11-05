@@ -1,5 +1,13 @@
-Todo:
-  - Insert queries should consider columns ordinal position
-  - Allow to add to auto connect using explorer
-  - Allow to open Bookmarks file
-  - Add option to refresh query results with hotkey or button
+TODO:
+  GENERATORS:
+    - Insert queries should consider columns ordinal position
+  EXPLORER:
+    - Allow to add to auto connect using explorer
+    - Allow to open Bookmarks file
+  RESULTS:
+    - Add option to refresh query results with hotkey or button
+
+VNEXT:
+  DOCS:
+    - add version selector
+    - write docs about settings

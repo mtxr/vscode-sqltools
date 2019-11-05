@@ -25,7 +25,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private context: ExtensionContext;
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
-  private attachedFilesMap = {};
+  private attachedFilesMap: { [fileUri: string ]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 
   public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
@@ -214,9 +214,14 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
-      if (!connNameOrId) {
+      if (!connNameOrId) { // check query defined connection name
         connNameOrId = extractConnName(query);
       }
+
+      if (!connNameOrId && window.activeTextEditor) { // check if has attached connection
+        connNameOrId = this.getAttachedConnection(window.activeTextEditor.document.uri);
+      }
+
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
         const conn = this.getConnectionList().find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
@@ -224,8 +229,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
           throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
         await this._setConnection(conn);
+      } else {
+        await this._connect();
       }
-      await this._connect();
 
       query = await this.replaceParams(query);
       await this._openResultsWebview();
@@ -394,7 +400,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         return <QuickPickItem>{
           label: table.name,
           value: getTableName(conn.dialect, table),
-          description: `${table.numberOfColumns} cols`,
+          description: typeof table.numberOfColumns !== 'undefined' ? `${table.numberOfColumns} cols` : '',
           detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
         };
       }), prop, {
@@ -530,6 +536,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.updateAttachedConnectionsMap(fileUri);
   }
 
+  private ext_copyTextFromTreeItem = async () => {
+    const nodes = this.explorer.getSelection();
+    if (!nodes || nodes.length === 0) return;
+    return commands.executeCommand(`${EXT_NAME}.copyText`, null, nodes);
+  }
+
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
@@ -655,7 +667,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
-      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile);
+      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
+      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem);
 
     // hooks
     ConfigManager.addOnUpdateHook(() => {

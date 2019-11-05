@@ -1,4 +1,3 @@
-import { EXT_NAME } from '@sqltools/core/constants';
 import { ExtensionContext, TreeItemCollapsibleState } from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import SidebarAbstractItem from './SidebarAbstractItem';
@@ -42,11 +41,6 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
       };
     }
     this.updateIconPath();
-    this.command = {
-      title: 'Append to Cursor',
-      command: `${EXT_NAME}.insertText`,
-      arguments: [`\${1:${column.columnName}}$0`],
-    };
   }
   public updateIconPath() {
     this.iconPath = SidebarColumn.icons.default;

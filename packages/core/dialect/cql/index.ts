@@ -111,11 +111,9 @@ export default class CQLDialect extends GenericDialect<CassandraLib.Client> impl
         if (typeof q === 'string') {
           query = q;
           result = await conn.execute(q);
-          console.log('conn.execute', q, result);
         } else {
           query = q.query;
           result = await conn.batch(q.statements, q.options);
-          console.log('conn.batch', q, result);
         }
       } catch (e) {
         // Return error and previous queries, as they might have modified data

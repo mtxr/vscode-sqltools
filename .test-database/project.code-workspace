@@ -33,7 +33,7 @@
     "sqltools.autoOpenSessionFiles": true,
     "sqltools.results": {
       "limit": 100,
-      "location": "current",
+      "location": "next",
       "customization": {
         "table-cell-padding": "2px 4px"
       }
@@ -214,6 +214,11 @@
     "sqltools.languageServerEnv": {
       "EXAMPLE_VARIABLE": "VALUE"
     },
-    "sqltools.queryParams.enableReplace": true
+    "sqltools.queryParams.enableReplace": true,
+    "sqltools.dependencyManager": {
+      "packageManager": "yarn",
+      "installArgs": ["add"],
+      "runScriptArgs": ["run"]
+    }
   }
 }
