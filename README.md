@@ -68,7 +68,7 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 
 You can also fund specific issues via Issuehunt. That can boost the development of a feature you need and make it more attractive for contributors.
 
-[![Issuehunt](https://github.com/BoostIO/issuehunt-materials/raw/master/v1/issuehunt-button-v1.svg?sanitize=true)](https://issuehunt.io/r/mtxr/vscode-sqltools)
+[![Issuehunt](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/issuehunt-button.png)](https://issuehunt.io/r/mtxr/vscode-sqltools)
 
 Our donators and supporters:
 <table>

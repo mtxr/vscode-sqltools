@@ -33,7 +33,7 @@
     "sqltools.autoOpenSessionFiles": true,
     "sqltools.results": {
       "limit": 100,
-      "location": "current",
+      "location": "next",
       "customization": {
         "table-cell-padding": "2px 4px"
       }

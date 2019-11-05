@@ -87,7 +87,12 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
       .catch(err => ([{
           connId: this.getId(),
           cols: [],
-          messages: messages.concat([err && err.message || err]),
+          messages: messages.concat([
+            [
+              (err && err.message || err),
+              err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
+            ].filter(Boolean).join(' ')
+          ]),
           error: true,
           query,
           results: [],
