@@ -49,6 +49,8 @@ interface Props {
   path?: string;
   disableSearch?: boolean;
   title?: string;
+  exclude?: string[];
+  include?: string[];
 }
 
 class RenderSettings extends React.Component<Props> {
@@ -90,6 +92,14 @@ class RenderSettings extends React.Component<Props> {
   render() {
     const search = this.state.search.toLowerCase();
     let propsList = this.state.jsonProps;
+    const exclude = this.props.exclude || [];
+    const include = this.props.include || [];
+
+    if (exclude.length > 0)
+      propsList = propsList.filter(prop => !exclude.includes(prop.name));
+    if (include.length > 0)
+      propsList = propsList.filter(prop => include.includes(prop.name));
+
     if (search.trim()) {
       propsList = propsList.filter(prop => prop.name.toLowerCase().includes(search));
     }

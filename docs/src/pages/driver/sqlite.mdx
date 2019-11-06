@@ -4,6 +4,8 @@ menu: Drivers
 route: /driver/sqlite
 ---
 
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+
 # SQLite Start Guide
 
 ## 1. Prerequisites
@@ -36,3 +38,5 @@ SQLite's connections handle files so you can use the example below as reference 
   "connectionTimeout": 15
 }
 ```
+
+<RenderConnectionOptions include={['name', 'dialect', 'database', 'connectionTimeout']}/>

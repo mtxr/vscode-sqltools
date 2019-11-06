@@ -573,7 +573,7 @@
                                     }
                                 }
                             },
-                            "pqOptions": {
+                            "pgOptions": {
                                 "type": [
                                     "object",
                                     "null"

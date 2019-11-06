@@ -4,7 +4,7 @@ import styled from 'styled-components';
 
 const OriginalEditor = components.editor;
 
-const CodeTitleHeader = styled.div`
+const CodeTitleHeader: any = styled.div`
   background: ${(props: any) => props.theme.docz.colors.grayBg};
   margin-top: 30px;
   margin-bottom: -31px;
@@ -40,7 +40,6 @@ const CodeTitle = (props: any) => (
 );
 
 const Editor = (props: any) => {
-  console.log(props.children.props)
   if (props.children && props.children.props.title) {
     return (
       <CodeTitle title={props.children.props.title} language={props.children.props.className.replace('language-', '')}>
