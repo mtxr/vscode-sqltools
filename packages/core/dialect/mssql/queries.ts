@@ -20,6 +20,7 @@ SELECT
     ISNULL('${TREE_SEP}', '') +
     ISNULL(C.TABLE_SCHEMA, '') +
     ISNULL('${TREE_SEP}', '') +
+
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
@@ -98,10 +99,10 @@ SELECT
   f.specific_name AS name,
   f.routine_schema AS dbSchema,
   f.routine_catalog AS dbName,
-  concat(
-    f.routine_schema,
-    '.',
-    f.routine_name    
+  (
+    ISNULL(f.routine_schema, '') +
+    ISNULL('.', '') +
+    ISNULL(f.routine_name, '')
   ) as signature,
   COALESCE(STUFF(
     (ISNULL(', ' + p.data_type, '')), 1, 2, N''
