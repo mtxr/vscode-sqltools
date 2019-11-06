@@ -4,6 +4,7 @@ import SQLTools from '@sqltools/core/plugin-api';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
+import ConfigManager from '@sqltools/core/config-manager';
 
 export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -34,11 +35,13 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
   private installingDialects: string[] = [];
   private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
     conn = conn || {};
-    const installNow = 'Install now';
+    const installNow = action === 'upgrade' ? 'Upgrade now' : 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
+    const dependencyManagerSettings = ConfigManager.dependencyManager;
+    const autoUpdateOrInstall = dependencyManagerSettings && dependencyManagerSettings.autoAccept;
     try {
-      const r = action === 'upgrade' ? installNow : await Win.showInformationMessage(
+      const r = autoUpdateOrInstall ? installNow : await Win.showInformationMessage(
         `You need to ${action} "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
         ...options,
       );
@@ -47,33 +50,26 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
           this.installingDialects.push(conn.dialect);
           await window.withProgress({
             location: ProgressLocation.Notification,
-            title: `SQLTools is ${action === 'upgrade' ? 'upgrading deps' : 'installing'}`,
+            title: 'SQLTools',
             cancellable: false,
           }, async (progress) => {
-            progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
-            const interval = setInterval(() => {
-              progress.report({ message: `${this.installingDialects.join(', ')} dependencies` });
-            }, 1000);
-            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect }).then(result => result, err => {
-              clearInterval(interval);
-              return Promise.reject(err);
-            });
-            clearInterval(interval);
+            progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDialects.join(', ')} dependencies` });
+            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
             return result;
           });
           this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
-          const rr = await Win.showInformationMessage(
+          const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
 Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
-            await commands.executeCommand(`${EXT_NAME}.showOutputChannel`, getConnectionId(conn));
+            await commands.executeCommand(`${EXT_NAME}.selectConnection`, getConnectionId(conn));
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/connections/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/driver/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {

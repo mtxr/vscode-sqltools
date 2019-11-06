@@ -738,7 +738,8 @@
                     "default": {
                         "packageManager": "npm",
                         "installArgs": ["install"],
-                        "runScriptArgs": ["run"]
+                        "runScriptArgs": ["run"],
+                        "autoAccept": false
                     },
                     "properties": {
                         "packageManager": {
@@ -755,6 +756,11 @@
                             "type": "array",
                             "description": "Array of args passed when runnning npm scripts.",
                             "default": ["run"]
+                        },
+                        "autoAccept": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Ignore confirmation requests to install or updagre dependencies."
                         }
                     }
                 }
