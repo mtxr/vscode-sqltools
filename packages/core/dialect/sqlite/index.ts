@@ -6,6 +6,8 @@ import SQLiteLib from 'sqlite3';
 import GenericDialect from '../generic';
 import queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import makeDir from 'make-dir';
+import { dirname } from 'path';
 
 const SQLite3Version = '4.0.8';
 
@@ -24,13 +26,20 @@ export default class SQLite extends GenericDialect<SQLiteLib.Database> implement
     return __non_webpack_require__('sqlite3') as SQLiteLib.sqlite3;
   }
 
+  createFileIfNotExists = () => {
+    if (this.credentials.database.toLowerCase() === ':memory:') return;
+
+    const baseDir = dirname(this.credentials.database);
+    makeDir.sync(baseDir);
+  }
+
   public async open() {
     if (this.connection) {
       return this.connection;
     }
 
     this.needToInstallDependencies();
-
+    this.createFileIfNotExists();
     const db = await new Promise<SQLiteLib.Database>((resolve, reject) => {
       const instance = new (this.lib).Database(this.credentials.database, (err) => {
         if (err) return reject(err);

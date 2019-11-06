@@ -156,7 +156,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       this.server.store.dispatch(actions.Connect(c));
 
       this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
-      await c.connect()
+      await c.connect();
       await this._loadConnectionData(c);
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
