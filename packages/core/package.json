@@ -12,6 +12,7 @@
     "cassandra-driver": "^4.1.0",
     "command-exists": "^1.2.8",
     "compare-versions": "^3.5.1",
+    "make-dir": "^3.0.0",
     "mssql": "^5.0.5",
     "mysql": "^2.16.0",
     "pg": "^7.12.1",
