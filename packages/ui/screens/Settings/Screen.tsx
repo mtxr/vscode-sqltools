@@ -181,6 +181,8 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
 
   goTo = (step: Step) => this.setState({ step });
 
+  openConnectionFile = () => getVscode().postMessage({ action: 'openConnectionFile' });
+
   public render() {
     const { step } = this.state;
     return (
@@ -216,6 +218,7 @@ export default class SettingsScreen extends React.Component<{}, SettingsScreenSt
               state={this.state}
               toggleGlobal={this.toggleGlobal}
               toggleUseRelative={this.toggleUseRelative}
+              openConnectionFile={this.openConnectionFile}
             />
           )}
           {step === Step.CONNECTION_CREATED && (

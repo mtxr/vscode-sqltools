@@ -93,6 +93,7 @@ export declare namespace SQLTools {
     addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>): this;
     notifyError(message: string, error?: any): any;
     client: IConnection['client'];
+    server: IConnection;
     docManager: TextDocuments;
     telemetry: TelemetryInterface;
     store: S;

@@ -15,21 +15,21 @@ SELECT
   C.COLUMN_DEFAULT as defaultValue,
   C.IS_NULLABLE as isNullable,
   TC.CONSTRAINT_TYPE as constraintType,
-  CONCAT(
-    C.TABLE_CATALOG,
-  '${TREE_SEP}',
-    C.TABLE_SCHEMA,
-  '${TREE_SEP}',
+  (
+    ISNULL(C.TABLE_CATALOG, '') +
+  ISNULL('${TREE_SEP}', '') +
+    ISNULL(C.TABLE_SCHEMA, '') +
+  ISNULL('${TREE_SEP}', '') +
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
-    ),
-  '${TREE_SEP}',
-    C.TABLE_NAME,
-  '${TREE_SEP}',
-    C.COLUMN_NAME
+    ) +
+  ISNULL('${TREE_SEP}', '') +
+    ISNULL(C.TABLE_NAME, '') +
+  ISNULL('${TREE_SEP}', '') +
+    ISNULL(C.COLUMN_NAME, '')
   ) AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS C
@@ -67,19 +67,19 @@ SELECT
   ) AS isView,
   DB_NAME() AS dbName,
   COUNT(1) AS numberOfColumns,
-  CONCAT(
-    T.TABLE_CATALOG,
-  '${TREE_SEP}',
-    T.TABLE_SCHEMA,
-  '${TREE_SEP}',
+  (
+    ISNULL(T.TABLE_CATALOG, '') +
+  ISNULL('${TREE_SEP}', '') +
+    ISNULL(T.TABLE_SCHEMA, '') +
+  ISNULL('${TREE_SEP}', '') +
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
-    ),
-  '${TREE_SEP}',
-    T.TABLE_name
+    ) +
+  ISNULL('${TREE_SEP}', '') +
+    ISNULL(T.TABLE_name, '')
   ) AS tree
 FROM
   INFORMATION_SCHEMA.COLUMNS AS C
@@ -103,23 +103,27 @@ SELECT
     '.',
     f.routine_name    
   ) as signature,
-  STRING_AGG(p.data_type, ',') as args,
+  COALESCE(STUFF
+  (
+    (
+      ISNULL(', ' + p.data_type, '')
+    ), 1, 2, N''
+  ), N'') AS args,
   f.data_type AS resultType,
-  CONCAT(
-    f.routine_catalog,
-    '${TREE_SEP}',
-    f.routine_schema,
-    '${TREE_SEP}',
+  (
+    ISNULL(f.routine_catalog, '') +
+    ISNULL('${TREE_SEP}', '') +
+    ISNULL(f.routine_schema, '') +
+    ISNULL('${TREE_SEP}', '') +
     (
       CASE
         WHEN f.routine_type = 'PROCEDURE' THEN 'procedures'
         ELSE 'functions'
       END
-    ),
-    '${TREE_SEP}',
-    f.specific_name
+    ) +
+    ISNULL('${TREE_SEP}', '') +
+    ISNULL(f.specific_name, '')
   ) AS tree,
-  f.routine_definition AS source
 FROM
   information_schema.routines AS f
   LEFT JOIN information_schema.parameters AS p ON (
@@ -141,7 +145,7 @@ GROUP BY
   f.routine_name,
   f.data_type,
   f.routine_type,
-  f.routine_definition
+  p.data_type
 ORDER BY
   f.specific_name;
 `

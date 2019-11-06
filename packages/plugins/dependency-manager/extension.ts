@@ -1,9 +1,9 @@
 import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
-import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { getConnectionId } from '@sqltools/core/utils';
 
 export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -69,7 +69,7 @@ Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
-            await this.client.sendRequest(ConnectRequest, { conn });
+            await commands.executeCommand(`${EXT_NAME}.showOutputChannel`, getConnectionId(conn));
           }
           break;
         case readMore:

@@ -21,7 +21,7 @@ export function getConnectionDescription(c: ConnectionInterface): string | null 
   if (!c) return null;
 
   if (c.dialect === DatabaseDialect.SQLite) {
-    return `file://${c.database}`;
+    return c.database.replace(/\$\{workspaceFolder:(.+)}/g, '$1').replace(/\$\{workspaceFolder}/g, '.');
   }
 
   if (c.connectString) {

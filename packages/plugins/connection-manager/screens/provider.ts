@@ -143,6 +143,6 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   }
 
   public updatePanelName = () => {
-    this.panel.title = this.title;
+    if (this.panel) this.panel.title = this.title;
   }
 }

@@ -9,19 +9,20 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, StatusBarAlignment, StatusBarItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { getHome } from '@sqltools/core/utils';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
+import statusBar from './status-bar';
+import parseWorkspacePath from '@sqltools/core/utils/vscode/parse-workspace-path';
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
-  public statusBar: StatusBarItem;;
   private context: ExtensionContext;
   private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
   private explorer: ConnectionExplorer;
@@ -103,8 +104,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       await this.client.sendRequest(DisconnectRequest, { conn })
       this.client.telemetry.registerInfoMessage('Connection closed!');
       await this.explorer.updateTreeRoot();
-      this._updateStatusBar();
-
     } catch (e) {
       return this.errorHandler('Error closing connection', e);
     }
@@ -289,6 +288,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
   }
 
+  private ext_openSettings = async () => {
+    // TEMP SOlUTION
+    // in the future this should open correct json file to edit connections
+    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
+  }
+
   private ext_focusOnExplorer = () => {
     return this.explorer.focus();
   }
@@ -458,36 +463,15 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     let password = null;
 
     if (c && getConnectionId(c) !== this.explorer.getActiveId()) {
+      if (c.dialect === DatabaseDialect.SQLite) {
+        c.database = parseWorkspacePath(c.database);
+      }
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
-      c = await this.client.sendRequest(
-        ConnectRequest,
-        { conn: c, password },
-      );
+      c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     await this.explorer.focusActiveConnection(c);
-    this._updateStatusBar();
     return this.explorer.getActive();
-  }
-
-  private _updateStatusBar() {
-    if (!this.statusBar) {
-      this.statusBar = window.createStatusBarItem(StatusBarAlignment.Left, 10);
-      this.statusBar.tooltip = 'Select a connection';
-      this.statusBar.command = `${EXT_NAME}.selectConnection`;
-    }
-    if (this.explorer.getActive()) {
-      this.statusBar.text = `$(database) ${this.explorer.getActive().name}`;
-    } else {
-      this.statusBar.text = '$(database) Connect';
-    }
-    if (ConfigManager.showStatusbar) {
-      this.statusBar.show();
-    } else {
-      this.statusBar.hide();
-    }
-
-    return this.statusBar;
   }
 
   private async saveConnectionList(connList: ConnectionInterface[], writeTo?: ConfigurationTarget) {
@@ -624,7 +608,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.context = extension.context;
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer(extension);
-
+    this.explorer.onConnectionDidChange(() => {
+      const active = this.explorer.getActive();
+      statusBar.setText(active ? active.name : null);
+    });
     this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
     this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
@@ -633,7 +620,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     this.context.subscriptions.push(
       (this.resultsWebview = new ResultsWebviewManager(this.context, this.client)),
       (this.settingsWebview = new SettingsWebview(this.context)),
-      this._updateStatusBar(),
+      statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
       workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
@@ -644,6 +631,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`updateConnection`, this.ext_updateConnection)
       .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
       .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
+      .registerCommand(`openSettings`, this.ext_openSettings)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
       .registerCommand(`describeFunction`, this.ext_describeFunction)
@@ -662,11 +650,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem);
-
-    // hooks
-    ConfigManager.addOnUpdateHook(() => {
-      this._updateStatusBar();
-    });
 
     if (window.activeTextEditor) {
       setTimeout(() => {
