@@ -898,12 +898,12 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
                     "group": "sqltools.connectionExplorer.edit@0"
                 },
                 {
                     "command": "SQLTools.copyTextFromTreeItem",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
                     "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {

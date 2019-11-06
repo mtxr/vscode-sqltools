@@ -17,18 +17,18 @@ SELECT
   TC.CONSTRAINT_TYPE as constraintType,
   (
     ISNULL(C.TABLE_CATALOG, '') +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     ISNULL(C.TABLE_SCHEMA, '') +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ) +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     ISNULL(C.TABLE_NAME, '') +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     ISNULL(C.COLUMN_NAME, '')
   ) AS tree
 FROM
@@ -69,16 +69,16 @@ SELECT
   COUNT(1) AS numberOfColumns,
   (
     ISNULL(T.TABLE_CATALOG, '') +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     ISNULL(T.TABLE_SCHEMA, '') +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     (
       CASE
         WHEN T.TABLE_TYPE = 'VIEW' THEN 'views'
         ELSE 'tables'
       END
     ) +
-  ISNULL('${TREE_SEP}', '') +
+    ISNULL('${TREE_SEP}', '') +
     ISNULL(T.TABLE_name, '')
   ) AS tree
 FROM
@@ -103,11 +103,8 @@ SELECT
     '.',
     f.routine_name    
   ) as signature,
-  COALESCE(STUFF
-  (
-    (
-      ISNULL(', ' + p.data_type, '')
-    ), 1, 2, N''
+  COALESCE(STUFF(
+    (ISNULL(', ' + p.data_type, '')), 1, 2, N''
   ), N'') AS args,
   f.data_type AS resultType,
   (
@@ -123,7 +120,7 @@ SELECT
     ) +
     ISNULL('${TREE_SEP}', '') +
     ISNULL(f.specific_name, '')
-  ) AS tree,
+  ) AS tree
 FROM
   information_schema.routines AS f
   LEFT JOIN information_schema.parameters AS p ON (
