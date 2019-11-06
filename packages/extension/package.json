@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.21.1",
+    "version": "0.21.2",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -573,7 +573,7 @@
                                     }
                                 }
                             },
-                            "pqOptions": {
+                            "pgOptions": {
                                 "type": [
                                     "object",
                                     "null"
@@ -738,7 +738,8 @@
                     "default": {
                         "packageManager": "npm",
                         "installArgs": ["install"],
-                        "runScriptArgs": ["run"]
+                        "runScriptArgs": ["run"],
+                        "autoAccept": false
                     },
                     "properties": {
                         "packageManager": {
@@ -755,6 +756,11 @@
                             "type": "array",
                             "description": "Array of args passed when runnning npm scripts.",
                             "default": ["run"]
+                        },
+                        "autoAccept": {
+                            "type": "boolean",
+                            "default": false,
+                            "description": "Ignore confirmation requests to install or updagre dependencies."
                         }
                     }
                 }
@@ -898,12 +904,12 @@
                 },
                 {
                     "command": "SQLTools.insertText",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
                     "group": "sqltools.connectionExplorer.edit@0"
                 },
                 {
                     "command": "SQLTools.copyTextFromTreeItem",
-                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column)/",
+                    "when": "!editorReadonly && view == SQLTools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
                     "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {

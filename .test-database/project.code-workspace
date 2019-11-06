@@ -218,7 +218,8 @@
     "sqltools.dependencyManager": {
       "packageManager": "yarn",
       "installArgs": ["add"],
-      "runScriptArgs": ["run"]
-    }
-  }
+      "runScriptArgs": ["run"],
+      "autoAccept": true
+    },
+  },
 }

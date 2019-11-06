@@ -3,6 +3,7 @@ name: MySQL
 menu: Drivers
 route: /driver/mysql
 ---
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
 
 # MySQL Start Guide
 
@@ -102,3 +103,5 @@ Example configuration:
   ]
 }
 ```
+
+<RenderConnectionOptions exclude={['oracleOptions','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>

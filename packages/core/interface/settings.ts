@@ -29,6 +29,13 @@ export interface DependencyManagerSettings {
    * @memberof DependencyManagerSettings
    */
   runScriptArgs: string[];
+  /**
+   * Ignore confirmation requests to install or updagre dependencies.
+   *
+   * @type {boolean}
+   * @memberof DependencyManagerSettings
+   */
+  autoAccept: boolean;
 }
 
 export interface FormatOptions {

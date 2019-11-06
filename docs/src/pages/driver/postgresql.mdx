@@ -4,6 +4,8 @@ menu: Drivers
 route: /driver/postgresql
 ---
 
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+
 # PostgreSQL Start Guide
 
 ## 1. Connections
@@ -85,3 +87,5 @@ Using connectionURI for previous example:
   "connectionTimeout": 15,
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain']}/>

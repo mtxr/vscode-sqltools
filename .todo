@@ -1,5 +1,5 @@
 TODO:
-  GENERATORS:
+  QUERY BUILDER:
     - Insert queries should consider columns ordinal position
   EXPLORER:
     - Allow to add to auto connect using explorer
@@ -11,3 +11,5 @@ VNEXT:
   DOCS:
     - add version selector
     - write docs about settings
+  DEP MANAGER:
+    - Allow to use VSCode terminal api

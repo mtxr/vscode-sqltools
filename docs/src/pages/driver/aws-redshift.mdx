@@ -10,6 +10,8 @@ name: AWS Redshift
 
 ## 1. Connections
 
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+
 Connection example:
 ```json
 {
@@ -66,3 +68,5 @@ Using connectionURI for previous example:
   "connectionTimeout": 15,
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain']} />

@@ -4,6 +4,8 @@ menu: Drivers
 route: /driver/db2
 ---
 
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+
 # DB2 Start Guide
 
 ## 1. Prerequisites
@@ -57,3 +59,5 @@ Connection example:
   "database": "MyDB"
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>
