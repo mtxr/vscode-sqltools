@@ -3,6 +3,18 @@ import get from 'lodash/get';
 import pkgJson from '../../../../packages/extension/package.json';
 import Setting from './Setting';
 import styled from 'styled-components';
+import components from '../../components';
+
+function getQueryParams() {
+  const queryString = window.location.search;
+  var query: any = {};
+  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+  for (var i = 0; i < pairs.length; i++) {
+      var pair = pairs[i].split('=');
+      query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  }
+  return query;
+}
 
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
 
@@ -34,7 +46,9 @@ const Search = styled.input`
 `
 
 interface Props {
-  path: string;
+  path?: string;
+  disableSearch?: boolean;
+  title?: string;
 }
 
 class RenderSettings extends React.Component<Props> {
@@ -45,7 +59,7 @@ class RenderSettings extends React.Component<Props> {
 
   constructor(props: any) {
     super(props);
-    const jsonProps = get(pkgJson, props.path);
+    const jsonProps = get(pkgJson, `contributes.configuration.properties${props.path || ''}`);
     if (jsonProps) {
       this.state = {
         search: '',
@@ -56,6 +70,23 @@ class RenderSettings extends React.Component<Props> {
     }
   }
   inputRef = React.createRef<HTMLInputElement>();
+
+  renderSearchContainer = () => this.props.disableSearch ? null : (
+    <SearchContainer onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
+      <SearchIcon />
+      <Search placeholder="Type to search..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef}/>
+    </SearchContainer>
+  );
+
+  renderTitle = () => this.props.title ? (
+    <components.h2 id={this.props.title.toLowerCase().replace(/\s/g, '-')}>{this.props.title}</components.h2>
+  ) : null;
+
+  componentDidMount() {
+    const { q = '' } = getQueryParams();
+    q && this.setState({ search: q });
+  }
+
   render() {
     const search = this.state.search.toLowerCase();
     let propsList = this.state.jsonProps;
@@ -65,10 +96,8 @@ class RenderSettings extends React.Component<Props> {
 
     return (
       <>
-        <SearchContainer onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
-          <SearchIcon />
-          <Search placeholder="Type to search..." onChange={e => this.setState({ search: e.target.value || '' })} ref={this.inputRef}/>
-        </SearchContainer>
+        {this.renderTitle()}
+        {this.renderSearchContainer()}
         {propsList.map(prop => {
           return <Setting {...prop} key={prop.name} />;
         })}
