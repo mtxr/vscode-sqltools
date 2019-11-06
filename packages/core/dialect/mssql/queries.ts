@@ -98,10 +98,10 @@ SELECT
   f.specific_name AS name,
   f.routine_schema AS dbSchema,
   f.routine_catalog AS dbName,
-  (
-    ISNULL(f.routine_schema, '') +
-    ISNULL('.', '') +
-    ISNULL(f.routine_name, '')
+  concat(
+    f.routine_schema,
+    '.',
+    f.routine_name    
   ) as signature,
   COALESCE(STUFF
   (
@@ -123,7 +123,7 @@ SELECT
     ) +
     ISNULL('${TREE_SEP}', '') +
     ISNULL(f.specific_name, '')
-  ) AS tree
+  ) AS tree,
 FROM
   information_schema.routines AS f
   LEFT JOIN information_schema.parameters AS p ON (
