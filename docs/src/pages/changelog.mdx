@@ -8,12 +8,27 @@ route: /changelog
 
 ## v0.21
 
+### v0.21.2 - (November 06, 2019)
+
+* **Enhancements**
+  * MSSQL: Supporting MSSQL 2000 (v8.x). Thanks to [@glha](https://github.com/glha). [#440](https://github.com/mtxr/vscode-sqltools/pull/440)
+  * PostgreSQL: Show full error including "at character". [#437](https://github.com/mtxr/vscode-sqltools/issues/437)
+  * PostgreSQL: Add support for raising notices. [#417](https://github.com/mtxr/vscode-sqltools/issues/417)
+  * Add an option `sqltools.dependencyManager['autoAccept']` for preventing install dependency notifications. [Read the docs](https://vscode-sqltools.mteixeira.dev/settings/dependency-manager#sqltools.dependencymanager-options). [#434](https://github.com/mtxr/vscode-sqltools/issues/434)
+  * Allow to select multiple table columns from connections tree and copy them into text editor. [#406](https://github.com/mtxr/vscode-sqltools/issues/406)
+  * Displaying query messages for DML queries. [#404](https://github.com/mtxr/vscode-sqltools/issues/404)
+
+* **Fixes**
+  * SQLite: Relative paths now based on VSCode variable `${workspaceFolder}`. [#430](https://github.com/mtxr/vscode-sqltools/issues/430)
+  * Fixes query not holding execution til complete attaching to connection. [#405](https://github.com/mtxr/vscode-sqltools/issues/405)
+
+
 ### v0.21.1 - (October 25, 2019)
 
 * **Enhancements**
   * Improve Cassandra visualization. Issue [#420](https://github.com/mtxr/vscode-sqltools/pull/420)
   * SQLite paths for remote development. Issue [#421](https://github.com/mtxr/vscode-sqltools/issues/421)
-  * Support for Azure Active Directory login. Issue [#421](https://github.com/mtxr/vscode-sqltools/issues/375)
+  * Support for Azure Active Directory login. Issue [#375](https://github.com/mtxr/vscode-sqltools/issues/375)
 
 * **Fixes**
   * SQLite asking for passwords. Issue [#396](https://github.com/mtxr/vscode-sqltools/issues/396)
