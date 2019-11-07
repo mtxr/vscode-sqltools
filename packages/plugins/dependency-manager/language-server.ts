@@ -1,58 +1,12 @@
 import Drivers from '@sqltools/core/driver';
 import AbstractDriver from '@sqltools/core/driver/abstract';
 import SQLTools from '@sqltools/core/plugin-api';
-import { commandExists, getDataPath } from '@sqltools/core/utils';
-import { spawn, SpawnOptions } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { InstallDepRequest } from './contracts';
-
-function run(
-  command: string,
-  args?: ReadonlyArray<string>,
-  options: SpawnOptions = {}
-) {
-  return new Promise<{ message: string, stdout?: string; stderr?: string; code: number }>(
-    (resolve, reject) => {
-      options.env = {
-        ...process.env,
-        NODE_VERSION: process.versions.node,
-        ...options.env,
-      };
-      const child = spawn(command, args, { cwd: __dirname, ...options });
-      let stderr = '';
-      let stdout = '';
-      let output = '';
-
-      child.stdout.on('data', chunk => {
-        stdout += chunk.toString();
-        output += chunk.toString();
-        process.stdout.write(chunk);
-      });
-      child.stderr.on('data', chunk => {
-        stderr += chunk.toString();
-        output += chunk.toString();
-        process.stderr.write(chunk);
-      });
-
-      child.on('exit', code => {
-        if (code !== 0) {
-          return reject({
-            code,
-            stderr,
-            message: output
-          });
-        }
-        return resolve({
-          code,
-          stdout,
-          stderr,
-          message: output,
-        });
-      });
-    }
-  );
-}
+import packageManager from './lib/cli';
+import ConfigManager from '@sqltools/core/config-manager';
+import { Settings } from '@sqltools/core/interface';
 
 export default class DependencyManager implements SQLTools.LanguageServerPlugin {
   private root: string;
@@ -61,13 +15,22 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
   public static runningJobs: string[] = [];
 
   private onRequestToInstall = async ({ driver } = { driver: undefined }) => {
+    const depManagerSettings: Settings['dependencyManager'] = ConfigManager.dependencyManager || {
+      packageManager: 'npm',
+      installArgs: ['install'],
+      runScriptArgs: ['run'],
+      autoAccept: false
+    };
+    console.log(`Dependency manage settings:\n${JSON.stringify(depManagerSettings, null, 2)}`);
+    
     const DriverClass = Drivers[driver];
     if (
       !DriverClass ||
       !DriverClass.deps ||
       DriverClass.deps.length === 0
     ) {
-      throw new Error('Nothing to install. Request is invalid.');
+      console.log(`Nothing to install for ${driver}. Request is invalid.`);
+      throw new Error(`Nothing to install for ${driver}. Request is invalid.`);
     }
 
     const deps: typeof AbstractDriver['deps'] = DriverClass.deps;
@@ -78,18 +41,21 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     DependencyManager.runningJobs.push(driver);
 
     console.log('Received request to install deps:', JSON.stringify(deps));
+    const command: string = depManagerSettings.packageManager;
+    const options = { cwd: this.root };
+
     try {
       for (let dep of deps) {
         switch(dep.type) {
           case 'npmscript':
             console.log(`Will run ${dep.name} script`);
-            await this.runNpmScript(dep.name, { env: dep.env });
+            await packageManager(command, depManagerSettings.runScriptArgs.concat([dep.name]), options);
             console.log(`Finished ${dep.name} script`);
             break;
           case 'package':
             console.log(`Will install ${dep.name} package`, dep.args || '');
             const args = [`${dep.name}${dep.version ? `@${dep.version}` : ''}`].concat(dep.args || [])
-            await this.install(args, { env: dep.env });
+            await packageManager(command, depManagerSettings.installArgs.concat(args), options);
             console.log(`Finished ${dep.name} script`);
             break;
         }
@@ -115,26 +81,5 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     } catch (error) {};
 
     this.server.onRequest(InstallDepRequest, this.onRequestToInstall);
-  }
-
-  private npm(args: ReadonlyArray<string>, options: SpawnOptions = {}) {
-    if (!commandExists('npm')) {
-      throw new Error('You need to install node@6 or newer and npm/yarn first to install dependencies. Install it and restart to continue.');
-    }
-    return run('npm', args, { cwd: getDataPath(), shell: true, ...options });
-  }
-
-  get npmVersion() {
-    return this.npm(['--version']).then(({ stdout }) =>
-      stdout.replace('\n', '')
-    );
-  }
-
-  public async install(args: string | string[], options: SpawnOptions = {}) {
-    return this.npm(['install', ...(Array.isArray(args) ? args : [args]) ], options);
-  }
-
-  public async runNpmScript(scriptName: string, options: SpawnOptions = {}) {
-    return this.npm(['run', scriptName ], options);
   }
 }

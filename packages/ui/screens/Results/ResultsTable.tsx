@@ -37,12 +37,12 @@ const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
   />
 );
 
-const PagingPanelContainer = (buttons: React.ReactNode) => (props: PagingPanel.ContainerProps) => (
+const PagingPanelContainer = (buttons: React.ReactNode, showPagination: boolean) => (props: PagingPanel.ContainerProps) => (
   <div className="resultsPagination">
     {buttons}
-    <div className="paginator">
+    {showPagination && <div className="paginator">
       <PagingPanel.Container {...props} />
-    </div>
+    </div>}
   </div>
 );
 const FilterIcon = ({ type, ...restProps }) => {
@@ -304,10 +304,8 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
               <IntegratedSorting />
               <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
               <IntegratedFiltering columnExtensions={columnExtensions} />
-              {showPagination && [
-                <PagingState key={0} defaultCurrentPage={0} pageSize={pageSize} />,
-                <IntegratedPaging key={1} />,
-              ]}
+              <PagingState defaultCurrentPage={0} pageSize={showPagination ? pageSize : 99999999999999} />
+              <IntegratedPaging />
               <VirtualTable
                 height="100%"
                 cellComponent={TableCell(this.openContextMenu)}
@@ -321,7 +319,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
                 iconComponent={FilterIcon}
                 messages={{ regex: 'RegEx' } as any}
               />
-              {showPagination && <PagingPanel containerComponent={PagingPanelContainer(openDrawerButton)} />}
+              {<PagingPanel containerComponent={PagingPanelContainer(openDrawerButton, showPagination)} />}
             </Grid>
             <Menu
               open={Boolean(this.state.contextMenu.row)}

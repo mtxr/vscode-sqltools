@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/core",
-  "version": "0.21.1",
+  "version": "0.21.2",
   "description": "SQLTools Core Files",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.me>",
@@ -13,6 +13,7 @@
     "command-exists": "^1.2.8",
     "compare-versions": "^3.5.1",
     "env-paths": "^2.2.0",
+    "make-dir": "^3.0.0",
     "mssql": "^5.0.5",
     "mysql": "^2.16.0",
     "pg": "^7.12.1",

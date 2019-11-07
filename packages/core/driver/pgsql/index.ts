@@ -58,19 +58,23 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
   }
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+    const messages = [];
     return this.open()
-      .then((conn) => conn.query(query))
+      .then(async (pool) => {
+        const cli = await pool.connect();
+        cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
+        const results = await cli.query(query);
+        cli.release();
+        return results;
+      })
       .then((results: any[] | any) => {
         const queries = Utils.query.parse(query, 'pg');
-        const messages = [];
         if (!Array.isArray(results)) {
           results = [results];
         }
 
         return results.map((r, i): DatabaseInterface.QueryResults => {
-          if (r.rows.length === 0 && r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number') {
-            messages.push(`${r.rowCount} rows were affected.`);
-          }
+          messages.push(`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`);
           return {
             connId: this.getId(),
             cols: (r.fields || []).map(({ name }) => name),
@@ -79,7 +83,20 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
             results: r.rows,
           };
         });
-      });
+      })
+      .catch(err => ([{
+          connId: this.getId(),
+          cols: [],
+          messages: messages.concat([
+            [
+              (err && err.message || err),
+              err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
+            ].filter(Boolean).join(' ')
+          ]),
+          error: true,
+          query,
+          results: [],
+      }]))
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
@@ -87,8 +104,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
+          .map((obj) => ({
               name: obj.tablename,
               isView: !!obj.isview,
               numberOfColumns: parseInt(obj.numberofcolumns, 10),
@@ -96,8 +112,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
               tableDatabase: obj.dbname,
               tableSchema: obj.tableschema,
               tree: obj.tree,
-            } as DatabaseInterface.Table;
-          });
+            } as DatabaseInterface.Table));
       });
   }
 

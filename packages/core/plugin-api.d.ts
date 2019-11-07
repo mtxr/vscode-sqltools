@@ -44,7 +44,6 @@ export declare namespace SQLTools {
         [key: string]: any;
       }
     ): void;
-    registerErrorMessage(message: string, error?: Error, value?: string): void;
     registerSession(): any;
     registerMessage(severity: Contracts.SeverityLevel, message: string, value?: string): void;
     registerTime(timeKey: string, timer: Timer): any;
@@ -94,6 +93,7 @@ export declare namespace SQLTools {
     addOnInitializedHook(hook: Arg0<IConnection['onInitialized']>): this;
     notifyError(message: string, error?: any): any;
     client: IConnection['client'];
+    server: IConnection;
     docManager: TextDocuments;
     telemetry: TelemetryInterface;
     store: S;

@@ -1,8 +1,10 @@
 ---
 name: SAP Hana
-menu: Connection Drivers
-route: /connections/saphana
+menu: Drivers
+route: /driver/saphana
 ---
+
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
 
 # SAP HANA Start Guide
 
@@ -53,3 +55,5 @@ ConnectionString maps from `connectString` property:
   "connectString": "<see docs>" // Example: "connectString": "HOST=myServer;PORT=30015;UID=MyUser;PWD=MyPassword"
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>

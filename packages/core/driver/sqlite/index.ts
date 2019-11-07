@@ -7,6 +7,8 @@ import AbstractDriver from '../abstract';
 import queries from './queries';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import sqltoolsRequire from '../../utils/sqltools-require';
+import makeDir from 'make-dir';
+import { dirname } from 'path';
 
 const SQLite3Version = '4.0.8';
 
@@ -25,13 +27,20 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database> implement
     return sqltoolsRequire('sqlite3') as SQLiteLib.sqlite3;
   }
 
+  createFileIfNotExists = () => {
+    if (this.credentials.database.toLowerCase() === ':memory:') return;
+
+    const baseDir = dirname(this.credentials.database);
+    makeDir.sync(baseDir);
+  }
+
   public async open() {
     if (this.connection) {
       return this.connection;
     }
 
     this.needToInstallDependencies();
-
+    this.createFileIfNotExists();
     const db = await new Promise<SQLiteLib.Database>((resolve, reject) => {
       const instance = new (this.lib).Database(this.credentials.database, (err) => {
         if (err) return reject(err);

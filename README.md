@@ -14,18 +14,20 @@
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
-### Features
+You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
 
-Some feature provide by SQLTools:
+## Features
+
+Some feature provided by SQLTools:
 
 * Beautifier/Formatter
 * Query runner, history and bookmarks
 * Connection explorer
 * Query generators (INSERT only)
 
-Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev).
+Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/features).
 
-### Supported Drivers
+## Supported Drivers
 
 |Driver||Main Maintainer(s)|
 |-|-|-|
@@ -47,19 +49,14 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 
 > I'm looking for maintainers for each driver, if you are interested on maintain/test any driver, please contact me. https://mteixeira.dev
 
-
-### Docs
-
-You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
-
-### How To Contribute
+## Contributing
 
 Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
 Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
 
-### Donate and Support
+## Donate and Support
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
@@ -69,6 +66,9 @@ SQLTools will save you (for sure) a lot of time and help you to increase your pr
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 
+You can also fund specific issues via Issuehunt. That can boost the development of a feature you need and make it more attractive for contributors.
+
+[![Issuehunt](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/issuehunt-button.png)](https://issuehunt.io/r/mtxr/vscode-sqltools)
 
 Our donators and supporters:
 <table>
@@ -95,11 +95,11 @@ Our donators and supporters:
 </table>
 
 
-### Changelog
+## Changelog
 
 See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
 
-### Feedback
+## Feedback
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 

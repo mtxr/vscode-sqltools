@@ -1,16 +1,10 @@
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
-import { commands, ExtensionContext, Uri, workspace } from 'vscode';
+import { commands, ExtensionContext, Uri } from 'vscode';
 import path from 'path';
 import { DatabaseDriver } from '@sqltools/core/interface';
-
-const relativeToWorkspace = (file: string) => {
-  const fileUri = workspace.asRelativePath(Uri.file(file), true);
-  if (file === fileUri) return file;
-  if (fileUri.startsWith('/') || fileUri.startsWith('.//')) return file;
-  return `.${path.sep}${fileUri}`;
-}
+import relativeToWorkspace from '@sqltools/core/utils/vscode/relative-to-workspace';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
@@ -30,6 +24,8 @@ export default class SettingsWebview extends WebviewProvider {
           return this.updateConnection(payload);
         case 'testConnection':
           return this.testConnection(payload);
+        case 'openConnectionFile':
+          this.openConnectionFile();
         default:
         break;
       }
@@ -83,5 +79,9 @@ export default class SettingsWebview extends WebviewProvider {
       }
       this.postMessage({ action: 'testConnectionError', payload });
     });
+  }
+
+  private openConnectionFile = async () => {
+    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
   }
 }

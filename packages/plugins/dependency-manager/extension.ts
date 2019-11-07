@@ -1,9 +1,10 @@
 import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
-import { ConnectRequest } from '@sqltools/plugins/connection-manager/contracts';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { getConnectionId } from '@sqltools/core/utils';
+import ConfigManager from '@sqltools/core/config-manager';
 
 export default class DependencyManager implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -34,11 +35,13 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
   private installingDrivers: string[] = [];
   private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
     conn = conn || {};
-    const installNow = 'Install now';
+    const installNow = action === 'upgrade' ? 'Upgrade now' : 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
+    const dependencyManagerSettings = ConfigManager.dependencyManager;
+    const autoUpdateOrInstall = dependencyManagerSettings && dependencyManagerSettings.autoAccept;
     try {
-      const r = action === 'upgrade' ? installNow : await Win.showInformationMessage(
+      const r = autoUpdateOrInstall ? installNow : await Win.showInformationMessage(
         `You need to ${action} "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
         ...options,
       );
@@ -47,30 +50,26 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
           this.installingDrivers.push(conn.driver);
           await window.withProgress({
             location: ProgressLocation.Notification,
-            title: `SQLTools is ${action === 'upgrade' ? 'upgrading deps' : 'installing'}`,
+            title: 'SQLTools',
             cancellable: false,
           }, async (progress) => {
-            progress.report({ message: `${this.installingDrivers.join(', ')} dependencies` });
-            const interval = setInterval(() => {
-              progress.report({ message: `${this.installingDrivers.join(', ')} dependencies` });
-            }, 1000);
-            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.driver });
-            clearInterval(interval);
+            progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDrivers.join(', ')} dependencies` });
+            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.dialect });
             return result;
           });
           this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
-          const rr = await Win.showInformationMessage(
+          const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
             `"${moduleName}@${moduleVersion}" installed!\n
 Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
-            await this.client.sendRequest(ConnectRequest, { conn });
+            await commands.executeCommand(`${EXT_NAME}.selectConnection`, getConnectionId(conn));
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/connections/${conn.driver ? conn.driver.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/driver/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {

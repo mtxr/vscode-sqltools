@@ -1,6 +1,6 @@
 export interface WebviewMessageType<T = any> {
   action: string;
-  payload: T;
+  payload?: T;
   connId?: string;
 }
 

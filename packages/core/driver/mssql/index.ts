@@ -162,6 +162,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
           .map((obj) => {
             return {
               ...obj,
+              source: obj.source || '',
               args: obj.args ? obj.args.split(/, */g) : [],
               database: obj.dbName,
               schema: obj.dbSchema,

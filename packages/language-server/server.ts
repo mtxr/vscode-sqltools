@@ -139,6 +139,9 @@ ExecPath: ${process.execPath}
     return this;
   }
 
+  public get server() {
+    return this._server;
+  }
   public get client() {
     return this._server.client;
   }

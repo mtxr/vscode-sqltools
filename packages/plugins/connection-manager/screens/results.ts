@@ -38,7 +38,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return <any>ConfigManager.results.customization;
   }
 
-  public async saveResults(filetype: 'csv' | 'json' = 'csv') {
+  public saveResults = async (filetype: 'csv' | 'json' = 'csv') => {
     const { connId, activeTab, queries } = await this.getState();
     let filters = undefined;
 
@@ -61,7 +61,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
-  async show() {
+  show() {
     this.wereToShow = null;
     switch (ConfigManager.results.location) {
       case 'active': // fallback older version
@@ -84,7 +84,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
         }
     }
 
-    await super.show();
+    super.show();
 
     return new Promise((resolve, reject) => {
       let count = 0;
@@ -100,7 +100,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       }, 500);
     });
   }
-  updateResults(payload: DatabaseInterface.QueryResults[]) {
+  updateResults = (payload: DatabaseInterface.QueryResults[]) => {
     this.title = 'SQLTools Results';
     try {
       if (payload && payload.length > 0) {
@@ -124,16 +124,16 @@ export default class ResultsWebviewManager {
     this.viewsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }
 
-  dispose() {
+  dispose = () => {
     return Promise.all(Object.keys(this.resultsMap).map(id => this.resultsMap[id].dispose()));
   }
 
-  private createForId(connId: string) {
+  private createForId = (connId: string) => {
     this.resultsMap[connId] = new ResultsWebview(this.context, this.client, this.iconsPath, this.viewsPath);
     return this.resultsMap[connId];
   }
 
-  get(connId: string) {
+  get = (connId: string) => {
     if (!connId) throw new Error('Missing connection id to create results view');
 
     return this.resultsMap[connId] || this.createForId(connId);
