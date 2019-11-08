@@ -4,6 +4,7 @@ const WORKSPACE_PLACEHOLDER = /\$\{workspaceFolder(?:\:(.+))?}/;
 
 const parseWorkspacePath = (file: string) => {
   if (!WORKSPACE_PLACEHOLDER.test(file)) return file;
+  // @ts-ignore
   const [ _, workspaceName ] = file.match(WORKSPACE_PLACEHOLDER) || [];
   if (workspaceName) {
     const workspacePath = (workspace.workspaceFolders.find(w => w.name === workspaceName) || { uri: { fsPath: '.' } }).uri.fsPath;
