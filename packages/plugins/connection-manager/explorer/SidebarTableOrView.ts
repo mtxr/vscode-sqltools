@@ -3,9 +3,11 @@ import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscod
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
-import SidebarColumn from "./SidebarColumn";
+import SidebarColumn from './SidebarColumn';
+import ContextValue from '../context-value';
+
 export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
-  public contextValue = 'connection.tableOrView';
+  public contextValue = ContextValue.TABLEORVIEW;
   public value: string;
   public toString() {
     return this.table.name;

@@ -1,9 +1,9 @@
-import { EXT_NAME } from '@sqltools/core/constants';
 import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import SidebarAbstractItem from './SidebarAbstractItem';
+import ContextValue from '../context-value';
 export default class SidebarFunction extends SidebarAbstractItem<null> {
-  public contextValue = 'connection.function';
+  public contextValue: ContextValue = ContextValue.FUNCTION;
   public value: string;
   public get items(): null { return null; }
   public addItem(_: never): never {

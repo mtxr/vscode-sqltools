@@ -7,13 +7,14 @@ import { getIconPathForDriver } from '@sqltools/core/utils/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
+import ContextValue from '../context-value';
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
   public static icons: { [driver: string]: { active: SidebarAbstractItem['iconPath']; connected: SidebarAbstractItem['iconPath']; disconnected: SidebarAbstractItem['iconPath'] } } = {};
   public parent = null;
 
   public get contextValue() {
-    return this.isConnected ? 'connectedConnection' : 'connection';
+    return this.isConnected ? ContextValue.CONNECTED_CONNECTION : ContextValue.CONNECTION;
   }
   public tree: {
     [id: string]: SidebarResourceGroup;

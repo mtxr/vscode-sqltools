@@ -1,9 +1,11 @@
 import { asArray } from '@sqltools/core/utils';
 import { ThemeIcon, TreeItemCollapsibleState } from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
+import ContextValue from '../context-value';
+
 export default class SidebarResourceGroup<T extends SidebarAbstractItem = SidebarAbstractItem> extends SidebarAbstractItem<T> {
   public iconPath = ThemeIcon.Folder;
-  public contextValue = 'connection.resource_group';
+  public contextValue = ContextValue.RESOURCE_GROUP;
   public value: string;
   public tree: {
     [name: string]: T;
