@@ -28,6 +28,7 @@ import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 import Menu from '../../components/Menu';
 import ErrorIcon from '../../components/ErrorIcon';
+import styled from 'styled-components';
 import get from 'lodash/get';
 
 const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
@@ -93,7 +94,11 @@ const TableRow = selectedRow => (props: Table.DataRowProps) => (
   <Table.Row {...props} className={selectedRow === props.tableRow.key ? 'selected-row' : undefined} />
 );
 
-const GridRoot = props => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }} />;
+const GridRoot = styled(Grid.Root)`
+  width: 100%;
+  overflow: auto;
+  height: 100%;
+`;
 
 const generateColumnExtensions = (colNames, rows) =>
   colNames.map(columnName => ({

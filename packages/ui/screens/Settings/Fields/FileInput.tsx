@@ -1,4 +1,5 @@
 import React from 'react';
+import FieldWrapper from './FieldWrapper';
 
 interface State {
   value: string;
@@ -50,30 +51,18 @@ class FileInput extends React.Component<Props, State> {
 
   render() {
     return (
-      <div className={`field ${this.props.hasError ? 'has-error' : ''}`}>
+      <FieldWrapper hasError={this.props.hasError} file>
         <label>{this.props.label}</label>
-        <div style={{ display: 'flex' }} title={this.state.value}>
+        <div title={this.state.value}>
           <input
-            style={{ flex: 1 }}
             type="text"
             placeholder="File or remote path"
             value={this.state.name || ''}
             onChange={e => this.onTypePath(e.target.value || '')}
             disabled={this.props.disabled || false}
           />
-          <button type="button" style={{ position: 'relative' }}>
+          <button type="button">
             <input
-              style={{
-                opacity: 0,
-                position: 'absolute',
-                flex: 1,
-                cursor: 'pointer',
-                width: '100%',
-                top: 0,
-                bottom: 0,
-                left: 0,
-                right: 0,
-              }}
               type="file"
               ref={this.fileField}
               onChange={this.onChangeFile}
@@ -81,7 +70,7 @@ class FileInput extends React.Component<Props, State> {
             Select file
           </button>
         </div>
-      </div>
+      </FieldWrapper>
     );
   }
 }

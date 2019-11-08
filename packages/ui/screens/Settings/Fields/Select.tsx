@@ -1,4 +1,5 @@
 import React from 'react';
+import FieldWrapper from './FieldWrapper';
 
 export default ({ value = '', options = [], helperText = null, onChange, label, type = 'text', ...props }) => {
   const optionsMapped = options.map((o, k) => {
@@ -11,7 +12,7 @@ export default ({ value = '', options = [], helperText = null, onChange, label, 
     );
   });
   return (
-    <div className="field">
+    <FieldWrapper>
       <label>{label}</label>
       <div>
         <select
@@ -23,6 +24,6 @@ export default ({ value = '', options = [], helperText = null, onChange, label, 
         </select>
         {helperText && <small>{helperText}</small>}
       </div>
-    </div>
+    </FieldWrapper>
   );
 };

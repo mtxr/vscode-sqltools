@@ -3,6 +3,7 @@ import { clipboardInsert } from '../lib/utils';
 
 interface SyntaxProps {
   language?: string;
+  width?: string;
   code: any;
   strong?: boolean;
   allowCopy?: boolean;
@@ -47,7 +48,7 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
   }
   public render() {
     return (
-      <div className='relative syntax-container' style={this.props.style}>
+      <div className='relative syntax-container' style={{ width: this.props.width, ...this.props.style }}>
         <div
           id={this.id}
           className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}

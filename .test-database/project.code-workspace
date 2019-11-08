@@ -209,6 +209,26 @@
         "port": 9044,
         "server": "localhost",
         "username": "cassandra"
+      },
+      {
+        "database": "${workspaceFolder:sqlite}/test_db.db",
+        "driver": "SQLite",
+        "group": "test",
+        "name": "a"
+      },
+      {
+        "database": "${workspaceFolder:sqlite}/test_db.db",
+        "driver": "SQLite",
+        "group": "a",
+        "name": "a"
+      },
+      {
+        "database": "asda",
+        "driver": "SQLite",
+        "group": "asda",
+        "isActive": false,
+        "isConnected": false,
+        "name": "asdas"
       }
     ],
     "sqltools.languageServerEnv": {
