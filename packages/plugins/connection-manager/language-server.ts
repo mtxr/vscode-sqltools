@@ -5,7 +5,7 @@ import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plug
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -236,6 +236,20 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     }
   }
 
+  private GetChildrenForTreeItemHandler: RequestHandler<typeof GetChildrenForTreeItemRequest> = async (req) => {
+    if (!req || !req.conn) {
+      return [];
+    }
+    let c = this.getConnectionInstance(req.conn);
+    if (!c) return [];
+    switch (req.contextValue) {
+      case 'connection':
+      case 'connectedConnection':
+        // return c.getDatabases(); // @TODO implement
+    }
+    return [];
+  };
+
   public register(server: SQLTools.LanguageServerInterface) {
     this.server = this.server || server;
 
@@ -248,6 +262,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     this.server.onRequest(ConnectRequest, this.openConnectionHandler);
     this.server.onRequest(TestConnectionRequest, this.testConnectionHandler);
     this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler);
+    this.server.onRequest(GetChildrenForTreeItemRequest, this.GetChildrenForTreeItemHandler);
     this.server.addOnDidChangeConfigurationHooks(this._autoConnectIfActive);
   }
 

@@ -11,7 +11,7 @@ import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqlt
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
@@ -47,6 +47,13 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.client.sendRequest(
       TestConnectionRequest,
       { conn: c, password },
+    );
+  }
+
+  private ext_getChildrenForTreeItem = async ({ conn, contextValue }) => {
+    return this.client.sendRequest(
+      GetChildrenForTreeItemRequest,
+      { conn, contextValue },
     );
   }
 
@@ -649,7 +656,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
-      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem);
+      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
+      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     if (window.activeTextEditor) {
       setTimeout(() => {

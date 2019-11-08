@@ -545,7 +545,7 @@
                                 "description": "Connection Driver",
                                 "required": false
                             },
-                            "databasesFilter": {
+                            "databaseFilter": {
                                 "type": ["object", "null"],
                                 "description": "Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all",
                                 "default": null,

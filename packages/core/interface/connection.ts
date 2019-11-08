@@ -169,13 +169,13 @@ export interface ConnectionInterface {
 /**
    * Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all
    *
-   * @type {DatabasesFilterType}
+   * @type {DatabaseFilterType}
    * @memberof ConnectionInterface
    */
-   databasesFilter?: DatabasesFilterType;
+   databaseFilter?: DatabaseFilterType;
 }
 
-export interface DatabasesFilterType {
+export interface DatabaseFilterType {
   show: string[];
   hide: string[];
 }
