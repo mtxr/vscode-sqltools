@@ -223,7 +223,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
-        const conn = this.getConnectionList().find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
+        const conn = (await this.ext_getConnectionStatus({ connectedOnly: false, sort: 'connectedFirst'})).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
           throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }

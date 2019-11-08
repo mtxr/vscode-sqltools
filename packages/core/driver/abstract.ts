@@ -2,6 +2,7 @@ import {
   ConnectionDriver,
   DriverQueries,
   ConnectionInterface,
+  DatabasesFilterType,
 } from '@sqltools/core/interface';
 import Drivers from '@sqltools/core/driver';
 import * as Utils from '@sqltools/core/utils';
@@ -23,7 +24,7 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
   public getId() {
     return Utils.getConnectionId(this.credentials) || 'BROKEN';
   }
-  protected get deps() {
+  protected get deps(): Deps[] {
     if (!Drivers[this.constructor.name]) {
       return [];
     }
@@ -80,5 +81,15 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
       });
     }
     return false
+  }
+
+  public getBaseQueryFilters() {
+    const databaseFilter: DatabasesFilterType = this.credentials.databasesFilter || <DatabasesFilterType>{};
+    databaseFilter.show = databaseFilter.show || (!databaseFilter.hide ? [this.credentials.database] : []);
+    databaseFilter.hide = databaseFilter.hide || [];
+
+    return {
+      databaseFilter
+    };
   }
 }

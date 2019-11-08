@@ -137,9 +137,13 @@
                 "category": "SQLTools Bookmarks"
             },
             {
-                "title": "Delete All",
+                "title": "Clear",
                 "command": "SQLTools.clearBookmarks",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/trash-light.svg",
+                    "dark": "icons/trash-dark.svg"
+                }
             },
             {
                 "title": "Delete",
@@ -149,22 +153,47 @@
             {
                 "title": "Edit",
                 "command": "SQLTools.editBookmark",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/edit-light.svg",
+                    "dark": "icons/edit-dark.svg"
+                }
             },
             {
                 "title": "Run",
                 "command": "SQLTools.runFromBookmarks",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/run-light.svg",
+                    "dark": "icons/run-dark.svg"
+                }
             },
             {
                 "title": "Run",
                 "command": "SQLTools.runFromHistory",
-                "category": "SQLTools History"
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/run-light.svg",
+                    "dark": "icons/run-dark.svg"
+                }
             },
             {
                 "title": "Edit From History",
                 "command": "SQLTools.editHistory",
-                "category": "SQLTools History"
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/edit-light.svg",
+                    "dark": "icons/edit-dark.svg"
+                }
+            },
+            {
+                "title": "Clear",
+                "command": "SQLTools.clearHistory",
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/trash-light.svg",
+                    "dark": "icons/trash-dark.svg"
+                }
             },
             {
                 "title": "Describe Table",
@@ -516,6 +545,29 @@
                                 "description": "Connection Driver",
                                 "required": false
                             },
+                            "databasesFilter": {
+                                "type": ["object", "null"],
+                                "description": "Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all",
+                                "default": null,
+                                "properties": {
+                                    "show": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "Name database you want to show",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "hide": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "Name database you don't want to show",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
                             "dialect": {
                                 "type": "string",
                                 "description": "Connection Driver",
@@ -859,6 +911,11 @@
                     "command": "SQLTools.clearBookmarks",
                     "when": "view == SQLTools/bookmarksExplorer",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "SQLTools.clearHistory",
+                    "when": "view == SQLTools/historyExplorer",
+                    "group": "navigation@1"
                 }
             ],
             "view/item/context": [
@@ -938,6 +995,11 @@
                     "group": "inline@1"
                 },
                 {
+                    "command": "SQLTools.editHistory",
+                    "when": "view == SQLTools/historyExplorer && viewItem == history.item",
+                    "group": "inline@0"
+                },
+                {
                     "command": "SQLTools.runFromHistory",
                     "when": "view == SQLTools/historyExplorer && viewItem == history.item",
                     "group": "inline@0"
@@ -954,6 +1016,11 @@
                 },
                 {
                     "command": "SQLTools.runFromBookmarks",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "SQLTools.editBookmark",
                     "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
                     "group": "inline@0"
                 },

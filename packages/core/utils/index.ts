@@ -39,7 +39,7 @@ export function getConnectionDescription(c: ConnectionInterface): string | null 
   ].filter(Boolean).join('');
 }
 
-export function isEmpty(v?: string) {
+export function isEmpty(v?: string | any[]) {
   return !v || v.length === 0;
 }
 
