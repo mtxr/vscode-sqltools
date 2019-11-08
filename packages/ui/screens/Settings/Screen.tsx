@@ -31,7 +31,7 @@ interface SettingsScreenState {
   transformToRelative?: boolean;
 }
 
-export default class SettingsScreen extends React.Component<{}, SettingsScreenState> {
+export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
     console.log(`Message received: ${action}`, ...[ payload ]);
     switch(action) {

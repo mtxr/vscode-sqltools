@@ -54,7 +54,7 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
             cancellable: false,
           }, async (progress) => {
             progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDrivers.join(', ')} dependencies` });
-            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.dialect });
+            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.driver });
             return result;
           });
           this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
@@ -69,7 +69,7 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/driver/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/driver/${conn.driver ? conn.driver.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {

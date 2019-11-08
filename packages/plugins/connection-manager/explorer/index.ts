@@ -9,9 +9,10 @@ import SidebarTableOrView from "@sqltools/plugins/connection-manager/explorer/Si
 import SidebarResourceGroup from "@sqltools/plugins/connection-manager/explorer/SidebarResourceGroup";
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import SidebarAbstractItem from "@sqltools/plugins/connection-manager/explorer/SidebarAbstractItem";
-import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands } from 'vscode';
+import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
+import sortBy from 'lodash/sortBy';
 import logger from '@sqltools/core/log/vscode';
 
 const DriverHierarchyChildNames = {
@@ -20,10 +21,16 @@ const DriverHierarchyChildNames = {
   [DatabaseDriver.Cassandra]: ['Keyspace'],
 }
 
-const connectedTreeItem = new TreeItem('Connected', TreeItemCollapsibleState.Expanded);
+type ConnectionGroup = TreeItem & { items?: TreeItem[]; isGroup?: boolean };
+
+const connectedTreeItem: ConnectionGroup = new TreeItem('Connected', TreeItemCollapsibleState.Expanded);
 connectedTreeItem.id = 'CONNECTED'
-const notConnectedTreeItem = new TreeItem('Not Connected', TreeItemCollapsibleState.Expanded);
+connectedTreeItem.iconPath = ThemeIcon.Folder;
+
+const notConnectedTreeItem: ConnectionGroup = new TreeItem('Not Connected', TreeItemCollapsibleState.Expanded);
 notConnectedTreeItem.id = 'DISCONNECTED';
+notConnectedTreeItem.iconPath = ThemeIcon.Folder;
+
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
@@ -63,22 +70,43 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return [addNew];
     }
 
-    const connected = [];
-    const notConnected = [];
+    connectedTreeItem.items = [];
+    notConnectedTreeItem.items = [];
+    let connectedTreeCount = 0;
+    let notConnectedTreeCount = 0;
     items.forEach(item => {
+      let group: ConnectionGroup = null;
       if (item.isConnected) {
-        connected.push(item);
+        group = connectedTreeItem;
+        connectedTreeCount++;
       } else {
-        notConnected.push(item);
+        group = notConnectedTreeItem;
+        notConnectedTreeCount++
       }
+      if (item.conn && item.conn.group) {
+        const groupId = `GID:${item.isConnected ? 'C' : 'N'}:${item.conn.group}`;
+        let subGroup: ConnectionGroup = group.items.find((it: TreeItem) => it.id === groupId);
+        if (!subGroup) {
+          subGroup = new TreeItem(item.conn.group, TreeItemCollapsibleState.Expanded);
+          subGroup.isGroup = true;
+          subGroup.id = groupId;
+          subGroup.items = subGroup.items || [];
+          subGroup.iconPath = ThemeIcon.Folder;
+          group.items.push(subGroup);
+        }
+        subGroup.description = `${subGroup.items.length + 1} connections`;
+        group = subGroup;
+      }
+      group.items.push(item);
     });
 
-    connectedTreeItem.description = `${connected.length.toString()} connections`;
-    (<any>connectedTreeItem).items = connected;
-    notConnectedTreeItem.description = `${notConnected.length.toString()} connections`;
-    (<any>notConnectedTreeItem).items = notConnected;
+    connectedTreeItem.items = sortBy(connectedTreeItem.items, ['isGroup', 'label']);
+    notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, ['isGroup', 'label']);
 
-    return [connectedTreeItem, notConnectedTreeItem];
+    notConnectedTreeItem.description = `${notConnectedTreeCount} connections`;
+    connectedTreeItem.description = `${connectedTreeCount} connections`;
+
+    return [connectedTreeItem, notConnectedTreeItem].filter(a => a.items.length > 0);
   }
   public async getChildren(element?: SidebarTreeItem) {
     if (!element) {

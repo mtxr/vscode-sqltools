@@ -13,6 +13,12 @@ export interface ConnectionInterface {
    */
   name: string;
   /**
+   * Connection group name
+   * @type {string}
+   * @memberof ConnectionInterface
+   */
+   group?: string;
+  /**
    * Server address
    * @type {string}
    * @default "127.0.0.1"

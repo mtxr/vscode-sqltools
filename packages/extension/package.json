@@ -483,6 +483,10 @@
                                 "type": "string",
                                 "description": "Connection name"
                             },
+                            "group": {
+                                "type": "string",
+                                "description": "Connection group name"
+                            },
                             "server": {
                                 "type": "string",
                                 "description": "Server address",
