@@ -4,6 +4,7 @@ import { ConnectionDriver, ConnectionInterface } from '@sqltools/core/interface'
 import AbstractDriver from '@sqltools/core/driver/abstract';
 import * as Utils from '@sqltools/core/utils';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import fs from 'fs';
 
 const rawValue = (v: string) => v;
 
@@ -18,7 +19,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
       return this.connection;
     }
 
-    const pgOptions: any = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
+    const pgOptions: PoolConfig = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
 
     let poolConfig: PoolConfig = {
       // statement_timeout: parseInt(`${this.credentials.connectionTimeout || 0}`, 10) * 1000,
@@ -39,6 +40,14 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
         user: this.credentials.username,
         ...poolConfig,
       };
+    }
+
+    if (poolConfig.ssl && typeof poolConfig.ssl === 'object') {
+      Object.keys(poolConfig.ssl).forEach(key => {
+        if (!`${poolConfig.ssl[key]}`.startsWith('file://')) return;
+        console.log(`Reading file ${poolConfig.ssl[key].replace('file://', '')}`)
+        poolConfig.ssl[key] = fs.readFileSync(poolConfig.ssl[key].replace('file://', '')).toString();
+      });
     }
 
     const pool = new Pool(poolConfig);

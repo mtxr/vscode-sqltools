@@ -20,9 +20,9 @@ const DriverHierarchyChildNames = {
   [DatabaseDriver.Cassandra]: ['Keyspace'],
 }
 
-const connectedTreeItem = new TreeItem('Connected', TreeItemCollapsibleState.Collapsed);
+const connectedTreeItem = new TreeItem('Connected', TreeItemCollapsibleState.Expanded);
 connectedTreeItem.id = 'CONNECTED'
-const notConnectedTreeItem = new TreeItem('Not Connected', TreeItemCollapsibleState.Collapsed);
+const notConnectedTreeItem = new TreeItem('Not Connected', TreeItemCollapsibleState.Expanded);
 notConnectedTreeItem.id = 'DISCONNECTED';
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {

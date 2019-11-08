@@ -92,7 +92,7 @@
       },
       {
         "name": "SQLite",
-        "dialect": "SQLite",
+        "driver": "SQLite",
         "database": "./sqlite/test_db.db",
         "connectionTimeout": 15
       },

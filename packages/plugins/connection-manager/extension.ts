@@ -473,6 +473,12 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       if (c.driver === DatabaseDriver.SQLite) {
         c.database = parseWorkspacePath(c.database);
       }
+      if (c.driver === DatabaseDriver.PostgreSQL && c.pgOptions && typeof c.pgOptions.ssl === 'object') {
+        Object.keys(c.pgOptions.ssl).forEach(key => {
+          if (!`${c.pgOptions.ssl[key]}`.startsWith('file://')) return;
+          c.pgOptions.ssl[key] = `file://${parseWorkspacePath(c.pgOptions.ssl[key].replace('file://', ''))}`;
+        });
+      }
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
