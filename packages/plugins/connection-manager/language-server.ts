@@ -143,7 +143,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     try {
       if (c) {
         this.server.store.dispatch(actions.Connect(c));
-        await this._loadConnectionData(c);
+        this._loadConnectionData(c);
         return this.serializarConnectionState(req.conn);
       }
       c = new Connection(req.conn, this.server.telemetry);
@@ -158,7 +158,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
       this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
       await c.connect();
-      await this._loadConnectionData(c);
+      this._loadConnectionData(c);
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
     } catch (e) {
@@ -268,6 +268,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
   // internal utils
   private async _loadConnectionData(conn: Connection) {
+    console.log('*** DEPRECATION *** this method is deprecated and will be removed in v0.22.x')
     if (!conn) {
       return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
     }

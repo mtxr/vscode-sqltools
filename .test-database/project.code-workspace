@@ -54,7 +54,8 @@
         "username": "root",
         "askForPassword": false,
         "password": "root",
-        "connectionTimeout": 15
+        "connectionTimeout": 15,
+        "group": "PG"
       },
       {
         "name": "PGSQL",
@@ -66,15 +67,14 @@
         "askForPassword": false,
         "password": "root",
         "connectionTimeout": 15,
-        "icons": {
-          "active": "https://cdn.iconscout.com/icon/free/png-256/postgresql-10-1175121.png"
-        }
+        "group": "PG"
       },
       {
         "name": "PGSQL URI",
         "driver": "PostgreSQL",
         "connectString": "postgres://root:root@localhost:5433/test_db",
-        "connectionTimeout": 15
+        "connectionTimeout": 15,
+        "group": "PG"
       },
       {
         "name": "MSSQL",
@@ -88,13 +88,15 @@
         "connectionTimeout": 15,
         "mssqlOptions": {
           "encrypt": false
-        }
+        },
+        "group": "MSSQL"
       },
       {
         "name": "SQLite",
         "driver": "SQLite",
         "database": "./sqlite/test_db.db",
-        "connectionTimeout": 15
+        "connectionTimeout": 15,
+        "group": "SQLITE"
       },
       {
         "askForPassword": false,
@@ -105,7 +107,8 @@
         "password": "root",
         "port": 3307,
         "server": "localhost",
-        "username": "root"
+        "username": "root",
+        "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -119,7 +122,8 @@
         "username": "root",
         "mysqlOptions": {
           "authProtocol": "xprotocol"
-        }
+        },
+        "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -135,7 +139,8 @@
           "poolMax": 1,
           "poolMin": 1,
           "poolIncrement": 0
-        }
+        },
+        "group": "ORACLE"
       },
       {
         "askForPassword": false,
@@ -145,7 +150,8 @@
         "name": "MySQL Socket",
         "password": "root",
         "socketPath": "/home/mteixeira/projects/personal/vscode-sqltools/.test-database/mysql/local-mysqld/mysqld.sock",
-        "username": "root"
+        "username": "root",
+        "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -158,7 +164,8 @@
         "username": "root",
         "mysqlOptions": {
           "authProtocol": "xprotocol"
-        }
+        },
+        "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -169,17 +176,20 @@
         "password": "Tg6cdRmULar3.yQcw4kVh.SeFNaF._iPaWLFdDvB94_C2jNnVB25reG63nSUkMs.DPFllAJHKwsRCRz1qtgGQrc4t81H8eLpGq3pUsMi9IUrwWZoabdLUHM3FHyhEOee",
         "port": 30041,
         "server": "127.0.0.1",
-        "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123"
+        "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123",
+        "group": "SAP"
       },
       {
         "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
         "driver": "MSSQL",
-        "name": "MSSQL ConnectionString"
+        "name": "MSSQL ConnectionString",
+        "group": "MSSQL"
       },
       {
         "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
         "driver": "MSSQL",
-        "name": "MSSQL ConnectionString schema"
+        "name": "MSSQL ConnectionString schema",
+        "group": "MSSQL"
       },
       {
         "database": "mydb",
@@ -188,7 +198,8 @@
         "password": "password",
         "port": 50000,
         "username": "db2inst1",
-        "server": "localhost"
+        "server": "localhost",
+        "group": "IBM DB2"
       },
       {
         "askForPassword": false,
@@ -198,7 +209,8 @@
         "password": "cassandra",
         "port": 9043,
         "server": "localhost",
-        "username": "cassandra"
+        "username": "cassandra",
+        "group": "CQL"
       },
       {
         "askForPassword": false,
@@ -208,27 +220,8 @@
         "password": "cassandra",
         "port": 9044,
         "server": "localhost",
-        "username": "cassandra"
-      },
-      {
-        "database": "${workspaceFolder:sqlite}/test_db.db",
-        "driver": "SQLite",
-        "group": "test",
-        "name": "a"
-      },
-      {
-        "database": "${workspaceFolder:sqlite}/test_db.db",
-        "driver": "SQLite",
-        "group": "a",
-        "name": "a"
-      },
-      {
-        "database": "asda",
-        "driver": "SQLite",
-        "group": "asda",
-        "isActive": false,
-        "isConnected": false,
-        "name": "asdas"
+        "username": "cassandra",
+        "group": "CQL"
       }
     ],
     "sqltools.languageServerEnv": {
