@@ -3,6 +3,7 @@ import SQLTools from '@sqltools/core/plugin-api';
 import * as Utils from '@sqltools/core/utils';
 import { Disposable, DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangeFormattingRequest, Range, TextEdit } from 'vscode-languageserver';
 import { format } from './utils';
+import telemetry from '@sqltools/core/utils/telemetry';
 
 export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
@@ -27,7 +28,7 @@ export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
 
       return [ TextEdit.replace(newRange || range, format(text, ConfigManager.format)) ];
     } catch (e) {
-      this.server.telemetry.registerException(e);
+      telemetry.registerException(e);
     }
   }
 

@@ -108,9 +108,9 @@ export interface Settings {
    */
   telemetry?: boolean;
   /**
-   * Extension ID
-   * @type {string}
-   * @default null
+   * Toggle statusbar visibility.
+   * @type {boolean}
+   * @default true
    * @memberof Settings
    */
   showStatusbar?: boolean;

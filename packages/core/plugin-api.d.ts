@@ -22,32 +22,10 @@ export declare namespace SQLTools {
     version?: string;
   }
   interface TelemetryArgs {
-    product: Product;
     enableTelemetry?: boolean;
     vscodeInfo?: VSCodeInfo;
   }
-  class TelemetryStaticProps {
-    static SeveriryLevel: Contracts.SeverityLevel;
-    static enabled: Boolean;
-    static vscodeInfo: VSCodeInfo;
-  }
-  interface TelemetryInterface extends TelemetryStaticProps {
-    updateOpts(opts: TelemetryArgs): any;
-    enable(): void;
-    disable(): void;
-    registerCommand(command: string): any;
-    registerInfoMessage(message: string, value?: string): any;
-    registerException(
-      error: Error,
-      data?: {
-        [key: string]: any;
-      }
-    ): void;
-    registerSession(): any;
-    registerMessage(severity: Contracts.SeverityLevel, message: string, value?: string): void;
-    registerTime(timeKey: string, timer: Timer): any;
-    registerMetric(name: string, value: number): any;
-  }
+
   interface LanguageServerPlugin<T = LanguageServerInterface> {
     register: (server: T) => void;
   }
@@ -94,7 +72,6 @@ export declare namespace SQLTools {
     client: IConnection['client'];
     server: IConnection;
     docManager: TextDocuments;
-    telemetry: TelemetryInterface;
     store: S;
   }
   interface LanguageClientInterface {
@@ -105,7 +82,6 @@ export declare namespace SQLTools {
     onRequest: LanguageClient['onRequest'];
     sendNotification: LanguageClient['sendNotification'];
     onNotification: LanguageClient['onNotification'];
-    telemetry: TelemetryInterface;
   }
 }
 

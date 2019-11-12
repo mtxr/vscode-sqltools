@@ -19,7 +19,7 @@ export default class DependencyManager implements SQLTools.ExtensionPlugin {
 
   private electronNotSupported = async () => {
     const r = await Win.showInformationMessage(
-      'Electron is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
+      'VSCode engine is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
       'Enable now',
     );
     if (!r) return;

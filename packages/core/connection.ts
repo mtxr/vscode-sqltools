@@ -4,8 +4,9 @@ import {
   ConnectionDriver,
   ConnectionInterface,
 } from './interface';
-import SQLTools, { DatabaseInterface } from './plugin-api';
+import { DatabaseInterface } from './plugin-api';
 import { decorateException } from './utils/errors';
+import telemetry from '@sqltools/core/utils/telemetry';
 
 export default class Connection {
   private tables: DatabaseInterface.Table[] = [];
@@ -13,7 +14,7 @@ export default class Connection {
   private functions: DatabaseInterface.Function[] = [];
   private connected: boolean = false;
   private conn: ConnectionDriver;
-  constructor(private credentials: ConnectionInterface, private telemetry: SQLTools.TelemetryInterface) {
+  constructor(private credentials: ConnectionInterface) {
     this.conn = new Drivers[credentials.driver](this.credentials);
   }
 
@@ -108,7 +109,7 @@ export default class Connection {
       .catch(this.decorateException)
       .catch((e) => {
         if (throwIfError) throw e;
-        this.telemetry.registerException(e, { driver: this.conn.credentials.driver });
+        telemetry.registerException(e, { driver: this.conn.credentials.driver });
         let message = '';
         if (typeof e === 'string') {
           message = e;
@@ -161,8 +162,8 @@ export default class Connection {
     };
   }
 
-  public static async testConnection(credentials: ConnectionInterface, telemetry: SQLTools.TelemetryInterface) {
-    const testConn = new Connection(credentials, telemetry);
+  public static async testConnection(credentials: ConnectionInterface) {
+    const testConn = new Connection(credentials);
     await testConn.connect();
     await testConn.close();
     return true;

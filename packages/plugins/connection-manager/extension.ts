@@ -10,14 +10,14 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vsco
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
+import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
-import { CancellationTokenSource } from 'vscode-jsonrpc';
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/core/utils/vscode/parse-workspace-path';
+import telemetry from '@sqltools/core/utils/telemetry';
 
 const log = logger.extend('conn-man');
 
@@ -111,7 +111,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     try {
       await this.client.sendRequest(DisconnectRequest, { conn })
-      this.client.telemetry.registerInfoMessage('Connection closed!');
+      telemetry.registerMessage('Information', 'Connection closed!');
       await this.explorer.updateTreeRoot();
     } catch (e) {
       return this.errorHandler('Error closing connection', e);

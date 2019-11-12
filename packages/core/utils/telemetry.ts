@@ -1,11 +1,11 @@
 import { AI_KEY, ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
 import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
-import Timer from '@sqltools/core/utils/timer';
 import * as AI from 'applicationinsights';
 import { version as AIVersion } from 'applicationinsights/package.json';
 import SQLTools from '@sqltools/core/plugin-api';
-import { numericVersion } from '@sqltools/core/utils';
-import logger, { Logger } from '@sqltools/core/log';
+import { numericVersion, Timer } from '@sqltools/core/utils';
+import logger from '@sqltools/core/log';
+import ConfigManager from '@sqltools/core/config-manager';
 
 const IGNORE_ERRORS_REGEX = new RegExp(`(${[
   'aggregate function',
@@ -40,18 +40,21 @@ const IGNORE_ERRORS_REGEX = new RegExp(`(${[
   'violates',
 ].join('|')})`, 'g');
 
-export class Telemetry implements SQLTools.TelemetryInterface {
-  public static SeveriryLevel = AI.Contracts.SeverityLevel;
+const product = process.env.PRODUCT as SQLTools.Product;
+const log = logger.extend('telemetry');
+const SeverityLevel = AI.Contracts.SeverityLevel;
+
+class Telemetry {
   public static enabled: Boolean;
   public static vscodeInfo: SQLTools.VSCodeInfo;
   private client: AI.TelemetryClient;
-  private product: SQLTools.Product;
-  private logger: Logger = logger.extend('telemetry');
   private prefixed(key: string) {
-    return `${this.product}:${key}`;
+    return `${product}:${key}`;
   }
 
   private createClient = () => {
+    AI.dispose();
+
     AI.setup(AI_KEY)
       .setAutoCollectConsole(false)
       .setAutoCollectDependencies(false)
@@ -66,11 +69,9 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     this.client = AI.defaultClient;
 
     const aiCtx = this.client.context;
-    aiCtx.tags[aiCtx.keys.applicationVersion] = `${EXT_NAME}-${
-      this.product
-      }@${VERSION}`;
+    aiCtx.tags[aiCtx.keys.applicationVersion] = `${EXT_NAME}-${product}@${VERSION}`;
     aiCtx.tags[aiCtx.keys.internalSdkVersion] = `node:${AIVersion}`;
-    aiCtx.tags[aiCtx.keys.deviceType] = this.product;
+    aiCtx.tags[aiCtx.keys.deviceType] = product;
 
     if (Telemetry.vscodeInfo) {
       aiCtx.tags[aiCtx.keys.userId] = Telemetry.vscodeInfo.uniqId;
@@ -105,14 +106,12 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     };
 
     AI.start();
-    this.registerSession();
   }
   constructor(opts: SQLTools.TelemetryArgs) {
     this.updateOpts(opts);
   }
 
   public updateOpts = (opts: SQLTools.TelemetryArgs) => {
-    this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
     if (opts.enableTelemetry === true) this.enable();
     else if (opts.enableTelemetry === false)this.disable();
@@ -121,7 +120,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   public enable = (): void => {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
-    this.logger.extend('debug')('Telemetry enabled!');
+    log.extend('debug')('Telemetry enabled!');
     this.createClient();
   }
 
@@ -129,18 +128,8 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     AI.dispose();
-    this.logger.extend('debug')('Telemetry disabled!');
+    log.extend('debug')('Telemetry disabled!');
     this.client = undefined;
-  }
-
-  @runIfPropIsDefined('client')
-  public registerCommand(command: string) {
-    this.registerEvent(`cmd:${command}`);
-  }
-
-  @runIfPropIsDefined('client')
-  public registerInfoMessage(message, value = 'Dismissed') {
-    this.registerMessage(Telemetry.SeveriryLevel.Information, message, value);
   }
 
   @runIfPropIsDefined('client')
@@ -149,36 +138,8 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     const errStr = (error && error.message ? error.message : '').toLowerCase();
     if (IGNORE_ERRORS_REGEX.test(errStr)) return;
 
-    this.sendException(error, { ...((<any>error).data || {}), ...data });
-  }
-
-  @runIfPropIsDefined('client')
-  public registerSession() {
-    this.registerEvent(`sessionStarted:${this.product}`);
-  }
-
-  @runIfPropIsDefined('client')
-  public registerMessage(
-    severity: AI.Contracts.SeverityLevel,
-    message: string,
-    value: string = 'Dismissed'
-  ): void {
-    this.logger.extend('debug')(`Message: ${message}`);
-    this.client.trackTrace({ message: this.prefixed(message), severity, properties: { value } });
-  }
-
-  @runIfPropIsDefined('client')
-  public registerEvent(
-    name: string,
-    properties?: { [key: string]: string }
-  ): void {
-    this.logger.extend('debug')(`Event: ${name}`, properties || '');
-    this.client.trackEvent({ name: this.prefixed(name), properties });
-  }
-
-  @runIfPropIsDefined('client')
-  private sendException(error: Error, properties: { [key: string]: any } = {}) {
-    this.logger.extend('error')('Error: ', error);
+    const properties = { ...((<any>error).data || {}), ...data };
+    log.extend('error')(`Exception:%O\n\tData: %j`, error, properties);
     this.client.trackException({
       exception: error,
       contextObjects: properties,
@@ -187,9 +148,30 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   }
 
   @runIfPropIsDefined('client')
+  public registerMessage(
+    severity: keyof typeof SeverityLevel,
+    message: string,
+    value: string = 'Dismissed'
+  ): void {
+    log.extend(severity.substr(0, 5).toLowerCase())(`Message: %s, value: %s`, message, value);
+    const sev = SeverityLevel[severity];
+    this.client.trackTrace({ message: this.prefixed(message), severity: sev, properties: { value } });
+  }
+
+  @runIfPropIsDefined('client')
+  public registerEvent(
+    name: string,
+    properties?: { [key: string]: string }
+  ): void {
+    log.extend('debug')(`Event: %s\n%j`, name,  properties || '');
+    this.client.trackEvent({ name: this.prefixed(name), properties });
+  }
+
+  @runIfPropIsDefined('client')
   public registerTime(timeKey: string, timer: Timer) {
-    this.logger.extend('debug')(`${timeKey.charAt(0).toUpperCase()}${timeKey.substr(1).toLowerCase()} time: ${timer.elapsed()}ms`);
-    this.registerMetric(this.prefixed(`time:${timeKey}`), timer.elapsed());
+    const elapsed = timer.elapsed();
+    log.extend('debug')('Time: %s %d ms', timeKey, elapsed);
+    this.registerMetric(this.prefixed(`time:${timeKey}`), elapsed);
   }
 
   @runIfPropIsDefined('client')
@@ -201,4 +183,13 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   }
 }
 
-export default Telemetry;
+const telemetry = new Telemetry({
+  enableTelemetry: false,
+});
+
+export default telemetry;
+
+ConfigManager.addOnUpdateHook(() => {
+  if (ConfigManager.telemetry) telemetry.enable();
+  else telemetry.disable();
+});

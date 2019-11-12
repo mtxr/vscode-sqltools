@@ -11,6 +11,7 @@ import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
 import { decorateException } from '@sqltools/core/utils/errors';
 import logger from '@sqltools/core/log';
+import telemetry from '@sqltools/core/utils/telemetry';
 const log = logger.extend('conn-mann');
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
@@ -148,7 +149,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         this._loadConnectionData(c);
         return this.serializarConnectionState(req.conn);
       }
-      c = new Connection(req.conn, this.server.telemetry);
+      c = new Connection(req.conn);
       progressBase = {
         id: `progress:${c.getId()}`,
         title: c.getName(),
@@ -174,7 +175,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         return void this.server.sendNotification(e.data.notification, e.data.args);
       }
 
-      this.server.telemetry.registerException(e);
+      telemetry.registerException(e);
 
       throw e;
     }
@@ -197,7 +198,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
         ...req.conn,
         password: req.conn.password || req.password,
       }
-      await Connection.testConnection(creds, this.server.telemetry);
+      await Connection.testConnection(creds);
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connection test successful!' });
       return req.conn;
     } catch (e) {
@@ -270,7 +271,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
   // internal utils
   private async _loadConnectionData(conn: Connection) {
-    log.extend('warn')('*** DEPRECATION *** this method is deprecated and will be removed in v0.22.x')
+    log.extend('warn')('*** DEPRECATION *** _loadConnectionData is deprecated and will be removed in v0.22.x')
     if (!conn) {
       return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
     }

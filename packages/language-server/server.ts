@@ -1,16 +1,12 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import SQLTools, { Arg0 } from '@sqltools/core/plugin-api';
-import { Telemetry } from '@sqltools/core/utils';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
 import { InvalidActionException } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
+import telemetry from '@sqltools/core/utils/telemetry';
 
 class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
-  private _telemetry = new Telemetry({
-    enableTelemetry: false,
-    product: 'ls',
-  });
   private _server: IConnection;
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
@@ -26,15 +22,14 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
-    this.telemetry.registerInfoMessage(`Initialized with node version:${process.version}`);
+    telemetry.registerMessage('Information', `Initialized with node version:${process.version}`);
 
     this.onInitializedHooks.forEach(hook => hook(params));
   };
 
   private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
     if (params.initializationOptions.telemetry) {
-      this.telemetry.updateOpts({
-        product: 'ls',
+      telemetry.updateOpts({
         ...params.initializationOptions.telemetry,
       });
     }
@@ -59,8 +54,8 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigManager.update(changes.settings.sqltools);
-    if (ConfigManager.telemetry) this.telemetry.enable();
-    else this.telemetry.disable();
+    if (ConfigManager.telemetry) telemetry.enable();
+    else telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -142,13 +137,9 @@ ExecPath: ${process.execPath}
     return this._docManager;
   }
 
-  public get telemetry() {
-    return this._telemetry;
-  }
-
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
-      this.telemetry.registerException(err, { message, languageServer: true });
+      telemetry.registerException(err, { message, languageServer: true });
       this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
     };
     if (typeof error !== 'undefined') return cb(error);

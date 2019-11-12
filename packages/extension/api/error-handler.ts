@@ -1,10 +1,9 @@
-import { Telemetry } from '@sqltools/core/utils';
 import { commands, window } from 'vscode';
 import { openExternal } from '@sqltools/core/utils/vscode';
-import { ResponseError } from 'vscode-jsonrpc';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import telemetry from '@sqltools/core/utils/telemetry';
+import { ResponseError } from 'vscode-languageclient';
 namespace ErrorHandler {
-  let telemetry: Telemetry;
   export function create(message: string): (reason: any) => void {
     return async (error: any): Promise<void> => {
       if (error) {
@@ -14,9 +13,6 @@ namespace ErrorHandler {
       }
       output(message, error);
     };
-  }
-  export function setTelemetryClient(cli: Telemetry) {
-    telemetry = cli;
   }
 
   async function output(message: string, error: ResponseError<any>) {

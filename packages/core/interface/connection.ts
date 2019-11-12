@@ -91,7 +91,6 @@ export interface ConnectionInterface {
   connectString?: string;
   /**
    * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options
-   * @deprecated replaced by mssqlOptions
    * @type {any}
    * @memberof ConnectionInterface
    */

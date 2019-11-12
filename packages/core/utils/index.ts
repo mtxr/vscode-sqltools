@@ -4,7 +4,6 @@ import commandExists from './command-exists';
 import { ConnectionInterface, DatabaseDriver } from '../interface';
 export * from './persistence';
 export * from './replacer';
-export * from './telemetry';
 export * from './timer';
 export * from './get-connection-stuff';
 

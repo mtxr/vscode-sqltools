@@ -3,7 +3,7 @@ import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
 import { Settings as SettingsInterface } from '@sqltools/core/interface';
-import { Telemetry, Timer } from '@sqltools/core/utils';
+import { Timer } from '@sqltools/core/utils';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
@@ -20,9 +20,9 @@ import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
+import telemetry from '@sqltools/core/utils/telemetry';
 
 export class SQLToolsExtension implements SQLTools.ExtensionInterface {
-  private telemetry: Telemetry;
   private pluginsQueue: SQLTools.ExtensionPlugin<this>[] = [];
   private onWillRunCommandEmitter: EventEmitter<SQLTools.CommandEvent>;
   private onDidRunCommandSuccessfullyEmitter: EventEmitter<SQLTools.CommandSuccessEvent>;
@@ -32,15 +32,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 
   public activate() {
     const activationTimer = new Timer();
-    ConfigManager.addOnUpdateHook(() => {
-      log.extend('info')('Settings updated!');
-      if (this.telemetry) {
-        if (ConfigManager.telemetry) this.telemetry.enable();
-        else this.telemetry.disable();
-      }
-    });
-    this.telemetry = new Telemetry({
-      product: 'ext',
+    telemetry.updateOpts({
       vscodeInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
@@ -52,7 +44,6 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
-    ErrorHandler.setTelemetryClient(this.telemetry);
     this.context.subscriptions.push(
       workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
@@ -67,7 +58,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     }
     this.loadPlugins();
     activationTimer.end();
-    this.telemetry.registerTime('activation', activationTimer);
+    telemetry.registerTime('activation', activationTimer);
     this.displayReleaseNotesMessage();
   }
 
@@ -165,7 +156,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
       const message = `SQLTools updated! Check out the release notes for more information.`;
       const options = [ moreInfo, supportProject, releaseNotes ];
       const res: string = await window.showInformationMessage(message, ...options);
-      this.telemetry.registerInfoMessage(message, res);
+      telemetry.registerMessage('Information', message, res);
       switch (res) {
         case moreInfo:
           openExternal('https://github.com/mtxr/vscode-sqltools#donate');
