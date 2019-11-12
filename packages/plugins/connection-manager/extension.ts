@@ -89,57 +89,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_describeCurrent = async () => {
-    try {
-      let activeEditor = await getOrCreateEditor();
-      if (!activeEditor) {
-          return;
-      }
-      let text = activeEditor.document.getText(); 
-      let line = activeEditor.selection.active.line;
-      let eol = activeEditor.document.eol === 2 ? "\r\n" : "\n";
-      let tests = text.split(eol);
-      let currentLine = tests[line];
-      let col = activeEditor.selection.active.character;
-      let startCol = 0;
-      for (let i = col; i >= 0; i--) {
-        let curLine = currentLine[i] || "";
-        if (curLine == " " || curLine == "," || curLine == "(" || curLine == ")" || curLine == "'") {
-          startCol = i + 1;
-          break;
-        }
-      }
-      let endCol = currentLine.length;
-      for (let i = col; i < currentLine.length; i++) {
-        let curLine = currentLine[i] || "";
-        if (curLine == " " || curLine == "," || curLine == "(" || curLine == ")" || curLine == "'") {
-          endCol = i;
-          break;
-        } 
-      }
-      let query = "";
-      for (let q = startCol; q < endCol; q++) {
-        query = query + currentLine[q];
-      }
-      const conn = await this._connect();
-      const s = await this.client.sendRequest(GetConnectionDataRequest, { conn });
-      let table = s.tables.find(p => p.name == query);
-      if (table != null) {
-        this._openResultsWebview();
-        const payload = await this._runConnectionCommandWithArgs('describeTable', getTableName(conn.dialect, table));
-        this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
-      } else {
-        let func = s.functions.find(p => p.name == query);
-        if (func != null) {
-          const payload = await this._runConnectionCommandWithArgs('describeFunction', func.signature);
-        }
-      }
-      
-    } catch (e) {
-      this.errorHandler('Error while describing table records', e);
-    }
-  }
-
   private ext_describeFunction() {
     window.showInformationMessage('Not implemented yet.');
   }
@@ -292,6 +241,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     let activeEditor = await getOrCreateEditor();
     if (!activeEditor) {
         return;
+    }
+    if (!activeEditor.selection.isEmpty) {
+      return this.ext_executeQuery();
     }
     let text = activeEditor.document.getText(); 
     let line = activeEditor.selection.active.line;
@@ -717,7 +669,6 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
       .registerCommand(`closeConnection`, this.ext_closeConnection)
       .registerCommand(`deleteConnection`, this.ext_deleteConnection)
-      .registerCommand(`describeCurrent`, this.ext_describeCurrent)
       .registerCommand(`describeFunction`, this.ext_describeFunction)
       .registerCommand(`describeTable`, this.ext_describeTable)
       .registerCommand(`executeFromInput`, this.ext_executeFromInput)

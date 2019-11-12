@@ -3,7 +3,6 @@ import {
 } from '../../interface';
 import * as Utils from '../../utils';
 import queries from './queries';
-import queriesLocal from './queriesLocal';
 import OracleDBLib from 'oracledb';
 import GenericDialect from '../generic';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
@@ -50,7 +49,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
     if (this.poolCreated) {
       return this.connection;
     }
-    this.queries = this.credentials.local ? queriesLocal : queries; 
+
     this.needToInstallDependencies();
 
     let { connectString } = this.credentials;
@@ -165,7 +164,7 @@ export default class OracleDB extends GenericDialect<OracleDBLib.Connection> imp
               type: obj.TYPE,
               isPk: obj.KEYTYPE === 'P',
               isFk: obj.KEYTYPE === 'R',
-              tree: obj.TREE, 
+              tree: obj.TREE,
             } as DatabaseInterface.TableColumn;
           });
       });
