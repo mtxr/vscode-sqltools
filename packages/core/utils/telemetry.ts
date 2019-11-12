@@ -114,22 +114,22 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   public updateOpts = (opts: SQLTools.TelemetryArgs) => {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
-    if (opts.enableTelemetry === true) this.enable();
-    else if (opts.enableTelemetry === false)this.disable();
+    this.disable();
   }
 
   public enable = (): void => {
-    if (Telemetry.enabled) return;
-    Telemetry.enabled = true;
-    this.logger.info('Telemetry enabled!');
-    this.createClient();
+    return this.disable();
+    // if (Telemetry.enabled) return;
+    // Telemetry.enabled = true;
+    // this.logger.info('Telemetry enabled!');
+    // this.createClient();
   }
 
   public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     AI.dispose();
-    this.logger.info('Telemetry disabled!');
+    // this.logger.info('Telemetry disabled!');
     this.client = undefined;
   }
 
