@@ -2,21 +2,17 @@ import React, { useState } from 'react';
 import ResultsTable from './ResultsTable';
 import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@material-ui/core';
 import Syntax from '../../components/Syntax';
+import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-interface QueryResultProps {
-  connId: string;
-  messages: string[];
-  cols: string[];
-  results: any[];
-  error?: boolean;
-  query?: string;
+type QueryResultProps = {
   pageSize: number;
-}
-export default ({ cols, error, query, messages, results = [], connId, pageSize }: QueryResultProps) => {
+} & DatabaseInterface.QueryResults;
+
+const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize, page, total }: QueryResultProps) => {
   const [showMessages, setShowMessages] = useState(!!(error || (results.length === 0 && messages.length > 0)));
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
-
+  const showPagination = !results || results.length > pageSize;
   return (
     <div className="result">
       <ResultsTable
@@ -25,7 +21,10 @@ export default ({ cols, error, query, messages, results = [], connId, pageSize }
         query={query}
         connId={connId}
         columnNames={cols}
-        pageSize={pageSize}
+        page={page || 0}
+        total={total}
+        showPagination={showPagination}
+        pageSize={showPagination ? pageSize : 0}
         error={error}
         openDrawerButton={
           <Button
@@ -53,3 +52,5 @@ export default ({ cols, error, query, messages, results = [], connId, pageSize }
     </div>
   );
 };
+
+export default QueryResults;

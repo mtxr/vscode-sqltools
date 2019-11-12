@@ -194,7 +194,7 @@ export interface ConnectionDriver {
   getColumns(): Promise<DatabaseInterface.TableColumn[]>;
   getFunctions(): Promise<DatabaseInterface.Function[]>;
   describeTable(tableName: string): Promise<DatabaseInterface.QueryResults[]>;
-  showRecords(tableName: string, limit: number): Promise<DatabaseInterface.QueryResults[]>;
+  showRecords(tableName: string, limit: number, page?: number): Promise<DatabaseInterface.QueryResults[]>;
   query(query: string): Promise<DatabaseInterface.QueryResults[]>;
   testConnection?(): Promise<void>;
 }

@@ -72,15 +72,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_showRecords = async (node?: SidebarTableOrView) => {
+  private ext_showRecords = async (node?: SidebarTableOrView | string, page: number = 0) => {
     try {
-      const table = await this._getTableName(node);
+      const table = typeof node === 'string' ? node : await this._getTableName(node);
       await this._openResultsWebview();
-      let limit = 50;
-      if (ConfigManager.results && ConfigManager.results.limit) {
-        limit = ConfigManager.results.limit;
-      }
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, limit);
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, page);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
 
     } catch (e) {

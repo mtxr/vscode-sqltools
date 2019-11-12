@@ -10,5 +10,8 @@ export interface ResultsTableProps {
   query: string;
   connId: string;
   pageSize: number;
+  page: number;
+  total: number;
   openDrawerButton: ReactNode;
+  showPagination: boolean;
 }

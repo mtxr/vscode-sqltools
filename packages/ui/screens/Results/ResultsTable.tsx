@@ -8,6 +8,7 @@ import {
   DataTypeProvider,
   PagingState,
   IntegratedPaging,
+  CustomPaging,
 } from '@devexpress/dx-react-grid';
 
 import {
@@ -94,7 +95,7 @@ const TableRow = selectedRow => (props: Table.DataRowProps) => (
   <Table.Row {...props} className={selectedRow === props.tableRow.key ? 'selected-row' : undefined} />
 );
 
-const GridRoot = styled(Grid.Root)`
+const GridRoot: typeof Grid.Root = styled(Grid.Root)`
   width: 100%;
   overflow: auto;
   height: 100%;
@@ -293,10 +294,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   );
 
   render() {
-    const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
+    const { rows, columns, columnNames, pageSize, openDrawerButton, error, showPagination, page, total } = this.props;
     const { filters } = this.state;
     const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
-    const showPagination = rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
         {error ? (
@@ -309,8 +309,11 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
               <IntegratedSorting />
               <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
               <IntegratedFiltering columnExtensions={columnExtensions} />
-              <PagingState defaultCurrentPage={0} pageSize={showPagination ? pageSize : 99999999999999} />
+              <PagingState defaultCurrentPage={page} pageSize={pageSize} />
               <IntegratedPaging />
+              <CustomPaging
+                totalCount={total || rows.length}
+              />
               <VirtualTable
                 height="100%"
                 cellComponent={TableCell(this.openContextMenu)}

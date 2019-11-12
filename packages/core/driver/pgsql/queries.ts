@@ -1,5 +1,6 @@
 import { DriverQueries } from '@sqltools/core/interface';
 import { TREE_SEP } from '../../constants';
+import queryFactory from '../../utils/query/query-factory';
 
 export default {
   describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
@@ -42,8 +43,9 @@ ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION
 `,
-  fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-  fetchTables: `
+fetchRecords: 'SELECT * FROM :table LIMIT :limit',
+fetchRecordsV2: queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0}; SELECT count(1) FROM ${p => p.table};`,
+fetchTables: `
 SELECT
   T.TABLE_NAME AS tableName,
   T.TABLE_SCHEMA AS tableSchema,

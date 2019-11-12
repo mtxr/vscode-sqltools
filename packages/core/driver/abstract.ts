@@ -56,8 +56,12 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
 
-  public showRecords(table: string, limit: number) {
-    return this.query(Utils.replacer(this.queries.fetchRecords, { limit, table }));
+  public showRecords(table: string, limit: number, page: number = 0) {
+    const params = { limit, table, offset: page * limit };
+    if (typeof this.queries.fetchRecordsV2 === 'function') {
+      return this.query(this.queries.fetchRecordsV2(params));
+    }
+    return this.query(Utils.replacer(this.queries.fetchRecords, params));
   }
 
   protected needToInstallDependencies() {

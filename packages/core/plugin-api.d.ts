@@ -155,6 +155,8 @@ export namespace DatabaseInterface {
     cols: string[];
     query: string;
     messages: string[];
+    page?: number;
+    total?: number;
   }
 }
 

@@ -3,8 +3,9 @@ export interface DriverQueries {
   describeTable: string;
   fetchColumns: string;
   fetchRecords: string;
+  fetchRecordsV2: (params: { limit: number; offset: number; table: string }) => string;
   fetchFunctions?: string;
-  [id: string]: string;
+  [id: string]: string | Function;
 }
 
 export enum DatabaseDriver {

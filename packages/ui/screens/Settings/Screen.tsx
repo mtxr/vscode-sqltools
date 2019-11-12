@@ -36,6 +36,7 @@ interface SettingsScreenState {
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
       case 'editConnection':

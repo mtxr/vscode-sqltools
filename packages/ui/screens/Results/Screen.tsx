@@ -1,6 +1,5 @@
 import React from 'react';
 import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
-import Loading from '@sqltools/ui/components/Loading';
 import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
@@ -10,16 +9,16 @@ import { Tabs, Tab, Typography } from '@material-ui/core';
 import logger from '@sqltools/core/log';
 
 const log = logger.extend('results');
+const defaultPageSize = 50;
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state: QueryResultsState = {
     connId: null,
-    isLoaded: false,
     resultMap: {},
     queries: [],
     error: null,
     activeTab: null,
-    pageSize: 50,
+    pageSize: defaultPageSize,
   };
 
   constructor(props) {
@@ -45,6 +44,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+    if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch (action) {
       case 'queryResults':
@@ -59,7 +59,6 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         });
         this.saveState({
           connId,
-          isLoaded: true,
           queries,
           resultMap,
           error: null,
@@ -67,7 +66,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         });
         break;
       case 'reset':
-        this.saveState({ connId: null, isLoaded: false, resultMap: {}, queries: [] });
+        this.saveState({ connId: null, resultMap: {}, queries: [] });
         break;
 
       case 'getState':
@@ -80,9 +79,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   };
 
   render() {
-    if (!this.state.isLoaded) {
-      return <Loading active />;
-    } else if (this.state.isLoaded && this.state.error) {
+    if (this.state.error) {
       return (
         <div>
           <h2>Query errored. Check the logs.</h2>
