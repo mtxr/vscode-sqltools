@@ -202,7 +202,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         ib.prompt = 'Remember to escape values if neeeded.'
         ib.onDidAccept(() => {
           const r = new RegExp(params[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
-          query = query.replace(r, `'${ib.value}'`);
+          query = query.replace(r, ib.value);
           ib.step++;
           if (ib.step > ib.totalSteps) {
             ib.hide();
@@ -211,7 +211,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
           ib.value = '';
           ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
         });
-        ib.onDidHide(() =>ib.step === ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
+        ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
         ib.show();
       });
     }

@@ -131,9 +131,12 @@ module.exports = () => {
       )
     ].concat(config.plugins || []);
     config.node = {
-      ...(config.node || {}),
       __dirname: false,
       __filename: false,
+      fs: 'empty',
+      net: 'empty',
+      child_process: 'empty',
+      ...(config.node || {}),
     };
 
     config.optimization = config.optimization || {};
