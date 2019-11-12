@@ -4,11 +4,12 @@ import { Telemetry } from '@sqltools/core/utils';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
 import { InvalidActionException } from '@sqltools/core/exception';
+import log from '@sqltools/core/log';
 
 class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   private _telemetry = new Telemetry({
     enableTelemetry: false,
-    product: 'language-server',
+    product: 'ls',
   });
   private _server: IConnection;
   private _docManager = new TextDocuments();
@@ -33,18 +34,12 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
     if (params.initializationOptions.telemetry) {
       this.telemetry.updateOpts({
-        product: 'language-server',
+        product: 'ls',
         ...params.initializationOptions.telemetry,
       });
     }
     if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
-      console.log(
-        `
-===============================
-User defined env vars:
-${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
-===============================
-`);
+      log.extend('debug')(`User defined env vars ===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
     }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
@@ -85,14 +80,11 @@ ${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
   }
 
   public listen() {
-    console.log(
-`
+    log.extend('info')(`SQLTools Server started!
 ===============================
-SQLTools Server started!
 Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
 ExecPath: ${process.execPath}
-===============================
-`)
+===============================`)
     this._server.listen();
     return this;
   }
@@ -111,7 +103,7 @@ ExecPath: ${process.execPath}
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
     if (!handler) throw new InvalidActionException('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
-      console.log(`Request ${req._method || req.toString()} received`);
+      log.extend('debug')('received %s', req._method || req.toString());
       let result = handler(...args);
       if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
         result = await result;

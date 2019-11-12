@@ -8,8 +8,11 @@ import availableDrivers from './lib/availableDrivers';
 import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
 import getVscode from '@sqltools/ui/lib/vscode';
-import '@sqltools/ui/sass/app.scss';
 import ConnectionCreated from './Widget/ConnectionCreated';
+import logger from '@sqltools/core/log';
+import '@sqltools/ui/sass/app.scss';
+
+const log = logger.extend('settings');
 
 enum ConnectionMethod {
   ServerAndPort = 'Server and Port',
@@ -33,7 +36,7 @@ interface SettingsScreenState {
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, ...[ payload ]);
+    log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
       case 'editConnection':
         const conn = payload.conn || {};
@@ -78,6 +81,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       case 'reset':
         this.reset();
       default:
+        log.extend('warn')(`No handler set for %s`, action);
         break;
     }
   }

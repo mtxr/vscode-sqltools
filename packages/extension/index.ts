@@ -1,5 +1,4 @@
 import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
-import logger from '@sqltools/core/log/vscode';
 import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
@@ -11,7 +10,9 @@ import Utils from './api/utils';
 import { openExternal } from '@sqltools/core/utils/vscode';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
+import logger from '@sqltools/core/log';
 
+const log = logger.extend('main');
 // plugins
 import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
@@ -32,15 +33,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   public activate() {
     const activationTimer = new Timer();
     ConfigManager.addOnUpdateHook(() => {
-      logger.log('Settings updated!');
+      log.extend('info')('Settings updated!');
       if (this.telemetry) {
         if (ConfigManager.telemetry) this.telemetry.enable();
         else this.telemetry.disable();
       }
     });
     this.telemetry = new Telemetry({
-      logger,
-      product: 'extension',
+      product: 'ext',
       vscodeInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
@@ -62,8 +62,8 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
 
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
 
-    if ((<any>logger).outputChannel) {
-      this.context.subscriptions.push((<any>logger).outputChannel);
+    if (logger.outputChannel) {
+      this.context.subscriptions.push(logger.outputChannel);
     }
     this.loadPlugins();
     activationTimer.end();
@@ -188,14 +188,14 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     if (!evt.command) return;
     if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
 
-    logger.log(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
+    log.extend('debug')(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
   }
   private onDidRunCommandSuccessfullyHandler = (evt: SQLTools.CommandSuccessEvent): void => {
     if (!evt.command) return;
     if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
 
-    logger.log(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
+    log.extend('debug')(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
@@ -235,7 +235,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
     this.context.subscriptions.push(
       commands[type](`${EXT_NAME}.${command}`, async (...args) => {
-        logger.info(`Executing ${EXT_NAME}.${command}`)
+        log.extend('info')(`Executing ${EXT_NAME}.${command}`)
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);

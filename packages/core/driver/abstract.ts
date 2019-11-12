@@ -9,6 +9,7 @@ import * as Utils from '@sqltools/core/utils';
 import { MissingModuleException, ElectronNotSupportedException } from '../exception';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import sqltoolsRequire from '../utils/sqltools-require';
+import log from '@sqltools/core/log';
 
 export interface Deps {
   type: 'package' | 'npmscript';
@@ -19,6 +20,7 @@ export interface Deps {
 }
 
 export default abstract class AbstractDriver<ConnectionType extends any> implements ConnectionDriver {
+  public log: typeof log;
   public static deps: Deps[] = [];
 
   public getId() {
@@ -32,7 +34,9 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
   }
   public connection: Promise<ConnectionType>;
   abstract queries: DriverQueries;
-  constructor(public credentials: ConnectionInterface) { }
+  constructor(public credentials: ConnectionInterface) {
+    this.log = log.extend(credentials.driver.toLowerCase());
+  }
 
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
@@ -44,7 +48,7 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
   abstract getColumns(): Promise<DatabaseInterface.TableColumn[]>;
 
   public getFunctions(): Promise<DatabaseInterface.Function[]> {
-    console.error(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.driver}\n####################`);
+    this.log.extend('error')(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
 

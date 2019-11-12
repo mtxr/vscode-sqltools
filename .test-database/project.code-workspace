@@ -225,7 +225,25 @@
       }
     ],
     "sqltools.languageServerEnv": {
-      "EXAMPLE_VARIABLE": "VALUE"
+      "EXAMPLE_VARIABLE742": "VALUE",
+      "EXAMPLE_VARIABLE663": "VALUE",
+      "EXAMPLE_VARIABLE204": "VALUE",
+      "EXAMPLE_VARIABLE625": "VALUE",
+      "EXAMPLE_VARIABLE724": "VALUE",
+      "EXAMPLE_VARIABLE126": "VALUE",
+      "EXAMPLE_VARIABLE11": "VALUE",
+      "EXAMPLE_VARIABLE246": "VALUE",
+      "EXAMPLE_VARIABLE273": "VALUE",
+      "EXAMPLE_VARIABLE409": "VALUE",
+      "EXAMPLE_VARIABLE17": "VALUE",
+      "EXAMPLE_VARIABLE930": "VALUE",
+      "EXAMPLE_VARIABLE195": "VALUE",
+      "EXAMPLE_VARIABLE936": "VALUE",
+      "EXAMPLE_VARIABLE650": "VALUE",
+      "EXAMPLE_VARIABLE775": "VALUE",
+      "EXAMPLE_VARIABLE768": "VALUE",
+      "EXAMPLE_VARIABLE925": "VALUE",
+      "EXAMPLE_VARIABLE895": "VALUE",
     },
     "sqltools.queryParams.enableReplace": true,
     "sqltools.dependencyManager": {

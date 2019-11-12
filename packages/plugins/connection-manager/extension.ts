@@ -1,4 +1,4 @@
-import logger from '@sqltools/core/log/vscode';
+import logger from '@sqltools/core/log';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDriver } from '@sqltools/core/interface';
@@ -18,6 +18,8 @@ import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query'
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/core/utils/vscode/parse-workspace-path';
+
+const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
   public client: SQLTools.LanguageClientInterface;
@@ -254,7 +256,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  private ext_showOutputChannel = () => (<any>logger).show();
+  private ext_showOutputChannel = () => logger.show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     connId = typeof connId === 'string' ? connId : undefined;
@@ -352,7 +354,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_addConnection = (connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      logger.warn('Nothing to do. No parameter received');
+      log.extend('warn')('Nothing to do. No parameter received');
       return;
     }
 
@@ -363,7 +365,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
   private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      logger.warn('Nothing to do. No parameter received');
+      log.extend('warn')('Nothing to do. No parameter received');
       return;
     }
 
@@ -562,7 +564,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     [id: string]: {
       progress: Progress<any>,
       tokenSource: CancellationTokenSource,
-      interval: NodeJS.Timeout,
+      interval: number,
       resolve: Function,
       reject: Function,
     }

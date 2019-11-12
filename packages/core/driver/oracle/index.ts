@@ -117,7 +117,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
         try {
           await conn.close();
         } catch (e) {
-          console.error(e);
+          this.log(e);
         }
       }
     }

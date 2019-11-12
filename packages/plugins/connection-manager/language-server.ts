@@ -10,6 +10,8 @@ import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
 import { decorateException } from '@sqltools/core/utils/errors';
+import logger from '@sqltools/core/log';
+const log = logger.extend('conn-mann');
 
 export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
@@ -91,7 +93,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       toRefresh = toRefresh.filter(c => connIds.includes(c));
     }
     await Promise.all(toRefresh.map(c => {
-      console.log(`Refreshing ${(<Connection>activeConnections[c]).getName()}`)
+      log.extend('info')(`Refreshing ${(<Connection>activeConnections[c]).getName()}`)
       return this._loadConnectionData(activeConnections[c]);
     }));
   };
@@ -268,7 +270,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
 
   // internal utils
   private async _loadConnectionData(conn: Connection) {
-    console.log('*** DEPRECATION *** this method is deprecated and will be removed in v0.22.x')
+    log.extend('warn')('*** DEPRECATION *** this method is deprecated and will be removed in v0.22.x')
     if (!conn) {
       return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
     }
@@ -316,7 +318,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
       const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
       ? ConfigManager.autoConnectTo
       : [ConfigManager.autoConnectTo];
-      console.info(`Configuration set to auto connect to: ${autoConnectTo}`);
+      log.extend('info')(`Configuration set to auto connect to: ${autoConnectTo}`);
 
       defaultConnections.push(...ConfigManager.connections
         .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)

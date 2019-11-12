@@ -172,7 +172,7 @@ export interface ConnectionInterface {
     connected?: string;
     disconnected?: string;
   };
-/**
+  /**
    * Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all
    *
    * @type {DatabaseFilterType}

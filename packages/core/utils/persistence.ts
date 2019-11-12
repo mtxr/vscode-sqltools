@@ -2,22 +2,28 @@ import envPaths from 'env-paths';
 import path from 'path';
 import fs from 'fs';
 import EnvironmentException from './../exception/environment';
+import logger from '@sqltools/core/log';
 
+const log = logger.extend('persistence');
 const SQLTOOLS_PATHS = envPaths('vscode-sqltools', { suffix: null });
 let home: string;
 
 if (!fs.existsSync(SQLTOOLS_PATHS.config)) {
   fs.mkdirSync(SQLTOOLS_PATHS.config);
+  log.extend('debug')(`Created config path ${SQLTOOLS_PATHS.config}`);
 }
 if (!fs.existsSync(SQLTOOLS_PATHS.data)) {
   fs.mkdirSync(SQLTOOLS_PATHS.data);
+  log.extend('debug')(`Created data path ${SQLTOOLS_PATHS.data}`);
 }
 if (!fs.existsSync(SQLTOOLS_PATHS.cache)) {
   fs.mkdirSync(SQLTOOLS_PATHS.cache);
+  log.extend('debug')(`Created cache path ${SQLTOOLS_PATHS.cache}`);
 }
 
 if (!fs.existsSync(getDataPath('node_modules'))) {
   fs.mkdirSync(getDataPath('node_modules'));
+  log.extend('debug')(`Created node_modules path ${getDataPath('node_modules')}`);
 }
 
 /**
@@ -50,6 +56,7 @@ export function getCachePath(...args: string[]) {
 }
 
 export function migrateFilesToNewPaths() {
+  log.extend('debug')(`Checking file paths migration needed`);
   const toMigrate = [
     {
       from: getHome('.sqltools-setup'),
@@ -63,12 +70,19 @@ export function migrateFilesToNewPaths() {
   ];
   toMigrate.map((task) => {
     const { from, to } = task;
-    if(!fs.existsSync(from) || (fs.existsSync(from) && fs.existsSync(to))) return task;
+    if(fs.existsSync(to)) {
+      log.extend('debug')(`Destination file ${to} already exists. Skipping...`);
+      return task;
+    };
+    if(!fs.existsSync(from)) {
+      log.extend('debug')(`Origin file ${from} doesnt exists. Skipping...`);
+      return task;
+    };
 
     fs.renameSync(from, to);
     task.migrated = true;
 
-    console.log(`Migrated ${from} to ${to}`);
+    log.extend('info')(`Migrated file from ${from} to ${to}`);
 
     return task;
   });

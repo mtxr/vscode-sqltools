@@ -65,7 +65,7 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
 
       this.connection = new Promise<HanaConnection>((resolve, reject) => conn.connect(err => {
         if (err) {
-          console.error("Connection to HANA failed", err.toString());
+          this.log.extend('error')("Connection to HANA failed", err.toString());
           reject(err);
         }
         this.schema = this.credentials.database;
@@ -73,13 +73,13 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
             if (err) {
               reject(err);
             }
-            console.log("Connection to SAP Hana succeeded!");
+            this.log.extend('debug')("Connection to SAP Hana succeeded!");
             resolve(conn);
           });
       }));
       return this.connection;
     } catch (e) {
-      console.error("Connection to HANA failed" + e.toString());
+      this.log.extend('error')("Connection to HANA failed" + e.toString());
       Promise.reject(e);
     }
   }

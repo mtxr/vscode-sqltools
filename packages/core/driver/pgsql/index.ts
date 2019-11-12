@@ -45,7 +45,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
     if (poolConfig.ssl && typeof poolConfig.ssl === 'object') {
       Object.keys(poolConfig.ssl).forEach(key => {
         if (typeof poolConfig.ssl[key] === 'string' && poolConfig.ssl[key].startsWith('file://')) return;
-        console.log(`Reading file ${poolConfig.ssl[key].replace('file://', '')}`)
+        this.log.extend('info')(`Reading file ${poolConfig.ssl[key].replace('file://', '')}`)
         poolConfig.ssl[key] = fs.readFileSync(poolConfig.ssl[key].replace('file://', '')).toString();
       });
     }

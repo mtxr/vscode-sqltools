@@ -1,4 +1,4 @@
-import logger from '@sqltools/core/log/vscode';
+import logger from '@sqltools/core/log';
 import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
@@ -9,12 +9,13 @@ import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, Extensio
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
 
+const log = logger.extend('lc');
+
 export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
   private _telemetry = new Telemetry({
-    logger,
-    product: 'language-client',
+    product: 'lc',
   });
 
   constructor(public context: ExtensionContext) {
@@ -71,18 +72,21 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
     const serverModule = this.context.asAbsolutePath('languageserver.js');
     let runtime: string = undefined;
     const useNodeRuntime = ConfigManager.useNodeRuntime;
-    if (useNodeRuntime && typeof useNodeRuntime === 'string') {
-      const runtimePath = path.normalize(useNodeRuntime);
-      if (fs.existsSync(runtimePath)) {
-        runtime = runtimePath;
+    if (useNodeRuntime) {
+      if (typeof useNodeRuntime === 'string') {
+        const runtimePath = path.normalize(useNodeRuntime);
+        if (fs.existsSync(runtimePath)) {
+          runtime = runtimePath;
+        }
       } else {
-        window.showInformationMessage('Node runtime not found. Using default as a fallback.');
+        if (commandExists('node')) {
+          runtime = 'node';
+        }
       }
-    } else if (useNodeRuntime) {
-      if (commandExists('node')) {
-        runtime = 'node';
-      } else {
-        window.showInformationMessage('Node runtime not found. Using default as a fallback.');
+      if (!runtime) {
+        const message = 'Node runtime not found. Using default as a fallback.';
+        window.showInformationMessage(message);
+        log.extend('info')(message)
       }
     }
 
@@ -112,7 +116,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
 
   private getClientOptions(): LanguageClientOptions {
     const telemetryArgs: SQLTools.TelemetryArgs = {
-      product: 'language-server',
+      product: 'ls',
       enableTelemetry: ConfigManager.telemetry,
       vscodeInfo: {
         sessId: VSCodeEnv.sessionId,
@@ -185,6 +189,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       onError,
     );
     this.telemetry.registerInfoMessage('LanguageClient ready');
+    log.extend('info')('LanguageClient ready');
   }
 
   public get telemetry() {

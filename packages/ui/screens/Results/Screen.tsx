@@ -7,6 +7,9 @@ import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { Tabs, Tab, Typography } from '@material-ui/core';
+import logger from '@sqltools/core/log';
+
+const log = logger.extend('results');
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state: QueryResultsState = {
@@ -42,7 +45,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
   }
 
   messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, ...[payload]);
+    log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch (action) {
       case 'queryResults':
         const results: DatabaseInterface.QueryResults[] = payload;
@@ -71,6 +74,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         getVscode().postMessage({ action: 'receivedState', payload: this.state });
         break;
       default:
+        log.extend('warn')(`No handler set for %s`, action);
         break;
     }
   };

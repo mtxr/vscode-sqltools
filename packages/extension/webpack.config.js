@@ -37,7 +37,7 @@ const outdir = path.resolve(rootdir, '..', 'dist');
 function getExtensionConfig() {
   /** @type webpack.Configuration */
   let config = {
-    name: 'sqltools',
+    name: 'ext',
     target: 'node',
     entry: {
       extension: path.join(__dirname, 'index.ts'),
@@ -133,6 +133,7 @@ module.exports = () => {
     config.node = {
       ...(config.node || {}),
       __dirname: false,
+      __filename: false,
     };
 
     config.optimization = config.optimization || {};

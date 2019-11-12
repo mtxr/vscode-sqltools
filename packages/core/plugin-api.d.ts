@@ -15,14 +15,13 @@ export declare namespace SQLTools {
     start(): void;
     end(): void;
   }
-  type Product = 'core' | 'extension' | 'language-server' | 'language-client' | 'ui';
+  type Product = 'core' | 'ext' | 'ls' | 'lc' | 'ui';
   interface VSCodeInfo {
     uniqId?: string;
     sessId?: string;
     version?: string;
   }
   interface TelemetryArgs {
-    logger?: Console;
     product: Product;
     enableTelemetry?: boolean;
     vscodeInfo?: VSCodeInfo;

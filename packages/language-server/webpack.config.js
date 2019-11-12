@@ -6,7 +6,7 @@ const babelOptions = require(path.join(__dirname, '.babelrc'));
 
 module.exports = function getLanguageServerConfig() {
   let config = {
-    name: 'languageserver',
+    name: 'ls',
     target: 'node',
     entry: {
       languageserver: path.join(__dirname, 'index.ts'),

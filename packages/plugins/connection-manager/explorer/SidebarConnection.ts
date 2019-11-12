@@ -8,6 +8,9 @@ import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
 import ContextValue from '../context-value';
+import logger from '@sqltools/core/log';
+
+const log = logger.extend('conn-explorer');
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
   public static icons: { [driver: string]: { active: SidebarAbstractItem['iconPath']; connected: SidebarAbstractItem['iconPath']; disconnected: SidebarAbstractItem['iconPath'] } } = {};
@@ -90,7 +93,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
         };
       }
     } catch (error) {
-      console.log(error);
+      log.extend('error')(error);
     }
   }
   public get iconPath() {
@@ -103,7 +106,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
       }
       return this.getIcon('disconnected');
     } catch (error) {
-      console.log(error);
+      log.extend('error')(error);
     }
   }
   public getId() {

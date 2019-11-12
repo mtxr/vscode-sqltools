@@ -1,9 +1,14 @@
 import { getDataPath } from './persistence';
+import logger from '@sqltools/core/log';
+
+const log = logger.extend('sqltools-require:debug');
 
 function _sqltoolsRequire(id) {
+  log(`Require module ${getDataPath('node_modules', id)}`)
   return __non_webpack_require__(getDataPath('node_modules', id));
 }
 function _sqltoolsResolve (id, options) {
+  log(`Resolve module ${getDataPath('node_modules', id)}`)
   return __non_webpack_require__.resolve(getDataPath('node_modules', id), options)
 }
 

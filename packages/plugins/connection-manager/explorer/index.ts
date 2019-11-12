@@ -13,7 +13,9 @@ import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCol
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
 import sortBy from 'lodash/sortBy';
-import logger from '@sqltools/core/log/vscode';
+import logger from '@sqltools/core/log';
+
+const log = logger.extend('conn-man:explorer');
 
 const DriverHierarchyChildNames = {
   [DatabaseDriver.PostgreSQL]: ['Database', 'Schema'],
@@ -124,7 +126,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
   public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
-    logger.debug(`Connection explorer updated. ${item ? `Updated ${item.label}` : ''}`.trim());
+    log.extend('debug')(`Connection explorer updated. ${item ? `Updated ${item.label}` : ''}`.trim());
 
   }
 

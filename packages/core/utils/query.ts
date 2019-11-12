@@ -71,7 +71,6 @@ export function getQueryParameters(query: string, regexStr: string) {
 
   let match;
   while ((match = regex.exec(query)) !== null) {
-    console.log(`Found ${match[0]}. Next starts at ${regex.lastIndex}.`);
     const queryPart = query.substring(Math.max(0, regex.lastIndex - 15), Math.min(query.length, regex.lastIndex + 15)).replace(/[\r\n]/g, '').replace(/\s+/g, ' ').trim();
     if (!paramsMap[match[0]]) {
       paramsMap[match[0]] = {

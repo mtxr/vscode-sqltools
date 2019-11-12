@@ -236,5 +236,13 @@ export interface Settings {
    * @type {DependencyManagerSettings}
    * @memberof Settings
    */
-  dependencyManager?: DependencyManagerSettings
+  dependencyManager?: DependencyManagerSettings;
+
+  /**
+   * SQLTools debug settings
+   * 
+   * @type {{ namespaces?: string }}
+   * @memberof Settings
+   */
+  debug?: { namespaces?: string };
 }
