@@ -1,5 +1,4 @@
-import Drivers from '@sqltools/core/driver';
-import AbstractDriver from '@sqltools/core/driver/abstract';
+import Drivers from '@sqltools/drivers';
 import SQLTools from '@sqltools/core/plugin-api';
 import { InstallDepRequest } from './contracts';
 import packageManager from './lib/cli';
@@ -9,12 +8,15 @@ import logger from '@sqltools/core/log';
 
 const log = logger.extend('dep-man');
 
+type AvailableDrivers = keyof typeof Drivers;
+
+
 export default class DependencyManager implements SQLTools.LanguageServerPlugin {
   private server: SQLTools.LanguageServerInterface;
 
   public static runningJobs: string[] = [];
 
-  private onRequestToInstall = async ({ driver } = { driver: undefined }) => {
+  private onRequestToInstall = async ({ driver }: { driver?: AvailableDrivers } = { }) => {
     const depManagerSettings: Settings['dependencyManager'] = ConfigManager.dependencyManager || {
       packageManager: 'npm',
       installArgs: ['install'],
@@ -33,7 +35,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
       throw new Error(`Nothing to install for ${driver}. Request is invalid.`);
     }
 
-    const deps: typeof AbstractDriver['deps'] = DriverClass.deps;
+    const deps = DriverClass.deps;
 
     if (DependencyManager.runningJobs.includes(driver)) {
       return log.extend('info')(`You are already installing deps for ${driver}`)

@@ -2,8 +2,8 @@ export interface QueryThatResults<T = any> extends String {
   resultsIn?: T;
 }
 export interface DriverQueries {
-  fetchRecordsV2: (params: { limit: number; offset: number; table: string }) => string;
-  countRecordsV2: (params: { table: string }) => QueryThatResults<{ total: number }>;
+  fetchRecordsV2?: (params: { limit: number; offset: number; table: string }) => string;
+  countRecordsV2?: (params: { table: string }) => QueryThatResults<{ total: number }>;
 
   // old api
   fetchTables: string;

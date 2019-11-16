@@ -7,10 +7,10 @@ import { Timer } from '@sqltools/core/utils';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
-import { openExternal } from '@sqltools/core/utils/vscode';
+import { openExternal } from '@sqltools/vscode/utils';
 import SQLToolsLanguageClient from './language-client';
 import SQLTools from '@sqltools/core/plugin-api';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 
 const log = logger.extend('main');
 // plugins

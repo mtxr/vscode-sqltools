@@ -1,5 +1,5 @@
 import { commands, window } from 'vscode';
-import { openExternal } from '@sqltools/core/utils/vscode';
+import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ResponseError } from 'vscode-languageclient';

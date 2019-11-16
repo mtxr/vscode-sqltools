@@ -4,7 +4,7 @@ import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provid
 import { commands, ExtensionContext, Uri } from 'vscode';
 import path from 'path';
 import { DatabaseDriver } from '@sqltools/core/interface';
-import relativeToWorkspace from '@sqltools/core/utils/vscode/relative-to-workspace';
+import relativeToWorkspace from '@sqltools/vscode/utils/relative-to-workspace';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';

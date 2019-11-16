@@ -1,9 +1,9 @@
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import { TextEditor, TextEditorEdit, commands, SnippetString, env } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
-import { insertText, getOrCreateEditor } from '@sqltools/core/utils/vscode';
+import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 const log = logger.extend('formatter');

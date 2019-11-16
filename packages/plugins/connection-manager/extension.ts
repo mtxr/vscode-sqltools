@@ -1,4 +1,4 @@
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDriver } from '@sqltools/core/interface';
@@ -6,7 +6,7 @@ import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persist
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
 import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput } from '@sqltools/core/utils/vscode';
+import { getSelectedText, quickPick, readInput } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -16,7 +16,7 @@ import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import statusBar from './status-bar';
-import parseWorkspacePath from '@sqltools/core/utils/vscode/parse-workspace-path';
+import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/core/utils/telemetry';
 
 const log = logger.extend('conn-man');

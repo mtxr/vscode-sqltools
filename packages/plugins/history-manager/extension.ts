@@ -1,7 +1,7 @@
 import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import HistoryExplorer from './explorer';
 import { getNameFromId } from '@sqltools/core/utils';
-import { quickPick, insertText } from '@sqltools/core/utils/vscode';
+import { quickPick, insertText } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';

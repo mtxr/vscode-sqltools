@@ -1,7 +1,7 @@
 import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import SQLTools from '@sqltools/core/plugin-api';
-import { openExternal } from '@sqltools/core/utils/vscode';
+import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';

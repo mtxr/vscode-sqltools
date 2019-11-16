@@ -1,6 +1,6 @@
 import SQLTools from '@sqltools/core/plugin-api';
 import BookmarksExplorer from './explorer';
-import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/core/utils/vscode';
+import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';

@@ -1,5 +1,7 @@
+// @TODO MOVE FILE TO LANGUAGE SERVER
+
 import { getConnectionId } from './utils';
-import Drivers from './driver';
+import Drivers from '@sqltools/drivers';
 import {
   ConnectionDriver,
   ConnectionInterface,
