@@ -247,7 +247,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
     let text = activeEditor.document.getText();
     let currentOffset = activeEditor.document.offsetAt(activeEditor.selection.active);
-    const pattern = /((?:[^\;\']*\'[^\']*\')*[^\;]*(?:\;|$))/;
+    const pattern = /(?:[^\;\']*\'[^\']*\')*[^\;]+(?:\;|$)/;
     for (let match = []; match = text.match(pattern); match.length > 0) {
       const query = match[0];
       if (query.length >= currentOffset) {
