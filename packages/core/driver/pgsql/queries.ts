@@ -44,7 +44,9 @@ ORDER BY
   C.ORDINAL_POSITION
 `,
 fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-fetchRecordsV2: queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0}; SELECT count(1) FROM ${p => p.table};`,
+fetchRecordsV2: queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0};`,
+countRecordsV2: queryFactory`SELECT count(1) AS total FROM ${p => p.table};`,
+
 fetchTables: `
 SELECT
   T.TABLE_NAME AS tableName,

@@ -6,7 +6,7 @@
     { "path": "./packages/language-server" },
     { "path": "./packages/ui" },
     { "path": "./packages/plugins" },
-    { "path": "./packages/formatter" },
+    // { "path": "./packages/formatter" },
     { "path": "./docs" }
   ],
   "extensions": {},

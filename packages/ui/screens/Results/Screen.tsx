@@ -116,7 +116,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     return (
       <div className="query-results-container fullscreen-container">
         {tabs}
-        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} pageSize={this.state.pageSize}/>
+        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]}/>
       </div>
     );
   }

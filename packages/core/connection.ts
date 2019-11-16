@@ -98,18 +98,14 @@ export default class Connection {
   public async showRecords(tableName: string, page: number = 0) {
     const limit = this.conn.credentials.previewLimit || (ConfigManager.results && ConfigManager.results.limit) || 50;
 
-    const [records, totalResult] = await this.conn.showRecords(tableName, limit, page).catch(this.decorateException);
+    const [records] = await this.conn.showRecords(tableName, limit, page).catch(this.decorateException);
 
     let totalPart = '';
-    let total = 0;
-    if (totalResult && totalResult.results && totalResult.results.length > 0) {
-      totalPart = `of ${totalResult.results[0].count}`;
-      total = Number(totalResult.results[0].count);
+    if (typeof records.total === 'number') {
+      totalPart = `of ${records.total}`;
     }
     if (records) {
       records.label = `Showing ${Math.min(limit, records.results.length || 0)} ${totalPart}${tableName} records`;
-      records.page = page;
-      records.total = total;
     }
     return [records];
   }

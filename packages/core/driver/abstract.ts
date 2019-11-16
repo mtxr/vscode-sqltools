@@ -3,6 +3,7 @@ import {
   DriverQueries,
   ConnectionInterface,
   DatabaseFilterType,
+  QueryThatResults,
 } from '@sqltools/core/interface';
 import Drivers from '@sqltools/core/driver';
 import * as Utils from '@sqltools/core/utils';
@@ -41,7 +42,11 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
 
-  abstract query(query: string): Promise<DatabaseInterface.QueryResults[]>;
+  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String): Promise<DatabaseInterface.QueryResults<Q extends QueryThatResults<infer U> ? U : R>[]>;
+
+  public singleQuery<R = any, Q = any>(query: Q | string | String) {
+    return this.query<R, Q>(query).then(([ res ]) => res);
+  }
 
   abstract getTables(): Promise<DatabaseInterface.Table[]>;
 
@@ -56,11 +61,20 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
     return this.query(Utils.replacer(this.queries.describeTable, { table }));
   }
 
-  public showRecords(table: string, limit: number, page: number = 0) {
+  public async showRecords(table: string, limit: number, page: number = 0) {
     const params = { limit, table, offset: page * limit };
-    if (typeof this.queries.fetchRecordsV2 === 'function') {
-      return this.query(this.queries.fetchRecordsV2(params));
+    if (typeof this.queries.fetchRecordsV2 === 'function' && typeof this.queries.countRecordsV2 === 'function') {
+      const [ records, totalResult ] = await (Promise.all([
+        this.singleQuery(this.queries.fetchRecordsV2(params)),
+        this.singleQuery(this.queries.countRecordsV2(params)),
+      ]));
+      records.pageSize = limit;
+      records.page = page;
+      records.total = Number(totalResult.results[0].total);
+
+      return [records];
     }
+    log.extend('debug')('*** DEPRECATION *** needs to be migrated to v2 queries');
     return this.query(Utils.replacer(this.queries.fetchRecords, params));
   }
 

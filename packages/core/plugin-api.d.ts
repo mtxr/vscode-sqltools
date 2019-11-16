@@ -147,16 +147,17 @@ export namespace DatabaseInterface {
   }
 
   export type Procedure = Function;
-  export interface QueryResults {
+  export interface QueryResults<T extends { [key: string]: any } = any> {
     label?: string;
     connId: string;
     error?: boolean;
-    results: any[];
+    results: (T extends { [key: string]: any } ? T : any)[];
     cols: string[];
     query: string;
     messages: string[];
     page?: number;
     total?: number;
+    pageSize?: number;
   }
 }
 

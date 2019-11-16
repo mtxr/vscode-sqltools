@@ -4,15 +4,11 @@ import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@ma
 import Syntax from '../../components/Syntax';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-type QueryResultProps = {
-  pageSize: number;
-} & DatabaseInterface.QueryResults;
-
-const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize, page, total }: QueryResultProps) => {
+const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total }: DatabaseInterface.QueryResults) => {
   const [showMessages, setShowMessages] = useState(!!(error || (results.length === 0 && messages.length > 0)));
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
-  const showPagination = !results || results.length > pageSize;
+  const showPagination = !results || Math.max(total || 0, results.length) > pageSize;
   return (
     <div className="result">
       <ResultsTable

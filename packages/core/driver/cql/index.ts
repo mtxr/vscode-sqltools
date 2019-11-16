@@ -115,6 +115,23 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
           query = q.query;
           result = await conn.batch(q.statements, q.options);
         }
+        const messages = [];
+        const cols = result.columns ? result.columns.map(column => column.name) : [];
+        const queryresult: DatabaseInterface.QueryResults = {
+          connId: this.getId(),
+          cols,
+          messages,
+          query,
+          results: result.rows ? result.rows.map((row) => {
+            Object.entries(row).forEach(([key, value]) => {
+              if (typeof value === 'object') {
+                row[key] = JSON.stringify(value);
+              }
+            });
+            return row;
+          }) : [],
+        };
+        results.push(queryresult);
       } catch (e) {
         // Return error and previous queries, as they might have modified data
         const queryresult: DatabaseInterface.QueryResults = {
@@ -129,23 +146,6 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
         // continue;
         return results;
       }
-      const messages = [];
-      const cols = result.columns ? result.columns.map(column => column.name) : [];
-      const queryresult: DatabaseInterface.QueryResults = {
-        connId: this.getId(),
-        cols,
-        messages,
-        query,
-        results: result.rows ? result.rows.map((row) => {
-          Object.entries(row).forEach(([key, value]) => {
-            if (typeof value === 'object') {
-              row[key] = JSON.stringify(value);
-            }
-          });
-          return row;
-        }) : [],
-      };
-      results.push(queryresult);
     }
     return results;
   }
