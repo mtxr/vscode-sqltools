@@ -238,38 +238,24 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   }
   
   private ext_executeCurrentQuery = async () => {
-    let activeEditor = await getOrCreateEditor();
+    const activeEditor = await getOrCreateEditor();
     if (!activeEditor) {
         return;
     }
     if (!activeEditor.selection.isEmpty) {
       return this.ext_executeQuery();
     }
-    let text = activeEditor.document.getText(); 
-    let line = activeEditor.selection.active.line;
-    let eol = activeEditor.document.eol === 2 ? "\r\n" : "\n";
-    let tests = text.split(eol);
-    let startLine = 0;
-    for (let i = line; i >= 0; i--) {
-      let curLine = tests[i] || "";
-      if (curLine.trim() == "") {
-        startLine = i + 1;
-        break;
+    let text = activeEditor.document.getText();
+    let currentOffset = activeEditor.document.offsetAt(activeEditor.selection.active);
+    const pattern = /((?:[^\;\']*\'[^\']*\')*[^\;]*(?:\;|$))/;
+    for (let match = []; match = text.match(pattern); match.length > 0) {
+      const query = match[0];
+      if (query.length >= currentOffset) {
+        return this.ext_executeQuery(query);
       }
+      text = text.slice(query.length);
+      currentOffset -= query.length;
     }
-    let endLine = tests.length;
-    for (let i = line; i < tests.length; i++) {
-      let curLine = tests[i] || "";
-      if (curLine.trim() == "") {
-        endLine = i;
-        break;
-      } 
-    }
-    let query = "";
-    for (let q = startLine; q < endLine; q++) {
-      query = query + tests[q] + eol;
-    }
-    return this.ext_executeQuery(query); 
   }
 
   private ext_executeQueryFromFile = async () => {
