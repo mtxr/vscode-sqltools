@@ -185,7 +185,7 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
       'serverError', // @TODO: constant
       onError,
     );
-    telemetry.registerMessage('Information', 'LanguageClient ready');
+    telemetry.registerMessage('info', 'LanguageClient ready');
     log.extend('info')('LanguageClient ready');
   }
 }

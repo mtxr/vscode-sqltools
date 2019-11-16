@@ -3,7 +3,6 @@ import { IConnection, TextDocuments } from 'vscode-languageserver';
 import { RequestType, RequestType0 } from 'vscode-languageserver-protocol';
 import { ExtensionContext } from 'vscode';
 import { Store } from 'redux';
-import { Contracts } from 'applicationinsights';
 export declare type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 export declare type Arg0<T> = ArgsType<T>[0];
 export declare type RequestHandler<T> = T extends RequestType<infer P, infer R, any, any>
@@ -23,7 +22,7 @@ export declare namespace SQLTools {
   }
   interface TelemetryArgs {
     enableTelemetry?: boolean;
-    vscodeInfo?: VSCodeInfo;
+    extraInfo?: VSCodeInfo;
   }
 
   interface LanguageServerPlugin<T = LanguageServerInterface> {

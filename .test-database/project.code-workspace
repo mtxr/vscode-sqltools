@@ -27,7 +27,7 @@
     }
   ],
   "settings": {
-    "sqltools.telemetry": true,
+    "sqltools.telemetry": false,
     "sqltools.useNodeRuntime": true,
     "sqltools.sortColumns": "ordinalnumber",
     "sqltools.autoOpenSessionFiles": true,

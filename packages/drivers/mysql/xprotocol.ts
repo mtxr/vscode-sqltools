@@ -68,7 +68,7 @@ export default class MySQLX extends AbstractDriver<any> implements ConnectionDri
       return JSON.parse(JSON.stringify(mapped, cols));
     }
 
-    const queryInfo = await session.sql(query).execute(_result => results.push(toMappedRow(_result)), _meta => {
+    await session.sql(query).execute(_result => results.push(toMappedRow(_result)), _meta => {
       _meta.forEach(({ name }, i) => {
         cols.push(name);
         props[name] = {
@@ -80,13 +80,6 @@ export default class MySQLX extends AbstractDriver<any> implements ConnectionDri
       });
     });
 
-    const affectedRows = queryInfo.getAffectedRowsCount();
-
-
-
-    if (affectedRows) {
-      messages.push(`${affectedRows} rows were affected.`);
-    }
     return {
       connId: this.getId(),
       cols,

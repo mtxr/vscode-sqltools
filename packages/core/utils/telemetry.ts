@@ -1,11 +1,10 @@
-import { AI_KEY, ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
 import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
-import * as AI from 'applicationinsights';
-import { version as AIVersion } from 'applicationinsights/package.json';
 import SQLTools from '@sqltools/core/plugin-api';
 import { numericVersion, Timer } from '@sqltools/core/utils';
 import logger from '@sqltools/core/log';
 import ConfigManager from '@sqltools/core/config-manager';
+import * as Sentry from '@sentry/node';
 
 const IGNORE_ERRORS_REGEX = new RegExp(`(${[
   'aggregate function',
@@ -42,94 +41,70 @@ const IGNORE_ERRORS_REGEX = new RegExp(`(${[
 
 const product = process.env.PRODUCT as SQLTools.Product;
 const log = logger.extend('telemetry');
-const SeverityLevel = AI.Contracts.SeverityLevel;
+
+Sentry.init({
+  maxBreadcrumbs: 5,
+  enabled: false,
+  sampleRate: 1,
+  release: `${product}@${VERSION}`,
+  environment: ENV,
+  attachStacktrace: true,
+  dsn: process.env.DSN_KEY,
+  beforeSend(event, hint) {
+    if (!Telemetry.enabled) {
+      return null;
+    }
+    return event;
+  }
+});
 
 class Telemetry {
   public static enabled: Boolean;
-  public static vscodeInfo: SQLTools.VSCodeInfo;
-  private client: AI.TelemetryClient;
+  public static extraInfo: SQLTools.VSCodeInfo;
   private prefixed(key: string) {
     return `${product}:${key}`;
   }
 
   private createClient = () => {
-    AI.dispose();
+    Sentry.getCurrentHub().getClient().getOptions().enabled = true;
 
-    AI.setup(AI_KEY)
-      .setAutoCollectConsole(false)
-      .setAutoCollectDependencies(false)
-      .setAutoCollectExceptions(false)
-      .setAutoCollectPerformance(false)
-      .setAutoCollectRequests(false)
-      .setAutoDependencyCorrelation(false)
-      .setInternalLogging(false, false)
-      .setUseDiskRetryCaching(true);
-
-    AI.defaultClient.config.samplingPercentage = 50;
-    this.client = AI.defaultClient;
-
-    const aiCtx = this.client.context;
-    aiCtx.tags[aiCtx.keys.applicationVersion] = `${EXT_NAME}-${product}@${VERSION}`;
-    aiCtx.tags[aiCtx.keys.internalSdkVersion] = `node:${AIVersion}`;
-    aiCtx.tags[aiCtx.keys.deviceType] = product;
-
-    if (Telemetry.vscodeInfo) {
-      aiCtx.tags[aiCtx.keys.userId] = Telemetry.vscodeInfo.uniqId;
-      aiCtx.tags[aiCtx.keys.deviceId] = Telemetry.vscodeInfo.uniqId;
-      aiCtx.tags[aiCtx.keys.sessionId] = Telemetry.vscodeInfo.sessId;
-
+    Sentry.setTags({
+      product,
+      os: process.platform,
+      arch: process.arch,
+      version: VERSION,
+      extversionnum: numericVersion(VERSION).toString(),
+      nodeversion: process.version,
+    });
+    if (Telemetry.extraInfo) {
+      Sentry.setUser({
+        id: Telemetry.extraInfo.uniqId, // vscode install id
+        deviceId: Telemetry.extraInfo.uniqId,
+        sessionId: Telemetry.extraInfo.sessId,
+      });
     }
-
-    // __GDPR__COMMON__ "common.os" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.arch" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.channel" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.extname" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.extversion" : { "classification": "PublicNonPersonalData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.vscodeuniqid" : { "endPoint": "MacAddressHash", "classification": "EndUserPseudonymizedInformation", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.vscodesessid" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    // __GDPR__COMMON__ "common.vscodeversion" : { "classification": "SystemMetaData", "purpose": "FeatureInsight" }
-    this.client.commonProperties = {
-      'common.os': process.platform,
-      'common.arch': process.arch,
-      'common.channel': ENV,
-      'common.extname': EXT_NAME,
-      'common.extversion': VERSION,
-      'common.extversionnum': numericVersion(VERSION).toString(),
-      'common.nodeversion': process.version,
-      ...(Telemetry.vscodeInfo
-        ? {
-            'common.vscodeuniqid': Telemetry.vscodeInfo.uniqId,
-            'common.vscodesessid': Telemetry.vscodeInfo.sessId,
-            'common.vscodeversion': Telemetry.vscodeInfo.version
-          }
-        : {})
-    };
-
-    AI.start();
   }
   constructor(opts: SQLTools.TelemetryArgs) {
     this.updateOpts(opts);
   }
 
   public updateOpts = (opts: SQLTools.TelemetryArgs) => {
-    Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
-    if (opts.enableTelemetry === true) this.enable();
-    else if (opts.enableTelemetry === false)this.disable();
+    Telemetry.extraInfo = opts.extraInfo || Telemetry.extraInfo || {};
+    this.disable();
   }
 
   public enable = (): void => {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
-    log.extend('debug')('Telemetry enabled!');
     this.createClient();
+    log.extend('debug')('Telemetry enabled!');
   }
 
   public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
-    AI.dispose();
+    Sentry.getCurrentHub().getClient().getOptions().enabled = false;
     log.extend('debug')('Telemetry disabled!');
-    this.client = undefined;
   }
 
   @runIfPropIsDefined('client')
@@ -140,45 +115,65 @@ class Telemetry {
 
     const properties = { ...((<any>error).data || {}), ...data };
     log.extend('error')(`Exception:%O\n\tData: %j`, error, properties);
-    this.client.trackException({
-      exception: error,
-      contextObjects: properties,
-      properties
-    });
+    Sentry.configureScope(scope => {
+      scope.setExtras({
+        exception: error,
+        properties
+      });
+      Sentry.captureException(error);
+    })
   }
 
   @runIfPropIsDefined('client')
   public registerMessage(
-    severity: keyof typeof SeverityLevel,
+    severity: 'info' | 'warn' | 'debug' | 'error' | 'critical' | 'fatal',
     message: string,
     value: string = 'Dismissed'
   ): void {
     log.extend(severity.substr(0, 5).toLowerCase())(`Message: %s, value: %s`, message, value);
-    const sev = SeverityLevel[severity];
-    this.client.trackTrace({ message: this.prefixed(message), severity: sev, properties: { value } });
+    let sev: Sentry.Severity;
+    switch (severity) {
+      case 'debug':
+        sev = Sentry.Severity.Debug;
+        break;
+      case 'info':
+        sev = Sentry.Severity.Info;
+        break;
+      case 'warn':
+        sev = Sentry.Severity.Warning;
+        break;
+      case 'error':
+      case 'fatal':
+      case 'critical':
+        sev = Sentry.Severity.Error;
+        break;
+      default:
+        sev = Sentry.Severity.Info;
+        break;
+    }
+    Sentry.captureMessage(this.prefixed(message), Sentry.Severity[sev]);
   }
 
   @runIfPropIsDefined('client')
   public registerEvent(
     name: string,
-    properties?: { [key: string]: string }
+    properties?: { [key: string]: any }
   ): void {
     log.extend('debug')(`Event: %s\n%j`, name,  properties || '');
-    this.client.trackEvent({ name: this.prefixed(name), properties });
+    Sentry.captureEvent({
+      event_id: this.prefixed(name),
+      message: name,
+      extra: properties,
+      timestamp: +new Date(),
+    });
   }
 
   @runIfPropIsDefined('client')
   public registerTime(timeKey: string, timer: Timer) {
     const elapsed = timer.elapsed();
     log.extend('debug')('Time: %s %d ms', timeKey, elapsed);
-    this.registerMetric(this.prefixed(`time:${timeKey}`), elapsed);
-  }
-
-  @runIfPropIsDefined('client')
-  public registerMetric(name: string, value: number) {
-    this.client.trackMetric({
-      name,
-      value
+    this.registerEvent(this.prefixed(`time:${timeKey}`), {
+      value: elapsed,
     });
   }
 }

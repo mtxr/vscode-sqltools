@@ -107,7 +107,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     try {
       await this.client.sendRequest(DisconnectRequest, { conn })
-      telemetry.registerMessage('Information', 'Connection closed!');
+      telemetry.registerMessage('info', 'Connection closed!');
       await this.explorer.updateTreeRoot();
     } catch (e) {
       return this.errorHandler('Error closing connection', e);

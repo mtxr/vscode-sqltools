@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -118,6 +120,7 @@ module.exports = () => {
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
         'process.env.PRODUCT': JSON.stringify(config.name),
+        'process.env.DSN_KEY': JSON.stringify((config.name === 'ext' ? process.env.EXT_DSN_KEY : process.env.LS_DSN_KEY) || ''),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(EXT_NAME),
         'process.env.DISPLAY_NAME': JSON.stringify(DISPLAY_NAME),

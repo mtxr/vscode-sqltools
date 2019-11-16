@@ -58,7 +58,9 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
     }
     this.loadPlugins();
     activationTimer.end();
-    telemetry.registerTime('activation', activationTimer);
+    setTimeout(() => {
+      telemetry.registerTime('activation', activationTimer);
+    }, 5000);
     this.displayReleaseNotesMessage();
   }
 
@@ -156,7 +158,7 @@ export class SQLToolsExtension implements SQLTools.ExtensionInterface {
       const message = `SQLTools updated! Check out the release notes for more information.`;
       const options = [ moreInfo, supportProject, releaseNotes ];
       const res: string = await window.showInformationMessage(message, ...options);
-      telemetry.registerMessage('Information', message, res);
+      telemetry.registerMessage('info', message, res);
       switch (res) {
         case moreInfo:
           openExternal('https://github.com/mtxr/vscode-sqltools#donate');

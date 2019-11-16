@@ -22,7 +22,7 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
-    telemetry.registerMessage('Information', `Initialized with node version:${process.version}`);
+    telemetry.registerMessage('info', `Initialized with node version:${process.version}`);
 
     this.onInitializedHooks.forEach(hook => hook(params));
   };

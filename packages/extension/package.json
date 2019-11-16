@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.21.2",
+    "version": "0.21.3",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -550,7 +550,10 @@
                                 "required": false
                             },
                             "databaseFilter": {
-                                "type": ["object", "null"],
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
                                 "description": "Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all",
                                 "default": null,
                                 "properties": {
@@ -798,8 +801,12 @@
                     "description": "Dependency manager settings",
                     "default": {
                         "packageManager": "npm",
-                        "installArgs": ["install"],
-                        "runScriptArgs": ["run"],
+                        "installArgs": [
+                            "install"
+                        ],
+                        "runScriptArgs": [
+                            "run"
+                        ],
                         "autoAccept": false
                     },
                     "properties": {
@@ -811,12 +818,16 @@
                         "installArgs": {
                             "type": "array",
                             "description": "Array of args passed when installing. If you use yarn, this shoud be set to `[\"add\"]`",
-                            "default": ["install"]
+                            "default": [
+                                "install"
+                            ]
                         },
                         "runScriptArgs": {
                             "type": "array",
                             "description": "Array of args passed when runnning npm scripts.",
-                            "default": ["run"]
+                            "default": [
+                                "run"
+                            ]
                         },
                         "autoAccept": {
                             "type": "boolean",
@@ -1113,6 +1124,7 @@
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
         "css-loader": "^3.2.0",
+        "dotenv": "^8.2.0",
         "file-loader": "^4.2.0",
         "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
