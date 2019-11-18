@@ -1,8 +1,10 @@
 ---
 name: Cassandra (CQL)
-menu: Connection Drivers
-route: /connections/cassandra
+menu: Drivers
+route: /driver/cassandra
 ---
+
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
 
 # Cassandra Start Guide
 
@@ -45,3 +47,5 @@ Cassandra driver specific options can be passed using `cqlOptions` settings.
 ```
 
 You can use any options defined in https://docs.datastax.com/en/developer/nodejs-driver/4.1/api/type.ClientOptions/ in `cqlOptions`.
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>

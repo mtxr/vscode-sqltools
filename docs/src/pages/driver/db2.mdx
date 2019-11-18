@@ -1,8 +1,10 @@
 ---
 name: IBM DB2
-menu: Connection Drivers
-route: /connections/db2
+menu: Drivers
+route: /driver/db2
 ---
+
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
 
 # DB2 Start Guide
 
@@ -57,3 +59,5 @@ Connection example:
   "database": "MyDB"
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>

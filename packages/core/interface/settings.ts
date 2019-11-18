@@ -4,6 +4,40 @@ export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
 export type CodelensLanguages = string[];
 
+export interface DependencyManagerSettings {
+  /**
+   * Package mangaer name or path. Eg. yarn, npm or absolute paths like /usr/bin/npm
+   *
+   * @type {string}
+   * @default npm
+   * @memberof DependencyManagerSettings
+   */
+  packageManager: string;
+  /**
+   * Array of args passed when installing. If you use yarn, this shoud be set to `[\"add\"]`
+   *
+   * @type {string[]}
+   * @default ["install"]
+   * @memberof DependencyManagerSettings
+   */
+  installArgs: string[];
+  /**
+   * Array of args passed when runnning npm scripts.
+   *
+   * @type {string[]}
+   * @default ["run"]
+   * @memberof DependencyManagerSettings
+   */
+  runScriptArgs: string[];
+  /**
+   * Ignore confirmation requests to install or updagre dependencies.
+   *
+   * @type {boolean}
+   * @memberof DependencyManagerSettings
+   */
+  autoAccept: boolean;
+}
+
 export interface FormatOptions {
   /**
    * Indent Size
@@ -179,7 +213,7 @@ export interface Settings {
    */
   languageServerEnv?: { [id: string]: string };
 
-  queryParams: {
+  queryParams?: {
     /**
      * Enables query parameter checking
      * @memberof Settings['queryParams']
@@ -195,4 +229,12 @@ export interface Settings {
      */
     regex: string;
   };
+
+  /**
+   * Dependency manager settings
+   *
+   * @type {DependencyManagerSettings}
+   * @memberof Settings
+   */
+  dependencyManager?: DependencyManagerSettings
 }

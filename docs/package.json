@@ -16,16 +16,17 @@
     "docz": "^1.2.0",
     "docz-core": "^1.2.0",
     "docz-theme-default": "^1.2.0",
-    "styled-components": "^4.4.0",
     "gatsby-plugin-offline": "^2.2.7",
-    "gatsby-remark-code-titles": "^1.1.0",
-    "gatsby-remark-vscode": "^1.2.1",
+    "@mdx-js/runtime": "^1.5.1",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
-    "scheduler": "^0.15.0"
+    "scheduler": "^0.15.0",
+    "styled-components": "^4.4.0",
+    "react-feather": "^2.0.3"
   },
   "devDependencies": {
     "@types/react": "^16.8.13",
-    "@types/react-dom": "^16.8.4"
+    "@types/react-dom": "^16.8.4",
+    "@types/styled-components": "^4.1.20"
   }
 }

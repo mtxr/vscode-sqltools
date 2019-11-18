@@ -166,6 +166,7 @@ export default class MSSQL extends GenericDialect<MSSQLLib.ConnectionPool> imple
           .map((obj) => {
             return {
               ...obj,
+              source: obj.source || '',
               args: obj.args ? obj.args.split(/, */g) : [],
               database: obj.dbName,
               schema: obj.dbSchema,

@@ -1,6 +1,6 @@
 ---
-menu: Connection Drivers
-route: /connections/aws-redshift
+menu: Drivers
+route: /driver/aws-redshift
 name: AWS Redshift
 ---
 
@@ -9,6 +9,8 @@ name: AWS Redshift
 > Remember: Redshift is a fork from postgresql. We use the same driver to connect for both Redshift and PostgreSQL.
 
 ## 1. Connections
+
+import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
 
 Connection example:
 ```json
@@ -66,3 +68,5 @@ Using connectionURI for previous example:
   "connectionTimeout": 15,
 }
 ```
+
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain']} />

@@ -30,11 +30,6 @@ export default class SidebarFunction extends SidebarAbstractItem<null> {
         args.push(`\${${index + 1}:${type}}`);
       }
     });
-    this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')})$0`);
-    this.command = {
-      title: 'Append to Cursor',
-      command: `${EXT_NAME}.insertText`,
-      arguments: [this.snippet],
-    };
+    this.snippet = new SnippetString(`${this.functionData.signature}(${args.join(', ')})`).appendTabstop(0);
   }
 }

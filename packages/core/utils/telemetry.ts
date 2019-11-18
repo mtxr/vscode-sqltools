@@ -6,6 +6,39 @@ import { version as AIVersion } from 'applicationinsights/package.json';
 import SQLTools from '@sqltools/core/plugin-api';
 import { numericVersion } from '.';
 
+const IGNORE_ERRORS_REGEX = new RegExp(`(${[
+  'aggregate function',
+  'already exists',
+  'authentication failed',
+  'cannot drop',
+  'cross-database references',
+  'does not exist',
+  'econnrefused',
+  'econnreset',
+  'enotfound',
+  'enotfound',
+  'er_access_denied_error',
+  'er_bad_db_error',
+  'er_bad_field_error',
+  'er_cannot_load_from_table_v2',
+  'er_dup_fieldname',
+  'er_no_referenced_row_2',
+  'er_no_such_table',
+  'er_not_supported_auth_mode',
+  'er_parse_error',
+  'etimedout',
+  'failed to connect',
+  'is ambiguous',
+  'key constraint',
+  'login failed',
+  'no such table',
+  'ora-[0-9]+',
+  'sqlite_cantopen',
+  'syntax error',
+  'unknown_code_please_report',
+  'violates',
+].join('|')})`, 'g');
+
 export class Telemetry implements SQLTools.TelemetryInterface {
   public static SeveriryLevel = AI.Contracts.SeverityLevel;
   public static enabled: Boolean;
@@ -17,7 +50,7 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     return `${this.product}:${key}`;
   }
 
-  private createClient() {
+  private createClient = () => {
     AI.setup(AI_KEY)
       .setAutoCollectConsole(false)
       .setAutoCollectDependencies(false)
@@ -78,25 +111,25 @@ export class Telemetry implements SQLTools.TelemetryInterface {
     this.updateOpts(opts);
   }
 
-  public updateOpts(opts: SQLTools.TelemetryArgs) {
+  public updateOpts = (opts: SQLTools.TelemetryArgs) => {
     this.product = opts.product || this.product;
     Telemetry.vscodeInfo = opts.vscodeInfo || Telemetry.vscodeInfo || {};
-    if (opts.enableTelemetry === true) this.enable();
-    else if (opts.enableTelemetry === false)this.disable();
+    this.disable();
   }
 
-  public enable(): void {
-    if (Telemetry.enabled) return;
-    Telemetry.enabled = true;
-    this.logger.info('Telemetry enabled!');
-    this.createClient();
+  public enable = (): void => {
+    return this.disable();
+    // if (Telemetry.enabled) return;
+    // Telemetry.enabled = true;
+    // this.logger.info('Telemetry enabled!');
+    // this.createClient();
   }
 
-  public disable(): void {
+  public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     AI.dispose();
-    this.logger.info('Telemetry disabled!');
+    // this.logger.info('Telemetry disabled!');
     this.client = undefined;
   }
 
@@ -113,19 +146,10 @@ export class Telemetry implements SQLTools.TelemetryInterface {
   @runIfPropIsDefined('client')
   public registerException(error: Error, data: { [key: string]: any } = {}) {
     if (!error) return;
-    this.sendException(error, { ...((<any>error).data || {}), ...data });
-  }
+    const errStr = (error && error.message ? error.message : '').toLowerCase();
+    if (IGNORE_ERRORS_REGEX.test(errStr)) return;
 
-  @runIfPropIsDefined('client')
-  public registerErrorMessage(
-    message,
-    error?: Error,
-    value: string = 'Dismissed'
-  ) {
-    this.registerMessage(Telemetry.SeveriryLevel.Error, message, value);
-    if (error) {
-      this.registerException(error, { message });
-    }
+    this.sendException(error, { ...((<any>error).data || {}), ...data });
   }
 
   @runIfPropIsDefined('client')
