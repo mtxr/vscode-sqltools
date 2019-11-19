@@ -13,19 +13,20 @@ jobs:
     strategy:
       matrix:
         node-version: [10.x]
+        branches: [add-driver-example]
 
     steps:
     - uses: actions/checkout@v1
       with:
         ref: add-driver-example
 
-    - name: Update branch add-driver-example
+    - name: Update branch ${{ matrix.branches }}
       run: |
         git config --global user.email "bot@mteixeira.dev"
         git config --global user.name "bot@mtxr"
         git remote add botorigin https://mtxr:${GITHUB_TOKEN}@github.com/mtxr/vscode-sqltools.git
         git fetch botorigin
         git rebase botorigin/master
-        git push --force botorigin add-driver-example
+        git push --force botorigin ${{ matrix.branches }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
