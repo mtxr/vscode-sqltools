@@ -26,7 +26,6 @@ export default class SAPHana extends GenericDialect<HanaConnection> implements C
   public static deps: typeof GenericDialect['deps'] = [{
     type: 'package',
     name: '@sap/hana-client',
-    version: '2.4.126',
     args: ['--@sap:registry=https://npm.sap.com']
   }];
 
