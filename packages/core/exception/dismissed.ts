@@ -1,10 +1,10 @@
-import GenericException from './generic';
+import GenericError from './generic';
 
-export class DismissedException extends GenericException {
+export class DismissedError extends GenericError {
   public dontNotify: boolean = true;
   constructor(message: string = 'Dialog dismissed. This is not an error.') {
     super(message);
   }
 }
 
-export default DismissedException;
+export default DismissedError;

@@ -10,7 +10,7 @@ import {
   commands,
   Uri,
 } from 'vscode';
-import { DismissedException } from '@sqltools/core/exception';
+import { DismissedError } from '@sqltools/core/exception';
 import { isEmpty } from '@sqltools/core/utils';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
@@ -27,7 +27,7 @@ export async function getSelectedText(action = 'proceed', fullText = false) {
   const query = editor.document.getText(fullText ? undefined : editor.selection);
   if (isEmpty(query)) {
     window.showInformationMessage(`Can't ${action}. You have selected nothing.`);
-    throw new DismissedException();
+    throw new DismissedError();
   }
   return query;
 }
@@ -45,7 +45,7 @@ export async function insertText(text: string | SnippetString, forceCreate = fal
 
 export async function readInput(prompt: string, placeholder?: string, value?: string) {
   const data = await window.showInputBox({ prompt, placeHolder: placeholder || prompt, value });
-  if (isEmpty(data)) throw new DismissedException();
+  if (isEmpty(data)) throw new DismissedError();
   return data;
 }
 
@@ -54,7 +54,7 @@ export async function readInput(prompt: string, placeholder?: string, value?: st
  */
 async function quickPickOldApi(options: QuickPickItem[], prop?: string): Promise<QuickPickItem | any> {
   const sel: QuickPickItem = await window.showQuickPick(options);
-  if (!sel || (prop && !sel[prop])) throw new DismissedException();
+  if (!sel || (prop && !sel[prop])) throw new DismissedError();
   return prop ? sel[prop] : sel;
 }
 
@@ -106,7 +106,7 @@ export async function quickPick<T = QuickPickItem | any>(
 
     qPick.show();
   });
-  if (!sel || (prop && !sel[prop])) throw new DismissedException();
+  if (!sel || (prop && !sel[prop])) throw new DismissedError();
   return <T>(prop ? sel[prop] : sel);
 }
 

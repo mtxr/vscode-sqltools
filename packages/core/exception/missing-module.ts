@@ -1,19 +1,10 @@
-import { ResponseError } from 'vscode-languageserver';
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import { ConnectionInterface } from '../interface';
+import { IConnection } from '@sqltools/types';
+import NotifyResponseError from './response-error';
 
 
-interface NotifyResponseErrorData {
-  notification: string; dontNotify?: boolean; args?: any
-};
-class NotifyResponseError extends ResponseError<NotifyResponseErrorData> {
-  constructor(code: number, message: string, data: NotifyResponseErrorData) {
-    super(code, message, data);
-  }
-}
-
-export class MissingModuleException extends NotifyResponseError {
-  constructor(moduleName: string, moduleVersion: string = 'latest', conn: ConnectionInterface, mustUpgrade = false) {
+export class MissingModuleError extends NotifyResponseError {
+  constructor(moduleName: string, moduleVersion: string = 'latest', conn: IConnection, mustUpgrade = false) {
     super(1000, `Missing module "${moduleName}@${moduleVersion}". Need to ${mustUpgrade ? 'upgrade' : 'install'}.`, {
       notification: MissingModuleNotification,
       dontNotify: true,
@@ -27,4 +18,4 @@ export class MissingModuleException extends NotifyResponseError {
   }
 }
 
-export default MissingModuleException;
+export default MissingModuleError;

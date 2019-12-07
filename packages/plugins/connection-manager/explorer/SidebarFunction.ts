@@ -1,5 +1,5 @@
 import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase } from '@sqltools/types';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import ContextValue from '../context-value';
 export default class SidebarFunction extends SidebarAbstractItem<null> {
@@ -10,7 +10,7 @@ export default class SidebarFunction extends SidebarAbstractItem<null> {
     throw new Error('Cannot add items to database function');
   }
   public get conn() { return this.parent.conn; }
-  constructor(context: ExtensionContext, public functionData: DatabaseInterface.Function) {
+  constructor(context: ExtensionContext, public functionData: NSDatabase.IFunction) {
     super(functionData.name, TreeItemCollapsibleState.None);
     this.value = functionData.name;
     this.iconPath = {

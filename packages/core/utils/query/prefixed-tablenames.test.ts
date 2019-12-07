@@ -1,5 +1,5 @@
 import getNames from './prefixed-tablenames';
-import { DatabaseDriver } from '../../interface';
+import { DatabaseDriver } from '@sqltools/types';
 
 describe('Should generate table names based on drivers', () => {
   it('get db2 table names', () => {

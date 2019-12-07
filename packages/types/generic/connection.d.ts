@@ -1,162 +1,148 @@
-import { DatabaseDriver } from './driver';
-import { ClientConfig } from 'pg';
-import { ConnectionConfig } from 'mysql';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
-import { PoolAttributes } from 'oracledb';
-import { ClientOptions as CQLClientOptions } from 'cassandra-driver';
+import { DatabaseDriver } from '@sqltools/types/driver';
+import { NSDatabase } from '@sqltools/types/generic/database';
 
-export interface ConnectionInterface {
+export declare interface IConnection<DriverOptions = any> {
   /**
    * Connection name
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   name: string;
   /**
    * Connection group name
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
    group?: string;
   /**
    * Server address
    * @type {string}
    * @default "127.0.0.1"
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   server?: string;
   /**
    * Port for connection
    * @type {number}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   port: number;
   /**
    * Path of socket file to connect using UNIX sockets
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   socketPath?: string;
   /**
    * Database name
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   database?: string;
   /**
    * Database username
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   username: string;
   /**
    * Connection password. You can use option askForPassword to prompt password before connect
    * @type {string}
    * @default null
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   password?: string;
   /**
    * Ask for password instead of set it in your settings
    * @type {boolean}
    * @default false
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   askForPassword?: boolean;
   /**
    * Connection driver
    * @type {DatabaseDriver}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   driver: DatabaseDriver;
   /**
    * Connection timeout in seconds
    * @type {number}
    * @default 30
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   connectionTimeout?: number;
   /**
    * Connection show records limit
    * @type {number}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   previewLimit?: number;
   /**
    * Oracle specific driver options. See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrsconnectstring
    * @type {string}
    * @default null
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   connectString?: string;
   /**
    * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options
    * @type {any}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   mssqlOptions?: { encrypt?: boolean };
 
   /**
    * MySQL specific driver options
    * @type {any}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
-  mysqlOptions?: {
-    authProtocol?: 'xprotocol' | 'default'
-    /**
-     * If using xprotocol, must be boolean
-     *
-     * @type {ConnectionConfig['ssl'] | boolean}
-     */
-    ssl?: ConnectionConfig['ssl'] | boolean;
-  }
+  mysqlOptions?: DriverOptions;
 
   /**
    * PostgreSQL/Redshift specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options
    * @type {any}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
-  pgOptions?: {
-    ssl?: ClientConfig['ssl'];
-  }
+  pgOptions?: DriverOptions;
 
   /**
    * OracleDB specific driver options (pool). See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrs
    * @type {PoolAttributes}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
-  oracleOptions?: PoolAttributes
+  oracleOptions?: DriverOptions;
 
   /**
    * Cassandra specific driver options. See https://docs.datastax.com/en/developer/nodejs-driver/4.1/api/type.ClientOptions/
    * @type {CQLClientOptions}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
-  cqlOptions?: CQLClientOptions;
+  cqlOptions?: DriverOptions;
 
   /**
    * Connection domain (for MSSQL/Azure only)
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   domain?: string;
 
   /**
    * Connection generated id. This is not a settings. It's generated in runtime
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   id: string;
   /**
    * Connection flag. This is not a settings. It's generated in runtime
    * @type {boolean}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   isConnected: boolean;
   /**
    * Connection flag. This is not a settings. It's generated in runtime
    * @type {boolean}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   isActive: boolean;
 
@@ -164,7 +150,7 @@ export interface ConnectionInterface {
    * Define an icon for this connection. If not specified, use defaults
    *
    * @type {string}
-   * @memberof ConnectionInterface
+   * @memberof IConnection
    */
   icons?: {
     active?: string;
@@ -174,28 +160,28 @@ export interface ConnectionInterface {
   /**
    * Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all
    *
-   * @type {DatabaseFilterType}
-   * @memberof ConnectionInterface
+   * @type {IDatabaseFilter}
+   * @memberof IConnection
    */
-   databaseFilter?: DatabaseFilterType;
+   databaseFilter?: IDatabaseFilter;
 }
 
-export interface DatabaseFilterType {
+export declare interface IDatabaseFilter {
   show: string[];
   hide: string[];
 }
 
-export interface ConnectionDriver {
+export declare interface IConnectionDriver {
   connection: any;
-  credentials: ConnectionInterface;
+  credentials: IConnection;
   open(): Promise<any>;
   close(): Promise<any>;
-  getTables(): Promise<DatabaseInterface.Table[]>;
-  getColumns(): Promise<DatabaseInterface.TableColumn[]>;
-  getFunctions(): Promise<DatabaseInterface.Function[]>;
-  describeTable(tableName: string): Promise<DatabaseInterface.QueryResults[]>;
-  showRecords(tableName: string, limit: number, page?: number): Promise<DatabaseInterface.QueryResults[]>;
-  query(query: string): Promise<DatabaseInterface.QueryResults[]>;
+  getTables(): Promise<NSDatabase.ITable[]>;
+  getColumns(): Promise<NSDatabase.IColumn[]>;
+  getFunctions(): Promise<NSDatabase.IFunction[]>;
+  describeTable(tableName: string): Promise<NSDatabase.IResult[]>;
+  showRecords(tableName: string, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
+  query(query: string): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
 }
 

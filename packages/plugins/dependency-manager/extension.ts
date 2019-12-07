@@ -1,15 +1,15 @@
 import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import SQLTools from '@sqltools/core/plugin-api';
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
+import { IExtensionPlugin, ILanguageClient, IExtension } from '@sqltools/types';
 
-export default class DependencyManager implements SQLTools.ExtensionPlugin {
-  public client: SQLTools.LanguageClientInterface;
-  private extension: SQLTools.ExtensionInterface;
-  register(extension: SQLTools.ExtensionInterface) {
+export default class DependencyManager implements IExtensionPlugin {
+  public client: ILanguageClient;
+  private extension: IExtension;
+  register(extension: IExtension) {
     this.extension = extension;
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));

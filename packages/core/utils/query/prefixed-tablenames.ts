@@ -1,9 +1,8 @@
-import { DatabaseDriver } from '@sqltools/core/interface';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { DatabaseDriver, NSDatabase } from '@sqltools/types';
 
-function prefixedtableName(driver: DatabaseDriver, table: DatabaseInterface.Table | string) {
+function prefixedtableName(driver: DatabaseDriver, table: NSDatabase.ITable | string) {
   let items: string[] = [];
-  let tableObj = typeof table === 'string' ? <DatabaseInterface.Table>{ name: table } : table;
+  let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ name: table } : table;
   switch(driver) {
     case DatabaseDriver.SQLite:
       return `"${tableObj.name}"`;

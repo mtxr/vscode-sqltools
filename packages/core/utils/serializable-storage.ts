@@ -1,8 +1,7 @@
-import { StorageInterface } from '@sqltools/core/interface';
 import fs from 'fs';
-import { NotFoundException } from '../exception';
+import { NotFoundError } from '../exception';
 
-export default class SerializableStorage<Item, Key = string | number | Symbol> implements StorageInterface {
+export default class SerializableStorage<Item, Key = string | number | Symbol> {
   public encoding: string = 'utf8';
   public storagePath: string = null;
   protected defaultSerializable: string = '{}';
@@ -50,7 +49,7 @@ export default class SerializableStorage<Item, Key = string | number | Symbol> i
 
   public get(key: Key) {
     if (!this.items[key]) {
-      throw new NotFoundException('Query not found!');
+      throw new NotFoundError('Query not found!');
     }
     return this.items[key];
   }

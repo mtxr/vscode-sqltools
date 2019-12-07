@@ -1,4 +1,4 @@
-import { DriverQueries } from '@sqltools/core/interface';
+import { IBaseQueries } from '@sqltools/types';
 import { TREE_SEP } from '@sqltools/core/constants';
 
 export default {
@@ -29,4 +29,4 @@ WHERE
 ORDER BY
   name;`,
   listFks: `PRAGMA foreign_key_list(\':table\');`
-} as DriverQueries;
+} as IBaseQueries;

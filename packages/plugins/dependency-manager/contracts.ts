@@ -1,8 +1,8 @@
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { IConnection } from '@sqltools/types';
 import { RequestType } from 'vscode-languageserver-protocol';
 
 export const InstallDepRequest = new RequestType<
-  { driver: ConnectionInterface['driver'] },
+  { driver: IConnection['driver'] },
   void,
   Error,
   void

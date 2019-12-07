@@ -1,7 +1,6 @@
 import React from 'react';
 import Loading from '@sqltools/ui/components/Loading';
-import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { IConnection } from '@sqltools/types';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
 import availableDrivers from './lib/availableDrivers';
@@ -11,6 +10,7 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/core/log';
 import '@sqltools/ui/sass/app.scss';
+import { IWebviewMessage } from '@sqltools/ui/lib/interfaces';
 
 const log = logger.extend('settings');
 
@@ -23,7 +23,7 @@ enum ConnectionMethod {
 interface SettingsScreenState {
   loading?: boolean;
   step: Step;
-  connectionSettings: ConnectionInterface;
+  connectionSettings: IConnection;
   defaultMethod?: string,
   externalMessage: string,
   externalMessageType: string,
@@ -35,7 +35,7 @@ interface SettingsScreenState {
 }
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
-  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+  messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
@@ -97,7 +97,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     loading: false,
     connectionSettings: {
       askForPassword: true,
-    } as ConnectionInterface,
+    } as IConnection,
     step: Step.CONNECTION_TYPE,
     externalMessage: null,
     externalMessageType: null,
@@ -107,14 +107,14 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
 
   constructor(props) {
     super(props);
-    window.addEventListener('message', ev => this.messagesHandler(ev.data as WebviewMessageType));
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
   }
 
   toggleGlobal = globalSetting => this.setState({ globalSetting });
 
   toggleUseRelative = transformToRelative => this.setState({ transformToRelative });
 
-  updateConnectionSettings = (options: Partial<ConnectionInterface> = {}, cb?: any) => this.setState({
+  updateConnectionSettings = (options: Partial<IConnection> = {}, cb?: any) => this.setState({
     connectionSettings: {
       ...this.state.connectionSettings,
       ...options,

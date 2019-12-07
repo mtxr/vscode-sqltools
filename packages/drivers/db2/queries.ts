@@ -1,4 +1,4 @@
-import { DriverQueries } from '@sqltools/core/interface';
+import { IBaseQueries } from '@sqltools/types';
 import { TREE_SEP } from '@sqltools/core/constants';
 
 export default {
@@ -116,4 +116,4 @@ ORDER BY P.ROUTINE_CATALOG
      , P.ROUTINE_SCHEMA
      , P.ROUTINE_NAME
 `
-} as DriverQueries;
+} as IBaseQueries;

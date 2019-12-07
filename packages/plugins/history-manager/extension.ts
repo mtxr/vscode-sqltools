@@ -1,4 +1,4 @@
-import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase, IExtensionPlugin, IExtension, ICommandSuccessEvent } from '@sqltools/types';
 import HistoryExplorer from './explorer';
 import { getNameFromId } from '@sqltools/core/utils';
 import { quickPick, insertText } from '@sqltools/vscode/utils';
@@ -12,10 +12,10 @@ const hookedCommands = [
   'executeQueryFromFile',
 ];
 
-export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
+export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private explorer: HistoryExplorer;
-  private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
-  private addToHistoryHook = (evt: SQLTools.CommandSuccessEvent<DatabaseInterface.QueryResults[]>) => {
+  private errorHandler: IExtension['errorHandler'];
+  private addToHistoryHook = (evt: ICommandSuccessEvent<NSDatabase.IResult[]>) => {
     evt.result.forEach(r => {
       this.explorer.addItem(getNameFromId(r.connId), r.query);
     });
@@ -41,7 +41,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       });
   }
 
-  private ext_runFromHistory = async (entry?: HistoryTreeItem): Promise<DatabaseInterface.QueryResults[]> => {
+  private ext_runFromHistory = async (entry?: HistoryTreeItem): Promise<NSDatabase.IResult[]> => {
     let query: string;
     if (entry && entry.query) {
       query = entry.query
@@ -71,7 +71,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  public register(extension: SQLTools.ExtensionInterface) {
+  public register(extension: IExtension) {
     if (this.explorer) return; // do not register twice
 
     this.explorer = new HistoryExplorer(extension.context);

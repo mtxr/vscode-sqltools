@@ -1,4 +1,4 @@
-import { ConnectionInterface } from '../interface';
+import { IConnection } from '@sqltools/types';
 import { ResponseError } from 'vscode-languageserver';
 
 class DecoratedException<A> extends ResponseError<A> {
@@ -9,7 +9,7 @@ class DecoratedException<A> extends ResponseError<A> {
   }
 }
 
-export function decorateException(e: Error & { code?: number; data?: { [key: string]: any } }, { conn }: { conn?: ConnectionInterface } = {}) {
+export function decorateException(e: Error & { code?: number; data?: { [key: string]: any } }, { conn }: { conn?: IConnection } = {}) {
   let data: { [key: string]: any } = {};
   if (conn && conn.driver) {
     data.driver = conn.driver;

@@ -1,13 +1,12 @@
-import { ConnectionDriver } from '@sqltools/core/interface';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import * as db2Lib from 'ibm_db';
 import AbstractDriver from '../abstract';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 
 const D2BLibVersion = '2.6.1';
-export default class DB2 extends AbstractDriver<db2Lib.Database> implements ConnectionDriver {
+export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements IConnectionDriver {
   public static deps: typeof AbstractDriver['deps'] = [{
     type: 'package',
     name: 'ibm_db',
@@ -48,14 +47,14 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
     })
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     let thiz: DB2 = this;
     const database = await thiz.open();
-    return new Promise<DatabaseInterface.QueryResults[]>(
+    return new Promise<NSDatabase.IResult[]>(
       function (resolve, reject) {
         try {
           const queries = Utils.query.parse(query)
-          const results: DatabaseInterface.QueryResults[] = [];
+          const results: NSDatabase.IResult[] = [];
           for (let q of queries) {
             try {
               let res = thiz.queryResultSync(database, q);
@@ -90,7 +89,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
     return this.query('SELECT 1 FROM SYSIBM.SYSDUMMY1').then(() => void 0);
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     return this.query(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
@@ -104,12 +103,12 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
               tree: obj.TREE,
-            } as DatabaseInterface.Table;
+            } as NSDatabase.ITable;
           });
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     return this.query(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
@@ -128,7 +127,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
               isPk: obj.KEYTYPE === 'P',
               isFk: obj.KEYTYPE === 'R',
               tree: obj.TREE,
-            } as DatabaseInterface.TableColumn;
+            } as NSDatabase.IColumn;
           });
       });
   }
@@ -148,13 +147,13 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
     }
     return ''
   }
-  public async describeTable(prefixedTable: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async describeTable(prefixedTable: string): Promise<NSDatabase.IResult[]> {
     const [schema, table] = prefixedTable.split('.');
     let thiz: DB2 = this;
     const database = await thiz.open();
-    return new Promise<DatabaseInterface.QueryResults[]>(
+    return new Promise<NSDatabase.IResult[]>(
       function (resolve, reject) {
-        const results: DatabaseInterface.QueryResults[] = [];
+        const results: NSDatabase.IResult[] = [];
         database.describe({
           database: thiz.getDatabaseName(database),
           schema: schema,
@@ -180,7 +179,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
     )
   }
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(): Promise<NSDatabase.IFunction[]> {
     return this.query(this.queries.fetchFunctions)
       .then(([queryRes]) => {
         return queryRes.results
@@ -194,7 +193,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database> implements Conn
               args: obj.ARGS ? obj.ARGS.split(/, */g) : [],
               resultType: obj.RESULTTYPE,
               tree: obj.TREE,
-            } as DatabaseInterface.Function;
+            } as NSDatabase.IFunction;
           });
       });
   }

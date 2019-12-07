@@ -1,19 +1,16 @@
-import {
-  ConnectionDriver,
-  ConnectionInterface,
-} from '@sqltools/core/interface';
 import AbstractDriver from '@sqltools/drivers/abstract';
 import Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import compareVersions from 'compare-versions';
+import { IConnectionDriver, IConnection, NSDatabase } from '@sqltools/types';
 
-export default class MySQL extends AbstractDriver<any> implements ConnectionDriver {
+export default class MySQL<O = any> extends AbstractDriver<any, O> implements IConnectionDriver {
   queries = Queries;
-  private driver: AbstractDriver<any>;
+  private driver: AbstractDriver<any, any>;
 
-  constructor(public credentials: ConnectionInterface) {
+  constructor(public credentials: IConnection) {
+    // move to diferent drivers
     super(credentials);
     if (this.credentials.mysqlOptions && this.credentials.mysqlOptions.authProtocol === 'xprotocol') {
       this.driver = new MySQLX(credentials);
@@ -29,12 +26,12 @@ export default class MySQL extends AbstractDriver<any> implements ConnectionDriv
     return this.driver.close();
   }
 
-  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string): Promise<NSDatabase.IResult[]> {
     return this.driver.query(query);
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
-    return this.driver.query(this.queries.fetchTables)
+  public getTables(): Promise<NSDatabase.ITable[]> {
+    return this.driver.query<any>(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -47,18 +44,18 @@ export default class MySQL extends AbstractDriver<any> implements ConnectionDriv
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
               tree: obj.tree,
-            } as DatabaseInterface.Table;
+            } as NSDatabase.ITable;
           });
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
-    return this.driver.query(this.queries.fetchColumns)
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
+    return this.driver.query<any>(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            return <DatabaseInterface.TableColumn>{
+            return <NSDatabase.IColumn>{
               ...obj,
               isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
               size: obj.size !== null ? parseInt(obj.size, 10) : null,
@@ -69,7 +66,7 @@ export default class MySQL extends AbstractDriver<any> implements ConnectionDriv
       });
   }
 
-  public async getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public async getFunctions(): Promise<NSDatabase.IFunction[]> {
     const functions = await (
       await this.is55OrNewer()
         ? this.driver.query(this.queries.fetchFunctions)
@@ -84,7 +81,7 @@ export default class MySQL extends AbstractDriver<any> implements ConnectionDriv
           args: obj.args ? obj.args.split(/, */g) : [],
           database: obj.dbname,
           schema: obj.dbschema,
-        } as DatabaseInterface.Function;
+        } as NSDatabase.IFunction;
       })
   }
 

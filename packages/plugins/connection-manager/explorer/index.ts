@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME, TREE_SEP } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseDriver } from '@sqltools/core/interface';
+import { IConnection, DatabaseDriver, NSDatabase, IExtension } from '@sqltools/types';
 import { getConnectionId, asArray, getNameFromId } from '@sqltools/core/utils';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import SidebarFunction from "@sqltools/plugins/connection-manager/explorer/SidebarFunction";
@@ -10,7 +10,6 @@ import SidebarResourceGroup from "@sqltools/plugins/connection-manager/explorer/
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import SidebarAbstractItem from "@sqltools/plugins/connection-manager/explorer/SidebarAbstractItem";
 import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
-import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
 import safeGet from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 import logger from '@sqltools/core/log';
@@ -37,18 +36,18 @@ notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
   private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
-  private _onConnectionDidChange: EventEmitter<{ conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[]> = new EventEmitter();
+  private _onConnectionDidChange: EventEmitter<{ conn: IConnection, action: 'added' | 'deleted' | 'changed' }[]> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   public readonly onConnectionDidChange = this._onConnectionDidChange.event;
   private tree: { [database: string]: SidebarConnection } = {};
-  public getActive(): ConnectionInterface | null {
+  public getActive(): IConnection | null {
     const activeId = Object.keys(this.tree).find(k => this.tree[k].isActive);
     if (!activeId) return null;
 
     return {
       ...this.tree[activeId].conn,
       id: getConnectionId(this.tree[activeId].conn),
-    } as ConnectionInterface;
+    } as IConnection;
   }
 
   public getActiveId() {
@@ -130,9 +129,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   }
 
-  public setConnections(connections: (ConnectionInterface)[]) {
+  public setConnections(connections: (IConnection)[]) {
     const keys = [];
-    const changed: { conn: ConnectionInterface, action: 'added' | 'deleted' | 'changed' }[] = [];
+    const changed: { conn: IConnection, action: 'added' | 'deleted' | 'changed' }[] = [];
 
     connections.forEach((conn) => {
       if (!this.tree[getConnectionId(conn)]) {
@@ -163,10 +162,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     columns,
     functions
   }: {
-    conn: ConnectionInterface;
-    tables: DatabaseInterface.Table[];
-    columns: DatabaseInterface.TableColumn[];
-    functions: DatabaseInterface.Function[];
+    conn: IConnection;
+    tables: NSDatabase.ITable[];
+    columns: NSDatabase.IColumn[];
+    functions: NSDatabase.IFunction[];
   }) => {
     if (!conn) return;
     const connId = getConnectionId(conn);
@@ -221,7 +220,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  private insertTables(connId: string, driver: DatabaseDriver, tables: DatabaseInterface.Table[]) {
+  private insertTables(connId: string, driver: DatabaseDriver, tables: NSDatabase.ITable[]) {
     try {
       switch (driver) {
         case DatabaseDriver.DB2:
@@ -250,7 +249,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  private insertColumns(connId: string, driver: DatabaseDriver, columns: DatabaseInterface.TableColumn[]) {
+  private insertColumns(connId: string, driver: DatabaseDriver, columns: NSDatabase.IColumn[]) {
     try {
       if (ConfigManager.sortColumns && ConfigManager.sortColumns === 'name') {
         columns = columns.sort((a, b) => a.columnName.localeCompare(b.columnName));
@@ -282,7 +281,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  private insertFunctions(connId: string, driver: DatabaseDriver, functions: DatabaseInterface.Function[]) {
+  private insertFunctions(connId: string, driver: DatabaseDriver, functions: NSDatabase.IFunction[]) {
     try {
       switch (driver) {
         case DatabaseDriver.DB2:
@@ -308,7 +307,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     }
   }
 
-  public async focusActiveConnection(c: ConnectionInterface) {
+  public async focusActiveConnection(c: IConnection) {
     if (!c) return;
 
     const item = this.tree[getConnectionId(c)];
@@ -335,7 +334,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public updateTreeRoot = async () => {
-    const connections: ConnectionInterface[] = await commands.executeCommand(`${EXT_NAME}.getConnectionStatus`);
+    const connections: IConnection[] = await commands.executeCommand(`${EXT_NAME}.getConnectionStatus`);
     this.setConnections(connections);
   }
 
@@ -343,7 +342,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return this.treeView.selection;
   }
 
-  public constructor(private extension: SQLTools.ExtensionInterface) {
+  public constructor(private extension: IExtension) {
     this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
     ConfigManager.addOnUpdateHook(this.updateTreeRoot);
     this.updateTreeRoot();

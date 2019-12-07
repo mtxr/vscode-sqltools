@@ -1,7 +1,7 @@
 import envPaths from 'env-paths';
 import path from 'path';
 import fs from 'fs';
-import EnvironmentException from './../exception/environment';
+import EnvironmentError from './../exception/environment';
 import logger from '@sqltools/core/log';
 
 const log = logger.extend('persistence');
@@ -37,7 +37,7 @@ export function getHome(...args: string[]): string {
     if (process && process.env && (process.env.HOME || process.env.USERPROFILE)) {
       home = process.env.HOME || process.env.USERPROFILE;
     } else {
-      throw new EnvironmentException('Could not find user home path');
+      throw new EnvironmentError('Could not find user home path');
     }
   }
   return path.resolve(home, ...args);

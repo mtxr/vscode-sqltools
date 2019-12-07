@@ -1,9 +1,8 @@
 import Drivers from '@sqltools/drivers';
-import SQLTools from '@sqltools/core/plugin-api';
 import { InstallDepRequest } from './contracts';
 import packageManager from './lib/cli';
 import ConfigManager from '@sqltools/core/config-manager';
-import { Settings } from '@sqltools/core/interface';
+import { ISettings, ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 import logger from '@sqltools/core/log';
 
 const log = logger.extend('dep-man');
@@ -11,13 +10,13 @@ const log = logger.extend('dep-man');
 type AvailableDrivers = keyof typeof Drivers;
 
 
-export default class DependencyManager implements SQLTools.LanguageServerPlugin {
-  private server: SQLTools.LanguageServerInterface;
+export default class DependencyManager implements ILanguageServerPlugin {
+  private server: ILanguageServer;
 
   public static runningJobs: string[] = [];
 
   private onRequestToInstall = async ({ driver }: { driver?: AvailableDrivers } = { }) => {
-    const depManagerSettings: Settings['dependencyManager'] = ConfigManager.dependencyManager || {
+    const depManagerSettings: ISettings['dependencyManager'] = ConfigManager.dependencyManager || {
       packageManager: 'npm',
       installArgs: ['install'],
       runScriptArgs: ['run'],
@@ -69,7 +68,7 @@ export default class DependencyManager implements SQLTools.LanguageServerPlugin 
     }
   }
 
-  public register(server: SQLTools.LanguageServerInterface) {
+  public register(server: ILanguageServer) {
     this.server = this.server || server;
 
     this.server.addOnInitializeHook(() => {

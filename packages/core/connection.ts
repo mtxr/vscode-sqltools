@@ -2,22 +2,18 @@
 
 import { getConnectionId } from './utils';
 import Drivers from '@sqltools/drivers';
-import {
-  ConnectionDriver,
-  ConnectionInterface,
-} from './interface';
-import { DatabaseInterface } from './plugin-api';
 import { decorateException } from './utils/errors';
 import telemetry from '@sqltools/core/utils/telemetry';
 import ConfigManager from './config-manager';
+import { NSDatabase, IConnectionDriver, IConnection } from '@sqltools/types';
 
 export default class Connection {
-  private tables: DatabaseInterface.Table[] = [];
-  private columns: DatabaseInterface.TableColumn[] = [];
-  private functions: DatabaseInterface.Function[] = [];
+  private tables: NSDatabase.ITable[] = [];
+  private columns: NSDatabase.IColumn[] = [];
+  private functions: NSDatabase.IFunction[] = [];
   private connected: boolean = false;
-  private conn: ConnectionDriver;
-  constructor(private credentials: ConnectionInterface) {
+  private conn: IConnectionDriver;
+  constructor(private credentials: IConnection) {
     this.conn = new Drivers[credentials.driver](this.credentials);
   }
 
@@ -59,31 +55,31 @@ export default class Connection {
     return this.conn.open().catch(this.decorateException);
   }
 
-  public getTables(cached: boolean = false): Promise<DatabaseInterface.Table[]> {
+  public getTables(cached: boolean = false): Promise<NSDatabase.ITable[]> {
     if (cached && this.tables.length > 0) {
       return Promise.resolve(this.tables);
     }
-    return this.conn.getTables().then((tables: DatabaseInterface.Table[]) => {
+    return this.conn.getTables().then((tables: NSDatabase.ITable[]) => {
       this.tables = tables;
       return this.tables;
     }).catch(this.decorateException);
   }
 
-  public getColumns(cached: boolean = false): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(cached: boolean = false): Promise<NSDatabase.IColumn[]> {
     if (cached && this.columns.length > 0) {
       return Promise.resolve(this.columns);
     }
-    return this.conn.getColumns().then((columns: DatabaseInterface.TableColumn[]) => {
+    return this.conn.getColumns().then((columns: NSDatabase.IColumn[]) => {
       this.columns = columns;
       return this.columns;
     }).catch(this.decorateException);
   }
 
-  public getFunctions(cached: boolean = false): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(cached: boolean = false): Promise<NSDatabase.IFunction[]> {
     if (cached && this.columns.length > 0) {
       return Promise.resolve(this.functions);
     }
-    return this.conn.getFunctions().then((functions: DatabaseInterface.Function[]) => {
+    return this.conn.getFunctions().then((functions: NSDatabase.IFunction[]) => {
       this.functions = functions;
       return this.functions;
     }).catch(this.decorateException);
@@ -112,7 +108,7 @@ export default class Connection {
     return [records];
   }
 
-  public query(query: string, throwIfError: boolean = false): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, throwIfError: boolean = false): Promise<NSDatabase.IResult[]> {
     return this.conn.query(query)
       .catch(this.decorateException)
       .catch((e) => {
@@ -162,7 +158,7 @@ export default class Connection {
     return getConnectionId(this.conn.credentials);
   }
 
-  public serialize(): ConnectionInterface {
+  public serialize(): IConnection {
     return {
       id: this.getId(),
       ...this.conn.credentials,
@@ -170,7 +166,7 @@ export default class Connection {
     };
   }
 
-  public static async testConnection(credentials: ConnectionInterface) {
+  public static async testConnection(credentials: IConnection) {
     const testConn = new Connection(credentials);
     await testConn.connect();
     await testConn.close();

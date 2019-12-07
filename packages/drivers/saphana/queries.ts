@@ -1,4 +1,4 @@
-import { DriverQueries } from '@sqltools/core/interface';
+import { IBaseQueries } from '@sqltools/types';
 import { TREE_SEP } from '@sqltools/core/constants';
 
 export default {
@@ -112,4 +112,4 @@ WHERE
   A.SCHEMA_NAME = ? 
 GROUP BY 
   A.TABLE_NAME`*/
-} as DriverQueries;
+} as IBaseQueries;

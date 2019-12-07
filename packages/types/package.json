@@ -1,0 +1,18 @@
+{
+  "name": "@sqltools/types",
+  "version": "0.0.1",
+  "description": "SQLTools interfaces and types",
+  "types": "index.d.ts",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "@types/vscode": "^1.36.0",
+    "typescript": "3.6.2"
+  },
+  "private": false,
+  "peerDependencies": {
+    "vscode-languageclient": "*",
+    "vscode-languageserver-protocol": "*",
+    "vscode-languageserver": "*"
+  }
+}

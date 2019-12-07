@@ -1,16 +1,13 @@
-import {
-  ConnectionDriver,
-} from '@sqltools/core/interface';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
 import AbstractDriver from '../abstract';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 
 const OracleDBLibVersion = '4.0.0';
-export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> implements ConnectionDriver {
+export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, OracleDBLib.PoolAttributes> implements IConnectionDriver {
   public static deps: typeof AbstractDriver['deps'] = [{
     type: 'package',
     name: 'oracledb',
@@ -93,10 +90,10 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
     return  [code];
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     const conn = await this.open();
     const queries = this.simpleParse(query);
-    const results: DatabaseInterface.QueryResults[] = [];
+    const results: NSDatabase.IResult[] = [];
     try {
       for(let q of queries) {
         let res = await conn.execute(q, [], { outFormat: this.lib.OUT_FORMAT_OBJECT });
@@ -128,7 +125,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
     return this.query('select 1 from dual').then(() => void 0);
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     return this.query(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
@@ -142,12 +139,12 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
               tree: obj.TREE,
-            } as DatabaseInterface.Table;
+            } as NSDatabase.ITable;
           });
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     return this.query(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
@@ -166,7 +163,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
               isPk: obj.KEYTYPE === 'P',
               isFk: obj.KEYTYPE === 'R',
               tree: obj.TREE,
-            } as DatabaseInterface.TableColumn;
+            } as NSDatabase.IColumn;
           });
       });
   }
@@ -176,7 +173,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
     return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
   }
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(): Promise<NSDatabase.IFunction[]> {
     return this.query(this.queries.fetchFunctions)
       .then(([queryRes]) => {
         return queryRes.results
@@ -190,7 +187,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection> imp
               args: obj.ARGS ? obj.ARGS.split(/, */g) : [],
               resultType: obj.RESULTTYPE,
               tree: obj.TREE,
-            } as DatabaseInterface.Function;
+            } as NSDatabase.IFunction;
           });
       });
   }

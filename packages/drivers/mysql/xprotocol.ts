@@ -1,21 +1,17 @@
 import MySQLXLib from '@mysql/xdevapi';
-import {
-  ConnectionDriver,
-  ConnectionInterface,
-} from '@sqltools/core/interface';
+import { IConnectionDriver, IConnection, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import AbstractDriver from '@sqltools/drivers/abstract';
 import Queries from './queries';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
-export default class MySQLX extends AbstractDriver<any> implements ConnectionDriver {
+export default class MySQLX extends AbstractDriver<any, any> implements IConnectionDriver {
   queries = Queries;
   public async open() {
     if (this.connection) {
       return this.connection;
     }
 
-    const mysqlOptions = this.credentials.mysqlOptions || <ConnectionInterface['mysqlOptions']>{};
+    const mysqlOptions = this.credentials.mysqlOptions || <IConnection['mysqlOptions']>{};
     const client = MySQLXLib.getClient(
       this.credentials.connectString ||
       {
@@ -51,7 +47,7 @@ export default class MySQLX extends AbstractDriver<any> implements ConnectionDri
     this.connection = null;
   }
 
-  private async runSingleQuery(query: string, session): Promise<DatabaseInterface.QueryResults> {
+  private async runSingleQuery(query: string, session): Promise<NSDatabase.IResult> {
     const results: any[] = [];
     const messages: string[] = [];
     const cols: string[] = [];
@@ -89,7 +85,7 @@ export default class MySQLX extends AbstractDriver<any> implements ConnectionDri
     }
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     const session = await this.open().then(client => client.getSession());
     const queries = Utils.query.parse(query);
     const results = [];
@@ -101,11 +97,11 @@ export default class MySQLX extends AbstractDriver<any> implements ConnectionDri
     return results;
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     throw new Error('Never called! Must use parent classe');
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     throw new Error('Never called! Must use parent classe');
   }
 }

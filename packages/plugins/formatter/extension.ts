@@ -4,7 +4,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { format } from './utils';
 import { query as QueryUtils } from '@sqltools/core/utils';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
-import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase, IExtension } from '@sqltools/types';
 
 const log = logger.extend('formatter');
 
@@ -49,7 +49,7 @@ function copyTextHandler(item: { value: string } | string, items?: ({ value: str
   return env.clipboard.writeText(copyText);
 }
 
-function generateInsertQueryHandler(item: { columns: DatabaseInterface.TableColumn[], name?: string }) {
+function generateInsertQueryHandler(item: { columns: NSDatabase.IColumn[], name?: string }) {
   return insertText(new SnippetString(QueryUtils.generateInsert(item.name || item.toString(), item.columns, ConfigManager.format)));
 }
 
@@ -57,7 +57,7 @@ function newSqlFileHandler() {
   return getOrCreateEditor(true);
 }
 
-const register = (extension: SQLTools.ExtensionInterface) => {
+const register = (extension: IExtension) => {
   extension.registerTextEditorCommand(`formatSql`, formatSqlHandler)
     .registerCommand(`insertText`, insertTextHandler)
     .registerCommand(`copyText`, copyTextHandler)

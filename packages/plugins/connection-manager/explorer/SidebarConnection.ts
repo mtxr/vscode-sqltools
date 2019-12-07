@@ -1,5 +1,5 @@
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface } from '@sqltools/core/interface';
+import { IConnection } from '@sqltools/types';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
 import { ExtensionContext, TreeItemCollapsibleState, Uri, commands } from 'vscode';
@@ -64,7 +64,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
     }
   }
 
-  constructor(context: ExtensionContext, public conn: ConnectionInterface) {
+  constructor(context: ExtensionContext, public conn: IConnection) {
     super(conn.name, TreeItemCollapsibleState.None);
     try {
       
@@ -127,7 +127,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
     this.collapsibleState = TreeItemCollapsibleState.None;
   }
 
-  public updateStatus(c: ConnectionInterface) {
+  public updateStatus(c: IConnection) {
     this.updateCreds(c);
     if (this.isActive) {
       this.expand();
@@ -140,7 +140,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
   public expand() {
     this.collapsibleState = TreeItemCollapsibleState.Expanded;
   }
-  public updateCreds(creds: ConnectionInterface) {
+  public updateCreds(creds: IConnection) {
     if (isDeepStrictEqual(this.conn, creds)) {
       return false;
     }

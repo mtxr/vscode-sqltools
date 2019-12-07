@@ -1,16 +1,16 @@
-import { ConnectionInterface } from '@sqltools/core/interface/connection';
+import { IConnection } from '@sqltools/types/generic/connection';
 
-export type CompletionLanguages = string[];
-export type FormatLanguages = string[];
-export type CodelensLanguages = string[];
+export declare type CompletionLanguages = string[];
+export declare type FormatLanguages = string[];
+export declare type CodelensLanguages = string[];
 
-export interface DependencyManagerSettings {
+export declare interface IDependencyManagerSettings {
   /**
    * Package mangaer name or path. Eg. yarn, npm or absolute paths like /usr/bin/npm
    *
    * @type {string}
    * @default npm
-   * @memberof DependencyManagerSettings
+   * @memberof IDependencyManagerSettings
    */
   packageManager: string;
   /**
@@ -18,7 +18,7 @@ export interface DependencyManagerSettings {
    *
    * @type {string[]}
    * @default ["install"]
-   * @memberof DependencyManagerSettings
+   * @memberof IDependencyManagerSettings
    */
   installArgs: string[];
   /**
@@ -26,24 +26,24 @@ export interface DependencyManagerSettings {
    *
    * @type {string[]}
    * @default ["run"]
-   * @memberof DependencyManagerSettings
+   * @memberof IDependencyManagerSettings
    */
   runScriptArgs: string[];
   /**
    * Ignore confirmation requests to install or updagre dependencies.
    *
    * @type {boolean}
-   * @memberof DependencyManagerSettings
+   * @memberof IDependencyManagerSettings
    */
   autoAccept: boolean;
 }
 
-export interface FormatOptions {
+export declare interface IFormatOptions {
   /**
    * Indent Size
    * @type {number}
    * @default 2
-   * @memberof FormatOptions
+   * @memberof IFormatOptions
    */
   indentSize: number;
 
@@ -51,17 +51,17 @@ export interface FormatOptions {
    * Reserverd word case
    * @type {string}
    * @default null
-   * @memberof FormatOptions
+   * @memberof IFormatOptions
    */
   reservedWordCase?: 'upper' | 'lower' | null;
 }
 
-export interface ResultsOptions {
+export declare interface IResultsOptions {
   /**
    * Global show records limit
    * @type {number}
    * @default 50
-   * @memberof ResultsOptions
+   * @memberof IResultsOptions
    */
   limit: number;
 
@@ -69,14 +69,14 @@ export interface ResultsOptions {
    * Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn
    * @type {string}
    * @default 'next'
-   * @memberof ResultsOptions
+   * @memberof IResultsOptions
    */
   location?: 'current' | 'next' | 'end' | number;
   /**
    * Customize results screen CSS
    *
    * @type {{ [varible: string]: string }}
-   * @memberof ResultsOptions
+   * @memberof IResultsOptions
    */
   customization?: {
     'font-family'?: string;
@@ -85,47 +85,47 @@ export interface ResultsOptions {
    };
 }
 
-export interface Settings {
+export declare interface ISettings {
   /**
    * Disable new release notifications.
    * @default false
    * @type {boolean}
-   * @memberof Settings
+   * @memberof ISettings
    */
   disableReleaseNotifications?: boolean;
   /**
    * Name of the connection to auto connect on start
    * @type {string | string[]}
    * @default null
-   * @memberof Settings
+   * @memberof ISettings
    */
   autoConnectTo?: string | string[];
   /**
    * Help SQLTools development.
    * @type {boolean}
    * @default true
-   * @memberof Settings
+   * @memberof ISettings
    */
   telemetry?: boolean;
   /**
    * Toggle statusbar visibility.
    * @type {boolean}
    * @default true
-   * @memberof Settings
+   * @memberof ISettings
    */
   showStatusbar?: boolean;
   /**
    * Number of queries to keep on History.
    * @type {number}
    * @default 100
-   * @memberof Settings
+   * @memberof ISettings
    */
    historySize?: number;
   /**
    * Languages with SQL completion enabled.
    * @type {CompletionLanguages}
    * @default ["sql"]
-   * @memberof Settings
+   * @memberof ISettings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
   completionLanguages?: CompletionLanguages;
@@ -133,7 +133,7 @@ export interface Settings {
    * Languages with SQL formatting enabled.
    * @type {FormatLanguages}
    * @default ["sql"]
-   * @memberof Settings
+   * @memberof ISettings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
   formatLanguages?: FormatLanguages;
@@ -141,44 +141,44 @@ export interface Settings {
    * Languages with SQL CodeLens enabled.
    * @type {CodelensLanguages}
    * @default ["sql"]
-   * @memberof Settings
+   * @memberof ISettings
    * @see {@link https://code.visualstudio.com/docs/languages/identifiers} for more information.
    */
   codelensLanguages?: CodelensLanguages;
   /**
    * Format document/selection options
-   * @type {FormatOptions}
-   * @memberof Settings
+   * @type {IFormatOptions}
+   * @memberof ISettings
    */
-  format?: FormatOptions;
+  format?: IFormatOptions;
 
   /**
    * Results view options
-   * @type {ResultsOptions}
-   * @memberof Settings
+   * @type {IResultsOptions}
+   * @memberof ISettings
    */
-  results?: ResultsOptions;
+  results?: IResultsOptions;
 
   /**
    * Connections
-   * @type {ConnectionInterface[]}
+   * @type {IConnection[]}
    * @default []
-   * @memberof Settings
+   * @memberof ISettings
    */
-  connections?: ConnectionInterface[];
+  connections?: IConnection[];
 
   /**
    * Default export results mode
    * @default "prompt"
    * @type {string}
-   * @memberof Settings
+   * @memberof ISettings
    */
   defaultExportType?: 'prompt' | 'csv' | 'json';
   /**
    * Enable node runtime usage.
    * @default false
    * @type {null | boolean | string}
-   * @memberof Settings
+   * @memberof ISettings
    */
   useNodeRuntime?: null | boolean | string;
 
@@ -186,7 +186,7 @@ export interface Settings {
    * Columns sort order
    * @default 'name'
    * @type {null | string}
-   * @memberof Settings
+   * @memberof ISettings
    */
   sortColumns?: 'name' | 'ordinalnumber' | null;
 
@@ -194,7 +194,7 @@ export interface Settings {
    * Flatten groups with has only one child
    * @default false
    * @type {boolean}
-   * @memberof Settings
+   * @memberof ISettings
    */
   flattenGroupsIfOne?: boolean;
 
@@ -202,28 +202,28 @@ export interface Settings {
    * Auto open session file when connect
    * @default true
    * @type {boolean}
-   * @memberof Settings
+   * @memberof ISettings
    */
   autoOpenSessionFiles?: boolean;
   /**
    * Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH...
    * @default {}
    * @type {{ [id: string]: string }}
-   * @memberof Settings
+   * @memberof ISettings
    */
   languageServerEnv?: { [id: string]: string };
 
   queryParams?: {
     /**
      * Enables query parameter checking
-     * @memberof Settings['queryParams']
+     * @memberof ISettings['queryParams']
      * @default true
      * @type {boolean}
      */
     enableReplace: boolean;
     /**
      * RegEx used to identify query parameters
-     * @memberof Settings['queryParams']
+     * @memberof ISettings['queryParams']
      * @default "\\$[\\d]+|\\$\\[[\\d\\w]+\\]"
      * @type {string}
      */
@@ -233,16 +233,16 @@ export interface Settings {
   /**
    * Dependency manager settings
    *
-   * @type {DependencyManagerSettings}
-   * @memberof Settings
+   * @type {IDependencyManagerSettings}
+   * @memberof ISettings
    */
-  dependencyManager?: DependencyManagerSettings;
+  dependencyManager?: IDependencyManagerSettings;
 
   /**
    * SQLTools debug settings
    * 
    * @type {{ namespaces?: string }}
-   * @memberof Settings
+   * @memberof ISettings
    */
   debug?: { namespaces?: string };
 }

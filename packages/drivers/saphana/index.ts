@@ -1,11 +1,8 @@
 
-import {
-  ConnectionDriver
-} from '@sqltools/core/interface';
 import queries from './queries';
 import AbstractDriver from '@sqltools/drivers/abstract';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
 interface Statement {
   exec(params: any[], handler: (err: any, row: any) => void);
@@ -22,7 +19,7 @@ interface HanaConnection {
   prepare(query: string, handler: (err: any, statement: Statement) => void);
 }
 
-export default class SAPHana extends AbstractDriver<HanaConnection> implements ConnectionDriver {
+export default class SAPHana extends AbstractDriver<HanaConnection, any> implements IConnectionDriver {
 
   public static deps: typeof AbstractDriver['deps'] = [{
     type: 'package',
@@ -91,9 +88,9 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
     this.connection = null;
   }
 
-  public query(query: string, args?: any[]): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string, args?: any[]): Promise<NSDatabase.IResult[]> {
     return this.open().then(conn => {
-      return new Promise<DatabaseInterface.QueryResults[]>((resolve) => {
+      return new Promise<NSDatabase.IResult[]>((resolve) => {
         if (args) {
           conn.prepare(query, (err, statement) => {
             if (err) {
@@ -132,7 +129,7 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
       cols: cols,
       query: query,
       messages: []
-    } as DatabaseInterface.QueryResults
+    } as NSDatabase.IResult
 
     return resolve([res]);
   }
@@ -150,10 +147,10 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
       cols: [],
       query: query,
       messages: messages
-    } as DatabaseInterface.QueryResults]);
+    } as NSDatabase.IResult]);
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     return this.query(this.queries.fetchTables, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
@@ -167,12 +164,12 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
               tableDatabase: obj.DBNAME,
               tableSchema: obj.TABLESCHEMA,
               tree: obj.TREE,
-            } as DatabaseInterface.Table;
+            } as NSDatabase.ITable;
           });
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     return this.query(this.queries.fetchColumns, [this.schema, this.schema])
       .then(([queryRes]) => {
         return queryRes.results
@@ -191,7 +188,7 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
               isFk: (obj.KEYTYPE || '').toLowerCase() === 'foreign key',
               type: obj.TYPE,
               tree: obj.TREE,
-            } as DatabaseInterface.TableColumn;
+            } as NSDatabase.IColumn;
           });
       });
   }
@@ -201,7 +198,7 @@ export default class SAPHana extends AbstractDriver<HanaConnection> implements C
   }
 
   public describeTable(prefixedTable: string) {
-    return new Promise<DatabaseInterface.QueryResults[]>(resolve => {
+    return new Promise<NSDatabase.IResult[]>(resolve => {
       this.query(this.queries.describeTable, [this.schema, prefixedTable]).then(queryRes => {
         if (queryRes[0].results.length == 0) {
           this.query(this.queries.describeView as string, [this.schema, prefixedTable]).then(res => resolve(res));

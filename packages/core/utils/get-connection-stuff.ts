@@ -1,8 +1,8 @@
-import { ConnectionInterface } from '../interface';
+import { IConnection } from '@sqltools/types';
 
 export const idSep = '|';
 
-export function getConnectionId(c: ConnectionInterface): string | null {
+export function getConnectionId(c: IConnection): string | null {
   c = migrateConnectionSetting(c);
   if (!c)
     return null;
@@ -18,15 +18,15 @@ export function getNameFromId(id: string) {
 }
 
 
-export function migrateConnectionSetting(c: ConnectionInterface) {
+export function migrateConnectionSetting(c: IConnection) {
   c.driver = c.driver || (<any>c).dialect;
   return c;
 }
 
-export function migrateConnectionSettings(connections: ConnectionInterface[]): ConnectionInterface[] {
+export function migrateConnectionSettings(connections: IConnection[]): IConnection[] {
   if (!connections) return connections;
 
-  return (<ConnectionInterface[]>connections).map(migrateConnectionSetting);
+  return (<IConnection[]>connections).map(migrateConnectionSetting);
 }
 
 export function getSessionBasename(connName: string) {

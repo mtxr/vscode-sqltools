@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { IDatabase, NSDatabase } from '@sqltools/types';
 import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarColumn from './SidebarColumn';
@@ -15,7 +15,7 @@ export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColum
   public get name() {
     return prefixedtableName(this.conn.driver, this.table);
   }
-  public get columns(): DatabaseInterface.TableColumn[] {
+  public get columns(): NSDatabase.IColumn[] {
     return this._columns.map(item => item.column);
   }
   public get items() {
@@ -34,7 +34,7 @@ export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColum
       return '';
     return `${this.table.numberOfColumns} cols`;
   }
-  constructor(context: ExtensionContext, public table: DatabaseInterface.Table) {
+  constructor(context: ExtensionContext, public table: NSDatabase.ITable) {
     super(table.name, (ConfigManager.get('tableTreeItemsExpanded', false)
       ? TreeItemCollapsibleState.Expanded
       : TreeItemCollapsibleState.Collapsed));

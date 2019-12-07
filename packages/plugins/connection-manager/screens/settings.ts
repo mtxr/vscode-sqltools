@@ -3,7 +3,7 @@ import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import { commands, ExtensionContext, Uri } from 'vscode';
 import path from 'path';
-import { DatabaseDriver } from '@sqltools/core/interface';
+import { DatabaseDriver } from '@sqltools/types';
 import relativeToWorkspace from '@sqltools/vscode/utils/relative-to-workspace';
 
 export default class SettingsWebview extends WebviewProvider {

@@ -1,13 +1,13 @@
+import { IExtensionPlugin, ILanguageClient, IExtension } from '@sqltools/types';
+
 /**
  * This file should register everything extension needs.
  * Commands, explorer, webviews, language client request. Language server requests are handled by language-server.ts file.
  */
 
-import SQLTools from '@sqltools/core/plugin-api';
-
-export default class ExamplePlugin implements SQLTools.ExtensionPlugin {
-  public client: SQLTools.LanguageClientInterface;
-  register(extension: SQLTools.ExtensionInterface) {
+export default class ExamplePlugin implements IExtensionPlugin {
+  public client: ILanguageClient;
+  register(extension: IExtension) {
     this.client = extension.client;
   }
 }

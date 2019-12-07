@@ -1,14 +1,11 @@
 import MySQLLib from 'mysql';
-import {
-  ConnectionDriver,
-} from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import AbstractDriver from '@sqltools/drivers/abstract';
 import Queries from './queries';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import fs from 'fs';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
-export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool> implements ConnectionDriver {
+export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolConfig> implements IConnectionDriver {
   queries = Queries;
   public open() {
     if (this.connection) {
@@ -65,8 +62,8 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool> implemen
     });
   }
 
-  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
-    return this.open().then((conn): Promise<DatabaseInterface.QueryResults[]> => {
+  public query(query: string): Promise<NSDatabase.IResult[]> {
+    return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
       return new Promise((resolve, reject) => {
         conn.query(query, (error, results) => {
           if (error) return reject(error);
@@ -74,7 +71,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool> implemen
           if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
             results = [results];
           }
-          return resolve(queries.map((q, i): DatabaseInterface.QueryResults => {
+          return resolve(queries.map((q, i): NSDatabase.IResult => {
             const r = results[i] || [];
             const messages = [];
             if (r.affectedRows) {
@@ -96,11 +93,11 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool> implemen
     });
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     throw new Error('Never called! Must use parent classe');
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     throw new Error('Never called! Must use parent classe');
   }
 }

@@ -1,4 +1,4 @@
-import { DriverQueries } from '@sqltools/core/interface';
+import { IBaseQueries } from '@sqltools/types';
 
 export default {
   describeTable: `
@@ -13,4 +13,4 @@ export default {
     FROM system_schema.columns
     GROUP BY keyspace_name, table_name`,
   fetchFunctions: `SELECT * FROM system_schema.functions`,
-} as DriverQueries;
+} as IBaseQueries;

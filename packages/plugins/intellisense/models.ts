@@ -2,9 +2,9 @@ import {
   CompletionItem,
   CompletionItemKind,
 } from 'vscode-languageserver';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase } from '@sqltools/types';
 
-export function TableCompletionItem(table: DatabaseInterface.Table): CompletionItem {
+export function TableCompletionItem(table: NSDatabase.ITable): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = '';
   if (table.tableDatabase) {
@@ -31,14 +31,14 @@ export function TableCompletionItem(table: DatabaseInterface.Table): CompletionI
   };
 }
 
-export function TableCompletionItemFirst(table: DatabaseInterface.Table): CompletionItem {
+export function TableCompletionItemFirst(table: NSDatabase.ITable): CompletionItem {
   return {
     ...TableCompletionItem(table),
     sortText: `0.${table.name}`,
   }
 }
 
-export function TableColumnCompletionItem(col: DatabaseInterface.TableColumn): CompletionItem {
+export function TableColumnCompletionItem(col: NSDatabase.IColumn): CompletionItem {
   const colInfo = [ col.columnName ];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);

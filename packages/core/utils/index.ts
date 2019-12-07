@@ -1,7 +1,7 @@
 import path from 'path';
 import * as query from './query';
 import commandExists from './command-exists';
-import { ConnectionInterface, DatabaseDriver } from '../interface';
+import { IConnection, DatabaseDriver } from '@sqltools/types';
 export * from './persistence';
 export * from './replacer';
 export * from './timer';
@@ -16,7 +16,7 @@ export function asArray<T>(obj: any) {
   return Object.keys(obj).map((k) => obj[k]) as T[];
 }
 
-export function getConnectionDescription(c: ConnectionInterface): string | null {
+export function getConnectionDescription(c: IConnection): string | null {
   if (!c) return null;
 
   if (c.driver === DatabaseDriver.SQLite) {

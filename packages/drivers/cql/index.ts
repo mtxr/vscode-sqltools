@@ -1,11 +1,8 @@
 import * as CassandraLib from 'cassandra-driver';
-import {
-  ConnectionDriver, ConnectionInterface,
-} from '@sqltools/core/interface';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import AbstractDriver from '../abstract';
 import Queries from './queries';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { TREE_SEP } from '@sqltools/core/constants';
 
 interface CQLBatch {
@@ -14,14 +11,14 @@ interface CQLBatch {
   options: CassandraLib.QueryOptions,
 }
 
-export default class CQL extends AbstractDriver<CassandraLib.Client> implements ConnectionDriver {
+export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLib.ClientOptions> implements IConnectionDriver {
   queries = Queries;
 
   public async open() {
     if (this.connection) {
       return this.connection;
     }
-    const cqlOptions = this.credentials.cqlOptions || <ConnectionInterface['cqlOptions']>{};
+    const cqlOptions: CassandraLib.ClientOptions = this.credentials.cqlOptions || {};
     const clientOptions: CassandraLib.ClientOptions = {
       contactPoints: [this.credentials.server],
       keyspace: this.credentials.database ? this.credentials.database : undefined,
@@ -99,10 +96,10 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
     return cqlQueries;
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     const conn = await this.open();
     const queries = this.cqlParse(query);
-    const results: DatabaseInterface.QueryResults[] = [];
+    const results: NSDatabase.IResult[] = [];
     for (let i = 0; i < queries.length; i++) {
       const q = queries[i];
       let query: string;
@@ -117,7 +114,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
         }
         const messages = [];
         const cols = result.columns ? result.columns.map(column => column.name) : [];
-        const queryresult: DatabaseInterface.QueryResults = {
+        const queryresult: NSDatabase.IResult = {
           connId: this.getId(),
           cols,
           messages,
@@ -134,7 +131,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
         results.push(queryresult);
       } catch (e) {
         // Return error and previous queries, as they might have modified data
-        const queryresult: DatabaseInterface.QueryResults = {
+        const queryresult: NSDatabase.IResult = {
           connId: this.getId(),
           cols: [],
           messages: [e.toString()],
@@ -150,7 +147,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
     return results;
   }
 
-  public async getTables(): Promise<DatabaseInterface.Table[]> {
+  public async getTables(): Promise<NSDatabase.ITable[]> {
     const [queryResults, numberOfColumnsResults] = await this.query(this.queries.fetchTables);
     const numberOfColumnsMap: {string: {string: number}} = numberOfColumnsResults.results.reduce((prev, curr) => prev.concat(curr), []).reduce((acc, obj: any) => {
       if (typeof acc[obj.keyspace_name] === 'undefined') {
@@ -160,7 +157,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
       return acc;
     }, {});
     return queryResults.results.reduce((prev, curr) => prev.concat(curr), []).map((obj: any) => {
-      const table: DatabaseInterface.Table = {
+      const table: NSDatabase.ITable = {
         name: obj.table_name,
         isView: false,
         tableSchema: obj.keyspace_name,
@@ -171,10 +168,10 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
     });
   }
 
-  public async getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public async getColumns(): Promise<NSDatabase.IColumn[]> {
     const [queryResults] = await this.query(this.queries.fetchColumns);
     return queryResults.results.reduce((prev, curr) => prev.concat(curr), []).map((obj: any) => {
-      const column: DatabaseInterface.TableColumn = {
+      const column: NSDatabase.IColumn = {
         columnName: obj.column_name,
         tableName: obj.table_name,
         type: obj.type,
@@ -188,10 +185,10 @@ export default class CQL extends AbstractDriver<CassandraLib.Client> implements 
     });
   }
 
-  public async getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public async getFunctions(): Promise<NSDatabase.IFunction[]> {
     const [queryResults] = await this.query(this.queries.fetchFunctions);
     return queryResults.results.reduce((prev, curr) => prev.concat(curr), []).map((obj: any) => {
-      const func: DatabaseInterface.Function = {
+      const func: NSDatabase.IFunction = {
         name: obj.function_name,
         schema: obj.keyspace_name,
         database: '',

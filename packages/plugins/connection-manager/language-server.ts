@@ -1,7 +1,6 @@
 import Connection from '@sqltools/core/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { ConnectionInterface,} from '@sqltools/core/interface';
-import SQLTools, { RequestHandler, DatabaseInterface } from '@sqltools/core/plugin-api';
+import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler} from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
@@ -12,10 +11,12 @@ import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/
 import { decorateException } from '@sqltools/core/utils/errors';
 import logger from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
+import { Store } from 'redux';
+
 const log = logger.extend('conn-mann');
 
-export default class ConnectionManagerPlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLTools.LanguageServerInterface;
+export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
+  private server: ILanguageServer<Store>;
   private get connections() {
     const { activeConnections, lastUsedId } = this.server.store.getState();
     return (ConfigManager.connections || []).map(conn => {
@@ -27,7 +28,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     });
   }
 
-  private getConnectionInstance(creds: ConnectionInterface) {
+  private getConnectionInstance(creds: IConnection) {
     const id = getConnectionId(creds);
     const { activeConnections } = this.server.store.getState();
     return <Connection | null>(activeConnections[id] || null);
@@ -37,7 +38,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     try {
       const c = this.getConnectionInstance(conn);
       if (!c) throw 'Connection not found';
-      const results: DatabaseInterface.QueryResults[] = await c[command](...args);
+      const results: NSDatabase.IResult[] = await c[command](...args);
       this.server.store.dispatch(actions.QuerySuccess(c, { results }));
       return results;
     } catch (e) {
@@ -122,7 +123,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return null;
   };
 
-  private serializarConnectionState = (conn: ConnectionInterface) => {
+  private serializarConnectionState = (conn: IConnection) => {
     const instance = this.getConnectionInstance(conn);
     const { lastUsedId } = this.server.store.getState();
     if (instance) {
@@ -135,9 +136,9 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   }
 
   private openConnectionHandler: RequestHandler<typeof ConnectRequest> = async (req: {
-    conn: ConnectionInterface;
+    conn: IConnection;
     password?: string;
-  }): Promise<ConnectionInterface> => {
+  }): Promise<IConnection> => {
     if (!req || !req.conn) {
       return undefined;
     }
@@ -182,9 +183,9 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   };
 
   private testConnectionHandler: RequestHandler<typeof TestConnectionRequest> = async (req: {
-    conn: ConnectionInterface;
+    conn: IConnection;
     password?: string;
-  }): Promise<ConnectionInterface> => {
+  }): Promise<IConnection> => {
     if (!req || !req.conn) {
       return undefined;
     }
@@ -253,7 +254,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     return [];
   };
 
-  public register(server: SQLTools.LanguageServerInterface) {
+  public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
@@ -292,10 +293,10 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     columns,
     functions
   }: {
-    conn: ConnectionInterface;
-    tables: DatabaseInterface.Table[];
-    columns: DatabaseInterface.TableColumn[];
-    functions: DatabaseInterface.Function[];
+    conn: IConnection;
+    tables: NSDatabase.ITable[];
+    columns: NSDatabase.IColumn[];
+    functions: NSDatabase.IFunction[];
    }) {
     if (!conn) return Promise.resolve();
     conn.isActive = this.server.store.getState().lastUsedId === getConnectionId(conn);
@@ -303,7 +304,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
   }
 
   public _autoConnectIfActive = async () => {
-    const defaultConnections: ConnectionInterface[] = [];
+    const defaultConnections: IConnection[] = [];
     const { lastUsedId, activeConnections } = this.server.store.getState();
     if (lastUsedId && activeConnections[lastUsedId]) {
       defaultConnections.push(this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
@@ -330,7 +331,7 @@ export default class ConnectionManagerPlugin implements SQLTools.LanguageServerP
     }
     try {
       await Promise.all(defaultConnections.slice(1).map(conn =>
-        (<Promise<ConnectionInterface>>this.openConnectionHandler({ conn }))
+        (<Promise<IConnection>>this.openConnectionHandler({ conn }))
           .catch(e => {
             this.server.notifyError(`Failed to auto connect to  ${conn.name}`, e);
             return Promise.resolve();

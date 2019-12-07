@@ -1,4 +1,4 @@
-import { DatabaseDriver } from '@sqltools/core/interface';
+import { DatabaseDriver } from '@sqltools/types';
 import { getIconPathForDriver } from '@sqltools/core/utils/driver';
 
 const requirements = [

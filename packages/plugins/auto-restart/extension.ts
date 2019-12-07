@@ -1,10 +1,10 @@
-import SQLTools from '@sqltools/core/plugin-api';
 import { CloseAction } from 'vscode-languageclient';
 import { ExitCalledNotification } from './contracts';
+import { IExtensionPlugin } from '@sqltools/types';
 
 let avoidRestart = false;
 
-const AutoRestartPlugin: SQLTools.ExtensionPlugin = {
+const AutoRestartPlugin: IExtensionPlugin = {
   register(extension) {
     const defaultHandler = extension.client.clientErrorHandler;
     extension.client.clientErrorHandler = {

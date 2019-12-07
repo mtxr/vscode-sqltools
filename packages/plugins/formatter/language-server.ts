@@ -1,12 +1,12 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import SQLTools from '@sqltools/core/plugin-api';
 import * as Utils from '@sqltools/core/utils';
 import { Disposable, DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangeFormattingRequest, Range, TextEdit } from 'vscode-languageserver';
 import { format } from './utils';
 import telemetry from '@sqltools/core/utils/telemetry';
+import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 
-export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
-  private server: SQLTools.LanguageServerInterface;
+export default class FormatterPlugin implements ILanguageServerPlugin {
+  private server: ILanguageServer;
   private formatterLanguages: string[] = [];
   private  formatterRegistration: Thenable<Disposable> | null = null;
 
@@ -32,7 +32,7 @@ export default class FormatterPlugin implements SQLTools.LanguageServerPlugin {
     }
   }
 
-  register(server: SQLTools.LanguageServerInterface) {
+  register(server: ILanguageServer) {
     this.server = server;
     this.server.addOnDidChangeConfigurationHooks(this.onDidChangeConfiguration);
     this.server.onDocumentFormatting(this.handler);

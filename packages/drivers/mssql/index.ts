@@ -1,14 +1,11 @@
 import MSSQLLib, { IResult, Binary } from 'mssql';
-import {
-  ConnectionDriver,
-} from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import AbstractDriver from '@sqltools/drivers/abstract';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import get from 'lodash/get';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
-export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> implements ConnectionDriver {
+export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> implements IConnectionDriver {
   queries = queries;
 
   private retryCount = 0;
@@ -74,14 +71,14 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
     this.connection = null;
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     const pool = await this.open();
     const request = pool.request();
     request.multiple = true;
     query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
     const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
     const queries = Utils.query.parse(query, 'mssql');
-    return queries.map((q, i): DatabaseInterface.QueryResults => {
+    return queries.map((q, i): NSDatabase.IResult => {
       const r = recordsets[i] || [];
       const columnNames = [];
       const bufferCols = [];
@@ -116,7 +113,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
     })
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     return this.query(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
@@ -130,18 +127,18 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
               tableDatabase: obj.dbName,
               tableSchema: obj.tableSchema,
               tree: obj.tree,
-            } as DatabaseInterface.Table;
+            } as NSDatabase.ITable;
           });
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     return this.query(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
           .map((obj) => {
-            return <DatabaseInterface.TableColumn>{
+            return <NSDatabase.IColumn>{
               ...obj,
               isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
               size: obj.size !== null ? parseInt(obj.size, 10) : null,
@@ -154,7 +151,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
       });
   }
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(): Promise<NSDatabase.IFunction[]> {
     return this.query(this.queries.fetchFunctions)
       .then(([queryRes]) => {
         return queryRes.results
@@ -166,7 +163,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool> imple
               args: obj.args ? obj.args.split(/, */g) : [],
               database: obj.dbName,
               schema: obj.dbSchema,
-            } as DatabaseInterface.Function;
+            } as NSDatabase.IFunction;
           });
       });
   }

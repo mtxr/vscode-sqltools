@@ -1,4 +1,4 @@
-import { DriverQueries } from '@sqltools/core/interface';
+import { IBaseQueries } from '@sqltools/types';
 import { TREE_SEP } from '@sqltools/core/constants';
 import queryFactory from '@sqltools/core/utils/query/factory';
 
@@ -98,4 +98,4 @@ WHERE
   n.nspname not in ('pg_catalog', 'information_schema')
 ORDER BY name
 ;`,
-} as DriverQueries;
+} as IBaseQueries;

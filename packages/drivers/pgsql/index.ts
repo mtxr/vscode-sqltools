@@ -1,9 +1,8 @@
 import { Pool, PoolConfig, types } from 'pg';
 import Queries from './queries';
-import { ConnectionDriver, ConnectionInterface } from '@sqltools/core/interface';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import AbstractDriver from '@sqltools/drivers/abstract';
 import * as Utils from '@sqltools/core/utils';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import fs from 'fs';
 
 const rawValue = (v: string) => v;
@@ -12,14 +11,14 @@ types.setTypeParser(types.builtins.TIMESTAMP, rawValue);
 types.setTypeParser(types.builtins.TIMESTAMPTZ, rawValue);
 types.setTypeParser(types.builtins.DATE, rawValue);
 
-export default class PostgreSQL extends AbstractDriver<Pool> implements ConnectionDriver {
+export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> implements IConnectionDriver {
   queries = Queries;
   public open() {
     if (this.connection) {
       return this.connection;
     }
 
-    const pgOptions: PoolConfig = this.credentials.pgOptions || <ConnectionInterface['pgOptions']>{};
+    const pgOptions: PoolConfig = this.credentials.pgOptions || {};
 
     let poolConfig: PoolConfig = {
       // statement_timeout: parseInt(`${this.credentials.connectionTimeout || 0}`, 10) * 1000,
@@ -66,7 +65,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
     pool.end();
   }
 
-  public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public query(query: string): Promise<NSDatabase.IResult[]> {
     const messages = [];
     return this.open()
       .then(async (pool) => {
@@ -82,7 +81,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
           results = [results];
         }
 
-        return results.map((r, i): DatabaseInterface.QueryResults => {
+        return results.map((r, i): NSDatabase.IResult => {
           messages.push(`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`);
           return {
             connId: this.getId(),
@@ -108,7 +107,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
       }]))
   }
 
-  public getTables(): Promise<DatabaseInterface.Table[]> {
+  public getTables(): Promise<NSDatabase.ITable[]> {
     return this.query(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
@@ -121,11 +120,11 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
               tableDatabase: obj.dbname,
               tableSchema: obj.tableschema,
               tree: obj.tree,
-            } as DatabaseInterface.Table));
+            } as NSDatabase.ITable));
       });
   }
 
-  public getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public getColumns(): Promise<NSDatabase.IColumn[]> {
     return this.query(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
@@ -144,12 +143,12 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
               isFk: (obj.keytype || '').toLowerCase() === 'foreign key',
               type: obj.type,
               tree: obj.tree,
-            } as DatabaseInterface.TableColumn;
+            } as NSDatabase.IColumn;
           });
       });
   }
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(): Promise<NSDatabase.IFunction[]> {
     return this.query(this.queries.fetchFunctions)
       .then(([queryRes]) => {
         return queryRes.results
@@ -158,7 +157,7 @@ export default class PostgreSQL extends AbstractDriver<Pool> implements Connecti
             return {
               ...obj,
               args: obj.args ? obj.args.split(/, */g) : [],
-            } as DatabaseInterface.TableColumn;
+            } as NSDatabase.IColumn;
           });
       });
   }

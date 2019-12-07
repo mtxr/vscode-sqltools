@@ -1,7 +1,6 @@
-import { Settings } from '../interface';
+import { ISettings, NSDatabase } from '@sqltools/types';
 import { format } from '@sqltools/plugins/formatter/utils';
 import multipleQueriesParse from './query/parse';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 /**
  * Parse multiple queries to an array of queries
@@ -40,14 +39,14 @@ export function cleanUp(query: string = '') {
  *
  * @export
  * @param {string} table
- * @param {Array<DatabaseInterface.TableColumn>} cols
- * @param {Settings['format']} [formatOptions]
+ * @param {Array<NSDatabase.IColumn>} cols
+ * @param {ISettings['format']} [formatOptions]
  * @returns {string}
  */
 export function generateInsert(
   table: string,
-  cols: Array<DatabaseInterface.TableColumn>,
-  formatOptions?: Settings['format'],
+  cols: Array<NSDatabase.IColumn>,
+  formatOptions?: ISettings['format'],
 ): string {
   let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.columnName).join(', ')}) VALUES (`;
   cols.forEach((col, index) => {

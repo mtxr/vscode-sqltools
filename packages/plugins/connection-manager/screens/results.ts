@@ -1,4 +1,4 @@
-import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase, ILanguageClient } from '@sqltools/types';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
@@ -13,7 +13,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   protected isOpen = false;
 
-  constructor(context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
+  constructor(context: vscode.ExtensionContext, private client: ILanguageClient, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
     super(context, iconsPath, viewsPath);
 
     this.onDidDispose(() => {
@@ -100,7 +100,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       }, 500);
     });
   }
-  updateResults = (payload: DatabaseInterface.QueryResults[]) => {
+  updateResults = (payload: NSDatabase.IResult[]) => {
     this.title = 'SQLTools Results';
     try {
       if (payload && payload.length > 0) {
@@ -119,7 +119,7 @@ export default class ResultsWebviewManager {
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
-  constructor(private context: vscode.ExtensionContext, private client: SQLTools.LanguageClientInterface) {
+  constructor(private context: vscode.ExtensionContext, private client: ILanguageClient) {
     this.iconsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
     this.viewsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }

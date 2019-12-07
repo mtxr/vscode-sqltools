@@ -1,14 +1,14 @@
 import {
-  ConnectionDriver,
-  DriverQueries,
-  ConnectionInterface,
-  DatabaseFilterType,
-  QueryThatResults,
-} from '@sqltools/core/interface';
+  IConnectionDriver,
+  IBaseQueries,
+  IConnection,
+  IDatabaseFilter,
+  IExpectedResult,
+} from '@sqltools/types';
 import Drivers from '@sqltools/drivers';
 import * as Utils from '@sqltools/core/utils';
-import { MissingModuleException, ElectronNotSupportedException } from '@sqltools/core/exception';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/core/exception';
+import { NSDatabase } from '@sqltools/types';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import log from '@sqltools/core/log';
 
@@ -20,7 +20,7 @@ export interface NodeDependency {
   args?: string[], // extra arguments to be passaged to packag managers
 }
 
-export default abstract class AbstractDriver<ConnectionType extends any> implements ConnectionDriver {
+export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
   public static deps: NodeDependency[] = [];
 
@@ -34,25 +34,25 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
     return Drivers[this.constructor.name].deps;
   }
   public connection: Promise<ConnectionType>;
-  abstract queries: DriverQueries;
-  constructor(public credentials: ConnectionInterface) {
+  abstract queries: IBaseQueries;
+  constructor(public credentials: IConnection<DriverOptions>) {
     this.log = log.extend(credentials.driver.toLowerCase());
   }
 
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
 
-  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String): Promise<DatabaseInterface.QueryResults<Q extends QueryThatResults<infer U> ? U : R>[]>;
+  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
 
   public singleQuery<R = any, Q = any>(query: Q | string | String) {
     return this.query<R, Q>(query).then(([ res ]) => res);
   }
 
-  abstract getTables(): Promise<DatabaseInterface.Table[]>;
+  abstract getTables(): Promise<NSDatabase.ITable[]>;
 
-  abstract getColumns(): Promise<DatabaseInterface.TableColumn[]>;
+  abstract getColumns(): Promise<NSDatabase.IColumn[]>;
 
-  public getFunctions(): Promise<DatabaseInterface.Function[]> {
+  public getFunctions(): Promise<NSDatabase.IFunction[]> {
     this.log.extend('error')(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
@@ -80,7 +80,7 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
 
   protected needToInstallDependencies() {
     if (parseInt(process.env['IS_NODE_RUNTIME'] || '0') !== 1) {
-      throw new ElectronNotSupportedException();
+      throw new ElectronNotSupportedError();
     }
     if (this.deps && this.deps.length > 0) {
       this.deps.forEach(dep => {
@@ -96,7 +96,7 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
               }
               sqltoolsRequire(dep.name);
             } catch(e) {
-              throw new MissingModuleException(dep.name, dep.version, this.credentials, mustUpgrade);
+              throw new MissingModuleError(dep.name, dep.version, this.credentials, mustUpgrade);
             }
             break;
         }
@@ -106,7 +106,7 @@ export default abstract class AbstractDriver<ConnectionType extends any> impleme
   }
 
   public getBaseQueryFilters() {
-    const databaseFilter: DatabaseFilterType = this.credentials.databaseFilter || <DatabaseFilterType>{};
+    const databaseFilter: IDatabaseFilter = this.credentials.databaseFilter || <IDatabaseFilter>{};
     databaseFilter.show = databaseFilter.show || (!databaseFilter.hide ? [this.credentials.database] : []);
     databaseFilter.hide = databaseFilter.hide || [];
 

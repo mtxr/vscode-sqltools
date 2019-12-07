@@ -3,16 +3,16 @@ import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DISPLAY_NAME, EXT_NAME } from '@sqltools/core/constants';
-import SQLTools from '@sqltools/core/plugin-api';
 import { commandExists } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
 import telemetry from '@sqltools/core/utils/telemetry';
+import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 
 const log = logger.extend('lc');
 
-export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface {
+export class SQLToolsLanguageClient implements ILanguageClient {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
 
@@ -113,9 +113,9 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
   }
 
   private getClientOptions(): LanguageClientOptions {
-    const telemetryArgs: SQLTools.TelemetryArgs = {
+    const telemetryArgs: ITelemetryArgs = {
       enableTelemetry: ConfigManager.telemetry,
-      vscodeInfo: {
+      extraInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
         version: VSCodeVersion,

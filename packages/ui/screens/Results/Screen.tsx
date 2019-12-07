@@ -1,12 +1,12 @@
 import React from 'react';
-import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
+import { NSDatabase } from '@sqltools/types';
 import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { Tabs, Tab, Typography } from '@material-ui/core';
 import logger from '@sqltools/core/log';
+import { IWebviewMessage } from '@sqltools/ui/lib/interfaces';
 
 const log = logger.extend('results');
 const defaultPageSize = 50;
@@ -23,7 +23,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
 
   constructor(props) {
     super(props);
-    window.addEventListener('message', ev => this.messagesHandler(ev.data as WebviewMessageType));
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
   }
 
   saveState = (data, cb = () => {}) => {
@@ -43,12 +43,12 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     });
   }
 
-  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
+  messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch (action) {
       case 'queryResults':
-        const results: DatabaseInterface.QueryResults[] = payload;
+        const results: NSDatabase.IResult[] = payload;
         const queries = [];
         const resultMap = {};
         let connId: string;

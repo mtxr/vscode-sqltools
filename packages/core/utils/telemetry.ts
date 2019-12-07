@@ -1,10 +1,10 @@
-import { ENV, EXT_NAME, VERSION } from '@sqltools/core/constants';
+import { ENV, VERSION } from '@sqltools/core/constants';
 import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
-import SQLTools from '@sqltools/core/plugin-api';
 import { numericVersion, Timer } from '@sqltools/core/utils';
 import logger from '@sqltools/core/log';
 import ConfigManager from '@sqltools/core/config-manager';
 import * as Sentry from '@sentry/node';
+import { ITelemetryArgs } from '@sqltools/types';
 
 const IGNORE_ERRORS_REGEX = new RegExp(`(${[
   'aggregate function',
@@ -39,7 +39,7 @@ const IGNORE_ERRORS_REGEX = new RegExp(`(${[
   'violates',
 ].join('|')})`, 'g');
 
-const product = process.env.PRODUCT as SQLTools.Product;
+const product = process.env.PRODUCT;
 const log = logger.extend('telemetry');
 
 Sentry.init({
@@ -50,7 +50,7 @@ Sentry.init({
   environment: ENV,
   attachStacktrace: true,
   dsn: process.env.DSN_KEY,
-  beforeSend(event, hint) {
+  beforeSend(event, _) {
     if (!Telemetry.enabled) {
       return null;
     }
@@ -60,7 +60,7 @@ Sentry.init({
 
 class Telemetry {
   public static enabled: Boolean;
-  public static extraInfo: SQLTools.VSCodeInfo;
+  public static extraInfo: ITelemetryArgs['extraInfo'];
   private prefixed(key: string) {
     return `${product}:${key}`;
   }
@@ -84,11 +84,11 @@ class Telemetry {
       });
     }
   }
-  constructor(opts: SQLTools.TelemetryArgs) {
+  constructor(opts: ITelemetryArgs) {
     this.updateOpts(opts);
   }
 
-  public updateOpts = (opts: SQLTools.TelemetryArgs) => {
+  public updateOpts = (opts: ITelemetryArgs) => {
     Telemetry.extraInfo = opts.extraInfo || Telemetry.extraInfo || {};
     this.disable();
   }

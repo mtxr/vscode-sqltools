@@ -1,18 +1,15 @@
-import {
-  ConnectionDriver,
-} from '@sqltools/core/interface';
 import * as Utils from '@sqltools/core/utils';
 import SQLiteLib from 'sqlite3';
 import AbstractDriver from '../abstract';
 import queries from './queries';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import mkdir from '@sqltools/core/utils/mkdir';
 import { dirname } from 'path';
+import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
 const SQLite3Version = '4.0.8';
 
-export default class SQLite extends AbstractDriver<SQLiteLib.Database> implements ConnectionDriver {
+export default class SQLite extends AbstractDriver<SQLiteLib.Database, never> implements IConnectionDriver {
 
   public static deps: typeof AbstractDriver['deps'] = [{
     type: 'package',
@@ -70,10 +67,10 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database> implement
     });
   }
 
-  public async query(query: string): Promise<DatabaseInterface.QueryResults[]> {
+  public async query(query: string): Promise<NSDatabase.IResult[]> {
     const db = await this.open();
     const queries = Utils.query.parse(query).filter(Boolean);
-    const results: DatabaseInterface.QueryResults[] = [];
+    const results: NSDatabase.IResult[] = [];
     for(let i = 0; i < queries.length; i++) {
       const res: any[][] = (await this.runSingleQuery(db, queries[i])) || [];
       const messages = [];
@@ -91,7 +88,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database> implement
     return results;
   }
 
-  public async getTables(): Promise<DatabaseInterface.Table[]> {
+  public async getTables(): Promise<NSDatabase.ITable[]> {
     const [ queryRes ] = await this.query(this.queries.fetchTables);
     return queryRes.results
       .reduce((prev, curr) => prev.concat(curr), [])
@@ -101,13 +98,13 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database> implement
           isView: obj.type === 'view',
           tableDatabase: this.credentials.database,
           tree: obj.tree,
-        } as DatabaseInterface.Table;
+        } as NSDatabase.ITable;
       });
   }
 
-  public async getColumns(): Promise<DatabaseInterface.TableColumn[]> {
+  public async getColumns(): Promise<NSDatabase.IColumn[]> {
     const allTables = await this.getTables();
-    const columns: DatabaseInterface.TableColumn[] = [];
+    const columns: NSDatabase.IColumn[] = [];
 
     await Promise.all(allTables.map(async t => {
       const [[{ results: tableColumns }], [{ results: fks }]] = await Promise.all([

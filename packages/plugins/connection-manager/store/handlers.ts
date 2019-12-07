@@ -1,6 +1,6 @@
 import { ConnectionManagerState } from './state';
 import Connection from '@sqltools/core/connection';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase } from '@sqltools/types';
 
 export const onConnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {
   return {
@@ -38,7 +38,7 @@ export const onDisconnect = (state: ConnectionManagerState, conn: Connection): C
   };
 };
 
-export const onQuerySuccess = (state: ConnectionManagerState, { conn, results }: { conn: Connection, results: DatabaseInterface.QueryResults[] }): ConnectionManagerState => {
+export const onQuerySuccess = (state: ConnectionManagerState, { conn, results }: { conn: Connection, results: NSDatabase.IResult[] }): ConnectionManagerState => {
   let { queryResults } = state;
   queryResults[conn.getId()] = results.reduce((agg, res) => ({ ...agg, [res.query]: res }), {});
   return {
@@ -47,7 +47,7 @@ export const onQuerySuccess = (state: ConnectionManagerState, { conn, results }:
   };
 }
 
-export const onConnectionData = (state: ConnectionManagerState, { conn, tables, columns, functions }: { conn: Connection, tables: DatabaseInterface.Table[], columns: DatabaseInterface.TableColumn[], functions: DatabaseInterface.Function[] }): ConnectionManagerState => {
+export const onConnectionData = (state: ConnectionManagerState, { conn, tables, columns, functions }: { conn: Connection, tables: NSDatabase.ITable[], columns: NSDatabase.IColumn[], functions: NSDatabase.IFunction[] }): ConnectionManagerState => {
   let { connectionInfo } = state;
 
   const newState = {

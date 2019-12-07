@@ -1,19 +1,19 @@
 import Connection from '@sqltools/core/connection';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase } from '@sqltools/types';
 
 export interface ConnectionManagerState {
   lastUsedId: string;
   activeConnections: { [id: string]: Connection };
   queryResults: {
     [connection_id: string]: {
-      [query: string]: DatabaseInterface.QueryResults
+      [query: string]: NSDatabase.IResult
     }
   };
   connectionInfo: {
     [id: string]: {
-      tables: DatabaseInterface.Table[];
-      columns: DatabaseInterface.TableColumn[];
-      functions: DatabaseInterface.Function[];
+      tables: NSDatabase.ITable[];
+      columns: NSDatabase.IColumn[];
+      functions: NSDatabase.IFunction[];
     };
   };
 }

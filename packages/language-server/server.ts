@@ -1,12 +1,12 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import SQLTools, { Arg0 } from '@sqltools/core/plugin-api';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
-import { InvalidActionException } from '@sqltools/core/exception';
+import { InvalidActionError } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
+import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
 
-class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
+class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
@@ -84,7 +84,7 @@ ExecPath: ${process.execPath}
     return this;
   }
 
-  public registerPlugin(plugin: SQLTools.LanguageServerPlugin) {
+  public registerPlugin(plugin: ILanguageServerPlugin) {
     plugin.register(this);
     return this;
   }
@@ -96,7 +96,7 @@ ExecPath: ${process.execPath}
     return this._server.onNotification;
   }
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
-    if (!handler) throw new InvalidActionException('Disabled registration for * handlers');
+    if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
       log.extend('debug')('received %s', req._method || req.toString());
       let result = handler(...args);

@@ -1,9 +1,17 @@
-import { InvalidActionException } from '@sqltools/core/exception';
-import { Settings } from '@sqltools/core/interface';
+import { ISettings as ISettingsProps } from '@sqltools/types';
+import { InvalidActionError } from '@sqltools/core/exception';
 import packageJson from '@sqltools/extension/package.json';
+
+interface ISettings extends ISettingsProps {
+  get?: typeof get;
+  update?: typeof update;
+  addOnUpdateHook?: typeof addOnUpdateHook;
+  inspect?: (prop) => { defaultValue: any };
+}
+
 const { contributes: { configuration: { properties: defaults } } } = packageJson;
 
-let settings: Settings & { inspect?: (prop) => { defaultValue: any } } = {};
+let settings: Partial<ISettings> = {};
 const onUpdateHooks: (() => any)[] = [];
 function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
   const keys: string [] = configKey.split('.');
@@ -18,7 +26,7 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
   return setting;
 }
 
-function update(newSettings: typeof settings) {
+function update(newSettings: ISettings) {
   settings = newSettings;
   if (!settings.inspect) {
     // inspect implementation for language server.
@@ -49,11 +57,10 @@ const handler = {
     return undefined;
   },
   set() {
-    throw new InvalidActionException('Cannot set settings value directly!');
+    throw new InvalidActionError('Cannot set settings value directly!');
   },
 };
 
-type ExtendedSettings = Settings & { get: typeof get, update: typeof update, addOnUpdateHook: typeof addOnUpdateHook };
-const ConfigManager = new Proxy<ExtendedSettings>(<any>settings, handler);
+const ConfigManager = new Proxy<ISettings>(settings, handler);
 
 export default ConfigManager;
