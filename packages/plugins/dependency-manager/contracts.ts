@@ -1,8 +1,7 @@
-import { IConnection } from '@sqltools/types';
 import { RequestType } from 'vscode-languageserver-protocol';
-
+import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
 export const InstallDepRequest = new RequestType<
-  { driver: IConnection['driver'] },
+  { deps: NodeDependency[] },
   void,
   Error,
   void

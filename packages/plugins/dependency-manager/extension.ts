@@ -4,7 +4,8 @@ import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
-import { IExtensionPlugin, ILanguageClient, IExtension } from '@sqltools/types';
+import { IExtensionPlugin, ILanguageClient, IExtension, IConnection } from '@sqltools/types';
+import { NodeDependency } from './interfaces';
 
 export default class DependencyManager implements IExtensionPlugin {
   public client: ILanguageClient;
@@ -12,8 +13,8 @@ export default class DependencyManager implements IExtensionPlugin {
   register(extension: IExtension) {
     this.extension = extension;
     this.client = extension.client;
-    this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
-    this.client.onNotification(DependeciesAreBeingInstalledNotification, param => this.jobRunning(param));
+    this.client.onNotification(MissingModuleNotification, this.requestToInstall);
+    this.client.onNotification(DependeciesAreBeingInstalledNotification, this.jobRunning);
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
   }
 
@@ -33,16 +34,17 @@ export default class DependencyManager implements IExtensionPlugin {
   }
 
   private installingDrivers: string[] = [];
-  private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
-    conn = conn || {};
+  private requestToInstall = async ({ conn, action = 'install', deps = [] }: { conn: IConnection; action: 'upgrade' | 'install'; deps: NodeDependency[]}) => {
+    if (!conn) return;
     const installNow = action === 'upgrade' ? 'Upgrade now' : 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
     const dependencyManagerSettings = ConfigManager.dependencyManager;
     const autoUpdateOrInstall = dependencyManagerSettings && dependencyManagerSettings.autoAccept;
+    const dependenciesName = deps.map((d, i) => `${d.name}@${d.version || 'latest'}${i === deps.length - 2 ? ' and ' : (i === deps.length - 1 ? '' : ', ')}`).join('');
     try {
       const r = autoUpdateOrInstall ? installNow : await Win.showInformationMessage(
-        `You need to ${action} "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
+        `You need to ${action} "${dependenciesName}" to connect to ${conn.name}.`,
         ...options,
       );
       switch (r) {
@@ -54,13 +56,13 @@ export default class DependencyManager implements IExtensionPlugin {
             cancellable: false,
           }, async (progress) => {
             progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDrivers.join(', ')} dependencies` });
-            const result = await this.client.sendRequest(InstallDepRequest, { driver: conn.driver });
+            const result = await this.client.sendRequest(InstallDepRequest, { deps });
             return result;
           });
           this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
-            `"${moduleName}@${moduleVersion}" installed!\n
+            `"${dependenciesName}" installed!\n
 Go ahead and connect!`,
             ...opt
           );

@@ -9,9 +9,9 @@ import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
 const SQLite3Version = '4.0.8';
 
-export default class SQLite extends AbstractDriver<SQLiteLib.Database, never> implements IConnectionDriver {
+export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 
-  public static deps: typeof AbstractDriver['deps'] = [{
+  public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
     type: 'package',
     name: 'sqlite3',
     version: SQLite3Version,

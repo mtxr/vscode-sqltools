@@ -5,33 +5,19 @@ import {
   IDatabaseFilter,
   IExpectedResult,
 } from '@sqltools/types';
-import Drivers from '@sqltools/drivers';
 import * as Utils from '@sqltools/core/utils';
 import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/core/exception';
 import { NSDatabase } from '@sqltools/types';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import log from '@sqltools/core/log';
-
-export interface NodeDependency {
-  type: 'package' | 'npmscript';
-  name: string;
-  version?: string;
-  env?: { [id: string]: string };
-  args?: string[], // extra arguments to be passaged to packag managers
-}
+import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
-  public static deps: NodeDependency[] = [];
+  public readonly deps: NodeDependency[] = [];
 
   public getId() {
     return Utils.getConnectionId(this.credentials) || 'BROKEN';
-  }
-  protected get deps(): NodeDependency[] {
-    if (!Drivers[this.constructor.name]) {
-      return [];
-    }
-    return Drivers[this.constructor.name].deps;
   }
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;
@@ -96,7 +82,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
               }
               sqltoolsRequire(dep.name);
             } catch(e) {
-              throw new MissingModuleError(dep.name, dep.version, this.credentials, mustUpgrade);
+              throw new MissingModuleError(this.deps, this.credentials, mustUpgrade);
             }
             break;
         }

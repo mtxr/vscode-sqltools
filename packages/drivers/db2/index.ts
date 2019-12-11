@@ -7,7 +7,7 @@ import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 
 const D2BLibVersion = '2.6.1';
 export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements IConnectionDriver {
-  public static deps: typeof AbstractDriver['deps'] = [{
+  public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
     type: 'package',
     name: 'ibm_db',
     version: D2BLibVersion

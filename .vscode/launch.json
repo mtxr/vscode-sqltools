@@ -26,7 +26,7 @@
     {
       "type": "node",
       "request": "attach",
-      "name": "Attach Language Server",
+      "name": "Attach LS",
       "port": 6010,
       "restart": true,
       "sourceMaps": true,
@@ -37,6 +37,12 @@
         "${workspaceRoot}/../dist/*.js"
       ],
       "protocol": "inspector"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Extension and Attach LS",
+      "configurations": ["Launch Extension", "Attach LS"]
     }
   ]
 }

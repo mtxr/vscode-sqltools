@@ -8,7 +8,7 @@ import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 
 const OracleDBLibVersion = '4.0.0';
 export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, OracleDBLib.PoolAttributes> implements IConnectionDriver {
-  public static deps: typeof AbstractDriver['deps'] = [{
+  public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
     type: 'package',
     name: 'oracledb',
     version: OracleDBLibVersion,

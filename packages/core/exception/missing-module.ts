@@ -1,18 +1,18 @@
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { IConnection } from '@sqltools/types';
 import NotifyResponseError from './response-error';
+import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
 
 
 export class MissingModuleError extends NotifyResponseError {
-  constructor(moduleName: string, moduleVersion: string = 'latest', conn: IConnection, mustUpgrade = false) {
-    super(1000, `Missing module "${moduleName}@${moduleVersion}". Need to ${mustUpgrade ? 'upgrade' : 'install'}.`, {
+  constructor(deps: NodeDependency[], conn: IConnection, mustUpgrade = false) {
+    super(1000, `Missing module "${deps.map((d, i) => `${d.name}@${d.version || 'latest'}${i === deps.length - 2 ? ' and ' : (i === deps.length - 1 ? '' : ', ')}`).join('')}". Need to ${mustUpgrade ? 'upgrade' : 'install'}.`, {
       notification: MissingModuleNotification,
       dontNotify: true,
       args: {
         conn,
-        moduleName,
-        moduleVersion,
-        action: mustUpgrade ? 'upgrade' : 'install'
+        action: mustUpgrade ? 'upgrade' : 'install',
+        deps,
       }
     });
   }
