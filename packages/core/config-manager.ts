@@ -1,6 +1,5 @@
 import { ISettings as ISettingsProps } from '@sqltools/types';
 import { InvalidActionError } from '@sqltools/core/exception';
-import packageJson from '@sqltools/extension/package.json';
 
 interface ISettings extends ISettingsProps {
   get?: typeof get;
@@ -8,8 +7,6 @@ interface ISettings extends ISettingsProps {
   addOnUpdateHook?: typeof addOnUpdateHook;
   inspect?: (prop) => { defaultValue: any };
 }
-
-const { contributes: { configuration: { properties: defaults } } } = packageJson;
 
 let settings: Partial<ISettings> = {};
 const onUpdateHooks: (() => any)[] = [];
@@ -30,11 +27,8 @@ function update(newSettings: ISettings) {
   settings = newSettings;
   if (!settings.inspect) {
     // inspect implementation for language server.
-    settings.inspect = prop => {
-      const key = `sqltools.${prop}`;
-      return {
-        defaultValue: key in defaults ? defaults[key].default : undefined,
-      }
+    settings.inspect = () => {
+      throw new Error(`Inspect doesnt exist within ${process.env.PRODUCT} context`);
     };
   }
   onUpdateHooks.forEach(cb => cb());

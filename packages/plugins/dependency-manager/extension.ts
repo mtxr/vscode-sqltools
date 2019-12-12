@@ -1,7 +1,7 @@
-import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
-import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { window as Win, window, ProgressLocation, commands } from 'vscode';
+import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { EXT_NAME, DOCS_ROOT_URL, MissingModuleNotification } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
@@ -14,23 +14,9 @@ export default class DependencyManager implements IExtensionPlugin {
     this.client = extension.client;
     this.client.onNotification(MissingModuleNotification, this.requestToInstall);
     this.client.onNotification(DependeciesAreBeingInstalledNotification, this.jobRunning);
-    this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
   }
 
-  private electronNotSupported = async () => {
-    const r = await Win.showInformationMessage(
-      'VSCode engine is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
-      'Enable now',
-    );
-    if (!r) return;
-    await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
-    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
-    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
-    const res = await Win.showInformationMessage(
-      '\'sqltools.useNodeRuntime\' enabled. You must reload VSCode to take effect.', 'Reload now');
-    if (!res) return;
-    commands.executeCommand('workbench.action.reloadWindow');
-  }
+  c
 
   private installingDrivers: string[] = [];
   private requestToInstall = async ({ conn, action = 'install', deps = [] }: { conn: IConnection; action: 'upgrade' | 'install'; deps: NodeDependency[]}) => {

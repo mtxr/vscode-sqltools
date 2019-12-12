@@ -1,4 +1,4 @@
-import { format } from './utils';
+import { format } from '@sqltools/core/utils/query';
 
 it('Format simple select query', () => {
   expect(format('SELECT * FROM user;')).toEqual(

@@ -2,9 +2,9 @@ import logger from '@sqltools/core/log';
 import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DISPLAY_NAME, EXT_NAME } from '@sqltools/core/constants';
+import { DISPLAY_NAME, EXT_NAME, ElectronNotSupportedNotification } from '@sqltools/core/constants';
 import { commandExists } from '@sqltools/core/utils';
-import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands } from 'vscode';
+import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands, ConfigurationTarget } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
 import telemetry from '@sqltools/core/utils/telemetry';
@@ -185,7 +185,24 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       'serverError', // @TODO: constant
       onError,
     );
+    this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
+
     telemetry.registerMessage('info', 'LanguageClient ready');
     log.extend('info')('LanguageClient ready');
+  }
+
+  private electronNotSupported = async () => {
+    const r = await window.showInformationMessage(
+      'VSCode engine is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
+      'Enable now',
+    );
+    if (!r) return;
+    await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
+    try { await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
+    try { await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
+    const res = await window.showInformationMessage(
+      '\'sqltools.useNodeRuntime\' enabled. You must reload VSCode to take effect.', 'Reload now');
+    if (!res) return;
+    commands.executeCommand('workbench.action.reloadWindow');
   }
 }

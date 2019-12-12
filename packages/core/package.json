@@ -22,6 +22,7 @@
     "vscode-languageserver": "5.2.1"
   },
   "devDependencies": {
+    "@sqltools/types": "*",
     "@types/cassandra-driver": "^4.1.1",
     "@types/command-exists": "^1.2.0",
     "@types/debug": "^4.1.5",

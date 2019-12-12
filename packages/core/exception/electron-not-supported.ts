@@ -1,4 +1,4 @@
-import { ElectronNotSupportedNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { ElectronNotSupportedNotification } from '@sqltools/core/constants';
 import NotifyResponseError from './response-error';
 
 

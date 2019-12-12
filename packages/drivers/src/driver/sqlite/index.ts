@@ -1,6 +1,6 @@
 import * as Utils from '@sqltools/core/utils';
 import SQLiteLib from 'sqlite3';
-import AbstractDriver from '@lib/abstract';
+import AbstractDriver from '../../lib/abstract';
 import queries from './queries';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import mkdir from '@sqltools/core/utils/mkdir';

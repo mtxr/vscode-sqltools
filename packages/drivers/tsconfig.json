@@ -14,12 +14,7 @@
     "sourceMap": false,
     "declaration": false,
     "target": "es6",
-    "baseUrl": "./src",
-    "paths": {
-      "@@/*": ["./*"],
-      "@driver/*": ["driver/*"],
-      "@lib/*": ["lib/*"],
-    }
+    "baseUrl": "./src"
   },
   "include": [
     "src/**/*"

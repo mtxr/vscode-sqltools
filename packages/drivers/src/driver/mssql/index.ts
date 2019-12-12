@@ -1,7 +1,7 @@
 import MSSQLLib, { IResult, Binary } from 'mssql';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
-import AbstractDriver from '@lib/abstract';
+import AbstractDriver from '../../lib/abstract';
 import get from 'lodash/get';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 

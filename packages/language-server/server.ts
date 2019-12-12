@@ -6,7 +6,7 @@ import log from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
 
-class SQLToolsLanguageServer implements ILanguageServer {
+class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];

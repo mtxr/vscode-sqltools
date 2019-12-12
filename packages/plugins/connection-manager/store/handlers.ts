@@ -1,5 +1,5 @@
 import { ConnectionManagerState } from './state';
-import Connection from '@sqltools/core/connection';
+import Connection from '@sqltools/language-server/connection';
 import { NSDatabase } from '@sqltools/types';
 
 export const onConnect = (state: ConnectionManagerState, conn: Connection): ConnectionManagerState => {

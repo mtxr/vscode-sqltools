@@ -2,7 +2,7 @@ import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import * as db2Lib from 'ibm_db';
-import AbstractDriver from '@lib/abstract';
+import AbstractDriver from '../../lib/abstract';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 
 const D2BLibVersion = '2.6.1';

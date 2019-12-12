@@ -1,11 +1,9 @@
-// @TODO MOVE FILE TO LANGUAGE SERVER
-
-import { getConnectionId } from './utils';
-import Drivers from '@sqltools/drivers/src';
-import { decorateException } from './utils/errors';
-import telemetry from '@sqltools/core/utils/telemetry';
-import ConfigManager from './config-manager';
 import { NSDatabase, IConnectionDriver, IConnection } from '@sqltools/types';
+import { decorateException } from '@sqltools/core/utils/errors';
+import { getConnectionId } from '@sqltools/core/utils';
+import ConfigManager from '@sqltools/core/config-manager';
+import telemetry from '@sqltools/core/utils/telemetry';
+import Drivers from '@sqltools/drivers/src';
 
 export default class Connection {
   private tables: NSDatabase.ITable[] = [];
@@ -49,10 +47,6 @@ export default class Connection {
     if (this.needsPassword()) this.conn.credentials.password = null;
     this.connected = false;
     return this.conn.close();
-  }
-
-  public open() {
-    return this.conn.open().catch(this.decorateException);
   }
 
   public getTables(cached: boolean = false): Promise<NSDatabase.ITable[]> {

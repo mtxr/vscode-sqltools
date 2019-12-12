@@ -11,3 +11,7 @@ export const LineSplitterRegex = /\r?\n/g;
 export const CommentIdentifiersRegex = /^\s*(#|\/{2})/;
 export const FileVariableDefinitionRegex = /^\s*@([^\s=]+)\s*=\s*(.+?)\s*$/;
 export const DelimiterStartRegex = /^\s*-{2,}\s*@block.*$/;
+
+// notifications
+export const ElectronNotSupportedNotification = 'Core/electronNotSupported';
+export const MissingModuleNotification = 'Core/missingModule';

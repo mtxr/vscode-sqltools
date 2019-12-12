@@ -1,4 +1,4 @@
-import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { MissingModuleNotification } from '@sqltools/core/constants';
 import { IConnection, NodeDependency } from '@sqltools/types';
 import NotifyResponseError from './response-error';
 

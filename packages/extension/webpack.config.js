@@ -155,6 +155,7 @@ module.exports = () => {
     config.devtool = false;
     config.mode = isProduction ? 'production' : 'development';
     config.output = config.output || {};
+    config.stats = 'minimal';
     return config;
   });
 };

@@ -1,4 +1,4 @@
-import Connection from '@sqltools/core/connection';
+import Connection from '@sqltools/language-server/connection';
 import ConfigManager from '@sqltools/core/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler} from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
