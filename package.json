@@ -10,9 +10,6 @@
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"
   },
-  "engines": {
-    "vscode": "^1.36.0"
-  },
   "private": true,
   "workspaces": [
     "packages/*"
@@ -47,7 +44,7 @@
     "minimist": "^1.2.0",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
-    "typescript": "3.6.2",
+    "typescript": "^3.7.3",
     "vsce": "^1.66.0"
   }
 }

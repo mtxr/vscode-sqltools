@@ -7,7 +7,7 @@
   "license": "MIT",
   "devDependencies": {
     "@types/vscode": "^1.36.0",
-    "typescript": "3.6.2"
+    "typescript": "^3.7.3"
   },
   "private": false,
   "peerDependencies": {

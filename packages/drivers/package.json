@@ -4,7 +4,14 @@
   "description": "SQLTools connector drivers files",
   "author": "Matheus Teixeira <me@mteixeira.me>",
   "license": "MIT",
-  "private": true,
+  "private": false,
+  "files": [
+    "./dist/*",
+    "./src/*"
+  ],
+  "scripts": {
+    "compile": "tsc -p tsconfig.json"
+  },
   "dependencies": {
     "@mysql/xdevapi": "^8.0.15",
     "cassandra-driver": "^4.1.0",
@@ -14,6 +21,7 @@
     "pg": "^7.12.1"
   },
   "devDependencies": {
+    "@sqltools/types": "*",
     "@types/cassandra-driver": "^4.1.1",
     "@types/ibm_db": "^2.0.5",
     "@types/jest": "^24.0.11",
@@ -22,10 +30,9 @@
     "@types/oracledb": "^4.0.0",
     "@types/pg": "^7.4.14",
     "@types/sqlite3": "^3.1.5",
-    "@sqltools/types": "*",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",
-    "typescript": "3.6.2"
+    "typescript": "^3.7.3"
   }
 }

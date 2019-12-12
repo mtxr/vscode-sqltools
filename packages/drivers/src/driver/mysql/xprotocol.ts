@@ -1,7 +1,7 @@
 import MySQLXLib from '@mysql/xdevapi';
 import { IConnectionDriver, IConnection, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
-import AbstractDriver from '@sqltools/drivers/abstract';
+import AbstractDriver from '@lib/abstract';
 import Queries from './queries';
 
 export default class MySQLX extends AbstractDriver<any, any> implements IConnectionDriver {

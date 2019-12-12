@@ -9,10 +9,10 @@ services:
       extends:
         file: ./mysql/docker-compose.yml
         service: db
-    mysqlv5:
-      extends:
-        file: ./mysql/docker-compose.yml
-        service: dbv5
+    # mysqlv5:
+    #   extends:
+    #     file: ./mysql/docker-compose.yml
+    #     service: dbv5
     # mysql_xprotocol:
     #   extends:
     #     file: ./mysql/docker-compose.yml
@@ -25,11 +25,11 @@ services:
       extends:
         file: ./pgsql/docker-compose.yml
         service: db
-    cql_cassandra:
-      extends:
-        file: ./cql/docker-compose.yml
-        service: db_cassandra
-    cql_scylla:
-      extends:
-        file: ./cql/docker-compose.yml
-        service: db_scylla
+    # cql_cassandra:
+    #   extends:
+    #     file: ./cql/docker-compose.yml
+    #     service: db_cassandra
+    # cql_scylla:
+    #   extends:
+    #     file: ./cql/docker-compose.yml
+    #     service: db_scylla

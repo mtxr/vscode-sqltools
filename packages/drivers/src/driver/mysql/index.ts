@@ -1,4 +1,4 @@
-import AbstractDriver from '@sqltools/drivers/abstract';
+import AbstractDriver from '@lib/abstract';
 import Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';

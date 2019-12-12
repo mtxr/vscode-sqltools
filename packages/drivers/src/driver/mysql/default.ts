@@ -1,6 +1,6 @@
 import MySQLLib from 'mysql';
 import * as Utils from '@sqltools/core/utils';
-import AbstractDriver from '@sqltools/drivers/abstract';
+import AbstractDriver from '@lib/abstract';
 import Queries from './queries';
 import fs from 'fs';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';

@@ -1,5 +1,5 @@
 import { RequestType } from 'vscode-languageserver-protocol';
-import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
+import { NodeDependency } from '@sqltools/types';
 export const InstallDepRequest = new RequestType<
   { deps: NodeDependency[] },
   void,

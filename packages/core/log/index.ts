@@ -9,7 +9,7 @@ debug.enable(process.env.DEBUG);
 const productLogger: Debugger = debug(process.env.PRODUCT);
 
 productLogger.log = console.log.bind(console);
-(productLogger as any).show = () => productLogger.extend('warn')(`Methodo show available within ${process.env.PRODUCT} context`);
+(productLogger as any).show = () => productLogger.extend('warn')(`Method show not available within ${process.env.PRODUCT} context`);
 
 export default productLogger;
 

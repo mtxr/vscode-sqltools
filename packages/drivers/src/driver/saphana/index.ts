@@ -1,6 +1,6 @@
 
 import queries from './queries';
-import AbstractDriver from '@sqltools/drivers/abstract';
+import AbstractDriver from '@lib/abstract';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 

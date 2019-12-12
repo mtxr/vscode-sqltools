@@ -4,13 +4,13 @@ import {
   IConnection,
   IDatabaseFilter,
   IExpectedResult,
+  NodeDependency
 } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/core/exception';
 import { NSDatabase } from '@sqltools/types';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 import log from '@sqltools/core/log';
-import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
@@ -56,7 +56,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       ]));
       records.pageSize = limit;
       records.page = page;
-      records.total = Number(totalResult.results[0].total);
+      records.total = Number((totalResult.results[0] as any).total);
 
       return [records];
     }

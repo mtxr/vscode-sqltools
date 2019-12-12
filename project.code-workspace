@@ -21,7 +21,8 @@
       "**/CVS": true,
       "**/.DS_Store": true,
       "**/.vscode-test": true,
-      "**/.test-database": true
+      "**/.test-database": true,
+      "**/dist": false
     },
     "files.watcherExclude": {
       "**/.git/objects/**": true,

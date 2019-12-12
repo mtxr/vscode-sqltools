@@ -1,7 +1,7 @@
 import { Pool, PoolConfig, types } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
-import AbstractDriver from '@sqltools/drivers/abstract';
+import AbstractDriver from '@lib/abstract';
 import * as Utils from '@sqltools/core/utils';
 import fs from 'fs';
 

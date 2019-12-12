@@ -2,7 +2,7 @@ import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
-import AbstractDriver from '../abstract';
+import AbstractDriver from '@lib/abstract';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
 

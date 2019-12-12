@@ -1,3 +1,30 @@
 {
-  "extends": "../core/tsconfig.json"
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "lib": ["es6"],
+    "module": "commonjs",
+    "noEmit": false,
+    "outDir": "./dist",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "declaration": false,
+    "target": "es6",
+    "baseUrl": "./src",
+    "paths": {
+      "@@/*": ["./*"],
+      "@driver/*": ["driver/*"],
+      "@lib/*": ["lib/*"],
+    }
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
 }

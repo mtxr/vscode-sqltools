@@ -1,7 +1,7 @@
 // @TODO MOVE FILE TO LANGUAGE SERVER
 
 import { getConnectionId } from './utils';
-import Drivers from '@sqltools/drivers';
+import Drivers from '@sqltools/drivers/src';
 import { decorateException } from './utils/errors';
 import telemetry from '@sqltools/core/utils/telemetry';
 import ConfigManager from './config-manager';

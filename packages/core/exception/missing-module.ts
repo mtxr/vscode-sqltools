@@ -1,8 +1,6 @@
 import { MissingModuleNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import { IConnection } from '@sqltools/types';
+import { IConnection, NodeDependency } from '@sqltools/types';
 import NotifyResponseError from './response-error';
-import { NodeDependency } from '@sqltools/plugins/dependency-manager/interfaces';
-
 
 export class MissingModuleError extends NotifyResponseError {
   constructor(deps: NodeDependency[], conn: IConnection, mustUpgrade = false) {

@@ -4,12 +4,12 @@ import { ExtensionContext } from 'vscode';
 export declare interface ICommandEvent {
   command: string;
   args: any[];
-};
+}
 export declare interface ICommandSuccessEvent<T = any> {
   command: string;
   args: any[];
   result: T;
-};
+}
 
 export declare type CommandEventHandler<T> = (evt: T) => void;
 
