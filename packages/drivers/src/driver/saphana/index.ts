@@ -24,7 +24,6 @@ export default class SAPHana extends AbstractDriver<HanaConnection, any> impleme
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
     type: 'package',
     name: '@sap/hana-client',
-    version: '2.4.126',
     args: ['--@sap:registry=https://npm.sap.com']
   }];
 
