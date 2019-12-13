@@ -1,6 +1,6 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
-import { IDatabase, NSDatabase } from '@sqltools/types';
+import { NSDatabase } from '@sqltools/types';
 import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarColumn from './SidebarColumn';
