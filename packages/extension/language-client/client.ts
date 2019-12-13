@@ -97,15 +97,17 @@ export class SQLToolsLanguageClient implements SQLTools.LanguageClientInterface 
         },
       }
     };
+    const debugOptions = runOptions;
+
+    if (process.env.NODE_ENV === 'production') {
+      debugOptions.options = {
+        ...runOptions.options,
+        execArgv: ['--nolazy', '--inspect=6010']
+      }
+    }
 
     return {
-      debug: {
-        ...runOptions,
-        options: {
-          ...runOptions.options,
-          execArgv: ['--nolazy', '--inspect=6010']
-        }
-      },
+      debug: debugOptions,
       run: runOptions,
     };
   }
