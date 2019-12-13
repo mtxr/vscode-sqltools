@@ -31,15 +31,16 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 |Driver||Main Maintainer(s)|
 |-|-|-|
-|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/redshift.png)|AWS Redshift|[@mtxr](https://github.com/mtxr)|
-|![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/cassandra.png)|Cassandra|[@EpicEric](https://github.com/EpicEric)|
-|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mariadb.png)|MariaDB|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mssql.png)|Microsoft SQL Server|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/mysql.png)|MySQL|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/oracle.png)|OracleDB|[@mickeypearce](https://github.com/mickeypearce)|
-|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/postgresql.png)|PostgreSQL|[@mtxr](https://github.com/mtxr)|
-|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sap_hana.png)|SAPHana|[ariel-bentu](https://github.com/ariel-bentu)|
-|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/ui/screens/Settings/icons/sqlite.png)|SQLite|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/awsredshift/default.png)|AWS Redshift|[@mtxr](https://github.com/mtxr)|
+|![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/cassandra/default.png)|Cassandra|[@EpicEric](https://github.com/EpicEric)|
+|![IBM DB2](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/db2/default.png)|IBM DB2|[@snyang](https://github.com/snyang)|
+|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/mariadb/default.png)|MariaDB|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/mssql/default.png)|Microsoft SQL Server|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/mysql/default.png)|MySQL|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/oracledb/default.png)|OracleDB|[@mickeypearce](https://github.com/mickeypearce)|
+|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/postgresql/default.png)|PostgreSQL|[@mtxr](https://github.com/mtxr)|
+|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/saphana/default.png)|SAPHana|[ariel-bentu](https://github.com/ariel-bentu)|
+|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/core/icons/sqlite/default.png)|SQLite|[@mtxr](https://github.com/mtxr) - ***looking for help***|
 
 
 Special thanks to this amazing developers that keep the project running!
