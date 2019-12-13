@@ -10,7 +10,7 @@
     { "path": "./packages/vscode"},
     { "path": "./packages/formatter" },
     { "path": "./packages/types" },
-    // { "path": "./docs" }
+    { "path": "./docs" }
   ],
   "extensions": {},
   "settings": {
