@@ -1,7 +1,6 @@
 # https://code.visualstudio.com/api/working-with-extensions/continuous-integration
 
-name: Node CI
-
+name: Formatter Test & Build
 on: [push, pull_request]
 
 jobs:
