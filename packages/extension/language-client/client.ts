@@ -99,6 +99,14 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         },
       }
     };
+    const debugOptions = runOptions;
+
+    if (process.env.NODE_ENV === 'production') {
+      debugOptions.options = {
+        ...runOptions.options,
+        execArgv: ['--nolazy', '--inspect=6010']
+      }
+    }
 
     const debugOptions = runOptions;
 
