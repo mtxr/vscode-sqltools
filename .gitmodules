@@ -1,3 +1,0 @@
-[submodule "packages/formatter"]
-	path = packages/formatter
-	url = https://github.com/mtxr/sqltools-formatter.git

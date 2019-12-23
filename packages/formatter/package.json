@@ -1,0 +1,61 @@
+{
+  "name": "@sqltools/formatter",
+  "version": "1.1.1",
+  "description": "Formats SQL queries. Part of SQLTools",
+  "license": "MIT",
+  "main": "lib/sqlFormatter.js",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "sql",
+    "formatter",
+    "format",
+    "n1ql",
+    "whitespaces",
+    "sqltools"
+  ],
+  "authors": [
+    "Matheus Teixeira <matheus@mteixeira.dev>",
+    "Rene Saarsoo",
+    "Uku Pattak"
+  ],
+  "files": [
+    "lib"
+  ],
+  "scripts": {
+    "clean": "rimraf lib dist",
+    "test": "jest --config jest.config.js",
+    "test:watch": "yarn run test -- --watch",
+    "check": "yarn run test",
+    "precompile": "yarn run check && yarn run clean",
+    "compile": "./node_modules/.bin/tsc -p tsconfig.json",
+    "build": "yarn run compile"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/sqltools-formatter.git"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/sqltools-formatter/issues"
+  },
+  "dependencies": {
+    "lodash": "^4.17.11"
+  },
+  "devDependencies": {
+    "@types/jest": "^24.0.11",
+    "husky": "^3.0.3",
+    "jest": "^24.7.0",
+    "jest-cli": "^24.7.0",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.0.1",
+    "typescript": "^3.4.1"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test"
+    }
+  }
+}
