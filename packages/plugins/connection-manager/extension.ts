@@ -4,7 +4,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
-import { getConnectionDescription, getConnectionId, isEmpty } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId, isEmpty, query } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/core/utils/vscode';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
@@ -13,7 +13,7 @@ import { commands, QuickPickItem, ExtensionContext, window, workspace, Configura
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
-import { getHome, query } from '@sqltools/core/utils';
+import { getHome } from '@sqltools/core/utils';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import { CancellationTokenSource } from 'vscode-jsonrpc';
 import statusBar from './status-bar';
