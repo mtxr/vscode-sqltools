@@ -7,7 +7,7 @@ import mkdir from '@sqltools/core/utils/mkdir';
 import { dirname } from 'path';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
-const SQLite3Version = '4.0.8';
+const SQLite3Version = '4.1.1';
 
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 
