@@ -166,4 +166,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     const [ catalog, schema, table ] = prefixedTable.split('.').map(v => v.replace(/^("(.+)")$/g, '$2'));
     return this.query(Utils.replacer(this.queries.describeTable, { catalog, schema, table }));
   }
+
+  public async testConnection() {
+    const pool = await this.open()
+    const cli = await pool.connect();
+    await cli.query('SELECT 1');
+    cli.release();
+  }
 }
