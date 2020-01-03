@@ -9,7 +9,6 @@
     "lib": ["es6", "dom"],
     "module": "commonjs",
     "noEmit": true,
-    "outDir": "../../../dist/ui",
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,

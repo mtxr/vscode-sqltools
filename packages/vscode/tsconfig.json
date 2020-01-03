@@ -8,7 +8,6 @@
     "lib": ["es6"],
     "module": "commonjs",
     "noEmit": true,
-    "outDir": "../../../dist/core",
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,

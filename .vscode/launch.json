@@ -9,7 +9,7 @@
       "runtimeExecutable": "${execPath}",
       "args": [
         "${workspaceRoot}/.test-database/project.code-workspace",
-        "--extensionDevelopmentPath=${workspaceRoot}/../dist",
+        "--extensionDevelopmentPath=${workspaceRoot}/dist",
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
@@ -17,7 +17,7 @@
         "<node_internals>/**/*.js"
       ],
       "outFiles": [
-        "${workspaceRoot}/../dist/*.js"
+        "${workspaceRoot}/dist/*.js"
       ],
       "env": {
         "NODE_ENV": "development"
@@ -34,7 +34,7 @@
         "<node_internals>/**/*.js"
       ],
       "outFiles": [
-        "${workspaceRoot}/../dist/*.js"
+        "${workspaceRoot}/dist/*.js"
       ],
       "protocol": "inspector"
     }

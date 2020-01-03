@@ -34,9 +34,9 @@ const DISPLAY_NAME = EXT_NAME;
 const EXT_ID = 'sqltools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
-const outdir = path.resolve(rootdir, '..', 'dist');
+const outdir = path.resolve(rootdir, 'dist');
 
-function getExtensionConfig() {
+function getExtensionConfig(outdir) {
   /** @type webpack.Configuration */
   let config = {
     name: 'ext',
@@ -115,7 +115,7 @@ function getExtensionConfig() {
 
 module.exports = () => {
   const isProduction = process.env.NODE_ENV !== 'development';
-  return [getLanguageServerConfig(), getExtensionConfig(), getWebviewConfig()].map(config => {
+  return [getLanguageServerConfig(outdir), getExtensionConfig(outdir), getWebviewConfig(outdir)].map(config => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({

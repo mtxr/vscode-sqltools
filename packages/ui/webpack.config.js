@@ -1,14 +1,11 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 
-const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
-
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
 const IS_DEV = process.env.NODE_ENV !== 'production';
 
-
-module.exports = exports = function getWebviewConfig() {
+module.exports = exports = function getWebviewConfig(outdir) {
   return {
     name: 'ui',
     entry: {
