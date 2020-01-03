@@ -89,7 +89,7 @@ function getExtensionConfig(outdir) {
           },
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
-        { from: path.join(__dirname, '..', 'core', 'icons'), to: path.join(outdir, 'icons', 'driver') },
+        { from: path.join(__dirname, '..', 'drivers', 'icons'), to: path.join(outdir, 'icons', 'driver') },
         { from: path.join(__dirname, 'language'), to: path.join(outdir, 'language') },
         { from: path.join(__dirname, '..', '..', 'static/icon.png'), to: path.join(outdir, 'static/icon.png') },
         { from: path.join(__dirname, '..', '..', '.vscodeignore'), to: path.join(outdir, '.vscodeignore'), toType: 'file' },
