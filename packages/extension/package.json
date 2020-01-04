@@ -836,6 +836,11 @@
                         }
                     }
                 },
+                "sqltools.connectionExplorer.groupConnected": {
+                  "type": "boolean",
+                  "description": "Group connection in two groups, 'Connected' and 'Not Connected'",
+                  "default": false
+                },
                 "sqltools.debug": {
                     "type": "object",
                     "description": "SQLTools debug settings",

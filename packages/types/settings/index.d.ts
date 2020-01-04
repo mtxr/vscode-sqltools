@@ -245,4 +245,8 @@ export declare interface ISettings {
    * @memberof ISettings
    */
   debug?: { namespaces?: string };
+
+  connectionExplorer: {
+    groupConnected: boolean
+  }
 }

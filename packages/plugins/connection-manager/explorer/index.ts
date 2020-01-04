@@ -61,6 +61,48 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getTreeItems() {
+    const groupConnected = ConfigManager.connectionExplorer.groupConnected;
+    if (groupConnected) {
+      return this.getTreeItemsGrouped();
+    }
+
+    const items = asArray<SidebarConnection>(this.tree);
+    if (items.length === 0) {
+      const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
+      addNew.command = {
+        title: 'Add New Connections',
+        command: `${EXT_NAME}.openAddConnectionScreen`,
+      };
+      return [addNew];
+    }
+
+    const root: ConnectionGroup = new TreeItem('Root');
+    root.items = [];
+    items.forEach(item => {
+      let group: ConnectionGroup = root;
+      if (item.conn && item.conn.group) {
+        const groupId = `GID:${item.conn.group}`;
+        let subGroup: ConnectionGroup = group.items.find((it: TreeItem) => it.id === groupId);
+        if (!subGroup) {
+          subGroup = new TreeItem(item.conn.group, TreeItemCollapsibleState.Expanded);
+          subGroup.isGroup = true;
+          subGroup.id = groupId;
+          subGroup.items = subGroup.items || [];
+          subGroup.iconPath = ThemeIcon.Folder;
+          group.items.push(subGroup);
+        }
+        subGroup.description = `${subGroup.items.length + 1} connections`;
+        group = subGroup;
+      }
+      group.items.push(item);
+    });
+
+    root.items = sortBy(root.items, ['isGroup', 'label']);
+
+    return root.items;
+  }
+
+  private getTreeItemsGrouped() {
     const items = asArray<SidebarConnection>(this.tree);
     if (items.length === 0) {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
@@ -336,6 +378,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public updateTreeRoot = async () => {
     const connections: IConnection[] = await commands.executeCommand(`${EXT_NAME}.getConnectionStatus`);
     this.setConnections(connections);
+    this._onDidChangeTreeData.fire();
   }
 
   public getSelection() {
