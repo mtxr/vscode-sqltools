@@ -10,7 +10,7 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/core/log';
 import '@sqltools/ui/sass/app.scss';
-import { IWebviewMessage } from '@sqltools/ui/lib/interfaces';
+import { IWebviewMessage } from '@sqltools/ui/interfaces';
 
 const log = logger.extend('settings');
 

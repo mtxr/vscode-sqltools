@@ -3,7 +3,7 @@
 /**
  * @type {DatabaseDriver}
  */
-export const DatabaseDriver = {
+const DatabaseDriver = {
   'AWS Redshift': 'AWS Redshift',
   Cassandra: 'Cassandra',
   DB2: 'DB2',
@@ -14,4 +14,8 @@ export const DatabaseDriver = {
   PostgreSQL: 'PostgreSQL',
   SAPHana: 'SAPHana',
   SQLite: 'SQLite'
+}
+
+module.exports = {
+  DatabaseDriver
 }

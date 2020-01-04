@@ -2,8 +2,8 @@ import { CompletionItem, CompletionParams, Range } from 'vscode-languageserver';
 import { TableCompletionItem, TableColumnCompletionItem, TableCompletionItemFirst } from './models';
 import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 
-export default class IntellisensePlugin implements ILanguageServerPlugin {
-  private server: ILanguageServer;
+export default class IntellisensePlugin<T extends ILanguageServer<any>> implements ILanguageServerPlugin<T> {
+  private server: T;
 
   private onCompletion = (params: CompletionParams): CompletionItem[] => {
     const { connectionInfo, lastUsedId } = this.server.store.getState();
@@ -31,7 +31,7 @@ export default class IntellisensePlugin implements ILanguageServerPlugin {
     return columns.map(TableColumnCompletionItem).concat(tables.map(TableCompletionItem));
   }
 
-  public register(server: ILanguageServer) {
+  public register(server: T) {
     this.server = this.server || server;
     this.server.addOnInitializeHook(() => ({
       capabilities: {

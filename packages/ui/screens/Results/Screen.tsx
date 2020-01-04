@@ -6,7 +6,7 @@ import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { Tabs, Tab, Typography } from '@material-ui/core';
 import logger from '@sqltools/core/log';
-import { IWebviewMessage } from '@sqltools/ui/lib/interfaces';
+import { IWebviewMessage } from '@sqltools/ui/interfaces';
 
 const log = logger.extend('results');
 const defaultPageSize = 50;
