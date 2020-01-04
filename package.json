@@ -29,9 +29,9 @@
     "prewatch": "yarn run clean",
     "publish": "yarn run package && cd ./dist && vsce publish --yarn",
     "test:older": "cross-env CODE_VERSION=1.32.3 yarn test",
-    "test:upcontainers": "bash ./.test-database/start-dbs.sh",
+    "test:docker": "yarn --cwd ./test run",
     "test:watch": "cross-env WATCH=1 yarn run test",
-    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./.test-database node ./test/run-tests.js",
+    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
     "watch": "yarn workspace @sqltools/extension watch",
     "build": "yarn --cwd ./docs run docz:build"
   },

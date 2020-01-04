@@ -15,8 +15,8 @@ cache/
 .vscode/aisettings.json
 *.db
 *.zip
-.test-database/oracle/docker-images-master
-.test-database/**/local*
+test/docker/oracle/docker-images-master
+test/docker/**/local*
 .DS_Store
 .npmrc
 .docz

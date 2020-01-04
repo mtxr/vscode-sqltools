@@ -5,25 +5,25 @@
       "name": "root"
     },
     {
-      "path": "db2"
+      "path": "docker/db2"
     },
     {
-      "path": "pgsql"
+      "path": "docker/pgsql"
     },
     {
-      "path": "mysql"
+      "path": "docker/mysql"
     },
     {
-      "path": "sqlite"
+      "path": "docker/sqlite"
     },
     {
-      "path": "mssql"
+      "path": "docker/mssql"
     },
     {
-      "path": "oracle"
+      "path": "docker/oracle"
     },
     {
-      "path": "cql"
+      "path": "docker/cql"
     }
   ],
   "settings": {
@@ -94,7 +94,7 @@
       {
         "name": "SQLite",
         "driver": "SQLite",
-        "database": "./sqlite/test_db.db",
+        "database": "./docker/sqlite/test_db.db",
         "connectionTimeout": 15,
         "group": "SQLITE"
       },
@@ -149,7 +149,7 @@
         "driver": "MySQL",
         "name": "MySQL Socket",
         "password": "root",
-        "socketPath": "/home/mteixeira/projects/personal/vscode-sqltools/.test-database/mysql/local-mysqld/mysqld.sock",
+        "socketPath": "./docker/mysql/local-mysqld/mysqld.sock",
         "username": "root",
         "group": "MYSQL"
       },
@@ -159,7 +159,7 @@
         "database": "test_db",
         "driver": "MySQL",
         "name": "MySQLX Socket",
-        "socketPath": "/home/mteixeira/projects/personal/vscode-sqltools/.test-database/mysql/local-mysqld/mysqlx.sock",
+        "socketPath": "./docker/mysql/local-mysqld/mysqlx.sock",
         "password": "root",
         "username": "root",
         "mysqlOptions": {

@@ -8,7 +8,7 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceRoot}/.test-database/project.code-workspace",
+        "${workspaceRoot}/test/project.code-workspace",
         "--extensionDevelopmentPath=${workspaceRoot}/dist",
       ],
       "stopOnEntry": false,
