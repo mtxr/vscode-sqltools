@@ -71,29 +71,17 @@ You can also fund specific issues via Issuehunt. That can boost the development 
 
 [![Issuehunt](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/issuehunt-button.png)](https://issuehunt.io/r/mtxr/vscode-sqltools)
 
-Our donators and supporters:
-<table>
-  <tbody>
-  <tr>
-    <td>Alejandro Dunogent</td>
-    <td>Alexander Krylkov</td>
-    <td>Benyamin Limanto (<a href="https://github.com/benyaminl)">@benyaminl</a>)</td>
-    <td>Bogdan Bursuc (<a href="https://github.com/bogh)">@bogh</a>)</td>
-  </tr>
-  <tr>
-    <td>Hector Bentancor</td>
-    <td>Justin Webber</td>
-    <td>Kornei Dontsov (<a href="https://github.com/KorneiDontsov)">@KorneiDontsov</a>)</td>
-    <td>Meirion Morris (<a href="https://github.com/mwmorris)">@mwmorris</a>)</td>
-  </tr>
-  <tr>
-    <td>Oleksandr Akhtyrskiy</td>
-    <td>Ran Sagy (<a href="https://github.com/ransagy)">@ransagy</a>)</td>
-    <td>Scott Wilson (<a href="https://github.com/omiba)">@omiba</a>)</td>
-    <td>Trung Nguyen</td>
-  </tr>
-  </tbody>
-</table>
+### Want to contribute without spending money? Yeah, free contribution!
+
+Pesonally I use Brave Browser because it's chromium based and has a builtin Ad-Block. Also its shipped with a lot of cross-site tracker blocker and other tools to take care of my privacy.
+Brave also has its own Crypto wallet and coin, and this coind helps to fund projects and publishers around the web, want to see more? Check BAT tokens and BAT project [here](https://brave.com/mtx234).
+
+That said, if you use Brave Browser and download using this link [https://brave.com/mtx234](https://brave.com/mtx234), you will be contributing (with ~$7) to the project without spending any money. Pretty cool, huh?
+
+[Download Brave](https://brave.com/mtx234)
+
+If you don't want to contribute, but still want to try Brave, I do encourange you to try, you can search anywhere and use any link you want.
+
 
 
 ## Changelog
