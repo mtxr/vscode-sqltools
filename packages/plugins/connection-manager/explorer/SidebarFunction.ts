@@ -1,7 +1,8 @@
-import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
+import { TreeItemCollapsibleState, SnippetString } from 'vscode';
 import { NSDatabase } from '@sqltools/types';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import ContextValue from '../context-value';
+import { getIconPaths } from '@sqltools/vscode/icons';
 export default class SidebarFunction extends SidebarAbstractItem<null> {
   public contextValue: ContextValue = ContextValue.FUNCTION;
   public value: string;
@@ -10,13 +11,10 @@ export default class SidebarFunction extends SidebarAbstractItem<null> {
     throw new Error('Cannot add items to database function');
   }
   public get conn() { return this.parent.conn; }
-  constructor(context: ExtensionContext, public functionData: NSDatabase.IFunction) {
+  constructor(public functionData: NSDatabase.IFunction) {
     super(functionData.name, TreeItemCollapsibleState.None);
     this.value = functionData.name;
-    this.iconPath = {
-      dark: context.asAbsolutePath('icons/function-dark.svg'),
-      light: context.asAbsolutePath('icons/function-light.svg'),
-    };
+    this.iconPath = getIconPaths('function');
     this.description = `${this.functionData.name}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
     this.tooltip = `${this.functionData.signature}(${this.functionData.args.join(',')}) => ${this.functionData.resultType || 'void'}`;
     this.value = `${this.functionData.signature}`;

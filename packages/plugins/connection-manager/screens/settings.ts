@@ -1,20 +1,20 @@
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
-import { commands, ExtensionContext, Uri } from 'vscode';
+import { commands, Uri } from 'vscode';
 import path from 'path';
 import { DatabaseDriver } from '@sqltools/types';
 import relativeToWorkspace from '@sqltools/vscode/utils/relative-to-workspace';
+import Context from '@sqltools/vscode/context';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
   protected title: string = 'SQLTools Settings';
 
-  constructor(context: ExtensionContext) {
+  constructor() {
     super(
-      context,
-      Uri.file(path.resolve(context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
-      Uri.file(path.resolve(context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
+      Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
+      Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
     );
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {

@@ -9,7 +9,7 @@ import { getSelectedText, quickPick, readInput } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
+import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
 import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
@@ -17,6 +17,8 @@ import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query'
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/core/utils/telemetry';
+import Context from '@sqltools/vscode/context';
+import { getIconPaths } from '@sqltools/vscode/icons';
 
 const log = logger.extend('conn-man');
 
@@ -24,7 +26,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public client: ILanguageClient;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
-  private context: ExtensionContext;
   private errorHandler: IExtension['errorHandler'];
   private explorer: ConnectionExplorer;
   private attachedFilesMap: { [fileUri: string ]: string } = {};
@@ -51,10 +52,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     );
   }
 
-  private ext_getChildrenForTreeItem = async ({ conn, contextValue }) => {
+  private ext_getChildrenForTreeItem: RequestHandler<typeof GetChildrenForTreeItemRequest> = async (params) => {
     return this.client.sendRequest(
       GetChildrenForTreeItemRequest,
-      { conn, contextValue },
+      params,
     );
   }
 
@@ -119,7 +120,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     } else {
       this.attachedFilesMap[fileUri.toString()] = connId;
     }
-    await this.context.workspaceState.update('attachedFilesMap', this.attachedFilesMap);
+    await Context.workspaceState.update('attachedFilesMap', this.attachedFilesMap);
     this.codeLensPlugin.reset();
     this.changeTextEditorHandler(window.activeTextEditor);
   }
@@ -438,10 +439,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       title: 'Connections',
       buttons: [
         {
-          iconPath: {
-            dark: this.context.asAbsolutePath('icons/add-connection-dark.svg'),
-            light: this.context.asAbsolutePath('icons/add-connection-light.svg'),
-          },
+          iconPath: getIconPaths('add-connection'),
           tooltip: 'Add new Connection',
           cb: () => commands.executeCommand(`${EXT_NAME}.openAddConnectionScreen`),
         } as any,
@@ -615,7 +613,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public register(extension: IExtension) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
-    this.context = extension.context;
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer(extension);
     this.explorer.onConnectionDidChange(() => {
@@ -627,9 +624,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
 
     // extension stuff
-    this.context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager(this.context, this.client)),
-      (this.settingsWebview = new SettingsWebview(this.context)),
+    Context.subscriptions.push(
+      (this.resultsWebview = new ResultsWebviewManager(Context, this.client)),
+      (this.settingsWebview = new SettingsWebview(Context)),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
       workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
@@ -670,7 +667,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   constructor(extension: IExtension) {
-    this.attachedFilesMap = extension.context.workspaceState.get('attachedFilesMap', {});
+    this.attachedFilesMap = Context.workspaceState.get('attachedFilesMap', {});
     this.codeLensPlugin = new CodeLensPlugin;
     extension.registerPlugin(this.codeLensPlugin);
   }

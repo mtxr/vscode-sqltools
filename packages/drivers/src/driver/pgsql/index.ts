@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, types } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0 } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import * as Utils from '@sqltools/core/utils';
 import fs from 'fs';
@@ -65,18 +65,18 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     pool.end();
   }
 
-  public query(query: string): Promise<NSDatabase.IResult[]> {
+  public query: (typeof AbstractDriver)['prototype']['query'] = (query) => {
     const messages = [];
     return this.open()
       .then(async (pool) => {
         const cli = await pool.connect();
         cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
-        const results = await cli.query(query);
+        const results = await cli.query(query.toString());
         cli.release();
         return results;
       })
       .then((results: any[] | any) => {
-        const queries = Utils.query.parse(query, 'pg');
+        const queries = Utils.query.parse(query.toString(), 'pg');
         if (!Array.isArray(results)) {
           results = [results];
         }
@@ -108,7 +108,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   }
 
   public getTables(): Promise<NSDatabase.ITable[]> {
-    return this.query(this.queries.fetchTables)
+    return this.query<any>(this.queries.fetchTables)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -125,7 +125,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   }
 
   public getColumns(): Promise<NSDatabase.IColumn[]> {
-    return this.query(this.queries.fetchColumns)
+    return this.query<any>(this.queries.fetchColumns)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -149,7 +149,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   }
 
   public getFunctions(): Promise<NSDatabase.IFunction[]> {
-    return this.query(this.queries.fetchFunctions)
+    return this.query<any>(this.queries.fetchFunctions)
       .then(([queryRes]) => {
         return queryRes.results
           .reduce((prev, curr) => prev.concat(curr), [])
@@ -172,5 +172,18 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     const cli = await pool.connect();
     await cli.query('SELECT 1');
     cli.release();
+  }
+
+  private async getDatabases(): Promise<NSDatabase.IDatabase[]> {
+    const results = await this.query(this.queries.fetchDatabases());
+    return results[0].results;
+  }
+
+  public async getChildrenForItem({ itemType }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch(itemType) {
+      case 'root':
+        return this.getDatabases();
+    }
+    return [];
   }
 }

@@ -83,7 +83,7 @@ export default class BookmarksManagerPlugin implements IExtensionPlugin {
   public register(extension: IExtension) {
     if (this.explorer) return; // do not register twice
 
-    this.explorer = new BookmarksExplorer(extension.context);
+    this.explorer = new BookmarksExplorer();
     this.errorHandler = extension.errorHandler;
 
     extension

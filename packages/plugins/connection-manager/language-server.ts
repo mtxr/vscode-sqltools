@@ -1,6 +1,6 @@
 import Connection from '@sqltools/language-server/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler} from '@sqltools/types';
+import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler, DatabaseDriver} from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
@@ -244,14 +244,10 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (!req || !req.conn) {
       return [];
     }
-    let c = this.getConnectionInstance(req.conn);
+    const { conn, ...params } = req;
+    let c = this.getConnectionInstance(conn);
     if (!c) return [];
-    switch (req.contextValue) {
-      case 'connection':
-      case 'connectedConnection':
-        // return c.getDatabases(); // @TODO implement
-    }
-    return [];
+    return c.getChildrenForItem(params);
   };
 
   public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
@@ -272,9 +268,13 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
   // internal utils
   private async _loadConnectionData(conn: Connection) {
-    log.extend('warn')('*** DEPRECATION *** _loadConnectionData is deprecated and will be removed in v0.22.x')
     if (!conn) {
       return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
+    }
+    if (conn && conn.getDriver() === DatabaseDriver['PostgreSQL']) {
+      log.extend('warn')('*** DEPRECATION *** _loadConnectionData is deprecated and will be removed in v0.22.x');
+      this.server.store.dispatch(actions.ConnectionData(conn, { tables: [], columns: [], functions: [] }))
+      return this._updateSidebar({ conn: this.serializarConnectionState(conn.serialize()) });
     }
     return Promise.all([conn.getTables(), conn.getColumns(), conn.getFunctions()])
       .then(async ([tables, columns, functions ]) => {
@@ -289,14 +289,14 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
   private _updateSidebar({
     conn,
-    tables,
-    columns,
-    functions
+    tables = [],
+    columns = [],
+    functions = []
   }: {
     conn: IConnection;
-    tables: NSDatabase.ITable[];
-    columns: NSDatabase.IColumn[];
-    functions: NSDatabase.IFunction[];
+    tables?: NSDatabase.ITable[];
+    columns?: NSDatabase.IColumn[];
+    functions?: NSDatabase.IFunction[];
    }) {
     if (!conn) return Promise.resolve();
     conn.isActive = this.server.store.getState().lastUsedId === getConnectionId(conn);

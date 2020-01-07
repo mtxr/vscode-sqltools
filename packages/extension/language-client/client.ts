@@ -4,11 +4,12 @@ import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
 import { DISPLAY_NAME, EXT_NAME, ElectronNotSupportedNotification } from '@sqltools/core/constants';
 import { commandExists } from '@sqltools/core/utils';
-import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, ExtensionContext, window, commands, ConfigurationTarget } from 'vscode';
+import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
+import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('lc');
 
@@ -16,7 +17,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
 
-  constructor(public context: ExtensionContext) {
+  constructor() {
     this.client = new LanguageClient(
       `${DISPLAY_NAME} Language Server`,
       this.getServerOptions(),
@@ -67,7 +68,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   }
 
   private getServerOptions(): ServerOptions {
-    const serverModule = this.context.asAbsolutePath('languageserver.js');
+    const serverModule = Context.asAbsolutePath('languageserver.js');
     let runtime: string = undefined;
     const useNodeRuntime = ConfigManager.useNodeRuntime;
     if (useNodeRuntime) {
@@ -147,7 +148,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       documentSelector: selector,
       initializationOptions: {
         telemetry: telemetryArgs,
-        extensionPath: this.context.extensionPath,
+        extensionPath: Context.extensionPath,
         userEnvVars: ConfigManager.languageServerEnv
       },
       synchronize: {

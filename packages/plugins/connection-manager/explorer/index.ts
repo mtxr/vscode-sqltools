@@ -13,6 +13,7 @@ import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCol
 import safeGet from 'lodash/get';
 import sortBy from 'lodash/sortBy';
 import logger from '@sqltools/core/log';
+import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('conn-man:explorer');
 
@@ -62,10 +63,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   private getTreeItems() {
     const groupConnected = ConfigManager.connectionExplorer.groupConnected;
-    if (groupConnected) {
-      return this.getTreeItemsGrouped();
-    }
-
     const items = asArray<SidebarConnection>(this.tree);
     if (items.length === 0) {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
@@ -74,6 +71,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         command: `${EXT_NAME}.openAddConnectionScreen`,
       };
       return [addNew];
+    }
+
+    if (groupConnected) {
+      return this.getTreeItemsGrouped(items);
     }
 
     const root: ConnectionGroup = new TreeItem('Root');
@@ -102,17 +103,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return root.items;
   }
 
-  private getTreeItemsGrouped() {
-    const items = asArray<SidebarConnection>(this.tree);
-    if (items.length === 0) {
-      const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
-      addNew.command = {
-        title: 'Add New Connections',
-        command: `${EXT_NAME}.openAddConnectionScreen`,
-      };
-      return [addNew];
-    }
-
+  private getTreeItemsGrouped(items: SidebarConnection[]) {
     connectedTreeItem.items = [];
     notConnectedTreeItem.items = [];
     let connectedTreeCount = 0;
@@ -177,7 +168,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
     connections.forEach((conn) => {
       if (!this.tree[getConnectionId(conn)]) {
-        this.tree[getConnectionId(conn)] = new SidebarConnection(this.extension.context, conn);
+        this.tree[getConnectionId(conn)] = new SidebarConnection(conn);
         changed.push({ conn, action: 'added' });
       } else if (this.tree[getConnectionId(conn)].updateCreds(conn)) {
         changed.push({ conn, action: 'changed' });
@@ -200,21 +191,22 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public setTreeData = ({
     conn,
-    tables,
-    columns,
-    functions
+    tables = [],
+    columns = [],
+    functions = []
   }: {
     conn: IConnection;
-    tables: NSDatabase.ITable[];
-    columns: NSDatabase.IColumn[];
-    functions: NSDatabase.IFunction[];
+    tables?: NSDatabase.ITable[];
+    columns?: NSDatabase.IColumn[];
+    functions?: NSDatabase.IFunction[];
   }) => {
     if (!conn) return;
     const connId = getConnectionId(conn);
 
-    this.tree[connId] = this.tree[connId] || new SidebarConnection(this.extension.context, conn);
+    this.tree[connId] = this.tree[connId] || new SidebarConnection(conn);
 
     this.tree[connId].reset();
+    this.tree[connId].updateStatus(conn);
 
     if (!tables && !columns && !functions) {
       return;
@@ -275,14 +267,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDriver.SAPHana:
         case DatabaseDriver.Cassandra:
           tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
-            this.getOrCreateGroups(connId, driver, item.tree, 1).addItem(new SidebarTableOrView(this.extension.context, item));
+            this.getOrCreateGroups(connId, driver, item.tree, 1).addItem(new SidebarTableOrView(item));
           });
           break;
         default:
           // old style. Compatibily
           tables.sort((a, b) => a.name.localeCompare(b.name)).forEach((item) => {
             const key = item.isView ? 'views' : 'tables';
-            this.getOrCreateGroups(connId, driver, key).addItem(new SidebarTableOrView(this.extension.context, item));
+            this.getOrCreateGroups(connId, driver, key).addItem(new SidebarTableOrView(item));
           });
           break;
       }
@@ -307,14 +299,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDriver.SAPHana:
         case DatabaseDriver.Cassandra:
           columns.forEach((column) => {
-            this.getOrCreateGroups(connId, driver, column.tree, 1).addItem(new SidebarColumn(this.extension.context, column));
+            this.getOrCreateGroups(connId, driver, column.tree, 1).addItem(new SidebarColumn(column));
           });
           break;
         default:
           // old style. Compatibily
           columns.forEach((column) => {
             const key = this.getGroup(connId, 'views', column.tableName) ? 'views' : 'tables';
-            this.getOrCreateGroups(connId, driver, `${key}/${column.tableName}`).addItem(new SidebarColumn(this.extension.context, column));
+            this.getOrCreateGroups(connId, driver, `${key}/${column.tableName}`).addItem(new SidebarColumn(column));
           });
           break;
       }
@@ -334,13 +326,13 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         case DatabaseDriver.OracleDB:
         case DatabaseDriver.Cassandra:
           functions.forEach((fn) => {
-            this.getOrCreateGroups(connId, driver, fn.tree, 1).addItem(new SidebarFunction(this.extension.context, fn));
+            this.getOrCreateGroups(connId, driver, fn.tree, 1).addItem(new SidebarFunction(fn));
           });
           break;
         default:
           // old style. Compatibily
           functions.forEach((fn) => {
-            this.getOrCreateGroups(connId, driver, `functions/${fn.name}`).addItem(new SidebarFunction(this.extension.context, fn));
+            this.getOrCreateGroups(connId, driver, `functions/${fn.name}`).addItem(new SidebarFunction(fn));
           });
           break;
       }
@@ -389,7 +381,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
     ConfigManager.addOnUpdateHook(this.updateTreeRoot);
     this.updateTreeRoot();
-    this.extension.context.subscriptions.push(this.treeView);
+    Context.subscriptions.push(this.treeView);
   }
 }
 

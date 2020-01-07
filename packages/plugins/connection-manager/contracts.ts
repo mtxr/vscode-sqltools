@@ -1,5 +1,5 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
-import { IConnection, NSDatabase } from '@sqltools/types';
+import { IConnection, NSDatabase, MConnectionExplorer } from '@sqltools/types';
 import ContextValue from './context-value';
 
 export const GetConnectionsRequest = new RequestType<
@@ -87,8 +87,8 @@ export interface ProgressNotificationCompleteParams {
 export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>('sqltools/window/progress/complete');
 
 export const GetChildrenForTreeItemRequest = new RequestType<
-  { conn: IConnection, contextValue: ContextValue },
-  any[], // @TODO define type
+  { conn: IConnection, itemType: MConnectionExplorer.TreeItemType, itemId: string },
+  MConnectionExplorer.IChildItem[], // @TODO define type
   Error,
   void
 >('connection/GetChildrenForTreeItemRequest');

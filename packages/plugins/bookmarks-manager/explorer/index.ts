@@ -1,10 +1,11 @@
 import logger from '@sqltools/core/log';
-import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
+import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { getDataPath } from '@sqltools/core/utils/persistence';
 import fs from 'fs';
+import Context from '@sqltools/vscode/context';
 const log = logger.extend('book-man:explorer');
 
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
@@ -48,7 +49,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   private get oldFilePath() {
-    return this.asAbsolutePath('Bookmarks.json');
+    return Context.asAbsolutePath('Bookmarks.json');
   }
 
   private get filePath() {
@@ -113,12 +114,10 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     return fs.writeFileSync(this.filePath, JSON.stringify(data));
   }
 
-  private asAbsolutePath: ExtensionContext['asAbsolutePath'];
 
-  constructor(context: ExtensionContext) {
-    this.asAbsolutePath = context.asAbsolutePath;
+  constructor() {
     this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAME}/bookmarksExplorer`, { treeDataProvider: this });
-    context.subscriptions.push(this.treeView);
+    Context.subscriptions.push(this.treeView);
     this.readFromFile();
   }
 }

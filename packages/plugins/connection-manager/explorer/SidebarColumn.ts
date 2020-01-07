@@ -1,9 +1,9 @@
-import { ExtensionContext, TreeItemCollapsibleState } from 'vscode';
+import { TreeItemCollapsibleState } from 'vscode';
 import { NSDatabase } from '@sqltools/types';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import ContextValue from '../context-value';
+import { getIconPaths } from '@sqltools/vscode/icons';
 export default class SidebarColumn extends SidebarAbstractItem<null> {
-  static icons;
   public contextValue = ContextValue.COLUMN;
   public value: string;
   public get items(): null { return null; }
@@ -18,41 +18,20 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
     return `${(this.column.type || '').toUpperCase()}${typeSize}`;
   }
   public get conn() { return this.parent.conn; }
-  constructor(context: ExtensionContext, public column: NSDatabase.IColumn) {
+  constructor(public column: NSDatabase.IColumn) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
-    if (!SidebarColumn.icons) {
-      SidebarColumn.icons = {
-        default: {
-          dark: context.asAbsolutePath('icons/column-dark.svg'),
-          light: context.asAbsolutePath('icons/column-light.svg'),
-        },
-        primaryKey: {
-          dark: context.asAbsolutePath('icons/pk-dark.svg'),
-          light: context.asAbsolutePath('icons/pk-lightk.svg'),
-        },
-        foreignKey: {
-          dark: context.asAbsolutePath('icons/fk-dark.svg'),
-          light: context.asAbsolutePath('icons/fk-light.svg'),
-        },
-        partitionKey: {
-          dark: context.asAbsolutePath('icons/partition-key-dark.svg'),
-          light: context.asAbsolutePath('icons/partition-key-light.svg'),
-        },
-      };
-    }
     this.updateIconPath();
   }
   public updateIconPath() {
-    this.iconPath = SidebarColumn.icons.default;
     if (this.column.isPartitionKey) {
-      this.iconPath = SidebarColumn.icons.partitionKey;
-    }
-    else if (this.column.isPk) {
-      this.iconPath = SidebarColumn.icons.primaryKey;
-    }
-    else if (this.column.isFk) {
-      this.iconPath = SidebarColumn.icons.foreignKey;
+      this.iconPath = getIconPaths('partition-key');
+    } else if (this.column.isPk) {
+      this.iconPath = getIconPaths('pk');
+    } else if (this.column.isFk) {
+      this.iconPath = getIconPaths('fk');
+    } else {
+      this.iconPath = getIconPaths('column');
     }
   }
 }

@@ -1,5 +1,6 @@
 import { DatabaseDriver } from '@sqltools/types/driver';
 import { NSDatabase } from '@sqltools/types/generic/database';
+import ConnectionExplorer from '@sqltools/plugins/connection-manager/explorer';
 
 export declare interface IConnection<DriverOptions = any> {
   /**
@@ -183,5 +184,14 @@ export declare interface IConnectionDriver {
   showRecords(tableName: string, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
   query(query: string): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
+  getChildrenForItem?(params: { itemId: string, itemType: MConnectionExplorer.TreeItemType }): Promise<MConnectionExplorer.IChildItem[]>;
+}
+export module MConnectionExplorer {
+  type TreeItemType = 'root' | 'database';
+  interface IChildItem {
+    itemType: TreeItemType;
+    itemId: string;
+    label: string;
+  }
 }
 

@@ -1,4 +1,4 @@
-import { NSDatabase, IConnectionDriver, IConnection } from '@sqltools/types';
+import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer } from '@sqltools/types';
 import { decorateException } from '@sqltools/core/utils/errors';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
@@ -165,5 +165,9 @@ export default class Connection {
     await testConn.connect();
     await testConn.close();
     return true;
+  }
+
+  public getChildrenForItem(params: { itemId: string, itemType: MConnectionExplorer.TreeItemType }) {
+    return this.conn.getChildrenForItem(params);
   }
 }

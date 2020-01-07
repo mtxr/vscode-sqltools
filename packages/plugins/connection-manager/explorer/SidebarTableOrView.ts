@@ -1,10 +1,11 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import { ExtensionContext, TreeItemCollapsibleState, SnippetString } from 'vscode';
+import { TreeItemCollapsibleState, SnippetString } from 'vscode';
 import { NSDatabase } from '@sqltools/types';
 import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarColumn from './SidebarColumn';
 import ContextValue from '../context-value';
+import { getIconPaths } from '@sqltools/vscode/icons';
 
 export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {
   public contextValue = ContextValue.TABLEORVIEW;
@@ -34,22 +35,16 @@ export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColum
       return '';
     return `${this.table.numberOfColumns} cols`;
   }
-  constructor(context: ExtensionContext, public table: NSDatabase.ITable) {
+  constructor(public table: NSDatabase.ITable) {
     super(table.name, (ConfigManager.get('tableTreeItemsExpanded', false)
       ? TreeItemCollapsibleState.Expanded
       : TreeItemCollapsibleState.Collapsed));
     this.value = this.table.name;
     if (this.table.isView) {
-      this.iconPath = {
-        dark: context.asAbsolutePath('icons/view-dark.svg'),
-        light: context.asAbsolutePath('icons/view-light.svg'),
-      };
+      this.iconPath = getIconPaths('view');
     }
     else {
-      this.iconPath = {
-        dark: context.asAbsolutePath('icons/table-dark.svg'),
-        light: context.asAbsolutePath('icons/table-light.svg'),
-      };
+      this.iconPath = getIconPaths('table');
     }
   }
   public addItem(item: SidebarColumn) {

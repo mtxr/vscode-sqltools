@@ -74,7 +74,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public register(extension: IExtension) {
     if (this.explorer) return; // do not register twice
 
-    this.explorer = new HistoryExplorer(extension.context);
+    this.explorer = new HistoryExplorer();
     this.errorHandler = extension.errorHandler;
     hookedCommands.forEach(cmd => extension.addAfterCommandSuccessHook(cmd, this.addToHistoryHook));
     extension.registerCommand('runFromHistory', this.ext_runFromHistory)

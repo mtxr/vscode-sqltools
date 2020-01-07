@@ -1,6 +1,9 @@
 export declare namespace NSDatabase {
   export interface IDatabase {
     name: string;
+    label: string;
+    itemType: 'database';
+    itemId: string;
   }
 
   export interface ITable {

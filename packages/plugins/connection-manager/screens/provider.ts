@@ -1,4 +1,6 @@
-import { Uri, commands, Disposable, EventEmitter, ExtensionContext, ViewColumn, WebviewPanel, window } from 'vscode';
+import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, window } from 'vscode';
+import { getIconPath } from '@sqltools/vscode/icons';
+import Context from '@sqltools/vscode/context';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
@@ -9,7 +11,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   protected cssVariables: { [name: string]: string };
   private get baseHtml(): string {
     const cssVariables = Object.keys(this.cssVariables || {}).map(k => `--sqltools-${k}: ${this.cssVariables[k]}`).join(';');
-    const extRoot = Uri.file(this.context.asAbsolutePath('.'))
+    const extRoot = Uri.file(Context.asAbsolutePath('.'))
     .with({ scheme: 'vscode-resource' })
     .toString();
 
@@ -41,7 +43,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   private disposables: Disposable[] = [];
   private messageCb;
 
-  public constructor(private context: ExtensionContext, private iconsPath: Uri, private viewsPath: Uri) {}
+  public constructor(private iconsPath: Uri, private viewsPath: Uri) {}
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
   public show() {
@@ -58,7 +60,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableFindWidget: true,
         },
       );
-      this.panel.iconPath = Uri.file(this.context.asAbsolutePath('icons/database-active.svg'));
+      this.panel.iconPath = getIconPath('database-active');
       this.disposables.push(Disposable.from(this.panel));
       this.disposables.push(this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables));
       this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {

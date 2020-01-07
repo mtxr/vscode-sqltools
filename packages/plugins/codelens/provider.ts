@@ -3,7 +3,7 @@ import * as Constants from '@sqltools/core/constants';
 import Selector from '@sqltools/vscode/utils/selector';
 import { getNameFromId } from '@sqltools/core/utils';
 import { extractConnName } from '@sqltools/core/utils/query';
-import { IExtension } from '@sqltools/types';
+import Context from '@sqltools/vscode/context';
 
 export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   private _onDidChangeCodeLenses = new EventEmitter<void>();
@@ -19,7 +19,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     const requestRanges: [number, number][] = Selector.getQueryRanges(lines);
     const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
     const lenses: CodeLens[] = [];
-    const attachedId = this.context.workspaceState.get('attachedFilesMap', {})[document.uri.toString()];
+    const attachedId = Context.workspaceState.get('attachedFilesMap', {})[document.uri.toString()];
     if (attachedId) {
       // attached to a connection
       const connName = getNameFromId(attachedId);
@@ -52,7 +52,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     return lenses;
   }
 
-  constructor(private context: IExtension['context']) {
-    context.subscriptions.push(this._onDidChangeCodeLenses);
+  constructor() {
+    Context.subscriptions.push(this._onDidChangeCodeLenses);
   }
 }

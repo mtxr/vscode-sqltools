@@ -10,6 +10,7 @@ import Utils from './api/utils';
 import { openExternal } from '@sqltools/vscode/utils';
 import SQLToolsLanguageClient from './language-client';
 import logger from '@sqltools/vscode/log';
+import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('main');
 // plugins
@@ -39,11 +40,11 @@ export class SQLToolsExtension implements IExtension {
       },
     });
     this.getAndUpdateConfig();
-    this.client = new SQLToolsLanguageClient(this.context);
+    this.client = new SQLToolsLanguageClient();
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
-    this.context.subscriptions.push(
+    Context.subscriptions.push(
       workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
       this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
@@ -53,7 +54,7 @@ export class SQLToolsExtension implements IExtension {
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
 
     if (logger.outputChannel) {
-      this.context.subscriptions.push(logger.outputChannel);
+      Context.subscriptions.push(logger.outputChannel);
     }
     this.loadPlugins();
     activationTimer.end();
@@ -64,7 +65,7 @@ export class SQLToolsExtension implements IExtension {
   }
 
   public deactivate(): void {
-    return this.context.subscriptions.forEach((sub) => void sub.dispose());
+    return Context.subscriptions.forEach((sub) => void sub.dispose());
   }
 
   private getIssueTemplate(name: string) {
@@ -225,7 +226,7 @@ export class SQLToolsExtension implements IExtension {
   }
 
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
-    this.context.subscriptions.push(
+    Context.subscriptions.push(
       commands[type](`${EXT_NAME}.${command}`, async (...args) => {
         log.extend('info')(`Executing ${EXT_NAME}.${command}`)
         this.onWillRunCommandEmitter.fire({ command, args });
@@ -241,15 +242,14 @@ export class SQLToolsExtension implements IExtension {
     );
     return this;
   }
-
-  constructor(public context: ExtensionContext) {}
 }
 
 let instance: SQLToolsExtension;
-export function activate(context: ExtensionContext) {
+export function activate(ctx: ExtensionContext) {
+  Context.set(ctx);
   if (instance) return;
   migrateFilesToNewPaths();
-  instance = new SQLToolsExtension(context);
+  instance = new SQLToolsExtension();
   instance
     .registerPlugin(FormatterPlugin)
     .registerPlugin(AutoRestartPlugin)

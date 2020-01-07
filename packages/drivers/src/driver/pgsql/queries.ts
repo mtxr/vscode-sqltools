@@ -1,14 +1,13 @@
-import { IBaseQueries } from '@sqltools/types';
 import { TREE_SEP } from '@sqltools/core/constants';
 import queryFactory from '@sqltools/core/utils/query/factory';
+import { IBaseQueries, IExpectedResult, NSDatabase } from '@sqltools/types';
 
-export default {
-  describeTable: `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
-      WHERE
-        TABLE_NAME = ':table'
-        AND TABLE_CATALOG = ':catalog'
-        AND TABLE_SCHEMA = ':schema'`,
-  fetchColumns: `
+const describeTable = `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
+  WHERE
+    TABLE_NAME = ':table'
+    AND TABLE_CATALOG = ':catalog'
+    AND TABLE_SCHEMA = ':schema'`;
+const fetchColumns = `
 SELECT
   C.TABLE_NAME AS tableName,
   C.COLUMN_NAME AS columnName,
@@ -42,12 +41,12 @@ WHERE
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION
-`,
-fetchRecords: 'SELECT * FROM :table LIMIT :limit',
-fetchRecordsV2: queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0};`,
-countRecordsV2: queryFactory`SELECT count(1) AS total FROM ${p => p.table};`,
+`;
+const fetchRecords = 'SELECT * FROM :table LIMIT :limit';
+const fetchRecordsV2: IBaseQueries['fetchRecordsV2'] = queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0};`;
+const countRecordsV2: IBaseQueries['countRecordsV2'] = queryFactory`SELECT count(1) AS total FROM ${p => p.table};`;
 
-fetchTables: `
+const fetchTables = `
 SELECT
   T.TABLE_NAME AS tableName,
   T.TABLE_SCHEMA AS tableSchema,
@@ -79,8 +78,8 @@ GROUP by
   T.TABLE_CATALOG,
   T.TABLE_TYPE
 ORDER BY
-  T.TABLE_NAME;`,
-  fetchFunctions: `
+  T.TABLE_NAME;`;
+const fetchFunctions = `
 SELECT
   n.nspname AS schema,
   f.proname AS name,
@@ -97,5 +96,28 @@ FROM
 WHERE
   n.nspname not in ('pg_catalog', 'information_schema')
 ORDER BY name
-;`,
-} as IBaseQueries;
+;`;
+const fetchDatabases: () => IExpectedResult<NSDatabase.IDatabase> = queryFactory`
+SELECT
+  db.*,
+  db.datname as "label",
+  'database' as "itemType",
+  db.oid as "itemId"
+FROM pg_catalog.pg_database db
+WHERE
+  datallowconn
+  AND NOT datistemplate
+ORDER BY
+  db.datname;
+`;
+
+export default {
+  describeTable,
+  fetchColumns,
+  fetchRecords,
+  fetchRecordsV2,
+  countRecordsV2,
+  fetchTables,
+  fetchFunctions,
+  fetchDatabases,
+}

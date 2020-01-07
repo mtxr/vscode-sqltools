@@ -1,19 +1,19 @@
 import { EXT_NAME } from '@sqltools/core/constants';
-import { IConnection } from '@sqltools/types';
+import { IConnection, DatabaseDriver, MConnectionExplorer } from '@sqltools/types';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
-import { ExtensionContext, TreeItemCollapsibleState, Uri, commands } from 'vscode';
+import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
 import { getIconPathForDriver } from '@sqltools/core/utils/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
 import ContextValue from '../context-value';
 import logger from '@sqltools/core/log';
+import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('conn-explorer');
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
-  public static icons: { [driver: string]: { active: SidebarAbstractItem['iconPath']; connected: SidebarAbstractItem['iconPath']; disconnected: SidebarAbstractItem['iconPath'] } } = {};
   public parent = null;
 
   public get contextValue() {
@@ -22,6 +22,15 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
   public tree: {
     [id: string]: SidebarResourceGroup;
   } = {};
+
+  public async checkItemsCache() {
+    if (this.conn.driver === DatabaseDriver['PostgreSQL']) {
+      const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAME}.getChildrenForTreeItem`, { conn: this.conn, itemType: 'root', itemId: this.getId() });
+      items.forEach(item => {
+        this.addItem(new SidebarResourceGroup(item.label, item.itemType));
+      });
+    }
+  }
   public get items() {
     return asArray<SidebarResourceGroup>(this.tree);
   }
@@ -49,6 +58,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
       if (!this.isConnected) {
         await commands.executeCommand(`${EXT_NAME}.selectConnection`, this);
       }
+      await this.checkItemsCache();
       return this.items;
     } catch(e) {
       return null;
@@ -64,37 +74,8 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
     }
   }
 
-  constructor(context: ExtensionContext, public conn: IConnection) {
+  constructor(public conn: IConnection) {
     super(conn.name, TreeItemCollapsibleState.None);
-    try {
-      
-      if (!SidebarConnection.icons.default) {
-        SidebarConnection.icons.defaut = {
-          active: {
-            dark: context.asAbsolutePath('icons/database-active-dark.svg'),
-            light: context.asAbsolutePath('icons/database-active-light.svg')
-          },
-          connected: {
-            dark: context.asAbsolutePath('icons/database-dark.svg'),
-            light: context.asAbsolutePath('icons/database-light.svg'),
-          },
-          disconnected: {
-            dark: context.asAbsolutePath('icons/database-disconnected-dark.svg'),
-            light: context.asAbsolutePath('icons/database-disconnected-light.svg'),
-          }
-        };
-      }
-  
-      if (!SidebarConnection.icons[conn.driver]) {
-        SidebarConnection.icons[conn.driver] = {
-          active: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'active'))),
-          connected: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'default'))),
-          disconnected: Uri.parse(context.asAbsolutePath(getIconPathForDriver(conn.driver, 'inactive'))),
-        };
-      }
-    } catch (error) {
-      log.extend('error')(error);
-    }
   }
   public get iconPath() {
     try {
@@ -156,6 +137,12 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
       return Uri.parse(this.conn.icons[type]);
     }
 
-    return SidebarConnection.icons[this.conn.driver][type];
+    const typeMap = {
+      active: 'active',
+      connected: 'default',
+      disconnected: 'inactive',
+    };
+
+    return Uri.parse(Context.asAbsolutePath(getIconPathForDriver(this.conn.driver, typeMap[type] as any || 'default')));
   }
 }

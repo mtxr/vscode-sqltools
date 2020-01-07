@@ -6,6 +6,7 @@ import vscode from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
 import { getNameFromId } from '@sqltools/core/utils';
 import path from 'path';
+import Context from '@sqltools/vscode/context';
 
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
@@ -13,8 +14,8 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   protected isOpen = false;
 
-  constructor(context: vscode.ExtensionContext, private client: ILanguageClient, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
-    super(context, iconsPath, viewsPath);
+  constructor(private client: ILanguageClient, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
+    super(iconsPath, viewsPath);
 
     this.onDidDispose(() => {
       this.isOpen = false;
@@ -119,9 +120,9 @@ export default class ResultsWebviewManager {
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
-  constructor(private context: vscode.ExtensionContext, private client: ILanguageClient) {
-    this.iconsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
-    this.viewsPath = vscode.Uri.file(path.resolve(this.context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
+  constructor(private client: ILanguageClient) {
+    this.iconsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
+    this.viewsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }
 
   dispose = () => {
@@ -129,7 +130,7 @@ export default class ResultsWebviewManager {
   }
 
   private createForId = (connId: string) => {
-    this.resultsMap[connId] = new ResultsWebview(this.context, this.client, this.iconsPath, this.viewsPath);
+    this.resultsMap[connId] = new ResultsWebview(this.client, this.iconsPath, this.viewsPath);
     return this.resultsMap[connId];
   }
 

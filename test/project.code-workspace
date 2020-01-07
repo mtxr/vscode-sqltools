@@ -42,7 +42,7 @@
       "indentSize": 2,
       "reservedWordCase": "upper"
     },
-    "sqltools.autoConnectTo": ["PGSQL"],
+    // "sqltools.autoConnectTo": ["PGSQL"],
     "sqltools.flattenGroupsIfOne": false,
     "sqltools.connections": [
       {

@@ -15,7 +15,6 @@ export declare type CommandEventHandler<T> = (evt: T) => void;
 
 export declare interface IExtension {
   client: ILanguageClient;
-  context: ExtensionContext;
   activate(): void;
   deactivate(): void;
   registerPlugin(plugin: IExtensionPlugin): this;
