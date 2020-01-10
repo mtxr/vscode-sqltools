@@ -9,7 +9,7 @@ import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import makeDir from 'make-dir';
 import { dirname } from 'path';
 
-const SQLite3Version = '4.0.8';
+const SQLite3Version = '4.1.1';
 
 export default class SQLite extends GenericDialect<SQLiteLib.Database> implements ConnectionDialect {
 
