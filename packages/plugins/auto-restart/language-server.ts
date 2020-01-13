@@ -1,7 +1,8 @@
-import SQLTools from '@sqltools/core/plugin-api';
 import { ExitCalledNotification } from './contracts';
+import telemetry from '@sqltools/core/utils/telemetry';
+import { ILanguageServerPlugin } from '@sqltools/types';
 
-const AutoRestartPlugin: SQLTools.LanguageServerPlugin = {
+const AutoRestartPlugin: ILanguageServerPlugin = {
   register: server => {
     const nodeExit = process.exit;
     process.exit = ((code?: number): void => {
@@ -14,7 +15,7 @@ const AutoRestartPlugin: SQLTools.LanguageServerPlugin = {
     process.on('uncaughtException', (error: any) => {
       let message: string;
       if (error) {
-        server.telemetry.registerException(error, { type: 'uncaughtException' })
+        telemetry.registerException(error, { type: 'uncaughtException' })
         if (typeof error.stack === 'string') {
           message = error.stack;
         } else if (typeof error.message === 'string') {
@@ -26,7 +27,7 @@ const AutoRestartPlugin: SQLTools.LanguageServerPlugin = {
         }
       }
       if (message) {
-        server.telemetry.registerInfoMessage(message);
+        telemetry.registerMessage('error', message);
       }
     });
   },

@@ -1,9 +1,14 @@
-import { InvalidActionException } from '@sqltools/core/exception';
-import { Settings } from '@sqltools/core/interface';
-import packageJson from '@sqltools/extension/package.json';
-const { contributes: { configuration: { properties: defaults } } } = packageJson;
+import { ISettings as ISettingsProps } from '@sqltools/types';
+import { InvalidActionError } from '@sqltools/core/exception';
 
-let settings: Settings & { inspect?: (prop) => { defaultValue: any } } = {};
+interface ISettings extends ISettingsProps {
+  get?: typeof get;
+  update?: typeof update;
+  addOnUpdateHook?: typeof addOnUpdateHook;
+  inspect?: (prop) => { defaultValue: any };
+}
+
+let settings: Partial<ISettings> = {};
 const onUpdateHooks: (() => any)[] = [];
 function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
   const keys: string [] = configKey.split('.');
@@ -18,15 +23,12 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
   return setting;
 }
 
-function update(newSettings: typeof settings) {
+function update(newSettings: ISettings) {
   settings = newSettings;
   if (!settings.inspect) {
     // inspect implementation for language server.
-    settings.inspect = prop => {
-      const key = `sqltools.${prop}`;
-      return {
-        defaultValue: key in defaults ? defaults[key].default : undefined,
-      }
+    settings.inspect = () => {
+      throw new Error(`Inspect doesnt exist within ${process.env.PRODUCT} context`);
     };
   }
   onUpdateHooks.forEach(cb => cb());
@@ -49,11 +51,10 @@ const handler = {
     return undefined;
   },
   set() {
-    throw new InvalidActionException('Cannot set settings value directly!');
+    throw new InvalidActionError('Cannot set settings value directly!');
   },
 };
 
-type ExtendedSettings = Settings & { get: typeof get, update: typeof update, addOnUpdateHook: typeof addOnUpdateHook };
-const ConfigManager = new Proxy<ExtendedSettings>(<any>settings, handler);
+const ConfigManager = new Proxy<ISettings>(settings, handler);
 
 export default ConfigManager;

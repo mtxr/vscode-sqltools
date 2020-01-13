@@ -1,9 +1,9 @@
-import GenericException from './generic';
-export class EnvironmentException extends GenericException {
+import GenericError from './generic';
+export class EnvironmentError extends GenericError {
   public name = 'EnvironmentError';
   constructor(message: string = 'Could not retrived env vars') {
     super(message);
   }
 }
 
-export default EnvironmentException;
+export default EnvironmentError;

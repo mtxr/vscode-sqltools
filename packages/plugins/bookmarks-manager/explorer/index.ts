@@ -1,11 +1,11 @@
-import logger from '@sqltools/core/log/vscode';
+import logger from '@sqltools/core/log';
 import { EventEmitter, TreeDataProvider,TreeView, ExtensionContext } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { getHome } from '@sqltools/core/utils';
+import { getDataPath } from '@sqltools/core/utils/persistence';
 import fs from 'fs';
-import path from 'path';
+const log = logger.extend('book-man:explorer');
 
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
 
@@ -48,11 +48,11 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   private get oldFilePath() {
-    return path.join(getHome(), `.Bookmarks.SQLToolsStorage.json`);
+    return this.asAbsolutePath('Bookmarks.json');
   }
 
   private get filePath() {
-    return path.join(this.asAbsolutePath('Bookmarks.json'));
+    return getDataPath('Bookmarks.json');
   }
 
   /**
@@ -63,14 +63,6 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     if (!fs.existsSync(this.oldFilePath)) return;
     try {
       fs.renameSync(this.oldFilePath, this.filePath);
-      let data = {};
-      try {
-        data = JSON.parse(fs.readFileSync(this.filePath).toString('utf8'))
-      } catch (error) {}
-      const Bookmarks = {
-        Ungrouped: data,
-      };
-      fs.writeFileSync(this.filePath, JSON.stringify(Bookmarks));
     } catch (e) {}
   }
 
@@ -89,7 +81,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
       })
 
     } catch(e) {
-      logger.error('Error reading bookmarks:', e);
+      log.extend('error')('Error reading bookmarks:', e);
     }
   }
 

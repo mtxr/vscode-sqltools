@@ -1,5 +1,5 @@
-import Connection from '@sqltools/core/connection';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import Connection from '@sqltools/language-server/connection';
+import { NSDatabase } from '@sqltools/types';
 
 function Connect(conn: Connection) {
   return { type: Connect.type, payload: conn };
@@ -11,7 +11,7 @@ function Disconnect(conn: Connection) {
 }
 Disconnect.type = 'Disconnect';
 
-function QuerySuccess(conn: Connection, { results }: { results: DatabaseInterface.QueryResults[] }) {
+function QuerySuccess(conn: Connection, { results }: { results: NSDatabase.IResult[] }) {
   return { type: QuerySuccess.type, payload: { conn, results } };
 }
 QuerySuccess.type = 'QuerySuccess';
@@ -19,9 +19,9 @@ QuerySuccess.type = 'QuerySuccess';
 function ConnectionData(
   conn: Connection,
   data: {
-    tables: DatabaseInterface.Table[];
-    columns?: DatabaseInterface.TableColumn[];
-    functions: DatabaseInterface.Function[];
+    tables: NSDatabase.ITable[];
+    columns?: NSDatabase.IColumn[];
+    functions: NSDatabase.IFunction[];
   }
 ) {
   return { type: ConnectionData.type, payload: { conn, ...data } };

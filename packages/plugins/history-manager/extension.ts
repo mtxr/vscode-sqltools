@@ -1,7 +1,7 @@
-import SQLTools, { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase, IExtensionPlugin, IExtension, ICommandSuccessEvent } from '@sqltools/types';
 import HistoryExplorer from './explorer';
 import { getNameFromId } from '@sqltools/core/utils';
-import { quickPick, insertText } from '@sqltools/core/utils/vscode';
+import { quickPick, insertText } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';
@@ -12,10 +12,10 @@ const hookedCommands = [
   'executeQueryFromFile',
 ];
 
-export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
+export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private explorer: HistoryExplorer;
-  private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
-  private addToHistoryHook = (evt: SQLTools.CommandSuccessEvent<DatabaseInterface.QueryResults[]>) => {
+  private errorHandler: IExtension['errorHandler'];
+  private addToHistoryHook = (evt: ICommandSuccessEvent<NSDatabase.IResult[]>) => {
     evt.result.forEach(r => {
       this.explorer.addItem(getNameFromId(r.connId), r.query);
     });
@@ -41,7 +41,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       });
   }
 
-  private ext_runFromHistory = async (entry?: HistoryTreeItem): Promise<DatabaseInterface.QueryResults[]> => {
+  private ext_runFromHistory = async (entry?: HistoryTreeItem): Promise<NSDatabase.IResult[]> => {
     let query: string;
     if (entry && entry.query) {
       query = entry.query
@@ -52,6 +52,10 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     } catch (e) {
       this.errorHandler('Error while running query.', e);
     }
+  }
+
+  private ext_clearHistory = async () => {
+    this.explorer.clear();
   }
 
   private ext_editHistory = async (entry?: HistoryTreeItem): Promise<void> => {
@@ -67,13 +71,14 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  public register(extension: SQLTools.ExtensionInterface) {
+  public register(extension: IExtension) {
     if (this.explorer) return; // do not register twice
 
     this.explorer = new HistoryExplorer(extension.context);
     this.errorHandler = extension.errorHandler;
     hookedCommands.forEach(cmd => extension.addAfterCommandSuccessHook(cmd, this.addToHistoryHook));
     extension.registerCommand('runFromHistory', this.ext_runFromHistory)
-      .registerCommand('editHistory', this.ext_editHistory);
+      .registerCommand('editHistory', this.ext_editHistory)
+      .registerCommand('clearHistory', this.ext_clearHistory);
   }
 }

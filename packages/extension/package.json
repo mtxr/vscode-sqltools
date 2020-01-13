@@ -137,9 +137,13 @@
                 "category": "SQLTools Bookmarks"
             },
             {
-                "title": "Delete All",
+                "title": "Clear",
                 "command": "SQLTools.clearBookmarks",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/trash-light.svg",
+                    "dark": "icons/trash-dark.svg"
+                }
             },
             {
                 "title": "Delete",
@@ -149,22 +153,47 @@
             {
                 "title": "Edit",
                 "command": "SQLTools.editBookmark",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/edit-light.svg",
+                    "dark": "icons/edit-dark.svg"
+                }
             },
             {
                 "title": "Run",
                 "command": "SQLTools.runFromBookmarks",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/run-light.svg",
+                    "dark": "icons/run-dark.svg"
+                }
             },
             {
                 "title": "Run",
                 "command": "SQLTools.runFromHistory",
-                "category": "SQLTools History"
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/run-light.svg",
+                    "dark": "icons/run-dark.svg"
+                }
             },
             {
                 "title": "Edit From History",
                 "command": "SQLTools.editHistory",
-                "category": "SQLTools History"
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/edit-light.svg",
+                    "dark": "icons/edit-dark.svg"
+                }
+            },
+            {
+                "title": "Clear",
+                "command": "SQLTools.clearHistory",
+                "category": "SQLTools History",
+                "icon": {
+                    "light": "icons/trash-light.svg",
+                    "dark": "icons/trash-dark.svg"
+                }
             },
             {
                 "title": "Run Current Query",
@@ -459,6 +488,10 @@
                                 "type": "string",
                                 "description": "Connection name"
                             },
+                            "group": {
+                                "type": "string",
+                                "description": "Connection group name"
+                            },
                             "server": {
                                 "type": "string",
                                 "description": "Server address",
@@ -504,7 +537,7 @@
                                 "required": false,
                                 "default": false
                             },
-                            "dialect": {
+                            "driver": {
                                 "type": "string",
                                 "enum": [
                                     "AWS Redshift",
@@ -518,8 +551,39 @@
                                     "SAPHana",
                                     "SQLite"
                                 ],
-                                "description": "Connection Dialect",
+                                "description": "Connection Driver",
                                 "required": false
+                            },
+                            "databaseFilter": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "description": "Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all",
+                                "default": null,
+                                "properties": {
+                                    "show": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "Name database you want to show",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    },
+                                    "hide": {
+                                        "type": "array",
+                                        "default": [],
+                                        "description": "Name database you don't want to show",
+                                        "items": {
+                                            "type": "string"
+                                        }
+                                    }
+                                }
+                            },
+                            "dialect": {
+                                "type": "string",
+                                "description": "Connection Driver",
+                                "deprecationMessage": "***DEPRECATED*** Replaced by `driver` property. Use `driver` property instead."
                             },
                             "connectString": {
                                 "type": [
@@ -534,7 +598,7 @@
                                     "null",
                                     "object"
                                 ],
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
                                 "required": false,
                                 "default": {},
                                 "properties": {
@@ -585,7 +649,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "required": false,
@@ -605,7 +669,7 @@
                                 ],
                                 "default": {},
                                 "required": false,
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
@@ -666,7 +730,7 @@
                                 "current",
                                 "end"
                             ],
-                            "description": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
+                            "markdownDescription": "Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn"
                         },
                         "customization": {
                             "type": "object",
@@ -742,8 +806,12 @@
                     "description": "Dependency manager settings",
                     "default": {
                         "packageManager": "npm",
-                        "installArgs": ["install"],
-                        "runScriptArgs": ["run"],
+                        "installArgs": [
+                            "install"
+                        ],
+                        "runScriptArgs": [
+                            "run"
+                        ],
                         "autoAccept": false
                     },
                     "properties": {
@@ -755,17 +823,37 @@
                         "installArgs": {
                             "type": "array",
                             "description": "Array of args passed when installing. If you use yarn, this shoud be set to `[\"add\"]`",
-                            "default": ["install"]
+                            "default": [
+                                "install"
+                            ]
                         },
                         "runScriptArgs": {
                             "type": "array",
                             "description": "Array of args passed when runnning npm scripts.",
-                            "default": ["run"]
+                            "default": [
+                                "run"
+                            ]
                         },
                         "autoAccept": {
                             "type": "boolean",
                             "default": false,
                             "description": "Ignore confirmation requests to install or updagre dependencies."
+                        }
+                    }
+                },
+                "sqltools.connectionExplorer.groupConnected": {
+                  "type": "boolean",
+                  "description": "Group connection in two groups, 'Connected' and 'Not Connected'",
+                  "default": false
+                },
+                "sqltools.debug": {
+                    "type": "object",
+                    "description": "SQLTools debug settings",
+                    "default": {},
+                    "properties": {
+                        "namespaces": {
+                            "type": "string",
+                            "markdownDescription": "Log debug namespaces. Eg: `ext:*,-*:debug`. Thist will print only extension logs and will ignore debug messages. See: https://github.com/visionmedia/debug/blob/4.1.1/README.md"
                         }
                     }
                 }
@@ -859,6 +947,11 @@
                     "command": "SQLTools.clearBookmarks",
                     "when": "view == SQLTools/bookmarksExplorer",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "SQLTools.clearHistory",
+                    "when": "view == SQLTools/historyExplorer",
+                    "group": "navigation@1"
                 }
             ],
             "view/item/context": [
@@ -938,6 +1031,11 @@
                     "group": "inline@1"
                 },
                 {
+                    "command": "SQLTools.editHistory",
+                    "when": "view == SQLTools/historyExplorer && viewItem == history.item",
+                    "group": "inline@0"
+                },
+                {
                     "command": "SQLTools.runFromHistory",
                     "when": "view == SQLTools/historyExplorer && viewItem == history.item",
                     "group": "inline@0"
@@ -954,6 +1052,11 @@
                 },
                 {
                     "command": "SQLTools.runFromBookmarks",
+                    "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
+                    "group": "inline@1"
+                },
+                {
+                    "command": "SQLTools.editBookmark",
                     "when": "view == SQLTools/bookmarksExplorer && viewItem == bookmark.item",
                     "group": "inline@0"
                 },
@@ -1020,7 +1123,6 @@
         "vscode:prepublish": "yarn run compile",
         "compile": "cross-env NODE_ENV=production ./node_modules/.bin/webpack",
         "watch": "cross-env NODE_ENV=development ./node_modules/.bin/webpack --watch --info-verbosity verbose",
-        "postinstall": "yarn run vscode-install",
         "postversion": "vsce publish && git push && git push --tags"
     },
     "devDependencies": {
@@ -1031,6 +1133,7 @@
         "copy-webpack-plugin": "^5.0.0",
         "cross-env": "^5.2.0",
         "css-loader": "^3.2.0",
+        "dotenv": "^8.2.0",
         "file-loader": "^4.2.0",
         "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
@@ -1041,8 +1144,8 @@
         "terser-webpack-plugin": "^1.3.0",
         "ts-jest": "^24.0.2",
         "ts-loader": "^6.0.0",
-        "typescript": "^3.4.1",
-        "vscode": "^1.1.36",
+        "typescript": "^3.7.3",
+        "vscode-test": "^1.2.3",
         "webpack": "^4.35.0",
         "webpack-cli": "^3.3.5"
     },

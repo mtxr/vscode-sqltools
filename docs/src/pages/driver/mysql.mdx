@@ -14,7 +14,7 @@ Connection example:
 {
   "name": "MySQL",
   "server": "localhost",
-  "dialect": "MySQL",
+  "driver": "MySQL",
   "port": 3306,
   "database": "test_db",
   "username": "root",
@@ -28,7 +28,7 @@ Using a socket file example:
 ```json
 {
   "name": "MySQL",
-  "dialect": "MySQL",
+  "driver": "MySQL",
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -47,7 +47,7 @@ MySQL driver specific options can be passed using `mysqlOptions` settings.
 {
   "name": "MySQL",
   "server": "localhost",
-  "dialect": "MySQL",
+  "driver": "MySQL",
   "port": 5433,
   "database": "test_db",
   "username": "root",
@@ -72,7 +72,7 @@ Extra options can be used as defined in the connectors documentation.
 * For MySQL xprotocol
   * See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
 
-They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/dialect/mysql/index.ts .
+They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/mysql/index.ts .
 
 ## Know Errors and How to Fix
 
@@ -91,7 +91,7 @@ Example configuration:
     {
       "askForPassword": true,
       "connectionTimeout": 30,
-      "dialect": "MySQL",
+      "driver": "MySQL",
       "name": "LocalHost",
       "port": 33060,
       "server": "127.0.0.1",

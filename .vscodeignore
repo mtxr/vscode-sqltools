@@ -22,8 +22,6 @@ __mocks__/**
 **/*example*/**
 static/**
 **/static/**
-.test-database/**
-**/.test-database/**
 packages/**
 **/packages/**
 package-lock.json

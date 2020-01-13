@@ -1,10 +1,10 @@
-import SQLTools from '@sqltools/core/plugin-api';
 import { languages, Disposable } from 'vscode';
 import SQLToolsCodeLensProvider from './provider';
 import ConfigManager from '@sqltools/core/config-manager';
 import * as Utils from '@sqltools/core/utils';
+import { IExtensionPlugin, IExtension } from '@sqltools/types';
 
-export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
+export default class CodeLensPlugin implements IExtensionPlugin {
   private codelensDisposable: Disposable;
   private registeredLanguages: string[] = [];
   private provider: SQLToolsCodeLensProvider;
@@ -14,7 +14,7 @@ export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
     this.codelensDisposable = null;
   }
 
-  async createCodelens(context: SQLTools.ExtensionInterface['context']) {
+  async createCodelens(context: IExtension['context']) {
     const oldLang = this.registeredLanguages.sort(Utils.sortText);
     const newLang = ConfigManager.codelensLanguages.sort(Utils.sortText);
     const shouldRegister = newLang.length > 0 && (oldLang.join() !== newLang.join());
@@ -32,7 +32,7 @@ export default class CodeLensPlugin implements SQLTools.ExtensionPlugin {
     this.registeredLanguages = ConfigManager.codelensLanguages;
   }
 
-  register(extension: SQLTools.ExtensionInterface) {
+  register(extension: IExtension) {
     extension.context.subscriptions.push(this);
     this.createCodelens(extension.context);
     ConfigManager.addOnUpdateHook(() => {

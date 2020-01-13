@@ -1,10 +1,10 @@
-import { VSCodeWebviewAPI } from './interfaces';
+import { IVSCodeWebviewAPI } from '../interfaces';
 
-let vscode: VSCodeWebviewAPI;
+let vscode: IVSCodeWebviewAPI;
 
-declare var acquireVsCodeApi: () => VSCodeWebviewAPI;
+declare var acquireVsCodeApi: () => IVSCodeWebviewAPI;
 
 export default function getVscode() {
   vscode = vscode || acquireVsCodeApi();
-  return vscode as VSCodeWebviewAPI;
+  return vscode as IVSCodeWebviewAPI;
 }

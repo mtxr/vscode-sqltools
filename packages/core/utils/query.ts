@@ -1,19 +1,18 @@
-import { Settings } from '../interface';
-import { format } from '@sqltools/plugins/formatter/utils';
+import { ISettings, NSDatabase } from '@sqltools/types';
+import formatter from '@sqltools/formatter/src/sqlFormatter';
 import multipleQueriesParse from './query/parse';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 
 /**
  * Parse multiple queries to an array of queries
  *
  * @export
  * @param {string} query
- * @param {('pg' | 'mysql' | 'mssql')} [dialect='mysql']
+ * @param {('pg' | 'mysql' | 'mssql')} [driver='mysql']
  * @param {string} [delimiter=';']
  * @returns {string[]}
  */
-export function parse(query: string, dialect: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): string[] {
-  return multipleQueriesParse(query, dialect);
+export function parse(query: string, driver: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): string[] {
+  return multipleQueriesParse(query, driver);
   // return fixedQuery.split(/\s*;\s*(?=([^']*'[^']*')*[^']*$)/g).filter((v) => !!v && !!`${v}`.trim()).map(v => `${v};`);
 }
 /**
@@ -40,14 +39,14 @@ export function cleanUp(query: string = '') {
  *
  * @export
  * @param {string} table
- * @param {Array<DatabaseInterface.TableColumn>} cols
- * @param {Settings['format']} [formatOptions]
+ * @param {Array<NSDatabase.IColumn>} cols
+ * @param {ISettings['format']} [formatOptions]
  * @returns {string}
  */
 export function generateInsert(
   table: string,
-  cols: Array<DatabaseInterface.TableColumn>,
-  formatOptions?: Settings['format'],
+  cols: Array<NSDatabase.IColumn>,
+  formatOptions?: ISettings['format'],
 ): string {
   let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.columnName).join(', ')}) VALUES (`;
   cols.forEach((col, index) => {
@@ -71,7 +70,6 @@ export function getQueryParameters(query: string, regexStr: string) {
 
   let match;
   while ((match = regex.exec(query)) !== null) {
-    console.log(`Found ${match[0]}. Next starts at ${regex.lastIndex}.`);
     const queryPart = query.substring(Math.max(0, regex.lastIndex - 15), Math.min(query.length, regex.lastIndex + 15)).replace(/[\r\n]/g, '').replace(/\s+/g, ' ').trim();
     if (!paramsMap[match[0]]) {
       paramsMap[match[0]] = {
@@ -83,3 +81,27 @@ export function getQueryParameters(query: string, regexStr: string) {
   return Object.values(paramsMap);
 }
 
+
+const dollarRegex = /\$([^\s]+)/gi;
+/**
+ * Format query with vscode snippet parameters
+ * @param query
+ * @param originalQuery
+ */
+function fixParameters(query: string, originalQuery: string) {
+  if (!dollarRegex.test(originalQuery)) return query;
+  const matches = originalQuery.match(dollarRegex) || [];
+
+  return matches.reduce((text, match) => {
+    const matchEscaped = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    return text.replace(new RegExp('\\\$' + ' +' + matchEscaped.substr(2), 'g'), match.replace(/\$/g, '$$$$'));
+  }, query);
+}
+
+export function format(query: string, formatOptions: Partial<{ indentSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
+  const { reservedWordCase = null, indentSize = 2 } = formatOptions;
+  return fixParameters(formatter.format(query, {
+    indent: ' '.repeat(indentSize),
+    reservedWordCase,
+  }), query);
+}

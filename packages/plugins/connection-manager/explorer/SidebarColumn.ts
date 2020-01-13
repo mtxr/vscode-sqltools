@@ -1,9 +1,10 @@
 import { ExtensionContext, TreeItemCollapsibleState } from 'vscode';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { NSDatabase } from '@sqltools/types';
 import SidebarAbstractItem from './SidebarAbstractItem';
+import ContextValue from '../context-value';
 export default class SidebarColumn extends SidebarAbstractItem<null> {
   static icons;
-  public contextValue = 'connection.column';
+  public contextValue = ContextValue.COLUMN;
   public value: string;
   public get items(): null { return null; }
   public addItem(_: never): never {
@@ -17,7 +18,7 @@ export default class SidebarColumn extends SidebarAbstractItem<null> {
     return `${(this.column.type || '').toUpperCase()}${typeSize}`;
   }
   public get conn() { return this.parent.conn; }
-  constructor(context: ExtensionContext, public column: DatabaseInterface.TableColumn) {
+  constructor(context: ExtensionContext, public column: NSDatabase.IColumn) {
     super(column.columnName, TreeItemCollapsibleState.None);
     this.value = column.columnName;
     if (!SidebarColumn.icons) {

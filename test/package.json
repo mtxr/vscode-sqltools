@@ -1,0 +1,16 @@
+{
+  "name": "@sqltools/test",
+  "private": true,
+  "scripts": {
+    "up": "docker-compose -f docker/docker-compose.yml up -d",
+    "up:mysql": "yarn run up mysql",
+    "up:mssql": "yarn run up mssql",
+    "up:mysqlv5": "yarn run up mysqlv5",
+    "up:mysql_xprotocol": "yarn run up mysql_xprotocol",
+    "up:oracle": "echo 'Oracle docker image currently not working'",
+    "up:pgsql": "yarn run up pgsql",
+    "up:cql_cassandra": "yarn run up cql_cassandra",
+    "up:cql_scylla": "yarn run up cql_scylla",
+    "preup:mysql": "bash ./docker/mysql/prepare.sh"
+  }
+}

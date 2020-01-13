@@ -1,66 +1,53 @@
-import { window as Win, workspace, ConfigurationTarget, window, ProgressLocation, commands } from 'vscode';
-import { InstallDepRequest, MissingModuleNotification, ElectronNotSupportedNotification, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
-import SQLTools from '@sqltools/core/plugin-api';
-import { openExternal } from '@sqltools/core/utils/vscode';
-import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { window as Win, window, ProgressLocation, commands } from 'vscode';
+import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
+import { openExternal } from '@sqltools/vscode/utils';
+import { EXT_NAME, DOCS_ROOT_URL, MissingModuleNotification } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
+import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
 
-export default class DependencyManager implements SQLTools.ExtensionPlugin {
-  public client: SQLTools.LanguageClientInterface;
-  private extension: SQLTools.ExtensionInterface;
-  register(extension: SQLTools.ExtensionInterface) {
+export default class DependencyManager implements IExtensionPlugin {
+  public client: ILanguageClient;
+  private extension: IExtension;
+  register(extension: IExtension) {
     this.extension = extension;
     this.client = extension.client;
-    this.client.onNotification(MissingModuleNotification, param => this.requestToInstall(param));
-    this.client.onNotification(DependeciesAreBeingInstalledNotification, param => this.jobRunning(param));
-    this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
+    this.client.onNotification(MissingModuleNotification, this.requestToInstall);
+    this.client.onNotification(DependeciesAreBeingInstalledNotification, this.jobRunning);
   }
 
-  private electronNotSupported = async () => {
-    const r = await Win.showInformationMessage(
-      'Electron is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
-      'Enable now',
-    );
-    if (!r) return;
-    await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
-    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
-    try { await workspace.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
-    const res = await Win.showInformationMessage(
-      '\'sqltools.useNodeRuntime\' enabled. You must reload VSCode to take effect.', 'Reload now');
-    if (!res) return;
-    commands.executeCommand('workbench.action.reloadWindow');
-  }
+  c
 
-  private installingDialects: string[] = [];
-  private requestToInstall = async ({ moduleName, moduleVersion, conn, action = 'install' }) => {
-    conn = conn || {};
+  private installingDrivers: string[] = [];
+  private requestToInstall = async ({ conn, action = 'install', deps = [] }: { conn: IConnection; action: 'upgrade' | 'install'; deps: NodeDependency[]}) => {
+    if (!conn) return;
     const installNow = action === 'upgrade' ? 'Upgrade now' : 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
     const dependencyManagerSettings = ConfigManager.dependencyManager;
     const autoUpdateOrInstall = dependencyManagerSettings && dependencyManagerSettings.autoAccept;
+    const dependenciesName = deps.map((d, i) => `${d.name}@${d.version || 'latest'}${i === deps.length - 2 ? ' and ' : (i === deps.length - 1 ? '' : ', ')}`).join('');
     try {
       const r = autoUpdateOrInstall ? installNow : await Win.showInformationMessage(
-        `You need to ${action} "${moduleName}@${moduleVersion}" to connect to ${conn.name}.`,
+        `You need to ${action} "${dependenciesName}" to connect to ${conn.name}.`,
         ...options,
       );
       switch (r) {
         case installNow:
-          this.installingDialects.push(conn.dialect);
+          this.installingDrivers.push(conn.driver);
           await window.withProgress({
             location: ProgressLocation.Notification,
             title: 'SQLTools',
             cancellable: false,
           }, async (progress) => {
-            progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDialects.join(', ')} dependencies` });
-            const result = await this.client.sendRequest(InstallDepRequest, { dialect: conn.dialect });
+            progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDrivers.join(', ')} dependencies` });
+            const result = await this.client.sendRequest(InstallDepRequest, { deps });
             return result;
           });
-          this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
+          this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
-            `"${moduleName}@${moduleVersion}" installed!\n
+            `"${dependenciesName}" installed!\n
 Go ahead and connect!`,
             ...opt
           );
@@ -69,12 +56,12 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/driver/${conn.dialect ? conn.dialect.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/driver/${conn.driver ? conn.driver.toLowerCase() : ''}`);
           break;
       }
     } catch (error) {
-      this.installingDialects = this.installingDialects.filter(v => v !== conn.dialect);
-      this.extension.errorHandler(`Failed to install dependencies for ${conn.dialect}:`, error);
+      this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
+      this.extension.errorHandler(`Failed to install dependencies for ${conn.driver}:`, error);
     }
   }
 

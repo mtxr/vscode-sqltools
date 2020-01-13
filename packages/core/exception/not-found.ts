@@ -1,4 +1,4 @@
-import GenericException from './generic';
-export class NotFoundException extends GenericException { }
+import GenericError from './generic';
+export class NotFoundError extends GenericError { }
 
-export default NotFoundException;
+export default NotFoundError;

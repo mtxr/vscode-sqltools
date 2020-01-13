@@ -1,35 +1,53 @@
 import React from 'react';
 import get from 'lodash/get';
-import availableDialects from '../lib/availableDialects';
-import './ConnectionCreated.scss';
+import availableDrivers from '../lib/availableDrivers';
 import Syntax from '../../../components/Syntax';
+import Button from '../../../components/Button';
+import DriverIcon  from '../../../components/DriverIcon';
 
 const ConnectionCreated = ({ settings, action, reset }) => {
   const { id, ...connSettings } = settings;
   return (
     <>
       <h5>Review connection details</h5>
-      <hr/>
-      {get(availableDialects, [settings.dialect, 'icon']) && <img className={'selected-driver-icon'} src={`${(window as any).extRoot}/${get(availableDialects, [settings.dialect, 'icon'])}`} />}
+      <hr />
+      <DriverIcon icon={get(availableDrivers, [settings.driver, 'icon'])} />
       <div style={{ minHeight: '150px' }}>
         <h5>
           {action === 'createConnectionSuccess' && `${settings.name} added to your settings!`}
           {action === 'updateConnectionSuccess' && `${settings.name} updated!`}
         </h5>
         <details open>
-          <summary>
-            Review JSON Syntax
-          </summary>
-          <Syntax code={connSettings} language='json' style={{ width: 'calc(100% - 100px)' }}/>
+          <summary>Review JSON Syntax</summary>
+          <Syntax code={connSettings} language="json" width='calc(100% - 100px)' />
         </details>
         <div style={{ paddingTop: '50px' }}>
-          <a onClick={reset} className="btn connect" href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.selectConnection?${JSON.stringify(settings.id)}`)}>Connect now</a>
-          <a onClick={reset} className="btn delete" style={{ float: 'right' }} href={encodeURI(`command:${process.env.EXT_NAME || 'sqltools'}.deleteConnection?${JSON.stringify(settings.id)}`)}>Delete {settings.name}</a>
-          <button onClick={reset} className="btn " style={{ float: 'right' }}>Create another</button>
+          <Button.a
+            onClick={reset}
+            bg="var(--vscode-list-highlightForeground)"
+            href={encodeURI(
+              `command:${process.env.EXT_NAME || 'sqltools'}.selectConnection?${JSON.stringify(settings.id)}`
+            )}
+          >
+            Connect now
+          </Button.a>
+          <Button.a
+            onClick={reset}
+            bg="var(--vscode-editorError-foreground)"
+            float="right"
+            href={encodeURI(
+              `command:${process.env.EXT_NAME || 'sqltools'}.deleteConnection?${JSON.stringify(settings.id)}`
+            )}
+          >
+            Delete {settings.name}
+          </Button.a>
+          <Button onClick={reset} float="right">
+            Create another
+          </Button>
         </div>
       </div>
     </>
   );
-}
+};
 
 export default ConnectionCreated;

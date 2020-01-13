@@ -1,15 +1,12 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import SQLTools, { Arg0 } from '@sqltools/core/plugin-api';
-import { Telemetry } from '@sqltools/core/utils';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import store from './store';
-import { InvalidActionException } from '@sqltools/core/exception';
+import { InvalidActionError } from '@sqltools/core/exception';
+import log from '@sqltools/core/log';
+import telemetry from '@sqltools/core/utils/telemetry';
+import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
 
-class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
-  private _telemetry = new Telemetry({
-    enableTelemetry: false,
-    product: 'language-server',
-  });
+class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
@@ -25,26 +22,19 @@ class SQLToolsLanguageServer implements SQLTools.LanguageServerInterface {
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
-    this.telemetry.registerInfoMessage(`Initialized with node version:${process.version}`);
+    telemetry.registerMessage('info', `Initialized with node version:${process.version}`);
 
     this.onInitializedHooks.forEach(hook => hook(params));
   };
 
   private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
     if (params.initializationOptions.telemetry) {
-      this.telemetry.updateOpts({
-        product: 'language-server',
+      telemetry.updateOpts({
         ...params.initializationOptions.telemetry,
       });
     }
     if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
-      console.log(
-        `
-===============================
-User defined env vars:
-${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
-===============================
-`);
+      log.extend('debug')(`User defined env vars ===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
     }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
@@ -64,8 +54,8 @@ ${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigManager.update(changes.settings.sqltools);
-    if (ConfigManager.telemetry) this.telemetry.enable();
-    else this.telemetry.disable();
+    if (ConfigManager.telemetry) telemetry.enable();
+    else telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -85,19 +75,16 @@ ${JSON.stringify(params.initializationOptions.userEnvVars, null, 2)}
   }
 
   public listen() {
-    console.log(
-`
+    log.extend('info')(`SQLTools Server started!
 ===============================
-SQLTools Server started!
 Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
 ExecPath: ${process.execPath}
-===============================
-`)
+===============================`)
     this._server.listen();
     return this;
   }
 
-  public registerPlugin(plugin: SQLTools.LanguageServerPlugin) {
+  public registerPlugin(plugin: ILanguageServerPlugin) {
     plugin.register(this);
     return this;
   }
@@ -109,9 +96,9 @@ ExecPath: ${process.execPath}
     return this._server.onNotification;
   }
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
-    if (!handler) throw new InvalidActionException('Disabled registration for * handlers');
+    if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
-      console.log(`Request ${req._method || req.toString()} received`);
+      log.extend('debug')('received %s', req._method || req.toString());
       let result = handler(...args);
       if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
         result = await result;
@@ -150,13 +137,9 @@ ExecPath: ${process.execPath}
     return this._docManager;
   }
 
-  public get telemetry() {
-    return this._telemetry;
-  }
-
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
-      this.telemetry.registerException(err, { message, languageServer: true });
+      telemetry.registerException(err, { message, languageServer: true });
       this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
     };
     if (typeof error !== 'undefined') return cb(error);

@@ -8,8 +8,8 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceRoot}/.test-database/project.code-workspace",
-        "--extensionDevelopmentPath=${workspaceRoot}/../dist",
+        "${workspaceRoot}/test/project.code-workspace",
+        "--extensionDevelopmentPath=${workspaceRoot}/dist",
       ],
       "stopOnEntry": false,
       "sourceMaps": true,
@@ -17,7 +17,7 @@
         "<node_internals>/**/*.js"
       ],
       "outFiles": [
-        "${workspaceRoot}/../dist/*.js"
+        "${workspaceRoot}/dist/*.js"
       ],
       "env": {
         "NODE_ENV": "development"
@@ -26,7 +26,7 @@
     {
       "type": "node",
       "request": "attach",
-      "name": "Attach Language Server",
+      "name": "Attach LS",
       "port": 6010,
       "restart": true,
       "sourceMaps": true,
@@ -34,9 +34,15 @@
         "<node_internals>/**/*.js"
       ],
       "outFiles": [
-        "${workspaceRoot}/../dist/*.js"
+        "${workspaceRoot}/dist/*.js"
       ],
       "protocol": "inspector"
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Launch Extension and Attach LS",
+      "configurations": ["Launch Extension", "Attach LS"]
     }
   ]
 }

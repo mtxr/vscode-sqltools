@@ -37,7 +37,7 @@ jobs:
         DISPLAY: ":99.0"
       run: |
         yarn run package
-        cp ../dist/*.vsix .
+        cp ./dist/*.vsix .
 
     - name: Upload to Release
       uses: OmgImAlexis/upload-to-release@12da88e

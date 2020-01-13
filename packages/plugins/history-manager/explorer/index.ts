@@ -42,6 +42,12 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
     this.refresh();
   }
 
+  public clear() {
+    this.tree = {};
+    this.treeGroupOrder = [];
+    this.refresh();
+  }
+  
   constructor(context: ExtensionContext) {
     this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAME}/historyExplorer`, { treeDataProvider: this });
     context.subscriptions.push(this.treeView);

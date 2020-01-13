@@ -1,13 +1,13 @@
-import SQLTools from '@sqltools/core/plugin-api';
 import BookmarksExplorer from './explorer';
-import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/core/utils/vscode';
+import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
 import { EXT_NAME } from '@sqltools/core/constants';
 import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';
+import { IExtensionPlugin, IExtension } from '@sqltools/types';
 
-export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin {
+export default class BookmarksManagerPlugin implements IExtensionPlugin {
   private explorer: BookmarksExplorer;
-  private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
+  private errorHandler: IExtension['errorHandler'];
 
   private bookmarksMenu = async (): Promise<BookmarkTreeItem> => {
     const items = this.explorer.getChildren().reduce<QuickPickItem[]>((agg, group: BookmarkTreeGroup) =>
@@ -80,7 +80,7 @@ export default class BookmarksManagerPlugin implements SQLTools.ExtensionPlugin 
   }
 
 
-  public register(extension: SQLTools.ExtensionInterface) {
+  public register(extension: IExtension) {
     if (this.explorer) return; // do not register twice
 
     this.explorer = new BookmarksExplorer(extension.context);

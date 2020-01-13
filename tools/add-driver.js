@@ -73,11 +73,11 @@ const replaceName = (name, contents) => {
   const hyphenCaseName = separatorCase(name, '-');
   const snakeCaseName = separatorCase(name, '_');
   return contents
-    .replace(/example-dialect/g, hyphenCaseName)
-    .replace(/example_dialect/g, snakeCaseName)
-    .replace(/exampleDialect/g, camelCaseName)
-    .replace(/ExampleDialect/g, titleCaseName)
-    .replace(/example dialect/gi, name);
+    .replace(/example-driver/g, hyphenCaseName)
+    .replace(/example_driver/g, snakeCaseName)
+    .replace(/exampleDriver/g, camelCaseName)
+    .replace(/ExampleDriver/g, titleCaseName)
+    .replace(/example driver/gi, name);
 };
 
 getDiffContents()

@@ -1,0 +1,41 @@
+# https://code.visualstudio.com/api/working-with-extensions/continuous-integration
+
+name: Formatter Test & Build
+on: [push, pull_request]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        node-version: [8.x, 10.x, 12.x]
+
+    steps:
+    - uses: actions/checkout@v1
+      with:
+        ref: ${{ github.ref }}
+    - name: Use Node.js ${{ matrix.node-version }}
+      uses: actions/setup-node@v1
+      with:
+        node-version: ${{ matrix.node-version }}
+    - env:
+        HUSKY_SKIP_INSTALL: "true"
+      run: |
+        yarn
+
+    - name: test & build
+      env:
+        HUSKY_SKIP_INSTALL: "true"
+      run: |
+        cd packages/formatter
+        yarn
+        yarn run check
+        echo ">>> Compiled vscode-test"
+        echo ">>> Run sample integration test"
+        yarn run build
+
+    - uses: codecov/codecov-action@v1.0.2
+      with:
+        token: ${{secrets.CODECOV_TOKEN}} #required

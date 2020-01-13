@@ -1,2 +1,2 @@
-export default class GenericException extends Error {
+export default class GenericError extends Error {
 }

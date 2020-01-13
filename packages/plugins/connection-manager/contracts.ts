@@ -1,10 +1,10 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
-import { ConnectionInterface } from '@sqltools/core/interface';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import { IConnection, NSDatabase } from '@sqltools/types';
+import ContextValue from './context-value';
 
 export const GetConnectionsRequest = new RequestType<
   { connectedOnly?: boolean, sort?: 'connectedFirst' | 'name', connId?: string },
-  ConnectionInterface[],
+  IConnection[],
   Error,
   void
 >('connection/GetConnectionsRequest');
@@ -12,52 +12,52 @@ export const RefreshTreeRequest = new RequestType<{ connIds?: string[] }, void, 
   'connection/RefreshTreeRequest'
 );
 export const GetConnectionPasswordRequest = new RequestType<
-  { conn: ConnectionInterface },
+  { conn: IConnection },
   string,
   Error,
   void
 >('connection/GetConnectionPasswordRequest');
 export const RunCommandRequest = new RequestType<
-  { conn: ConnectionInterface; command: string; args: any[] },
-  DatabaseInterface.QueryResults[],
+  { conn: IConnection; command: string; args: any[] },
+  NSDatabase.IResult[],
   Error,
   void
 >('connection/RunCommandRequest');
 export const ConnectRequest = new RequestType<
-  { conn: ConnectionInterface; password?: string },
-  ConnectionInterface,
+  { conn: IConnection; password?: string },
+  IConnection,
   Error,
   void
 >('connection/ConnectRequest');
 export const TestConnectionRequest = new RequestType<
-  { conn: ConnectionInterface; password?: string },
-  ConnectionInterface,
+  { conn: IConnection; password?: string },
+  IConnection,
   Error,
   void
 >('connection/TestConnectionRequest');
 export const DisconnectRequest = new RequestType<
-  { conn: ConnectionInterface },
+  { conn: IConnection },
   void,
   Error,
   void
 >('connection/DisconnectRequest');
 export const ConnectionDataUpdatedRequest = new RequestType<
   {
-    conn: ConnectionInterface;
-    tables: DatabaseInterface.Table[];
-    columns: DatabaseInterface.TableColumn[];
-    functions: DatabaseInterface.Function[];
+    conn: IConnection;
+    tables: NSDatabase.ITable[];
+    columns: NSDatabase.IColumn[];
+    functions: NSDatabase.IFunction[];
   },
   void,
   Error,
   void
 >('connection/ConnectionDataUpdatedRequest');
 export const GetConnectionDataRequest = new RequestType<
-  { conn: ConnectionInterface },
+  { conn: IConnection },
   {
-    tables: DatabaseInterface.Table[];
-    columns: DatabaseInterface.TableColumn[];
-    functions: DatabaseInterface.Function[];
+    tables: NSDatabase.ITable[];
+    columns: NSDatabase.IColumn[];
+    functions: NSDatabase.IFunction[];
   },
   Error,
   void
@@ -86,3 +86,9 @@ export interface ProgressNotificationCompleteParams {
 };
 export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>('sqltools/window/progress/complete');
 
+export const GetChildrenForTreeItemRequest = new RequestType<
+  { conn: IConnection, contextValue: ContextValue },
+  any[], // @TODO define type
+  Error,
+  void
+>('connection/GetChildrenForTreeItemRequest');

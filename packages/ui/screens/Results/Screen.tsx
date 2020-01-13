@@ -1,27 +1,29 @@
 import React from 'react';
-import { WebviewMessageType } from '@sqltools/ui/lib/interfaces';
-import Loading from '@sqltools/ui/components/Loading';
+import { NSDatabase } from '@sqltools/types';
 import QueryResult from './QueryResult';
 import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
-import { DatabaseInterface } from '@sqltools/core/plugin-api';
 import { Tabs, Tab, Typography } from '@material-ui/core';
+import logger from '@sqltools/core/log';
+import { IWebviewMessage } from '@sqltools/ui/interfaces';
+
+const log = logger.extend('results');
+const defaultPageSize = 50;
 
 export default class ResultsScreen extends React.Component<{}, QueryResultsState> {
   state: QueryResultsState = {
     connId: null,
-    isLoaded: false,
     resultMap: {},
     queries: [],
     error: null,
     activeTab: null,
-    pageSize: 50,
+    pageSize: defaultPageSize,
   };
 
   constructor(props) {
     super(props);
-    window.addEventListener('message', ev => this.messagesHandler(ev.data as WebviewMessageType));
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
   }
 
   saveState = (data, cb = () => {}) => {
@@ -41,11 +43,12 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     });
   }
 
-  messagesHandler = ({ action, payload }: WebviewMessageType<any>) => {
-    console.log(`Message received: ${action}`, ...[payload]);
+  messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
+    if (!action) return;
+    log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch (action) {
       case 'queryResults':
-        const results: DatabaseInterface.QueryResults[] = payload;
+        const results: NSDatabase.IResult[] = payload;
         const queries = [];
         const resultMap = {};
         let connId: string;
@@ -56,7 +59,6 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         });
         this.saveState({
           connId,
-          isLoaded: true,
           queries,
           resultMap,
           error: null,
@@ -64,21 +66,20 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         });
         break;
       case 'reset':
-        this.saveState({ connId: null, isLoaded: false, resultMap: {}, queries: [] });
+        this.saveState({ connId: null, resultMap: {}, queries: [] });
         break;
 
       case 'getState':
         getVscode().postMessage({ action: 'receivedState', payload: this.state });
         break;
       default:
+        log.extend('warn')(`No handler set for %s`, action);
         break;
     }
   };
 
   render() {
-    if (!this.state.isLoaded) {
-      return <Loading active />;
-    } else if (this.state.isLoaded && this.state.error) {
+    if (this.state.error) {
       return (
         <div>
           <h2>Query errored. Check the logs.</h2>
@@ -115,7 +116,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     return (
       <div className="query-results-container fullscreen-container">
         {tabs}
-        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]} pageSize={this.state.pageSize}/>
+        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]}/>
       </div>
     );
   }

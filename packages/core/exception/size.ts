@@ -1,3 +1,3 @@
-import GenericException from './generic';
+import GenericError from './generic';
 
-export class SizeException extends GenericException {}
+export class SizeError extends GenericError {}

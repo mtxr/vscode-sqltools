@@ -1,4 +1,6 @@
-export class Timer {
+import { ITimer } from '@sqltools/types';
+
+export class Timer implements ITimer {
   private s: [number, number];
   private e: [number, number];
 

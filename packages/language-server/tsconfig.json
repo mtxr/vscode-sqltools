@@ -8,7 +8,6 @@
     "lib": ["es6"],
     "module": "commonjs",
     "noEmit": true,
-    "outDir": "../../../dist/language-server",
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,

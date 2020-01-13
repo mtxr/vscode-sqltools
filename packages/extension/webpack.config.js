@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const path = require('path');
 const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
@@ -32,12 +34,12 @@ const DISPLAY_NAME = EXT_NAME;
 const EXT_ID = 'sqltools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
-const outdir = path.resolve(rootdir, '..', 'dist');
+const outdir = path.resolve(rootdir, 'dist');
 
-function getExtensionConfig() {
+function getExtensionConfig(outdir) {
   /** @type webpack.Configuration */
   let config = {
-    name: 'sqltools',
+    name: 'ext',
     target: 'node',
     entry: {
       extension: path.join(__dirname, 'index.ts'),
@@ -87,6 +89,7 @@ function getExtensionConfig() {
           },
         },
         { from: path.join(__dirname, 'icons'), to: path.join(outdir, 'icons') },
+        { from: path.join(__dirname, '..', 'drivers', 'icons'), to: path.join(outdir, 'icons', 'driver') },
         { from: path.join(__dirname, 'language'), to: path.join(outdir, 'language') },
         { from: path.join(__dirname, '..', '..', 'static/icon.png'), to: path.join(outdir, 'static/icon.png') },
         { from: path.join(__dirname, '..', '..', '.vscodeignore'), to: path.join(outdir, '.vscodeignore'), toType: 'file' },
@@ -112,11 +115,12 @@ function getExtensionConfig() {
 
 module.exports = () => {
   const isProduction = process.env.NODE_ENV !== 'development';
-  return [getLanguageServerConfig(), getExtensionConfig(), getWebviewConfig()].map(config => {
+  return [getLanguageServerConfig(outdir), getExtensionConfig(outdir), getWebviewConfig(outdir)].map(config => {
     config.plugins = [
       new webpack.ProgressPlugin(),
       new webpack.DefinePlugin({
         'process.env.PRODUCT': JSON.stringify(config.name),
+        'process.env.DSN_KEY': JSON.stringify((config.name === 'ext' ? process.env.EXT_DSN_KEY : process.env.LS_DSN_KEY) || ''),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAME': JSON.stringify(EXT_NAME),
         'process.env.DISPLAY_NAME': JSON.stringify(DISPLAY_NAME),
@@ -130,8 +134,12 @@ module.exports = () => {
       )
     ].concat(config.plugins || []);
     config.node = {
-      ...(config.node || {}),
       __dirname: false,
+      __filename: false,
+      fs: 'empty',
+      net: 'empty',
+      child_process: 'empty',
+      ...(config.node || {}),
     };
 
     config.optimization = config.optimization || {};
@@ -147,6 +155,7 @@ module.exports = () => {
     config.devtool = false;
     config.mode = isProduction ? 'production' : 'development';
     config.output = config.output || {};
+    config.stats = 'minimal';
     return config;
   });
 };

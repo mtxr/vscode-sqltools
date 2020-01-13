@@ -5,13 +5,10 @@
   "version": "0.21.6",
   "publisher": "mtxr",
   "license": "MIT",
-  "main": "../dist/extension.js",
+  "main": "./dist/extension.js",
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools",
     "type": "git"
-  },
-  "engines": {
-    "vscode": "^1.30.0"
   },
   "private": true,
   "workspaces": [
@@ -19,22 +16,22 @@
   ],
   "scripts": {
     "add-driver": "node ./tools/add-driver.js",
-    "clean": "rimraf -rf ../dist",
+    "clean": "rimraf -rf ./dist",
     "compile": "yarn workspace @sqltools/formatter build && yarn workspace @sqltools/extension compile",
     "docs:build": "yarn --cwd ./docs run docz:build",
     "docs:dev": "yarn --cwd ./docs run docz:dev",
     "jest": "jest --config jest.config.js --passWithNoTests",
-    "package": "cross-env NODE_ENV=production yarn run compile && (cd ../dist && cross-env NODE_ENV=production vsce package --yarn)",
-    "postcompile": "rimraf -rf ../dist/ui/theme.js || exit 0",
+    "package": "cross-env NODE_ENV=production yarn run compile && (cd ./dist && cross-env NODE_ENV=production vsce package --yarn)",
+    "postcompile": "rimraf -rf ./dist/ui/theme.js || exit 0",
     "postinstall": "yarn workspace @sqltools/formatter install",
     "precompile": "yarn test && yarn run clean",
     "pretest": "rimraf -rf ./coverage",
     "prewatch": "yarn run clean",
-    "publish": "yarn run package && cd ../dist && vsce publish --yarn",
+    "publish": "yarn run package && cd ./dist && vsce publish --yarn",
     "test:older": "cross-env CODE_VERSION=1.32.3 yarn test",
-    "test:upcontainers": "bash ./.test-database/start-dbs.sh",
+    "test:docker": "yarn --cwd ./test run",
     "test:watch": "cross-env WATCH=1 yarn run test",
-    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./.test-database node ./test/run-tests.js",
+    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
     "watch": "yarn workspace @sqltools/extension watch",
     "build": "yarn --cwd ./docs run docz:build"
   },
@@ -47,7 +44,7 @@
     "minimist": "^1.2.0",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
-    "typescript": "^3.4.1",
+    "typescript": "^3.7.3",
     "vsce": "^1.66.0"
   }
 }

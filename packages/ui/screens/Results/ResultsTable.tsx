@@ -8,6 +8,7 @@ import {
   DataTypeProvider,
   PagingState,
   IntegratedPaging,
+  CustomPaging,
 } from '@devexpress/dx-react-grid';
 
 import {
@@ -28,6 +29,7 @@ import { clipboardInsert } from '@sqltools/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 import Menu from '../../components/Menu';
 import ErrorIcon from '../../components/ErrorIcon';
+import styled from 'styled-components';
 import get from 'lodash/get';
 
 const TableFilterRowCell = (props: TableFilterRow.CellProps) => (
@@ -93,7 +95,11 @@ const TableRow = selectedRow => (props: Table.DataRowProps) => (
   <Table.Row {...props} className={selectedRow === props.tableRow.key ? 'selected-row' : undefined} />
 );
 
-const GridRoot = props => <Grid.Root {...props} style={{ width: '100%', overflow: 'auto', height: '100%' }} />;
+const GridRoot: typeof Grid.Root = styled(Grid.Root)`
+  width: 100%;
+  overflow: auto;
+  height: 100%;
+`;
 
 const generateColumnExtensions = (colNames, rows) =>
   colNames.map(columnName => ({
@@ -288,10 +294,9 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
   );
 
   render() {
-    const { rows, columns, columnNames, pageSize, openDrawerButton, error } = this.props;
+    const { rows, columns, columnNames, pageSize, openDrawerButton, error, showPagination, page, total } = this.props;
     const { filters } = this.state;
     const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
-    const showPagination = rows.length > pageSize;
     return (
       <Paper square elevation={0} style={{ height: '100%' }}>
         {error ? (
@@ -304,8 +309,11 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
               <IntegratedSorting />
               <FilteringState filters={filters} onFiltersChange={this.changeFilters} />
               <IntegratedFiltering columnExtensions={columnExtensions} />
-              <PagingState defaultCurrentPage={0} pageSize={showPagination ? pageSize : 99999999999999} />
+              <PagingState defaultCurrentPage={page} pageSize={pageSize} />
               <IntegratedPaging />
+              <CustomPaging
+                totalCount={total || rows.length}
+              />
               <VirtualTable
                 height="100%"
                 cellComponent={TableCell(this.openContextMenu)}

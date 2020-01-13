@@ -1,9 +1,9 @@
 import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event, EventEmitter } from 'vscode';
 import * as Constants from '@sqltools/core/constants';
-import Selector from '@sqltools/core/utils/vscode/selector';
+import Selector from '@sqltools/vscode/utils/selector';
 import { getNameFromId } from '@sqltools/core/utils';
-import SQLTools from '@sqltools/core/plugin-api';
 import { extractConnName } from '@sqltools/core/utils/query';
+import { IExtension } from '@sqltools/types';
 
 export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   private _onDidChangeCodeLenses = new EventEmitter<void>();
@@ -52,7 +52,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     return lenses;
   }
 
-  constructor(private context: SQLTools.ExtensionInterface['context']) {
+  constructor(private context: IExtension['context']) {
     context.subscriptions.push(this._onDidChangeCodeLenses);
   }
 }

@@ -1,12 +1,10 @@
 const path = require('path');
 
-const outdir = path.resolve(__dirname, '..', '..', '..', 'dist');
-
 const babelOptions = require(path.join(__dirname, '.babelrc'));
 
-module.exports = function getLanguageServerConfig() {
+module.exports = function getLanguageServerConfig(outdir) {
   let config = {
-    name: 'languageserver',
+    name: 'ls',
     target: 'node',
     entry: {
       languageserver: path.join(__dirname, 'index.ts'),

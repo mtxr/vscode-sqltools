@@ -8,6 +8,5 @@ const SQLite = ({ settings, updateSettings, toggleUseRelative }) => (
     <FileInput label='Database File*' onChange={({ file: database, transformToRelative }) => (updateSettings({ database }), toggleUseRelative(transformToRelative))} value={settings.database} />
   </>
 );
-// @TODO: add driver specific settings here
 
 export default SQLite;

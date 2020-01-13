@@ -1,30 +1,31 @@
-import logger from '@sqltools/core/log/vscode';
+import logger from '@sqltools/vscode/log';
 import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAME } from '@sqltools/core/constants';
-import { ConnectionInterface, DatabaseDialect } from '@sqltools/core/interface';
+import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
+import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
-import SQLTools, { RequestHandler } from '@sqltools/core/plugin-api';
-import { getConnectionDescription, getConnectionId, isEmpty, query } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/core/utils/vscode';
+import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename, query } from '@sqltools/core/utils';
+import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest } from './contracts';
+import { commands, QuickPickItem, ExtensionContext, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
+import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
-import { getHome } from '@sqltools/core/utils';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
-import { CancellationTokenSource } from 'vscode-jsonrpc';
 import statusBar from './status-bar';
-import parseWorkspacePath from '@sqltools/core/utils/vscode/parse-workspace-path';
+import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
+import telemetry from '@sqltools/core/utils/telemetry';
 
-export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin {
-  public client: SQLTools.LanguageClientInterface;
+const log = logger.extend('conn-man');
+
+export default class ConnectionManagerPlugin implements IExtensionPlugin {
+  public client: ILanguageClient;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
   private context: ExtensionContext;
-  private errorHandler: SQLTools.ExtensionInterface['errorHandler'];
+  private errorHandler: IExtension['errorHandler'];
   private explorer: ConnectionExplorer;
   private attachedFilesMap: { [fileUri: string ]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
@@ -39,14 +40,21 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.client.sendRequest(RefreshTreeRequest, { connIds: connIdOrTreeItem.length ? connIdOrTreeItem : null });
   }
 
-  private ext_testConnection = async (c: ConnectionInterface) => {
+  private ext_testConnection = async (c: IConnection) => {
     let password = null;
 
-    if (c.dialect !== DatabaseDialect.SQLite && c.askForPassword) password = await this._askForPassword(c);
+    if (c.driver !== DatabaseDriver.SQLite && c.askForPassword) password = await this._askForPassword(c);
     if (c.askForPassword && password === null) return;
     return this.client.sendRequest(
       TestConnectionRequest,
       { conn: c, password },
+    );
+  }
+
+  private ext_getChildrenForTreeItem = async ({ conn, contextValue }) => {
+    return this.client.sendRequest(
+      GetChildrenForTreeItemRequest,
+      { conn, contextValue },
     );
   }
 
@@ -63,15 +71,11 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  private ext_showRecords = async (node?: SidebarTableOrView) => {
+  private ext_showRecords = async (node?: SidebarTableOrView | string, page: number = 0) => {
     try {
-      const table = await this._getTableName(node);
+      const table = typeof node === 'string' ? node : await this._getTableName(node);
       await this._openResultsWebview();
-      let limit = 50;
-      if (ConfigManager.results && ConfigManager.results.limit) {
-        limit = ConfigManager.results.limit;
-      }
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, limit);
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, page);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
 
     } catch (e) {
@@ -102,7 +106,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
     try {
       await this.client.sendRequest(DisconnectRequest, { conn })
-      this.client.telemetry.registerInfoMessage('Connection closed!');
+      telemetry.registerMessage('info', 'Connection closed!');
       await this.explorer.updateTreeRoot();
     } catch (e) {
       return this.errorHandler('Error closing connection', e);
@@ -124,7 +128,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.attachedFilesMap[fileUri.toString()];
   }
 
-  private async openConnectionFile(conn: ConnectionInterface) {
+  private async openConnectionFile(conn: IConnection) {
     if (!ConfigManager.autoOpenSessionFiles) return;
     if (!conn) return;
     let baseFolder: Uri;
@@ -138,9 +142,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
 
     if (!baseFolder) {
-      baseFolder = Uri.file(path.join(getHome(), '.SQLTools'));
+      baseFolder = Uri.file(getDataPath(SESSION_FILES_DIRNAME));
     }
-    const sessionFilePath = path.join(baseFolder.fsPath, `${conn.name} Session.sql`);
+    const sessionFilePath = path.resolve(baseFolder.fsPath, getSessionBasename(conn.name));
     try {
       this.updateAttachedConnectionsMap(
         await this.openSessionFileWithProtocol(sessionFilePath, 'file'),
@@ -164,7 +168,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     if (connIdOrNode) {
       let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
 
-      conn = await this._setConnection(conn as ConnectionInterface).catch(e => this.errorHandler('Error opening connection', e));
+      conn = await this._setConnection(conn as IConnection).catch(e => this.errorHandler('Error opening connection', e));
       if (trySessionFile) await this.openConnectionFile(conn);
       return conn;
     }
@@ -193,7 +197,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         ib.prompt = 'Remember to escape values if neeeded.'
         ib.onDidAccept(() => {
           const r = new RegExp(params[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
-          query = query.replace(r, `'${ib.value}'`);
+          query = query.replace(r, ib.value);
           ib.step++;
           if (ib.step > ib.totalSteps) {
             ib.hide();
@@ -202,7 +206,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
           ib.value = '';
           ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
         });
-        ib.onDidHide(() =>ib.step === ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
+        ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
         ib.show();
       });
     }
@@ -223,7 +227,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
 
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
-        const conn = this.getConnectionList().find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
+        const conn = (await this.ext_getConnectionStatus({ connectedOnly: false, sort: 'connectedFirst'})).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
           throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
@@ -264,7 +268,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  private ext_showOutputChannel = () => (<any>logger).show();
+  private ext_showOutputChannel = () => logger.show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     connId = typeof connId === 'string' ? connId : undefined;
@@ -338,7 +342,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       globalValue = [],
     } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
 
-    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) == id);
+    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === id);
 
     let index = findIndex(workspaceFolderValue);
     if (index >= 0) {
@@ -360,9 +364,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return Promise.resolve(true);
   }
 
-  private ext_addConnection = (connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
+  private ext_addConnection = (connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      logger.warn('Nothing to do. No parameter received');
+      log.extend('warn')('Nothing to do. No parameter received');
       return;
     }
 
@@ -371,9 +375,9 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
-  private ext_updateConnection = (oldId: string, connInfo: ConnectionInterface, writeTo?: keyof typeof ConfigurationTarget) => {
+  private ext_updateConnection = (oldId: string, connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      logger.warn('Nothing to do. No parameter received');
+      log.extend('warn')('Nothing to do. No parameter received');
       return;
     }
 
@@ -386,8 +390,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   // internal utils
   private async _getTableName(node?: SidebarTableOrView): Promise<string> {
     if (node && node.conn) {
-      await this._setConnection(node.conn as ConnectionInterface);
-      return getTableName(node.conn.dialect, node.table);
+      await this._setConnection(node.conn as IConnection);
+      return getTableName(node.conn.driver, node.table);
     }
 
     const conn = await this._connect();
@@ -397,25 +401,25 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private _openResultsWebview(connId?: string) {
     return this.resultsWebview.get(connId || this.explorer.getActive().id).show();
   }
-  private _connect = async (force = false): Promise<ConnectionInterface> => {
+  private _connect = async (force = false): Promise<IConnection> => {
     if (!force && this.explorer.getActive()) {
       return this.explorer.getActive();
     }
-    const c: ConnectionInterface = await this._pickConnection(!force);
+    const c: IConnection = await this._pickConnection(!force);
     // history.clear();
     return this._setConnection(c);
   }
 
-  private async _pickTable(conn: ConnectionInterface, prop?: string): Promise<string> {
+  private async _pickTable(conn: IConnection, prop?: string): Promise<string> {
     const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
     return quickPick(tables
       .map((table) => {
-        const prefixedTableName = getTableName(conn.dialect, table);
+        const prefixedTableName = getTableName(conn.driver, table);
         const prefixes  = prefixedTableName.split('.');
 
         return <QuickPickItem>{
           label: table.name,
-          value: getTableName(conn.dialect, table),
+          value: getTableName(conn.driver, table),
           description: typeof table.numberOfColumns !== 'undefined' ? `${table.numberOfColumns} cols` : '',
           detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
         };
@@ -429,8 +433,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
   private ext_getConnectionStatus = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
     return this.client.sendRequest(GetConnectionsRequest, { connectedOnly, connId, sort });
   }
-  private async _pickConnection(connectedOnly = false): Promise<ConnectionInterface> {
-    const connections: ConnectionInterface[] = await this.ext_getConnectionStatus({ connectedOnly });
+  private async _pickConnection(connectedOnly = false): Promise<IConnection> {
+    const connections: IConnection[] = await this.ext_getConnectionStatus({ connectedOnly });
 
     if (connections.length === 0 && connectedOnly) return this._pickConnection();
 
@@ -467,7 +471,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.client.sendRequest(RunCommandRequest, { conn: this.explorer.getActive(), command, args });
   }
 
-  private async _askForPassword(c: ConnectionInterface): Promise<string | null> {
+  private async _askForPassword(c: IConnection): Promise<string | null> {
     const cachedPass = await this.client.sendRequest(GetConnectionPasswordRequest, { conn: c });
     return cachedPass || await window.showInputBox({
 
@@ -476,12 +480,18 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       validateInput: (v) => isEmpty(v) ? 'Password not provided.' : null,
     });
   }
-  private async _setConnection(c?: ConnectionInterface): Promise<ConnectionInterface> {
+  private async _setConnection(c?: IConnection): Promise<IConnection> {
     let password = null;
 
     if (c && getConnectionId(c) !== this.explorer.getActiveId()) {
-      if (c.dialect === DatabaseDialect.SQLite) {
+      if (c.driver === DatabaseDriver.SQLite) {
         c.database = parseWorkspacePath(c.database);
+      }
+      if (c.driver === DatabaseDriver.PostgreSQL && c.pgOptions && typeof c.pgOptions.ssl === 'object') {
+        Object.keys(c.pgOptions.ssl).forEach(key => {
+          if (typeof c.pgOptions.ssl[key] === 'string' && c.pgOptions.ssl[key].startsWith('file://')) return;
+          c.pgOptions.ssl[key] = `file://${parseWorkspacePath(c.pgOptions.ssl[key].replace('file://', ''))}`;
+        });
       }
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
@@ -491,25 +501,25 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     return this.explorer.getActive();
   }
 
-  private async saveConnectionList(connList: ConnectionInterface[], writeTo?: ConfigurationTarget) {
+  private async saveConnectionList(connList: IConnection[], writeTo?: ConfigurationTarget) {
     if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
       writeTo = ConfigurationTarget.Global;
     }
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', connList, writeTo);
+    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', migrateConnectionSettings(connList), writeTo);
   }
 
-  private getConnectionList(from?: ConfigurationTarget): ConnectionInterface[] {
-    if (!from) return workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || [];
+  private getConnectionList(from?: ConfigurationTarget): IConnection[] {
+    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || []);
 
     const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
     if (from === ConfigurationTarget.Global) {
-      return <ConnectionInterface[]>(config.globalValue || config.defaultValue) || [];
+      return migrateConnectionSettings(<IConnection[]>(config.globalValue || config.defaultValue) || []);
     }
     if (from === ConfigurationTarget.WorkspaceFolder) {
-      return <ConnectionInterface[]>(config.workspaceFolderValue || config.defaultValue) || [];
+      return migrateConnectionSettings(<IConnection[]>(config.workspaceFolderValue || config.defaultValue) || []);
     }
 
-    return <ConnectionInterface[]>(config.workspaceValue || config.defaultValue) || [];
+    return migrateConnectionSettings(<IConnection[]>(config.workspaceValue || config.defaultValue) || []);
   }
 
   private ext_attachFileToConnection = async (fileUri: Uri) => {
@@ -566,7 +576,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     [id: string]: {
       progress: Progress<any>,
       tokenSource: CancellationTokenSource,
-      interval: NodeJS.Timeout,
+      interval: number,
       resolve: Function,
       reject: Function,
     }
@@ -619,7 +629,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }, 3000);
   }
 
-  public register(extension: SQLTools.ExtensionInterface) {
+  public register(extension: IExtension) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
     this.context = extension.context;
@@ -667,7 +677,8 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
-      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem);
+      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
+      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     if (window.activeTextEditor) {
       setTimeout(() => {
@@ -676,7 +687,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
     }
   }
 
-  constructor(extension: SQLTools.ExtensionInterface) {
+  constructor(extension: IExtension) {
     this.attachedFilesMap = extension.context.workspaceState.get('attachedFilesMap', {});
     this.codeLensPlugin = new CodeLensPlugin;
     extension.registerPlugin(this.codeLensPlugin);
