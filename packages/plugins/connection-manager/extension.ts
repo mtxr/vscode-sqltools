@@ -613,25 +613,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public register(extension: IExtension) {
     if (this.client) return; // do not register twice
     this.client = extension.client;
-    this.errorHandler = extension.errorHandler;
-    this.explorer = new ConnectionExplorer(extension);
-    this.explorer.onConnectionDidChange(() => {
-      const active = this.explorer.getActive();
-      statusBar.setText(active ? active.name : null);
-    });
-    this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
-    this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
-    this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
-
-    // extension stuff
-    Context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager(Context, this.client)),
-      (this.settingsWebview = new SettingsWebview(Context)),
-      statusBar,
-      workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
-      workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
-      window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
-    );
 
     // register extension commands
     extension.registerCommand(`addConnection`, this.ext_addConnection)
@@ -658,6 +639,26 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
+
+    this.errorHandler = extension.errorHandler;
+    this.explorer = new ConnectionExplorer(extension);
+    this.explorer.onConnectionDidChange(() => {
+      const active = this.explorer.getActive();
+      statusBar.setText(active ? active.name : null);
+    });
+    this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
+    this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
+    this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
+
+    // extension stuff
+    Context.subscriptions.push(
+      (this.resultsWebview = new ResultsWebviewManager(this.client)),
+      (this.settingsWebview = new SettingsWebview()),
+      statusBar,
+      workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
+      workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
+      window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
+    );
 
     if (window.activeTextEditor) {
       setTimeout(() => {
