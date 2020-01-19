@@ -4,7 +4,7 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
-import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename, query } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
 import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
@@ -17,7 +17,7 @@ import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query'
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/core/utils/telemetry';
-
+import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -254,12 +254,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (!activeEditor.selection.isEmpty) {
       return this.ext_executeQuery();
     }
-    const text = activeEditor.document.getText();
-    const currentOffset = activeEditor.document.offsetAt(activeEditor.selection.active);
-    const prefix = text.slice(0, currentOffset+1);
-    const allQueries = query.parse(text);
-    const prefixQueries = query.parse(prefix);
-    const currentQuery = allQueries[prefixQueries.length-1];
+    const { currentQuery } = getEditorQueryDetails(activeEditor);
     return this.ext_executeQuery(currentQuery);
   }
 

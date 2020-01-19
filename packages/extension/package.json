@@ -90,6 +90,27 @@
         "onCommand:SQLTools.selectConnection"
     ],
     "contributes": {
+        "colors": [
+            {
+                "id": "SQLTools.currentQueryBg",
+                "description": "Background decoration color for current query",
+                "defaults": {
+                    "dark": "#00a2ff20",
+                    "light": "#00a2ff20",
+                    "highContrast": "#00a2ff20"
+                }
+            },
+            {
+              "id": "SQLTools.currentQueryOutline",
+              "description": "Background decoration color for current query",
+              "defaults": {
+                  "dark": "#00a2ff50",
+                  "light": "#00a2ff50",
+                  "highContrast": "#00a2ff50"
+              }
+          }
+        ],
+
         "languages": [
             {
                 "id": "sql",
