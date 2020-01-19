@@ -4,8 +4,8 @@ import { EXT_NAME } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
-import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput } from '@sqltools/vscode/utils';
+import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename, query } from '@sqltools/core/utils';
+import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -244,6 +244,23 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
     }
+  }
+  
+  private ext_executeCurrentQuery = async () => {
+    const activeEditor = await getOrCreateEditor();
+    if (!activeEditor) {
+        return;
+    }
+    if (!activeEditor.selection.isEmpty) {
+      return this.ext_executeQuery();
+    }
+    const text = activeEditor.document.getText();
+    const currentOffset = activeEditor.document.offsetAt(activeEditor.selection.active);
+    const prefix = text.slice(0, currentOffset+1);
+    const allQueries = query.parse(text);
+    const prefixQueries = query.parse(prefix);
+    const currentQuery = allQueries[prefixQueries.length-1];
+    return this.ext_executeQuery(currentQuery);
   }
 
   private ext_executeQueryFromFile = async () => {
@@ -627,6 +644,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`describeTable`, this.ext_describeTable)
       .registerCommand(`executeFromInput`, this.ext_executeFromInput)
       .registerCommand(`executeQuery`, this.ext_executeQuery)
+      .registerCommand(`executeCurrentQuery`, this.ext_executeCurrentQuery)
       .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
       .registerCommand(`refreshTree`, this.ext_refreshTree)
       .registerCommand(`saveResults`, this.ext_saveResults)

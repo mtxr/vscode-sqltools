@@ -196,6 +196,11 @@
                 }
             },
             {
+                "title": "Run Current Query",
+                "command": "SQLTools.executeCurrentQuery",
+                "category": "SQLTools Connection"
+            },
+            {
                 "title": "Describe Table",
                 "command": "SQLTools.describeTable",
                 "category": "SQLTools Connection"
