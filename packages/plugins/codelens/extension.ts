@@ -73,14 +73,12 @@ export default class CodeLensPlugin implements IExtensionPlugin {
       editor.setDecorations(currentQueryDecoration, []);
       const { range } = getEditorQueryDetails(editor);
       const decoration = { range };
-  
       editor.setDecorations(currentQueryDecoration, [decoration]);
     } catch (error) {
       console.log(error);
     }
   }
 }
-
 
 const currentQueryDecoration = window.createTextEditorDecorationType({
   backgroundColor: { id: `${EXT_NAME}.currentQueryBg` },

@@ -1,6 +1,5 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
 import { IConnection, NSDatabase, MConnectionExplorer } from '@sqltools/types';
-import ContextValue from './context-value';
 
 export const GetConnectionsRequest = new RequestType<
   { connectedOnly?: boolean, sort?: 'connectedFirst' | 'name', connId?: string },
@@ -8,9 +7,6 @@ export const GetConnectionsRequest = new RequestType<
   Error,
   void
 >('connection/GetConnectionsRequest');
-export const RefreshTreeRequest = new RequestType<{ connIds?: string[] }, void, Error, void>(
-  'connection/RefreshTreeRequest'
-);
 export const GetConnectionPasswordRequest = new RequestType<
   { conn: IConnection },
   string,
@@ -41,17 +37,6 @@ export const DisconnectRequest = new RequestType<
   Error,
   void
 >('connection/DisconnectRequest');
-export const ConnectionDataUpdatedRequest = new RequestType<
-  {
-    conn: IConnection;
-    tables: NSDatabase.ITable[];
-    columns: NSDatabase.IColumn[];
-    functions: NSDatabase.IFunction[];
-  },
-  void,
-  Error,
-  void
->('connection/ConnectionDataUpdatedRequest');
 export const GetConnectionDataRequest = new RequestType<
   { conn: IConnection },
   {

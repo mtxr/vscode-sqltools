@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqlt
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
@@ -31,14 +31,16 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private attachedFilesMap: { [fileUri: string ]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 
-  public handler_connectionDataUpdated: RequestHandler<typeof ConnectionDataUpdatedRequest> = (data) => this.explorer.setTreeData(data);
-
   // extension commands
-  private ext_refreshTree = (connIdOrTreeItem: SidebarConnection | string | string[]) => {
-    connIdOrTreeItem = connIdOrTreeItem instanceof SidebarConnection ? connIdOrTreeItem.getId() : connIdOrTreeItem;
+  private ext_refreshTree = (connIdOrTreeItem: SidebarConnection | SidebarConnection[]) => {
+    if (typeof connIdOrTreeItem === 'string') {
+      throw new Error(`Deprecated! ${EXT_NAME}.refreshTree command with strings is now deprecated.`);
+    }
+    if (!connIdOrTreeItem || (Array.isArray(connIdOrTreeItem) && connIdOrTreeItem.length === 0)) {
+      return this.explorer.refresh();
+    }
     connIdOrTreeItem = Array.isArray(connIdOrTreeItem) ? connIdOrTreeItem : [connIdOrTreeItem].filter(Boolean);
-
-    return this.client.sendRequest(RefreshTreeRequest, { connIds: connIdOrTreeItem.length ? connIdOrTreeItem : null });
+    connIdOrTreeItem.forEach(item => this.explorer.refresh(item));
   }
 
   private ext_testConnection = async (c: IConnection) => {
@@ -108,7 +110,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     try {
       await this.client.sendRequest(DisconnectRequest, { conn })
       telemetry.registerMessage('info', 'Connection closed!');
-      await this.explorer.updateTreeRoot();
+      await this.explorer.refresh();
     } catch (e) {
       return this.errorHandler('Error closing connection', e);
     }
@@ -167,7 +169,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
     if (connIdOrNode) {
-      let conn = connIdOrNode instanceof SidebarConnection ? connIdOrNode.conn : this.explorer.getById(connIdOrNode);
+      let conn = await this.getConnFromIdOrNode(connIdOrNode);
 
       conn = await this._setConnection(conn as IConnection).catch(e => this.errorHandler('Error opening connection', e));
       if (trySessionFile) await this.openConnectionFile(conn);
@@ -228,7 +230,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
-        const conn = (await this.ext_getConnectionStatus({ connectedOnly: false, sort: 'connectedFirst'})).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
+        const conn = (await this.ext_getConnections({ connectedOnly: false, sort: 'connectedFirst'})).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
           throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
@@ -289,18 +291,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {
-    let id: string;
-    if (connIdOrNode) {
-      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
-    } else {
-      const conn = await this._pickConnection();
-      id = conn ? getConnectionId(conn) : undefined;
-    }
-
-    if (!id) return;
-
-    const conn = this.explorer.getById(id);
-    conn.id = conn.id || getConnectionId(conn);
+    const conn = await this.getConnFromIdOrNode(connIdOrNode);
+    if (!conn) return;
     this.settingsWebview.show();
     this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
   }
@@ -316,17 +308,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
-    let id: string;
-    if (connIdOrNode) {
-      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
-    } else {
-      const conn = await this._pickConnection();
-      id = conn ? getConnectionId(conn) : undefined;
-    }
-
-    if (!id) return;
-
-    const conn = this.explorer.getById(id);
+    const conn = await this.getConnFromIdOrNode(connIdOrNode);
+    if (!conn) return;
 
     const res = await window.showInformationMessage(`Are you sure you want to remove ${conn.name}?`, { modal: true }, 'Yes');
 
@@ -338,7 +321,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       globalValue = [],
     } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
 
-    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === id);
+    const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === conn.id);
 
     let index = findIndex(workspaceFolderValue);
     if (index >= 0) {
@@ -357,7 +340,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       globalValue.splice(index, 1);
       return this.saveConnectionList(globalValue, ConfigurationTarget.Global);
     }
-    return Promise.resolve(true);
   }
 
   private ext_addConnection = (connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {
@@ -426,11 +408,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       });
   }
 
-  private ext_getConnectionStatus = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
+  private ext_getConnections = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
     return this.client.sendRequest(GetConnectionsRequest, { connectedOnly, connId, sort });
   }
   private async _pickConnection(connectedOnly = false): Promise<IConnection> {
-    const connections: IConnection[] = await this.ext_getConnectionStatus({ connectedOnly });
+    const connections: IConnection[] = await this.ext_getConnections({ connectedOnly });
 
     if (connections.length === 0 && connectedOnly) return this._pickConnection();
 
@@ -490,7 +472,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
-    await this.explorer.focusActiveConnection(c);
+    this.explorer.refresh();
+    if (c) {
+      await this.explorer.focusByConn(c);
+    }
     return this.explorer.getActive();
   }
 
@@ -540,6 +525,26 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return commands.executeCommand(`${EXT_NAME}.copyText`, null, nodes);
   }
 
+  private async getConnFromIdOrNode(connIdOrNode?: string | SidebarConnection) {
+    let id: string;
+    let conn: IConnection = null;
+    if (connIdOrNode) {
+      id = connIdOrNode instanceof SidebarConnection ? connIdOrNode.getId() : <string>connIdOrNode;
+    } else {
+      conn = await this._pickConnection();
+      id = conn ? getConnectionId(conn) : undefined;
+    }
+
+    if (!id) return null;
+
+    if (!conn) {
+      conn = conn || await this.explorer.getConnectionById(id);
+    }
+    if (!conn) return null;
+    conn.id = getConnectionId(conn);
+    return conn;
+  }
+
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
@@ -562,7 +567,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (doc.isClosed) {
       return this.updateAttachedConnectionsMap(doc.uri);
     }
-    this.explorer.updateTreeRoot();
+    this.explorer.refresh();
   }
 
   private notifications: {
@@ -648,18 +653,16 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
-      .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
+      .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     this.errorHandler = extension.errorHandler;
-    this.explorer = new ConnectionExplorer(extension);
-    this.explorer.onConnectionDidChange(() => {
-      const active = this.explorer.getActive();
+    this.explorer = new ConnectionExplorer();
+    this.explorer.onDidChangeActiveConnection((active: IConnection) => {
       statusBar.setText(active ? active.name : null);
     });
-    this.client.onRequest(ConnectionDataUpdatedRequest, this.handler_connectionDataUpdated);
     this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
 

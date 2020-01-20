@@ -1,10 +1,10 @@
 import Connection from '@sqltools/language-server/connection';
 import ConfigManager from '@sqltools/core/config-manager';
-import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler, DatabaseDriver} from '@sqltools/types';
+import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectionDataUpdatedRequest, ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RefreshTreeRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import actions from './store/actions';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -88,18 +88,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     };
   };
 
-  private refreshConnectionHandler: RequestHandler<typeof RefreshTreeRequest> = async ({ connIds } = {}) => {
-    const { activeConnections } = this.server.store.getState();
-    let toRefresh = Object.keys(activeConnections);
-    if(connIds) {
-      toRefresh = toRefresh.filter(c => connIds.includes(c));
-    }
-    await Promise.all(toRefresh.map(c => {
-      log.extend('info')(`Refreshing ${(<Connection>activeConnections[c]).getName()}`)
-      return this._loadConnectionData(activeConnections[c]);
-    }));
-  };
-
   private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }) => {
     if (!conn) {
       return undefined;
@@ -108,8 +96,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (!c) return;
     await c.close().catch(this.server.notifyError('Connection Error'));
     this.server.store.dispatch(actions.Disconnect(c));
-    conn.isConnected = false;
-    await this._updateSidebar({ conn, tables: null, columns: null, functions: null });
   };
 
   private GetConnectionPasswordRequestHandler: RequestHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
@@ -147,7 +133,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     try {
       if (c) {
         this.server.store.dispatch(actions.Connect(c));
-        this._loadConnectionData(c);
         return this.serializarConnectionState(req.conn);
       }
       c = new Connection(req.conn);
@@ -162,7 +147,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
       await c.connect();
-      this._loadConnectionData(c);
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
     } catch (e) {
@@ -256,7 +240,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
     this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
     this.server.onRequest(GetConnectionDataRequest, this.getTablesAndColumnsHandler);
-    this.server.onRequest(RefreshTreeRequest, this.refreshConnectionHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
     this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
     this.server.onRequest(ConnectRequest, this.openConnectionHandler);
@@ -267,42 +250,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   }
 
   // internal utils
-  private async _loadConnectionData(conn: Connection) {
-    if (!conn) {
-      return this._updateSidebar({ conn: null, tables: [], columns: [], functions: [] });
-    }
-    if (conn && conn.getDriver() === DatabaseDriver['PostgreSQL']) {
-      log.extend('warn')('*** DEPRECATION *** _loadConnectionData is deprecated and will be removed in v0.22.x');
-      this.server.store.dispatch(actions.ConnectionData(conn, { tables: [], columns: [], functions: [] }))
-      return this._updateSidebar({ conn: this.serializarConnectionState(conn.serialize()) });
-    }
-    return Promise.all([conn.getTables(), conn.getColumns(), conn.getFunctions()])
-      .then(async ([tables, columns, functions ]) => {
-        this.server.store.dispatch(actions.ConnectionData(conn, { tables, columns, functions }))
-        return this._updateSidebar({ conn: this.serializarConnectionState(conn.serialize()), tables, columns, functions });
-      })
-      .catch(e => {
-        this.server.notifyError(`Error while preparing columns completions for connection ${conn.getName()}`)(e);
-        throw e;
-      });
-  }
-
-  private _updateSidebar({
-    conn,
-    tables = [],
-    columns = [],
-    functions = []
-  }: {
-    conn: IConnection;
-    tables?: NSDatabase.ITable[];
-    columns?: NSDatabase.IColumn[];
-    functions?: NSDatabase.IFunction[];
-   }) {
-    if (!conn) return Promise.resolve();
-    conn.isActive = this.server.store.getState().lastUsedId === getConnectionId(conn);
-    return this.server.sendRequest(ConnectionDataUpdatedRequest, { conn, tables, columns, functions });
-  }
-
   public _autoConnectIfActive = async () => {
     const defaultConnections: IConnection[] = [];
     const { lastUsedId, activeConnections } = this.server.store.getState();
