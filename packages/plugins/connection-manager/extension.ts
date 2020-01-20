@@ -5,7 +5,7 @@ import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtens
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
 import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
-import { getSelectedText, quickPick, readInput } from '@sqltools/vscode/utils';
+import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
@@ -17,7 +17,7 @@ import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query'
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/core/utils/telemetry';
-
+import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -244,6 +244,18 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
     }
+  }
+  
+  private ext_executeCurrentQuery = async () => {
+    const activeEditor = await getOrCreateEditor();
+    if (!activeEditor) {
+        return;
+    }
+    if (!activeEditor.selection.isEmpty) {
+      return this.ext_executeQuery();
+    }
+    const { currentQuery } = getEditorQueryDetails(activeEditor);
+    return this.ext_executeQuery(currentQuery);
   }
 
   private ext_executeQueryFromFile = async () => {
@@ -614,6 +626,34 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   public register(extension: IExtension) {
     if (this.client) return; // do not register twice
+
+    // register extension commands
+    extension.registerCommand(`addConnection`, this.ext_addConnection)
+      .registerCommand(`updateConnection`, this.ext_updateConnection)
+      .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
+      .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
+      .registerCommand(`openSettings`, this.ext_openSettings)
+      .registerCommand(`closeConnection`, this.ext_closeConnection)
+      .registerCommand(`deleteConnection`, this.ext_deleteConnection)
+      .registerCommand(`describeFunction`, this.ext_describeFunction)
+      .registerCommand(`describeTable`, this.ext_describeTable)
+      .registerCommand(`executeFromInput`, this.ext_executeFromInput)
+      .registerCommand(`executeQuery`, this.ext_executeQuery)
+      .registerCommand(`executeCurrentQuery`, this.ext_executeCurrentQuery)
+      .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
+      .registerCommand(`refreshTree`, this.ext_refreshTree)
+      .registerCommand(`saveResults`, this.ext_saveResults)
+      .registerCommand(`selectConnection`, this.ext_selectConnection)
+      .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
+      .registerCommand(`showRecords`, this.ext_showRecords)
+      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
+      .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
+      .registerCommand(`testConnection`, this.ext_testConnection)
+      .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
+      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
+      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
+      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
+
     this.client = extension.client;
     this.context = extension.context;
     this.errorHandler = extension.errorHandler;
@@ -635,32 +675,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
-
-    // register extension commands
-    extension.registerCommand(`addConnection`, this.ext_addConnection)
-      .registerCommand(`updateConnection`, this.ext_updateConnection)
-      .registerCommand(`openAddConnectionScreen`, this.ext_openAddConnectionScreen)
-      .registerCommand(`openEditConnectionScreen`, this.ext_openEditConnectionScreen)
-      .registerCommand(`openSettings`, this.ext_openSettings)
-      .registerCommand(`closeConnection`, this.ext_closeConnection)
-      .registerCommand(`deleteConnection`, this.ext_deleteConnection)
-      .registerCommand(`describeFunction`, this.ext_describeFunction)
-      .registerCommand(`describeTable`, this.ext_describeTable)
-      .registerCommand(`executeFromInput`, this.ext_executeFromInput)
-      .registerCommand(`executeQuery`, this.ext_executeQuery)
-      .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
-      .registerCommand(`refreshTree`, this.ext_refreshTree)
-      .registerCommand(`saveResults`, this.ext_saveResults)
-      .registerCommand(`selectConnection`, this.ext_selectConnection)
-      .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
-      .registerCommand(`showRecords`, this.ext_showRecords)
-      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
-      .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
-      .registerCommand(`testConnection`, this.ext_testConnection)
-      .registerCommand(`getConnectionStatus`, this.ext_getConnectionStatus)
-      .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
-      .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
-      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     if (window.activeTextEditor) {
       setTimeout(() => {
