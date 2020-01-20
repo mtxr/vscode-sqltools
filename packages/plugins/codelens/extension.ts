@@ -36,20 +36,20 @@ export default class CodeLensPlugin implements IExtensionPlugin {
 
   createDecorations(context: IExtension['context']) {
     window.onDidChangeActiveTextEditor(editor => {
-      updateDecorations(editor);
+      this.updateDecorations(editor);
     }, null, context.subscriptions);
 
     workspace.onDidChangeTextDocument(event => {
       if (window.activeTextEditor && event.document === window.activeTextEditor.document) {
-        updateDecorations(window.activeTextEditor);
+        this.updateDecorations(window.activeTextEditor);
       }
     }, null, context.subscriptions);
     window.onDidChangeTextEditorSelection(event => {
       if (event.textEditor && event.textEditor.document === window.activeTextEditor.document) {
-        updateDecorations(window.activeTextEditor);
+        this.updateDecorations(window.activeTextEditor);
       }
     }, null, context.subscriptions);
-    updateDecorations(window.activeTextEditor);
+    this.updateDecorations(window.activeTextEditor);
   }
 
   register(extension: IExtension) {
@@ -64,22 +64,22 @@ export default class CodeLensPlugin implements IExtensionPlugin {
   reset() {
     return this.provider.reset();
   }
+  updateDecorations = (editor: TextEditor) => {
+    if (!editor || !editor.document || editor.document.uri.scheme === 'output' || !this.registeredLanguages.includes(editor.document.languageId)) {
+      return;
+    }
+    try {
+      editor.setDecorations(currentQueryDecoration, []);
+      const { range } = getEditorQueryDetails(editor);
+      const decoration = { range };
+  
+      editor.setDecorations(currentQueryDecoration, [decoration]);
+    } catch (error) {
+      console.log(error);
+    }
+  }
 }
 
-function updateDecorations(editor: TextEditor) {
-  if (!editor || !editor.document || editor.document.uri.scheme === 'output') {
-    return;
-  }
-  try {
-    editor.setDecorations(currentQueryDecoration, []);
-    const { range } = getEditorQueryDetails(editor);
-    const decoration = { range };
-
-    editor.setDecorations(currentQueryDecoration, [decoration]);
-  } catch (error) {
-    console.log(error);
-  }
-}
 
 const currentQueryDecoration = window.createTextEditorDecorationType({
   backgroundColor: { id: `${EXT_NAME}.currentQueryBg` },
