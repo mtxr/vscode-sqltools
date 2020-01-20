@@ -4,6 +4,7 @@ import AbstractDriver from '../../lib/abstract';
 import Queries from './queries';
 import fs from 'fs';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
+import {countBy} from 'lodash';
 
 export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolConfig> implements IConnectionDriver {
   queries = Queries;
@@ -65,7 +66,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
   public query(query: string): Promise<NSDatabase.IResult[]> {
     return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
       return new Promise((resolve, reject) => {
-        conn.query(query, (error, results) => {
+        conn.query({sql: query, nestTables: true}, (error, results, fields) => {
           if (error) return reject(error);
           const queries = Utils.query.parse(query);
           if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
@@ -82,15 +83,25 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
             }
             return {
               connId: this.getId(),
-              cols: Array.isArray(r) ? Object.keys(r[0] || {}) : [],
+              cols: Array.isArray(fields) ? this.getColumnNames(fields) : [],
               messages,
               query: q,
-              results: Array.isArray(r) ? r : [],
+              results: Array.isArray(r) ? this.mapRows(r, fields) : [],
             };
           }));
         });
       });
     });
+  }
+
+  private getColumnNames(fields: MySQLLib.FieldInfo[]): string[] {
+    const count = countBy(fields, ({name}) => name);
+    return fields.map(({table, name}) => count[name] > 1 ? `${table}.${name}` : name);
+  }
+
+  private mapRows(rows: any[], fields: MySQLLib.FieldInfo[]): any[] {
+    const names = this.getColumnNames(fields);
+    return rows.map((row) => fields.reduce((r, {table, name}, i) => ({...r, [names[i]]: row[table][name]}), {}));
   }
 
   public getTables(): Promise<NSDatabase.ITable[]> {

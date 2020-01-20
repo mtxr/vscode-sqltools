@@ -1,9 +1,10 @@
-import { Pool, PoolConfig, types } from 'pg';
+import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import * as Utils from '@sqltools/core/utils';
 import fs from 'fs';
+import {zipObject} from 'lodash';
 
 const rawValue = (v: string) => v;
 
@@ -71,7 +72,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       .then(async (pool) => {
         const cli = await pool.connect();
         cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
-        const results = await cli.query(query);
+        const results = await cli.query({text: query, rowMode: 'array'});
         cli.release();
         return results;
       })
@@ -83,12 +84,13 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
         return results.map((r, i): NSDatabase.IResult => {
           messages.push(`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`);
+          const cols = this.getColumnNames(r.fields || []);
           return {
             connId: this.getId(),
-            cols: (r.fields || []).map(({ name }) => name),
+            cols,
             messages,
             query: queries[i],
-            results: r.rows,
+            results: this.mapRows(r.rows, cols),
           };
         });
       })
@@ -105,6 +107,17 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           query,
           results: [],
       }]))
+  }
+
+  private getColumnNames(fields: FieldDef[]): string[] {
+    return fields.reduce((names, {name}) => {
+      const count = names.filter((n) => n === name).length;
+      return names.concat(count > 0 ? `${name} (${count})` : name);
+    }, []);
+  }
+
+  private mapRows(rows: any[], columns: string[]): any[] {
+    return rows.map((r) => zipObject(columns, r));
   }
 
   public getTables(): Promise<NSDatabase.ITable[]> {
