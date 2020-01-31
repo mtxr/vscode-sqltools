@@ -9,7 +9,6 @@
   "dependencies": {
     "@sqltools/core": "*",
     "@sqltools/plugins": "*",
-    "redux": "^4.0.1",
     "vscode-languageserver": "5.2.1"
   },
   "devDependencies": {

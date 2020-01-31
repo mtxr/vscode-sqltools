@@ -5,20 +5,24 @@ import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils'
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
-import actions from './store/actions';
+import Handlers from './cache/handlers';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
 import { decorateException } from '@sqltools/core/utils/errors';
 import logger from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
-import { Store } from 'redux';
+import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
+import queryResultsCache from './cache/query-results.model';
 
 const log = logger.extend('conn-mann');
 
 export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
-  private server: ILanguageServer<Store>;
-  private get connections() {
-    const { activeConnections, lastUsedId } = this.server.store.getState();
+  private server: ILanguageServer;
+  private getConnectionsList = async () => {
+    const [ activeConnections = {}, lastUsedId ] = await Promise.all([
+      connectionStateCache.get(ACTIVE_CONNECTIONS_KEY,),
+      connectionStateCache.get(LAST_USED_ID_KEY),
+    ]);
     return (ConfigManager.connections || []).map(conn => {
       conn = migrateConnectionSetting(conn);
       conn.isActive = getConnectionId(conn) === lastUsedId;
@@ -28,18 +32,18 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     });
   }
 
-  private getConnectionInstance(creds: IConnection) {
+  private async getConnectionInstance(creds: IConnection) {
     const id = getConnectionId(creds);
-    const { activeConnections } = this.server.store.getState();
+    const activeConnections = await connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {});
     return <Connection | null>(activeConnections[id] || null);
   }
 
   private runCommandHandler: RequestHandler<typeof RunCommandRequest> = async ({ conn, args, command }) => {
     try {
-      const c = this.getConnectionInstance(conn);
+      const c = await this.getConnectionInstance(conn);
       if (!c) throw 'Connection not found';
       const results: NSDatabase.IResult[] = await c[command](...args);
-      this.server.store.dispatch(actions.QuerySuccess(c, { results }));
+      await Handlers.QuerySuccess(c, { results });
       return results;
     } catch (e) {
       this.server.notifyError('Execute query error', e);
@@ -47,9 +51,8 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = ({ connId, filename, query, filetype = 'csv' }) => {
-    const { queryResults } = this.server.store.getState();
-    const { results, cols } = queryResults[connId][query];
+  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ connId, filename, query, filetype = 'csv' }) => {
+    const { results, cols } = await queryResultsCache.get(`[${connId}][QUERY=${query}]`);
     let output = '';
     if (filetype === 'json') {
       output = JSON.stringify(results, null, 2);
@@ -68,10 +71,10 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (!conn) {
       return undefined;
     }
-    const { activeConnections } = this.server.store.getState();
+    const activeConnections = await connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {});
     if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [], functions: [] };
 
-    const c = this.getConnectionInstance(conn);
+    const c = await this.getConnectionInstance(conn);
     const [
       tables,
       columns,
@@ -92,26 +95,26 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (!conn) {
       return undefined;
     }
-    const c = this.getConnectionInstance(conn);
+    const c = await this.getConnectionInstance(conn);
     if (!c) return;
     await c.close().catch(this.server.notifyError('Connection Error'));
-    this.server.store.dispatch(actions.Disconnect(c));
+    await Handlers.Disconnect(c);
   };
 
   private GetConnectionPasswordRequestHandler: RequestHandler<typeof GetConnectionPasswordRequest> = async ({ conn }): Promise<string> => {
     if (!conn) {
       return undefined;
     }
-    const c = this.getConnectionInstance(conn);
+    const c = await this.getConnectionInstance(conn);
     if (c) {
       return c.getPassword();
     }
     return null;
   };
 
-  private serializarConnectionState = (conn: IConnection) => {
-    const instance = this.getConnectionInstance(conn);
-    const { lastUsedId } = this.server.store.getState();
+  private serializarConnectionState = async (conn: IConnection) => {
+    const instance = await this.getConnectionInstance(conn);
+    const lastUsedId = await connectionStateCache.get(LAST_USED_ID_KEY);
     if (instance) {
       return {
         ...instance.serialize(),
@@ -128,11 +131,11 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (!req || !req.conn) {
       return undefined;
     }
-    let c = this.getConnectionInstance(req.conn);
+    let c = await this.getConnectionInstance(req.conn);
     let progressBase;
     try {
       if (c) {
-        this.server.store.dispatch(actions.Connect(c));
+        await Handlers.Connect(c);
         return this.serializarConnectionState(req.conn);
       }
       c = new Connection(req.conn);
@@ -143,14 +146,14 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       if (req.password) c.setPassword(req.password);
 
-      this.server.store.dispatch(actions.Connect(c));
+      await Handlers.Connect(c);
 
       this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
       await c.connect();
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
     } catch (e) {
-      this.server.store.dispatch(actions.Disconnect(c));
+      await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
@@ -201,8 +204,8 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = ({ connId, connectedOnly, sort = 'connectedFirst' } = {}) => {
-    let connList = this.connections;
+  private clientRequestConnectionHandler: RequestHandler<typeof GetConnectionsRequest> = async ({ connId, connectedOnly, sort = 'connectedFirst' } = {}) => {
+    let connList = await this.getConnectionsList();
 
     if (connId) return connList.filter(c => c.id === connId);
     
@@ -229,7 +232,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       return [];
     }
     const { conn, ...params } = req;
-    let c = this.getConnectionInstance(conn);
+    let c = await this.getConnectionInstance(conn);
     if (!c) return [];
     return c.getChildrenForItem(params);
   };
@@ -252,9 +255,12 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   // internal utils
   public _autoConnectIfActive = async () => {
     const defaultConnections: IConnection[] = [];
-    const { lastUsedId, activeConnections } = this.server.store.getState();
+    const [ activeConnections, lastUsedId ] = await Promise.all([
+      connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}),
+      connectionStateCache.get(LAST_USED_ID_KEY),
+    ])
     if (lastUsedId && activeConnections[lastUsedId]) {
-      defaultConnections.push(this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
+      defaultConnections.push(await this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
     }
     if (defaultConnections.length === 0
       && (

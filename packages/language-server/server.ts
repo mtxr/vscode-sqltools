@@ -1,6 +1,5 @@
 import ConfigManager from '@sqltools/core/config-manager';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
-import store from './store';
 import { InvalidActionError } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
@@ -98,12 +97,8 @@ ExecPath: ${process.execPath}
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
     if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
-      log.extend('debug')('received %s', req._method || req.toString());
-      let result = handler(...args);
-      if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
-        result = await result;
-      }
-      return result;
+      log.extend('debug')('REQUEST => %s', req._method || req.toString());
+      return Promise.resolve(handler(...args));
     });
   }
 
@@ -144,10 +139,6 @@ ExecPath: ${process.execPath}
     };
     if (typeof error !== 'undefined') return cb(error);
     return cb;
-  }
-
-  public get store() {
-    return store;
   }
 }
 
