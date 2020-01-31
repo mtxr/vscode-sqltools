@@ -101,16 +101,15 @@
                 }
             },
             {
-              "id": "SQLTools.currentQueryOutline",
-              "description": "Background decoration color for current query",
-              "defaults": {
-                  "dark": "#00a2ff50",
-                  "light": "#00a2ff50",
-                  "highContrast": "#00a2ff50"
-              }
-          }
+                "id": "SQLTools.currentQueryOutline",
+                "description": "Background decoration color for current query",
+                "defaults": {
+                    "dark": "#00a2ff50",
+                    "light": "#00a2ff50",
+                    "highContrast": "#00a2ff50"
+                }
+            }
         ],
-
         "languages": [
             {
                 "id": "sql",
@@ -863,9 +862,9 @@
                     }
                 },
                 "sqltools.connectionExplorer.groupConnected": {
-                  "type": "boolean",
-                  "description": "Group connection in two groups, 'Connected' and 'Not Connected'",
-                  "default": false
+                    "type": "boolean",
+                    "description": "Group connection in two groups, 'Connected' and 'Not Connected'",
+                    "default": false
                 },
                 "sqltools.debug": {
                     "type": "object",

@@ -12,7 +12,7 @@
   "private": false,
   "peerDependencies": {
     "vscode-languageclient": "*",
-    "vscode-languageserver-protocol": "*",
-    "vscode-languageserver": "*"
+    "vscode-languageserver": "*",
+    "vscode-languageserver-protocol": "*"
   }
 }
