@@ -6,29 +6,30 @@ export default class IntellisensePlugin<T extends ILanguageServer<any>> implemen
   private server: T;
 
   private onCompletion = (params: CompletionParams): CompletionItem[] => {
-    const { connectionInfo, lastUsedId } = this.server.store.getState();
-    if (!lastUsedId) return;
+    return [];
+    // const { connectionInfo, lastUsedId } = this.server.store.getState();
+    // if (!lastUsedId) return;
 
-    const { textDocument, position } = params;
-    const doc = this.server.docManager.get(textDocument.uri);
+    // const { textDocument, position } = params;
+    // const doc = this.server.docManager.get(textDocument.uri);
 
-    const prevWord = doc.getText(Range.create(Math.max(0, position.line - 5), 0, position.line, position.character)).replace(/[\r\n|\n]+/g, ' ').split(/[\s]+/g).filter(Boolean).pop();
+    // const prevWord = doc.getText(Range.create(Math.max(0, position.line - 5), 0, position.line, position.character)).replace(/[\r\n|\n]+/g, ' ').split(/[\s]+/g).filter(Boolean).pop();
 
-    const tablePrefixes = [
-      'from',
-      'join',
-      'update',
-      'table'
-    ];
+    // const tablePrefixes = [
+    //   'from',
+    //   'join',
+    //   'update',
+    //   'table'
+    // ];
 
-    const { columns, tables } = connectionInfo[lastUsedId];
+    // const { columns, tables } = connectionInfo[lastUsedId];
 
-    if (tablePrefixes.includes(prevWord.toLowerCase())) {
-      return tables.map(TableCompletionItemFirst)
-      .concat(columns.map(TableColumnCompletionItem));
-    }
+    // if (tablePrefixes.includes(prevWord.toLowerCase())) {
+    //   return tables.map(TableCompletionItemFirst)
+    //   .concat(columns.map(TableColumnCompletionItem));
+    // }
 
-    return columns.map(TableColumnCompletionItem).concat(tables.map(TableCompletionItem));
+    // return columns.map(TableColumnCompletionItem).concat(tables.map(TableCompletionItem));
   }
 
   public register(server: T) {
