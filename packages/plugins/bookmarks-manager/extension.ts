@@ -1,7 +1,7 @@
 import BookmarksExplorer from './explorer';
 import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
 
@@ -73,7 +73,7 @@ export default class BookmarksManagerPlugin implements IExtensionPlugin {
     try {
       item = item || (await this.bookmarksMenu());
       if (!item) return;
-      await commands.executeCommand(`${EXT_NAME}.executeQuery`, item.query);
+      await commands.executeCommand(`${EXT_NAMESPACE}.executeQuery`, item.query);
     } catch (e) {
       this.errorHandler('Error while running query.', e);
     }

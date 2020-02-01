@@ -29,8 +29,8 @@ const devDependencies = Object.assign(
 );
 
 // defintions
-const EXT_NAME = 'SQLTools';
-const DISPLAY_NAME = EXT_NAME;
+const EXT_NAMESPACE = 'sqltools';
+const DISPLAY_NAME = 'SQLTools';
 const EXT_ID = 'sqltools';
 
 const rootdir = path.resolve(__dirname, '..', '..');
@@ -84,7 +84,7 @@ function getExtensionConfig(outdir) {
           transform: (content) => {
             content = content.toString();
             const hrPos = content.indexOf('<hr');
-            content = `# ${EXT_NAME} extension for Visual Studio Code\n${content.substring(hrPos).replace(/^<hr * \/>/, '')}`;
+            content = `# ${EXT_NAMESPACE} extension for Visual Studio Code\n${content.substring(hrPos).replace(/^<hr * \/>/, '')}`;
             return content;
           },
         },
@@ -122,7 +122,7 @@ module.exports = () => {
         'process.env.PRODUCT': JSON.stringify(config.name),
         'process.env.DSN_KEY': JSON.stringify((config.name === 'ext' ? process.env.EXT_DSN_KEY : process.env.LS_DSN_KEY) || ''),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
-        'process.env.EXT_NAME': JSON.stringify(EXT_NAME),
+        'process.env.EXT_NAMESPACE': JSON.stringify(EXT_NAMESPACE),
         'process.env.DISPLAY_NAME': JSON.stringify(DISPLAY_NAME),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),

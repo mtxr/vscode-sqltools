@@ -26,7 +26,7 @@ const ConnectionCreated = ({ settings, action, reset }) => {
             onClick={reset}
             bg="var(--vscode-list-highlightForeground)"
             href={encodeURI(
-              `command:${process.env.EXT_NAME || 'sqltools'}.selectConnection?${JSON.stringify(settings.id)}`
+              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.selectConnection?${JSON.stringify(settings.id)}`
             )}
           >
             Connect now
@@ -36,7 +36,7 @@ const ConnectionCreated = ({ settings, action, reset }) => {
             bg="var(--vscode-editorError-foreground)"
             float="right"
             href={encodeURI(
-              `command:${process.env.EXT_NAME || 'sqltools'}.deleteConnection?${JSON.stringify(settings.id)}`
+              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.deleteConnection?${JSON.stringify(settings.id)}`
             )}
           >
             Delete {settings.name}

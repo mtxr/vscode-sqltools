@@ -26,7 +26,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
       const runCmd: Command = {
         arguments: [document.uri],
         title: `Detach file from ${connName.trim()}`,
-        command: `${Constants.EXT_NAME}.detachConnectionFromFile`,
+        command: `${Constants.EXT_NAMESPACE}.detachConnectionFromFile`,
       };
       lenses.push(new CodeLens(new Range(0, 0, 0, 0), runCmd))
     }
@@ -37,7 +37,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
       const runCmd: Command = {
         arguments: [queries, (connName || defaultConn || '').trim() || undefined].filter(Boolean),
         title: `Run query block on ${(connName || defaultConn || 'active connection').trim()}`,
-        command: `${Constants.EXT_NAME}.executeQuery`,
+        command: `${Constants.EXT_NAMESPACE}.executeQuery`,
       };
       lenses.push(new CodeLens(range, runCmd));
       // @todo select query block

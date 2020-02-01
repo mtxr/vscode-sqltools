@@ -4,6 +4,7 @@ import { InvalidActionError } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 
 class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
@@ -52,7 +53,7 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
   };
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
-    ConfigManager.update(changes.settings.sqltools);
+    ConfigManager.update(changes.settings[EXT_NAMESPACE.toLowerCase()]);
     if (ConfigManager.telemetry) telemetry.enable();
     else telemetry.disable();
 

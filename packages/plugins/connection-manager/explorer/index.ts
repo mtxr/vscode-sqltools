@@ -1,5 +1,5 @@
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/core/utils';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
@@ -98,19 +98,17 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
+    this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
     ConfigManager.addOnUpdateHook(() => this.refresh());
     Context.subscriptions.push(this.treeView);
   }
 
   private getConnections(): Thenable<IConnection[]> {
-    return commands.executeCommand(`${EXT_NAME}.getConnections`);
+    return commands.executeCommand(`${EXT_NAMESPACE}.getConnections`);
   }
   private getConnectionsTreeItems = async () => {
     const connections: IConnection[] = await this.getConnections();
     const items: SidebarConnection[] = connections.map(conn => new SidebarConnection(conn));
-
-    this._onDidChangeActiveConnection.fire();
 
     return items;
   }
@@ -136,7 +134,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
       addNew.command = {
         title: 'Add New Connections',
-        command: `${EXT_NAME}.openAddConnectionScreen`,
+        command: `${EXT_NAMESPACE}.openAddConnectionScreen`,
       };
       return [addNew];
     }
@@ -160,6 +158,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
       currentGroup.items.push(item);
     });
+    this._onDidChangeActiveConnection.fire(this._active ? this._active.conn : null);
 
     root.items = sortBy(root.items, ['isGroup', 'label']);
 
@@ -191,6 +190,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
       currentGroup.items.push(item);
     });
+    this._onDidChangeActiveConnection.fire(this._active ? this._active.conn : null);
 
     connectedTreeItem.items = sortBy(connectedTreeItem.items, ['isGroup', 'label']);
     notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, ['isGroup', 'label']);

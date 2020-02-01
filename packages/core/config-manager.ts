@@ -9,7 +9,7 @@ interface ISettings extends ISettingsProps {
 }
 
 let settings: Partial<ISettings> = {};
-const onUpdateHooks: (() => any)[] = [];
+const onUpdateHooks: ((event?: { affectsConfiguration?: (section: string, resource?: any) => boolean; }) => any)[] = [];
 function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
   const keys: string [] = configKey.split('.');
 
@@ -23,7 +23,7 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
   return setting;
 }
 
-function update(newSettings: ISettings) {
+function update(newSettings: ISettings, event?: { affectsConfiguration: (section: string, resource?: any) => boolean; }) {
   settings = newSettings;
   if (!settings.inspect) {
     // inspect implementation for language server.
@@ -31,7 +31,7 @@ function update(newSettings: ISettings) {
       throw new Error(`Inspect doesnt exist within ${process.env.PRODUCT} context`);
     };
   }
-  onUpdateHooks.forEach(cb => cb());
+  onUpdateHooks.forEach(cb => cb(event));
 }
 
 function addOnUpdateHook(handler: () => void) {

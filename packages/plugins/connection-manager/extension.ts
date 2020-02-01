@@ -1,6 +1,6 @@
 import logger from '@sqltools/vscode/log';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
@@ -34,7 +34,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   // extension commands
   private ext_refreshTree = (connIdOrTreeItem: SidebarConnection | SidebarConnection[]) => {
     if (typeof connIdOrTreeItem === 'string') {
-      throw new Error(`Deprecated! ${EXT_NAME}.refreshTree command with strings is now deprecated.`);
+      throw new Error(`Deprecated! ${EXT_NAMESPACE}.refreshTree command with strings is now deprecated.`);
     }
     if (!connIdOrTreeItem || (Array.isArray(connIdOrTreeItem) && connIdOrTreeItem.length === 0)) {
       return this.explorer.refresh();
@@ -300,7 +300,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_openSettings = async () => {
     // TEMP SOlUTION
     // in the future this should open correct json file to edit connections
-    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
+    return commands.executeCommand('workbench.action.openSettings', `${EXT_NAMESPACE}.connections`);
   }
 
   private ext_focusOnExplorer = () => {
@@ -319,7 +319,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       workspaceFolderValue = [],
       workspaceValue = [],
       globalValue = [],
-    } = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+    } = workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).inspect('connections');
 
     const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === conn.id);
 
@@ -435,7 +435,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         {
           iconPath: getIconPaths('add-connection'),
           tooltip: 'Add new Connection',
-          cb: () => commands.executeCommand(`${EXT_NAME}.openAddConnectionScreen`),
+          cb: () => commands.executeCommand(`${EXT_NAMESPACE}.openAddConnectionScreen`),
         } as any,
       ],
     })) as string;
@@ -483,13 +483,13 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
       writeTo = ConfigurationTarget.Global;
     }
-    return workspace.getConfiguration(EXT_NAME.toLowerCase()).update('connections', migrateConnectionSettings(connList), writeTo);
+    return workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).update('connections', migrateConnectionSettings(connList), writeTo);
   }
 
   private getConnectionList(from?: ConfigurationTarget): IConnection[] {
-    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_NAME.toLowerCase()).get('connections') || []);
+    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).get('connections') || []);
 
-    const config = workspace.getConfiguration(EXT_NAME.toLowerCase()).inspect('connections');
+    const config = workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).inspect('connections');
     if (from === ConfigurationTarget.Global) {
       return migrateConnectionSettings(<IConnection[]>(config.globalValue || config.defaultValue) || []);
     }
@@ -522,7 +522,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_copyTextFromTreeItem = async () => {
     const nodes = this.explorer.getSelection();
     if (!nodes || nodes.length === 0) return;
-    return commands.executeCommand(`${EXT_NAME}.copyText`, null, nodes);
+    return commands.executeCommand(`${EXT_NAMESPACE}.copyText`, null, nodes);
   }
 
   private async getConnFromIdOrNode(connIdOrNode?: string | SidebarConnection) {
@@ -550,11 +550,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
     const connId = this.getAttachedConnection(editor.document.uri);
     if (!connId) {
-      return commands.executeCommand('setContext', `sqltools.file.connectionAttached`, false);
+      return commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, false);
     }
 
-    await this.ext_selectConnection(connId, editor.document.uri.scheme === EXT_NAME.toLocaleLowerCase());
-    await commands.executeCommand('setContext', `sqltools.file.connectionAttached`, true);
+    await this.ext_selectConnection(connId, editor.document.uri.scheme === EXT_NAMESPACE.toLocaleLowerCase());
+    await commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, true);
   }
 
   private onDidOpenOrCloseTextDocument = (doc: TextDocument) => {

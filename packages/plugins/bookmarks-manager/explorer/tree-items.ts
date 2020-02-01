@@ -1,5 +1,5 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 
 export class BookmarkTreeItem extends TreeItem {
   public contextValue = 'bookmark.item';
@@ -13,7 +13,7 @@ export class BookmarkTreeItem extends TreeItem {
     this.description = query;
     this.command = {
       title: 'Edit',
-      command: `${EXT_NAME}.editBookmark`,
+      command: `${EXT_NAMESPACE}.editBookmark`,
       arguments: [this],
     };
   }

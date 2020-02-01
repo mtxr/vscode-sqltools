@@ -1,7 +1,7 @@
 import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
 import { window } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import Context from '@sqltools/vscode/context';
 
 type HistoryExplorerItem = HistoryTreeItem | HistoryTreeGroup;
@@ -50,7 +50,7 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   }
   
   constructor() {
-    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAME}/historyExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}/historyExplorer`, { treeDataProvider: this });
     Context.subscriptions.push(this.treeView);
   }
 }

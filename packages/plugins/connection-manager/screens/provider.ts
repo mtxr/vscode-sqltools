@@ -1,6 +1,7 @@
 import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getIconPath } from '@sqltools/vscode/icons';
 import Context from '@sqltools/vscode/context';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();
@@ -116,7 +117,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   }
 
   private setPreviewActiveContext = (value: boolean) => {
-		commands.executeCommand('setContext', `sqltools.${this.id}.active`, value);
+		commands.executeCommand('setContext', `${EXT_NAMESPACE}.${this.id}.active`, value);
   }
 
   private lastState = undefined;

@@ -1,4 +1,4 @@
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, MConnectionExplorer } from '@sqltools/types';
 import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
 import { isDeepStrictEqual } from 'util';
@@ -25,7 +25,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
 
   public async checkItemsCache() {
     if (this.conn.driver === DatabaseDriver['PostgreSQL']) {
-      const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAME}.getChildrenForTreeItem`, { conn: this.conn, itemType: 'root', itemId: this.getId() });
+      const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, { conn: this.conn, itemType: 'root', itemId: this.getId() });
       items.forEach(item => {
         this.addItem(new SidebarResourceGroup(item.label, item.itemType));
       });
@@ -56,7 +56,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
   public async getChildren() {
     try {
       if (!this.isConnected) {
-        await commands.executeCommand(`${EXT_NAME}.selectConnection`, this);
+        await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, this);
       }
       await this.checkItemsCache();
       return this.items;
@@ -68,7 +68,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
     if (!this.isActive) {
       return {
         title: 'Connect',
-        command: `${EXT_NAME}.selectConnection`,
+        command: `${EXT_NAMESPACE}.selectConnection`,
         arguments: [this],
       };
     }

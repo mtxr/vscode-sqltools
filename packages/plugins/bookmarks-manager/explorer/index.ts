@@ -2,7 +2,7 @@ import logger from '@sqltools/core/log';
 import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { getDataPath } from '@sqltools/core/utils/persistence';
 import fs from 'fs';
 import Context from '@sqltools/vscode/context';
@@ -116,7 +116,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
 
 
   constructor() {
-    this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAME}/bookmarksExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAMESPACE}/bookmarksExplorer`, { treeDataProvider: this });
     Context.subscriptions.push(this.treeView);
     this.readFromFile();
   }

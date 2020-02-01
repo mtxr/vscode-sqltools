@@ -3,7 +3,7 @@ import HistoryExplorer from './explorer';
 import { getNameFromId } from '@sqltools/core/utils';
 import { quickPick, insertText } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';
 
 const hookedCommands = [
@@ -48,7 +48,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
     try {
       query = query || (await this.historyMenu());
-      return commands.executeCommand(`${EXT_NAME}.executeQuery`, query, false);
+      return commands.executeCommand(`${EXT_NAMESPACE}.executeQuery`, query, false);
     } catch (e) {
       this.errorHandler('Error while running query.', e);
     }

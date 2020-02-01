@@ -4,7 +4,7 @@ import ConfigManager from '@sqltools/core/config-manager';
 import * as Utils from '@sqltools/core/utils';
 import { IExtensionPlugin } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 
 export default class CodeLensPlugin implements IExtensionPlugin {
@@ -81,8 +81,8 @@ export default class CodeLensPlugin implements IExtensionPlugin {
 }
 
 const currentQueryDecoration = window.createTextEditorDecorationType({
-  backgroundColor: { id: `${EXT_NAME}.currentQueryBg` },
-  borderColor: { id: `${EXT_NAME}.currentQueryOutline` },
+  backgroundColor: { id: `${EXT_NAMESPACE}.currentQueryBg` },
+  borderColor: { id: `${EXT_NAMESPACE}.currentQueryOutline` },
   borderWidth: '1px',
   borderStyle: 'solid',
 });

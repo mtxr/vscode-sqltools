@@ -1,10 +1,10 @@
 import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
 import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME, VERSION, AUTHOR } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, VERSION, AUTHOR } from '@sqltools/core/constants';
 import { ISettings, IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
 import { Timer } from '@sqltools/core/utils';
-import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter } from 'vscode';
+import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter, ConfigurationChangeEvent } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
 import { openExternal } from '@sqltools/vscode/utils';
@@ -39,7 +39,7 @@ export class SQLToolsExtension implements IExtension {
         version: VSCodeVersion,
       },
     });
-    this.getAndUpdateConfig();
+    this.getAndUpdateConfig(null);
     this.client = new SQLToolsLanguageClient();
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
@@ -132,8 +132,8 @@ export class SQLToolsExtension implements IExtension {
   /**
    * Management functions
    */
-  private getAndUpdateConfig() {
-    ConfigManager.update(<ISettings>workspace.getConfiguration(EXT_NAME.toLowerCase()));
+  private getAndUpdateConfig(event?: ConfigurationChangeEvent) {
+    ConfigManager.update(<ISettings>workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()), event);
   }
 
   private async displayReleaseNotesMessage() {
@@ -227,8 +227,8 @@ export class SQLToolsExtension implements IExtension {
 
   private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
     Context.subscriptions.push(
-      commands[type](`${EXT_NAME}.${command}`, async (...args) => {
-        log.extend('info')(`Executing ${EXT_NAME}.${command}`)
+      commands[type](`${EXT_NAMESPACE}.${command}`, async (...args) => {
+        log.extend('info')(`Executing ${EXT_NAMESPACE}.${command}`)
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);

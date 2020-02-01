@@ -189,7 +189,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         getVscode().postMessage({
           action: 'call',
           payload: {
-            command: `${process.env.EXT_NAME}.insertText`,
+            command: `${process.env.EXT_NAMESPACE}.insertText`,
             args: [`${contextMenu.row[contextMenu.column.name]}`],
           },
         });
@@ -198,7 +198,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         getVscode().postMessage({
           action: 'call',
           payload: {
-            command: `${process.env.EXT_NAME}.insertText`,
+            command: `${process.env.EXT_NAMESPACE}.insertText`,
             args: [JSON.stringify(contextMenu.row, null, 2)],
           },
         });
@@ -207,7 +207,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         getVscode().postMessage({
           action: 'call',
           payload: {
-            command: `${process.env.EXT_NAME}.executeQuery`,
+            command: `${process.env.EXT_NAMESPACE}.executeQuery`,
             args: [this.props.query, this.props.connId],
           },
         });
@@ -216,7 +216,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         getVscode().postMessage({
           action: 'call',
           payload: {
-            command: `${process.env.EXT_NAME}.saveResults`,
+            command: `${process.env.EXT_NAMESPACE}.saveResults`,
             args: ['csv', this.props.connId],
           },
         });
@@ -225,7 +225,7 @@ export default class ResultsTable extends React.PureComponent<ResultsTableProps>
         getVscode().postMessage({
           action: 'call',
           payload: {
-            command: `${process.env.EXT_NAME}.saveResults`,
+            command: `${process.env.EXT_NAMESPACE}.saveResults`,
             args: ['json', this.props.connId],
           },
         });

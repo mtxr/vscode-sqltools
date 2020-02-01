@@ -1,6 +1,6 @@
 import { commands, window } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAME, DOCS_ROOT_URL } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, DOCS_ROOT_URL } from '@sqltools/core/constants';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ResponseError } from 'vscode-languageclient';
 namespace ErrorHandler {
@@ -23,7 +23,7 @@ namespace ErrorHandler {
 
     switch (await window.showErrorMessage(message, ...options)) {
       case 'View Logs':
-        commands.executeCommand(`${EXT_NAME}.showOutputChannel`);
+        commands.executeCommand(`${EXT_NAMESPACE}.showOutputChannel`);
         break;
       case 'Help!':
         openExternal(`${DOCS_ROOT_URL}/connections/${error.data.driver.toLowerCase()}#${typeof error.code === 'string' ? error.code : error.name}`);

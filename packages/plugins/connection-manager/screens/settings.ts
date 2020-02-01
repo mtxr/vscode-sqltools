@@ -1,4 +1,4 @@
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import { commands, Uri } from 'vscode';
@@ -36,7 +36,7 @@ export default class SettingsWebview extends WebviewProvider {
     if (connInfo.driver === DatabaseDriver.SQLite && transformToRelative) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-    return commands.executeCommand(`${EXT_NAME}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAMESPACE}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       this.postMessage({ action: 'updateConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
@@ -51,7 +51,7 @@ export default class SettingsWebview extends WebviewProvider {
     if (connInfo.driver === DatabaseDriver.SQLite && transformToRelative) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-    return commands.executeCommand(`${EXT_NAME}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
+    return commands.executeCommand(`${EXT_NAMESPACE}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       this.postMessage({ action: 'createConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
@@ -66,7 +66,7 @@ export default class SettingsWebview extends WebviewProvider {
     if (connInfo.driver === DatabaseDriver.SQLite) {
       connInfo.database = relativeToWorkspace(connInfo.database);
     }
-    return commands.executeCommand(`${EXT_NAME}.testConnection`, connInfo)
+    return commands.executeCommand(`${EXT_NAMESPACE}.testConnection`, connInfo)
     .then((res: any) => {
       if (res && res.notification) {
         const message = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
@@ -82,6 +82,6 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private openConnectionFile = async () => {
-    return commands.executeCommand('workbench.action.openSettings', 'sqltools.connections');
+    return commands.executeCommand('workbench.action.openSettings', `${EXT_NAMESPACE}.connections`);
   }
 }

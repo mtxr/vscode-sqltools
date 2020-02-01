@@ -2,7 +2,7 @@ import logger from '@sqltools/core/log';
 import path from 'path';
 import fs from 'fs';
 import ConfigManager from '@sqltools/core/config-manager';
-import { DISPLAY_NAME, EXT_NAME, ElectronNotSupportedNotification } from '@sqltools/core/constants';
+import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification } from '@sqltools/core/constants';
 import { commandExists } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
@@ -142,7 +142,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
           agg.push(language);
         }
         return agg;
-      }, [{ scheme: EXT_NAME.toLowerCase(), language: undefined }]);
+      }, [{ scheme: EXT_NAMESPACE.toLowerCase(), language: undefined }]);
 
     return {
       documentSelector: selector,
@@ -152,7 +152,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         userEnvVars: ConfigManager.languageServerEnv
       },
       synchronize: {
-        configurationSection: EXT_NAME.toLowerCase(),
+        configurationSection: EXT_NAMESPACE.toLowerCase(),
         fileEvents: Wspc.createFileSystemWatcher('**/.sqltoolsrc'),
       },
       initializationFailedHandler: error => {
@@ -196,15 +196,15 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private electronNotSupported = async () => {
     const r = await window.showInformationMessage(
-      'VSCode engine is not supported. You should enable \'sqltools.useNodeRuntime\' and have NodeJS installed to continue.',
+      `VSCode engine is not supported. You should enable \'${EXT_NAMESPACE}.useNodeRuntime\' and have NodeJS installed to continue.`,
       'Enable now',
     );
     if (!r) return;
-    await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
-    try { await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
-    try { await Wspc.getConfiguration(EXT_NAME.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
+    await Wspc.getConfiguration(EXT_NAMESPACE.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Global);
+    try { await Wspc.getConfiguration(EXT_NAMESPACE.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch(e) {}
+    try { await Wspc.getConfiguration(EXT_NAMESPACE.toLowerCase()).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch(e) {}
     const res = await window.showInformationMessage(
-      '\'sqltools.useNodeRuntime\' enabled. You must reload VSCode to take effect.', 'Reload now');
+      `\'${EXT_NAMESPACE}.useNodeRuntime\' enabled. You must reload VSCode to take effect.`, 'Reload now');
     if (!res) return;
     commands.executeCommand('workbench.action.reloadWindow');
   }

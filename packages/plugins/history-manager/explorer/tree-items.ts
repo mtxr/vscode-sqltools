@@ -1,6 +1,6 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAME } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { cleanUp } from '@sqltools/core/utils/query';
 
 export class HistoryTreeItem extends TreeItem {
@@ -15,7 +15,7 @@ export class HistoryTreeItem extends TreeItem {
     this.description = new Date().toLocaleString();
     this.command = {
       title: 'Edit',
-      command: `${EXT_NAME}.editHistory`,
+      command: `${EXT_NAMESPACE}.editHistory`,
       arguments: [this],
     };
   }

@@ -1,7 +1,7 @@
 import { window as Win, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAME, DOCS_ROOT_URL, MissingModuleNotification } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
@@ -52,7 +52,7 @@ Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
-            await commands.executeCommand(`${EXT_NAME}.selectConnection`, getConnectionId(conn));
+            await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, getConnectionId(conn));
           }
           break;
         case readMore:
