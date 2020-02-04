@@ -3,7 +3,7 @@ import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sq
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification, DISPLAY_NAME } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
-import ConfigManager from '@sqltools/core/config-manager';
+import Config from '@sqltools/vscode/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
 
 export default class DependencyManager implements IExtensionPlugin {
@@ -24,7 +24,7 @@ export default class DependencyManager implements IExtensionPlugin {
     const installNow = action === 'upgrade' ? 'Upgrade now' : 'Install now';
     const readMore = 'Read more';
     const options = [readMore, installNow];
-    const dependencyManagerSettings = ConfigManager.dependencyManager;
+    const dependencyManagerSettings = Config.dependencyManager;
     const autoUpdateOrInstall = dependencyManagerSettings && dependencyManagerSettings.autoAccept;
     const dependenciesName = deps.map((d, i) => `${d.name}@${d.version || 'latest'}${i === deps.length - 2 ? ' and ' : (i === deps.length - 1 ? '' : ', ')}`).join('');
     try {

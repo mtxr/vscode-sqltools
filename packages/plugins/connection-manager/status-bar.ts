@@ -1,4 +1,4 @@
-import ConfigManager from '@sqltools/core/config-manager';
+import Config from '@sqltools/vscode/config-manager';
 import { window, StatusBarItem, StatusBarAlignment } from 'vscode';
 import { EXT_NAMESPACE } from '@sqltools/core/constants';
 
@@ -12,10 +12,10 @@ statusBar.setText = text => (statusBar.text = `$(database) ${text || 'Connect'}`
 
 statusBar.setText();
 
-const updateVisibility = () => ConfigManager.showStatusbar ? statusBar.show() : statusBar.hide();
+const updateVisibility = () => Config.showStatusbar ? statusBar.show() : statusBar.hide();
 
 updateVisibility();
 
-ConfigManager.addOnUpdateHook(updateVisibility);
+Config.addOnUpdateHook(ev => ev.affectsConfig('showStatusbar') && updateVisibility);
 
 export default statusBar;

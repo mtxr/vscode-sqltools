@@ -1,4 +1,3 @@
-import ConfigManager from '@sqltools/core/config-manager';
 import { EXT_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/core/utils';
@@ -8,8 +7,9 @@ import SidebarTableOrView from "@sqltools/plugins/connection-manager/explorer/Si
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
 import sortBy from 'lodash/sortBy';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import Context from '@sqltools/vscode/context';
+import Config from '@sqltools/vscode/config-manager';
 
 const log = logger.extend('conn-man:explorer');
 
@@ -54,7 +54,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return this.getRootItems();
     }
     const items = (<any>element).getChildren ? await (<any>element).getChildren() : element.items as any[];
-    if (ConfigManager.flattenGroupsIfOne && items.length === 1) {
+    if (Config.flattenGroupsIfOne && items.length === 1) {
       return this.getChildren(items[0]);
     }
     return items;
@@ -99,7 +99,16 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public constructor() {
     this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
-    ConfigManager.addOnUpdateHook(() => this.refresh());
+    Config.addOnUpdateHook((ev) => {
+      if (
+        ev.affectsConfig('flattenGroupsIfOne')
+        || ev.affectsConfig('connections')
+        || ev.affectsConfig('connectionExplorer.groupConnected')
+        || ev.affectsConfig('sortColumns')
+      ) {
+        this.refresh();
+      }
+    });
     Context.subscriptions.push(this.treeView);
   }
 
@@ -128,7 +137,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private async getRootItems(): Promise<TreeItem[]> {
-    const groupConnected = ConfigManager['connectionExplorer.groupConnected'];
+    const groupConnected = Config['connectionExplorer.groupConnected'];
     const items = await this.getConnectionsTreeItems();
     if (items.length === 0) {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);

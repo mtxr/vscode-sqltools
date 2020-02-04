@@ -3,7 +3,7 @@ import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contrac
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
-import ConfigManager from '@sqltools/core/config-manager';
+import Config from '@sqltools/vscode/config-manager';
 import { getNameFromId } from '@sqltools/core/utils';
 import path from 'path';
 import Context from '@sqltools/vscode/context';
@@ -34,10 +34,10 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   public get cssVariables() {
-    if (!ConfigManager.results.customization) {
+    if (!Config.results.customization) {
       return super.cssVariables;
     }
-    return <any>ConfigManager.results.customization;
+    return <any>Config.results.customization;
   }
 
   public saveResults = async (filetype: 'csv' | 'json' = 'csv') => {
@@ -65,7 +65,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   show() {
     this.wereToShow = null;
-    switch (ConfigManager.results.location) {
+    switch (Config.results.location) {
       case 'active': // fallback older version
       case 'current':
         this.wereToShow = vscode.ViewColumn.Active;
@@ -77,8 +77,8 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       default:
         if (!vscode.window.activeTextEditor) {
           this.wereToShow = vscode.ViewColumn.One;
-        } else if (ConfigManager.results && typeof ConfigManager.results.location === 'number' && ConfigManager.results.location >= -1 && ConfigManager.results.location <= 9 && ConfigManager.results.location !== 0) {
-          this.wereToShow = ConfigManager.results.location;
+        } else if (Config.results && typeof Config.results.location === 'number' && Config.results.location >= -1 && Config.results.location <= 9 && Config.results.location !== 0) {
+          this.wereToShow = Config.results.location;
         } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
             this.wereToShow = vscode.ViewColumn.Two;
         } else {

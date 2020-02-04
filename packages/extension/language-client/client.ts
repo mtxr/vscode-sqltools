@@ -1,13 +1,13 @@
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import path from 'path';
 import fs from 'fs';
-import ConfigManager from '@sqltools/core/config-manager';
+import Config from '@sqltools/vscode/config-manager';
 import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 import { commandExists } from '@sqltools/core/utils';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
-import telemetry from '@sqltools/core/utils/telemetry';
+import telemetry from '@sqltools/vscode/telemetry';
 import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 
@@ -27,21 +27,19 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
     this.registerBaseNotifications();
 
-    const useNodeRuntimePrevValue = ConfigManager.useNodeRuntime;
-    const languageServerEnvPrevValue = JSON.stringify(ConfigManager.languageServerEnv);
-    ConfigManager.addOnUpdateHook(async () => {
-      if (ConfigManager.useNodeRuntime !== useNodeRuntimePrevValue) {
+    Config.addOnUpdateHook(async (ev) => {
+      if (ev.affectsConfig('useNodeRuntime')) {
         const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
       }
 
-      if (JSON.stringify(ConfigManager.languageServerEnv) !== languageServerEnvPrevValue) {
+      if (ev.affectsConfig('languageServerEnv')) {
         const res = await window.showWarningMessage('New language server environment variables set. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
       }
-    })
+    });
   }
 
   public start() {
@@ -70,7 +68,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   private getServerOptions(): ServerOptions {
     const serverModule = Context.asAbsolutePath('languageserver.js');
     let runtime: string = undefined;
-    const useNodeRuntime = ConfigManager.useNodeRuntime;
+    const useNodeRuntime = Config.useNodeRuntime;
     if (useNodeRuntime) {
       if (typeof useNodeRuntime === 'string') {
         const runtimePath = path.normalize(useNodeRuntime);
@@ -95,7 +93,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       runtime,
       options: {
         env: {
-          ...(ConfigManager.languageServerEnv || {}),
+          ...(Config.languageServerEnv || {}),
           IS_NODE_RUNTIME: useNodeRuntime ? 1 : 0,
         },
       }
@@ -117,7 +115,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private getClientOptions(): LanguageClientOptions {
     const telemetryArgs: ITelemetryArgs = {
-      enableTelemetry: ConfigManager.telemetry,
+      enableTelemetry: Config.telemetry,
       extraInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
@@ -125,12 +123,12 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       },
     };
     let selector = [];
-    if (ConfigManager.completionLanguages){
-      selector = selector.concat(ConfigManager.completionLanguages);
+    if (Config.completionLanguages){
+      selector = selector.concat(Config.completionLanguages);
     }
 
-    if (ConfigManager.formatLanguages) {
-      selector = selector.concat(ConfigManager.formatLanguages);
+    if (Config.formatLanguages) {
+      selector = selector.concat(Config.formatLanguages);
     }
 
     selector = selector.reduce((agg, language) => {
@@ -149,7 +147,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       initializationOptions: {
         telemetry: telemetryArgs,
         extensionPath: Context.extensionPath,
-        userEnvVars: ConfigManager.languageServerEnv
+        userEnvVars: Config.languageServerEnv
       },
       synchronize: {
         configurationSection: EXT_CONFIG_NAMESPACE,

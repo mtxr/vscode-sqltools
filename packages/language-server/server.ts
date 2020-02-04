@@ -1,10 +1,10 @@
-import ConfigManager from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/core/config-manager';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
 import { InvalidActionError } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
-import telemetry from '@sqltools/core/utils/telemetry';
+import telemetry from '@sqltools/language-server/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
-import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
+import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 
 class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
@@ -53,8 +53,8 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
   };
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
-    ConfigManager.update(changes.settings[EXT_CONFIG_NAMESPACE]);
-    if (ConfigManager.telemetry) telemetry.enable();
+    ConfigRO.replaceAll(changes.settings[EXT_CONFIG_NAMESPACE]);
+    if (ConfigRO.telemetry) telemetry.enable();
     else telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());

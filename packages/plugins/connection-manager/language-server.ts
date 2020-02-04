@@ -1,5 +1,5 @@
 import Connection from '@sqltools/language-server/connection';
-import ConfigManager from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/core/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
 import csvStringify from 'csv-stringify/lib/sync';
@@ -10,7 +10,7 @@ import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
 import { decorateException } from '@sqltools/core/utils/errors';
 import logger from '@sqltools/core/log';
-import telemetry from '@sqltools/core/utils/telemetry';
+import telemetry from '@sqltools/language-server/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
 
@@ -23,7 +23,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       connectionStateCache.get(ACTIVE_CONNECTIONS_KEY,),
       connectionStateCache.get(LAST_USED_ID_KEY),
     ]);
-    return (ConfigManager.connections || []).map(conn => {
+    return (ConfigRO.connections || []).map(conn => {
       conn = migrateConnectionSetting(conn);
       conn.isActive = getConnectionId(conn) === lastUsedId;
       conn.isConnected = !!activeConnections[getConnectionId(conn)];
@@ -264,18 +264,18 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
     if (defaultConnections.length === 0
       && (
-        typeof ConfigManager.autoConnectTo === 'string'
+        typeof ConfigRO.autoConnectTo === 'string'
         || (
-          Array.isArray(ConfigManager.autoConnectTo) && ConfigManager.autoConnectTo.length > 0
+          Array.isArray(ConfigRO.autoConnectTo) && ConfigRO.autoConnectTo.length > 0
           )
         )
     ) {
-      const autoConnectTo = Array.isArray(ConfigManager.autoConnectTo)
-      ? ConfigManager.autoConnectTo
-      : [ConfigManager.autoConnectTo];
+      const autoConnectTo = Array.isArray(ConfigRO.autoConnectTo)
+      ? ConfigRO.autoConnectTo
+      : [ConfigRO.autoConnectTo];
       log.extend('info')(`Configuration set to auto connect to: ${autoConnectTo}`);
 
-      defaultConnections.push(...ConfigManager.connections
+      defaultConnections.push(...ConfigRO.connections
         .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
         .filter(Boolean));
     }

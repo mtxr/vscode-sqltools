@@ -8,7 +8,7 @@ import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
 import ContextValue from '../context-value';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('conn-explorer');

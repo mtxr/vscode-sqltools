@@ -1,4 +1,4 @@
-import ConfigManager from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/core/config-manager';
 import { TreeItemCollapsibleState, SnippetString } from 'vscode';
 import { NSDatabase } from '@sqltools/types';
 import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
@@ -36,7 +36,7 @@ export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColum
     return `${this.table.numberOfColumns} cols`;
   }
   constructor(public table: NSDatabase.ITable) {
-    super(table.name, (ConfigManager.get('tableTreeItemsExpanded', false)
+    super(table.name, (ConfigRO.get('tableTreeItemsExpanded', false)
       ? TreeItemCollapsibleState.Expanded
       : TreeItemCollapsibleState.Collapsed));
     this.value = this.table.name;

@@ -1,8 +1,8 @@
 import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer } from '@sqltools/types';
 import { decorateException } from '@sqltools/core/utils/errors';
 import { getConnectionId } from '@sqltools/core/utils';
-import ConfigManager from '@sqltools/core/config-manager';
-import telemetry from '@sqltools/core/utils/telemetry';
+import ConfigRO from '@sqltools/core/config-manager';
+import telemetry from '@sqltools/language-server/telemetry';
 import Drivers from '@sqltools/drivers/src';
 
 export default class Connection {
@@ -88,7 +88,7 @@ export default class Connection {
     return info;
   }
   public async showRecords(tableName: string, page: number = 0) {
-    const limit = this.conn.credentials.previewLimit || (ConfigManager.results && ConfigManager.results.limit) || 50;
+    const limit = this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
 
     const [records] = await this.conn.showRecords(tableName, limit, page).catch(this.decorateException);
 

@@ -1,5 +1,5 @@
 import logger from '@sqltools/vscode/log';
-import ConfigManager from '@sqltools/core/config-manager';
+import Config from '@sqltools/vscode/config-manager';
 import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
@@ -16,7 +16,7 @@ import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
-import telemetry from '@sqltools/core/utils/telemetry';
+import telemetry from '@sqltools/vscode/telemetry';
 import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
@@ -132,7 +132,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private async openConnectionFile(conn: IConnection) {
-    if (!ConfigManager.autoOpenSessionFiles) return;
+    if (!Config.autoOpenSessionFiles) return;
     if (!conn) return;
     let baseFolder: Uri;
 
@@ -185,9 +185,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private replaceParams = async (query: string) => {
-    if (!ConfigManager['queryParams.enableReplace']) return query;
+    if (!Config['queryParams.enableReplace']) return query;
 
-    const params = getQueryParameters(query, ConfigManager['queryParams.regex']);
+    const params = getQueryParameters(query, Config['queryParams.regex']);
     if (params.length > 0) {
       await new Promise((resolve, reject) => {
         const ib = window.createInputBox();
@@ -269,7 +269,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     connId = typeof connId === 'string' ? connId : undefined;
     filetype = typeof filetype === 'string' ? filetype : undefined;
-    let mode: any = filetype || ConfigManager.defaultExportType;
+    let mode: any = filetype || Config.defaultExportType;
     if (mode === 'prompt') {
       mode = await quickPick<'csv' | 'json' | undefined>([
         { label: 'Save results as CSV', value: 'csv' },

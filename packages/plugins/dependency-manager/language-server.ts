@@ -1,6 +1,6 @@
 import { InstallDepRequest } from './contracts';
 import packageManager from './lib/cli';
-import ConfigManager from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/core/config-manager';
 import { ISettings, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import logger from '@sqltools/core/log';
 
@@ -12,7 +12,7 @@ export default class DependencyManager<T extends ILanguageServer<any> = ILanguag
   public static runningJobs: string[] = [];
 
   private onRequestToInstall: RequestHandler<typeof InstallDepRequest> = async ({ deps = [] }) => {
-    const depManagerSettings: ISettings['dependencyManager'] = ConfigManager.dependencyManager || {
+    const depManagerSettings: ISettings['dependencyManager'] = ConfigRO.dependencyManager || {
       packageManager: 'npm',
       installArgs: ['install'],
       runScriptArgs: ['run'],

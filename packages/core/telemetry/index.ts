@@ -2,7 +2,6 @@ import { ENV, VERSION } from '@sqltools/core/constants';
 import { runIfPropIsDefined } from '@sqltools/core/utils/decorators';
 import { numericVersion, Timer } from '@sqltools/core/utils';
 import logger from '@sqltools/core/log';
-import ConfigManager from '@sqltools/core/config-manager';
 import * as Sentry from '@sentry/node';
 import { ITelemetryArgs } from '@sqltools/types';
 
@@ -183,8 +182,3 @@ const telemetry = new Telemetry({
 });
 
 export default telemetry;
-
-ConfigManager.addOnUpdateHook(() => {
-  if (ConfigManager.telemetry) telemetry.enable();
-  else telemetry.disable();
-});

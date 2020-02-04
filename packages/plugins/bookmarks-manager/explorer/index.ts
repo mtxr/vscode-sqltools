@@ -1,4 +1,4 @@
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/vscode/log';
 import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';

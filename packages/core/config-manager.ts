@@ -3,15 +3,22 @@ import { InvalidActionError } from '@sqltools/core/exception';
 
 interface ISettings extends ISettingsProps {
   get?: typeof get;
-  update?: typeof update;
+  replaceAll?: typeof replaceAll;
   addOnUpdateHook?: typeof addOnUpdateHook;
 }
 
 let settings: Partial<ISettings> = {};
-const onUpdateHooks: ((event?: { affectsConfiguration?: (section: string, resource?: any) => boolean; }) => any)[] = [];
-function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
+
+type KSettings = (keyof ISettingsProps);
+
+const onUpdateHooks: (() => any)[] = [];
+
+function get<
+  K extends KSettings = KSettings,
+  V = ISettings[K]
+>(configKey: K, defaultValue: V | any = null): V {
   if ((settings as any).hasOwnProperty(configKey)) {
-    return settings[configKey];
+    return settings[configKey] as any as V;
   }
   const keys: string [] = configKey.split('.');
 
@@ -25,9 +32,9 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
   return setting;
 }
 
-function update(newSettings: ISettings, event?: { affectsConfiguration: (section: string, resource?: any) => boolean; }) {
+function replaceAll(newSettings: ISettings) {
   settings = newSettings;
-  onUpdateHooks.forEach(cb => cb(event));
+  onUpdateHooks.forEach(cb => cb());
 }
 
 function addOnUpdateHook(handler: () => void) {
@@ -36,7 +43,8 @@ function addOnUpdateHook(handler: () => void) {
 
 const handler = {
   get(_: never, prop: string) {
-    if (prop === 'update') return update;
+    if (prop === 'replaceAll') return replaceAll;
+    if (prop === 'update') throw 'update is not available. Config Manager is in read-only mode.';
     if (prop === 'get') return get;
     if (prop === 'addOnUpdateHook') return addOnUpdateHook;
     if (prop in settings && typeof settings[prop] !== 'undefined') return settings[prop];
@@ -47,6 +55,14 @@ const handler = {
   },
 };
 
-const ConfigManager = new Proxy<ISettings>(settings, handler);
+/**
+ * Readonly configuration
+ *
+ * @type Readonly<ISettings>
+ */
+const ConfigRO: Readonly<ISettings> = new Proxy<Readonly<ISettings>>(settings, handler);
 
-export default ConfigManager;
+export default ConfigRO;
+
+
+// @TODO move to language server package

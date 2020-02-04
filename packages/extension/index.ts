@@ -1,10 +1,10 @@
 import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
 import https from 'https';
-import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
-import { ISettings, IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
+import Config from '@sqltools/vscode/config-manager';
+import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/core/constants';
+import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
 import { Timer } from '@sqltools/core/utils';
-import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter, ConfigurationChangeEvent } from 'vscode';
+import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
 import { openExternal } from '@sqltools/vscode/utils';
@@ -20,7 +20,7 @@ import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import telemetry from '@sqltools/core/utils/telemetry';
+import telemetry from '@sqltools/vscode/telemetry';
 
 export class SQLToolsExtension implements IExtension {
   private pluginsQueue: IExtensionPlugin<this>[] = [];
@@ -39,13 +39,11 @@ export class SQLToolsExtension implements IExtension {
         version: VSCodeVersion,
       },
     });
-    this.getAndUpdateConfig(null);
     this.client = new SQLToolsLanguageClient();
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
     Context.subscriptions.push(
-      workspace.onDidChangeConfiguration(this.getAndUpdateConfig),
       this.client.start(),
       this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
       this.onDidRunCommandSuccessfullyEmitter.event(this.onDidRunCommandSuccessfullyHandler),
@@ -86,7 +84,7 @@ export class SQLToolsExtension implements IExtension {
       `${DISPLAY_NAME} v${VERSION}`,
       '',
       `Platform: ${process.platform}, ${process.arch}`,
-      `Using Node Runtime: ${ConfigManager.useNodeRuntime ? 'yes' : 'no'}`,
+      `Using Node Runtime: ${Config.useNodeRuntime ? 'yes' : 'no'}`,
       '',
       `by @mtxr ${AUTHOR}`
     ];
@@ -132,10 +130,6 @@ export class SQLToolsExtension implements IExtension {
   /**
    * Management functions
    */
-  private getAndUpdateConfig(event?: ConfigurationChangeEvent) {
-    ConfigManager.update(<ISettings>workspace.getConfiguration(EXT_CONFIG_NAMESPACE), event);
-  }
-
   private async displayReleaseNotesMessage() {
     try {
       const current = Utils.getlastRunInfo();
@@ -145,7 +139,7 @@ export class SQLToolsExtension implements IExtension {
       const updatedRecently = (today - lastNDate) < 2;
 
       if (
-        ConfigManager.disableReleaseNotifications
+        Config.disableReleaseNotifications
         || !updated
         || updatedRecently
       ) return;
