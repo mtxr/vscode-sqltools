@@ -3,9 +3,10 @@ import path from 'path';
 import fs from 'fs';
 import EnvironmentError from './../exception/environment';
 import logger from '@sqltools/core/log';
+import { EXT_NAMESPACE } from '../constants';
 
 const log = logger.extend('persistence');
-const SQLTOOLS_PATHS = envPaths('vscode-sqltools', { suffix: null });
+const SQLTOOLS_PATHS = envPaths(`vscode-${EXT_NAMESPACE}`, { suffix: null });
 let home: string;
 
 if (!fs.existsSync(SQLTOOLS_PATHS.config)) {

@@ -168,6 +168,14 @@ export declare interface ISettings {
   connections?: IConnection[];
 
   /**
+   * Table columns should be expanded on load?
+   *
+   * @type {boolean}
+   * @memberof ISettings
+   */
+  tableTreeItemsExpanded?: boolean;
+
+  /**
    * Default export results mode
    * @default "prompt"
    * @type {string}
@@ -213,22 +221,18 @@ export declare interface ISettings {
    */
   languageServerEnv?: { [id: string]: string };
 
-  queryParams?: {
-    /**
-     * Enables query parameter checking
-     * @memberof ISettings['queryParams']
-     * @default true
-     * @type {boolean}
-     */
-    enableReplace: boolean;
-    /**
-     * RegEx used to identify query parameters
-     * @memberof ISettings['queryParams']
-     * @default "\\$[\\d]+|\\$\\[[\\d\\w]+\\]"
-     * @type {string}
-     */
-    regex: string;
-  };
+  /**
+   * Enables query parameter checking
+   * @default true
+   * @type {boolean}
+   */
+  'queryParams.enableReplace'?: boolean;
+  /**
+   * RegEx used to identify query parameters
+   * @default "\\$[\\d]+|\\$\\[[\\d\\w]+\\]"
+   * @type {string}
+   */
+  'queryParams.regex'?: string;
 
   /**
    * Dependency manager settings
@@ -246,7 +250,5 @@ export declare interface ISettings {
    */
   debug?: { namespaces?: string };
 
-  connectionExplorer?: {
-    groupConnected: boolean
-  }
+  'connectionExplorer.groupConnected'?: boolean;
 }

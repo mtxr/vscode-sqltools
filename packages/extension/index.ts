@@ -1,7 +1,7 @@
 import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
 import https from 'https';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAMESPACE, VERSION, AUTHOR } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 import { ISettings, IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
 import { Timer } from '@sqltools/core/utils';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, workspace, EventEmitter, ConfigurationChangeEvent } from 'vscode';
@@ -83,7 +83,7 @@ export class SQLToolsExtension implements IExtension {
     const FoundABug = 'Found a bug?';
     const FeatureRequest = 'Feature Request';
     const message = [
-      `SQLTools v${VERSION}`,
+      `${DISPLAY_NAME} v${VERSION}`,
       '',
       `Platform: ${process.platform}, ${process.arch}`,
       `Using Node Runtime: ${ConfigManager.useNodeRuntime ? 'yes' : 'no'}`,
@@ -133,7 +133,7 @@ export class SQLToolsExtension implements IExtension {
    * Management functions
    */
   private getAndUpdateConfig(event?: ConfigurationChangeEvent) {
-    ConfigManager.update(<ISettings>workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()), event);
+    ConfigManager.update(<ISettings>workspace.getConfiguration(EXT_CONFIG_NAMESPACE), event);
   }
 
   private async displayReleaseNotesMessage() {
@@ -155,7 +155,7 @@ export class SQLToolsExtension implements IExtension {
       const moreInfo = 'More Info';
       const supportProject = 'Support This Project';
       const releaseNotes = 'Release Notes';
-      const message = `SQLTools updated! Check out the release notes for more information.`;
+      const message = `${DISPLAY_NAME} updated! Check out the release notes for more information.`;
       const options = [ moreInfo, supportProject, releaseNotes ];
       const res: string = await window.showInformationMessage(message, ...options);
       telemetry.registerMessage('info', message, res);
@@ -245,21 +245,28 @@ export class SQLToolsExtension implements IExtension {
 }
 
 let instance: SQLToolsExtension;
-export function activate(ctx: ExtensionContext) {
-  Context.set(ctx);
-  if (instance) return;
-  migrateFilesToNewPaths();
-  instance = new SQLToolsExtension();
-  instance
-    .registerPlugin(FormatterPlugin)
-    .registerPlugin(AutoRestartPlugin)
-    .registerPlugin(new ConnectionManagerPlugin(instance))
-    .registerPlugin(new DependencyManagerPlugin)
-    .registerPlugin(new HistoryManagerPlugin)
-    .registerPlugin(new BookmarksManagerPlugin);
-
-  return instance.activate();
-}
+export function activate(ctx: ExtensionContext) {try {
+  
+    Context.set(ctx);
+    if (instance) return;
+    migrateFilesToNewPaths();
+    instance = new SQLToolsExtension();
+    instance
+      .registerPlugin(FormatterPlugin)
+      .registerPlugin(AutoRestartPlugin)
+      .registerPlugin(new ConnectionManagerPlugin(instance))
+      .registerPlugin(new DependencyManagerPlugin)
+      .registerPlugin(new HistoryManagerPlugin)
+      .registerPlugin(new BookmarksManagerPlugin);
+  
+    return instance.activate();
+  
+} catch (err) {
+  console.error(err);
+  setTimeout(() => {
+    console.error(err);
+  }, 5000);
+}}
 
 export function deactivate() {
   if (!instance) return;

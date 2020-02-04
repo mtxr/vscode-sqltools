@@ -1,6 +1,6 @@
 import logger from '@sqltools/vscode/log';
 import ConfigManager from '@sqltools/core/config-manager';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
 import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
@@ -185,11 +185,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private replaceParams = async (query: string) => {
-    const queryParamsCfg = ConfigManager.queryParams;
+    if (!ConfigManager['queryParams.enableReplace']) return query;
 
-    if (!queryParamsCfg || !queryParamsCfg.enableReplace) return query;
-
-    const params = getQueryParameters(query, queryParamsCfg.regex);
+    const params = getQueryParameters(query, ConfigManager['queryParams.regex']);
     if (params.length > 0) {
       await new Promise((resolve, reject) => {
         const ib = window.createInputBox();
@@ -319,7 +317,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       workspaceFolderValue = [],
       workspaceValue = [],
       globalValue = [],
-    } = workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).inspect('connections');
+    } = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect('connections');
 
     const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === conn.id);
 
@@ -483,13 +481,13 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (!writeTo && (!workspace.workspaceFolders || workspace.workspaceFolders.length === 0)) {
       writeTo = ConfigurationTarget.Global;
     }
-    return workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).update('connections', migrateConnectionSettings(connList), writeTo);
+    return workspace.getConfiguration(EXT_CONFIG_NAMESPACE).update('connections', migrateConnectionSettings(connList), writeTo);
   }
 
   private getConnectionList(from?: ConfigurationTarget): IConnection[] {
-    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).get('connections') || []);
+    if (!from) return migrateConnectionSettings(workspace.getConfiguration(EXT_CONFIG_NAMESPACE).get('connections') || []);
 
-    const config = workspace.getConfiguration(EXT_NAMESPACE.toLowerCase()).inspect('connections');
+    const config = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect('connections');
     if (from === ConfigurationTarget.Global) {
       return migrateConnectionSettings(<IConnection[]>(config.globalValue || config.defaultValue) || []);
     }
@@ -553,7 +551,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       return commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, false);
     }
 
-    await this.ext_selectConnection(connId, editor.document.uri.scheme === EXT_NAMESPACE.toLocaleLowerCase());
+    await this.ext_selectConnection(connId, editor.document.uri.scheme === EXT_NAMESPACE);
     await commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, true);
   }
 

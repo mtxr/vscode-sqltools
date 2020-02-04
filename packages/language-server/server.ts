@@ -4,7 +4,7 @@ import { InvalidActionError } from '@sqltools/core/exception';
 import log from '@sqltools/core/log';
 import telemetry from '@sqltools/core/utils/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 
 class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
@@ -53,7 +53,7 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
   };
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
-    ConfigManager.update(changes.settings[EXT_NAMESPACE.toLowerCase()]);
+    ConfigManager.update(changes.settings[EXT_CONFIG_NAMESPACE]);
     if (ConfigManager.telemetry) telemetry.enable();
     else telemetry.disable();
 
@@ -75,7 +75,7 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
   }
 
   public listen() {
-    log.extend('info')(`SQLTools Server started!
+    log.extend('info')(`${DISPLAY_NAME} Server started!
 ===============================
 Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
 ExecPath: ${process.execPath}

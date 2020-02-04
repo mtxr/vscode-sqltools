@@ -5,12 +5,14 @@ interface ISettings extends ISettingsProps {
   get?: typeof get;
   update?: typeof update;
   addOnUpdateHook?: typeof addOnUpdateHook;
-  inspect?: (prop) => { defaultValue: any };
 }
 
 let settings: Partial<ISettings> = {};
 const onUpdateHooks: ((event?: { affectsConfiguration?: (section: string, resource?: any) => boolean; }) => any)[] = [];
 function get(configKey: string, defaultValue: any = null): any[] | string | boolean | number {
+  if ((settings as any).hasOwnProperty(configKey)) {
+    return settings[configKey];
+  }
   const keys: string [] = configKey.split('.');
 
   let setting = settings as any;
@@ -25,12 +27,6 @@ function get(configKey: string, defaultValue: any = null): any[] | string | bool
 
 function update(newSettings: ISettings, event?: { affectsConfiguration: (section: string, resource?: any) => boolean; }) {
   settings = newSettings;
-  if (!settings.inspect) {
-    // inspect implementation for language server.
-    settings.inspect = () => {
-      throw new Error(`Inspect doesnt exist within ${process.env.PRODUCT} context`);
-    };
-  }
   onUpdateHooks.forEach(cb => cb(event));
 }
 
@@ -44,10 +40,6 @@ const handler = {
     if (prop === 'get') return get;
     if (prop === 'addOnUpdateHook') return addOnUpdateHook;
     if (prop in settings && typeof settings[prop] !== 'undefined') return settings[prop];
-    if (settings.inspect) {
-      const data = settings.inspect(prop) || { defaultValue: undefined };
-      return data.defaultValue;
-    }
     return undefined;
   },
   set() {

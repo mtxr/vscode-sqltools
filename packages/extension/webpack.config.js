@@ -29,9 +29,10 @@ const devDependencies = Object.assign(
 );
 
 // defintions
-const EXT_NAMESPACE = 'sqltools';
-const DISPLAY_NAME = 'SQLTools';
-const EXT_ID = 'sqltools';
+const DISPLAY_NAME = process.env.DISPLAY_NAME || 'SQLTools';
+const EXT_NAMESPACE = DISPLAY_NAME.toLowerCase().replace(/(?:^\w|[A-Z]|\b\w)/g, function(word, index) {return index == 0 ? word.toLowerCase() : word.toUpperCase();}).replace(/\s+/g, '');
+const EXT_CONFIG_NAMESPACE = 'sqltools';
+const isPreview = !!(process.env.DISPLAY_NAME || false);
 
 const rootdir = path.resolve(__dirname, '..', '..');
 const outdir = path.resolve(rootdir, 'dist');
@@ -59,8 +60,13 @@ function getExtensionConfig(outdir) {
           from: path.join(__dirname, 'package.json'),
           to: path.join(outdir, 'package.json'),
           transform: (content) => {
-            content = JSON.parse(content.toString())
-            content.name = EXT_ID;
+            content = JSON.parse(content.toString());
+            const configurationOriginal = content.contributes.configuration;
+            delete content.contributes.configuration;
+            content.name = EXT_NAMESPACE;
+            if (isPreview) {
+              content.preview = true;
+            }
             Object.keys(content.scripts || {}).forEach(k => {
               if (!k.startsWith('tool:') && !k.startsWith('dep:')) {
                 delete content.scripts[k];
@@ -74,6 +80,11 @@ function getExtensionConfig(outdir) {
               .forEach(k => {
                 delete content.devDependencies[k];
               });
+            content = JSON.parse(JSON.stringify(content)
+              .replace(/sqltools([\/\.\-])/g, `${EXT_NAMESPACE}$1`)
+              .replace(/SQLTools/g, `${DISPLAY_NAME}`));
+
+            content.contributes.configuration = configurationOriginal;
 
             return JSON.stringify(content, null, process.env.NODE_ENV === 'production' ? undefined : 2);
           },
@@ -123,6 +134,7 @@ module.exports = () => {
         'process.env.DSN_KEY': JSON.stringify((config.name === 'ext' ? process.env.EXT_DSN_KEY : process.env.LS_DSN_KEY) || ''),
         'process.env.VERSION': JSON.stringify(extPkgJson.version),
         'process.env.EXT_NAMESPACE': JSON.stringify(EXT_NAMESPACE),
+        'process.env.EXT_CONFIG_NAMESPACE': JSON.stringify(EXT_CONFIG_NAMESPACE),
         'process.env.DISPLAY_NAME': JSON.stringify(DISPLAY_NAME),
         'process.env.AUTHOR': JSON.stringify(extPkgJson.author),
         'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
@@ -130,7 +142,8 @@ module.exports = () => {
       new webpack.SourceMapDevToolPlugin({
         moduleFilenameTemplate: (info) => path.relative(rootdir, info.absoluteResourcePath),
         filename: isProduction ? '[file].map' : undefined,
-        sourceRoot: path.relative(outdir, rootdir)}
+        sourceRoot: path.relative(outdir, rootdir)
+      }
       )
     ].concat(config.plugins || []);
     config.node = {

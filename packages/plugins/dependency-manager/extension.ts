@@ -1,7 +1,7 @@
 import { window as Win, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification, DISPLAY_NAME } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import ConfigManager from '@sqltools/core/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
@@ -37,7 +37,7 @@ export default class DependencyManager implements IExtensionPlugin {
           this.installingDrivers.push(conn.driver);
           await window.withProgress({
             location: ProgressLocation.Notification,
-            title: 'SQLTools',
+            title: DISPLAY_NAME,
             cancellable: false,
           }, async (progress) => {
             progress.report({ message: `${action === 'upgrade' ? 'upgrading' : 'installing'} ${this.installingDrivers.join(', ')} dependencies` });

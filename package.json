@@ -32,7 +32,7 @@
     "test:docker": "yarn --cwd ./test run",
     "test:watch": "cross-env WATCH=1 yarn run test",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
-    "watch": "yarn workspace @sqltools/extension watch",
+    "watch": "cross-env DISPLAY_NAME=\"SQLTools Preview\" yarn workspace @sqltools/extension watch",
     "build": "yarn --cwd ./docs run docz:build"
   },
   "devDependencies": {

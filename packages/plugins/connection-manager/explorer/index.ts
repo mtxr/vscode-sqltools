@@ -128,7 +128,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private async getRootItems(): Promise<TreeItem[]> {
-    const groupConnected = ConfigManager.connectionExplorer.groupConnected;
+    const groupConnected = ConfigManager['connectionExplorer.groupConnected'];
     const items = await this.getConnectionsTreeItems();
     if (items.length === 0) {
       const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);

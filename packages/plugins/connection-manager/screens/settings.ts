@@ -1,4 +1,4 @@
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
 import { getConnectionId } from '@sqltools/core/utils';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import { commands, Uri } from 'vscode';
@@ -9,7 +9,7 @@ import Context from '@sqltools/vscode/context';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
-  protected title: string = 'SQLTools Settings';
+  protected title: string = `${DISPLAY_NAME} Settings`;
 
   constructor() {
     super(
@@ -82,6 +82,6 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private openConnectionFile = async () => {
-    return commands.executeCommand('workbench.action.openSettings', `${EXT_NAMESPACE}.connections`);
+    return commands.executeCommand('workbench.action.openSettings', `${EXT_CONFIG_NAMESPACE}.connections`);
   }
 }

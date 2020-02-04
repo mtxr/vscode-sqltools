@@ -7,10 +7,11 @@ import ConfigManager from '@sqltools/core/config-manager';
 import { getNameFromId } from '@sqltools/core/utils';
 import path from 'path';
 import Context from '@sqltools/vscode/context';
+import { DISPLAY_NAME } from '@sqltools/core/constants';
 
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
-  protected title: string = 'SQLTools Results';
+  protected title: string = `${DISPLAY_NAME} Results`;
 
   protected isOpen = false;
 
@@ -102,7 +103,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     });
   }
   updateResults = (payload: NSDatabase.IResult[]) => {
-    this.title = 'SQLTools Results';
+    this.title = `${DISPLAY_NAME} Results`;
     try {
       if (payload && payload.length > 0) {
         this.title = `${getNameFromId(payload[0].connId)} Results`;

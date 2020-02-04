@@ -1,5 +1,6 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
 import { IConnection, NSDatabase, MConnectionExplorer } from '@sqltools/types';
+import { EXT_NAMESPACE } from '@sqltools/core/constants';
 
 export const GetConnectionsRequest = new RequestType<
   { connectedOnly?: boolean, sort?: 'connectedFirst' | 'name', connId?: string },
@@ -62,14 +63,14 @@ export interface ProgressNotificationStartParams {
   message: string;
   id: string;
 };
-export const ProgressNotificationStart = new NotificationType<ProgressNotificationStartParams, void>('sqltools/window/progress/start');
+export const ProgressNotificationStart = new NotificationType<ProgressNotificationStartParams, void>(`${EXT_NAMESPACE}/window/progress/start`);
 
 export interface ProgressNotificationCompleteParams {
   title?: string;
   message?: string;
   id: string;
 };
-export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>('sqltools/window/progress/complete');
+export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>(`${EXT_NAMESPACE}/window/progress/complete`);
 
 export const GetChildrenForTreeItemRequest = new RequestType<
   { conn: IConnection, itemType: MConnectionExplorer.TreeItemType, itemId: string },
