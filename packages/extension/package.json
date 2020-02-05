@@ -822,6 +822,11 @@
                     "default": true,
                     "description": "Auto open session file when connect"
                 },
+                "sqltools.sessionFilesFolder": {
+                    "type": "string",
+                    "default": "",
+                    "description": "Folder for session files to be saved in"
+                },
                 "sqltools.dependencyManager": {
                     "type": "object",
                     "description": "Dependency manager settings",

@@ -206,6 +206,13 @@ export declare interface ISettings {
    */
   autoOpenSessionFiles?: boolean;
   /**
+   * Folder for session files to be saved in
+   * @default ''
+   * @type {string}
+   * @memberof ISettings
+   */
+  sessionFilesFolder?: string;  
+  /**
    * Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH...
    * @default {}
    * @type {{ [id: string]: string }}
