@@ -2,7 +2,7 @@
 
 import { EOL } from 'os';
 import { Range, TextEditor } from 'vscode';
-import * as Constants from '@sqltools/core/constants';
+import * as Constants from '@sqltools/util/constants';
 
 export default class Selector {
   public static getQueryText(editor: TextEditor, range: Range = null): string {
@@ -33,12 +33,8 @@ export default class Selector {
     return requestRanges;
   }
 
-  public static isVariableDefinitionLine(line: string): boolean {
-    return Constants.FileVariableDefinitionRegex.test(line);
-  }
-
   private static getDelimitedText(fullText: string, currentLine: number): string {
-    let lines: string[] = fullText.split(Constants.LineSplitterRegex);
+    let lines: string[] = fullText.split(Constants.LINE_SPLITTER_REGEX);
     let delimiterLineNumbers: number[] = Selector.getDelimiterRows(lines);
     if (delimiterLineNumbers.length === 0) {
       return fullText;
@@ -69,7 +65,7 @@ export default class Selector {
   private static getDelimiterRows(lines: string[]): number[] {
     let rows: number[] = [];
     for (let index = 0; index < lines.length; index++) {
-      if (lines[index].match(Constants.DelimiterStartRegex)) {
+      if (lines[index].match(Constants.DELIMITER_START_REGEX)) {
         rows.push(index);
       }
     }

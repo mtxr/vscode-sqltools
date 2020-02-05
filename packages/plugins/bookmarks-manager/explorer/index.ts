@@ -1,9 +1,9 @@
-import logger from '@sqltools/vscode/log';
+import logger from '@sqltools/util/log';
 import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
-import { getDataPath } from '@sqltools/core/utils/persistence';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
+import { getDataPath } from '@sqltools/util/path';
 import fs from 'fs';
 import Context from '@sqltools/vscode/context';
 const log = logger.extend('book-man:explorer');

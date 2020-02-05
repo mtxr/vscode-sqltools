@@ -1,7 +1,7 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import Config from '@sqltools/vscode/config-manager';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
-import { cleanUp } from '@sqltools/core/utils/query';
+import Config from '@sqltools/util/config-manager';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
+import { cleanUp } from '@sqltools/util/query';
 
 export class HistoryTreeItem extends TreeItem {
   public contextValue = 'history.item';
@@ -57,6 +57,6 @@ export class HistoryTreeGroup extends TreeItem {
   constructor(public name: string, private refresh: Function) {
     super(name, TreeItemCollapsibleState.Expanded);
 
-    Config.addOnUpdateHook(ev => ev.affectsConfig('historySize') && this.sizeKeeper);
+    Config.addOnUpdateHook(({ event }) => event.affectsConfig('historySize') && this.sizeKeeper);
   }
 }

@@ -1,13 +1,13 @@
-import logger from '@sqltools/vscode/log';
+import logger from '@sqltools/util/log';
 import path from 'path';
 import fs from 'fs';
-import Config from '@sqltools/vscode/config-manager';
-import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
-import { commandExists } from '@sqltools/core/utils';
-import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget } from 'vscode';
+import Config from '@sqltools/util/config-manager';
+import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import commandExists from '@sqltools/util/dependencies/command-exists';
+import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget, workspace } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
-import telemetry from '@sqltools/vscode/telemetry';
+import telemetry from '@sqltools/util/telemetry';
 import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 
@@ -27,14 +27,14 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
     this.registerBaseNotifications();
 
-    Config.addOnUpdateHook(async (ev) => {
-      if (ev.affectsConfig('useNodeRuntime')) {
+    Config.addOnUpdateHook(async ({ event }) => {
+      if (event.affectsConfig('useNodeRuntime')) {
         const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
       }
 
-      if (ev.affectsConfig('languageServerEnv')) {
+      if (event.affectsConfig('languageServerEnv')) {
         const res = await window.showWarningMessage('New language server environment variables set. You must reload window to take effect.', 'Reload now');
         if (!res) return;
         commands.executeCommand('workbench.action.reloadWindow');
@@ -115,7 +115,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private getClientOptions(): LanguageClientOptions {
     const telemetryArgs: ITelemetryArgs = {
-      enableTelemetry: Config.telemetry,
+      enableTelemetry: workspace.getConfiguration().get('telemetry.enableTelemetry') || false,
       extraInfo: {
         sessId: VSCodeEnv.sessionId,
         uniqId: VSCodeEnv.machineId,
@@ -150,7 +150,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         userEnvVars: Config.languageServerEnv
       },
       synchronize: {
-        configurationSection: EXT_CONFIG_NAMESPACE,
+        configurationSection: [EXT_CONFIG_NAMESPACE, 'telemetry'],
         fileEvents: Wspc.createFileSystemWatcher(`**/.${EXT_NAMESPACE}rc`),
       },
       initializationFailedHandler: error => {

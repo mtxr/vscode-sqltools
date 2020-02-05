@@ -1,5 +1,5 @@
 import { TreeItem, TreeItemCollapsibleState } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export class BookmarkTreeItem extends TreeItem {
   public contextValue = 'bookmark.item';

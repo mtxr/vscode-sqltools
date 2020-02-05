@@ -1,15 +1,15 @@
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { IConnection } from '@sqltools/types';
-import { getConnectionId } from '@sqltools/core/utils';
+import { getConnectionId } from '@sqltools/util/connection';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import SidebarColumn from "@sqltools/plugins/connection-manager/explorer/SidebarColumn";
 import SidebarTableOrView from "@sqltools/plugins/connection-manager/explorer/SidebarTableOrView";
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
 import sortBy from 'lodash/sortBy';
-import logger from '@sqltools/vscode/log';
+import logger from '@sqltools/util/log';
 import Context from '@sqltools/vscode/context';
-import Config from '@sqltools/vscode/config-manager';
+import Config from '@sqltools/util/config-manager';
 
 const log = logger.extend('conn-man:explorer');
 
@@ -99,12 +99,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public constructor() {
     this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
-    Config.addOnUpdateHook((ev) => {
+    Config.addOnUpdateHook(({ event }) => {
       if (
-        ev.affectsConfig('flattenGroupsIfOne')
-        || ev.affectsConfig('connections')
-        || ev.affectsConfig('connectionExplorer.groupConnected')
-        || ev.affectsConfig('sortColumns')
+        event.affectsConfig('flattenGroupsIfOne')
+        || event.affectsConfig('connections')
+        || event.affectsConfig('connectionExplorer.groupConnected')
+        || event.affectsConfig('sortColumns')
       ) {
         this.refresh();
       }

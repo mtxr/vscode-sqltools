@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@sqltools/core": "*",
+    "@sqltools/util": "*",
     "@sqltools/plugins": "*",
     "vscode-languageserver": "5.2.1"
   },

@@ -1,7 +1,7 @@
 import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, window } from 'vscode';
 import { getIconPath } from '@sqltools/vscode/icons';
 import Context from '@sqltools/vscode/context';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   public disposeEvent: EventEmitter<never> = new EventEmitter();

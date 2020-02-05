@@ -1,10 +1,10 @@
-import ConfigRO from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/util/config-manager';
 import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
-import { InvalidActionError } from '@sqltools/core/exception';
-import log from '@sqltools/core/log';
-import telemetry from '@sqltools/language-server/telemetry';
+import { InvalidActionError } from '@sqltools/util/exception';
+import log from '@sqltools/util/log';
+import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
-import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
+import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 
 class SQLToolsLanguageServer implements ILanguageServer<any> {
   private _server: IConnection;
@@ -54,7 +54,7 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigRO.replaceAll(changes.settings[EXT_CONFIG_NAMESPACE]);
-    if (ConfigRO.telemetry) telemetry.enable();
+    if (changes.settings.telemetry && changes.settings.telemetry.enableTelemetry) telemetry.enable();
     else telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
@@ -77,7 +77,7 @@ class SQLToolsLanguageServer implements ILanguageServer<any> {
   public listen() {
     log.extend('info')(`${DISPLAY_NAME} Server started!
 ===============================
-Using node runtime?: ${parseInt(process.env['IS_NODE_RUNTIME'] || '0') === 1}
+Using node runtime?: ${parseInt(process.env.IS_NODE_RUNTIME || '0') === 1}
 ExecPath: ${process.execPath}
 ===============================`)
     this._server.listen();

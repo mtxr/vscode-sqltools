@@ -1,7 +1,7 @@
 
 import queries from './queries';
 import AbstractDriver from '../../lib/abstract';
-import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
+import sqltoolsRequire from '@sqltools/util/dependencies/require';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
 interface Statement {

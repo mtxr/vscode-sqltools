@@ -2,7 +2,7 @@ import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase, Arg0 } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
-import * as Utils from '@sqltools/core/utils';
+import { replacer } from '@sqltools/util/text';
 import fs from 'fs';
 import {zipObject} from 'lodash';
 
@@ -177,7 +177,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
   public describeTable(prefixedTable: string) {
     const [ catalog, schema, table ] = prefixedTable.split('.').map(v => v.replace(/^("(.+)")$/g, '$2'));
-    return this.query(Utils.replacer(this.queries.describeTable, { catalog, schema, table }));
+    return this.query(replacer(this.queries.describeTable, { catalog, schema, table }));
   }
 
   public async testConnection() {

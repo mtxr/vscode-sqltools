@@ -6,18 +6,19 @@ import {
   IExpectedResult,
   NodeDependency
 } from '@sqltools/types';
-import * as Utils from '@sqltools/core/utils';
-import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/core/exception';
+import { getConnectionId } from '@sqltools/util/connection';
+import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/util/exception';
 import { NSDatabase } from '@sqltools/types';
-import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
-import log from '@sqltools/core/log';
+import sqltoolsRequire from '@sqltools/util/dependencies/require';
+import log from '@sqltools/util/log';
+import { replacer } from '@sqltools/util/text';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
   public readonly deps: NodeDependency[] = [];
 
   public getId() {
-    return Utils.getConnectionId(this.credentials) || 'BROKEN';
+    return getConnectionId(this.credentials) || 'BROKEN';
   }
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;
@@ -44,7 +45,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
 
   public describeTable(table: string) {
-    return this.query(Utils.replacer(this.queries.describeTable, { table }));
+    return this.query(replacer(this.queries.describeTable, { table }));
   }
 
   public async showRecords(table: string, limit: number, page: number = 0) {
@@ -61,11 +62,11 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       return [records];
     }
     log.extend('debug')('*** DEPRECATION *** needs to be migrated to v2 queries');
-    return this.query(Utils.replacer(this.queries.fetchRecords, params));
+    return this.query(replacer(this.queries.fetchRecords, params));
   }
 
   protected needToInstallDependencies() {
-    if (parseInt(process.env['IS_NODE_RUNTIME'] || '0') !== 1) {
+    if (parseInt(process.env.IS_NODE_RUNTIME || '0') !== 1) {
       throw new ElectronNotSupportedError();
     }
     if (this.deps && this.deps.length > 0) {

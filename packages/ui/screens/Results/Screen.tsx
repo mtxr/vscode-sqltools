@@ -5,7 +5,7 @@ import getVscode from '@sqltools/ui/lib/vscode';
 import QueryResultsState from './State';
 import '@sqltools/ui/sass/results.scss';
 import { Tabs, Tab, Typography } from '@material-ui/core';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/util/log';
 import { IWebviewMessage } from '@sqltools/ui/interfaces';
 
 const log = logger.extend('results');

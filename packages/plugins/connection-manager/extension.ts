@@ -1,10 +1,10 @@
-import logger from '@sqltools/vscode/log';
-import Config from '@sqltools/vscode/config-manager';
-import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
+import logger from '@sqltools/util/log';
+import Config from '@sqltools/util/config-manager';
+import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
-import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/core/utils/persistence';
-import getTableName from '@sqltools/core/utils/query/prefixed-tablenames';
-import { getConnectionDescription, getConnectionId, isEmpty, migrateConnectionSettings, getSessionBasename } from '@sqltools/core/utils';
+import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
+import getTableName from '@sqltools/util/query/prefixed-tablenames';
+import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
 import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
@@ -13,13 +13,14 @@ import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, T
 import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
-import { extractConnName, getQueryParameters } from '@sqltools/core/utils/query';
+import { extractConnName, getQueryParameters } from '@sqltools/util/query';
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
-import telemetry from '@sqltools/vscode/telemetry';
+import telemetry from '@sqltools/util/telemetry';
 import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
+import { isEmpty } from '@sqltools/util/validation';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {

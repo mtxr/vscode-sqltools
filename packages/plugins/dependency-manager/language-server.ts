@@ -1,8 +1,8 @@
 import { InstallDepRequest } from './contracts';
 import packageManager from './lib/cli';
-import ConfigRO from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/util/config-manager';
 import { ISettings, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/util/log';
 
 const log = logger.extend('dep-man');
 

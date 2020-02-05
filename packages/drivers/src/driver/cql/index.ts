@@ -1,9 +1,9 @@
 import * as CassandraLib from 'cassandra-driver';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
-import * as Utils from '@sqltools/core/utils';
+import { replacer } from '@sqltools/util/text';
 import AbstractDriver from '../../lib/abstract';
 import Queries from './queries';
-import { TREE_SEP } from '@sqltools/core/constants';
+import { TREE_SEP } from '@sqltools/util/constants';
 
 interface CQLBatch {
   query: string,
@@ -204,12 +204,12 @@ export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLi
 
   public async describeTable(prefixedTable: string) {
     const [keyspace, table] = prefixedTable.split('.');
-    return this.query(Utils.replacer(this.queries.describeTable, {keyspace, table}));
+    return this.query(replacer(this.queries.describeTable, {keyspace, table}));
   }
 
   public async showRecords(prefixedTable: string, limit: number) {
     const [keyspace, table] = prefixedTable.split('.');
-    return this.query(Utils.replacer(this.queries.fetchRecords, {keyspace, table, limit}));
+    return this.query(replacer(this.queries.fetchRecords, {keyspace, table, limit}));
   }
 
   public async testConnection() {

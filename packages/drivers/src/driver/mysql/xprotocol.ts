@@ -1,6 +1,6 @@
 import MySQLXLib from '@mysql/xdevapi';
 import { IConnectionDriver, IConnection, NSDatabase } from '@sqltools/types';
-import * as Utils from '@sqltools/core/utils';
+import { parse as queryParse } from '@sqltools/util/query';
 import AbstractDriver from '../../lib/abstract';
 import Queries from './queries';
 
@@ -87,7 +87,7 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
 
   public async query(query: string): Promise<NSDatabase.IResult[]> {
     const session = await this.open().then(client => client.getSession());
-    const queries = Utils.query.parse(query);
+    const queries = queryParse(query);
     const results = [];
     for(let q of queries) {
       const res = await this.runSingleQuery(q, session);

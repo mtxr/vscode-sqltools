@@ -13,6 +13,7 @@
     "compile": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@sqltools/util": "*",
     "@mysql/xdevapi": "^8.0.15",
     "cassandra-driver": "^4.1.0",
     "debug": "https://github.com/mtxr/debug.git",

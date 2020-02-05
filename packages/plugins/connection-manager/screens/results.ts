@@ -3,11 +3,11 @@ import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contrac
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import QueryResultsState from '@sqltools/ui/screens/Results/State';
 import vscode from 'vscode';
-import Config from '@sqltools/vscode/config-manager';
-import { getNameFromId } from '@sqltools/core/utils';
+import Config from '@sqltools/util/config-manager';
+import { getNameFromId } from '@sqltools/util/connection';
 import path from 'path';
 import Context from '@sqltools/vscode/context';
-import { DISPLAY_NAME } from '@sqltools/core/constants';
+import { DISPLAY_NAME } from '@sqltools/util/constants';
 
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';

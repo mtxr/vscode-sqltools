@@ -1,6 +1,6 @@
-import Config from '@sqltools/vscode/config-manager';
+import Config from '@sqltools/util/config-manager';
 import { window, StatusBarItem, StatusBarAlignment } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 let statusBar: StatusBarItem & { setText: (text?: string) => void };
 
@@ -16,6 +16,6 @@ const updateVisibility = () => Config.showStatusbar ? statusBar.show() : statusB
 
 updateVisibility();
 
-Config.addOnUpdateHook(ev => ev.affectsConfig('showStatusbar') && updateVisibility);
+Config.addOnUpdateHook(({ event }) => event.affectsConfig('showStatusbar') && updateVisibility);
 
 export default statusBar;

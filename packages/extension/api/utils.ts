@@ -1,7 +1,7 @@
-import { VERSION, DOCS_ROOT_URL } from '@sqltools/core/constants';
-import SerializableStorage from '@sqltools/core/utils/serializable-storage';
-import { numericVersion } from '@sqltools/core/utils';
-import { getConfigPath, RUNNING_INFO_FILENAME } from '@sqltools/core/utils/persistence';
+import { VERSION, DOCS_ROOT_URL } from '@sqltools/util/constants';
+import SerializableStorage from '@sqltools/util/persistence/serializable-storage';
+import { numericVersion } from '@sqltools/util/text';
+import { getConfigPath, RUNNING_INFO_FILENAME } from '@sqltools/util/path';
 
 let setup: SerializableStorage<any, string>;
 

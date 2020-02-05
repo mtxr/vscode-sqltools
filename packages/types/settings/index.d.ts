@@ -106,13 +106,6 @@ export declare interface ISettings {
    * @default true
    * @memberof ISettings
    */
-  telemetry?: boolean;
-  /**
-   * Toggle statusbar visibility.
-   * @type {boolean}
-   * @default true
-   * @memberof ISettings
-   */
   showStatusbar?: boolean;
   /**
    * Number of queries to keep on History.
@@ -251,4 +244,28 @@ export declare interface ISettings {
   debug?: { namespaces?: string };
 
   'connectionExplorer.groupConnected'?: boolean;
+}
+
+export declare interface IConfig extends ISettings {
+  get: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: K, defaultValue?: V | any) => V;
+  update: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: KeysOfSettings, value: V) => Promise<void>;
+  addOnUpdateHook: (handler: OnUpdateConfigHandler) => void;
+  replaceAll: (newSettings: IConfig) => void;
+}
+
+export declare type OnUpdateConfigHandler = (data: { event?: ConfigChangeEvent; settings?: ISettings }) => any;
+
+export declare type KeysOfSettings = (keyof ISettings);
+
+export declare interface ConfigChangeEvent {
+  affectsConfig(section: KeysOfSettings, resource?: any): boolean;
+  /**
+   * VSCode config
+   *
+   * @param {string} section
+   * @param {any} [resource]
+   * @returns {boolean}
+   * @memberof ConfigChangeEvent
+   */
+  affectsConfiguration(section: string, resource?: any): boolean;
 }

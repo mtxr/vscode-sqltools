@@ -1,7 +1,7 @@
 import { commands, window } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAMESPACE, DOCS_ROOT_URL } from '@sqltools/core/constants';
-import telemetry from '@sqltools/vscode/telemetry';
+import { EXT_NAMESPACE, DOCS_ROOT_URL } from '@sqltools/util/constants';
+import telemetry from '@sqltools/util/telemetry';
 import { ResponseError } from 'vscode-languageclient';
 namespace ErrorHandler {
   export function create(message: string): (reason: any) => void {

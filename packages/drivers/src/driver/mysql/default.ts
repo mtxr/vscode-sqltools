@@ -1,10 +1,10 @@
 import MySQLLib from 'mysql';
-import * as Utils from '@sqltools/core/utils';
 import AbstractDriver from '../../lib/abstract';
 import Queries from './queries';
 import fs from 'fs';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import {countBy} from 'lodash';
+import { parse as queryParse } from '@sqltools/util/query';
 
 export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolConfig> implements IConnectionDriver {
   queries = Queries;
@@ -68,7 +68,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
       return new Promise((resolve, reject) => {
         conn.query({sql: query, nestTables: true}, (error, results, fields) => {
           if (error) return reject(error);
-          const queries = Utils.query.parse(query);
+          const queries = queryParse(query);
           if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
             results = [results];
           }

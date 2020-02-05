@@ -1,4 +1,4 @@
-import { asArray } from '@sqltools/core/utils';
+import { asArray } from '@sqltools/util/transform';
 import { ThemeIcon, TreeItemCollapsibleState } from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import ContextValue from '../context-value';

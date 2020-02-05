@@ -1,11 +1,11 @@
-import * as Utils from '@sqltools/core/utils';
 import SQLiteLib from 'sqlite3';
 import AbstractDriver from '../../lib/abstract';
 import queries from './queries';
-import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
-import mkdir from '@sqltools/core/utils/mkdir';
+import sqltoolsRequire from '@sqltools/util/dependencies/require';
+import mkdir from '@sqltools/util/path/mkdir';
 import { dirname } from 'path';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
+import { replacer } from '@sqltools/util/text';
 
 const SQLite3Version = '4.1.1';
 
@@ -108,8 +108,8 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
 
     await Promise.all(allTables.map(async t => {
       const [[{ results: tableColumns }], [{ results: fks }]] = await Promise.all([
-        this.query(Utils.replacer(this.queries.fetchColumns, { table: t.name })),
-        this.query(Utils.replacer(this.queries.listFks as string, { table: t.name })),
+        this.query(replacer(this.queries.fetchColumns, { table: t.name })),
+        this.query(replacer(this.queries.listFks as string, { table: t.name })),
       ]);
 
       const fksMap = fks.reduce((agg, fk) => ({ ...agg, [fk.from]: true }), {});

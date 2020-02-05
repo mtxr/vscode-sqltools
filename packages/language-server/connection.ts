@@ -1,8 +1,8 @@
 import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer } from '@sqltools/types';
-import { decorateException } from '@sqltools/core/utils/errors';
-import { getConnectionId } from '@sqltools/core/utils';
-import ConfigRO from '@sqltools/core/config-manager';
-import telemetry from '@sqltools/language-server/telemetry';
+import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
+import { getConnectionId } from '@sqltools/util/connection';
+import ConfigRO from '@sqltools/util/config-manager';
+import telemetry from '@sqltools/util/telemetry';
 import Drivers from '@sqltools/drivers/src';
 
 export default class Connection {
@@ -16,7 +16,7 @@ export default class Connection {
   }
 
   private decorateException = (e: Error) => {
-    e = decorateException(e, { conn: this.credentials });
+    e = decorateLSException(e, { conn: this.credentials });
     return Promise.reject(e);
   }
 

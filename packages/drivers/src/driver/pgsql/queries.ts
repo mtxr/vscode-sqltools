@@ -1,5 +1,5 @@
-import { TREE_SEP } from '@sqltools/core/constants';
-import queryFactory from '@sqltools/core/utils/query/factory';
+import { TREE_SEP } from '@sqltools/util/constants';
+import queryFactory from '@sqltools/util/query/factory';
 import { IBaseQueries, IExpectedResult, NSDatabase } from '@sqltools/types';
 
 const describeTable = `SELECT * FROM INFORMATION_SCHEMA.COLUMNS

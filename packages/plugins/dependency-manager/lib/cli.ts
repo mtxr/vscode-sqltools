@@ -1,6 +1,7 @@
-import { commandExists, getDataPath } from '@sqltools/core/utils';
+import commandExists from '@sqltools/util/dependencies/command-exists';
 import execPromise from './execPromise';
 import { SpawnOptions } from 'child_process';
+import { getDataPath } from '@sqltools/util/path';
 
 export function cli(command: string, args: ReadonlyArray<string>, options: SpawnOptions = {}) {
   if (!commandExists(command)) {

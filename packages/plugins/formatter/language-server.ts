@@ -1,8 +1,8 @@
-import ConfigRO from '@sqltools/core/config-manager';
-import * as Utils from '@sqltools/core/utils';
+import ConfigRO from '@sqltools/util/config-manager';
+import { sortText } from '@sqltools/util/text';
 import { Disposable, DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangeFormattingRequest, Range, TextEdit } from 'vscode-languageserver';
-import { format } from '@sqltools/core/utils/query';
-import telemetry from '@sqltools/language-server/telemetry';
+import { format } from '@sqltools/util/query';
+import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 
 export default class FormatterPlugin implements ILanguageServerPlugin {
@@ -40,8 +40,8 @@ export default class FormatterPlugin implements ILanguageServerPlugin {
   }
 
   private onDidChangeConfiguration = async () => {
-    const oldLang = this.formatterLanguages.sort(Utils.sortText);
-    const newLang = ConfigRO.formatLanguages.sort(Utils.sortText);
+    const oldLang = this.formatterLanguages.sort(sortText);
+    const newLang = ConfigRO.formatLanguages.sort(sortText);
     const register = newLang.length > 0 && (!this.formatterRegistration || oldLang.join() !== newLang.join());
     if (register) {
       this.formatterLanguages = newLang.reduce((agg, language) => {

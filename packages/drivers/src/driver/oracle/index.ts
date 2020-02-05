@@ -1,10 +1,11 @@
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
-import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
 import AbstractDriver from '../../lib/abstract';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
-import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
+import sqltoolsRequire from '@sqltools/util/dependencies/require';
+import { getConnectionId } from '@sqltools/util/connection';
+import { replacer } from '@sqltools/util/text';
 
 const OracleDBLibVersion = '4.0.0';
 export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, OracleDBLib.PoolAttributes> implements IConnectionDriver {
@@ -29,7 +30,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, Ora
   }
 
   private get poolName(): string {
-    return Utils.getConnectionId(this.credentials);
+    return getConnectionId(this.credentials);
   }
 
   private get poolCreated(): boolean {
@@ -170,7 +171,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, Ora
 
   public describeTable(prefixedTable: string) {
     const [ schema, table ] = prefixedTable.split('.');
-    return this.query(Utils.replacer(this.queries.describeTable, { schema, table }));
+    return this.query(replacer(this.queries.describeTable, { schema, table }));
   }
 
   public getFunctions(): Promise<NSDatabase.IFunction[]> {

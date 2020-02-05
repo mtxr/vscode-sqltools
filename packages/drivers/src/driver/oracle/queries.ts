@@ -1,5 +1,5 @@
 import { IBaseQueries } from '@sqltools/types';
-import { TREE_SEP } from '@sqltools/core/constants';
+import { TREE_SEP } from '@sqltools/util/constants';
 
 export default {
   describeTable: `select * from all_tab_columns

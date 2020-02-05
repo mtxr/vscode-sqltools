@@ -1,6 +1,6 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
 import { IConnection, NSDatabase, MConnectionExplorer } from '@sqltools/types';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export const GetConnectionsRequest = new RequestType<
   { connectedOnly?: boolean, sort?: 'connectedFirst' | 'name', connId?: string },

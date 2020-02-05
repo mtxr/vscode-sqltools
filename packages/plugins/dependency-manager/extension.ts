@@ -1,9 +1,9 @@
 import { window as Win, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification, DISPLAY_NAME } from '@sqltools/core/constants';
-import { getConnectionId } from '@sqltools/core/utils';
-import Config from '@sqltools/vscode/config-manager';
+import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification, DISPLAY_NAME } from '@sqltools/util/constants';
+import { getConnectionId } from '@sqltools/util/connection';
+import Config from '@sqltools/util/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
 
 export default class DependencyManager implements IExtensionPlugin {

@@ -1,15 +1,15 @@
-import { migrateFilesToNewPaths } from '@sqltools/core/utils/persistence';
+import { migrateFilesToNewPaths } from '@sqltools/util/path';
 import https from 'https';
-import Config from '@sqltools/vscode/config-manager';
-import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/core/constants';
+import Config from '@sqltools/util/config-manager';
+import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
 import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
-import { Timer } from '@sqltools/core/utils';
+import Timer from '@sqltools/util/telemetry/timer';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
 import { openExternal } from '@sqltools/vscode/utils';
 import SQLToolsLanguageClient from './language-client';
-import logger from '@sqltools/vscode/log';
+import logger from '@sqltools/util/log';
 import Context from '@sqltools/vscode/context';
 
 const log = logger.extend('main');
@@ -20,7 +20,7 @@ import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
-import telemetry from '@sqltools/vscode/telemetry';
+import telemetry from '@sqltools/util/telemetry';
 
 export class SQLToolsExtension implements IExtension {
   private pluginsQueue: IExtensionPlugin<this>[] = [];

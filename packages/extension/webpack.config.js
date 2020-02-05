@@ -9,24 +9,21 @@ const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
 const extPkgJson = require('./package.json');
-const corePkgJson = require('./../core/package.json');
-const lsPkgJson = require('./../language-server/package.json');
-const uiPkgJson = require('./../ui/package.json');
-
-const dependencies = Object.assign(
-  {},
-  uiPkgJson.dependencies || {},
-  lsPkgJson.dependencies || {},
-  corePkgJson.dependencies || {},
-  extPkgJson.dependencies || {}
-);
-const devDependencies = Object.assign(
-  {},
-  uiPkgJson.devDependencies || {},
-  lsPkgJson.devDependencies || {},
-  corePkgJson.devDependencies || {},
-  extPkgJson.devDependencies || {}
-);
+const { dependencies, devDependencies } = require('fs').readdirSync('../').reduce((deps, pkg) => {
+  console.log(`Reading dependencies from @sqltools/${pkg}`);
+  const pkgJson = require(`./../${pkg}/package.json`);
+  deps.dependencies = {
+    ...deps.dependencies,
+    ...pkgJson.dependencies,
+  };
+  deps.devDependencies = {
+    ...deps.devDependencies,
+    ...pkgJson.devDependencies,
+  };
+  return deps;
+}, { dependencies: {}, devDependencies: {} });
+console.log(`Total dependencies: ${Object.keys(dependencies).length}`);
+console.log(`Total devDependencies: ${Object.keys(devDependencies).length}`);
 
 // defintions
 const DISPLAY_NAME = process.env.DISPLAY_NAME || 'SQLTools';

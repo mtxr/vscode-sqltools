@@ -8,7 +8,7 @@ import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
 import getVscode from '@sqltools/ui/lib/vscode';
 import ConnectionCreated from './Widget/ConnectionCreated';
-import logger from '@sqltools/core/log';
+import logger from '@sqltools/util/log';
 import '@sqltools/ui/sass/app.scss';
 import { IWebviewMessage } from '@sqltools/ui/interfaces';
 

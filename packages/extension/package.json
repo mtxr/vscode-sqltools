@@ -422,11 +422,6 @@
                         "type": "string"
                     }
                 },
-                "sqltools.telemetry": {
-                    "type": "boolean",
-                    "default": true,
-                    "description": "Help SQLTools development. You can opt-out any time."
-                },
                 "sqltools.showStatusbar": {
                     "type": "boolean",
                     "default": true,
@@ -1170,7 +1165,7 @@
         "webpack-cli": "^3.3.5"
     },
     "dependencies": {
-        "@sqltools/core": "*",
+        "@sqltools/util": "*",
         "@sqltools/plugins": "*",
         "vscode-languageclient": "5.2.1"
     }

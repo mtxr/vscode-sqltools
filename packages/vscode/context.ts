@@ -1,5 +1,7 @@
+if (process.env.PRODUCT !== 'ext') { throw 'Cant use context module outside of VSCode context'; }
+
 import { ExtensionContext } from 'vscode';
-import { InvalidActionError } from '@sqltools/core/exception';
+import { InvalidActionError } from '@sqltools/util/exception';
 
 let currentContext: ExtensionContext & { set: typeof setCurrentContext; onRegister: typeof onRegister } = {} as any;
 

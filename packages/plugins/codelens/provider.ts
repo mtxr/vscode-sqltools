@@ -1,8 +1,8 @@
 import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event, EventEmitter } from 'vscode';
-import * as Constants from '@sqltools/core/constants';
+import * as Constants from '@sqltools/util/constants';
 import Selector from '@sqltools/vscode/utils/selector';
-import { getNameFromId } from '@sqltools/core/utils';
-import { extractConnName } from '@sqltools/core/utils/query';
+import { getNameFromId } from '@sqltools/util/connection';
+import { extractConnName } from '@sqltools/util/query';
 import Context from '@sqltools/vscode/context';
 
 export default class SQLToolsCodeLensProvider implements CodeLensProvider {
@@ -15,7 +15,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     this._onDidChangeCodeLenses.fire();
   }
   async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
-    const lines: string[] = document.getText().split(Constants.LineSplitterRegex);
+    const lines: string[] = document.getText().split(Constants.LINE_SPLITTER_REGEX);
     const requestRanges: [number, number][] = Selector.getQueryRanges(lines);
     const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
     const lenses: CodeLens[] = [];

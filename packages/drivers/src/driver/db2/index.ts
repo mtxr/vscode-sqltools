@@ -1,10 +1,9 @@
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
-import * as Utils from '@sqltools/core/utils';
 import queries from './queries';
 import * as db2Lib from 'ibm_db';
 import AbstractDriver from '../../lib/abstract';
-import sqltoolsRequire from '@sqltools/core/utils/sqltools-require';
-
+import sqltoolsRequire from '@sqltools/util/dependencies/require';
+import { parse as queryParse } from '@sqltools/util/query';
 const D2BLibVersion = '2.6.1';
 export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements IConnectionDriver {
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
@@ -53,7 +52,7 @@ export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements
     return new Promise<NSDatabase.IResult[]>(
       function (resolve, reject) {
         try {
-          const queries = Utils.query.parse(query)
+          const queries = queryParse(query)
           const results: NSDatabase.IResult[] = [];
           for (let q of queries) {
             try {

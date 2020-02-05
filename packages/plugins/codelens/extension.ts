@@ -1,11 +1,11 @@
 import { languages, Disposable, window, workspace, TextEditor } from 'vscode';
 import SQLToolsCodeLensProvider from './provider';
-import * as Utils from '@sqltools/core/utils';
+import { sortText } from '@sqltools/util/text';
 import { IExtensionPlugin } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
-import Config from '@sqltools/vscode/config-manager';
+import Config from '@sqltools/util/config-manager';
 
 export default class CodeLensPlugin implements IExtensionPlugin {
   private codelensDisposable: Disposable;
@@ -18,8 +18,8 @@ export default class CodeLensPlugin implements IExtensionPlugin {
   }
 
   async createCodelens() {
-    const oldLang = this.registeredLanguages.sort(Utils.sortText);
-    const newLang = Config.codelensLanguages.sort(Utils.sortText);
+    const oldLang = this.registeredLanguages.sort(sortText);
+    const newLang = Config.codelensLanguages.sort(sortText);
     const shouldRegister = newLang.length > 0 && (oldLang.join() !== newLang.join());
 
     if (!shouldRegister) return;
@@ -57,8 +57,8 @@ export default class CodeLensPlugin implements IExtensionPlugin {
     Context.subscriptions.push(this);
     this.createCodelens();
     this.createDecorations();
-    Config.addOnUpdateHook((ev) => {
-      if (ev.affectsConfig('codelensLanguages')) {
+    Config.addOnUpdateHook(({ event }) => {
+      if (event.affectsConfig('codelensLanguages')) {
         this.createCodelens();
       }
     });

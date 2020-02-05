@@ -1,7 +1,7 @@
 import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
 import { window } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import Context from '@sqltools/vscode/context';
 
 type HistoryExplorerItem = HistoryTreeItem | HistoryTreeGroup;

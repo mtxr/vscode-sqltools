@@ -1,5 +1,5 @@
 import MSSQLLib, { IResult, Binary } from 'mssql';
-import * as Utils from '@sqltools/core/utils';
+import { replacer } from '@sqltools/util/text';
 import queries from './queries';
 import AbstractDriver from '../../lib/abstract';
 import get from 'lodash/get';
@@ -170,6 +170,6 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
 
   public describeTable(prefixedTable: string) {
     prefixedTable.split('].[').reverse().join('], [');
-    return this.query(Utils.replacer(this.queries.describeTable, { table: prefixedTable.split(/\.(?=\[)/g).reverse().join(',') }));
+    return this.query(replacer(this.queries.describeTable, { table: prefixedTable.split(/\.(?=\[)/g).reverse().join(',') }));
   }
 }

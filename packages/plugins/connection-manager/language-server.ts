@@ -1,16 +1,16 @@
 import Connection from '@sqltools/language-server/connection';
-import ConfigRO from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
-import { getConnectionId, migrateConnectionSetting } from '@sqltools/core/utils';
+import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
 import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import Handlers from './cache/handlers';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
-import { decorateException } from '@sqltools/core/utils/errors';
-import logger from '@sqltools/core/log';
-import telemetry from '@sqltools/language-server/telemetry';
+import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
+import logger from '@sqltools/util/log';
+import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
 
@@ -155,7 +155,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     } catch (e) {
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
-      e = decorateException(e, { conn: req.conn });
+      e = decorateLSException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
         if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
           return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
@@ -191,7 +191,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       return req.conn;
     } catch (e) {
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
-      e = decorateException(e, { conn: req.conn });
+      e = decorateLSException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
         if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
           return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);

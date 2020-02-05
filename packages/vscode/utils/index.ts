@@ -10,8 +10,8 @@ import {
   commands,
   Uri,
 } from 'vscode';
-import { DismissedError } from '@sqltools/core/exception';
-import { isEmpty } from '@sqltools/core/utils';
+import { DismissedError } from '@sqltools/util/exception';
+import { isEmpty } from '@sqltools/util/validation';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
   if (forceCreate || !window.activeTextEditor || !window.activeTextEditor.viewColumn) {

@@ -1,9 +1,9 @@
 import { NSDatabase, IExtensionPlugin, IExtension, ICommandSuccessEvent } from '@sqltools/types';
 import HistoryExplorer from './explorer';
-import { getNameFromId } from '@sqltools/core/utils';
+import { getNameFromId } from '@sqltools/util/connection';
 import { quickPick, insertText } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';
 
 const hookedCommands = [

@@ -1,5 +1,5 @@
 import { TextEditor, Range } from 'vscode';
-import { query as QueryUtils } from '@sqltools/core/utils';
+import { parse } from '@sqltools/util/query';
 
 export const getEditorQueryDetails = (editor: TextEditor): { currentQuery: string, range: Range } => {
   if (!editor || !editor.document || editor.document.uri.scheme === 'output') {
@@ -22,8 +22,8 @@ export const getEditorQueryDetails = (editor: TextEditor): { currentQuery: strin
   const text = editor.document.getText();
   const currentOffset = editor.document.offsetAt(editor.selection.active);
   const prefix = text.slice(0, currentOffset+1);
-  const allQueries = QueryUtils.parse(text);
-  const prefixQueries = QueryUtils.parse(prefix);
+  const allQueries = parse(text);
+  const prefixQueries = parse(prefix);
   const currentQuery = allQueries[prefixQueries.length-1];
   const startIndex = prefix.lastIndexOf(prefixQueries[prefixQueries.length - 1]);
   const startPos = editor.document.positionAt(startIndex);

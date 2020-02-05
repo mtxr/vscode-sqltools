@@ -1,5 +1,5 @@
 import { ExitCalledNotification } from './contracts';
-import telemetry from '@sqltools/language-server/telemetry';
+import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServerPlugin } from '@sqltools/types';
 
 const AutoRestartPlugin: ILanguageServerPlugin = {

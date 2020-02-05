@@ -1,5 +1,5 @@
 import { DatabaseDriver } from '@sqltools/types';
-import { getIconPathForDriver } from '@sqltools/core/utils/driver';
+import { getIconPathForDriver } from '@sqltools/util/path/driver';
 
 const requirements = [
   'Node 7 or newer is required.',

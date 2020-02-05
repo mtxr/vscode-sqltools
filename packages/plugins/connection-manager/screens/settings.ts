@@ -1,5 +1,5 @@
-import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/core/constants';
-import { getConnectionId } from '@sqltools/core/utils';
+import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import { getConnectionId } from '@sqltools/util/connection';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
 import { commands, Uri } from 'vscode';
 import path from 'path';

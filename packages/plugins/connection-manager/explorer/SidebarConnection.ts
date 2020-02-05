@@ -1,16 +1,16 @@
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { IConnection, DatabaseDriver, MConnectionExplorer } from '@sqltools/types';
-import { getConnectionDescription, getConnectionId, asArray } from '@sqltools/core/utils';
+import { getConnectionDescription, getConnectionId } from '@sqltools/util/connection';
 import { isDeepStrictEqual } from 'util';
 import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
-import { getIconPathForDriver } from '@sqltools/core/utils/driver';
+import { getIconPathForDriver } from '@sqltools/util/path/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarResourceGroup from "./SidebarResourceGroup";
 import get from 'lodash/get';
 import ContextValue from '../context-value';
-import logger from '@sqltools/vscode/log';
+import logger from '@sqltools/util/log';
 import Context from '@sqltools/vscode/context';
-
+import { asArray } from '@sqltools/util/transform';
 const log = logger.extend('conn-explorer');
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {

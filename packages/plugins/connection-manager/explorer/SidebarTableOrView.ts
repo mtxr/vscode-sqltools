@@ -1,7 +1,7 @@
-import ConfigRO from '@sqltools/core/config-manager';
+import ConfigRO from '@sqltools/util/config-manager';
 import { TreeItemCollapsibleState, SnippetString } from 'vscode';
 import { NSDatabase } from '@sqltools/types';
-import prefixedtableName from '@sqltools/core/utils/query/prefixed-tablenames';
+import prefixedtableName from '@sqltools/util/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarColumn from './SidebarColumn';
 import ContextValue from '../context-value';

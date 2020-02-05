@@ -1,7 +1,7 @@
 import BookmarksExplorer from './explorer';
 import { quickPick, insertText, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { QuickPickItem, commands } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/core/constants';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
 
