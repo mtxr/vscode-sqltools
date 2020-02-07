@@ -148,6 +148,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (!baseFolder) {
       baseFolder = Uri.file(getDataPath(SESSION_FILES_DIRNAME));
     }
+
+    if (ConfigManager.sessionFilesFolder && ConfigManager.sessionFilesFolder != '') {
+      baseFolder = Uri.file(getDataPath(ConfigManager.sessionFilesFolder));
+    }
+
     const sessionFilePath = path.resolve(baseFolder.fsPath, getSessionBasename(conn.name));
     try {
       this.updateAttachedConnectionsMap(

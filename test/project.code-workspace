@@ -30,6 +30,7 @@
     "sqltools.useNodeRuntime": true,
     "sqltools.sortColumns": "ordinalnumber",
     "sqltools.autoOpenSessionFiles": true,
+    "sqltools.sessionFilesFolder": "/tmp",
     "sqltools.results": {
       "limit": 100,
       "location": "next",
