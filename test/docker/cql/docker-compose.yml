@@ -3,6 +3,9 @@ version: '2.1'
 
 services:
   db_cassandra:
+    build:
+      context: '.'
+      dockerfile: Dockerfile.cassandra
     container_name: sqltools_cql_cassandra
     image: cassandra
     restart: unless-stopped
