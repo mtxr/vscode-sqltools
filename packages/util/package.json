@@ -2,7 +2,7 @@
   "name": "@sqltools/util",
   "version": "1.0.0",
   "description": "SQLTools Logger",
-  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
   "dependencies": {

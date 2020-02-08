@@ -3,7 +3,7 @@
   "version": "0.21.2",
   "description": "SQLTools VSCode related api",
   "main": "index.ts",
-  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
   "dependencies": {

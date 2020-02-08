@@ -4,6 +4,7 @@
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
   "version": "0.21.6",
   "publisher": "mtxr",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "main": "./dist/extension.js",
   "repository": {
@@ -27,13 +28,15 @@
     "precompile": "yarn test && yarn run clean",
     "pretest": "rimraf -rf ./coverage",
     "prewatch": "yarn run clean",
+    "prewatch:v2": "yarn run clean",
     "publish": "yarn run package && cd ./dist && vsce publish --yarn",
     "test:older": "cross-env CODE_VERSION=1.32.3 yarn test",
     "test:docker": "yarn --cwd ./test run",
     "test:watch": "cross-env WATCH=1 yarn run test",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
     "watch": "cross-env DISPLAY_NAME=\"SQLTools Preview\" yarn workspace @sqltools/extension watch",
-    "build": "yarn --cwd ./docs run docz:build"
+    "build": "yarn --cwd ./docs run docz:build",
+    "watch:v2": "yarn --cwd ./build-tools run watch"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

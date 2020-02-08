@@ -2,7 +2,7 @@
   "name": "@sqltools/plugins",
   "version": "0.21.6",
   "description": "SQLTools Plugins",
-  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
   "dependencies": {

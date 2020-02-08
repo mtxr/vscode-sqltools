@@ -3,9 +3,19 @@
   "version": "0.21.6",
   "description": "UI components for SQLTools",
   "main": "noop.ts",
-  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
+  "build": [
+    {
+      "entries": {
+        "Settings": "screens/Settings.tsx",
+        "Results": "screens/Results.tsx",
+        "theme": "sass/theme.scss"
+      },
+      "type": "webview"
+    }
+  ],
   "dependencies": {
     "@devexpress/dx-react-core": "^2.0.1",
     "@devexpress/dx-react-grid": "^2.0.1",

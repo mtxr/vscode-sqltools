@@ -2,9 +2,17 @@
   "name": "@sqltools/drivers",
   "version": "0.21.2",
   "description": "SQLTools connector drivers files",
-  "author": "Matheus Teixeira <me@mteixeira.me>",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": false,
+  "build": [
+    {
+      "entries": {
+        "icons": "icons/driver"
+      },
+      "type": "copy"
+    }
+  ],
   "files": [
     "./dist/*",
     "./src/*"

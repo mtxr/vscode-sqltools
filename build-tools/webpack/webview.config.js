@@ -1,18 +1,25 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const setDefaults = require('./../common/set-defaults');
+const webpack = require('webpack');
 
-const babelOptions = require(path.join(__dirname, '.babelrc'));
+const { rootdir, IS_PRODUCTION } = require('../constants');
 
-const IS_DEV = process.env.NODE_ENV !== 'production';
-
-module.exports = exports = function getWebviewConfig(outdir) {
-  return {
+/**
+ *
+ * @param {object} entries
+ * @param {string} packagePath
+ * @returns {webpack.Configuration['plugins']}
+ */
+module.exports = exports = function getWebviewConfig(entries, packagePath) {
+  const babelOptions = require(path.join(packagePath, '.babelrc'));
+  /** @type webpack.Configuration */
+  const config = {
     name: 'ui',
-    entry: {
-      Settings: path.join(__dirname, 'screens', 'Settings.tsx'),
-      Results: path.join(__dirname, 'screens', 'Results.tsx'),
-      theme: path.join(__dirname, 'sass', 'theme.scss'),
-    },
+    entry: Object.keys(entries).reduce((agg, name) => ({
+      ...agg,
+      [name]: path.resolve(packagePath, entries[name]),
+    }), {}),
     module: {
       rules: [
         {
@@ -29,7 +36,7 @@ module.exports = exports = function getWebviewConfig(outdir) {
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
-                hmr: IS_DEV,
+                hmr: !IS_PRODUCTION,
               },
             },
             'css-loader'
@@ -42,7 +49,7 @@ module.exports = exports = function getWebviewConfig(outdir) {
             {
               loader: MiniCssExtractPlugin.loader,
               options: {
-                hmr: IS_DEV,
+                hmr: !IS_PRODUCTION,
               },
             },
             'css-loader',
@@ -66,7 +73,7 @@ module.exports = exports = function getWebviewConfig(outdir) {
     },
     resolve: {
       extensions: ['.tsx', '.ts', '.js', '.json', '.css', '.scss', '.sass'],
-      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
+      modules: ['node_modules', path.join(rootdir, 'node_modules')],
     },
     optimization: {
       splitChunks: {
@@ -92,7 +99,6 @@ module.exports = exports = function getWebviewConfig(outdir) {
     output: {
       chunkFilename: 'ui/[name].js',
       filename: 'ui/[name].js',
-      path: outdir,
     },
     plugins: [
       new MiniCssExtractPlugin({
@@ -102,4 +108,6 @@ module.exports = exports = function getWebviewConfig(outdir) {
       }),
     ],
   };
+
+  return setDefaults(config);
 };

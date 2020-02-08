@@ -1,14 +1,23 @@
 const path = require('path');
+const setDefaults = require('./../common/set-defaults');
+const webpack = require('webpack');
 
-const babelOptions = require(path.join(__dirname, '.babelrc'));
-
-module.exports = function getLanguageServerConfig(outdir) {
+/**
+ *
+ * @param {object} entries
+ * @param {string} packagePath
+ * @returns {webpack.Configuration['plugins']}
+ */
+module.exports = function getNodeConfig(entries, packagePath) {
+  const babelOptions = require(path.join(packagePath, '.babelrc'));
+  /** @type webpack.Configuration */
   let config = {
     name: 'ls',
     target: 'node',
-    entry: {
-      languageserver: path.join(__dirname, 'index.ts'),
-    },
+    entry: Object.keys(entries).reduce((agg, name) => ({
+      ...agg,
+      [name]: path.resolve(packagePath, entries[name]),
+    }), {}),
     module: {
       rules: [
         {
@@ -30,13 +39,12 @@ module.exports = function getLanguageServerConfig(outdir) {
     resolve: {
       extensions: ['.ts', '.js', '.json'],
       alias: {
-        'pg-native': path.join(__dirname, '../../', 'node_modules/pg/lib/native/index.js'),
+        'pg-native': path.join(packagePath, '../../', 'node_modules/pg/lib/native/index.js'),
       },
-      modules: ['node_modules', path.join(__dirname, '..', '..', 'node_modules')],
+      modules: ['node_modules', path.join(packagePath, '..', '..', 'node_modules')],
     },
     output: {
       filename: '[name].js',
-      path: outdir,
       libraryTarget: 'commonjs2',
     },
     externals: {
@@ -47,5 +55,5 @@ module.exports = function getLanguageServerConfig(outdir) {
     },
   };
 
-  return config;
+  return setDefaults(config);
 };

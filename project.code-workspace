@@ -10,7 +10,8 @@
     { "path": "./packages/formatter" },
     { "path": "./packages/util" },
     { "path": "./packages/types" },
-    { "path": "./docs" }
+    { "path": "./docs" },
+    { "path": "./build-tools" }
   ],
   "extensions": {},
   "settings": {
