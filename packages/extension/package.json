@@ -425,8 +425,8 @@
                 },
                 "sqltools.telemetry": {
                     "type": "boolean",
-                    "default": true,
-                    "description": "Help SQLTools development. You can opt-out any time."
+                    "default": false,
+                    "description": "Help SQLTools development. You can opt-in any time."
                 },
                 "sqltools.showStatusbar": {
                     "type": "boolean",

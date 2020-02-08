@@ -1,3 +1,4 @@
+import { workspace } from 'vscode';
 import { ISettings as ISettingsProps } from '@sqltools/types';
 import { InvalidActionError } from '@sqltools/core/exception';
 
@@ -43,6 +44,7 @@ const handler = {
     if (prop === 'update') return update;
     if (prop === 'get') return get;
     if (prop === 'addOnUpdateHook') return addOnUpdateHook;
+    if (prop === 'telemetry') return !!settings.telemetry && workspace.getConfiguration('telemetry').get('enableTelemetry', false));
     if (prop in settings && typeof settings[prop] !== 'undefined') return settings[prop];
     if (settings.inspect) {
       const data = settings.inspect(prop) || { defaultValue: undefined };
