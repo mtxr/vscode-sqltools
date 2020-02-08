@@ -1,16 +1,16 @@
 import React from 'react';
-import Loading from '@sqltools/ui/components/Loading';
+import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading';
 import { IConnection } from '@sqltools/types';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
 import availableDrivers from './lib/availableDrivers';
 import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
-import getVscode from '@sqltools/ui/lib/vscode';
+import getVscode from '@sqltools/plugins/connection-manager/ui/lib/vscode';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/util/log';
-import '@sqltools/ui/sass/app.scss';
-import { IWebviewMessage } from '@sqltools/ui/interfaces';
+import '@sqltools/plugins/connection-manager/ui/sass/app.scss';
+import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 
 const log = logger.extend('settings');
 

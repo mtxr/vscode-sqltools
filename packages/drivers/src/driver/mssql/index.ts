@@ -4,6 +4,7 @@ import queries from './queries';
 import AbstractDriver from '../../lib/abstract';
 import get from 'lodash/get';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
+import { parse as queryParse } from '@sqltools/util/query';
 
 export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> implements IConnectionDriver {
   queries = queries;
@@ -77,7 +78,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     request.multiple = true;
     query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
     const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
-    const queries = Utils.query.parse(query, 'mssql');
+    const queries = queryParse(query, 'mssql');
     return queries.map((q, i): NSDatabase.IResult => {
       const r = recordsets[i] || [];
       const columnNames = [];

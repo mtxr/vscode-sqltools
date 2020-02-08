@@ -5,11 +5,20 @@
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
+  "build": [
+    {
+      "entries": {
+        "Settings": "connection-manager/ui/screens/Settings.tsx",
+        "Results": "connection-manager/ui/screens/Results.tsx",
+        "theme": "connection-manager/ui/sass/theme.scss"
+      },
+      "type": "webview"
+    }
+  ],
   "dependencies": {
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
     "@sqltools/types": "*",
-    "@sqltools/ui": "*",
     "@sqltools/util": "*",
     "@sqltools/vscode": "*",
     "csv-stringify": "^5.3.2",

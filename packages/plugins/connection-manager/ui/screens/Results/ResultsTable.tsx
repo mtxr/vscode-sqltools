@@ -21,11 +21,11 @@ import {
   PagingPanel,
 } from '@devexpress/dx-react-grid-material-ui';
 import Code from '@material-ui/icons/Code';
-import { toRegEx } from '@sqltools/ui/lib/utils';
+import { toRegEx } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import { ResultsTableProps } from './lib/ResultsTableProps';
 import { filterPredicate } from './lib/filterPredicate';
 import { availableFilterOperations, MenuActions } from './constants';
-import { clipboardInsert } from '@sqltools/ui/lib/utils';
+import { clipboardInsert } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import getVscode from '../../lib/vscode';
 import Menu from '../../components/Menu';
 import ErrorIcon from '../../components/ErrorIcon';

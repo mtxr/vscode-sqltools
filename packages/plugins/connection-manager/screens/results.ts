@@ -1,7 +1,7 @@
 import { NSDatabase, ILanguageClient } from '@sqltools/types';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
-import QueryResultsState from '@sqltools/ui/screens/Results/State';
+import QueryResultsState from '@sqltools/plugins/connection-manager/ui/screens/Results/State';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';

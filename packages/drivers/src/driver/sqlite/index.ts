@@ -6,6 +6,7 @@ import mkdir from '@sqltools/util/path/mkdir';
 import { dirname } from 'path';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import { replacer } from '@sqltools/util/text';
+import { parse as queryParse } from '@sqltools/util/query';
 
 const SQLite3Version = '4.1.1';
 
@@ -69,7 +70,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
 
   public async query(query: string): Promise<NSDatabase.IResult[]> {
     const db = await this.open();
-    const queries = Utils.query.parse(query).filter(Boolean);
+    const queries = queryParse(query).filter(Boolean);
     const results: NSDatabase.IResult[] = [];
     for(let i = 0; i < queries.length; i++) {
       const res: any[][] = (await this.runSingleQuery(db, queries[i])) || [];

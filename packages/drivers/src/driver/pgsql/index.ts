@@ -5,6 +5,7 @@ import AbstractDriver from '../../lib/abstract';
 import { replacer } from '@sqltools/util/text';
 import fs from 'fs';
 import {zipObject} from 'lodash';
+import { parse as queryParse } from '@sqltools/util/query';
 
 const rawValue = (v: string) => v;
 
@@ -77,7 +78,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         return results;
       })
       .then((results: any[] | any) => {
-        const queries = Utils.query.parse(query.toString(), 'pg');
+        const queries = queryParse(query.toString(), 'pg');
         if (!Array.isArray(results)) {
           results = [results];
         }

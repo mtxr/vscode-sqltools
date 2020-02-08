@@ -12,7 +12,7 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "es6",
+    "target": "es2017",
     "types": ["@sqltools/types"]
   }
 }

@@ -4,6 +4,7 @@ import { replacer } from '@sqltools/util/text';
 import AbstractDriver from '../../lib/abstract';
 import Queries from './queries';
 import { TREE_SEP } from '@sqltools/util/constants';
+import { parse as queryParse } from '@sqltools/util/query';
 
 interface CQLBatch {
   query: string,
@@ -52,7 +53,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLi
    * @param query
    */
   private cqlParse(query: string): (string|CQLBatch)[] {
-    const queries = Utils.query.parse(query, 'cql');
+    const queries = queryParse(query, 'cql');
     const cqlQueries: (string|CQLBatch)[] = [];
     for (let i = 0; i < queries.length; i++) {
       const query = queries[i];

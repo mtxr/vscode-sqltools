@@ -11,7 +11,7 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "es6"
+    "target": "es2017",
   },
   "exclude": ["./test", "./node_modules", "./__mocks__", "./*.js"]
 }

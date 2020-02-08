@@ -1,12 +1,12 @@
 import React from 'react';
 import { NSDatabase } from '@sqltools/types';
 import QueryResult from './QueryResult';
-import getVscode from '@sqltools/ui/lib/vscode';
+import getVscode from '@sqltools/plugins/connection-manager/ui/lib/vscode';
 import QueryResultsState from './State';
-import '@sqltools/ui/sass/results.scss';
+import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 import { Tabs, Tab, Typography } from '@material-ui/core';
 import logger from '@sqltools/util/log';
-import { IWebviewMessage } from '@sqltools/ui/interfaces';
+import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 
 const log = logger.extend('results');
 const defaultPageSize = 50;
