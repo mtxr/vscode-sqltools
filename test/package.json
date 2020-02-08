@@ -2,7 +2,7 @@
   "name": "@sqltools/test",
   "private": true,
   "scripts": {
-    "up": "docker-compose -f docker/docker-compose.yml up -d",
+    "up": "docker-compose -f docker/docker-compose.yml up --build -d",
     "up:mysql": "yarn run up mysql",
     "up:mssql": "yarn run up mssql",
     "up:mysqlv5": "yarn run up mysqlv5",
