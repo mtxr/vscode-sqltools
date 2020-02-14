@@ -50,6 +50,9 @@ export class SQLToolsExtension implements IExtension {
     );
 
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
+    this.registerCommand('openDocs', (path?: string) => {
+      return openExternal(`https://vscode-sqltools.mteixeira.dev/${path || ''}`);
+    });
 
     if (logger.outputChannel) {
       Context.subscriptions.push(logger.outputChannel);

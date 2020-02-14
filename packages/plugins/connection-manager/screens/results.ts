@@ -1,6 +1,6 @@
 import { NSDatabase, ILanguageClient } from '@sqltools/types';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
-import WebviewProvider from '@sqltools/plugins/connection-manager/screens/provider';
+import WebviewProvider from '@sqltools/vscode/webview-provider';
 import QueryResultsState from '@sqltools/plugins/connection-manager/ui/screens/Results/State';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';

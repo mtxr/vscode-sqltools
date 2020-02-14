@@ -364,6 +364,11 @@
                 "title": "Detach Connection From File",
                 "command": "sqltools.detachConnectionFromFile",
                 "category": "SQLTools Internal"
+            },
+            {
+                "title": "Open Docs",
+                "command": "sqltools.openDocs",
+                "category": "SQLTools"
             }
         ],
         "keybindings": [
