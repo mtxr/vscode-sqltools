@@ -23,10 +23,10 @@
       }
     ],
     "repository": {
-        "url": "https://github.com/mtxr/vscode-sqltools",
+        "url": "https://github.com/mtxr/vscode-sqltools.git",
         "type": "git"
     },
-    "homepage": "https://github.com/mtxr/vscode-sqltools",
+    "homepage": "https://vscode-sqltools.mteixeira.dev/",
     "bugs": {
         "url": "https://github.com/mtxr/vscode-sqltools/issues"
     },
