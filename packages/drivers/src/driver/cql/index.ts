@@ -119,14 +119,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLi
           cols,
           messages,
           query,
-          results: result.rows ? result.rows.map((row) => {
-            Object.entries(row).forEach(([key, value]) => {
-              if (typeof value === 'object') {
-                row[key] = JSON.stringify(value);
-              }
-            });
-            return row;
-          }) : [],
+          results: result.rows || [],
         };
         results.push(queryresult);
       } catch (e) {
@@ -192,7 +185,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLi
         name: obj.function_name,
         schema: obj.keyspace_name,
         database: '',
-        signature: obj.argument_types ? `(${obj.argument_types.join('; ')})` : '()',
+        signature: obj.argument_types ? `(${obj.argument_types.join(',')})` : '()',
         args: obj.argument_names,
         resultType: obj.return_type,
         source: obj.body,
