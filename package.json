@@ -6,8 +6,9 @@
   "publisher": "mtxr",
   "license": "MIT",
   "main": "./dist/extension.js",
+  "homepage": "https://vscode-sqltools.mteixeira.dev/",
   "repository": {
-    "url": "https://github.com/mtxr/vscode-sqltools",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
     "type": "git"
   },
   "private": true,

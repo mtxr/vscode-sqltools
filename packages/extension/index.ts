@@ -160,7 +160,7 @@ export class SQLToolsExtension implements IExtension {
       telemetry.registerMessage('info', message, res);
       switch (res) {
         case moreInfo:
-          openExternal('https://github.com/mtxr/vscode-sqltools#donate');
+          openExternal('https://vscode-sqltools.mteixeira.dev/#donate-and-support');
           break;
         case releaseNotes:
           openExternal(current.releaseNotes);

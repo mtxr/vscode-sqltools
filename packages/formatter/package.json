@@ -36,7 +36,8 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/mtxr/sqltools-formatter.git"
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/formatter"
   },
   "bugs": {
     "url": "https://github.com/mtxr/sqltools-formatter/issues"
