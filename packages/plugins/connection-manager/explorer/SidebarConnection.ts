@@ -1,69 +1,58 @@
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, DatabaseDriver, MConnectionExplorer } from '@sqltools/types';
+import { IConnection, MConnectionExplorer, ContextValue } from '@sqltools/types';
 import { getConnectionDescription, getConnectionId } from '@sqltools/util/connection';
-import { isDeepStrictEqual } from 'util';
 import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
 import { getIconPathForDriver } from '@sqltools/util/path/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
-import SidebarResourceGroup from "./SidebarResourceGroup";
+import SidebarItem from "./SidebarItem";
 import get from 'lodash/get';
-import ContextValue from '../context-value';
 import logger from '@sqltools/util/log';
 import Context from '@sqltools/vscode/context';
-import { asArray } from '@sqltools/util/transform';
 const log = logger.extend('conn-explorer');
 
-export default class SidebarConnection extends SidebarAbstractItem<SidebarResourceGroup<SidebarAbstractItem>> {
-  public parent = null;
+export default class SidebarConnection extends SidebarAbstractItem<SidebarItem<SidebarAbstractItem>> {
+  parent = null;
 
-  public get contextValue() {
+  get contextValue() {
     return this.isConnected ? ContextValue.CONNECTED_CONNECTION : ContextValue.CONNECTION;
   }
-  public tree: {
-    [id: string]: SidebarResourceGroup;
-  } = {};
 
-  public async checkItemsCache() {
-    if (this.conn.driver === DatabaseDriver['PostgreSQL']) {
-      const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, { conn: this.conn, itemType: 'root', itemId: this.getId() });
-      items.forEach(item => {
-        this.addItem(new SidebarResourceGroup(item.label, item.itemType));
-      });
-    }
-  }
-  public get items() {
-    return asArray<SidebarResourceGroup>(this.tree);
-  }
-  public get description() {
+  get description() {
     return getConnectionDescription(this.conn);
   }
 
-  public get isConnected() {
+  get isConnected() {
     return this.conn.isConnected;
   }
-  public get id() {
+  get id() {
     return <string>this.getId();
   }
-  public get value() {
+  get value() {
     return this.conn.database;
   }
-  public get tooltip() {
+
+  get itemMetadata() {
+    return <MConnectionExplorer.IChildItem>{
+      id: this.id,
+      type: 'connection'
+    };
+  }
+  get tooltip() {
     if (this.isActive)
       return `Active Connection - Queries will run for this connection`;
     return undefined;
   }
 
-  public async getChildren() {
-    try {
-      if (!this.isConnected) {
-        await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, this);
-      }
-      await this.checkItemsCache();
-      return this.items;
-    } catch(e) {
-      return null;
+  async getChildren() {
+    if (!this.isConnected) {
+      await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, this);
     }
+    const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
+      conn: this.conn, item: this.itemMetadata
+    });
+    return items.map(item => new SidebarItem(item));
   }
+
   public get command () {
     if (!this.isActive) {
       return {
@@ -75,14 +64,14 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
   }
 
   constructor(public conn: IConnection) {
-    super(conn.name, TreeItemCollapsibleState.None);
+    super(conn.name, conn.isConnected ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
   }
-  public get iconPath() {
+  get iconPath() {
     try {
       if (this.isActive) {
         return this.getIcon('active');
       }
-      else if (this.contextValue === 'connectedConnection') {
+      else if (this.contextValue === ContextValue.CONNECTED_CONNECTION) {
         return this.getIcon('connected');
       }
       return this.getIcon('disconnected');
@@ -90,46 +79,12 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarResour
       log.extend('error')(error);
     }
   }
-  public getId() {
+  getId() {
     return getConnectionId(this.conn);
   }
-  public addItem(item: SidebarResourceGroup) {
-    if (this.tree[item.value])
-      return this;
-    this.tree[item.value] = this.tree[item.value] || item;
-    this.tree[item.value].parent = this;
-    this.collapsibleState = this.collapsibleState === TreeItemCollapsibleState.None
-      ? TreeItemCollapsibleState.Collapsed
-      : this.collapsibleState;
-    return this;
-  }
-  public reset() {
-    this.tree = {};
-    this.collapsibleState = TreeItemCollapsibleState.None;
-  }
 
-  public updateStatus(c: IConnection) {
-    this.updateCreds(c);
-    if (this.isActive) {
-      this.expand();
-    }
-  }
-
-  public get isActive() {
+  get isActive() {
     return this.conn.isActive;
-  }
-  public expand() {
-    this.collapsibleState = TreeItemCollapsibleState.Expanded;
-  }
-  public updateCreds(creds: IConnection) {
-    if (isDeepStrictEqual(this.conn, creds)) {
-      return false;
-    }
-    this.conn = creds;
-    if (!this.isConnected) {
-      this.reset();
-    }
-    return true;
   }
 
   private getIcon = (type: 'active' | 'connected' | 'disconnected') => {

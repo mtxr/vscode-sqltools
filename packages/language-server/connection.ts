@@ -167,7 +167,7 @@ export default class Connection {
     return true;
   }
 
-  public getChildrenForItem(params: { itemId: string, itemType: MConnectionExplorer.TreeItemType }) {
+  public getChildrenForItem(params: { item: MConnectionExplorer.IChildItem }) {
     return this.conn.getChildrenForItem(params);
   }
 }

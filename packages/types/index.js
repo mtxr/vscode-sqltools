@@ -1,8 +1,6 @@
-/// reference types="./driver/database-driver";
+// ATTENTION! Remember to update type declarations too!!!
 
-/**
- * @type {DatabaseDriver}
- */
+/// <reference path="./driver/database-driver.d.ts" />
 const DatabaseDriver = {
   'AWS Redshift': 'AWS Redshift',
   Cassandra: 'Cassandra',
@@ -16,6 +14,18 @@ const DatabaseDriver = {
   SQLite: 'SQLite'
 }
 
-module.exports = {
-  DatabaseDriver
+/// <reference path="./generic/connection.d.ts" />
+const ContextValue = {
+  CONNECTION: 'connection',
+  CONNECTED_CONNECTION: 'connectedConnection',
+  TABLEORVIEW: 'connection.tableOrView',
+  COLUMN: 'connection.column',
+  FUNCTION: 'connection.function',
+  RESOURCE_GROUP: 'connection.resource_group',
+  DATABASE: 'connection.database',
 }
+
+module.exports = {
+  ContextValue,
+  DatabaseDriver
+};

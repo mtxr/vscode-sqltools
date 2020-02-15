@@ -1,6 +1,5 @@
 import { DatabaseDriver } from '@sqltools/types/driver';
 import { NSDatabase } from '@sqltools/types/generic/database';
-import ConnectionExplorer from '@sqltools/plugins/connection-manager/explorer';
 
 export declare interface IConnection<DriverOptions = any> {
   /**
@@ -184,14 +183,29 @@ export declare interface IConnectionDriver {
   showRecords(tableName: string, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
   query(query: string): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
-  getChildrenForItem?(params: { itemId: string, itemType: MConnectionExplorer.TreeItemType }): Promise<MConnectionExplorer.IChildItem[]>;
+  getChildrenForItem?(params: { item: MConnectionExplorer.IChildItem }): Promise<MConnectionExplorer.IChildItem[]>;
 }
+
+export enum ContextValue {
+  CONNECTION ='connection',
+  CONNECTED_CONNECTION ='connectedConnection',
+  TABLEORVIEW ='connection.tableOrView',
+  COLUMN ='connection.column',
+  FUNCTION ='connection.function',
+  RESOURCE_GROUP ='connection.resource_group',
+  DATABASE ='connection.database'
+}
+
 export module MConnectionExplorer {
-  type TreeItemType = 'root' | 'database';
+  type TreeItemType = ContextValue;
   interface IChildItem {
-    itemType: TreeItemType;
-    itemId: string;
+    type: TreeItemType;
+    id: string;
     label: string;
+    /**
+     * Text that goes in front of the label
+     */
+    detail?: string;
   }
 }
 

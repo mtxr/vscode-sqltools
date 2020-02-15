@@ -1,9 +1,11 @@
+import { MConnectionExplorer, ContextValue } from './connection';
+
 export declare namespace NSDatabase {
-  export interface IDatabase {
+  export interface IDatabase extends MConnectionExplorer.IChildItem {
     name: string;
     label: string;
-    itemType: 'database';
-    itemId: string;
+    type: ContextValue.DATABASE;
+    id: string;
   }
 
   export interface ITable {

@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase, Arg0 } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0, ContextValue } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import { replacer } from '@sqltools/util/text';
 import fs from 'fs';
@@ -193,9 +193,10 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return results[0].results;
   }
 
-  public async getChildrenForItem({ itemType }: Arg0<IConnectionDriver['getChildrenForItem']>) {
-    switch(itemType) {
-      case 'root':
+  public async getChildrenForItem({ item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch(item.type) {
+      case ContextValue.CONNECTION:
+      case ContextValue.CONNECTED_CONNECTION:
         return this.getDatabases();
     }
     return [];

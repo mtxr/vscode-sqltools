@@ -2,8 +2,7 @@ import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { IConnection } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
-import SidebarColumn from "@sqltools/plugins/connection-manager/explorer/SidebarColumn";
-import SidebarTableOrView from "@sqltools/plugins/connection-manager/explorer/SidebarTableOrView";
+import SidebarItem from "@sqltools/plugins/connection-manager/explorer/SidebarItem";
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
 import sortBy from 'lodash/sortBy';
@@ -53,7 +52,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     if (!element) {
       return this.getRootItems();
     }
-    const items = (<any>element).getChildren ? await (<any>element).getChildren() : element.items as any[];
+    const items = await element.getChildren();
     if (Config.flattenGroupsIfOne && items.length === 1) {
       return this.getChildren(items[0]);
     }
@@ -65,20 +64,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
     log.extend('debug')(`Connection explorer changed. Will be updated. ${item ? `Changed item: ${item.label}` : ''}`.trim());
-  }
-
-  public async focusByConn(conn: IConnection) {
-    if (!conn) return;
-
-    if (this._active && this._active.getId() === getConnectionId(conn)) return this.focus(this._active);
-
-    const item = new SidebarConnection(conn);
-
-    if (this.treeView.visible && Object.keys(item.tree).length > 0) {
-      this.treeView.reveal(Object.values(item.tree)[0], { select: false, focus: false });
-      this.treeView.reveal(item);
-    }
-    return this.focus(item);
   }
 
   public async getConnectionById(id: string): Promise<IConnection> {
@@ -211,6 +196,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 }
 
-export { SidebarColumn, SidebarConnection, SidebarTableOrView, SidebarTreeItem };
+export { SidebarConnection, SidebarItem, SidebarTreeItem };
 
 export default ConnectionExplorer;

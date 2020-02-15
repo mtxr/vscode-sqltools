@@ -56,6 +56,13 @@ export const SaveResultsRequest = new RequestType<
   void
 >('connection/SaveResultsRequest');
 
+export const GetChildrenForTreeItemRequest = new RequestType<
+  { conn: IConnection, item: MConnectionExplorer.IChildItem },
+  MConnectionExplorer.IChildItem[],
+  Error,
+  void
+>('connection/GetChildrenForTreeItemRequest');
+
 
 // @TODO: later this will be replace by the native library when available
 export interface ProgressNotificationStartParams {
@@ -72,9 +79,3 @@ export interface ProgressNotificationCompleteParams {
 };
 export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>(`${EXT_NAMESPACE}/window/progress/complete`);
 
-export const GetChildrenForTreeItemRequest = new RequestType<
-  { conn: IConnection, itemType: MConnectionExplorer.TreeItemType, itemId: string },
-  MConnectionExplorer.IChildItem[], // @TODO define type
-  Error,
-  void
->('connection/GetChildrenForTreeItemRequest');

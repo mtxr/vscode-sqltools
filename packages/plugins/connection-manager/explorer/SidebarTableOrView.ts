@@ -1,10 +1,11 @@
+// @TODO to be deleted
+
 import ConfigRO from '@sqltools/util/config-manager';
 import { TreeItemCollapsibleState, SnippetString } from 'vscode';
-import { NSDatabase } from '@sqltools/types';
+import { NSDatabase, ContextValue } from '@sqltools/types';
 import prefixedtableName from '@sqltools/util/query/prefixed-tablenames';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarColumn from './SidebarColumn';
-import ContextValue from '../context-value';
 import { getIconPaths } from '@sqltools/vscode/icons';
 
 export default class SidebarTableOrView extends SidebarAbstractItem<SidebarColumn> {

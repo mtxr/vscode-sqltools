@@ -101,8 +101,8 @@ const fetchDatabases: () => IExpectedResult<NSDatabase.IDatabase> = queryFactory
 SELECT
   db.*,
   db.datname as "label",
-  'database' as "itemType",
-  db.oid as "itemId"
+  'database' as "type",
+  db.oid as "id"
 FROM pg_catalog.pg_database db
 WHERE
   datallowconn

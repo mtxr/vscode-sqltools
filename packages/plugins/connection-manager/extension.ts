@@ -6,7 +6,7 @@ import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import getTableName from '@sqltools/util/query/prefixed-tablenames';
 import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
 import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
-import { SidebarConnection, SidebarTableOrView, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
+import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
@@ -75,7 +75,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_showRecords = async (node?: SidebarTableOrView | string, page: number = 0) => {
+  private ext_showRecords = async (node?: SidebarItem | string, page: number = 0) => {
     try {
       const table = typeof node === 'string' ? node : await this._getTableName(node);
       await this._openResultsWebview();
@@ -87,7 +87,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_describeTable = async (node?: SidebarTableOrView) => {
+  private ext_describeTable = async (node?: SidebarItem) => {
     try {
       const table = await this._getTableName(node);
       await this._openResultsWebview();
@@ -149,8 +149,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       baseFolder = Uri.file(getDataPath(SESSION_FILES_DIRNAME));
     }
 
-    if (ConfigManager.sessionFilesFolder && ConfigManager.sessionFilesFolder != '') {
-      baseFolder = Uri.file(getDataPath(ConfigManager.sessionFilesFolder));
+    if (Config.sessionFilesFolder && Config.sessionFilesFolder != '') {
+      baseFolder = Uri.file(getDataPath(Config.sessionFilesFolder));
     }
 
     const sessionFilePath = path.resolve(baseFolder.fsPath, getSessionBasename(conn.name));
@@ -370,7 +370,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   // internal utils
-  private async _getTableName(node?: SidebarTableOrView): Promise<string> {
+  private async _getTableName(node?: SidebarItem): Promise<string> {
     if (node && node.conn) {
       await this._setConnection(node.conn as IConnection);
       return getTableName(node.conn.driver, node.table);
@@ -477,9 +477,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     this.explorer.refresh();
-    if (c) {
-      await this.explorer.focusByConn(c);
-    }
     return this.explorer.getActive();
   }
 
