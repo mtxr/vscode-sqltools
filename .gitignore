@@ -8,7 +8,7 @@ coverage.enabled
 npm-shrinkwrap.json
 *.log
 *.vsix
-cache/
+!packages/**/cache
 !**/.vscode
 **/package-lock.json
 .env
