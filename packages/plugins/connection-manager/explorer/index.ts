@@ -12,13 +12,19 @@ import Config from '@sqltools/util/config-manager';
 
 const log = logger.extend('conn-man:explorer');
 
-type ConnectionGroup = TreeItem & { items?: TreeItem[]; isGroup?: boolean };
+class ConnectionGroup extends TreeItem {
+  items: (ConnectionGroup | SidebarTreeItem)[] =  [];
+  isGroup: boolean = true;
+  getChildren() {
+    return this.items;
+  }
+}
 
-const connectedTreeItem: ConnectionGroup = new TreeItem('Connected', TreeItemCollapsibleState.Expanded);
+const connectedTreeItem: ConnectionGroup = new ConnectionGroup('Connected', TreeItemCollapsibleState.Expanded);
 connectedTreeItem.id = 'CONNECTED'
 connectedTreeItem.iconPath = ThemeIcon.Folder;
 
-const notConnectedTreeItem: ConnectionGroup = new TreeItem('Not Connected', TreeItemCollapsibleState.Expanded);
+const notConnectedTreeItem: ConnectionGroup = new ConnectionGroup('Not Connected', TreeItemCollapsibleState.Expanded);
 notConnectedTreeItem.id = 'DISCONNECTED';
 notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 
@@ -108,12 +114,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getOrCreateConnectionGroup = (currentGroup: ConnectionGroup, groupId: string, item: SidebarConnection) => {
-    let subGroup: ConnectionGroup = currentGroup.items.find((it: TreeItem) => it.id === groupId);
+    let subGroup = currentGroup.items.find((it: ConnectionGroup) => it.id === groupId) as ConnectionGroup;
     if (!subGroup) {
-      subGroup = new TreeItem(item.conn.group, TreeItemCollapsibleState.Expanded);
-      subGroup.isGroup = true;
+      subGroup = new ConnectionGroup(item.conn.group, TreeItemCollapsibleState.Expanded);
       subGroup.id = groupId;
-      subGroup.items = subGroup.items || [];
       subGroup.iconPath = ThemeIcon.Folder;
       currentGroup.items.push(subGroup);
     }
@@ -137,7 +141,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return this.getGroupedRootItems(items);
     }
 
-    const root: ConnectionGroup = new TreeItem('Root');
+    const root: ConnectionGroup = new ConnectionGroup('Root');
     root.items = [];
     this._active = null;
     items.forEach(item => {
