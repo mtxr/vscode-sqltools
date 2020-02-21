@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/drivers",
-  "version": "0.21.2",
+  "version": "1.0.0",
   "description": "SQLTools connector drivers files",
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",

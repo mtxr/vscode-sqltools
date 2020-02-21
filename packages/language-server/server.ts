@@ -99,6 +99,8 @@ ExecPath: ${process.execPath}
     if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
       log.extend('debug')('REQUEST => %s', req._method || req.toString());
+      process.env.NODE_ENV === 'development' && log.extend('debug')('REQUEST => %s %O', req._method || req.toString(), args);
+      process.env.NODE_ENV !== 'development' && log.extend('debug')('REQUEST => %s', req._method || req.toString());
       return Promise.resolve(handler(...args));
     });
   }

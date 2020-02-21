@@ -5,12 +5,12 @@
   "license": "MIT",
   "scripts": {
     "clean": "rimraf -rf ../dist",
-    "build:pack": "cd ../dist && cross-env NODE_ENV=production vsce package --yarn",
+    "build:pack": "cd ../dist && vsce package --yarn",
     "build:webpack": "node --max_old_space_size=4096 ./node_modules/.bin/webpack",
     "build": "yarn run build:webpack",
-    "dev:watch": "cross-env NODE_ENV=development yarn run webpack --watch --info-verbosity verbose",
+    "dev:watch": "yarn run webpack --watch --info-verbosity verbose",
     "postbuild": "rimraf -rf ../dist/ui/theme.js || exit 0",
-    "prebuild:pack": "cross-env NODE_ENV=production yarn run build",
+    "prebuild:pack": "yarn run build",
     "prebuild:webpack": "yarn run clean"
   },
   "devDependencies": {

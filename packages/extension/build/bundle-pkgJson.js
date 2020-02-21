@@ -1,4 +1,5 @@
 const path = require('path');
+const rootPkgJson = require('../../../package.json');
 
 module.exports = ({ EXT_NAMESPACE, isPreview, DISPLAY_NAME, outdir, IS_PRODUCTION }) => ({
   to: path.resolve(outdir, 'package.json'),
@@ -7,6 +8,7 @@ module.exports = ({ EXT_NAMESPACE, isPreview, DISPLAY_NAME, outdir, IS_PRODUCTIO
     const configurationOriginal = content.contributes.configuration;
     delete content.contributes.configuration;
     content.name = EXT_NAMESPACE;
+    content.version = rootPkgJson.version;
     if (isPreview) {
       content.preview = true;
     }

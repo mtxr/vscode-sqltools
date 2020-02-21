@@ -26,13 +26,13 @@
     "postinstall": "yarn workspace @sqltools/formatter install",
     "postversion": "yarn run publish && git push && git push --tags",
     "pretest": "rimraf -rf ./coverage",
-    "prepublish": "cross-env DISPLAY_NAME=\"SQLTools\" yarn run build:pack",
+    "prepublish": "cross-env DISPLAY_NAME=\"SQLTools\" NODE_ENV=production yarn run build:pack",
     "publish": "cd ./dist && vsce publish --yarn",
     "test:docker": "yarn --cwd ./test run",
     "test:older": "cross-env CODE_VERSION=1.32.3 yarn test",
     "test:watch": "cross-env WATCH=1 yarn run test",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
-    "dev:watch": "cross-env DISPLAY_NAME=\"SQLTools Preview\" yarn --cwd ./build-tools run dev:watch"
+    "dev:watch": "cross-env DISPLAY_NAME=\"SQLTools Preview\" NODE_ENV=development yarn --cwd ./build-tools run dev:watch"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

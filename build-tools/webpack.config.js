@@ -18,6 +18,8 @@ console.log(`
   Building version version ${version}
   by ${author}
   Output dir: ${outdir}
+  Display Name: ${constants.DISPLAY_NAME}
+  IS_PRODUCTION: ${constants.IS_PRODUCTION}
 
 #################################
 `)
