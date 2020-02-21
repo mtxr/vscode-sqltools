@@ -9,7 +9,8 @@
     { "path": "./packages/util" },
     { "path": "./packages/types" },
     { "path": "./docs" },
-    { "path": "./build-tools" }
+    { "path": "./build-tools" },
+    { "path": ".", "name": "root" }
   ],
   "extensions": {},
   "settings": {

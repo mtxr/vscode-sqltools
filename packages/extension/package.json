@@ -1160,12 +1160,6 @@
             ]
         }
     },
-    "scripts": {
-        "vscode:prepublish": "yarn run compile",
-        "compile": "cross-env NODE_ENV=production node --max_old_space_size=4096 ./node_modules/.bin/webpack",
-        "watch": "cross-env NODE_ENV=development node --max_old_space_size=4096 ./node_modules/.bin/webpack --watch --info-verbosity verbose",
-        "postversion": "vsce publish && git push && git push --tags"
-    },
     "devDependencies": {
         "@babel/cli": "^7.5.5",
         "@types/jest": "^24.0.11",
