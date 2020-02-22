@@ -206,6 +206,10 @@ export module MConnectionExplorer {
      * Text that goes in front of the label
      */
     detail?: string;
+    /**
+     * Icon id from https://microsoft.github.io/vscode-codicons/dist/codicon.html
+     */
+    iconId?: string;
   }
 }
 

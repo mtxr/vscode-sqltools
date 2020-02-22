@@ -10,7 +10,7 @@
     { "path": "./packages/types" },
     { "path": "./docs" },
     { "path": "./build-tools" },
-    { "path": ".", "name": "root" }
+    // { "path": ".", "name": "root" }
   ],
   "extensions": {},
   "settings": {
@@ -35,6 +35,21 @@
       "**/.vscode-test": true,
     },
     "typescript.tsdk": "root/node_modules/typescript/lib",
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Start dev:watch",
+        "type": "shell",
+        "isBackground": true,
+        "options": {
+          "cwd": "${workspaceFolder:docs}/../"
+        },
+        "command": "yarn run dev:watch",
+        "problemMatcher": []
+      }
+    ]
   },
   "launch": {
     "configurations": [

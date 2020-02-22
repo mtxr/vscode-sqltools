@@ -6,7 +6,7 @@
   "main": "index.js",
   "license": "MIT",
   "devDependencies": {
-    "@types/vscode": "^1.36.0",
+    "@types/vscode": "^1.42.0",
     "typescript": "^3.7.3"
   },
   "private": false,

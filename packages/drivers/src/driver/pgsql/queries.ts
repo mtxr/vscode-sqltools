@@ -1,6 +1,6 @@
 import { TREE_SEP } from '@sqltools/util/constants';
 import queryFactory from '@sqltools/util/query/factory';
-import { IBaseQueries, IExpectedResult, NSDatabase } from '@sqltools/types';
+import { IBaseQueries, IExpectedResult, NSDatabase, ContextValue } from '@sqltools/types';
 
 const describeTable = `SELECT * FROM INFORMATION_SCHEMA.COLUMNS
   WHERE
@@ -101,7 +101,8 @@ const fetchDatabases: () => IExpectedResult<NSDatabase.IDatabase> = queryFactory
 SELECT
   db.*,
   db.datname as "label",
-  'database' as "type",
+  '${ContextValue.DATABASE}' as "type",
+  'database' as "detail",
   db.oid as "id"
 FROM pg_catalog.pg_database db
 WHERE

@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase, Arg0, ContextValue } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import { replacer } from '@sqltools/util/text';
 import fs from 'fs';
@@ -198,6 +198,13 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
         return this.getDatabases();
+      case ContextValue.DATABASE:
+        return <MConnectionExplorer.IChildItem[]>[
+          { id: 'Schemas', label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          // { id: 'Roles', label: 'Roles', type: ContextValue.RESOURCE_GROUP, iconId: 'json' },
+          // { id: 'Extensions', label: 'Extensions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          // { id: 'Storage', label: 'Storage', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+        ];
     }
     return [];
   }

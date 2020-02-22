@@ -10,7 +10,7 @@ import logger from '@sqltools/util/log';
 import Context from '@sqltools/vscode/context';
 const log = logger.extend('conn-explorer');
 
-export default class SidebarConnection extends SidebarAbstractItem<SidebarItem<SidebarAbstractItem>> {
+export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> {
   parent = null;
 
   get contextValue() {
@@ -50,7 +50,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem<S
     const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
       conn: this.conn, item: this.itemMetadata
     });
-    return items.map(item => new SidebarItem(item));
+    return items.map(item => new SidebarItem(item, this));
   }
 
   public get command () {
