@@ -1043,12 +1043,12 @@
                 },
                 {
                     "command": "sqltools.insertText",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
+                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(.+)/",
                     "group": "sqltools.connectionExplorer.edit@0"
                 },
                 {
                     "command": "sqltools.copyTextFromTreeItem",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(resource_group|tableOrView|column|function)/",
+                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(.+)/",
                     "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {

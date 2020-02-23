@@ -1,10 +1,10 @@
 import { IConnection } from '@sqltools/types/generic/connection';
 
-export declare type CompletionLanguages = string[];
-export declare type FormatLanguages = string[];
-export declare type CodelensLanguages = string[];
+export type CompletionLanguages = string[];
+export type FormatLanguages = string[];
+export type CodelensLanguages = string[];
 
-export declare interface IDependencyManagerSettings {
+export interface IDependencyManagerSettings {
   /**
    * Package mangaer name or path. Eg. yarn, npm or absolute paths like /usr/bin/npm
    *
@@ -38,7 +38,7 @@ export declare interface IDependencyManagerSettings {
   autoAccept: boolean;
 }
 
-export declare interface IFormatOptions {
+export interface IFormatOptions {
   /**
    * Indent Size
    * @type {number}
@@ -56,7 +56,7 @@ export declare interface IFormatOptions {
   reservedWordCase?: 'upper' | 'lower' | null;
 }
 
-export declare interface IResultsOptions {
+export interface IResultsOptions {
   /**
    * Global show records limit
    * @type {number}
@@ -85,7 +85,7 @@ export declare interface IResultsOptions {
    };
 }
 
-export declare interface ISettings {
+export interface ISettings {
   /**
    * Disable new release notifications.
    * @default false
@@ -253,18 +253,18 @@ export declare interface ISettings {
   'connectionExplorer.groupConnected'?: boolean;
 }
 
-export declare interface IConfig extends ISettings {
+export interface IConfig extends ISettings {
   get: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: K, defaultValue?: V | any) => V;
   update: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: KeysOfSettings, value: V) => Promise<void>;
   addOnUpdateHook: (handler: OnUpdateConfigHandler) => void;
   replaceAll: (newSettings: IConfig) => void;
 }
 
-export declare type OnUpdateConfigHandler = (data: { event?: ConfigChangeEvent; settings?: ISettings }) => any;
+export type OnUpdateConfigHandler = (data: { event?: ConfigChangeEvent; settings?: ISettings }) => any;
 
-export declare type KeysOfSettings = (keyof ISettings);
+export type KeysOfSettings = (keyof ISettings);
 
-export declare interface ConfigChangeEvent {
+export interface ConfigChangeEvent {
   affectsConfig(section: KeysOfSettings, resource?: any): boolean;
   /**
    * VSCode config

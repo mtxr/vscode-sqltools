@@ -1,7 +1,7 @@
 import { DatabaseDriver } from '@sqltools/types/driver';
 import { NSDatabase } from '@sqltools/types/generic/database';
 
-export declare interface IConnection<DriverOptions = any> {
+export interface IConnection<DriverOptions = any> {
   /**
    * Connection name
    * @type {string}
@@ -166,12 +166,12 @@ export declare interface IConnection<DriverOptions = any> {
    databaseFilter?: IDatabaseFilter;
 }
 
-export declare interface IDatabaseFilter {
+export interface IDatabaseFilter {
   show: string[];
   hide: string[];
 }
 
-export declare interface IConnectionDriver {
+export interface IConnectionDriver {
   connection: any;
   credentials: IConnection;
   open(): Promise<any>;
@@ -186,7 +186,7 @@ export declare interface IConnectionDriver {
   getChildrenForItem?(params: { item: MConnectionExplorer.IChildItem }): Promise<MConnectionExplorer.IChildItem[]>;
 }
 
-export enum ContextValue {
+export const enum ContextValue {
   CONNECTION ='connection',
   CONNECTED_CONNECTION ='connectedConnection',
   TABLEORVIEW ='connection.tableOrView',

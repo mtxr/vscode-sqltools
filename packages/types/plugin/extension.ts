@@ -1,19 +1,19 @@
 import { ILanguageClient } from '@sqltools/types/plugin/language-client';
 import { ExtensionContext } from 'vscode';
 
-export declare interface ICommandEvent {
+export interface ICommandEvent {
   command: string;
   args: any[];
 }
-export declare interface ICommandSuccessEvent<T = any> {
+export interface ICommandSuccessEvent<T = any> {
   command: string;
   args: any[];
   result: T;
 }
 
-export declare type CommandEventHandler<T> = (evt: T) => void;
+export type CommandEventHandler<T> = (evt: T) => void;
 
-export declare interface IExtension {
+export interface IExtension {
   client: ILanguageClient;
   activate(): void;
   deactivate(): void;
@@ -25,6 +25,6 @@ export declare interface IExtension {
   errorHandler(message: string, error: any): any;
 }
 
-export declare interface IExtensionPlugin<T = IExtension> {
+export interface IExtensionPlugin<T = IExtension> {
   register: (extension: T) => void;
 }

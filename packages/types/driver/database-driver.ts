@@ -1,4 +1,4 @@
-export declare enum DatabaseDriver {
+export enum DatabaseDriver {
   'AWS Redshift' = 'AWS Redshift',
   Cassandra = 'Cassandra',
   DB2 = 'DB2',

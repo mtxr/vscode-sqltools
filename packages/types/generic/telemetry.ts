@@ -1,6 +1,6 @@
 import { ITimer } from './timer';
 
-export declare interface ITelemetryArgs {
+export interface ITelemetryArgs {
   enableTelemetry?: boolean;
   extraInfo?: {
     uniqId?: string;
@@ -9,7 +9,7 @@ export declare interface ITelemetryArgs {
   };
 }
 
-export declare abstract class ATelemetry {
+export abstract class ATelemetry {
   public static enabled: Boolean;
 
   public static extraInfo: ITelemetryArgs['extraInfo'];

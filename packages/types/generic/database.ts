@@ -1,6 +1,6 @@
 import { MConnectionExplorer, ContextValue } from './connection';
 
-export declare namespace NSDatabase {
+export namespace NSDatabase {
   export interface IDatabase extends MConnectionExplorer.IChildItem {
     name: string;
     label: string;

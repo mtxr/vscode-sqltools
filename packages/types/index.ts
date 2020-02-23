@@ -1,9 +1,7 @@
-declare module '@sqltools/types' {
-  export * from '@sqltools/types/driver';
-  export * from '@sqltools/types/generic';
-  export * from '@sqltools/types/plugin';
-  export * from '@sqltools/types/settings';
-}
+export * from './generic';
+export * from './driver';
+export * from './settings';
+export * from './plugin';
 
 declare namespace NodeJS {
   interface ProcessEnv {

@@ -1,7 +1,7 @@
-export declare interface IExpectedResult<T = any> extends String {
+export interface IExpectedResult<T = any> extends String {
   resultsIn?: T;
 }
-export declare interface IBaseQueries {
+export interface IBaseQueries {
   fetchRecordsV2?: (params: {
     limit: number;
     offset: number;

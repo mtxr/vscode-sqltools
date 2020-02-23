@@ -1,7 +1,7 @@
 import { IConnection, TextDocuments } from 'vscode-languageserver';
 import { Arg0 } from '@sqltools/types/generic/utils';
 
-export declare interface ILanguageServer<S = any> {
+export interface ILanguageServer<S = any> {
   listen(): void;
   registerPlugin(plugin: ILanguageServerPlugin): this;
   sendNotification: IConnection['sendNotification'];
@@ -21,6 +21,6 @@ export declare interface ILanguageServer<S = any> {
   docManager: TextDocuments;
 }
 
-export declare interface ILanguageServerPlugin<T = ILanguageServer<any>> {
+export interface ILanguageServerPlugin<T = ILanguageServer<any>> {
   register: (server: T) => void;
 }

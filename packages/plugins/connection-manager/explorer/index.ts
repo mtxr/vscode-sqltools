@@ -89,7 +89,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
+    this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
     Config.addOnUpdateHook(({ event }) => {
       if (
         event.affectsConfig('flattenGroupsIfOne')

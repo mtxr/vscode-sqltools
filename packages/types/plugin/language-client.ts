@@ -1,6 +1,6 @@
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
 
-export declare interface ILanguageClient {
+export interface ILanguageClient {
   client: LanguageClient;
   clientErrorHandler: LanguageClientErrorHandler;
   start: LanguageClient['start'];
