@@ -5,7 +5,7 @@ import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
  * Long requests, query manipulation, server connection e etc.
  */
 
-export default class ExamplePlugin<T extends ILanguageServer<any>> implements ILanguageServerPlugin<T> {
+export default class ExamplePlugin<T extends ILanguageServer> implements ILanguageServerPlugin<T> {
   private server: T;
 
   public register(server: T) {

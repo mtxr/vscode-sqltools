@@ -1,3 +1,5 @@
+import { NSDatabase } from '../dist';
+
 export interface IExpectedResult<T = any> extends String {
   resultsIn?: T;
 }
@@ -12,6 +14,7 @@ export interface IBaseQueries {
   }) => IExpectedResult<{
     total: number;
   }>;
+  fetchSchemas?: () => IExpectedResult<NSDatabase.ISchema>;
   // old api
   fetchTables: string;
   describeTable: string;

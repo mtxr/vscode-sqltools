@@ -108,9 +108,25 @@ FROM pg_catalog.pg_database db
 WHERE
   datallowconn
   AND NOT datistemplate
+  AND db.datname = CURRENT_DATABASE()
 ORDER BY
   db.datname;
 `;
+const fetchSchemas: IBaseQueries['fetchSchemas'] = queryFactory`
+SELECT
+  n.oid as id,
+  n.nspname AS label,
+  '${ContextValue.SCHEMA}' as "type",
+  'group-by-ref-type' as "iconId",
+  n.*
+FROM pg_catalog.pg_namespace n
+LEFT OUTER JOIN pg_catalog.pg_description d ON d.objoid = n.oid
+  AND d.objsubid = 0
+  AND d.classoid = 'pg_namespace'::regclass
+WHERE n.nspacl IS NOT NUll
+  AND nspname NOT IN ('information_schema', 'pg_catalog')
+ORDER BY
+  nspname;`;
 
 export default {
   describeTable,
@@ -121,4 +137,5 @@ export default {
   fetchTables,
   fetchFunctions,
   fetchDatabases,
+  fetchSchemas,
 }

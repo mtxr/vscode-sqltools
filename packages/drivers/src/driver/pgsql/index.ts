@@ -193,6 +193,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return results[0].results;
   }
 
+  private async getSchemas(): Promise<NSDatabase.ISchema[]> {
+    const results = await this.query(this.queries.fetchSchemas());
+    return results[0].results;
+  }
+
   public async getChildrenForItem({ item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch(item.type) {
       case ContextValue.CONNECTION:
@@ -200,11 +205,29 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         return this.getDatabases();
       case ContextValue.DATABASE:
         return <MConnectionExplorer.IChildItem[]>[
-          { id: 'Schemas', label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          { id: 'Schemas', label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.SCHEMA },
           // { id: 'Roles', label: 'Roles', type: ContextValue.RESOURCE_GROUP, iconId: 'json' },
           // { id: 'Extensions', label: 'Extensions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
           // { id: 'Storage', label: 'Storage', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
         ];
+      case ContextValue.RESOURCE_GROUP:
+        return this.getChildrenForGroup({ item });
+      case ContextValue.SCHEMA:
+        return <MConnectionExplorer.IChildItem[]>[
+          { id: 'Tables', label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.TABLE },
+          { id: 'Views', label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.VIEW },
+          { id: 'Materialized Views', label: 'Materialized Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.MATERIALIZED_VIEW },
+          // { id: 'Roles', label: 'Roles', type: ContextValue.RESOURCE_GROUP, iconId: 'json' },
+          // { id: 'Extensions', label: 'Extensions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          // { id: 'Storage', label: 'Storage', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+        ];
+    }
+    return [];
+  }
+  private async getChildrenForGroup({ item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch(item.childType) {
+      case ContextValue.SCHEMA:
+        return this.getSchemas();
     }
     return [];
   }

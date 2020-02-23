@@ -6,7 +6,7 @@ import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 
 export default class FormatterPlugin implements ILanguageServerPlugin {
-  private server: ILanguageServer<any>;
+  private server: ILanguageServer;
   private formatterLanguages: string[] = [];
   private  formatterRegistration: Thenable<Disposable> | null = null;
 
@@ -32,7 +32,7 @@ export default class FormatterPlugin implements ILanguageServerPlugin {
     }
   }
 
-  register(server: ILanguageServer<any>) {
+  register(server: ILanguageServer) {
     this.server = server;
     this.server.addOnDidChangeConfigurationHooks(this.onDidChangeConfiguration);
     this.server.onDocumentFormatting(this.handler);

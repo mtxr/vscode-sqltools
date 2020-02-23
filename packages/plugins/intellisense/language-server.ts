@@ -2,7 +2,7 @@ import { CompletionItem, CompletionParams, Range } from 'vscode-languageserver';
 import { TableCompletionItem, TableColumnCompletionItem, TableCompletionItemFirst } from './models';
 import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
 
-export default class IntellisensePlugin<T extends ILanguageServer<any>> implements ILanguageServerPlugin<T> {
+export default class IntellisensePlugin<T extends ILanguageServer> implements ILanguageServerPlugin<T> {
   private server: T;
 
   private onCompletion = (params: CompletionParams): CompletionItem[] => {

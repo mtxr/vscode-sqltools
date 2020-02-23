@@ -1,5 +1,4 @@
 import { ILanguageClient } from '@sqltools/types/plugin/language-client';
-import { ExtensionContext } from 'vscode';
 
 export interface ICommandEvent {
   command: string;

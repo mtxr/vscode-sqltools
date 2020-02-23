@@ -189,16 +189,23 @@ export interface IConnectionDriver {
 export const enum ContextValue {
   CONNECTION ='connection',
   CONNECTED_CONNECTION ='connectedConnection',
+  /**
+   * @deprecated replaced by table and view values
+   */
   TABLEORVIEW ='connection.tableOrView',
   COLUMN ='connection.column',
   FUNCTION ='connection.function',
+  SCHEMA ='connection.schema',
   RESOURCE_GROUP ='connection.resource_group',
-  DATABASE ='connection.database'
+  DATABASE ='connection.database',
+  TABLE ='connection.table',
+  VIEW ='connection.view',
+  MATERIALIZED_VIEW ='connection.materializedView',
 }
 
 export module MConnectionExplorer {
-  type TreeItemType = ContextValue;
-  interface IChildItem {
+  export type TreeItemType = ContextValue;
+  export interface IChildItem {
     type: TreeItemType;
     id: string;
     label: string;
@@ -210,6 +217,14 @@ export module MConnectionExplorer {
      * Icon id from https://microsoft.github.io/vscode-codicons/dist/codicon.html
      */
     iconId?: string;
+    /**
+     * reference id for groups. Eg. Schemas will have database id here so we can fetch database schemas
+     */
+    referenceId?: any;
+    /**
+     * for resource_groups
+     */
+    childType?: ContextValue;
   }
 }
 

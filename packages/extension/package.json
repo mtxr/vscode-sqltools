@@ -1028,17 +1028,17 @@
                 },
                 {
                     "command": "sqltools.showRecords",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.describeTable",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "navigation@2"
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "navigation@3"
                 },
                 {
@@ -1063,12 +1063,12 @@
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.showRecords",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection.tableOrView",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "inline@1"
                 },
                 {

@@ -6,7 +6,7 @@ import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
 import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 
-class SQLToolsLanguageServer implements ILanguageServer<any> {
+class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
   private _docManager = new TextDocuments();
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];

@@ -6,7 +6,7 @@ import logger from '@sqltools/util/log';
 
 const log = logger.extend('dep-man');
 
-export default class DependencyManager<T extends ILanguageServer<any> = ILanguageServer<any>> implements ILanguageServerPlugin<T> {
+export default class DependencyManager<T extends ILanguageServer = ILanguageServer> implements ILanguageServerPlugin<T> {
   private server: T;
 
   public static runningJobs: string[] = [];

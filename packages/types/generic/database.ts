@@ -2,10 +2,12 @@ import { MConnectionExplorer, ContextValue } from './connection';
 
 export namespace NSDatabase {
   export interface IDatabase extends MConnectionExplorer.IChildItem {
-    name: string;
-    label: string;
     type: ContextValue.DATABASE;
-    id: string;
+  }
+
+  export interface ISchema extends MConnectionExplorer.IChildItem {
+    type: ContextValue.SCHEMA;
+    iconId: 'group-by-ref-type';
   }
 
   export interface ITable {

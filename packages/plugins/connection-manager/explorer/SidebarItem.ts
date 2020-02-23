@@ -1,4 +1,4 @@
-import { ThemeIcon, TreeItemCollapsibleState, commands } from 'vscode';
+import { ThemeIcon, TreeItemCollapsibleState, commands, TreeItem } from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { MConnectionExplorer, ContextValue } from '@sqltools/types';
@@ -11,11 +11,17 @@ export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
     const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
       conn: this.conn, item: this.itemMetadata
     });
+    if (items.length === 0) {
+      return [new TreeItem('Nothing here') as SidebarItem];
+    }
     return items.map(item => new SidebarItem(item, this));
   }
 
   public get description() {
-    return this.itemMetadata && this.itemMetadata.detail || null;
+    if (this.itemMetadata && this.itemMetadata.detail) {
+      return this.itemMetadata.detail;
+    }
+    return null;
   }
   public get conn() {
     return this.parent.conn;
