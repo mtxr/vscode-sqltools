@@ -24,6 +24,7 @@
     "@sqltools/util": "*",
     "@mysql/xdevapi": "^8.0.15",
     "cassandra-driver": "^4.1.0",
+    "compare-versions": "3.6.0",
     "debug": "https://github.com/mtxr/debug.git",
     "mssql": "^5.0.5",
     "mysql": "^2.16.0",
