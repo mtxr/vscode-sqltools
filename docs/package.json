@@ -10,7 +10,8 @@
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build && cp _redirects dist/. && cp public/* dist/static/. && ls -hal ./dist/*"
+    "docz:build": "docz build",
+    "postdocz:build": "cp _redirects dist/.; cp -R public/* dist/static/.; ls -hal ./dist/*"
   },
   "dependencies": {
     "docz": "^1.2.0",
