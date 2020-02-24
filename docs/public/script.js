@@ -1,10 +1,11 @@
-window.__codefundEnabled = true;
-window.__carbonEnabled = true;
+window.__carbonEnabled = typeof window.__carbonEnabled === 'undefined' ? true : window.__carbonEnabled;
+window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? false : window.__codefundEnabled;
 
 (function(w) {
   var prevHref = '';
   var codefundId = 'codefund';
   var codefundIndex = 0;
+  console.log('loaded!');
   function loadScript(src, id, position) {
     var script = document.createElement('script');
     script.setAttribute('async', '');
