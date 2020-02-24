@@ -1,3 +1,4 @@
+.inplace-allowed { display: inline-block; }
 [class^=Sidebar__Footer] {
   display: none !important;
 }

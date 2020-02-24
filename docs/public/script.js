@@ -39,7 +39,7 @@ window.__carbonEnabled = true;
   function adCarbon(props) {
     if (!window.__carbonEnabled) return;
     try {
-      var el = document.getElementById('carbon-ad');
+      var el = document.getElementById('inplace-allowed');
       if (!el) return;
       loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el);
     } catch (error) {
