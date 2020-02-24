@@ -1033,12 +1033,12 @@
                 },
                 {
                     "command": "sqltools.describeTable",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "navigation@2"
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "navigation@3"
                 },
                 {
@@ -1063,7 +1063,7 @@
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "inline@0"
                 },
                 {

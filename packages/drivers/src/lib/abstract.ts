@@ -4,14 +4,13 @@ import {
   IConnection,
   IDatabaseFilter,
   IExpectedResult,
-  NodeDependency
+  NodeDependency,
 } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/util/exception';
 import { NSDatabase } from '@sqltools/types';
 import sqltoolsRequire from '@sqltools/util/dependencies/require';
 import log from '@sqltools/util/log';
-import { replacer } from '@sqltools/util/text';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
@@ -35,20 +34,20 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return this.query<R, Q>(query).then(([ res ]) => res);
   }
 
-  abstract getTables(): Promise<NSDatabase.ITable[]>;
+  abstract getTables(parent: any): Promise<NSDatabase.ITable[]>;
 
-  abstract getColumns(): Promise<NSDatabase.IColumn[]>;
+  abstract getColumns(parent: any): Promise<NSDatabase.IColumn[]>;
 
-  public getFunctions(): Promise<NSDatabase.IFunction[]> {
+  public getFunctions(parent: any): Promise<NSDatabase.IFunction[]> {
     this.log.extend('error')(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
 
-  public describeTable(table: string) {
-    return this.query(replacer(this.queries.describeTable, { table }));
+  public describeTable(metadata: NSDatabase.ITable) {
+    return this.query(this.queries.describeTable(metadata));
   }
 
-  public async showRecords(table: string, limit: number, page: number = 0) {
+  public async showRecords(table: NSDatabase.ITable, limit: number, page: number = 0) {
     const params = { limit, table, offset: page * limit };
     if (typeof this.queries.fetchRecordsV2 === 'function' && typeof this.queries.countRecordsV2 === 'function') {
       const [ records, totalResult ] = await (Promise.all([
@@ -61,8 +60,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
 
       return [records];
     }
-    log.extend('debug')('*** DEPRECATION *** needs to be migrated to v2 queries');
-    return this.query(replacer(this.queries.fetchRecords, params));
+
+    return this.query(this.queries.fetchRecords(params));
   }
 
   protected needToInstallDependencies() {

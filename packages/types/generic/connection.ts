@@ -176,14 +176,14 @@ export interface IConnectionDriver {
   credentials: IConnection;
   open(): Promise<any>;
   close(): Promise<any>;
-  getTables(): Promise<NSDatabase.ITable[]>;
-  getColumns(): Promise<NSDatabase.IColumn[]>;
-  getFunctions(): Promise<NSDatabase.IFunction[]>;
-  describeTable(tableName: string): Promise<NSDatabase.IResult[]>;
-  showRecords(tableName: string, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
+  getTables(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.ITable[]>;
+  getColumns(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.IColumn[]>;
+  getFunctions(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.IFunction[]>;
+  describeTable(table: NSDatabase.ITable): Promise<NSDatabase.IResult[]>;
+  showRecords(tableName: NSDatabase.ITable, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
   query(query: string): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
-  getChildrenForItem?(params: { item: MConnectionExplorer.IChildItem }): Promise<MConnectionExplorer.IChildItem[]>;
+  getChildrenForItem?(params: { item: any, parent?: any }): Promise<MConnectionExplorer.IChildItem[]>;
 }
 
 export const enum ContextValue {
@@ -200,15 +200,16 @@ export const enum ContextValue {
   DATABASE ='connection.database',
   TABLE ='connection.table',
   VIEW ='connection.view',
-  MATERIALIZED_VIEW ='connection.materializedView',
+  MATERIALIZED_VIEW = 'connection.materializedView',
+  NO_CHILD = 'NO_CHILD',
 }
 
 export module MConnectionExplorer {
-  export type TreeItemType = ContextValue;
   export interface IChildItem {
-    type: TreeItemType;
-    id: string;
+    type: ContextValue;
     label: string;
+    schema: string;
+    database: string;
     /**
      * Text that goes in front of the label
      */
@@ -216,12 +217,12 @@ export module MConnectionExplorer {
     /**
      * Icon id from https://microsoft.github.io/vscode-codicons/dist/codicon.html
      */
-    iconId?: string;
-    /**
-     * reference id for groups. Eg. Schemas will have database id here so we can fetch database schemas
-     */
-    referenceId?: any;
-    /**
+     iconId?: string;
+     /**
+      * sqltools icons
+      */
+     iconName?: string;
+     /**
      * for resource_groups
      */
     childType?: ContextValue;

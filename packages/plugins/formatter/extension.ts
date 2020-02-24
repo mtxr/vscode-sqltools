@@ -3,7 +3,9 @@ import { TextEditor, TextEditorEdit, commands, SnippetString, env } from 'vscode
 import Config from '@sqltools/util/config-manager';
 import { generateInsert, format as queryFormat } from '@sqltools/util/query';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
-import { NSDatabase, IExtension } from '@sqltools/types';
+import { NSDatabase, IExtension, MConnectionExplorer } from '@sqltools/types';
+import { SidebarItem } from '../connection-manager/explorer';
+import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 const log = logger.extend('formatter');
 
@@ -48,8 +50,12 @@ function copyTextHandler(item: { value: string } | string, items?: ({ value: str
   return env.clipboard.writeText(copyText);
 }
 
-function generateInsertQueryHandler(item: { columns: NSDatabase.IColumn[], name?: string }) {
-  return insertText(new SnippetString(generateInsert(item.name || item.toString(), item.columns, Config.format)));
+async function generateInsertQueryHandler(item: SidebarItem) {
+  const columns: NSDatabase.IColumn[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
+    conn: item.conn,
+    item: item.metadata,
+  });
+  return insertText(new SnippetString(generateInsert(item.label || item.toString(), columns, Config.format)));
 }
 
 function newSqlFileHandler() {

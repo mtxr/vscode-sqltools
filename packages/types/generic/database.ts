@@ -10,46 +10,25 @@ export namespace NSDatabase {
     iconId: 'group-by-ref-type';
   }
 
-  export interface ITable {
-    tableSchema?: string;
-    tableCatalog?: string;
-    tableDatabase?: string;
-    name: string;
+  export interface ITable extends MConnectionExplorer.IChildItem {
+    type: ContextValue.TABLE;
+
     isView: boolean;
-    numberOfColumns?: number;
-    /**
-     * This is used to build the connections explorer tree
-     *
-     * @type {string}
-     * @memberof ITable
-     */
-     tree?: string;
   }
-  export interface IColumn {
-    tableName: string;
-    columnName: string;
-    type: string;
+  export interface IColumn extends MConnectionExplorer.IChildItem {
+    type: ContextValue.COLUMN;
     size?: number;
-    tableSchema?: string;
-    tableDatabase?: string;
-    tableCatalog?: string;
     defaultValue?: string;
+    dataType: string;
     isNullable: boolean;
     isPartitionKey?: boolean;
     isPk?: boolean;
     isFk?: boolean;
     columnKey?: string;
     extra?: string;
-    /**
-     * This is used to build the connections explorer tree
-     *
-     * @type {string}
-     * @memberof IColumn
-     */
-    tree?: string;
   }
 
-  export interface IFunction {
+  export interface IFunction extends MConnectionExplorer.IChildItem {
     name: string;
     schema: string;
     database: string;
@@ -72,6 +51,7 @@ export namespace NSDatabase {
     label?: string;
     connId: string;
     error?: boolean;
+    rawError?: Error;
     results: (T extends { [key: string]: any } ? T : any)[];
     cols: string[];
     query: string;

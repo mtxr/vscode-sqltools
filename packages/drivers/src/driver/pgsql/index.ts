@@ -2,7 +2,6 @@ import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
-import { replacer } from '@sqltools/util/text';
 import fs from 'fs';
 import {zipObject} from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
@@ -67,7 +66,13 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     pool.end();
   }
 
+  private queryResults = async <R = any, Q = any>(query: Q | string | String) => {
+    const result = await this.singleQuery<R, Q>(query);
+    if (result.error)  throw result.rawError;
+    return result.results;
+  }
   public query: (typeof AbstractDriver)['prototype']['query'] = (query) => {
+    console.log(query);
     const messages = [];
     return this.open()
       .then(async (pool) => {
@@ -105,6 +110,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
             ].filter(Boolean).join(' ')
           ]),
           error: true,
+          rawError: err,
           query,
           results: [],
       }]))
@@ -121,64 +127,22 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return rows.map((r) => zipObject(columns, r));
   }
 
-  public getTables(): Promise<NSDatabase.ITable[]> {
-    return this.query<any>(this.queries.fetchTables)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => ({
-              name: obj.tablename,
-              isView: !!obj.isview,
-              numberOfColumns: parseInt(obj.numberofcolumns, 10),
-              tableCatalog: obj.tablecatalog,
-              tableDatabase: obj.dbname,
-              tableSchema: obj.tableschema,
-              tree: obj.tree,
-            } as NSDatabase.ITable));
-      });
+  public async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
+    const results = await this.queryResults(this.queries.fetchColumns(parent));
+    return results.map(col => ({ ...col, iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null), childType: ContextValue.NO_CHILD }));
   }
 
-  public getColumns(): Promise<NSDatabase.IColumn[]> {
-    return this.query<any>(this.queries.fetchColumns)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              columnName: obj.columnname,
-              defaultValue: obj.defaultvalue,
-              isNullable: !!obj.isnullable ? obj.isnullable.toString() === 'yes' : null,
-              size: obj.size !== null ? parseInt(obj.size, 10) : null,
-              tableCatalog: obj.tablecatalog,
-              tableDatabase: obj.dbname,
-              tableName: obj.tablename,
-              tableSchema: obj.tableschema,
-              isPk: (obj.keytype || '').toLowerCase() === 'primary key',
-              isFk: (obj.keytype || '').toLowerCase() === 'foreign key',
-              type: obj.type,
-              tree: obj.tree,
-            } as NSDatabase.IColumn;
-          });
-      });
-  }
-
-  public getFunctions(): Promise<NSDatabase.IFunction[]> {
-    return this.query<any>(this.queries.fetchFunctions)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              ...obj,
-              args: obj.args ? obj.args.split(/, */g) : [],
-            } as NSDatabase.IColumn;
-          });
-      });
-  }
-
-  public describeTable(prefixedTable: string) {
-    const [ catalog, schema, table ] = prefixedTable.split('.').map(v => v.replace(/^("(.+)")$/g, '$2'));
-    return this.query(replacer(this.queries.describeTable, { catalog, schema, table }));
+  public getFunctions(parent: NSDatabase.ISchema): Promise<NSDatabase.IFunction[]> {
+    return this.queryResults(this.queries.fetchFunctions(parent));
+      // .then((queryRes) => {
+      //   return queryRes
+      //     .map((obj) => {
+      //       return {
+      //         ...obj,
+      //         args: obj.args ? obj.args.split(/, */g) : [],
+      //       } as NSDatabase.IColumn;
+      //     });
+      // });
   }
 
   public async testConnection() {
@@ -189,45 +153,53 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   }
 
   private async getDatabases(): Promise<NSDatabase.IDatabase[]> {
-    const results = await this.query(this.queries.fetchDatabases());
-    return results[0].results;
+    return this.queryResults(this.queries.fetchDatabases());
   }
 
-  private async getSchemas(): Promise<NSDatabase.ISchema[]> {
-    const results = await this.query(this.queries.fetchSchemas());
-    return results[0].results;
+  private async getSchemas(parent: NSDatabase.IDatabase): Promise<NSDatabase.ISchema[]> {
+    return this.queryResults(this.queries.fetchSchemas(parent));
   }
 
-  public async getChildrenForItem({ item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+  public async getTables(parent: NSDatabase.ISchema): Promise<NSDatabase.ITable[]> {
+    return this.queryResults(this.queries.fetchTables(parent));
+  }
+  public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch(item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
         return this.getDatabases();
+      case ContextValue.TABLE:
+      case ContextValue.VIEW:
+      case ContextValue.MATERIALIZED_VIEW:
+        return this.getColumns(item);
       case ContextValue.DATABASE:
         return <MConnectionExplorer.IChildItem[]>[
-          { id: 'Schemas', label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.SCHEMA },
-          // { id: 'Roles', label: 'Roles', type: ContextValue.RESOURCE_GROUP, iconId: 'json' },
-          // { id: 'Extensions', label: 'Extensions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
-          // { id: 'Storage', label: 'Storage', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          { label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.SCHEMA },
         ];
       case ContextValue.RESOURCE_GROUP:
-        return this.getChildrenForGroup({ item });
+        return this.getChildrenForGroup({ item, parent });
       case ContextValue.SCHEMA:
         return <MConnectionExplorer.IChildItem[]>[
-          { id: 'Tables', label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.TABLE },
-          { id: 'Views', label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.VIEW },
-          { id: 'Materialized Views', label: 'Materialized Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', referenceId: item.id, childType: ContextValue.MATERIALIZED_VIEW },
-          // { id: 'Roles', label: 'Roles', type: ContextValue.RESOURCE_GROUP, iconId: 'json' },
-          // { id: 'Extensions', label: 'Extensions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
-          // { id: 'Storage', label: 'Storage', type: ContextValue.RESOURCE_GROUP, iconId: 'folder' },
+          { label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TABLE },
+          { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
+          { label: 'Materialized Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.MATERIALIZED_VIEW },
+          { label: 'Functions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.FUNCTION },
         ];
     }
     return [];
   }
-  private async getChildrenForGroup({ item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+  private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch(item.childType) {
       case ContextValue.SCHEMA:
-        return this.getSchemas();
+        return this.getSchemas(parent);
+      case ContextValue.TABLE:
+        return this.getTables(parent);
+      case ContextValue.VIEW:
+        return this.queryResults(this.queries.fetchViews(parent));
+      case ContextValue.MATERIALIZED_VIEW:
+        return this.queryResults(this.queries.fetchMaterializedViews(parent));
+      case ContextValue.FUNCTION:
+        return this.getFunctions(parent);
     }
     return [];
   }

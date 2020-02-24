@@ -57,7 +57,7 @@ export const SaveResultsRequest = new RequestType<
 >('connection/SaveResultsRequest');
 
 export const GetChildrenForTreeItemRequest = new RequestType<
-  { conn: IConnection, item: MConnectionExplorer.IChildItem },
+  { conn: IConnection, item: MConnectionExplorer.IChildItem, parent?: MConnectionExplorer.IChildItem },
   MConnectionExplorer.IChildItem[],
   Error,
   void

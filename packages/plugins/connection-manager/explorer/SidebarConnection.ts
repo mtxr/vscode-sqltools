@@ -31,10 +31,10 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     return this.conn.database;
   }
 
-  get itemMetadata() {
+  get metadata() {
     return <MConnectionExplorer.IChildItem>{
-      id: this.id,
-      type: 'connection'
+      label: this.label,
+      type: this.contextValue
     };
   }
   get tooltip() {
@@ -48,7 +48,8 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, this);
     }
     const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
-      conn: this.conn, item: this.itemMetadata
+      conn: this.conn,
+      item: this.metadata,
     });
     return items.map(item => new SidebarItem(item, this));
   }

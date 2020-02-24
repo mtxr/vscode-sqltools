@@ -55,7 +55,7 @@
         "askForPassword": false,
         "password": "root",
         "connectionTimeout": 15,
-        "group": "PG"
+        // "group": "PG"
       },
       {
         "name": "PGSQL",
@@ -67,14 +67,14 @@
         "askForPassword": false,
         "password": "root",
         "connectionTimeout": 15,
-        "group": "PG"
+        // "group": "PG"
       },
       {
         "name": "PGSQL URI",
         "driver": "PostgreSQL",
         "connectString": "postgres://root:root@localhost:5433/test_db",
         "connectionTimeout": 15,
-        "group": "PG"
+        // "group": "PG"
       },
       {
         "name": "MSSQL",
@@ -89,14 +89,14 @@
         "mssqlOptions": {
           "encrypt": false
         },
-        "group": "MSSQL"
+        // "group": "MSSQL"
       },
       {
         "name": "SQLite",
         "driver": "SQLite",
         "database": "./docker/sqlite/test_db.db",
         "connectionTimeout": 15,
-        "group": "SQLITE"
+        // "group": "SQLITE"
       },
       {
         "askForPassword": false,
@@ -108,7 +108,7 @@
         "port": 3307,
         "server": "localhost",
         "username": "root",
-        "group": "MYSQL"
+        // "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -123,7 +123,7 @@
         "mysqlOptions": {
           "authProtocol": "xprotocol"
         },
-        "group": "MYSQL"
+        // "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -140,7 +140,7 @@
           "poolMin": 1,
           "poolIncrement": 0
         },
-        "group": "ORACLE"
+        // "group": "ORACLE"
       },
       {
         "askForPassword": false,
@@ -151,7 +151,7 @@
         "password": "root",
         "socketPath": "./docker/mysql/local-mysqld/mysqld.sock",
         "username": "root",
-        "group": "MYSQL"
+        // "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -165,7 +165,7 @@
         "mysqlOptions": {
           "authProtocol": "xprotocol"
         },
-        "group": "MYSQL"
+        // "group": "MYSQL"
       },
       {
         "askForPassword": false,
@@ -177,19 +177,19 @@
         "port": 30041,
         "server": "127.0.0.1",
         "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123",
-        "group": "SAP"
+        // "group": "SAP"
       },
       {
         "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
         "driver": "MSSQL",
         "name": "MSSQL ConnectionString",
-        "group": "MSSQL"
+        // "group": "MSSQL"
       },
       {
         "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
         "driver": "MSSQL",
         "name": "MSSQL ConnectionString schema",
-        "group": "MSSQL"
+        // "group": "MSSQL"
       },
       {
         "database": "mydb",
@@ -199,7 +199,7 @@
         "port": 50000,
         "username": "db2inst1",
         "server": "localhost",
-        "group": "IBM DB2"
+        // "group": "IBM DB2"
       },
       {
         "askForPassword": false,
@@ -210,7 +210,7 @@
         "port": 9043,
         "server": "localhost",
         "username": "cassandra",
-        "group": "CQL"
+        // "group": "CQL"
       },
       {
         "askForPassword": false,
@@ -221,12 +221,13 @@
         "port": 9044,
         "server": "localhost",
         "username": "cassandra",
-        "group": "CQL"
+        // "group": "CQL"
       }
     ],
     "sqltools.languageServerEnv": {
       "EXAMPLE_VARIABLE": "VALUE"
     },
+    "sqltools.connectionExplorer.groupConnected": false,
     "sqltools.queryParams.enableReplace": true,
     "sqltools.dependencyManager": {
       "packageManager": "yarn",

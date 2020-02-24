@@ -79,11 +79,11 @@ export default class Connection {
     }).catch(this.decorateException);
   }
 
-  public async describeTable(tableName: string) {
-    const info = await this.conn.describeTable(tableName).catch(this.decorateException);
+  public async describeTable(table: NSDatabase.ITable) {
+    const info = await this.conn.describeTable(table).catch(this.decorateException);
 
     if (info[0]) {
-      info[0].label = `Table ${tableName}`;
+      info[0].label = `Table ${table.label}`;
     }
     return info;
   }

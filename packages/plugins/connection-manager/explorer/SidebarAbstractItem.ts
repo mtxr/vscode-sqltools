@@ -6,7 +6,7 @@ interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T>
   snippet?: SnippetString;
   conn: IConnection;
   getChildren(): Promise<T[]>;
-  itemMetadata: MConnectionExplorer.IChildItem;
+  metadata: MConnectionExplorer.IChildItem;
 }
 export default abstract class SidebarAbstractItem<T extends SidebarItemIterface<SidebarAbstractItem> = any, A = T> extends TreeItem implements SidebarItemIterface<T, A> {
   protected _snippet: SnippetString;
@@ -24,6 +24,6 @@ export default abstract class SidebarAbstractItem<T extends SidebarItemIterface<
   parent: SidebarAbstractItem = null;
   abstract value: string;
   abstract contextValue: ContextValue;
-  abstract itemMetadata: MConnectionExplorer.IChildItem;
+  abstract metadata: MConnectionExplorer.IChildItem;
   abstract getChildren(): Promise<T[]>;
 }

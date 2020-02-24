@@ -89,9 +89,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_describeTable = async (node?: SidebarItem) => {
     try {
-      const table = await this._getTableName(node);
+      // @TODO if not node, get all tables
       await this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('describeTable', table);
+      const payload = await this._runConnectionCommandWithArgs('describeTable', metadata);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
@@ -373,7 +373,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private async _getTableName(node?: SidebarItem): Promise<string> {
     if (node && node.conn) {
       await this._setConnection(node.conn as IConnection);
-      return getTableName(node.conn.driver, node.table);
+      return getTableName(node.conn.driver, node.label);
     }
 
     const conn = await this._connect();
@@ -400,9 +400,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         const prefixes  = prefixedTableName.split('.');
 
         return <QuickPickItem>{
-          label: table.name,
+          label: table.label,
           value: getTableName(conn.driver, table),
-          description: typeof table.numberOfColumns !== 'undefined' ? `${table.numberOfColumns} cols` : '',
           detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
         };
       }), prop, {

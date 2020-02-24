@@ -9,7 +9,9 @@ export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
   public value: string;
   public async getChildren() {
     const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
-      conn: this.conn, item: this.itemMetadata
+      conn: this.conn,
+      item: this.metadata,
+      parent: this.parent && this.parent.metadata || undefined
     });
     if (items.length === 0) {
       return [new TreeItem('Nothing here') as SidebarItem];
@@ -18,8 +20,8 @@ export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
   }
 
   public get description() {
-    if (this.itemMetadata && this.itemMetadata.detail) {
-      return this.itemMetadata.detail;
+    if (this.metadata) {
+      return this.metadata.detail || null;
     }
     return null;
   }
@@ -27,16 +29,21 @@ export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
     return this.parent.conn;
   }
   public contextValue = ContextValue.RESOURCE_GROUP;
-  constructor(public itemMetadata: MConnectionExplorer.IChildItem, public parent: SidebarAbstractItem) {
-    super(itemMetadata.label, TreeItemCollapsibleState.Collapsed);
+  constructor(public metadata: MConnectionExplorer.IChildItem, public parent: SidebarAbstractItem) {
+    super(metadata.label, TreeItemCollapsibleState.Collapsed);
     this.value = this.label;
-    if (itemMetadata.type) {
-      if (itemMetadata.type && itemMetadata.iconId) {
-        this.iconPath =  new ThemeIcon(itemMetadata.iconId);
+    if (metadata.type) {
+      this.contextValue = metadata.type;
+      if (metadata.type && metadata.iconId) {
+        this.iconPath =  new ThemeIcon(metadata.iconId);
+      } else if (metadata.type && metadata.iconName) {
+        this.iconPath =  getIconPaths(metadata.iconName);
       } else {
-        this.iconPath = getIconPaths(itemMetadata.type.replace('connection.', ''));
+        this.iconPath = getIconPaths(metadata.type.replace('connection.', ''));
       }
-      this.contextValue = itemMetadata.type;
+    }
+    if (metadata.childType === ContextValue.NO_CHILD) {
+      this.collapsibleState = TreeItemCollapsibleState.None;
     }
   }
 }
