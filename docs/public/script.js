@@ -42,6 +42,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
     try {
       var el = document.getElementById('inplace-allowed');
       if (!el) return;
+      el.innerHTML = '';
       loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el);
     } catch (error) {
       console.log(error);
@@ -60,6 +61,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
     /** @type {CustomEvent} */
     event
   ) {
+    console.log('pagechanged');
     checkLocation(event.detail)
   });
   window.addEventListener('docs-loaded', function(event) {
