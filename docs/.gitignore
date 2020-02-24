@@ -6,4 +6,6 @@ public/
 # dependencies
 node_modules
 
-!public/favicon.png
+!public/*.png
+!public/*.js
+!public/*.css

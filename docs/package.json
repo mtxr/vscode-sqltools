@@ -11,7 +11,7 @@
   "scripts": {
     "docz:dev": "docz dev --port=1234",
     "docz:build": "docz build",
-    "postdocz:build": "cp _redirects dist/.; cp -R public/* dist/static/.; ls -hal ./dist/*"
+    "postdocz:build": "cp _redirects dist/.; cp -R public/* dist/public/.; ls -hal ./dist/*"
   },
   "dependencies": {
     "docz": "^1.2.0",
