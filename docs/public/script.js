@@ -77,6 +77,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
           });
         } catch (error) {}
       }, 1000);
+      checkLocation(window.location);
     }
   })
 })();
