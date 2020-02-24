@@ -270,7 +270,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
-  private ext_showOutputChannel = () => logger.show();
+  private ext_showOutputChannel = async () => logger.show();
 
   private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
     connId = typeof connId === 'string' ? connId : undefined;

@@ -9,8 +9,8 @@ export type Logger = {
 
 const vscodeLogger: Logger = productLogger as Logger;
 vscodeLogger.log = outputChannelLogger.error;
-vscodeLogger.show = outputChannelLogger.outputChannel.show;
 vscodeLogger.outputChannel = outputChannelLogger.outputChannel;
+vscodeLogger.show = () => outputChannelLogger.outputChannel.show();
 
 export default vscodeLogger;
 
