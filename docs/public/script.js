@@ -5,7 +5,6 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
   var prevHref = '';
   var codefundId = 'codefund';
   var codefundIndex = 0;
-  console.log('loaded!');
   function loadScript(src, id, position) {
     var script = document.createElement('script');
     script.setAttribute('async', '');
@@ -65,22 +64,19 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
     console.log('pagechanged');
     checkLocation(event.detail)
   });
-  window.addEventListener('docs-loaded', function(event) {
-    console.log('docs-loaded');
-
-    var prevOnLoad = window.onload;
-    window.onload = function() {
-      prevOnLoad && prevOnLoad.apply(window, arguments);
-      setTimeout(() => {
-        try {
-          if (!window.location.hash) return;
-          var el = document.getElementById(window.location.hash.substr(1));
-          el.scrollIntoView({
-            behavior: 'smooth',
-          });
-        } catch (error) {}
-      }, 1000);
-      checkLocation(window);
-    }
-  })
+  var prevOnLoad = window.onload;
+  window.onload = function() {
+    console.log('window loaded')
+    prevOnLoad && prevOnLoad.apply(window, arguments);
+    setTimeout(() => {
+      try {
+        if (!window.location.hash) return;
+        var el = document.getElementById(window.location.hash.substr(1));
+        el.scrollIntoView({
+          behavior: 'smooth',
+        });
+      } catch (error) {}
+    }, 300);
+    checkLocation(window);
+  }
 })();

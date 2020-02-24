@@ -3,7 +3,6 @@ import './components';
 
 let loaded = null;
 const ThemeWrapper = ({ children }) => {
-  !loaded && window.dispatchEvent(new CustomEvent('docs-loaded'));
   return <>{children}</>;
 };
 
