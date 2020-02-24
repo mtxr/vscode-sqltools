@@ -51,6 +51,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
   
   function checkLocation(props) {
     if (prevHref && props.location.href === prevHref) return;
+    console.log('location changed')
     setTimeout(() => {
       prevHref = props.location.href;
       adCarbon(props);
@@ -77,7 +78,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
           });
         } catch (error) {}
       }, 1000);
-      checkLocation(window.location);
+      checkLocation(window);
     }
   })
 })();
