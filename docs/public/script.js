@@ -51,7 +51,7 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
   
   function checkLocation(props) {
     if (prevHref && props.location.href === prevHref) return;
-    console.log('location changed')
+    console.log('location changed');
     setTimeout(() => {
       prevHref = props.location.href;
       adCarbon(props);
@@ -66,6 +66,8 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
     checkLocation(event.detail)
   });
   window.addEventListener('docs-loaded', function(event) {
+    console.log('docs-loaded');
+
     var prevOnLoad = window.onload;
     window.onload = function() {
       prevOnLoad && prevOnLoad.apply(window, arguments);
