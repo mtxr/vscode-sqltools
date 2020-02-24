@@ -1,29 +1,51 @@
 let prevHref: string = '';
 let id = 'codefund';
 let index = 0;
-const checkLocation = (props: any) => {
+
+function loadScript(src: string, id: string, position: HTMLElement) {
+  const script = document.createElement('script');
+  script.setAttribute('async', '');
+  script.type = 'text/javascript';
+  script.src = src;
+  script.id = id;
+  position.appendChild(script);
+
+  return script;
+}
+
+const adCodeFund = (props: any) => {
   try {
-    console.log(props.location.href, prevHref, props.location);
-    if (props.location.href === prevHref) return;
-    prevHref = props.location.href;
     const el = document.getElementById(id);
-    console.log(id, el);
     if (!el) return;
     id = `codefund-${index}`
     el.id = id;
     const srcript = document.getElementById('codefund-src');
     (srcript as any).remove();
-    const s = document.createElement('script');
-    s.type = 'text/javascript';
-    s.src = `https://app.codefund.io/properties/684/funder.js?target=codefund-${index}`;
-    s.id = 'codefund-src';
-    s.async = true;
-    document.body.appendChild(s);
+    loadScript(`https://app.codefund.io/properties/684/funder.js?target=codefund-${index}`, 'codefund-src', document.body);
     index++;
   }
   catch (error) {
     console.log(error);
   }
 };
+
+const adCarbon = (props: any) => {
+  try {
+    const el = document.getElementById('carbon-ad');
+    if (!el) return;
+    loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el);
+  } catch (error) {
+    console.log(error);
+  }
+}
+
+const checkLocation = (props: any) => {
+  if (prevHref && props.location.href === prevHref) return;
+  setTimeout(() => {
+    prevHref = props.location.href;
+    adCodeFund(props);
+    adCarbon(props);
+  }, 500);
+}
 
 export default checkLocation;
