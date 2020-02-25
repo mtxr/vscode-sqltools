@@ -35,13 +35,16 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
       console.log(error);
     }
   };
-  
+
   function adCarbon(props) {
     if (!window.__carbonEnabled) return;
     try {
-      var el = document.getElementById('inplace-allowed');
-      if (!el) return;
+      var el = document.getElementById('carbon-ads');
+      if (el) el.remove();
+      el = document.createElement('div');
+      el.id = 'carbon-ads';
       el.innerHTML = '';
+      document.body.appendChild(el);
       loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el);
     } catch (error) {
       console.log(error);
