@@ -40,8 +40,8 @@ window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? fal
     if (!window.__carbonEnabled) return;
     try {
       var el = document.getElementById('carbon-ads');
-      if (el) el.remove();
-      el = document.createElement('div');
+      // if (el) el.remove();
+      el = el || document.createElement('div');
       el.id = 'carbon-ads';
       el.innerHTML = '';
       document.body.appendChild(el);
