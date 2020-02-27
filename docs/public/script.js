@@ -57,8 +57,9 @@
   function renderCarbon() {
     try {
       log('render Carbon')
-      getTagEl()
-      loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', getTagEl())
+      var el = getTagEl()
+      el.removeAttribute('style')
+      loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el)
       reg()
     } catch (error) {log(error);}
   }
