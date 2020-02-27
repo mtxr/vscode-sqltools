@@ -3,8 +3,9 @@ import SidebarAbstractItem from './SidebarAbstractItem';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { MConnectionExplorer, ContextValue } from '@sqltools/types';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
+import { SidebarConnection } from '.';
 
-export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
+export default class SidebarItem<T extends MConnectionExplorer.IChildItem = MConnectionExplorer.IChildItem> extends SidebarAbstractItem<SidebarItem> {
   public iconPath = ThemeIcon.Folder;
   public value: string;
   public async getChildren() {
@@ -29,7 +30,7 @@ export default class SidebarItem extends SidebarAbstractItem<SidebarItem> {
     return this.parent.conn;
   }
   public contextValue = ContextValue.RESOURCE_GROUP;
-  constructor(public metadata: MConnectionExplorer.IChildItem, public parent: SidebarAbstractItem) {
+  constructor(public metadata: T, public parent: SidebarItem | SidebarConnection) {
     super(metadata.label, TreeItemCollapsibleState.Collapsed);
     this.value = this.label;
     if (metadata.type) {

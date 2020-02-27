@@ -1,5 +1,6 @@
 import queryFactory from '@sqltools/util/query/factory';
-import { IBaseQueries, IExpectedResult, NSDatabase, ContextValue } from '@sqltools/types';
+import prefixedTableName from '@sqltools/util/query/prefixed-tablenames';
+import { IBaseQueries, IExpectedResult, NSDatabase, ContextValue, DatabaseDriver } from '@sqltools/types';
 
 const describeTable: IBaseQueries['describeTable'] = queryFactory`
 SELECT * FROM INFORMATION_SCHEMA.COLUMNS
@@ -41,8 +42,16 @@ ORDER BY
   C.ORDINAL_POSITION
 `;
 
-const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`SELECT * FROM ${p => p.table} LIMIT ${p => p.limit || 50} OFFSET ${p => p.offset || 0};`;
-const countRecords: IBaseQueries['countRecords'] = queryFactory`SELECT count(1) AS total FROM ${p => p.table};`;
+const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
+SELECT *
+FROM ${p => prefixedTableName(DatabaseDriver.PostgreSQL, p.table)}
+LIMIT ${p => p.limit || 50}
+OFFSET ${p => p.offset || 0};
+`;
+const countRecords: IBaseQueries['countRecords'] = queryFactory`
+SELECT count(1) AS total 
+FROM ${p => prefixedTableName(DatabaseDriver.PostgreSQL, p.table)};
+`;
 
 const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`
 SELECT
@@ -79,6 +88,24 @@ WHERE
   T.TABLE_SCHEMA = '${p => p.schema}'
   AND T.TABLE_CATALOG = '${p => p.database}'
   AND T.TABLE_TYPE = '${tableType}'
+ORDER BY
+  T.TABLE_NAME;
+`;
+
+const searchTables: IBaseQueries['searchTables'] = queryFactory`
+SELECT
+  T.TABLE_NAME AS label,
+  (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN '${ContextValue.TABLE}' ELSE '${ContextValue.VIEW}' END) as type,
+  T.TABLE_SCHEMA AS schema,
+  T.TABLE_CATALOG AS database,
+  (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN TRUE ELSE FALSE END) AS isView,
+  (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN 'table' ELSE 'view' END) AS description,
+  ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') as detail
+FROM INFORMATION_SCHEMA.TABLES AS T
+WHERE
+  (T.TABLE_CATALOG || '.' || T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p => p.search}%'
+  OR ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p => p.search}%'
+  OR T.TABLE_NAME ILIKE '%${p => p.search}%'
 ORDER BY
   T.TABLE_NAME;
 `;
@@ -154,4 +181,5 @@ export default {
   fetchDatabases,
   fetchSchemas,
   fetchMaterializedViews,
+  searchTables
 }

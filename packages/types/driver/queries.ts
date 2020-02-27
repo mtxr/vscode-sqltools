@@ -10,12 +10,13 @@ export interface IBaseQueries {
     table: NSDatabase.ITable;
   }) => string;
   countRecords: (params: {
-    table: string;
+    table: NSDatabase.ITable;
   }) => IExpectedResult<{
     total: number;
   }>;
   fetchSchemas?: (params: NSDatabase.IDatabase) => IExpectedResult<NSDatabase.ISchema>;
   fetchTables: (params: NSDatabase.ISchema) => IExpectedResult<NSDatabase.ITable>;
+  searchTables: ({ search: string }) => IExpectedResult<NSDatabase.ITable>;
   // old api
   describeTable: (params: NSDatabase.ITable) => IExpectedResult<any>;
   fetchColumns: (params: NSDatabase.ITable) => IExpectedResult<NSDatabase.IColumn>;

@@ -1,16 +1,16 @@
 import logger from '@sqltools/util/log';
 import Config from '@sqltools/util/config-manager';
 import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler } from '@sqltools/types';
+import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
-import getTableName from '@sqltools/util/query/prefixed-tablenames';
 import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
-import { getSelectedText, quickPick, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
+import { getSelectedText, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
+import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
 import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
@@ -75,9 +75,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_showRecords = async (node?: SidebarItem | string, page: number = 0) => {
+  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, page: number = 0) => {
     try {
-      const table = typeof node === 'string' ? node : await this._getTableName(node);
+      const table = await this._getTable(node);
       await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('showRecords', table, page);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
@@ -87,11 +87,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_describeTable = async (node?: SidebarItem) => {
+  private ext_describeTable = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable) => {
     try {
-      // @TODO if not node, get all tables
+      const table = await this._getTable(node);
       await this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('describeTable', metadata);
+      const payload = await this._runConnectionCommandWithArgs('describeTable', table);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
@@ -370,15 +370,24 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   // internal utils
-  private async _getTableName(node?: SidebarItem): Promise<string> {
-    if (node && node.conn) {
+  private async _getTable(node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable): Promise<NSDatabase.ITable> {
+    if (node instanceof SidebarItem && node.conn) {
       await this._setConnection(node.conn as IConnection);
-      return getTableName(node.conn.driver, node.label);
+      return node.metadata;
+    } else if (node) {
+      return node as NSDatabase.ITable;
     }
 
     const conn = await this._connect();
-    return this._pickTable(conn, 'value');
+    const loadOptions = (search: string) => this.client.sendRequest(SearchConnectionItemsRequest, { conn, itemType: ContextValue.TABLE, search }).then(({ results }) => results);
+    return quickPickSearch<NSDatabase.ITable>(loadOptions, {
+        matchOnDescription: true,
+        matchOnDetail: true,
+        title: `Tables in ${conn.database}`,
+        placeHolder: 'Type something to search tables...',
+      });
   }
+
 
   private _openResultsWebview(connId?: string) {
     return this.resultsWebview.get(connId || this.explorer.getActive().id).show();
@@ -390,25 +399,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     const c: IConnection = await this._pickConnection(!force);
     // history.clear();
     return this._setConnection(c);
-  }
-
-  private async _pickTable(conn: IConnection, prop?: string): Promise<string> {
-    const { tables } = await this.client.sendRequest(GetConnectionDataRequest, { conn });
-    return quickPick(tables
-      .map((table) => {
-        const prefixedTableName = getTableName(conn.driver, table);
-        const prefixes  = prefixedTableName.split('.');
-
-        return <QuickPickItem>{
-          label: table.label,
-          value: getTableName(conn.driver, table),
-          detail: prefixes.length > 1 ? `in ${prefixes.slice(0, prefixes.length - 1).join('.')}` : undefined,
-        };
-      }), prop, {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        title: `Tables in ${conn.database}`,
-      });
   }
 
   private ext_getConnections = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
@@ -474,9 +464,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
+      this.explorer.setActive(c);
     }
     this.explorer.refresh();
-    return this.explorer.getActive();
+    return c;
   }
 
   private async saveConnectionList(connList: IConnection[], writeTo?: ConfigurationTarget) {

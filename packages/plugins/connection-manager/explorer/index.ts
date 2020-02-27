@@ -32,12 +32,16 @@ notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
   private _active: SidebarConnection = null;
+  private _activeOverwrite: IConnection = null;
   private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
   private _onDidChangeActiveConnection: EventEmitter<IConnection> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   public readonly onDidChangeActiveConnection = this._onDidChangeActiveConnection.event;
 
   public getActive(): IConnection | null {
+
+    if (this._activeOverwrite) return this._activeOverwrite;
+
     if (!this._active) return null;
 
     return {
@@ -46,6 +50,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     };
   }
 
+  public setActive(c: IConnection) {
+    this._activeOverwrite = c;
+  }
   public getActiveId() {
     const active = this.getActive();
     if (!active) return null;
@@ -137,13 +144,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return [addNew];
     }
 
+    this._active = null;
+    this._activeOverwrite = null;
     if (groupConnected) {
       return this.getGroupedRootItems(items);
     }
 
     const root: ConnectionGroup = new ConnectionGroup('Root');
     root.items = [];
-    this._active = null;
     items.forEach(item => {
       if (item.isActive) {
         this._active = item;
@@ -168,7 +176,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     notConnectedTreeItem.items = [];
     let connectedTreeCount = 0;
     let notConnectedTreeCount = 0;
-    this._active = null;
     items.forEach(item => {
       if (item.isActive) {
         this._active = item;

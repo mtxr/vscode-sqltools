@@ -1,7 +1,8 @@
 import { NSDatabase, IExtensionPlugin, IExtension, ICommandSuccessEvent } from '@sqltools/types';
 import HistoryExplorer from './explorer';
 import { getNameFromId } from '@sqltools/util/connection';
-import { quickPick, insertText } from '@sqltools/vscode/utils';
+import { insertText } from '@sqltools/vscode/utils';
+import { quickPick } from '@sqltools/vscode/utils/quickPick';
 import { QuickPickItem, commands } from 'vscode';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';

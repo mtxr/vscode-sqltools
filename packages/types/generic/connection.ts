@@ -176,14 +176,12 @@ export interface IConnectionDriver {
   credentials: IConnection;
   open(): Promise<any>;
   close(): Promise<any>;
-  getTables(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.ITable[]>;
-  getColumns(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.IColumn[]>;
-  getFunctions(parent: MConnectionExplorer.IChildItem): Promise<NSDatabase.IFunction[]>;
   describeTable(table: NSDatabase.ITable): Promise<NSDatabase.IResult[]>;
   showRecords(tableName: NSDatabase.ITable, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
   query(query: string): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
-  getChildrenForItem?(params: { item: any, parent?: any }): Promise<MConnectionExplorer.IChildItem[]>;
+  getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
+  searchItems?(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]>;
 }
 
 export const enum ContextValue {

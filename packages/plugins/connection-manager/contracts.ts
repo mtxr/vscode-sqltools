@@ -1,5 +1,5 @@
 import { RequestType, NotificationType } from 'vscode-languageserver-protocol';
-import { IConnection, NSDatabase, MConnectionExplorer } from '@sqltools/types';
+import { IConnection, NSDatabase, MConnectionExplorer, ContextValue } from '@sqltools/types';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export const GetConnectionsRequest = new RequestType<
@@ -38,16 +38,14 @@ export const DisconnectRequest = new RequestType<
   Error,
   void
 >('connection/DisconnectRequest');
-export const GetConnectionDataRequest = new RequestType<
-  { conn: IConnection },
+export const SearchConnectionItemsRequest = new RequestType<
+  { conn: IConnection; itemType: ContextValue; search: string },
   {
-    tables: NSDatabase.ITable[];
-    columns: NSDatabase.IColumn[];
-    functions: NSDatabase.IFunction[];
+    results: NSDatabase.SearchableItem[];
   },
   Error,
   void
->('connection/GetConnectionDataRequest');
+>('connection/SearchConnectionItemsRequest');
 
 export const SaveResultsRequest = new RequestType<
   { connId: string, filename: string, query: string, filetype: 'json' | 'csv' },

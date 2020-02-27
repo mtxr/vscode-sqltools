@@ -60,4 +60,5 @@ export namespace NSDatabase {
     total?: number;
     pageSize?: number;
   }
+  export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
 }

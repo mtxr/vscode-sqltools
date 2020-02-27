@@ -5,6 +5,8 @@ import {
   IDatabaseFilter,
   IExpectedResult,
   NodeDependency,
+  ContextValue,
+  MConnectionExplorer,
 } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/util/exception';
@@ -34,25 +36,16 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return this.query<R, Q>(query).then(([ res ]) => res);
   }
 
-  abstract getTables(parent: any): Promise<NSDatabase.ITable[]>;
-
-  abstract getColumns(parent: any): Promise<NSDatabase.IColumn[]>;
-
-  public getFunctions(parent: any): Promise<NSDatabase.IFunction[]> {
-    this.log.extend('error')(`###### Attention ######\ngetFunctions not implemented for ${this.credentials.driver}\n####################`);
-    return Promise.resolve([]);
-  }
-
   public describeTable(metadata: NSDatabase.ITable) {
     return this.query(this.queries.describeTable(metadata));
   }
 
   public async showRecords(table: NSDatabase.ITable, limit: number, page: number = 0) {
     const params = { limit, table, offset: page * limit };
-    if (typeof this.queries.fetchRecordsV2 === 'function' && typeof this.queries.countRecordsV2 === 'function') {
+    if (typeof this.queries.fetchRecords === 'function' && typeof this.queries.countRecords === 'function') {
       const [ records, totalResult ] = await (Promise.all([
-        this.singleQuery(this.queries.fetchRecordsV2(params)),
-        this.singleQuery(this.queries.countRecordsV2(params)),
+        this.singleQuery(this.queries.fetchRecords(params)),
+        this.singleQuery(this.queries.countRecords(params)),
       ]));
       records.pageSize = limit;
       records.page = page;
@@ -99,5 +92,14 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return {
       databaseFilter
     };
+  }
+
+  public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {
+    this.log.extend('error')(`###### Attention ######\getChildrenForItem not implemented for ${this.credentials.driver}\n####################`);
+    return Promise.resolve([]);
+  }
+  public searchItems(_itemType: ContextValue, _search: string): Promise<NSDatabase.SearchableItem[]> {
+    this.log.extend('error')(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
+    return Promise.resolve([]);
   }
 }

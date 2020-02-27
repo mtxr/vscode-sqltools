@@ -4,7 +4,7 @@ import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, Reques
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
 import fs from 'fs';
-import { ConnectRequest, DisconnectRequest, GetConnectionDataRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import Handlers from './cache/handlers';
 import DependencyManager from '../dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
@@ -67,28 +67,16 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     fs.writeFileSync(filename, output);
   };
 
-  private getTablesAndColumnsHandler: RequestHandler<typeof GetConnectionDataRequest> = async ({ conn }) => {
+  private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search }) => {
     if (!conn) {
       return undefined;
     }
     const activeConnections = await connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {});
-    if (Object.keys(activeConnections).length === 0) return { tables: [], columns: [], functions: [] };
+    if (Object.keys(activeConnections).length === 0) return { results: [] };
 
     const c = await this.getConnectionInstance(conn);
-    const [
-      tables,
-      columns,
-      functions,
-    ] = await Promise.all([
-      c.getTables(true),
-      c.getColumns(true),
-      c.getFunctions(true)
-    ])
-    return {
-      tables,
-      columns,
-      functions,
-    };
+    const results = await c.searchItems(itemType, search);
+    return { results };
   };
 
   private closeConnectionHandler: RequestHandler<typeof DisconnectRequest> = async ({ conn }) => {
@@ -242,7 +230,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
     this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
-    this.server.onRequest(GetConnectionDataRequest, this.getTablesAndColumnsHandler);
+    this.server.onRequest(SearchConnectionItemsRequest, this.searchItemsHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
     this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
     this.server.onRequest(ConnectRequest, this.openConnectionHandler);

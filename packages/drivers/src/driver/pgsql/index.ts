@@ -3,7 +3,7 @@ import Queries from './queries';
 import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import fs from 'fs';
-import {zipObject} from 'lodash';
+import { zipObject } from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
 
 const rawValue = (v: string) => v;
@@ -68,7 +68,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
   private queryResults = async <R = any, Q = any>(query: Q | string | String) => {
     const result = await this.singleQuery<R, Q>(query);
-    if (result.error)  throw result.rawError;
+    if (result.error) throw result.rawError;
     return result.results;
   }
   public query: (typeof AbstractDriver)['prototype']['query'] = (query) => {
@@ -78,7 +78,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       .then(async (pool) => {
         const cli = await pool.connect();
         cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
-        const results = await cli.query({text: query.toString(), rowMode: 'array'});
+        const results = await cli.query({ text: query.toString(), rowMode: 'array' });
         cli.release();
         return results;
       })
@@ -101,23 +101,23 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         });
       })
       .catch(err => ([{
-          connId: this.getId(),
-          cols: [],
-          messages: messages.concat([
-            [
-              (err && err.message || err),
-              err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
-            ].filter(Boolean).join(' ')
-          ]),
-          error: true,
-          rawError: err,
-          query,
-          results: [],
+        connId: this.getId(),
+        cols: [],
+        messages: messages.concat([
+          [
+            (err && err.message || err),
+            err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
+          ].filter(Boolean).join(' ')
+        ]),
+        error: true,
+        rawError: err,
+        query,
+        results: [],
       }]))
   }
 
   private getColumnNames(fields: FieldDef[]): string[] {
-    return fields.reduce((names, {name}) => {
+    return fields.reduce((names, { name }) => {
       const count = names.filter((n) => n === name).length;
       return names.concat(count > 0 ? `${name} (${count})` : name);
     }, []);
@@ -127,22 +127,9 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return rows.map((r) => zipObject(columns, r));
   }
 
-  public async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
+  private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
     const results = await this.queryResults(this.queries.fetchColumns(parent));
     return results.map(col => ({ ...col, iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null), childType: ContextValue.NO_CHILD }));
-  }
-
-  public getFunctions(parent: NSDatabase.ISchema): Promise<NSDatabase.IFunction[]> {
-    return this.queryResults(this.queries.fetchFunctions(parent));
-      // .then((queryRes) => {
-      //   return queryRes
-      //     .map((obj) => {
-      //       return {
-      //         ...obj,
-      //         args: obj.args ? obj.args.split(/, */g) : [],
-      //       } as NSDatabase.IColumn;
-      //     });
-      // });
   }
 
   public async testConnection() {
@@ -152,26 +139,15 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     cli.release();
   }
 
-  private async getDatabases(): Promise<NSDatabase.IDatabase[]> {
-    return this.queryResults(this.queries.fetchDatabases());
-  }
-
-  private async getSchemas(parent: NSDatabase.IDatabase): Promise<NSDatabase.ISchema[]> {
-    return this.queryResults(this.queries.fetchSchemas(parent));
-  }
-
-  public async getTables(parent: NSDatabase.ISchema): Promise<NSDatabase.ITable[]> {
-    return this.queryResults(this.queries.fetchTables(parent));
-  }
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
-    switch(item.type) {
+    switch (item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
-        return this.getDatabases();
+        return this.queryResults(this.queries.fetchDatabases());
       case ContextValue.TABLE:
       case ContextValue.VIEW:
       case ContextValue.MATERIALIZED_VIEW:
-        return this.getColumns(item);
+        return this.getColumns(item as NSDatabase.ITable);
       case ContextValue.DATABASE:
         return <MConnectionExplorer.IChildItem[]>[
           { label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.SCHEMA },
@@ -189,18 +165,25 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return [];
   }
   private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
-    switch(item.childType) {
+    switch (item.childType) {
       case ContextValue.SCHEMA:
-        return this.getSchemas(parent);
+        return this.queryResults(this.queries.fetchSchemas(parent as NSDatabase.IDatabase));
       case ContextValue.TABLE:
-        return this.getTables(parent);
+        return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema));
       case ContextValue.VIEW:
-        return this.queryResults(this.queries.fetchViews(parent));
+        return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema));
       case ContextValue.MATERIALIZED_VIEW:
-        return this.queryResults(this.queries.fetchMaterializedViews(parent));
+        return this.queryResults(this.queries.fetchMaterializedViews(parent as NSDatabase.ISchema));
       case ContextValue.FUNCTION:
-        return this.getFunctions(parent);
+        return this.queryResults(this.queries.fetchFunctions(parent as NSDatabase.ISchema));
     }
     return [];
+  }
+
+  public searchItems(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]> {
+    switch (itemType) {
+      case ContextValue.TABLE:
+        return this.queryResults(this.queries.searchTables({ search }));
+    }
   }
 }

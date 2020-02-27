@@ -1,4 +1,4 @@
-import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer } from '@sqltools/types';
+import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue } from '@sqltools/types';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
@@ -6,9 +6,6 @@ import telemetry from '@sqltools/util/telemetry';
 import Drivers from '@sqltools/drivers/src';
 
 export default class Connection {
-  private tables: NSDatabase.ITable[] = [];
-  private columns: NSDatabase.IColumn[] = [];
-  private functions: NSDatabase.IFunction[] = [];
   private connected: boolean = false;
   private conn: IConnectionDriver;
   constructor(private credentials: IConnection) {
@@ -49,36 +46,6 @@ export default class Connection {
     return this.conn.close();
   }
 
-  public getTables(cached: boolean = false): Promise<NSDatabase.ITable[]> {
-    if (cached && this.tables.length > 0) {
-      return Promise.resolve(this.tables);
-    }
-    return this.conn.getTables().then((tables: NSDatabase.ITable[]) => {
-      this.tables = tables;
-      return this.tables;
-    }).catch(this.decorateException);
-  }
-
-  public getColumns(cached: boolean = false): Promise<NSDatabase.IColumn[]> {
-    if (cached && this.columns.length > 0) {
-      return Promise.resolve(this.columns);
-    }
-    return this.conn.getColumns().then((columns: NSDatabase.IColumn[]) => {
-      this.columns = columns;
-      return this.columns;
-    }).catch(this.decorateException);
-  }
-
-  public getFunctions(cached: boolean = false): Promise<NSDatabase.IFunction[]> {
-    if (cached && this.columns.length > 0) {
-      return Promise.resolve(this.functions);
-    }
-    return this.conn.getFunctions().then((functions: NSDatabase.IFunction[]) => {
-      this.functions = functions;
-      return this.functions;
-    }).catch(this.decorateException);
-  }
-
   public async describeTable(table: NSDatabase.ITable) {
     const info = await this.conn.describeTable(table).catch(this.decorateException);
 
@@ -87,17 +54,17 @@ export default class Connection {
     }
     return info;
   }
-  public async showRecords(tableName: string, page: number = 0) {
+  public async showRecords(table: NSDatabase.ITable, page: number = 0) {
     const limit = this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
 
-    const [records] = await this.conn.showRecords(tableName, limit, page).catch(this.decorateException);
+    const [records] = await this.conn.showRecords(table, limit, page).catch(this.decorateException);
 
     let totalPart = '';
     if (typeof records.total === 'number') {
       totalPart = `of ${records.total}`;
     }
     if (records) {
-      records.label = `Showing ${Math.min(limit, records.results.length || 0)} ${totalPart}${tableName} records`;
+      records.label = `Showing ${Math.min(limit, records.results.length || 0)} ${totalPart}${table.label} records`;
     }
     return [records];
   }
@@ -167,7 +134,12 @@ export default class Connection {
     return true;
   }
 
-  public getChildrenForItem(params: { item: MConnectionExplorer.IChildItem }) {
+  public getChildrenForItem(params: { item: MConnectionExplorer.IChildItem; parent?: MConnectionExplorer.IChildItem }) {
     return this.conn.getChildrenForItem(params);
+  }
+
+  public searchItems(itemType: ContextValue, search: string) {
+    if (!search || !search.trim()) return [];
+    return this.conn.searchItems(itemType, search);
   }
 }
