@@ -1,85 +1,112 @@
-window.__carbonEnabled = typeof window.__carbonEnabled === 'undefined' ? true : window.__carbonEnabled;
-window.__codefundEnabled = typeof window.__codefundEnabled === 'undefined' ? false : window.__codefundEnabled;
-
-(function(w) {
-  var prevHref = '';
-  var codefundId = 'codefund';
-  var codefundIndex = 0;
+(function(w, adTagId) {
+  var CODEFUND = 1
+  var CARBON = 2
+  function setProvider(provider) {
+    w['__adprovider'] = typeof provider === 'number' && [CODEFUND, CARBON].indexOf(provider) !== -1 ? provider : CODEFUND;
+    log('set provider', w['__adprovider'])
+  }
+  function log() {
+    if (!window.localStorage || !localStorage.getItem('ad_debug')) return
+    console.log.apply(console.log, [].concat.apply([''], arguments))
+  }
+  setProvider(typeof w['__adprovider'] !== 'undefined' ? w['__adprovider'] : CODEFUND)
+  var prevHref = ''
+  var codefundAttempt = 0
   function loadScript(src, id, position) {
-    var script = document.createElement('script');
-    script.setAttribute('async', '');
-    script.type = 'text/javascript';
-    script.src = src;
-    script.id = id;
-    position.appendChild(script);
-  
-    return script;
+    var script = document.createElement('script')
+    script.setAttribute('async', '')
+    script.type = 'text/javascript'
+    script.src = src
+    script.id = id
+    position.appendChild(script)
+    script.onload = function() {
+      log('Loaded', src)
+    }
+    return script
   }
-  
-  function adCodeFund(props) {
-    if (!window.__codefundEnabled) return;
-    try {
-      var el = document.getElementById(codefundId);
-      if (el) el.remove();
-      var script = document.getElementById('codefund-src');
-      if (script) script.remove();
-  
-      codefundId = 'codefund-' + codefundIndex;
-      el = document.createElement('div');
-      el.id = codefundId;
-      document.body.appendChild(el);
-      loadScript('https://app.codefund.io/properties/684/funder.js?target=codefund-' + codefundIndex, 'codefund-src', document.body);
-      codefundIndex++;
-    }
-    catch (error) {
-      console.log(error);
-    }
-  };
+  function getTagEl(tag, appendTo) {
+    var el = document.getElementById(adTagId)
+    if (el) return el;
+    el = (document.getElementById(adTagId) || document.createElement(tag || 'div'))
+    el.id = adTagId;
+    (appendTo || document.body).appendChild(el);
+    return el
+  }
 
-  function adCarbon(props) {
-    if (!window.__carbonEnabled) return;
-    try {
-      var el = document.getElementById('carbon-ads');
-      // if (el) el.remove();
-      el = el || document.createElement('div');
-      el.id = 'carbon-ads';
-      el.innerHTML = '';
-      document.body.appendChild(el);
-      loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', el);
-    } catch (error) {
-      console.log(error);
+  function clearTag(selector) {
+    var nodes = document.querySelectorAll(selector)
+    for(var i = 0; i < nodes.length; i++) {
+      nodes[i].innerHTML = ''
     }
   }
+
+  function renderCodefund() {
+    try {
+      log('render Codefund')
+      var script = document.getElementById('codefund-src')
+      if (script) script.remove()
+      getTagEl().style.opacity = '0';
+      loadScript('https://app.codefund.io/properties/684/funder.js?target=' + adTagId, 'codefund-src', document.body)
+    }
+    catch (error) {log(error);}
+  }
+
+  function renderCarbon() {
+    try {
+      log('render Carbon')
+      getTagEl()
+      loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', getTagEl())
+    } catch (error) {log(error);}
+  }
+
+  function renderAd() {
+    clearTag('#' + adTagId)
+    prevHref = location.href
+    if (w['__adprovider'] === CARBON) return renderCarbon()
+    renderCodefund()
+  }
+
+  var locationTimeout
+  function pageChanged(event) {
+    var l = (event.detail || w).location
+    if (prevHref && l.href === prevHref) return
+    log('location changed')
+    clearTimeout(locationTimeout)
+    setTimeout(renderAd, 250)
+  }
   
-  function checkLocation(props) {
-    if (prevHref && props.location.href === prevHref) return;
-    console.log('location changed');
-    setTimeout(() => {
-      prevHref = props.location.href;
-      adCarbon(props);
-      adCodeFund(props);
-    }, 500);
-  }
-  window.addEventListener('pagechanged', function(
-    /** @type {CustomEvent} */
-    event
-  ) {
-    console.log('pagechanged');
-    checkLocation(event.detail)
+  var prevOnLoad = w.onload
+  w.addEventListener('codefund', function(evt) {
+    log('codefund', evt['detail'])
+    var status = evt['detail'].status;
+    var inHouse = evt['detail'].house;
+    if (status === 'ok' && (
+      !inHouse
+      || (inHouse && Math.random() > 0.7)
+    )) {
+      getTagEl().removeAttribute('style')
+      return codefundAttempt = 0;
+    }
+
+    codefundAttempt++;
+    if (codefundAttempt >= 3) setProvider(CARBON)
+    setTimeout(renderAd, 250)
   });
-  var prevOnLoad = window.onload;
-  window.onload = function() {
-    console.log('window loaded')
-    prevOnLoad && prevOnLoad.apply(window, arguments);
-    setTimeout(() => {
+  w.onload = function() {
+    log('window loaded')
+    setProvider(Math.random() <= 0.7 ? CODEFUND : CARBON)
+    w.addEventListener('pagechanged', pageChanged)
+    pageChanged(w)
+    prevOnLoad && prevOnLoad.apply(w, arguments)
+    setTimeout(function() {
+      if (!location.hash) return
+      var el = document.getElementById(location.hash.substr(1))
+      if (!el) return
       try {
-        if (!window.location.hash) return;
-        var el = document.getElementById(window.location.hash.substr(1));
-        el.scrollIntoView({
-          behavior: 'smooth',
-        });
-      } catch (error) {}
-    }, 300);
-    checkLocation(window);
+        el.scrollIntoView({ behavior: 'smooth' })
+      } catch (error) {
+        document.querySelector('[class^=Page__Wrapper]').scrollTop = el.offsetTop
+      }
+    }, 300)
   }
-})();
+})(window, 'btfixedad');
