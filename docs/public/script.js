@@ -1,4 +1,4 @@
-(function(w, adTagId) {
+(function(w, adTagId, dl) {
   var CODEFUND = 1
   var CARBON = 2
   function setProvider(provider) {
@@ -9,9 +9,15 @@
     if (!window.localStorage || !localStorage.getItem('ad_debug')) return
     console.log.apply(console.log, [].concat.apply([''], arguments))
   }
+  function reg() {
+    dl.push({
+      event: 'ad-render',
+      adProvider: w['__adprovider']
+    })
+  }
   setProvider(typeof w['__adprovider'] !== 'undefined' ? w['__adprovider'] : CODEFUND)
   var prevHref = ''
-  var codefundAttempt = 0
+  var cfAttempt = 0
   function loadScript(src, id, position) {
     var script = document.createElement('script')
     script.setAttribute('async', '')
@@ -19,9 +25,6 @@
     script.src = src
     script.id = id
     position.appendChild(script)
-    script.onload = function() {
-      log('Loaded', src)
-    }
     return script
   }
   function getTagEl(tag, appendTo) {
@@ -56,6 +59,7 @@
       log('render Carbon')
       getTagEl()
       loadScript('//cdn.carbonads.com/carbon.js?serve=CE7ITK3L&placement=vscode-sqltoolsmteixeiradev', '_carbonads_js', getTagEl())
+      reg()
     } catch (error) {log(error);}
   }
 
@@ -85,11 +89,12 @@
       || (inHouse && Math.random() > 0.7)
     )) {
       getTagEl().removeAttribute('style')
-      return codefundAttempt = 0;
+      reg()
+      return cfAttempt = 0;
     }
 
-    codefundAttempt++;
-    if (codefundAttempt >= 3) setProvider(CARBON)
+    cfAttempt++;
+    if (cfAttempt >= 3) setProvider(CARBON)
     setTimeout(renderAd, 250)
   });
   w.onload = function() {
@@ -109,4 +114,4 @@
       }
     }, 300)
   }
-})(window, 'btfixedad');
+})(window, 'btfixedad', window['dataLayer']);
