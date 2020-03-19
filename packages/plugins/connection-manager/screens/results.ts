@@ -106,7 +106,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     this.title = `${DISPLAY_NAME} Results`;
     try {
       if (payload && payload.length > 0) {
-        this.title = payload.length === 1 ? payload[0].label : `${getNameFromId(payload[0].connId)} Results`;
+        this.title = payload.length === 1 && payload[0].label ? payload[0].label : `${getNameFromId(payload[0].connId)} Results`;
       }
     } catch (error) {}
     this.updatePanelName();

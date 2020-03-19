@@ -59,12 +59,14 @@ export default class Connection {
 
     const [records] = await this.conn.showRecords(table, limit, page).catch(this.decorateException);
 
-    let totalPart = '';
-    if (typeof records.total === 'number') {
-      totalPart = `of ${records.total}`;
-    }
     if (records) {
-      records.label = `Showing ${Math.min(limit, records.results.length || 0)} ${totalPart}${table.label} records`;
+      let label = [];
+      label.push('Showing', Math.min(limit, records.results.length || 0));
+      if (typeof records.total === 'number') {
+        label.push('of', records.total);
+      }
+      label.push(table.label, 'records');
+      records.label = label.join(' ');
     }
     return [records];
   }
