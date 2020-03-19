@@ -8,6 +8,7 @@ module.exports = ({ EXT_NAMESPACE, isPreview, DISPLAY_NAME, outdir, IS_PRODUCTIO
     const configurationOriginal = content.contributes.configuration;
     delete content.contributes.configuration;
     content.name = EXT_NAMESPACE;
+    content.displayName = DISPLAY_NAME;
     content.version = rootPkgJson.version;
     if (isPreview) {
       content.preview = true;

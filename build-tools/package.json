@@ -10,6 +10,7 @@
     "build": "yarn run build:webpack",
     "dev:watch": "yarn run webpack --watch --info-verbosity verbose",
     "postbuild": "rimraf -rf ../dist/ui/theme.js || exit 0",
+    "predev:watch": "yarn run clean",
     "prebuild:pack": "yarn run build",
     "prebuild:webpack": "yarn run clean"
   },
