@@ -1,24 +1,21 @@
 import {
   CompletionItem,
   CompletionItemKind,
+  TextEdit
 } from 'vscode-languageserver';
 import { NSDatabase } from '@sqltools/types';
 
-export function TableCompletionItem(table: NSDatabase.ITable): CompletionItem {
+export function TableCompletionItem(table: NSDatabase.ITable, priority?: number ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
-  let yml = '';
-  if (table.tableDatabase) {
-    yml += `Database: ${table.tableDatabase}\n`;
+  let yml = `${tableOrView}: ${table.label}\n`;
+  // if (table.catalog) {
+  //   yml += `Table Catalog: ${table.tableCatalog}\n`;
+  // }
+  if (table.schema) {
+    yml += `${tableOrView} Schema: ${table.schema}\n`;
   }
-  if (table.tableCatalog) {
-    yml += `Table Catalog: ${table.tableCatalog}\n`;
-  }
-  if (table.tableSchema) {
-    yml += `${tableOrView} Schema: ${table.tableSchema}\n`;
-  }
-  yml += `${tableOrView}: ${table.name}\n`;
-  if (table.numberOfColumns !== null && typeof table.numberOfColumns !== 'undefined') {
-    yml += `Number of Columns: ${table.numberOfColumns}\n`;
+  if (table.database) {
+    yml += `Database: ${table.database}\n`;
   }
   return {
     detail: tableOrView,
@@ -27,19 +24,14 @@ export function TableCompletionItem(table: NSDatabase.ITable): CompletionItem {
       kind: 'markdown',
     },
     kind: table.isView ? CompletionItemKind.Reference : CompletionItemKind.Constant,
-    label: table.name,
+    label: table.label,
+    filterText: table.label,
+    sortText: typeof priority === 'number' ? `${priority}:${table.label}` : table.label,
   };
 }
 
-export function TableCompletionItemFirst(table: NSDatabase.ITable): CompletionItem {
-  return {
-    ...TableCompletionItem(table),
-    sortText: `0.${table.name}`,
-  }
-}
-
 export function TableColumnCompletionItem(col: NSDatabase.IColumn): CompletionItem {
-  const colInfo = [ col.columnName ];
+  const colInfo = [ col.label ];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);
   } else {
@@ -53,26 +45,26 @@ export function TableColumnCompletionItem(col: NSDatabase.IColumn): CompletionIt
     colInfo.push(col.defaultValue);
   }
   let yml = '';
-  if (col.tableDatabase) {
-    yml += `Database: ${col.tableDatabase}\n`;
+  if (col.database) {
+    yml += `Database: ${col.database}\n`;
   }
-  if (col.tableCatalog) {
-    yml += `Table Catalog: ${col.tableCatalog}\n`;
+  // if (col.catalog) {
+  //   yml += `Table Catalog: ${col.catalog}\n`;
+  // }
+  if (col.schema) {
+    yml += `Table Schema: ${col.schema}\n`;
   }
-  if (col.tableSchema) {
-    yml += `Table Schema: ${col.tableSchema}\n`;
-  }
-  yml += `Table: ${col.tableName}`;
+  yml += `Table: ${col.table.label}`;
 
   return <CompletionItem>{
-    detail: `${col.tableName} Col`,
+    detail: `${col.table.label} Col`,
     documentation: {
       value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
     kind: CompletionItemKind.Field,
-    label: col.columnName,
-    sortText: `${col.tableName}.${col.columnName}`,
+    label: col.label,
+    sortText: `${col.table.label}.${col.label}`,
 
   };
 }

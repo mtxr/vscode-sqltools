@@ -26,6 +26,7 @@ export namespace NSDatabase {
     isFk?: boolean;
     columnKey?: string;
     extra?: string;
+    table: ITable;
   }
 
   export interface IFunction extends MConnectionExplorer.IChildItem {

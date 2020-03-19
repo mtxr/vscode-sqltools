@@ -16,7 +16,7 @@ export interface IBaseQueries {
   }>;
   fetchSchemas?: (params: NSDatabase.IDatabase) => IExpectedResult<NSDatabase.ISchema>;
   fetchTables: (params: NSDatabase.ISchema) => IExpectedResult<NSDatabase.ITable>;
-  searchTables: ({ search: string }) => IExpectedResult<NSDatabase.ITable>;
+  searchTables: (params: { search: string, limit?: number }) => IExpectedResult<NSDatabase.ITable>;
   // old api
   describeTable: (params: NSDatabase.ITable) => IExpectedResult<any>;
   fetchColumns: (params: NSDatabase.ITable) => IExpectedResult<NSDatabase.IColumn>;

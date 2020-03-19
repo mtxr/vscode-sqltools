@@ -72,7 +72,6 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return result.results;
   }
   public query: (typeof AbstractDriver)['prototype']['query'] = (query) => {
-    console.log(query);
     const messages = [];
     return this.open()
       .then(async (pool) => {
@@ -129,7 +128,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
   private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
     const results = await this.queryResults(this.queries.fetchColumns(parent));
-    return results.map(col => ({ ...col, iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null), childType: ContextValue.NO_CHILD }));
+    return results.map(col => ({ ...col, iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null), childType: ContextValue.NO_CHILD, table: parent }));
   }
 
   public async testConnection() {

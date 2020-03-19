@@ -6,7 +6,7 @@
   "scripts": {
     "clean": "rimraf -rf ../dist",
     "build:pack": "cd ../dist && vsce package --yarn",
-    "build:webpack": "node --max_old_space_size=4096 ./node_modules/.bin/webpack",
+    "build:webpack": "node --max_old_space_size=8192 ./node_modules/.bin/webpack",
     "build": "yarn run build:webpack",
     "dev:watch": "yarn run webpack --watch --info-verbosity verbose",
     "postbuild": "rimraf -rf ../dist/ui/theme.js || exit 0",

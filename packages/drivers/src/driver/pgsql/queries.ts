@@ -103,11 +103,15 @@ SELECT
   ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') as detail
 FROM INFORMATION_SCHEMA.TABLES AS T
 WHERE
-  (T.TABLE_CATALOG || '.' || T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p => p.search}%'
-  OR ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p => p.search}%'
-  OR T.TABLE_NAME ILIKE '%${p => p.search}%'
+  T.TABLE_SCHEMA !~ '^pg_'
+  AND T.TABLE_SCHEMA <> 'information_schema'
+  ${p => p.search ? `AND
+    (T.TABLE_CATALOG || '.' || T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p.search}%'
+    OR ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p.search}%'
+    OR T.TABLE_NAME ILIKE '%${p.search}%'` : ''}
 ORDER BY
-  T.TABLE_NAME;
+  T.TABLE_NAME
+LIMIT ${p => p.limit || 50};
 `;
 
 const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.TABLE);

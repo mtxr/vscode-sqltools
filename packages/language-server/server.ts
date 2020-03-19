@@ -1,5 +1,6 @@
 import ConfigRO from '@sqltools/util/config-manager';
-import { CancellationToken, createConnection, IConnection, InitializedParams, InitializeParams, InitializeResult, ProposedFeatures, TextDocuments } from 'vscode-languageserver';
+import { createConnection, IConnection, InitializedParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
 import { InvalidActionError } from '@sqltools/util/exception';
 import log from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
@@ -8,7 +9,7 @@ import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
-  private _docManager = new TextDocuments();
+  private _docManager = new TextDocuments(TextDocument);
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
   private onInitializedHooks: Arg0<IConnection['onInitialized']>[] = [];
   private onDidChangeConfigurationHooks: Function[] = [];
@@ -27,7 +28,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
     this.onInitializedHooks.forEach(hook => hook(params));
   };
 
-  private onInitialize: Arg0<IConnection['onInitialize']> = (params: InitializeParams, token: CancellationToken) => {
+  private onInitialize: Arg0<IConnection['onInitialize']> = (params, token, workDoneProgress, resultProgress) => {
     if (params.initializationOptions.telemetry) {
       telemetry.updateOpts({
         ...params.initializationOptions.telemetry,
@@ -39,14 +40,14 @@ class SQLToolsLanguageServer implements ILanguageServer {
 
     return this.onInitializeHooks.reduce<InitializeResult>(
       (opts, hook) => {
-        const result = hook(params, token) as InitializeResult;
+        const result = hook(params, token, workDoneProgress, resultProgress) as InitializeResult;
         return { ...result, capabilities: { ...opts.capabilities, ...result.capabilities } };
       },
       {
         capabilities: {
-          documentFormattingProvider: false,
-          documentRangeFormattingProvider: false,
-          textDocumentSync: this.docManager.syncKind,
+          documentFormattingProvider: true,
+          documentRangeFormattingProvider: true,
+          textDocumentSync: TextDocumentSyncKind.Incremental,
         },
       }
     );

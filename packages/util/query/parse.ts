@@ -131,7 +131,7 @@ class QueryParser {
 
       // it's a query, continue until you get delimiter hit
       if (
-        (char.toLowerCase() === delimiter.toLowerCase() || char.toLowerCase() === 'go') &&
+        (char.toLowerCase() === delimiter.toLowerCase() || char.toLowerCase() === 'go') &&
         isInString == false &&
         isInComment == false &&
         isInTag == false
@@ -142,7 +142,7 @@ class QueryParser {
           resultQueries = QueryParser.getQueryParts(query, splittingIndex, 2);
           break;
         }
-        resultQueries = QueryParser.getQueryParts(query, splittingIndex);
+        resultQueries = QueryParser.getQueryParts(query, splittingIndex, 0);
         break;
       }
     }

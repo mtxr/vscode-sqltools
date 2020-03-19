@@ -19,6 +19,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   constructor() {
     this.client = new LanguageClient(
+      EXT_CONFIG_NAMESPACE,
       `${DISPLAY_NAME} Language Server`,
       this.getServerOptions(),
       this.getClientOptions(),

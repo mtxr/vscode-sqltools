@@ -34,6 +34,7 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
     ]
   } else {
     config.optimization.minimize = false;
+    config.optimization.minimizer = undefined;
   }
   config.devtool = false;
   config.mode = IS_PRODUCTION ? 'production' : 'development';
