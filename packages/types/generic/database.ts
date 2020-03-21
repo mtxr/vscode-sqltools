@@ -48,6 +48,14 @@ export namespace NSDatabase {
 
   export interface IProcedure extends IFunction {}
 
+  export interface IStaticCompletion {
+    label: string;
+    filterText?: string;
+    sortText?: string;
+    detail: string;
+    documentation: { kind: 'markdown', value: string};
+  };
+
   export interface IResult<T extends { [key: string]: any } = any> {
     label?: string;
     connId: string;

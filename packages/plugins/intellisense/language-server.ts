@@ -6,6 +6,8 @@ import connectionStateCache, { LAST_USED_ID_KEY, ACTIVE_CONNECTIONS_KEY } from '
 import { Parser } from 'node-sql-parser';
 import Connection from '@sqltools/language-server/connection';
 import { TableCompletionItem } from './models';
+import logger from '@sqltools/util/log';
+const log = logger.extend('intellisense');
 
 const parser = new Parser();
 const IS_WORD_REGEX = /^\w/g;
@@ -13,6 +15,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
   private server: T;
 
   private onCompletion: Arg0<ILanguageServer['onCompletion']> = async params => {
+    let completions: CompletionItem[] = [];
     try {
       const [ activeConnections, lastUsedId ] = await Promise.all<
         {[k: string]: Connection },
@@ -22,37 +25,46 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
         connectionStateCache.get(LAST_USED_ID_KEY) as Promise<string>,
       ])
       const { textDocument, position } = params;
-      console.log('completion requested', position);
+      log.extend('info')('completion requested %O', position);
       const doc = this.server.docManager.get(textDocument.uri);
 
       const { currentQuery } = getDocumentCurrentQuery(doc, position);
-      const conn = activeConnections[lastUsedId];
-      let driver: string = conn ? conn.getDriver() : null;
-
-      console.log('got current query', currentQuery);
-      switch (driver) {
-        case DatabaseDriver['AWS Redshift']:
-          driver = DatabaseDriver.PostgreSQL;
-          break;
-        case DatabaseDriver.MSSQL:
-          driver = 'transactsql';
-          break;
-        case DatabaseDriver.MySQL:
-        case DatabaseDriver.MariaDB:
-          break;
-        default:
-          driver = null;
-      }
+      log.extend('debug')('got current query:\n%s', currentQuery);
       const prevWords = doc.getText(Range.create(Math.max(0, position.line - 5), 0, position.line, position.character)).replace(/[\r\n|\n]+/g, ' ').split(/;/g).pop().split(/\s+/g);
-      const currentPrefix = (prevWords.pop() || '').toLowerCase();
-      const prevWord = (prevWords.pop() || '').toLowerCase();
-      const completions: CompletionItem[] = [];
-      console.log('check prevword', prevWord);
+      const currentPrefix = (prevWords.pop() || '').toUpperCase();
+      const prevWord = (prevWords.pop() || '').toUpperCase();
+      log.extend('debug')('check prevword %s', prevWord);
+
+      const conn = activeConnections[lastUsedId];
+      let driver: string;
+
+      let searchTablesPromise: Promise<NSDatabase.ITable[]> = Promise.resolve([]);
+      let staticCompletionsPromise: ReturnType<typeof conn.getStaticCompletions> = Promise.resolve({});
+
+      if (conn) {
+        searchTablesPromise = conn.searchItems(ContextValue.TABLE, currentPrefix) as any;
+        staticCompletionsPromise = conn.getStaticCompletions();
+        switch (conn.getDriver()) {
+          case DatabaseDriver['AWS Redshift']:
+            driver = DatabaseDriver.PostgreSQL;
+            break;
+          case DatabaseDriver.MSSQL:
+            driver = 'transactsql';
+            break;
+          case DatabaseDriver.MySQL:
+          case DatabaseDriver.MariaDB:
+            break;
+          default:
+            driver = null;
+        }
+      }
+      const staticCompletions = await staticCompletionsPromise;
+
       try {
         const parsed = parser.parse(currentQuery, driver ? { database: driver } : undefined);
-        console.log('parsed', JSON.stringify(parsed));
+        log.extend('debug')('query ast parsed:\n%O', JSON.stringify(parsed));
+        completions = Object.values(staticCompletions);
       } catch (error) {
-        console.error(error.message);
         if (error.expected && error.expected.length > 0) {
           const added = {};
           error.expected.forEach(exp => {
@@ -62,37 +74,40 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
             }
             if (label === null || added[label]) return;
             added[label] = true;
-            completions.push(<CompletionItem>{
+            completions.push(<CompletionItem>(staticCompletions[label] || {
               label,
               filterText: label,
-              sortText: IS_WORD_REGEX.test(label) ? `0:${label}` : `1:${label}`,
+              sortText: IS_WORD_REGEX.test(label) ? `3:${label}` : `4:${label}`,
               kind: CompletionItemKind[exp.type.charAt(0) + exp.type.substr(1)]
-            });
+            }));
           })
         };
       }
 
-      if (!lastUsedId || !activeConnections[lastUsedId]) {
-        console.log('completion without conn', completions.length);
+      if (!conn) {
+        log.extend('info')('no active connection completions count: %d', completions.length);
         return completions
       };
+
       switch (prevWord) {
-        case 'from':
-        case 'join':
-          // suggest tables
-          const tables: NSDatabase.ITable[] = await <any>conn.searchItems(ContextValue.TABLE, currentPrefix);
-          console.log('got table', tables.length);
+        case 'FROM':
+        case 'JOIN':
+        case 'TABLE':
+        case 'INTO':
+              // suggest tables
+          const tables = await searchTablesPromise;
+          log.extend('info')('got %d table completions', tables.length);
           if (tables.length  > 0)
             completions.push(...tables.map(t => TableCompletionItem(t, 0)));
         default:
           break;
       }
-      console.log('found completions', completions.length);
-      return completions;
     } catch (error) {
       console.error(error);
-      return [];
+      log.extend('error')('got an error:\n %O', error);
     }
+    log.extend('debug')('total completions %d', completions.length);
+    return completions;
   }
 
   public register(server: T) {

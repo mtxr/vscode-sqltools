@@ -10,6 +10,7 @@ import ErrorHandler from '../api/error-handler';
 import telemetry from '@sqltools/util/telemetry';
 import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
+import uniq from 'lodash/uniq';
 
 const log = logger.extend('lc');
 
@@ -131,18 +132,19 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     if (Config.formatLanguages) {
       selector = selector.concat(Config.formatLanguages);
     }
-
+    selector = uniq(selector);
     selector = selector.reduce((agg, language) => {
-        if (typeof language === 'string') {
-          agg.push({ language, scheme: 'untitled' });
-          agg.push({ language, scheme: 'file' });
-          agg.push({ language, scheme: EXT_NAMESPACE });
-        } else {
-          agg.push(language);
-        }
-        return agg;
-      }, [{ scheme: EXT_NAMESPACE, language: undefined }]);
+      if (typeof language === 'string') {
+        agg.push({ language, scheme: 'untitled' });
+        agg.push({ language, scheme: 'file' });
+        agg.push({ language, scheme: EXT_NAMESPACE });
+      } else {
+        agg.push(language);
+      }
+      return agg;
+    }, [{ scheme: EXT_NAMESPACE, language: undefined }]);
 
+    log.extend('debug')('registered for languages %O', selector);
     return {
       documentSelector: selector,
       initializationOptions: {

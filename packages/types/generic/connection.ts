@@ -182,6 +182,7 @@ export interface IConnectionDriver {
   testConnection?(): Promise<void>;
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
   searchItems?(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]>;
+  getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
 }
 
 export const enum ContextValue {
@@ -200,6 +201,7 @@ export const enum ContextValue {
   VIEW ='connection.view',
   MATERIALIZED_VIEW = 'connection.materializedView',
   NO_CHILD = 'NO_CHILD',
+  KEYWORDS = 'KEYWORDS',
 }
 
 export module MConnectionExplorer {

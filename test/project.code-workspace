@@ -238,7 +238,6 @@
     "sqltools.debug": {
       "namespaces": "*"
     },
-    "sqltools.trace.server": "verbose",
-    // "sqltoolsPreview.trace.server": "verbose"
+    // "sqltools.trace.server": "verbose"
   },
 }

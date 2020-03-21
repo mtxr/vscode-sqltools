@@ -1,11 +1,10 @@
 import {
   CompletionItem,
   CompletionItemKind,
-  TextEdit
 } from 'vscode-languageserver';
 import { NSDatabase } from '@sqltools/types';
 
-export function TableCompletionItem(table: NSDatabase.ITable, priority?: number ): CompletionItem {
+export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = `${tableOrView}: ${table.label}\n`;
   // if (table.catalog) {

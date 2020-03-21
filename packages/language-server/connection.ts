@@ -144,4 +144,9 @@ export default class Connection {
     if (!search || !search.trim()) return [];
     return this.conn.searchItems(itemType, search);
   }
+
+  public getStaticCompletions: IConnectionDriver['getStaticCompletions'] = () => {
+    if (typeof this.conn.getStaticCompletions !== 'function') return Promise.resolve({} as any);
+    return this.conn.getStaticCompletions();
+  }
 }

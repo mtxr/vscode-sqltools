@@ -185,4 +185,26 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         return this.queryResults(this.queries.searchTables({ search }));
     }
   }
+
+  private completionsCache: { [w: string]: NSDatabase.IStaticCompletion } = null;
+  public getStaticCompletions = async () => {
+    if (this.completionsCache) return this.completionsCache;
+    this.completionsCache = {};
+    const items = await this.queryResults('SELECT UPPER(word) AS label, UPPER(catdesc) AS desc FROM pg_get_keywords();');
+
+    items.forEach((item: any) => {
+      this.completionsCache[item.label] = {
+        label: item.label,
+        detail: item.label,
+        filterText: item.label,
+        sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(item.label) ? '2:' : '') + item.label,
+        documentation: {
+          value: `\`\`\`yaml\nWORD: ${item.label}\nTYPE: ${item.desc}\n\`\`\``,
+          kind: 'markdown'
+        }
+      }
+    });
+
+    return this.completionsCache;
+  }
 }
