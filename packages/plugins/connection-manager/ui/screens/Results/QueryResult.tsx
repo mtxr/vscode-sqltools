@@ -5,7 +5,7 @@ import Syntax from '../../components/Syntax';
 import { NSDatabase } from '@sqltools/types';
 
 const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total }: NSDatabase.IResult) => {
-  const [showMessages, setShowMessages] = useState(!!(error || (results.length === 0 && messages.length > 0)));
+  const [showMessages, setShowMessages] = useState(!!(error || (results.length === 0)));
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
   const showPagination = !results || Math.max(total || 0, results.length) > pageSize;
