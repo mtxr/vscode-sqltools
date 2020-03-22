@@ -1,4 +1,4 @@
-import { NSDatabase, ILanguageClient } from '@sqltools/types';
+import { NSDatabase, ILanguageClient, InternalID } from '@sqltools/types';
 import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
 import QueryResultsState from '@sqltools/plugins/connection-manager/ui/screens/Results/State';
@@ -15,7 +15,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   protected isOpen = false;
 
-  constructor(private client: ILanguageClient, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
+  constructor(private client: ILanguageClient, public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
     super(iconsPath, viewsPath);
 
     this.onDidDispose(() => {
@@ -63,7 +63,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     return vscode.commands.executeCommand('vscode.open', file);
   }
 
-  show(reset?: boolean = true) {
+  show() {
     this.wereToShow = null;
     switch (Config.results.location) {
       case 'active': // fallback older version
@@ -86,7 +86,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
         }
     }
 
-    super.show(reset);
+    super.show();
 
     return new Promise((resolve, reject) => {
       let count = 0;
@@ -117,7 +117,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 }
 
 export default class ResultsWebviewManager {
-  private resultsMap: { [id: string]: ResultsWebview } = {};
+  private viewsMap: { [id: string]: ResultsWebview } = {};
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
@@ -127,17 +127,20 @@ export default class ResultsWebviewManager {
   }
 
   dispose = () => {
-    return Promise.all(Object.keys(this.resultsMap).map(id => this.resultsMap[id].dispose()));
+    return Promise.all(Object.keys(this.viewsMap).map(id => this.viewsMap[id].dispose()));
   }
 
-  private createForId = (connId: string) => {
-    this.resultsMap[connId] = new ResultsWebview(this.client, this.iconsPath, this.viewsPath);
-    return this.resultsMap[connId];
+  private createForId = (requestId: InternalID) => {
+    this.viewsMap[requestId] = new ResultsWebview(this.client, requestId, this.iconsPath, this.viewsPath);
+    this.viewsMap[requestId].onDidDispose(() => {
+      delete this.viewsMap[requestId];
+    });
+    return this.viewsMap[requestId];
   }
 
-  get = (connId: string) => {
-    if (!connId) throw new Error('Missing connection id to create results view');
+  get = (requestId: InternalID) => {
+    if (!requestId) throw new Error('Missing request id to create results view');
 
-    return this.resultsMap[connId] || this.createForId(connId);
+    return this.viewsMap[requestId] || this.createForId(requestId);
   }
 }

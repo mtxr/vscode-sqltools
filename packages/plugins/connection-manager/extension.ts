@@ -1,7 +1,7 @@
 import logger from '@sqltools/util/log';
 import Config from '@sqltools/util/config-manager';
 import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue } from '@sqltools/types';
+import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue, IQueryOptions } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
 import { getSelectedText, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
@@ -17,6 +17,7 @@ import { extractConnName, getQueryParameters } from '@sqltools/util/query';
 import statusBar from './status-bar';
 import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/util/telemetry';
+import generateId from '@sqltools/util/internal-id';
 import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
@@ -69,18 +70,18 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         return;
       }
       const query = await readInput('Query', `Type the query to run on ${conn.name}`);
-      return this.ext_executeQuery(query, getConnectionId(conn));
+      return this.ext_executeQuery(query, { connNameOrId: getConnectionId(conn) });
     } catch (e) {
       this.errorHandler('Error running query.', e);
     }
   }
 
-  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, page: number = 0, pageSize?: number) => {
+  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, opt: { page?: number, pageSize?: number } = {}) => {
     try {
       const table = await this._getTable(node);
-      await this._openResultsWebview(undefined, page === 0 && !pageSize);
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, page, pageSize);
-      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
+      const view = await this._openResultsWebview();
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, { ...opt, requestId: view.requestId });
+      view.updateResults(payload);
 
     } catch (e) {
       this.errorHandler('Error while showing table records', e);
@@ -90,9 +91,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_describeTable = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable) => {
     try {
       const table = await this._getTable(node);
-      await this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('describeTable', table);
-      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
+      const view = await this._openResultsWebview();
+      const payload = await this._runConnectionCommandWithArgs('describeTable', table, { requestId: view.requestId });
+      view.updateResults(payload);
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
     }
@@ -221,7 +222,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return query;
   }
 
-  private ext_executeQuery = async (query?: string, connNameOrId?: string) => {
+  private ext_executeQuery = async (query?: string, { connNameOrId, ...opt }: IQueryOptions & { connNameOrId?: string} = {}) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
       if (!connNameOrId) { // check query defined connection name
@@ -244,9 +245,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       }
 
       query = await this.replaceParams(query);
-      await this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('query', query);
-      this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
+      const view = await this._openResultsWebview();
+      const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
+      view.updateResults(payload);
       return payload;
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
@@ -389,8 +390,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
 
-  private _openResultsWebview(connId?: string, reset: boolean = true) {
-    return this.resultsWebview.get(connId || this.explorer.getActive().id).show(reset);
+  private async _openResultsWebview(requestId?: string) {
+    requestId = requestId || generateId();
+    const view = this.resultsWebview.get(requestId);
+    await view.show();
+    return view;
   }
   private _connect = async (force = false): Promise<IConnection> => {
     if (!force && this.explorer.getActive()) {

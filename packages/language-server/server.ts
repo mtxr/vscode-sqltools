@@ -35,7 +35,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
       });
     }
     if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
-      log.extend('debug')(`User defined env vars ===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
+      log.extend('debug')(`User defined env vars\n===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
     }
 
     return this.onInitializeHooks.reduce<InitializeResult>(

@@ -1,6 +1,6 @@
 import queryFactory from '@sqltools/util/query/factory';
 import prefixedTableName from '@sqltools/util/query/prefixed-tablenames';
-import { IBaseQueries, IExpectedResult, NSDatabase, ContextValue, DatabaseDriver } from '@sqltools/types';
+import { IBaseQueries, ContextValue, DatabaseDriver } from '@sqltools/types';
 
 const describeTable: IBaseQueries['describeTable'] = queryFactory`
 SELECT * FROM INFORMATION_SCHEMA.COLUMNS
@@ -105,13 +105,14 @@ FROM INFORMATION_SCHEMA.TABLES AS T
 WHERE
   T.TABLE_SCHEMA !~ '^pg_'
   AND T.TABLE_SCHEMA <> 'information_schema'
-  ${p => p.search ? `AND
+  ${p => p.search ? `AND (
     (T.TABLE_CATALOG || '.' || T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p.search}%'
     OR ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p.search}%'
-    OR T.TABLE_NAME ILIKE '%${p.search}%'` : ''}
+    OR T.TABLE_NAME ILIKE '%${p.search}%'
+  )` : ''}
 ORDER BY
   T.TABLE_NAME
-LIMIT ${p => p.limit || 50};
+LIMIT ${p => p.limit || 100};
 `;
 
 const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.TABLE);
@@ -145,7 +146,7 @@ WHERE
     )
   );
 `;
-const fetchDatabases: () => IExpectedResult<NSDatabase.IDatabase> = queryFactory`
+const fetchDatabases: IBaseQueries['fetchDatabases'] = queryFactory`
 SELECT
   db.*,
   db.datname as "label",

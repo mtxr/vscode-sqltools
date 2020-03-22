@@ -7,6 +7,7 @@ import {
   NodeDependency,
   ContextValue,
   MConnectionExplorer,
+  IQueryOptions,
 } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/util/exception';
@@ -30,23 +31,27 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
 
-  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
+  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String, opt: IQueryOptions): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
 
-  public singleQuery<R = any, Q = any>(query: Q | string | String) {
-    return this.query<R, Q>(query).then(([ res ]) => res);
+  public singleQuery<R = any, Q = any>(query: Q | string | String, opt: IQueryOptions) {
+    return this.query<R, Q>(query, opt).then(([ res ]) => res);
   }
 
-  public describeTable(metadata: NSDatabase.ITable) {
-    return this.query(this.queries.describeTable(metadata));
+  public async describeTable(metadata: NSDatabase.ITable, opt: IQueryOptions) {
+    const result = await this.singleQuery(this.queries.describeTable(metadata), opt);
+    result.baseQuery = this.queries.describeTable.raw;
+    return [result];
   }
 
-  public async showRecords(table: NSDatabase.ITable, limit: number, page: number = 0) {
+  public async showRecords(table: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }) {
+    const { limit, page = 0} = opt;
     const params = { limit, table, offset: page * limit };
     if (typeof this.queries.fetchRecords === 'function' && typeof this.queries.countRecords === 'function') {
       const [ records, totalResult ] = await (Promise.all([
-        this.singleQuery(this.queries.fetchRecords(params)),
-        this.singleQuery(this.queries.countRecords(params)),
+        this.singleQuery(this.queries.fetchRecords(params), opt),
+        this.singleQuery(this.queries.countRecords(params), opt),
       ]));
+      records.baseQuery = this.queries.fetchRecords.raw;
       records.pageSize = limit;
       records.page = page;
       records.total = Number((totalResult.results[0] as any).total);
@@ -55,7 +60,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       return [records];
     }
 
-    return this.query(this.queries.fetchRecords(params));
+    return this.query(this.queries.fetchRecords(params), opt);
   }
 
   protected needToInstallDependencies() {

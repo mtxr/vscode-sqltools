@@ -15,6 +15,8 @@ export type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | a
     title: QuickPick<T>['title'];
     placeHolderDisabled?: QuickPick<T>['placeholder'];
     buttons?: QuickPick<T>['buttons'];
+    debounceTime: number;
+    ignoreIfEmpty: boolean;
   }
 >;
 
@@ -64,17 +66,16 @@ export async function quickPick<T = QuickPickItem | any>(
 
 export async function quickPickSearch<T = any>(
   loadOptions: (search: string) => PromiseLike<(({ label: string; value?: T }))[]>,
-  quickPickOptions?: ExtendedQuickPickOptions,
-  debounceTime = 150
+  quickPickOptions: ExtendedQuickPickOptions = {},
 ): Promise<T> {
-  let items: QuickPickItem[] = [];
   const qPick = window.createQuickPick();
+  qPick.placeholder = qPick.placeholder || 'Type something to search...';
   const sel = await new Promise<any[]>(resolve => {
-    const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || ({} as ExtendedQuickPickOptions);
+    const { placeHolderDisabled, debounceTime = 150, ignoreIfEmpty = false, ...qPickOptions } = quickPickOptions;
     let searchTimeout = null;
-    qPick.onDidChangeValue((search) => {
+    const onChangeValue = (search = '') => {
       qPick.busy = true;
-      if (!search || !search.trim()) {
+      if (ignoreIfEmpty && (!search || !search.trim())) {
         qPick.items = [];
         qPick.busy = false;
         return;
@@ -85,6 +86,7 @@ export async function quickPickSearch<T = any>(
         const catchFn = error => {
           qPick.items = [];
           qPick.busy = false;
+          qPick.title = `${qPick.title || 'Items'} (${qPick.items.length})`;
           console.error(error);
         };
         const thenFn = (options: any[]) => {
@@ -93,10 +95,12 @@ export async function quickPickSearch<T = any>(
             ? <QuickPickItem[]>options.map(o => ({ ...o, value: o, label: o.value || o.label }))
             : options.map<QuickPickItem>(value => ({ value, label: value.toString() }));
         };
+        qPick.title = `${qPick.title || 'Items'} (${qPick.items.length})`;
         if (getOptsPromise instanceof Promise || typeof getOptsPromise['catch'] === 'function') (<Promise<any>>getOptsPromise).then(thenFn).catch(catchFn);
         else getOptsPromise.then(thenFn, catchFn);
       }, debounceTime);
-    });
+    };
+    qPick.onDidChangeValue(onChangeValue);
     qPick.onDidHide(() => qPick.dispose());
     qPick.onDidChangeSelection((selection: (QuickPickItem & { value: any })[] = []) => {
       qPick.hide();
@@ -111,11 +115,8 @@ export async function quickPickSearch<T = any>(
     Object.keys(qPickOptions).forEach(k => {
       qPick[k] = qPickOptions[k];
     });
-    qPick.items = items;
-    qPick.enabled = items.length > 0;
-    if (!qPick.enabled)
-      qPick.placeholder = placeHolderDisabled || qPick.placeholder || 'Type something to search...';
-    qPick.title = `${qPick.title || 'Items'} (${items.length})`;
+
+    if (!ignoreIfEmpty) onChangeValue();
     qPick.show();
   });
 

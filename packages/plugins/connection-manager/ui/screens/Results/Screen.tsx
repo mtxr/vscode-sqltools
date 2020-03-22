@@ -55,8 +55,8 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
         let connId: string;
         (Array.isArray(results) ? results : [results]).forEach(r => {
           connId = r.connId;
-          queries.push(r.query);
-          resultMap[r.query] = r;
+          queries.push(r.baseQuery || r.query);
+          resultMap[r.baseQuery || r.query] = r;
         });
         this.saveState({
           connId,
@@ -115,14 +115,14 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           variant="scrollable"
           scrollButtons="on"
         >
-          {this.state.queries.map((query: string, index: number) => (
+          {this.state.queries.map((q: string, index: number) => (
             <Tab
               disableFocusRipple
               disableRipple
               key={index}
               label={
                 <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
-                  {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
+                  {(this.state.resultMap[q] && (this.state.resultMap[q].label || this.state.resultMap[q].query)) || q}
                 </Typography>
               }
             />

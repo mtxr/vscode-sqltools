@@ -12,7 +12,8 @@
     "command-exists": "1.2.8",
     "debug": "https://github.com/mtxr/debug.git",
     "env-paths": "^2.2.0",
-    "lru-cache": "5.1.1"
+    "lru-cache": "5.1.1",
+    "uuid": "^7.0.2"
   },
   "devDependencies": {
     "@types/debug": "^4.1.5",

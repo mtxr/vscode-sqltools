@@ -1,10 +1,11 @@
 import { Pool, PoolConfig, types, FieldDef } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer, IQueryOptions } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
 import fs from 'fs';
 import { zipObject } from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
+import generateId from '@sqltools/util/internal-id';
 
 const rawValue = (v: string) => v;
 
@@ -66,13 +67,14 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     pool.end();
   }
 
-  private queryResults = async <R = any, Q = any>(query: Q | string | String) => {
-    const result = await this.singleQuery<R, Q>(query);
+  private queryResults = async <R = any, Q = any>(query: Q | string | String, opt?: IQueryOptions) => {
+    const result = await this.singleQuery<R, Q>(query, opt);
     if (result.error) throw result.rawError;
     return result.results;
   }
-  public query: (typeof AbstractDriver)['prototype']['query'] = (query) => {
+  public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     const messages = [];
+    const { requestId } = opt;
     return this.open()
       .then(async (pool) => {
         const cli = await pool.connect();
@@ -88,19 +90,22 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         }
 
         return results.map((r, i): NSDatabase.IResult => {
-          messages.push(`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`);
           const cols = this.getColumnNames(r.fields || []);
           return {
+            requestId,
+            resultId: generateId(),
             connId: this.getId(),
             cols,
-            messages,
+            messages: messages.concat([`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`]),
             query: queries[i],
             results: this.mapRows(r.rows, cols),
           };
         });
       })
-      .catch(err => ([{
+      .catch(err => ([<NSDatabase.IResult>{
         connId: this.getId(),
+        requestId,
+        resultId: generateId(),
         cols: [],
         messages: messages.concat([
           [

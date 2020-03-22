@@ -3,23 +3,23 @@ import { NSDatabase } from '../generic';
 export interface IExpectedResult<T = any> extends String {
   resultsIn?: T;
 }
+
+
+export interface QueryBuilder<P, R> {
+  (params?: P): IExpectedResult<R>;
+  raw?: string;
+}
+
 export interface IBaseQueries {
-  fetchRecords: (params: {
-    limit: number;
-    offset: number;
-    table: NSDatabase.ITable;
-  }) => string;
-  countRecords: (params: {
-    table: NSDatabase.ITable;
-  }) => IExpectedResult<{
-    total: number;
-  }>;
-  fetchSchemas?: (params: NSDatabase.IDatabase) => IExpectedResult<NSDatabase.ISchema>;
-  fetchTables: (params: NSDatabase.ISchema) => IExpectedResult<NSDatabase.ITable>;
-  searchTables: (params: { search: string, limit?: number }) => IExpectedResult<NSDatabase.ITable>;
+  fetchRecords: QueryBuilder<{ limit: number; offset: number; table: NSDatabase.ITable; }, any>;
+  countRecords: QueryBuilder<{ table: NSDatabase.ITable; }, { total: number; }>;
+  fetchSchemas?: QueryBuilder<NSDatabase.IDatabase, NSDatabase.ISchema>;
+  fetchDatabases?: QueryBuilder<never, NSDatabase.IDatabase>;
+  fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
+  searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
   // old api
-  describeTable: (params: NSDatabase.ITable) => IExpectedResult<any>;
-  fetchColumns: (params: NSDatabase.ITable) => IExpectedResult<NSDatabase.IColumn>;
-  fetchFunctions?: (params: NSDatabase.ISchema) => IExpectedResult<NSDatabase.IFunction>;
+  describeTable: QueryBuilder<NSDatabase.ITable, any>;
+  fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
+  fetchFunctions?: QueryBuilder<NSDatabase.ISchema, NSDatabase.IFunction>;
   [id: string]: string | ((params: any) => (string | IExpectedResult));
 }

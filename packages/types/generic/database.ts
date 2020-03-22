@@ -1,5 +1,7 @@
 import { MConnectionExplorer, ContextValue } from './connection';
 
+export type InternalID = string;
+
 export namespace NSDatabase {
   export interface IDatabase extends MConnectionExplorer.IChildItem {
     type: ContextValue.DATABASE;
@@ -57,6 +59,20 @@ export namespace NSDatabase {
   };
 
   export interface IResult<T extends { [key: string]: any } = any> {
+    /**
+     * This id is unique for a single query result
+     *
+     * @type {InternalID}
+     * @memberof IResult
+     */
+    resultId: InternalID;
+    /**
+     * This id represents a request to run one/multiple queries. It's used to group all queries in the same webview. Every request has it's own view
+     *
+     * @type {InternalID}
+     * @memberof IResult
+     */
+    requestId: InternalID;
     label?: string;
     connId: string;
     error?: boolean;
@@ -64,6 +80,7 @@ export namespace NSDatabase {
     results: (T extends { [key: string]: any } ? T : any)[];
     cols: string[];
     query: string;
+    baseQuery?: string; // used for extension generated queries
     messages: string[];
     page?: number;
     total?: number;

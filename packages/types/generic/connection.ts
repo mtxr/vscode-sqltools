@@ -1,5 +1,5 @@
 import { DatabaseDriver } from '@sqltools/types/driver';
-import { NSDatabase } from '@sqltools/types/generic/database';
+import { NSDatabase, InternalID } from '@sqltools/types/generic/database';
 
 export interface IConnection<DriverOptions = any> {
   /**
@@ -171,14 +171,18 @@ export interface IDatabaseFilter {
   hide: string[];
 }
 
+export interface IQueryOptions {
+  requestId?: InternalID;
+}
+
 export interface IConnectionDriver {
   connection: any;
   credentials: IConnection;
   open(): Promise<any>;
   close(): Promise<any>;
-  describeTable(table: NSDatabase.ITable): Promise<NSDatabase.IResult[]>;
-  showRecords(tableName: NSDatabase.ITable, limit: number, page?: number): Promise<NSDatabase.IResult[]>;
-  query(query: string): Promise<NSDatabase.IResult[]>;
+  describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
+  showRecords(tableName: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }): Promise<NSDatabase.IResult[]>;
+  query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
   searchItems?(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]>;

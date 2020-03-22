@@ -47,7 +47,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public constructor(private iconsPath: Uri, private viewsPath: Uri) {}
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
-  public show(reset: boolean = true) {
+  public show() {
     if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.id,
@@ -74,7 +74,6 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.updatePanelName();
 
     this.panel.reveal(this.wereToShow, this.preserveFocus);
-    reset && this.postMessage({ action: 'reset' });
     this.setPreviewActiveContext(true);
   }
 
