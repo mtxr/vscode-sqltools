@@ -19,6 +19,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     error: null,
     activeTab: null,
     pageSize: defaultPageSize,
+    loading: true,
   };
 
   constructor(props) {
@@ -63,10 +64,11 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
           resultMap,
           error: null,
           activeTab: 0,
+          loading: false,
         });
         break;
       case 'reset':
-        this.saveState({ connId: null, resultMap: {}, queries: [] });
+        this.saveState({ connId: null, resultMap: {}, queries: [], loading: true });
         break;
 
       case 'getState':
@@ -116,7 +118,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     return (
       <div className="query-results-container fullscreen-container">
         {tabs}
-        <QueryResult {...this.state.resultMap[this.state.queries[this.state.activeTab]]}/>
+        <QueryResult loading={this.state.loading} {...this.state.resultMap[this.state.queries[this.state.activeTab]]}/>
       </div>
     );
   }

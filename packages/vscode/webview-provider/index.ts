@@ -87,7 +87,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         commands.executeCommand(payload.command, ...(payload.args || []));
         break;
       case 'viewReady':
-        // process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
+        process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
         break;
     }
     if (this.messageCb) {

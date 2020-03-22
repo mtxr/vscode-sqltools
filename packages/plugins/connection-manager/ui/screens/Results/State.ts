@@ -8,4 +8,5 @@ export default interface QueryResultsState {
     [query: string]: NSDatabase.IResult;
   };
   pageSize: number;
+  loading: boolean;
 }

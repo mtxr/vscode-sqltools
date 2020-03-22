@@ -3,8 +3,9 @@ import ResultsTable from './ResultsTable';
 import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@material-ui/core';
 import Syntax from '../../components/Syntax';
 import { NSDatabase } from '@sqltools/types';
+import Loading from '../../components/Loading';
 
-const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total }: NSDatabase.IResult) => {
+const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total, loading }: NSDatabase.IResult & { loading: boolean }) => {
   const [showMessages, setShowMessages] = useState(error ? true : null);
   cols = !cols || cols.length === 0 ? [''] : cols;
   const columns = cols.map(title => ({ name: title, title }));
@@ -36,7 +37,7 @@ const QueryResults = ({ cols = [], error, query, messages = [], results = [], co
           </Button>
         }
       />
-      <Drawer open={showMessages} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
+      <Drawer open={showMessages || false} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
         <List dense component="ul" subheader={<ListSubheader>Query</ListSubheader>}>
           <ListItem component="li" className={'query ' + (error ? 'error' : '')}>
             <Syntax code={query} language="sql" strong />
@@ -50,6 +51,7 @@ const QueryResults = ({ cols = [], error, query, messages = [], results = [], co
           ))}
         </List>
       </Drawer>
+      {loading && <Loading active />}
     </div>
   );
 };
