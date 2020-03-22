@@ -54,8 +54,8 @@ export default class Connection {
     }
     return info;
   }
-  public async showRecords(table: NSDatabase.ITable, page: number = 0) {
-    const limit = this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
+  public async showRecords(table: NSDatabase.ITable, page: number = 0, pageSize?: number) {
+    const limit = pageSize || this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
 
     const [records] = await this.conn.showRecords(table, limit, page).catch(this.decorateException);
 

@@ -75,11 +75,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, page: number = 0) => {
+  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, page: number = 0, pageSize?: number) => {
     try {
       const table = await this._getTable(node);
-      await this._openResultsWebview();
-      const payload = await this._runConnectionCommandWithArgs('showRecords', table, page);
+      await this._openResultsWebview(undefined, page === 0 && !pageSize);
+      const payload = await this._runConnectionCommandWithArgs('showRecords', table, page, pageSize);
       this.resultsWebview.get(payload[0].connId || this.explorer.getActive().id).updateResults(payload);
 
     } catch (e) {
@@ -252,7 +252,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       this.errorHandler('Error fetching records.', e);
     }
   }
-  
+
   private ext_executeCurrentQuery = async () => {
     const activeEditor = await getOrCreateEditor();
     if (!activeEditor) {
@@ -389,8 +389,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
 
-  private _openResultsWebview(connId?: string) {
-    return this.resultsWebview.get(connId || this.explorer.getActive().id).show();
+  private _openResultsWebview(connId?: string, reset: boolean = true) {
+    return this.resultsWebview.get(connId || this.explorer.getActive().id).show(reset);
   }
   private _connect = async (force = false): Promise<IConnection> => {
     if (!force && this.explorer.getActive()) {

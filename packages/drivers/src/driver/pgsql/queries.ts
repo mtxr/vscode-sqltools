@@ -49,7 +49,7 @@ LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
 const countRecords: IBaseQueries['countRecords'] = queryFactory`
-SELECT count(1) AS total 
+SELECT count(1) AS total
 FROM ${p => prefixedTableName(DatabaseDriver.PostgreSQL, p.table)};
 `;
 
@@ -98,7 +98,7 @@ SELECT
   (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN '${ContextValue.TABLE}' ELSE '${ContextValue.VIEW}' END) as type,
   T.TABLE_SCHEMA AS schema,
   T.TABLE_CATALOG AS database,
-  (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN TRUE ELSE FALSE END) AS isView,
+  (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN FALSE ELSE TRUE END) AS "isView",
   (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN 'table' ELSE 'view' END) AS description,
   ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') as detail
 FROM INFORMATION_SCHEMA.TABLES AS T

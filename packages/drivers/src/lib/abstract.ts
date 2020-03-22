@@ -50,7 +50,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       records.pageSize = limit;
       records.page = page;
       records.total = Number((totalResult.results[0] as any).total);
-
+      records.queryType = 'showRecords';
+      records.queryParams = table;
       return [records];
     }
 

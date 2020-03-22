@@ -80,6 +80,19 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     }
   };
 
+  onCurrentPageChange = ({ queryType, queryParams, page, pageSize }) => {
+    if (!queryType) return;
+    this.setState({ loading: true }, () => {
+      getVscode().postMessage({
+        action: 'call',
+        payload: {
+          command: `${process.env.EXT_NAMESPACE}.${queryType}`,
+          args: [queryParams, page, pageSize],
+        },
+      });
+    })
+  }
+
   render() {
     if (this.state.error) {
       return (
@@ -90,6 +103,8 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
       );
     }
     let tabs = null;
+    const currentQuery = this.state.queries[this.state.activeTab];
+    const result = this.state.resultMap[currentQuery];
     if (this.state.queries.length > 1) {
       tabs = (
         <Tabs
@@ -104,12 +119,12 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
             <Tab
               disableFocusRipple
               disableRipple
+              key={index}
               label={
                 <Typography variant="inherit" noWrap style={{ width: '100%', textTransform: 'initial' }}>
                   {(this.state.resultMap[query] && this.state.resultMap[query].label) || query}
                 </Typography>
               }
-              key={index}
             />
           ))}
         </Tabs>
@@ -118,7 +133,7 @@ export default class ResultsScreen extends React.Component<{}, QueryResultsState
     return (
       <div className="query-results-container fullscreen-container">
         {tabs}
-        <QueryResult loading={this.state.loading} {...this.state.resultMap[this.state.queries[this.state.activeTab]]}/>
+        <QueryResult loading={this.state.loading} onCurrentPageChange={this.onCurrentPageChange} result={result} />
       </div>
     );
   }

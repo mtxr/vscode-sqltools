@@ -5,11 +5,19 @@ import Syntax from '../../components/Syntax';
 import { NSDatabase } from '@sqltools/types';
 import Loading from '../../components/Loading';
 
-const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total, loading }: NSDatabase.IResult & { loading: boolean }) => {
+interface QueryResultProps {
+  result: NSDatabase.IResult;
+  loading: boolean;
+  onCurrentPageChange?: (args: { queryType: string; queryParams: any; page: number; pageSize: number }) => void;
+}
+
+const QueryResult = ({ result = ({} as NSDatabase.IResult), loading, onCurrentPageChange }: QueryResultProps) => {
+  const { cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total, queryParams, queryType } = result;
   const [showMessages, setShowMessages] = useState(error ? true : null);
-  cols = !cols || cols.length === 0 ? [''] : cols;
+  if(cols.length === 0) cols.push('');
   const columns = cols.map(title => ({ name: title, title }));
   const showPagination = !results || Math.max(total || 0, results.length) > pageSize;
+  console.log('HERE')
   useEffect(() => {
     if(showMessages === null &&  results.length === 0 && messages.length > 0) {
       setShowMessages(true);
@@ -23,11 +31,12 @@ const QueryResults = ({ cols = [], error, query, messages = [], results = [], co
         query={query}
         connId={connId}
         columnNames={cols}
-        page={page || 0}
+        page={page}
         total={total}
         showPagination={showPagination}
         pageSize={showPagination ? pageSize : 0}
         error={error}
+        onCurrentPageChange={page => onCurrentPageChange({ queryParams, queryType, page, pageSize })}
         openDrawerButton={
           <Button
             onClick={() => setShowMessages(!showMessages)}
@@ -56,4 +65,4 @@ const QueryResults = ({ cols = [], error, query, messages = [], results = [], co
   );
 };
 
-export default QueryResults;
+export default QueryResult;

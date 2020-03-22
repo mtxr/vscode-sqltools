@@ -68,6 +68,8 @@ export namespace NSDatabase {
     page?: number;
     total?: number;
     pageSize?: number;
+    queryType?: string; // showRecords, describeTable
+    queryParams?: { [k: string]: any };
   }
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
 }
