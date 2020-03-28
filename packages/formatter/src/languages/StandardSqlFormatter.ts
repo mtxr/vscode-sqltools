@@ -38,6 +38,8 @@ function getTokenizer(): Tokenizer {
       namedPlaceholderTypes: ['@', ':', '%'],
       lineCommentTypes: ['#', '--'],
       tableNamePrefixWords,
+      openJinjaDelimiters: ['{{','{%','{#'],
+      closeJinjaDelimiters: ['}}','%}','#}'],
     });
   }
   return tokenizer;

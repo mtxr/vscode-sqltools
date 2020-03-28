@@ -462,6 +462,20 @@ from a
 where
   id = $1`);
     });
+
+    it("Format query with Jinja delimiters", () => {
+        expect(sqlFormatter.format(`select * from {{ ref('a') }}`)).toEqual(
+`select
+  *
+from {{ ref('a') }}`);
+    });
+
+    it("Format query with Jinja delimiters with whitespace control characters", () => {
+        expect(sqlFormatter.format(`select {%- macro() -%} from a`)).toEqual(
+`select
+  {%- macro() -%}
+from a`);
+    });
 });
 
 // @TODO improve this tests

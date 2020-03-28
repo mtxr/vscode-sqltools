@@ -19,12 +19,16 @@ export enum TokenTypes {
   SERVERVARIABLE = 'servervariable',
   TABLENAME_PREFIX = 'tablename-prefix',
   TABLENAME = 'tablename',
+  OPEN_JINJA_DELIMITER = 'open-jinja-delimiter',
+  CLOSE_JINJA_DELIMITER = 'close-jinja-delimiter',
 }
+
 export interface Config {
   indent?: string;
   reservedWordCase?: string;
   params?: Object;
 }
+
 export interface TokenizerConfig {
   reservedWords: string[];
   reservedToplevelWords: string[];
@@ -36,6 +40,8 @@ export interface TokenizerConfig {
   indexedPlaceholderTypes?: string[];
   namedPlaceholderTypes: string[];
   lineCommentTypes: string[];
+  openJinjaDelimiters: string[];
+  closeJinjaDelimiters: string[];
 }
 
 export interface Token {

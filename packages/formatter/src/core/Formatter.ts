@@ -78,6 +78,10 @@ export default class Formatter {
         formattedQuery = this.formatComma(token, formattedQuery);
       } else if (token.value === '.') {
         formattedQuery = this.formatWithoutSpaces(token, formattedQuery);
+      } else if (token.type === TokenTypes.OPEN_JINJA_DELIMITER) {
+        formattedQuery = this.formatWithSpaces(token, formattedQuery);      
+      } else if (token.type === TokenTypes.CLOSE_JINJA_DELIMITER) {
+          formattedQuery = this.formatWithSpaces(token, formattedQuery);
       } else if (token.value === ';' || token.type === TokenTypes.QUERY_SEPARATOR ) {
         formattedQuery = this.formatQuerySeparator(token, formattedQuery);
       } else {

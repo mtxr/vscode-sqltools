@@ -21,7 +21,9 @@ export default class Tokenizer {
   public INDEXED_PLACEHOLDER_REGEX: RegExp;
   public IDENT_NAMED_PLACEHOLDER_REGEX: RegExp;
   public STRING_NAMED_PLACEHOLDER_REGEX: RegExp;
-
+  public OPEN_JINJA_DELIMITER_REGEX: RegExp;
+  public CLOSE_JINJA_DELIMITER_REGEX: RegExp;
+  
   /**
    * @param {TokenizerConfig} cfg
    *  @param {string[]} cfg.reservedWords Reserved words in SQL
@@ -61,6 +63,9 @@ export default class Tokenizer {
       cfg.namedPlaceholderTypes,
       this.createStringPattern(cfg.stringTypes)
     );
+
+    this.OPEN_JINJA_DELIMITER_REGEX = this.createOpenJinjaDelimiterRegex(cfg.openJinjaDelimiters)
+    this.CLOSE_JINJA_DELIMITER_REGEX = this.createCloseJinjaDelimiterRegex(cfg.closeJinjaDelimiters)
   }
 
   createLineCommentRegex(lineCommentTypes) {
@@ -114,6 +119,14 @@ export default class Tokenizer {
     return new RegExp(`^((?:${typesRegex})(?:${pattern}))`);
   }
 
+  createOpenJinjaDelimiterRegex(types){
+    return new RegExp('^(' + types.map(b => `${escapeRegExp(b)}-?`).join('|') + ')');
+  }
+
+  createCloseJinjaDelimiterRegex(types){
+    return new RegExp('^(' + types.map(b => `-?${escapeRegExp(b)}`).join('|') + ')');
+  }
+
   /**
    * Takes a SQL string and breaks it into tokens.
    * Each token is an object with type and value.
@@ -146,6 +159,8 @@ export default class Tokenizer {
       this.getStringToken(input) ||
       this.getOpenParenToken(input) ||
       this.getCloseParenToken(input) ||
+      this.getOpenJinjaDelimiterToken(input) ||
+      this.getCloseJinjaDelimiterToken(input) ||
       this.getServerVariableToken(input) ||
       this.getPlaceholderToken(input) ||
       this.getNumberToken(input) ||
@@ -153,7 +168,7 @@ export default class Tokenizer {
       this.getTableNameToken(input, tokenMinus1, tokenMinus2) ||
       this.getWordToken(input) ||
       this.getQuerySeparatorToken(input) ||
-      this.getOperatorToken(input)
+      this.getOperatorToken(input) 
     );
   }
 
@@ -206,6 +221,22 @@ export default class Tokenizer {
       input,
       type: TokenTypes.CLOSE_PAREN,
       regex: this.CLOSE_PAREN_REGEX,
+    });
+  }
+  
+  getOpenJinjaDelimiterToken(input: string): Token {
+    return this.getTokenOnFirstMatch({
+      input,
+      type: TokenTypes.OPEN_JINJA_DELIMITER,
+      regex: this.OPEN_JINJA_DELIMITER_REGEX,
+    });
+  }
+
+  getCloseJinjaDelimiterToken(input: string): Token {
+    return this.getTokenOnFirstMatch({
+      input,
+      type: TokenTypes.CLOSE_JINJA_DELIMITER,
+      regex: this.CLOSE_JINJA_DELIMITER_REGEX,
     });
   }
 
