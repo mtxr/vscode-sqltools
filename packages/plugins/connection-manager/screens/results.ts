@@ -1,7 +1,6 @@
-import { NSDatabase, ILanguageClient, InternalID } from '@sqltools/types';
-import { SaveResultsRequest } from '@sqltools/plugins/connection-manager/contracts';
+import { NSDatabase, InternalID } from '@sqltools/types';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
-import QueryResultsState from '@sqltools/plugins/connection-manager/ui/screens/Results/State';
+import { QueryResultsState } from '../ui/screens/Results/interfaces';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';
@@ -12,10 +11,9 @@ import { DISPLAY_NAME } from '@sqltools/util/constants';
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
   protected title: string = `${DISPLAY_NAME} Results`;
-
   protected isOpen = false;
 
-  constructor(private client: ILanguageClient, public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
+  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
     super(iconsPath, viewsPath);
 
     this.onDidDispose(() => {
@@ -38,29 +36,6 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       return super.cssVariables;
     }
     return <any>Config.results.customization;
-  }
-
-  public saveResults = async (filetype: 'csv' | 'json' = 'csv') => {
-    const { connId, activeTab, queries } = await this.getState();
-    let filters = undefined;
-
-    if (filetype === 'csv') {
-      filters = {
-        'CSV File': ['csv', 'txt']
-      };
-    } else if (filetype === 'json') {
-      filters = {
-        'JSON File': ['json']
-      };
-    }
-    const file = await vscode.window.showSaveDialog({
-      filters,
-      saveLabel: 'Export'
-    });
-    if (!file) return;
-    const filename = file.fsPath;
-    await this.client.sendRequest(SaveResultsRequest, { connId, query: queries[activeTab], filename, filetype });
-    return vscode.commands.executeCommand('vscode.open', file);
   }
 
   show() {
@@ -103,11 +78,18 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     });
   }
   updateResults = (payload: NSDatabase.IResult[]) => {
-    this.title = `${DISPLAY_NAME} Results`;
+    this.title = `${DISPLAY_NAME} Console`;
     try {
+      const prefix = getNameFromId(payload[0].connId);
+      let suffix = 'query results';
       if (payload && payload.length > 0) {
-        this.title = payload.length === 1 && payload[0].label ? payload[0].label : `${getNameFromId(payload[0].connId)} Results`;
+        if (payload.length === 1) {
+          suffix = payload[0].label ? payload[0].label : payload[0].query.replace(/(\r?\n\s*)/gim, ' ');
+        } else {
+          suffix = 'multiple query results';
+        }
       }
+      this.title = `${prefix}: ${suffix}`;
     } catch (error) {}
     this.updatePanelName();
     this.postMessage({ action: 'queryResults', payload });
@@ -121,7 +103,7 @@ export default class ResultsWebviewManager {
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
-  constructor(private client: ILanguageClient) {
+  constructor() {
     this.iconsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
     this.viewsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }
@@ -131,7 +113,7 @@ export default class ResultsWebviewManager {
   }
 
   private createForId = (requestId: InternalID) => {
-    this.viewsMap[requestId] = new ResultsWebview(this.client, requestId, this.iconsPath, this.viewsPath);
+    this.viewsMap[requestId] = new ResultsWebview(requestId, this.iconsPath, this.viewsPath);
     this.viewsMap[requestId].onDidDispose(() => {
       delete this.viewsMap[requestId];
     });

@@ -58,13 +58,15 @@ class Cache<K = Key, V = Value> {
     return true;
   }
 
+  keys = () => this.instance.keys() as string[];
+
   delStartWith = async (startStr: string): Promise<boolean> => {
     this.log.extend('info')('DELETE keys starting with %s...', startStr);
     if (!startStr) {
       return;
     }
 
-    const keys: string[] = this.instance.keys() as any[];
+    const keys: string[] = this.keys();
     for (const key of keys) {
       if (key.startsWith(startStr)) {
         await this.del(<any>key);
@@ -84,6 +86,7 @@ class Cache<K = Key, V = Value> {
     return Promise.resolve(this.instance.prune());
   }
 
+  buildKey = (opts: any) => JSON.stringify(opts);
 
   private onDeleted = async (key: K, _value?: V) => {
     this.log.extend('debug')('DELETED %s', key);

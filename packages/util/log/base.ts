@@ -7,8 +7,10 @@ debug.enable(process.env.DEBUG);
 
 const productLogger: Debugger & { _debug?: Debug } = debug(process.env.PRODUCT);
 
-(debug as any).formatArgs = function(args: any) {
-  args[0] = `['${this.namespace}'] ${args[0]}`;
+if (process.env.PRODUCT !== 'ui') {
+  (debug as any).formatArgs = function(args: any) {
+    args[0] = `['${this.namespace}'] ${args[0]}`;
+  }
 }
 
 productLogger.log = console.log.bind(console);

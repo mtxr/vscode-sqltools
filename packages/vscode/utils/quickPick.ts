@@ -1,15 +1,6 @@
 import { window, QuickPickItem, QuickPickOptions, QuickPick } from 'vscode';
 import { DismissedError } from '@sqltools/util/exception';
 
-/**
- * @deprecated Will be removed in newer versions.
- */
- async function quickPickOldApi(options: QuickPickItem[], prop?: string): Promise<QuickPickItem | any> {
-  const sel: QuickPickItem = await window.showQuickPick(options);
-  if (!sel || (prop && !sel[prop])) throw new DismissedError();
-  return prop ? sel[prop] : sel;
-}
-
 export type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<
   QuickPickOptions & {
     title: QuickPick<T>['title'];
@@ -33,8 +24,6 @@ export async function quickPick<T = QuickPickItem | any>(
           label: value.toString(),
         }));
 
-  if (typeof window.createQuickPick !== 'function') return quickPickOldApi(items, prop);
-
   const qPick = window.createQuickPick();
   const sel = await new Promise<QuickPickItem | any>(resolve => {
     const { placeHolderDisabled, ...qPickOptions } = quickPickOptions || ({} as ExtendedQuickPickOptions);
@@ -56,7 +45,7 @@ export async function quickPick<T = QuickPickItem | any>(
 
     if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 
-    qPick.title = `${qPick.title || 'Items'} (${items.length})`;
+    qPick.title = `${qPickOptions.title || 'Items'} (${items.length})`;
 
     qPick.show();
   });
@@ -86,7 +75,7 @@ export async function quickPickSearch<T = any>(
         const catchFn = error => {
           qPick.items = [];
           qPick.busy = false;
-          qPick.title = `${qPick.title || 'Items'} (${qPick.items.length})`;
+          qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
           console.error(error);
         };
         const thenFn = (options: any[]) => {
@@ -95,7 +84,7 @@ export async function quickPickSearch<T = any>(
             ? <QuickPickItem[]>options.map(o => ({ ...o, value: o, label: o.value || o.label }))
             : options.map<QuickPickItem>(value => ({ value, label: value.toString() }));
         };
-        qPick.title = `${qPick.title || 'Items'} (${qPick.items.length})`;
+        qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
         if (getOptsPromise instanceof Promise || typeof getOptsPromise['catch'] === 'function') (<Promise<any>>getOptsPromise).then(thenFn).catch(catchFn);
         else getOptsPromise.then(thenFn, catchFn);
       }, debounceTime);

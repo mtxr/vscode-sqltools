@@ -5,4 +5,5 @@ const queryResultsCache = new Cache('query-results', {
   maxEntries: 50,
 });
 
+queryResultsCache.buildKey = ({ connId, resultId, query, requestId }) => `[${connId}][${requestId || query}][${resultId || query}]`;
 export default queryResultsCache;

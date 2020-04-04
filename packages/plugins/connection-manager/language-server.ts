@@ -3,7 +3,8 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
-import fs from 'fs';
+import { writeFile as writeFileWithCb } from 'fs';
+import { promisify } from 'util';
 import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import Handlers from './cache/handlers';
 import DependencyManager from '../dependency-manager/language-server';
@@ -13,6 +14,8 @@ import logger from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
+
+const writeFile = promisify(writeFileWithCb);
 
 const log = logger.extend('conn-mann');
 
@@ -43,7 +46,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       const c = await this.getConnectionInstance(conn);
       if (!c) throw 'Connection not found';
       const results: NSDatabase.IResult[] = await c[command](...args);
-      await Handlers.QuerySuccess(c, { results });
+      await Handlers.QuerySuccess(results);
       return results;
     } catch (e) {
       this.server.notifyError('Execute query error', e);
@@ -51,20 +54,22 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ connId, filename, query, filetype = 'csv' }) => {
-    const { results, cols } = await queryResultsCache.get(`[${connId}][QUERY=${query}]`);
-    let output = '';
-    if (filetype === 'json') {
-      output = JSON.stringify(results, null, 2);
-    } else if (filetype === 'csv') {
-      output = csvStringify(results, {
-        columns: cols,
-        header: true,
-        quoted_string: true,
-        quoted_empty: true,
-      });
+  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ fileType, filename, ...opts}) => {
+    const { results, cols } = await queryResultsCache.get(queryResultsCache.buildKey(opts));
+    if (fileType === 'json') {
+      return writeFile(filename, JSON.stringify(results, null, 2));
     }
-    fs.writeFileSync(filename, output);
+    if (fileType === 'csv') {
+      return writeFile(
+        filename,
+        csvStringify(results, {
+          columns: cols,
+          header: true,
+          quoted_string: true,
+          quoted_empty: true,
+        }),
+      );
+    }
   };
 
   private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search }) => {
@@ -196,7 +201,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     let connList = await this.getConnectionsList();
 
     if (connId) return connList.filter(c => c.id === connId);
-    
+
     if (connectedOnly) connList = connList.filter(c => c.isConnected);
 
     switch (sort) {

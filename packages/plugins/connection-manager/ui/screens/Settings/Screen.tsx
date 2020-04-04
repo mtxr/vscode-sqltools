@@ -6,11 +6,11 @@ import DriverSelector from './Widget/DriverSelector';
 import availableDrivers from './lib/availableDrivers';
 import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
-import getVscode from '@sqltools/plugins/connection-manager/ui/lib/vscode';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/util/log';
 import '@sqltools/plugins/connection-manager/ui/sass/app.scss';
 import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
+import sendMessage from '../../lib/messages';
 
 const log = logger.extend('settings');
 
@@ -61,7 +61,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
         this.setState({ step: Step.CONNECTION_CREATED, loading: false, connectionSettings: payload.connInfo, action, saved: true });
         break;
       case 'testConnectionSuccess':
-        this.setState({ loading: false, externalMessage: 'Connection test successfull!', externalMessageType: 'success' });
+        this.setState({ loading: false, externalMessage: 'Successfully connected!', externalMessageType: 'success' });
         break;
       case 'testConnectionWarning':
         this.setState({
@@ -122,8 +122,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   }, () => this.validateSettings(cb))
 
   componentDidMount() {
-    this.setState({ loading: false });
-    getVscode().postMessage({ action: 'viewReady', payload: true });
+    this.setState({ loading: false }, () => sendMessage('viewReady', true));
   }
 
   public focusField = (field) => {
@@ -159,14 +158,11 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       if (Object.keys(this.state.errors).length > 0) return;
       const { id: editId, ...connInfo } = this.state.connectionSettings;
       this.setState({ loading: true }, () => {
-        getVscode().postMessage({
-          action: !editId ? 'createConnection' : 'updateConnection',
-          payload: {
-            editId,
-            connInfo,
-            globalSetting: !!this.state.globalSetting,
-            transformToRelative: this.state.transformToRelative
-          }
+        sendMessage(!editId ? 'createConnection' : 'updateConnection', {
+          editId,
+          connInfo,
+          globalSetting: !!this.state.globalSetting,
+          transformToRelative: this.state.transformToRelative
         });
       });
     });
@@ -174,11 +170,8 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
 
   testConnection = () => {
     this.setState({ loading: true }, () => {
-      getVscode().postMessage({
-        action: 'testConnection',
-        payload: {
-          connInfo: this.state.connectionSettings,
-        }
+      sendMessage('testConnection', {
+        connInfo: this.state.connectionSettings,
       });
     });
   }
@@ -186,7 +179,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
 
   goTo = (step: Step) => this.setState({ step });
 
-  openConnectionFile = () => getVscode().postMessage({ action: 'openConnectionFile' });
+  openConnectionFile = () => sendMessage('openConnectionFile');
 
   public render() {
     const { step } = this.state;

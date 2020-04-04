@@ -31,30 +31,24 @@ notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
-  private _active: SidebarConnection = null;
-  private _activeOverwrite: IConnection = null;
   private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
   private _onDidChangeActiveConnection: EventEmitter<IConnection> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   public readonly onDidChangeActiveConnection = this._onDidChangeActiveConnection.event;
 
-  public getActive(): IConnection | null {
-
-    if (this._activeOverwrite) return this._activeOverwrite;
-
-    if (!this._active) return null;
+  public async getActive(): Promise<IConnection | null> {
+    const conns = await this.getConnections();
+    const active = conns.find(c => c.isActive);
+    if (!active) return null;
 
     return {
-      ...this._active.conn,
-      id: getConnectionId(this._active.conn),
+      ...active,
+      id: getConnectionId(active),
     };
   }
 
-  public setActive(c: IConnection) {
-    this._activeOverwrite = c;
-  }
-  public getActiveId() {
-    const active = this.getActive();
+  public async getActiveId() {
+    const active = await this.getActive();
     if (!active) return null;
     return active.id;
   }
@@ -85,8 +79,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return items.find(c => getConnectionId(c) === id) || null;
   }
 
-  public focus(item?: SidebarConnection) {
-    return this.treeView.reveal(item || this.treeView.selection[0] || this._active, {
+  public async focus(item?: SidebarConnection) {
+    return this.treeView.reveal(item || this.treeView.selection[0], {
       focus: true,
       select: true,
     });
@@ -144,8 +138,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return [addNew];
     }
 
-    this._active = null;
-    this._activeOverwrite = null;
+    let active = null;
     if (groupConnected) {
       return this.getGroupedRootItems(items);
     }
@@ -154,7 +147,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     root.items = [];
     items.forEach(item => {
       if (item.isActive) {
-        this._active = item;
+        active = item.conn;
       }
       let currentGroup: ConnectionGroup = root;
       if (item.conn && item.conn.group) {
@@ -164,7 +157,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
       currentGroup.items.push(item);
     });
-    this._onDidChangeActiveConnection.fire(this._active ? this._active.conn : null);
+    this._onDidChangeActiveConnection.fire(active);
 
     root.items = sortBy(root.items, ['isGroup', 'label']);
 
@@ -176,9 +169,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     notConnectedTreeItem.items = [];
     let connectedTreeCount = 0;
     let notConnectedTreeCount = 0;
+    let active = null;
     items.forEach(item => {
       if (item.isActive) {
-        this._active = item;
+        active = item.conn;
       }
       let currentGroup: ConnectionGroup = null;
       if (item.isConnected) {
@@ -195,7 +189,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
       currentGroup.items.push(item);
     });
-    this._onDidChangeActiveConnection.fire(this._active ? this._active.conn : null);
+    this._onDidChangeActiveConnection.fire(active);
 
     connectedTreeItem.items = sortBy(connectedTreeItem.items, ['isGroup', 'label']);
     notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, ['isGroup', 'label']);

@@ -4,13 +4,13 @@ module.exports = {
       require.resolve('@babel/preset-env'),
       {
         targets: {
-          node: '6',
+          node: '8',
         },
       },
     ],
   ],
-  plugins: [
-    require.resolve('@babel/plugin-proposal-object-rest-spread'),
-    require.resolve('@babel/plugin-transform-spread'),
-  ],
+  // plugins: [
+  //   require.resolve('@babel/plugin-proposal-object-rest-spread'),
+  //   require.resolve('@babel/plugin-transform-spread'),
+  // ],
 };

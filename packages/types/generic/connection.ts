@@ -173,6 +173,8 @@ export interface IDatabaseFilter {
 
 export interface IQueryOptions {
   requestId?: InternalID;
+  connId?: string;
+  [k: string]: any;
 }
 
 export interface IConnectionDriver {

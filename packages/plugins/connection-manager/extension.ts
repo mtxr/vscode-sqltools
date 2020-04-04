@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/pl
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
@@ -65,7 +65,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_executeFromInput = async () => {
     try {
-      const conn = this.explorer.getActive() ? this.explorer.getActive() : await this._pickConnection(true);
+      const conn = await this.explorer.getActive() || await this._pickConnection(true);
       if (!conn) {
         return;
       }
@@ -76,10 +76,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, opt: { page?: number, pageSize?: number } = {}) => {
+  private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, opt: IQueryOptions & { page?: number, pageSize?: number } = {}) => {
     try {
       const table = await this._getTable(node);
-      const view = await this._openResultsWebview();
+      const view = await this._openResultsWebview(opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('showRecords', table, { ...opt, requestId: view.requestId });
       view.updateResults(payload);
 
@@ -202,7 +202,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         ib.totalSteps = params.length;
         ib.ignoreFocusOut = true;
         ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
-        ib.prompt = 'Remember to escape values if neeeded.'
+        ib.prompt = 'Remember to escape values if needed.'
         ib.onDidAccept(() => {
           const r = new RegExp(params[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
           query = query.replace(r, ib.value);
@@ -214,7 +214,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
           ib.value = '';
           ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
         });
-        ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didnt fill all params. Cancelling...')));
+        ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didn\'t fill all params. Cancelling...')));
         ib.show();
       });
     }
@@ -222,9 +222,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return query;
   }
 
-  private ext_executeQuery = async (query?: string, { connNameOrId, ...opt }: IQueryOptions & { connNameOrId?: string} = {}) => {
+  private ext_executeQuery = async (query?: string, { connNameOrId, connId, ...opt }: IQueryOptions = {}) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
+      connNameOrId = connId || connNameOrId;
       if (!connNameOrId) { // check query defined connection name
         connNameOrId = extractConnName(query);
       }
@@ -245,7 +246,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       }
 
       query = await this.replaceParams(query);
-      const view = await this._openResultsWebview();
+      const view = await this._openResultsWebview(opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
       view.updateResults(payload);
       return payload;
@@ -273,12 +274,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_showOutputChannel = async () => logger.show();
 
-  private ext_saveResults = async (filetype: 'csv' | 'json', connId?: string) => {
-    connId = typeof connId === 'string' ? connId : undefined;
-    filetype = typeof filetype === 'string' ? filetype : undefined;
-    let mode: any = filetype || Config.defaultExportType;
-    if (mode === 'prompt') {
-      mode = await quickPick<'csv' | 'json' | undefined>([
+  private ext_saveResults = async ({ fileType, ...opt }: IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' } = {}) => {
+    fileType = fileType || Config.defaultExportType;
+    if (fileType === 'prompt') {
+      fileType = await quickPick<'csv' | 'json' | undefined>([
         { label: 'Save results as CSV', value: 'csv' },
         { label: 'Save results as JSON', value: 'json' },
       ], 'value', {
@@ -286,9 +285,17 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       });
     }
 
-    if (!mode) return;
+    if (!fileType || fileType === 'prompt') return;
 
-    return this.resultsWebview.get(connId || this.explorer.getActive().id).saveResults(mode);
+    const filters = fileType === 'csv' ? { 'CSV File': ['csv', 'txt'] } : { 'JSON File': ['json'] };
+    const file = await window.showSaveDialog({
+      filters,
+      saveLabel: 'Export'
+    });
+    if (!file) return;
+    const filename = file.fsPath;
+    await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
+    return commands.executeCommand('vscode.open', file);
   }
 
   private ext_openAddConnectionScreen = () => {
@@ -390,15 +397,16 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
 
-  private async _openResultsWebview(requestId?: string) {
-    requestId = requestId || generateId();
+  private async _openResultsWebview(reUseId?: string) {
+    const requestId = reUseId || generateId();
     const view = this.resultsWebview.get(requestId);
     await view.show();
     return view;
   }
   private _connect = async (force = false): Promise<IConnection> => {
-    if (!force && this.explorer.getActive()) {
-      return this.explorer.getActive();
+    if (!force) {
+      const active = await this.explorer.getActive();
+      if (active) return active;
     }
     const c: IConnection = await this._pickConnection(!force);
     // history.clear();
@@ -439,8 +447,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return connections.find((c) => getConnectionId(c) === sel);
   }
 
-  private _runConnectionCommandWithArgs(command, ...args) {
-    return this.client.sendRequest(RunCommandRequest, { conn: this.explorer.getActive(), command, args });
+  private async _runConnectionCommandWithArgs(command: string, ...args: any[]) {
+    return this.client.sendRequest(RunCommandRequest, { conn: await this.explorer.getActive(), command, args });
   }
 
   private async _askForPassword(c: IConnection): Promise<string | null> {
@@ -455,7 +463,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private async _setConnection(c?: IConnection): Promise<IConnection> {
     let password = null;
 
-    if (c && getConnectionId(c) !== this.explorer.getActiveId()) {
+    if (c && getConnectionId(c) !== (await this.explorer.getActiveId())) {
       if (c.driver === DatabaseDriver.SQLite) {
         c.database = parseWorkspacePath(c.database);
       }
@@ -468,7 +476,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
-      this.explorer.setActive(c);
     }
     this.explorer.refresh();
     return c;
@@ -663,7 +670,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
     // extension stuff
     Context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager(this.client)),
+      (this.resultsWebview = new ResultsWebviewManager()),
       (this.settingsWebview = new SettingsWebview()),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),

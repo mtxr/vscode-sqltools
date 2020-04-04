@@ -25,15 +25,6 @@ pre {
   }
 }
 
-#messages-drawer {
-  .MuiDrawer-paper {
-    width: 50%;
-  }
-  &.width-75pct .MuiDrawer-paper {
-    width: 75%;
-  }
-}
-
 .resultsPagination {
   border-top: 1px solid var(--vscode-editor-lineHighlightBorder);
   padding: 2px 6px !important;
@@ -60,12 +51,21 @@ pre {
     cursor: not-allowed;
   }
 
-  .MuiIconButton-root {
-    padding: 4px;
+  .paginator {
+    .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+      width: 2rem;
+      height: 2rem;
+      line-height: 1;
+
+      &:hover {
+        border: 1px solid var(--vscode-button-hoverBackground);
+        background: var(--vscode-button-hoverBackground);
+      }
+    }
   }
 
   button[class*="Pagination-activeButton"], .MuiButton-root.active, .MuiIconButton-root.active {
-    color: var(--vscode-input-placeholderForeground);
+    color: var(--vscode-input-foreground);
     background: var(--vscode-inputOption-activeBackground);
     border: 1px solid var(--vscode-inputOption-activeBorder);
   }

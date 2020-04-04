@@ -62,13 +62,12 @@ export default class Connection {
     const [records] = await this.conn.showRecords(table, { limit, page, requestId }).catch(this.decorateException);
 
     if (records) {
-      let label = [];
-      label.push('Showing', Math.min(limit, records.results.length || 0));
-      if (typeof records.total === 'number') {
-        label.push('of', records.total);
-      }
-      label.push(table.label, 'records');
-      records.label = label.join(' ');
+      records.label = [
+        Math.max(records.total || 0, records.results.length, 0),
+        'records on',
+        `'${table.label}'`,
+        'table'
+      ].join(' ');
     }
     return [records];
   }

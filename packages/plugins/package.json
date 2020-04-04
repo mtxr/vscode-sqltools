@@ -8,8 +8,8 @@
   "build": [
     {
       "entries": {
-        "Settings": "connection-manager/ui/screens/Settings.tsx",
-        "Results": "connection-manager/ui/screens/Results.tsx",
+        "Settings": "connection-manager/ui/screens/Settings/index.tsx",
+        "Results": "connection-manager/ui/screens/Results/index.tsx",
         "theme": "connection-manager/ui/sass/theme.scss"
       },
       "type": "webview"

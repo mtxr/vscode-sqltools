@@ -35,6 +35,9 @@
       "**/.vscode-test": true,
     },
     "typescript.tsdk": "root/node_modules/typescript/lib",
+    "cSpell.words": [
+      "sqltools"
+    ],
   },
   "tasks": {
     "version": "2.0.0",
@@ -48,52 +51,6 @@
         },
         "command": "yarn run dev:watch",
         "problemMatcher": []
-      }
-    ]
-  },
-  "launch": {
-    "configurations": [
-      {
-        "name": "Launch Extension",
-        "type": "extensionHost",
-        "request": "launch",
-        "runtimeExecutable": "${execPath}",
-        "args": [
-          "${workspaceFolder:extension}/../../test/project.code-workspace",
-          "--extensionDevelopmentPath=${workspaceFolder:extension}/../../dist",
-        ],
-        "stopOnEntry": false,
-        "sourceMaps": true,
-        "skipFiles": [
-          "<node_internals>/**/*.js"
-        ],
-        "outFiles": [
-          "${workspaceFolder:extension}/../../dist/*.js"
-        ],
-        "env": {
-          "NODE_ENV": "development"
-        }
-      },
-      {
-        "type": "node",
-        "request": "attach",
-        "name": "Attach LS",
-        "port": 6010,
-        "restart": true,
-        "sourceMaps": true,
-        "skipFiles": [
-          "<node_internals>/**/*.js"
-        ],
-        "outFiles": [
-          "${workspaceFolder:extension}/../../dist/*.js"
-        ],
-        "protocol": "inspector"
-      }
-    ],
-    "compounds": [
-      {
-        "name": "Launch Extension and Attach LS",
-        "configurations": ["Launch Extension", "Attach LS"]
       }
     ]
   }

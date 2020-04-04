@@ -2,7 +2,7 @@ import { DatabaseDriver } from '@sqltools/types';
 import { getIconPathForDriver } from '@sqltools/util/path/driver';
 
 const requirements = [
-  'Node 7 or newer is required.',
+  'Node 8 or newer is required.',
 ];
 
 interface Driver {

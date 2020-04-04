@@ -1,9 +1,12 @@
 import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, window } from 'vscode';
-import { getIconPath } from '@sqltools/vscode/icons';
+import { getIconPaths } from '@sqltools/vscode/icons';
 import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
+  get serializationId() {
+    return this.id;
+  }
   public disposeEvent: EventEmitter<never> = new EventEmitter();
   public get onDidDispose() {
     return this.disposeEvent.event;
@@ -50,24 +53,23 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public show() {
     if (!this.panel) {
       this.panel = window.createWebviewPanel(
-        this.id,
+        this.serializationId,
         this.title,
         this.wereToShow,
         {
           enableScripts: true,
-          retainContextWhenHidden: true,
+          retainContextWhenHidden: true, // @TODO remove and migrate to state restore
           enableCommandUris: true,
           localResourceRoots: [this.iconsPath, this.viewsPath],
-          enableFindWidget: true,
+          // enableFindWidget: true,
         },
       );
-      this.panel.iconPath = getIconPath('database-active');
-      this.disposables.push(Disposable.from(this.panel));
-      this.disposables.push(this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, undefined, this.disposables));
-      this.disposables.push(this.panel.onDidChangeViewState(({ webviewPanel }) => {
+      this.panel.iconPath = getIconPaths('database-active');
+      this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, null, this.disposables);
+      this.panel.onDidChangeViewState(({ webviewPanel }) => {
         this.setPreviewActiveContext(webviewPanel.active);
-      }));
-      this.disposables.push(this.panel.onDidDispose(this.dispose, null, this.disposables));
+      }, null, this.disposables);
+      this.panel.onDidDispose(this.dispose, null, this.disposables);
       this.panel.webview.html = this.html || this.baseHtml;
     }
 
@@ -130,7 +132,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           if (attempts < 10) return attempts++;
 
           clearInterval(timer);
-          return reject(new Error(`Could not get the state for ${this.id}`));
+          return reject(new Error(`Could not get the state for ${this.panel.title}`));
         }
         clearInterval(timer);
         const state = this.lastState;
