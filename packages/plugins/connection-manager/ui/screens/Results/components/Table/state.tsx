@@ -2,11 +2,15 @@ export const initialState = {
   filters: [],
   contextMenu: {
     row: null,
-    rowKey: null,
     column: null,
     options: [],
-    position: {},
+    position: {
+      x: null,
+      y: null,
+    },
+    anchorEl: null
   },
+  selection: [],
   columnExtensions: null,
 };
 

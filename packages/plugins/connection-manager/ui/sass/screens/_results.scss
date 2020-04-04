@@ -19,7 +19,7 @@ pre {
   flex-grow: 1;
   height: 0;
 
-  .selected-row {
+  [class*='TableSelectRow-selected'] {
     background: var(--vscode-editor-selectionBackground) !important;
     color: var(--vscode-editor-selectionForeground) !important;
   }

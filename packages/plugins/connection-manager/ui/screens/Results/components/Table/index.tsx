@@ -9,6 +9,7 @@ import {
   PagingState,
   CustomPaging,
   PagingStateProps,
+  SelectionState,
 } from '@devexpress/dx-react-grid';
 
 import {
@@ -19,6 +20,7 @@ import {
   Table as MTable,
   TableColumnResizing,
   PagingPanel,
+  TableSelection,
 } from '@devexpress/dx-react-grid-material-ui';
 import { toRegEx } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import { TableProps } from '../../interfaces';
@@ -30,7 +32,6 @@ import TableFilterRowCell from './TableFilterRowCell';
 import PagingPanelContainer from './PagingPanelContainer';
 import FilterIcon from './FilterIcon';
 import TableCell from './TableCell';
-import TableRow from './TableRow';
 import GridRoot from './GridRoot';
 import generateColumnExtensions from './generateColumnExtensions';
 import { IQueryOptions } from '@sqltools/types';
@@ -53,24 +54,28 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
     e: React.MouseEvent<HTMLElement> = undefined,
     row: any,
     column: MTable.DataCellProps['column'],
-    rowKey: any
+    index: number,
   ) => {
     const options = this.tableContextOptions(row, column);
     if (!options || options.length === 0) return;
     this.setState({
       contextMenu: {
         row,
-        rowKey,
         column,
         options,
+        anchorEl: e.currentTarget,
         position: {
-          pageX: e.pageX,
-          pageY: e.pageY,
+          x: e.clientX,
+          y: e.clientY,
         },
       },
+      selection: this.state.selection.includes(index) ? this.state.selection : [index],
     });
   };
 
+  closeContextMenu = () => {
+    this.setState({ contextMenu: initialState.contextMenu });
+  }
   onMenuSelect = (choice: string) => {
     const { contextMenu } = this.state;
     switch (choice) {
@@ -195,9 +200,10 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
     </div>
   );
 
+  setSelection = (selection = []) => this.setState({ selection });
   render() {
     const { rows, columns, columnNames, pageSize, focusMessagesButton, error, showPagination, page, total, changePage } = this.props;
-    const { filters } = this.state;
+    const { filters, selection, contextMenu } = this.state;
     const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
     let pagingProps: PagingStateProps = {};
     if (typeof page === 'number') {
@@ -224,13 +230,18 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
               <IntegratedFiltering columnExtensions={columnExtensions} />
               <PagingState pageSize={pageSize} {...pagingProps} />
               <CustomPaging totalCount={total || rows.length} />
+              <SelectionState selection={selection} onSelectionChange={this.setSelection} />
               <VirtualTable
                 height="100%"
                 cellComponent={TableCell(this.openContextMenu)}
-                rowComponent={TableRow(this.state.contextMenu.rowKey)}
               />
               <TableColumnResizing columnWidths={columnExtensions} onColumnWidthsChange={this.updateWidths} />
               <TableHeaderRow showSortingControls />
+              <TableSelection
+                selectByRowClick
+                highlightRow
+                showSelectionColumn={false}
+              />
               <TableFilterRow
                 cellComponent={TableFilterRowCell}
                 showFilterSelector
@@ -240,11 +251,12 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
               {<PagingPanel containerComponent={PagingPanelContainer(focusMessagesButton, showPagination)} />}
             </Grid>
             <Menu
-              open={Boolean(this.state.contextMenu.row)}
+              anchorEl={contextMenu.anchorEl}
               width={250}
-              position={this.state.contextMenu.position}
+              onClose={this.closeContextMenu}
+              position={contextMenu.position}
               onSelect={this.onMenuSelect}
-              options={this.state.contextMenu.options}
+              options={contextMenu.options}
             />
           </>
         )}
