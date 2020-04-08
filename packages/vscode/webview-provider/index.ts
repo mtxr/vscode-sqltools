@@ -96,6 +96,9 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     }
   }
 
+  public get isActive() {
+    return this.panel && this.panel.active;
+  }
   public hide = () => {
     if (this.panel === undefined) return;
     this.setPreviewActiveContext(false);

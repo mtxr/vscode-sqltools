@@ -125,4 +125,8 @@ export default class ResultsWebviewManager {
 
     return this.viewsMap[requestId] || this.createForId(requestId);
   }
+
+  public getActiveView = () => {
+    return this.viewsMap[Object.keys(this.viewsMap).find(k => this.viewsMap[k] && this.viewsMap[k].isActive)];
+  }
 }

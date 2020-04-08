@@ -22,13 +22,8 @@ export interface TableProps {
 }
 
 export interface QueryResultsState {
-  connId: string;
-  activeTab?: string;
-  error?: any;
-  queries: string[];
-  resultMap: {
-    [query: string]: NSDatabase.IResult;
-  };
-  pageSize: number;
   loading: boolean;
+  error: any;
+  resultTabs: NSDatabase.IResult[];
+  activeTab: number;
 }

@@ -11,6 +11,7 @@ import useReducer from './utils/useReducer.base';
 import { Button } from '@material-ui/core';
 import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 import sendMessage, { messageLog } from '../../lib/messages';
+import { QueryResultsState } from './interfaces';
 
 
 const log = logger.extend('results');
@@ -18,7 +19,7 @@ const log = logger.extend('results');
 interface Props {};
 type State = typeof initialState;
 
-const initialState = {
+const initialState: QueryResultsState = {
   loading: true,
   error: null,
   resultTabs: [] as NSDatabase.IResult[],
@@ -48,7 +49,7 @@ function reducer(state: State, action: { type: ACTION, payload?: any }): State {
 }
 
 const Screen: React.SFC<Props> = () => {
-  const [state, dispatch] = useReducer(reducer, initialState);
+  const [state, dispatch, stateRef] = useReducer(reducer, initialState);
   const {
     loading,
     error,
@@ -89,7 +90,8 @@ const Screen: React.SFC<Props> = () => {
       case 'reset':
         return resetRequest();
       case 'getState':
-        return sendMessage('receivedState', state);
+        console.log({stateRef});
+        return sendMessage('receivedState', stateRef.current);
       default:
         return log.extend('warn')(`No handler set for %s`, action);
     }
@@ -108,11 +110,11 @@ const Screen: React.SFC<Props> = () => {
 
   useEffect(() => {
     // did update state. Persist
-    getVscode().setState(state);
+    getVscode().setState(stateRef.current);
     return () => {
       getVscode().setState(null);
     }
-  }, [state]);
+  }, [state, state.resultTabs, state.resultTabs.length]);
 
   useEffect(() => {
     if (error) {

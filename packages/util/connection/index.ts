@@ -8,8 +8,16 @@ export function getConnectionId(c: IConnection): string | null {
     return null;
   if (c.id) return c.id;
 
-  if (c.connectString) `${c.name}${idSep}${c.connectString}`.replace(/\./g, ':').replace(/\//g, '\\')
-  return `${c.name}${idSep}${c.driver}${idSep}${c.server}${idSep}${c.database}`.replace(/\./g, ':').replace(/\//g, '\\');
+  const parts = [c.name, c.driver];
+  if (c.connectString) {
+    parts.push(c.connectString);
+  } else {
+    parts.push(
+      c.server,
+      c.database
+    );
+  }
+  return parts.join(idSep).replace(/\./g, ':').replace(/\//g, '\\');
 }
 
 export function getNameFromId(id: string) {

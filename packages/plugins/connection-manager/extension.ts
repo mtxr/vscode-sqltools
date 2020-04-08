@@ -274,7 +274,32 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_showOutputChannel = async () => logger.show();
 
-  private ext_saveResults = async ({ fileType, ...opt }: IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' } = {}) => {
+  private ext_saveResults = async (arg: (IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
+    let fileType = null;
+    let opt: IQueryOptions = {};
+    if (arg instanceof Uri) {
+      // if clicked on editor title actions
+      const view = this.resultsWebview.getActiveView();
+      if (!view) {
+        throw 'Can\'t find active results view';
+      }
+      const state = await view.getState();
+      const activeResult = state.resultTabs[state.activeTab];
+      opt = {
+        requestId: activeResult.requestId,
+        resultId: activeResult.resultId,
+        baseQuery: activeResult.baseQuery,
+        connId: activeResult.connId,
+      }
+    } else if (arg.requestId) {
+      // used context menu inside of a view
+      const { fileType: optFileType, ...rest } = arg;
+      fileType = optFileType;
+      opt = rest;
+    }
+
+    if (!opt || !opt.requestId) throw 'Can\'t find active results view';
+
     fileType = fileType || Config.defaultExportType;
     if (fileType === 'prompt') {
       fileType = await quickPick<'csv' | 'json' | undefined>([
