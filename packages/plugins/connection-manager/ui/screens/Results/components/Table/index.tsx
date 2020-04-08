@@ -37,6 +37,7 @@ import generateColumnExtensions from './generateColumnExtensions';
 import { IQueryOptions } from '@sqltools/types';
 import { initialState, TableState } from './state';
 import sendMessage from '../../../../lib/messages';
+import TableRow from './TableRow';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -78,6 +79,9 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
   }
   onMenuSelect = (choice: string) => {
     const { contextMenu } = this.state;
+    let selectedRows: any[] | any = this.state.selection.map(index => this.props.rows[index]);
+    selectedRows = selectedRows.length === 1 ? selectedRows[0] : selectedRows;
+    const cellValue = contextMenu.row[contextMenu.column.name];
     switch (choice) {
       case MenuActions.FilterByValueOption:
         const { filters = [] } = this.state;
@@ -90,26 +94,22 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
         });
         return this.setState({
           filters,
-          contextMenu: initialState.contextMenu
+          contextMenu: initialState.contextMenu,
+          selection: [],
         });
       case MenuActions.CopyCellOption:
-        clipboardInsert(contextMenu.row[contextMenu.column.name]);
-        return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.CopyRowOption:
-        clipboardInsert(contextMenu.row || 'Failed');
+        clipboardInsert(choice === MenuActions.CopyCellOption ? cellValue : selectedRows);
         return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.ClearFiltersOption:
-        return this.setState({ filters: [], contextMenu: initialState.contextMenu });
+        return this.setState({ filters: [], contextMenu: initialState.contextMenu, selection: [] });
+      case MenuActions.ClearSelection:
+        return this.setState({ contextMenu: initialState.contextMenu, selection: [] });
       case MenuActions.OpenEditorWithValueOption:
-        sendMessage('call', {
-          command: `${process.env.EXT_NAMESPACE}.insertText`,
-          args: [`${contextMenu.row[contextMenu.column.name]}`],
-        });
-        return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.OpenEditorWithRowOption:
         sendMessage('call', {
           command: `${process.env.EXT_NAMESPACE}.insertText`,
-          args: [JSON.stringify(contextMenu.row, null, 2)],
+          args: [choice === MenuActions.OpenEditorWithValueOption ? `${cellValue}` : JSON.stringify(selectedRows, null, 2)],
         });
         return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.ReRunQueryOption:
@@ -146,37 +146,66 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
   }
 
   tableContextOptions = (row: any, column: MTable.DataCellProps['column']): any[] => {
-    const options: any[] = [];
     let cellValue = row[column.name];
     const cellValueIsObject = cellValue && (Array.isArray(cellValue) || cellValue.toString() === '[object Object]');
     const replaceString = cellValueIsObject ? 'Cell Value' : `'${cellValue}'`;
+    const isMultiSelection = this.state.selection.length > 1;
+    const cellOptions = [];
+    const filterOptions = [];
+    const queryOptions = [MenuActions.ReRunQueryOption];
+    const rowOptions = [
+      MenuActions.CopyRowOption,
+      MenuActions.OpenEditorWithRowOption,
+    ];
+    const resultOptions = [
+      MenuActions.SaveCSVOption,
+      MenuActions.SaveJSONOption,
+    ];
     if (typeof cellValue !== 'undefined' && !cellValueIsObject) {
-      options.push({
+      cellOptions.push({
         label: MenuActions.FilterByValueOption.replace('{contextAction}', replaceString),
         value: MenuActions.FilterByValueOption,
       });
-      options.push('sep');
     }
     if (this.state.filters.length > 0) {
-      options.push(MenuActions.ClearFiltersOption);
-      options.push(MenuActions.Divider);
+      filterOptions.push(MenuActions.ClearFiltersOption);
     }
-    return options.concat([
-      {
-        label: MenuActions.OpenEditorWithValueOption.replace('{contextAction}', replaceString),
-        value: MenuActions.OpenEditorWithValueOption,
-      },
-      MenuActions.OpenEditorWithRowOption,
+    if (isMultiSelection) {
+      filterOptions.push(MenuActions.ClearSelection);
+    }
+
+    cellOptions.push(
       {
         label: MenuActions.CopyCellOption.replace('{contextAction}', replaceString),
         value: MenuActions.CopyCellOption,
       },
-      MenuActions.CopyRowOption,
-      MenuActions.Divider,
-      MenuActions.ReRunQueryOption,
-      MenuActions.SaveCSVOption,
-      MenuActions.SaveJSONOption,
-    ]);
+      {
+        label: MenuActions.OpenEditorWithValueOption.replace('{contextAction}', replaceString),
+        value: MenuActions.OpenEditorWithValueOption,
+      },
+    );
+
+    let options = [];
+    if (cellOptions.length > 0) {
+      options = options.concat(cellOptions);
+      options.push(MenuActions.Divider);
+    }
+    if (filterOptions.length > 0) {
+      options = options.concat(filterOptions);
+      options.push(MenuActions.Divider);
+    }
+    if (rowOptions.length > 0) {
+      options = options.concat(rowOptions);
+      options.push(MenuActions.Divider);
+    }
+    if (queryOptions.length > 0) {
+      options = options.concat(queryOptions);
+      options.push(MenuActions.Divider);
+    }
+    if (resultOptions.length > 0) {
+      options = options.concat(resultOptions);
+    }
+    return options;
   };
 
   renderError = (focusMessagesButton: React.ReactNode) => (
@@ -241,6 +270,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
                 selectByRowClick
                 highlightRow
                 showSelectionColumn={false}
+                rowComponent={TableRow.Selected}
               />
               <TableFilterRow
                 cellComponent={TableFilterRowCell}
@@ -252,7 +282,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
             </Grid>
             <Menu
               anchorEl={contextMenu.anchorEl}
-              width={250}
+              width={300}
               onClose={this.closeContextMenu}
               position={contextMenu.position}
               onSelect={this.onMenuSelect}
