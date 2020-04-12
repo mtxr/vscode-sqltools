@@ -31,6 +31,8 @@ notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
+  private messagesTreeView: TreeView<TreeItem>;
+  private messagesTreeViewProvider: MessagesProvider;
   private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
   private _onDidChangeActiveConnection: EventEmitter<IConnection> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
@@ -101,7 +103,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         this.refresh();
       }
     });
-    Context.subscriptions.push(this.treeView);
+    this.messagesTreeViewProvider = new MessagesProvider();
+    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}/queryMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: false });
+    Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 
   private getConnections(): Thenable<IConnection[]> {
@@ -198,6 +202,36 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     connectedTreeItem.description = `${connectedTreeCount} connections`;
 
     return [connectedTreeItem, notConnectedTreeItem].filter(a => a.items.length > 0);
+  }
+
+  public get addConsoleMessages () {
+    return this.messagesTreeViewProvider.addMessages;
+  }
+  focusQueryConsole = async () => {
+    const items = await this.messagesTreeViewProvider.getChildren();
+    this.messagesTreeView.reveal(items[0], { focus: true, select: true });
+  }
+}
+
+export class MessagesProvider implements TreeDataProvider<TreeItem> {
+  private items: TreeItem[] = [];
+  private _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter();
+  public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
+  getTreeItem(element: TreeItem): TreeItem | Thenable<TreeItem> {
+    return element;
+  }
+  async getChildren(element?: TreeItem): Promise<TreeItem[]> {
+    if (element) return Promise.resolve(null);
+    return Promise.resolve(this.items);
+  }
+
+  getParent = (_: TreeItem) => {
+    return null;
+  }
+
+  addMessages = (messages: string[] = []) => {
+    this.items = messages.map(m => new TreeItem(m, TreeItemCollapsibleState.None));
+    this._onDidChangeTreeData.fire(null);
   }
 }
 

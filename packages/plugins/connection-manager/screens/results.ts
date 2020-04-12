@@ -13,7 +13,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected title: string = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
 
-  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri) {
+  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri, private syncConsoleMessages: ((messages: string[]) => void)) {
     super(iconsPath, viewsPath);
 
     this.onDidDispose(() => {
@@ -25,10 +25,21 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
         case 'viewReady':
           this.isOpen = payload;
           break;
+        case 'syncConsoleMessages':
+          this.syncConsoleMessages(payload);
         default:
         break;
       }
     });
+  }
+
+  onViewActive = async (active: boolean) => {
+    if (!active) {
+      this.syncConsoleMessages([]);
+      return;
+    };
+    const state = await this.getState();
+    this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
   }
 
   public get cssVariables() {
@@ -103,7 +114,7 @@ export default class ResultsWebviewManager {
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
-  constructor() {
+  constructor(private syncConsoleMessages: ((messages: string[]) => void)) {
     this.iconsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
     this.viewsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }
@@ -113,7 +124,7 @@ export default class ResultsWebviewManager {
   }
 
   private createForId = (requestId: InternalID) => {
-    this.viewsMap[requestId] = new ResultsWebview(requestId, this.iconsPath, this.viewsPath);
+    this.viewsMap[requestId] = new ResultsWebview(requestId, this.iconsPath, this.viewsPath, this.syncConsoleMessages);
     this.viewsMap[requestId].onDidDispose(() => {
       delete this.viewsMap[requestId];
     });

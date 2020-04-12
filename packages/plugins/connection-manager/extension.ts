@@ -81,8 +81,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       const table = await this._getTable(node);
       const view = await this._openResultsWebview(opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('showRecords', table, { ...opt, requestId: view.requestId });
-      view.updateResults(payload);
-
+      this.updateViewResults(view, payload);
     } catch (e) {
       this.errorHandler('Error while showing table records', e);
     }
@@ -93,7 +92,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       const table = await this._getTable(node);
       const view = await this._openResultsWebview();
       const payload = await this._runConnectionCommandWithArgs('describeTable', table, { requestId: view.requestId });
-      view.updateResults(payload);
+      this.updateViewResults(view, payload);
     } catch (e) {
       this.errorHandler('Error while describing table records', e);
     }
@@ -116,6 +115,20 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     } catch (e) {
       return this.errorHandler('Error closing connection', e);
     }
+  }
+
+  private ext_focusQueryConsole = () => {
+    return this.explorer.focusQueryConsole();
+  }
+
+  private updateViewResults = (view: ResultsWebviewManager['viewsMap'][string], results: NSDatabase.IResult[]) => {
+    view.updateResults(results);
+    if (results.length > 0)
+      this.syncConsoleMessages(results[0].messages);
+  }
+
+  private syncConsoleMessages = (messages: string[]) => {
+    this.explorer.addConsoleMessages(messages || []);
   }
 
   private async updateAttachedConnectionsMap(fileUri: Uri, connId?: string) {
@@ -248,7 +261,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       query = await this.replaceParams(query);
       const view = await this._openResultsWebview(opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
-      view.updateResults(payload);
+      this.updateViewResults(view, payload);
       return payload;
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
@@ -683,6 +696,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
+      .registerCommand(`focusQueryConsole`, this.ext_focusQueryConsole)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     this.errorHandler = extension.errorHandler;
@@ -695,7 +709,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
     // extension stuff
     Context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager()),
+      (this.resultsWebview = new ResultsWebviewManager(this.syncConsoleMessages)),
       (this.settingsWebview = new SettingsWebview()),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),

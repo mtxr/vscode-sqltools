@@ -61,7 +61,7 @@ const Screen: React.SFC<Props> = () => {
   const resetRequest = () => dispatch({ type: ACTION.RESULTS_RECEIVED });
   const toggleTab = (value: number) => dispatch({ type: ACTION.TOGGLE_TAB, payload: value });
   const resultsReceived = (changes: Partial<State>) => dispatch({ type: ACTION.RESULTS_RECEIVED, payload: changes });
-  const focusMessages = () => console.log('focusMessages NOT IMPLEMENTED YET');
+  const focusMessages = () => sendMessage('call', { command: `${process.env.EXT_NAMESPACE}.focusQueryConsole` });
 
   const changePage = (page: number) => {
     set({ loading: true });
@@ -115,6 +115,12 @@ const Screen: React.SFC<Props> = () => {
       getVscode().setState(null);
     }
   }, [state, state.resultTabs, state.resultTabs.length]);
+
+  useEffect(() => {
+    const { resultTabs: results, activeTab: index } = stateRef.current;
+    const activeResult = results[index];
+    sendMessage('syncConsoleMessages', (activeResult && activeResult.messages) || []);
+  }, [activeTab, state.resultTabs, state.resultTabs.length]);
 
   useEffect(() => {
     if (error) {

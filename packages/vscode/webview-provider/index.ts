@@ -68,6 +68,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       this.panel.webview.onDidReceiveMessage(this.onDidReceiveMessage, null, this.disposables);
       this.panel.onDidChangeViewState(({ webviewPanel }) => {
         this.setPreviewActiveContext(webviewPanel.active);
+        this.onViewActive && this.onViewActive(webviewPanel.active);
       }, null, this.disposables);
       this.panel.onDidDispose(this.dispose, null, this.disposables);
       this.panel.webview.html = this.html || this.baseHtml;
@@ -79,6 +80,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.setPreviewActiveContext(true);
   }
 
+  public onViewActive?: (active: boolean) => any;
   private onDidReceiveMessage = ({ action, payload, ...rest}) => {
     switch(action) {
       case 'receivedState':

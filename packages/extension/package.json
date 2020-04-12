@@ -901,7 +901,7 @@
             }
         },
         "views": {
-            "sqltoolsView": [
+            "sqltoolsActivityBarContainer": [
                 {
                     "id": "sqltools/connectionExplorer",
                     "name": "Connections"
@@ -914,14 +914,27 @@
                     "id": "sqltools/historyExplorer",
                     "name": "Query History"
                 }
+            ],
+            "sqltoolsPanelContainer": [
+                {
+                    "id": "sqltools/queryMessages",
+                    "name": "Messages"
+                }
             ]
         },
         "viewsContainers": {
             "activitybar": [
                 {
-                    "id": "sqltoolsView",
+                    "id": "sqltoolsActivityBarContainer",
                     "icon": "icons/sqltools-sidebar.svg",
                     "title": "SQLTools"
+                }
+            ],
+            "panel": [
+                {
+                    "id": "sqltoolsPanelContainer",
+                    "icon": "icons/sqltools-sidebar.svg",
+                    "title": "Query Console"
                 }
             ]
         },
