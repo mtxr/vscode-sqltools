@@ -6,12 +6,15 @@
 
 <hr />
 
-[![Docs](https://img.shields.io/badge/docs-here-blueviolet?style=flat-square)](https://vscode-sqltools.mteixeira.dev)
-[![Gitter](https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square)](https://gitter.im/vscode-sqltools)
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=flat-square)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=flat-square)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
-[![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools?style=flat-square)](https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md)
-[![VSCode.pro](https://img.shields.io/badge/LEARN-VSCODE%20TODAY%20%E2%86%92-gray.svg?colorB=4D2AFF)](https://a.paddle.com/v2/click/16413/111711?link=1227)
+<p align="center">
+
+[![Docs](https://img.shields.io/badge/docs-here-blueviolet?style=for-the-badge)](https://vscode-sqltools.mteixeira.dev)
+[![VSCode.pro](https://img.shields.io/badge/Supported%20by-VSCode%20Power%20User%20Course%20%E2%86%92-gray.svg?colorA=655BE1&colorB=4F44D6&style=for-the-badge)](https://a.paddle.com/v2/click/16413/111711?link=1227)
+[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge)](https://www.patreon.com/mteixeira)
+[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+[![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge)](https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md)
+
+</p>
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
 
