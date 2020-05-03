@@ -38,6 +38,7 @@ export class SQLToolsExtension implements IExtension {
         version: VSCodeVersion,
       },
     });
+    this.getAndUpdateConfig();// check test 1112
     this.client = new SQLToolsLanguageClient(this.context);
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
@@ -55,7 +56,6 @@ export class SQLToolsExtension implements IExtension {
       this.context.subscriptions.push(logger.outputChannel);
     }
     this.loadPlugins();
-    this.getAndUpdateConfig();
     activationTimer.end();
     setTimeout(() => {
       telemetry.registerTime('activation', activationTimer);
