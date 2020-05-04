@@ -26,7 +26,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public settingsWebview: SettingsWebview;
   private context: ExtensionContext;
   private errorHandler: IExtension['errorHandler'];
-  private explorer: ConnectionExplorer;
+  public explorer: ConnectionExplorer;
   private attachedFilesMap: { [fileUri: string ]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 

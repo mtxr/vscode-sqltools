@@ -28,6 +28,7 @@ export class SQLToolsExtension implements IExtension {
   private willRunCommandHooks: { [commands: string]: Array<(evt: ICommandEvent) => void> } = {};
   private didRunCommandSuccessfullyHooks: { [commands: string]: Array<(evt: ICommandSuccessEvent) => void> } = {};
   public client: SQLToolsLanguageClient;
+  public connManagerPlugin: ConnectionManagerPlugin;
 
   public activate() {
     const activationTimer = new Timer();
@@ -56,6 +57,7 @@ export class SQLToolsExtension implements IExtension {
       this.context.subscriptions.push(logger.outputChannel);
     }
     this.loadPlugins();
+    this.connManagerPlugin.explorer.updateTreeRoot();
     activationTimer.end();
     setTimeout(() => {
       telemetry.registerTime('activation', activationTimer);
@@ -250,10 +252,11 @@ export function activate(context: ExtensionContext) {
   if (instance) return;
   migrateFilesToNewPaths();
   instance = new SQLToolsExtension(context);
+  instance.connManagerPlugin = new ConnectionManagerPlugin(instance);
   instance
     .registerPlugin(FormatterPlugin)
     .registerPlugin(AutoRestartPlugin)
-    .registerPlugin(new ConnectionManagerPlugin(instance))
+    .registerPlugin(instance.connManagerPlugin)
     .registerPlugin(new DependencyManagerPlugin)
     .registerPlugin(new HistoryManagerPlugin)
     .registerPlugin(new BookmarksManagerPlugin);
