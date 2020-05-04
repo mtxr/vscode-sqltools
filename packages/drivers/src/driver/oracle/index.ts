@@ -24,7 +24,7 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, Ora
 
   private get lib(): typeof OracleDBLib {
     const oracledb = sqltoolsRequire('oracledb');
-    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB, oracledb.NUMBER];
+    oracledb.fetchAsString = [oracledb.DATE, oracledb.CLOB, oracledb.NUMBER, oracledb.DB_TYPE_RAW];
     return oracledb;
   }
 
