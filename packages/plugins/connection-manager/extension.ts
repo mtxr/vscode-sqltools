@@ -26,7 +26,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public settingsWebview: SettingsWebview;
   private context: ExtensionContext;
   private errorHandler: IExtension['errorHandler'];
-  public explorer: ConnectionExplorer;
+  private explorer: ConnectionExplorer;
   private attachedFilesMap: { [fileUri: string ]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 
@@ -686,6 +686,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         this.changeTextEditorHandler(window.activeTextEditor);
       }, 5000);
     }
+    this.explorer.updateTreeRoot();
   }
 
   constructor(extension: IExtension) {
