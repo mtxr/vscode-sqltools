@@ -1,4 +1,4 @@
-import { Pool, PoolConfig, types, FieldDef } from 'pg';
+import { Pool, PoolConfig, PoolClient, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
@@ -68,9 +68,10 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
   public query(query: string): Promise<NSDatabase.IResult[]> {
     const messages = [];
+    let cli : PoolClient;
     return this.open()
       .then(async (pool) => {
-        const cli = await pool.connect();
+        cli = await pool.connect();
         cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
         const results = await cli.query({text: query, rowMode: 'array'});
         cli.release();
@@ -94,7 +95,9 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           };
         });
       })
-      .catch(err => ([{
+      .catch(err => {
+        cli && cli.release();
+        return ([{
           connId: this.getId(),
           cols: [],
           messages: messages.concat([
@@ -106,7 +109,8 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           error: true,
           query,
           results: [],
-      }]))
+        }])
+      })
   }
 
   private getColumnNames(fields: FieldDef[]): string[] {
