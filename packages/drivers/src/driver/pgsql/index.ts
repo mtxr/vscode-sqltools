@@ -68,7 +68,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
 
   public query(query: string): Promise<NSDatabase.IResult[]> {
     const messages = [];
-    var cli : PoolClient;
+    let cli : PoolClient;
     return this.open()
       .then(async (pool) => {
         cli = await pool.connect();
@@ -96,7 +96,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         });
       })
       .catch(err => {
-        cli.release();
+        cli && cli.release();
         return ([{
           connId: this.getId(),
           cols: [],
