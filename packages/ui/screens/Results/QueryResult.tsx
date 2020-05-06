@@ -3,6 +3,7 @@ import ResultsTable from './ResultsTable';
 import { Drawer, List, ListSubheader, ListItem, ListItemText, Button } from '@material-ui/core';
 import Syntax from '../../components/Syntax';
 import { NSDatabase } from '@sqltools/types';
+import getVscode from '../../lib/vscode';
 
 const QueryResults = ({ cols = [], error, query, messages = [], results = [], connId, pageSize = 50, page, total }: NSDatabase.IResult) => {
   const [showMessages, setShowMessages] = useState(!!(error || (results.length === 0 && messages.length > 0)));
@@ -23,15 +24,32 @@ const QueryResults = ({ cols = [], error, query, messages = [], results = [], co
         pageSize={showPagination ? pageSize : 0}
         error={error}
         openDrawerButton={
-          <Button
-            onClick={() => setShowMessages(!showMessages)}
-            className={'action-button' + (showMessages ? 'active' : '')}
-          >
-            Query Details
-          </Button>
+          <div>
+            <Button
+              onClick={() => setShowMessages(!showMessages)}
+              className={'action-button' + (showMessages ? 'active' : '')}
+            >
+              Query Details
+            </Button> &nbsp;
+            <Button
+              onClick={() => {
+                getVscode().postMessage({
+                  action: 'call',
+                  payload: {
+                    command: `${process.env.EXT_NAME}.executeQuery`,
+                    args: [query, connId],
+                  },
+                });
+              }}
+              className={'action-button' + (showMessages ? 'active' : '')}
+            >
+              Rerun Query
+            </Button>
+          </div>
         }
       />
-      <Drawer open={showMessages} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined }>
+
+      <Drawer open={showMessages} onClose={() => setShowMessages(false)} anchor="right" id="messages-drawer" className={error ? 'width-75pct' : undefined}>
         <List dense component="ul" subheader={<ListSubheader>Query</ListSubheader>}>
           <ListItem component="li" className={'query ' + (error ? 'error' : '')}>
             <Syntax code={query} language="sql" strong />
