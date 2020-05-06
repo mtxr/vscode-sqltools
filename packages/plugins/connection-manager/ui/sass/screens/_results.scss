@@ -26,6 +26,11 @@ pre {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  .buttons {
+    button:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
   .paginator > div {
     padding: 0 !important;
   }

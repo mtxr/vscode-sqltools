@@ -117,10 +117,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private ext_focusQueryConsole = () => {
-    return this.explorer.focusQueryConsole();
-  }
-
   private updateViewResults = (view: ResultsWebviewManager['viewsMap'][string], results: NSDatabase.IResult[]) => {
     view.updateResults(results);
     if (results.length > 0)
@@ -351,10 +347,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     // TEMP SOlUTION
     // in the future this should open correct json file to edit connections
     return commands.executeCommand('workbench.action.openSettings', `${EXT_NAMESPACE}.connections`);
-  }
-
-  private ext_focusOnExplorer = () => {
-    return this.explorer.focus();
   }
 
   private ext_deleteConnection = async (connIdOrNode?: string | SidebarConnection) => {
@@ -690,13 +682,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
       .registerCommand(`showRecords`, this.ext_showRecords)
-      .registerCommand(`focusOnExplorer`, this.ext_focusOnExplorer)
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
-      .registerCommand(`focusQueryConsole`, this.ext_focusQueryConsole)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
 
     this.errorHandler = extension.errorHandler;

@@ -267,11 +267,6 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Focus On Connection Explorer",
-                "command": "sqltools.focusOnExplorer",
-                "category": "SQLTools Management"
-            },
-            {
                 "title": "Show Table Records",
                 "command": "sqltools.showRecords",
                 "category": "SQLTools Connection",
@@ -917,7 +912,7 @@
             ],
             "sqltoolsPanelContainer": [
                 {
-                    "id": "sqltools/queryMessages",
+                    "id": "sqltools/consoleMessages",
                     "name": "Messages"
                 }
             ]
@@ -934,7 +929,7 @@
                 {
                     "id": "sqltoolsPanelContainer",
                     "icon": "icons/sqltools-sidebar.svg",
-                    "title": "Query Console"
+                    "title": "SQL Console"
                 }
             ]
         },

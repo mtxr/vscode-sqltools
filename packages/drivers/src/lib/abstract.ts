@@ -108,4 +108,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     this.log.extend('error')(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
+
+  protected prepareMessage(message: any): NSDatabase.IResult['messages'][number] {
+    return { message: message.toString(), date: new Date() };
+  }
 }

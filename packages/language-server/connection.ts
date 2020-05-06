@@ -92,7 +92,7 @@ export default class Connection {
           connId: this.getId(),
           cols: [],
           error: true,
-          messages: [ message ],
+          messages: [ { message, date: new Date() } ],
           query,
           results: [],
         } ];

@@ -78,7 +78,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return this.open()
       .then(async (pool) => {
         const cli = await pool.connect();
-        cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
+        cli.on('notice', notice => messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`)));
         const results = await cli.query({ text: query.toString(), rowMode: 'array' });
         cli.release();
         return results;
@@ -96,7 +96,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
             resultId: generateId(),
             connId: this.getId(),
             cols,
-            messages: messages.concat([`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`]),
+            messages: messages.concat([
+              this.prepareMessage(`${r.command} successfully executed.${
+                r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''
+              }`)
+            ]),
             query: queries[i],
             results: this.mapRows(r.rows, cols),
           };
@@ -108,10 +112,10 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         resultId: generateId(),
         cols: [],
         messages: messages.concat([
-          [
+          this.prepareMessage ([
             (err && err.message || err),
             err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
-          ].filter(Boolean).join(' ')
+          ].filter(Boolean).join(' '))
         ]),
         error: true,
         rawError: err,

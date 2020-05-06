@@ -13,7 +13,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected title: string = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
 
-  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri, private syncConsoleMessages: ((messages: string[]) => void)) {
+  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri, private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
     super(iconsPath, viewsPath);
 
     this.onDidDispose(() => {
@@ -35,7 +35,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   onViewActive = async (active: boolean) => {
     if (!active) {
-      this.syncConsoleMessages([]);
+      this.syncConsoleMessages(['Not focused to results view']);
       return;
     };
     const state = await this.getState();
@@ -114,7 +114,7 @@ export default class ResultsWebviewManager {
   private iconsPath: vscode.Uri;
   private viewsPath: vscode.Uri;
 
-  constructor(private syncConsoleMessages: ((messages: string[]) => void)) {
+  constructor(private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
     this.iconsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
     this.viewsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
   }

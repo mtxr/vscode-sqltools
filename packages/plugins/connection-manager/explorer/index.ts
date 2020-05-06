@@ -1,5 +1,5 @@
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection } from '@sqltools/types';
+import { IConnection, NSDatabase } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import SidebarItem from "@sqltools/plugins/connection-manager/explorer/SidebarItem";
@@ -81,12 +81,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return items.find(c => getConnectionId(c) === id) || null;
   }
 
-  public async focus(item?: SidebarConnection) {
-    return this.treeView.reveal(item || this.treeView.selection[0], {
-      focus: true,
-      select: true,
-    });
-  }
   public getSelection() {
     return this.treeView.selection;
   }
@@ -104,7 +98,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
     });
     this.messagesTreeViewProvider = new MessagesProvider();
-    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}/queryMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: false });
+    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}/consoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: false });
     Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 
@@ -207,10 +201,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public get addConsoleMessages () {
     return this.messagesTreeViewProvider.addMessages;
   }
-  focusQueryConsole = async () => {
-    const items = await this.messagesTreeViewProvider.getChildren();
-    this.messagesTreeView.reveal(items[0], { focus: true, select: true });
-  }
 }
 
 export class MessagesProvider implements TreeDataProvider<TreeItem> {
@@ -229,8 +219,16 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
     return null;
   }
 
-  addMessages = (messages: string[] = []) => {
-    this.items = messages.map(m => new TreeItem(m, TreeItemCollapsibleState.None));
+  addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
+    this.items = messages.map(m => {
+      if (typeof m === 'string')
+        return new TreeItem(m, TreeItemCollapsibleState.None);
+      const date = new Date(m.date || undefined);
+      const item = new TreeItem(m.message, TreeItemCollapsibleState.None);
+      item.description = date.toLocaleTimeString();
+      item.tooltip = date.toString();
+      return item;
+    });
     this._onDidChangeTreeData.fire(null);
   }
 }

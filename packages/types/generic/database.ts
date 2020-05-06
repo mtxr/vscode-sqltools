@@ -81,7 +81,7 @@ export namespace NSDatabase {
     cols: string[];
     query: string;
     baseQuery?: string; // used for extension generated queries
-    messages: string[];
+    messages: (string | { message: string; date: Date })[];
     page?: number;
     total?: number;
     pageSize?: number;

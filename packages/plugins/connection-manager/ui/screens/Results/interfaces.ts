@@ -1,6 +1,7 @@
 import { Column } from '@devexpress/dx-react-grid';
 import { NSDatabase, IQueryOptions } from '@sqltools/types';
 import { ReactNode } from 'react';
+import { MenuActions } from './constants';
 
 export interface TableProps {
   error: boolean;
@@ -16,9 +17,10 @@ export interface TableProps {
   pageSize: number;
   page?: number;
   total?: number;
-  focusMessagesButton: ReactNode;
+  footerButtons: ReactNode;
   showPagination: boolean;
   changePage?: (page: number) => void;
+  menuActions?: Partial<{ [k in MenuActions]: (...args: any[]) => void }>
 }
 
 export interface QueryResultsState {

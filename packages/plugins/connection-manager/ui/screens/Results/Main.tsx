@@ -2,7 +2,7 @@ import React, { useEffect } from 'react';
 import getVscode from '../../lib/vscode';
 import { IWebviewMessage } from '../../interfaces';
 import logger from '@sqltools/util/log';
-import { NSDatabase } from '@sqltools/types';
+import { NSDatabase, IQueryOptions } from '@sqltools/types';
 import ViewContainer from './components/ViewContainer';
 import Tabs from './components/QueryTabs';
 import Table from './components/Table';
@@ -12,17 +12,17 @@ import { Button } from '@material-ui/core';
 import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 import sendMessage, { messageLog } from '../../lib/messages';
 import { QueryResultsState } from './interfaces';
+import { MenuActions } from './constants';
 
 
 const log = logger.extend('results');
 
 interface Props {};
-type State = typeof initialState;
 
 const initialState: QueryResultsState = {
   loading: true,
   error: null,
-  resultTabs: [] as NSDatabase.IResult[],
+  resultTabs: [],
   activeTab: 0,
 };
 
@@ -33,7 +33,16 @@ enum ACTION {
   SET = 'SET',
 }
 
-function reducer(state: State, action: { type: ACTION, payload?: any }): State {
+const getCurrentQueryOptions = (activeResult: NSDatabase.IResult) => {
+  return {
+    requestId: activeResult.requestId,
+    resultId: activeResult.resultId,
+    baseQuery: activeResult.baseQuery,
+    connId: activeResult.connId,
+  };
+}
+
+function reducer(state: QueryResultsState, action: { type: ACTION, payload?: any }): QueryResultsState {
   switch (action.type) {
     case ACTION.RESET:
       return { ...initialState };
@@ -57,11 +66,47 @@ const Screen: React.SFC<Props> = () => {
     activeTab,
   } = state;
 
-  const set = (payload: Partial<State>) => dispatch({ type: ACTION.SET, payload });
+  const getCurrentResult = (s: QueryResultsState) => {
+    const { resultTabs: queryResults, activeTab: index } = s || state;
+    return queryResults[index] as NSDatabase.IResult;
+  }
+  const set = (payload: Partial<QueryResultsState>) => dispatch({ type: ACTION.SET, payload });
   const resetRequest = () => dispatch({ type: ACTION.RESULTS_RECEIVED });
   const toggleTab = (value: number) => dispatch({ type: ACTION.TOGGLE_TAB, payload: value });
-  const resultsReceived = (changes: Partial<State>) => dispatch({ type: ACTION.RESULTS_RECEIVED, payload: changes });
-  const focusMessages = () => sendMessage('call', { command: `${process.env.EXT_NAMESPACE}.focusQueryConsole` });
+  const resultsReceived = (changes: Partial<QueryResultsState>) => dispatch({ type: ACTION.RESULTS_RECEIVED, payload: changes });
+  const focusMessages = () => sendMessage('call', { command: `${process.env.EXT_NAMESPACE}/consoleMessages.focus` });
+  const exportResults = (choice?: MenuActions.SaveCSVOption | MenuActions.SaveJSONOption | any) => {
+    const activeResult = getCurrentResult(stateRef.current);
+    if (!activeResult) return;
+    sendMessage('call', {
+      command: `${process.env.EXT_NAMESPACE}.saveResults`,
+      args: [{
+        ...getCurrentQueryOptions(activeResult),
+        fileType: Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined,
+      }],
+    });
+    const a = Object.values(MenuActions);
+  };
+  const reRunQuery = () => {
+    const activeResult = getCurrentResult(stateRef.current);
+    if (!activeResult) return;
+    const { queryType, query, queryParams, pageSize, page } = activeResult;
+    if (queryType) {
+      sendMessage('call', {
+        command: `${process.env.EXT_NAMESPACE}.${queryType}`,
+        args: [queryParams, { ...getCurrentQueryOptions(activeResult), page: page, pageSize: pageSize || 50 }],
+      });
+      return set({ loading: true });
+    }
+    sendMessage('call', {
+      command: `${process.env.EXT_NAMESPACE}.executeQuery`,
+      args: [
+        query,
+        getCurrentQueryOptions(activeResult) as IQueryOptions
+      ],
+    });
+    return set({ loading: true });
+  };
 
   const changePage = (page: number) => {
     set({ loading: true });
@@ -78,7 +123,7 @@ const Screen: React.SFC<Props> = () => {
     messageLog('received => %s %O', action, payload || 'NO_PAYLOAD');
     switch (action) {
       case 'queryResults':
-        const changes: Partial<State> = {
+        const changes: Partial<QueryResultsState> = {
           resultTabs: payload,
           activeTab: 0,
           loading: false,
@@ -90,7 +135,6 @@ const Screen: React.SFC<Props> = () => {
       case 'reset':
         return resetRequest();
       case 'getState':
-        console.log({stateRef});
         return sendMessage('receivedState', stateRef.current);
       default:
         return log.extend('warn')(`No handler set for %s`, action);
@@ -150,19 +194,18 @@ const Screen: React.SFC<Props> = () => {
         pageSize={pageSize}
         error={error}
         changePage={changePage}
-        queryOptions={{
-          requestId: activeResult.requestId,
-          resultId: activeResult.resultId,
-          baseQuery: activeResult.baseQuery,
-          connId: activeResult.connId,
+        queryOptions={getCurrentQueryOptions(activeResult)}
+        menuActions={{
+          [MenuActions.ReRunQueryOption]: reRunQuery,
+          [MenuActions.SaveCSVOption]: exportResults,
+          [MenuActions.SaveJSONOption]: exportResults,
         }}
-        focusMessagesButton={
-          <Button
-            onClick={focusMessages}
-            className={'action-button'}
-          >
-            Query Details
-          </Button>
+        footerButtons={
+          <div className='buttons'>
+            <Button onClick={focusMessages} className='action-button'>Console</Button>
+            <Button onClick={reRunQuery} className='action-button'>Re-Run Query</Button>
+            <Button onClick={exportResults} className='action-button'>Export</Button>
+          </div>
         }
       />}
       {loading && <Loading active />}

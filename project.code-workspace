@@ -2,12 +2,12 @@
   "folders": [
     { "path": "./packages/drivers" },
     { "path": "./packages/extension" },
+    { "path": "./packages/formatter" },
     { "path": "./packages/language-server" },
     { "path": "./packages/plugins" },
-    { "path": "./packages/vscode"},
-    { "path": "./packages/formatter" },
-    { "path": "./packages/util" },
     { "path": "./packages/types" },
+    { "path": "./packages/util" },
+    { "path": "./packages/vscode"},
     { "path": "./docs" },
     { "path": "./build-tools" },
     // { "path": ".", "name": "root" }

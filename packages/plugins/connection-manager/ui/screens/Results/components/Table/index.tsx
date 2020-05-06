@@ -111,33 +111,10 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
           command: `${process.env.EXT_NAMESPACE}.insertText`,
           args: [choice === MenuActions.OpenEditorWithValueOption ? `${cellValue}` : JSON.stringify(selectedRows, null, 2)],
         });
-        return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.ReRunQueryOption:
-        if (this.props.queryType) {
-          sendMessage('call', {
-            command: `${process.env.EXT_NAMESPACE}.${this.props.queryType}`,
-            args: [this.props.queryParams, { ...this.props.queryOptions, page: this.props.page, pageSize: this.props.pageSize || 50 }],
-          });
-        } else {
-          sendMessage('call', {
-            command: `${process.env.EXT_NAMESPACE}.executeQuery`,
-            args: [
-              this.props.query,
-              this.props.queryOptions as IQueryOptions
-            ],
-          });
-        }
-        return this.setState({ contextMenu: initialState.contextMenu });
       case MenuActions.SaveCSVOption:
       case MenuActions.SaveJSONOption:
-        sendMessage('call', {
-          command: `${process.env.EXT_NAMESPACE}.saveResults`,
-          args: [{
-            ...this.props.queryOptions,
-            fileType: choice === MenuActions.SaveJSONOption ? 'json' : 'csv'
-          }],
-        });
-        return this.setState({ contextMenu: initialState.contextMenu });
+        return this.setState({ contextMenu: initialState.contextMenu }, () => this.props.menuActions[choice](choice));
     }
   };
 
@@ -208,7 +185,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
     return options;
   };
 
-  renderError = (focusMessagesButton: React.ReactNode) => (
+  renderError = (footerButtons: React.ReactNode) => (
     <div
       className='queryError'
       style={{
@@ -225,13 +202,13 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
         <ErrorIcon />
       </div>
       <div style={{ margin: '30px' }}>Query with errors. Please, check the error below.</div>
-      <div>{focusMessagesButton}</div>
+      <div>{footerButtons}</div>
     </div>
   );
 
   setSelection = (selection = []) => this.setState({ selection });
   render() {
-    const { rows, columns, columnNames, pageSize, focusMessagesButton, error, showPagination, page, total, changePage } = this.props;
+    const { rows, columns, columnNames, pageSize, footerButtons, error, showPagination, page, total, changePage } = this.props;
     const { filters, selection, contextMenu } = this.state;
     const columnExtensions = this.state.columnExtensions || generateColumnExtensions(columnNames, rows);
     let pagingProps: PagingStateProps = {};
@@ -248,7 +225,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
     return (
       <Paper square elevation={0} style={{ height: '100%' }} className="result">
         {error ? (
-          this.renderError(focusMessagesButton)
+          this.renderError(footerButtons)
         ) : (
           <>
             <Grid rows={rows} columns={columns} rootComponent={GridRoot}>
@@ -278,7 +255,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
                 iconComponent={FilterIcon}
                 messages={{ regex: 'RegEx' } as any}
               />
-              {<PagingPanel containerComponent={PagingPanelContainer(focusMessagesButton, showPagination)} />}
+              {<PagingPanel containerComponent={PagingPanelContainer(footerButtons, showPagination)} />}
             </Grid>
             <Menu
               anchorEl={contextMenu.anchorEl}
