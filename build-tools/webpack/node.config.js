@@ -23,18 +23,18 @@ module.exports = function getNodeConfig(entries, packagePath) {
         {
           test: /\.ts$/,
           use: [
-            { loader: 'babel-loader', options: babelOptions },
+            process.env.NODE_ENV !== 'development' && { loader: 'babel-loader', options: babelOptions },
             { loader: 'ts-loader', options: { transpileOnly: true } },
-          ],
+          ].filter(Boolean),
           exclude: /node_modules|\.test\..+/i,
         },
-        {
+        process.env.NODE_ENV !== 'development' && {
           test: /\.js$/,
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
 
         }
-      ],
+      ].filter(Boolean),
     },
     resolve: {
       extensions: ['.ts', '.js', '.json'],

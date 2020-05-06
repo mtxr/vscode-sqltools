@@ -38,6 +38,7 @@
     "cSpell.words": [
       "sqltools"
     ],
+    "cSpell.enabled": false,
   },
   "tasks": {
     "version": "2.0.0",
