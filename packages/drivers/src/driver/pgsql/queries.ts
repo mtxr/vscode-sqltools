@@ -44,13 +44,13 @@ ORDER BY
 
 const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM ${p => prefixedTableName(DatabaseDriver.PostgreSQL, p.table)}
+FROM ${p => prefixedTableName(p.table, { driver: DatabaseDriver.PostgreSQL })}
 LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
 const countRecords: IBaseQueries['countRecords'] = queryFactory`
 SELECT count(1) AS total
-FROM ${p => prefixedTableName(DatabaseDriver.PostgreSQL, p.table)};
+FROM ${p => prefixedTableName(p.table, { driver: DatabaseDriver.PostgreSQL })};
 `;
 
 const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`
@@ -113,6 +113,51 @@ WHERE
 ORDER BY
   T.TABLE_NAME
 LIMIT ${p => p.limit || 100};
+`;
+
+const searchColumns: IBaseQueries['searchColumns'] = queryFactory`
+SELECT
+  C.COLUMN_NAME AS label,
+  '${ContextValue.COLUMN}' as type,
+  C.TABLE_NAME AS table,
+  C.DATA_TYPE AS "dataType",
+  C.CHARACTER_MAXIMUM_LENGTH::INT AS size,
+  C.TABLE_CATALOG AS database,
+  C.TABLE_SCHEMA AS schema,
+  C.COLUMN_DEFAULT AS defaultValue,
+  C.IS_NULLABLE AS isNullable,
+  (CASE WHEN LOWER(TC.constraint_type) = 'primary key' THEN TRUE ELSE FALSE END) as "isPk",
+  (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk",
+  TC.constraint_type AS keytype
+FROM
+  INFORMATION_SCHEMA.COLUMNS C
+LEFT JOIN information_schema.key_column_usage KC ON KC.table_name = C.table_name
+  AND KC.table_schema = C.table_schema
+  AND KC.column_name = C.column_name
+LEFT JOIN information_schema.table_constraints TC ON KC.table_name = TC.table_name
+  AND KC.table_schema = TC.table_schema
+  AND KC.constraint_name = TC.constraint_name
+JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
+  AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
+  AND C.TABLE_CATALOG = T.TABLE_CATALOG
+WHERE
+  C.TABLE_SCHEMA !~ '^pg_'
+  AND C.TABLE_SCHEMA <> 'information_schema'
+  ${p => p.tables.filter(t => !!t.label).length
+    ? `AND LOWER(C.TABLE_NAME) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
+    : ''
+  }
+  ${p => p.search
+    ? `AND (
+      (C.TABLE_NAME || '.' || C.COLUMN_NAME) ILIKE '%${p.search}%'
+      OR C.COLUMN_NAME ILIKE '%${p.search}%'
+    )`
+    : ''
+  }
+ORDER BY
+  C.TABLE_NAME,
+  C.ORDINAL_POSITION
+LIMIT ${p => p.limit || 100}
 `;
 
 const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.TABLE);
@@ -186,5 +231,6 @@ export default {
   fetchDatabases,
   fetchSchemas,
   fetchMaterializedViews,
-  searchTables
+  searchTables,
+  searchColumns,
 }

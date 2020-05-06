@@ -5,7 +5,6 @@ import { Divider, Menu, Typography } from '@material-ui/core';
 export default ({ position, onSelect, onClose, anchorEl, options = [], width = 200 }) => {
   if (!anchorEl) return null;
   const { x, y } = position || {} as any;
-  // console.log(position, onSelect, onClose, options = [{ value: 'Nothing here...', disabled: true }], width = 200)
   return (
     <Menu
       id="context-menu"

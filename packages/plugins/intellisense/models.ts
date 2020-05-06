@@ -2,11 +2,13 @@ import {
   CompletionItem,
   CompletionItemKind,
 } from 'vscode-languageserver';
-import { NSDatabase } from '@sqltools/types';
+import { NSDatabase, DatabaseDriver } from '@sqltools/types';
+import escapeColumnNames from '@sqltools/util/query/escape-column-names';
 
 export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = `${tableOrView}: ${table.label}\n`;
+  // @TODO
   // if (table.catalog) {
   //   yml += `Table Catalog: ${table.tableCatalog}\n`;
   // }
@@ -29,7 +31,7 @@ export function TableCompletionItem(table: NSDatabase.ITable, priority: number =
   };
 }
 
-export function TableColumnCompletionItem(col: NSDatabase.IColumn): CompletionItem {
+export function TableColumnCompletionItem(col: NSDatabase.IColumn, { driver, addTable = false }: { driver?: DatabaseDriver; addTable?: boolean } = {}): CompletionItem {
   const colInfo = [ col.label ];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);
@@ -53,17 +55,17 @@ export function TableColumnCompletionItem(col: NSDatabase.IColumn): CompletionIt
   if (col.schema) {
     yml += `Table Schema: ${col.schema}\n`;
   }
-  yml += `Table: ${col.table.label}`;
-
+  const table = (<NSDatabase.ITable>col.table).label || col.table;
+  yml += `Table: ${table}`;
+  const label = addTable ? escapeColumnNames(col, { driver }) : col.label;
   return <CompletionItem>{
-    detail: `${col.table.label} Col`,
+    detail: `${table} Col`,
     documentation: {
       value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
     kind: CompletionItemKind.Field,
-    label: col.label,
-    sortText: `${col.table.label}.${col.label}`,
-
+    label,
+    sortText: `-1:${table}.${label}`,
   };
 }

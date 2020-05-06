@@ -187,7 +187,7 @@ export interface IConnectionDriver {
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
-  searchItems?(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]>;
+  searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
 }
 

@@ -104,7 +104,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     this.log.extend('error')(`###### Attention ######\getChildrenForItem not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
-  public searchItems(_itemType: ContextValue, _search: string): Promise<NSDatabase.SearchableItem[]> {
+  public searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]> {
     this.log.extend('error')(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }

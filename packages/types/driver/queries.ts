@@ -17,6 +17,7 @@ export interface IBaseQueries {
   fetchDatabases?: QueryBuilder<never, NSDatabase.IDatabase>;
   fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
   searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
+  searchColumns: QueryBuilder<{ search: string, tables: NSDatabase.ITable[], limit?: number }, NSDatabase.IColumn>;
   // old api
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;

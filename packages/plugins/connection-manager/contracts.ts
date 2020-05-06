@@ -39,7 +39,7 @@ export const DisconnectRequest = new RequestType<
   void
 >('connection/DisconnectRequest');
 export const SearchConnectionItemsRequest = new RequestType<
-  { conn: IConnection; itemType: ContextValue; search: string },
+  { conn: IConnection; itemType: ContextValue; search: string; extraParams?: any },
   {
     results: NSDatabase.SearchableItem[];
   },

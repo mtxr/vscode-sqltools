@@ -6,6 +6,9 @@ import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import Config from '@sqltools/util/config-manager';
+import logger from '@sqltools/util/log';
+
+const log = logger.extend('codelens');
 
 export default class CodeLensPlugin implements IExtensionPlugin {
   private codelensDisposable: Disposable;
@@ -77,7 +80,7 @@ export default class CodeLensPlugin implements IExtensionPlugin {
       const decoration = { range };
       editor.setDecorations(currentQueryDecoration, [decoration]);
     } catch (error) {
-      console.log(error);
+      log.extend('error')('update decorations failed: %O', error);
     }
   }
 }

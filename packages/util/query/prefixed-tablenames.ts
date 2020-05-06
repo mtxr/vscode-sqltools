@@ -1,6 +1,7 @@
 import { DatabaseDriver, NSDatabase } from '@sqltools/types';
+import { pgCheckEscape } from './escape-rules';
 
-function prefixedtableName(driver: DatabaseDriver, table: NSDatabase.ITable | string) {
+function prefixedtableName(table: Partial<NSDatabase.ITable> | string, { driver }: { driver?: DatabaseDriver } = {}) {
   let items: string[] = [];
   let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
   switch(driver) {
@@ -8,9 +9,9 @@ function prefixedtableName(driver: DatabaseDriver, table: NSDatabase.ITable | st
       return `"${tableObj.label}"`;
     case DatabaseDriver.PostgreSQL:
     case DatabaseDriver['AWS Redshift']:
-      tableObj.database && items.push(`"${tableObj.database}"`);
-      tableObj.schema && items.push(`"${tableObj.schema}"`);
-      items.push(`"${tableObj.label}"`);
+      tableObj.database && items.push(pgCheckEscape(tableObj.database));
+      tableObj.schema && items.push(pgCheckEscape(tableObj.schema));
+      items.push(pgCheckEscape(tableObj.label));
       break;
     case DatabaseDriver.DB2:
     case DatabaseDriver.OracleDB:

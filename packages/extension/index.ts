@@ -244,8 +244,9 @@ export class SQLToolsExtension implements IExtension {
 }
 
 let instance: SQLToolsExtension;
-export function activate(ctx: ExtensionContext) {try {
-  
+export function activate(ctx: ExtensionContext) {
+  try {
+
     Context.set(ctx);
     if (instance) return;
     migrateFilesToNewPaths();
@@ -257,15 +258,13 @@ export function activate(ctx: ExtensionContext) {try {
       .registerPlugin(new DependencyManagerPlugin)
       .registerPlugin(new HistoryManagerPlugin)
       .registerPlugin(new BookmarksManagerPlugin);
-  
+
     return instance.activate();
-  
-} catch (err) {
-  console.error(err);
-  setTimeout(() => {
-    console.error(err);
-  }, 5000);
-}}
+
+  } catch (err) {
+    logger.extend('fatal')('failed to activate: %O', err);
+  }
+}
 
 export function deactivate() {
   if (!instance) return;

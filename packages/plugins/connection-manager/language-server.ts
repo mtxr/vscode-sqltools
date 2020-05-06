@@ -72,7 +72,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search }) => {
+  private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search, extraParams = {} }) => {
     if (!conn) {
       return undefined;
     }
@@ -80,7 +80,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (Object.keys(activeConnections).length === 0) return { results: [] };
 
     const c = await this.getConnectionInstance(conn);
-    const results = await c.searchItems(itemType, search);
+    const results = await c.searchItems(itemType, search, extraParams);
     return { results };
   };
 

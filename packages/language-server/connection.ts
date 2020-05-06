@@ -143,8 +143,8 @@ export default class Connection {
     return this.conn.getChildrenForItem(params);
   }
 
-  public searchItems(itemType: ContextValue, search: string = '') {
-    return this.conn.searchItems(itemType, search);
+  public searchItems(itemType: ContextValue, search: string = '', extraParams = {}) {
+    return this.conn.searchItems(itemType, search, extraParams);
   }
 
   public getStaticCompletions: IConnectionDriver['getStaticCompletions'] = () => {

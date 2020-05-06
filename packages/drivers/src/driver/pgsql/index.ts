@@ -188,10 +188,12 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return [];
   }
 
-  public searchItems(itemType: ContextValue, search: string): Promise<NSDatabase.SearchableItem[]> {
+  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
         return this.queryResults(this.queries.searchTables({ search }));
+      case ContextValue.COLUMN:
+        return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
     }
   }
 
