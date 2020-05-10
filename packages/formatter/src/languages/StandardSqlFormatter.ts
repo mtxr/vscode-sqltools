@@ -1,64 +1,23 @@
-import Formatter from '../core/Formatter';
-import Tokenizer from '../core/Tokenizer';
-import { Config, Token } from '../core/types';
+import AbstractFormatter from './utils/abstract';
+import { TokenizerConfig } from '../core/types';
 
-let tokenizer: Tokenizer;
-
-export default class StandardSqlFormatter {
-  /**
-   * @param {Config} cfg Different set of configurations
-   */
-  constructor(public cfg: Config) {}
-
-  /**
-   * Format the whitespace in a Standard SQL string to make it easier to read
-   *
-   * @param {String} query The Standard SQL string
-   * @return {String} formatted string
-   */
-  format(query) {
-    return new Formatter(this.cfg, getTokenizer()).format(query);
-  }
-
-  tokenize(query): Token[] {
-    return getTokenizer().tokenize(query);
-  }
-}
-
-function getTokenizer(): Tokenizer {
-  if (!tokenizer) {
-    tokenizer = new Tokenizer({
+export default class StandardSqlFormatter extends AbstractFormatter {
+  getTokenizerConfig() {
+    return <TokenizerConfig>{
       reservedWords,
-      reservedToplevelWords,
+      reservedTopLevelWords,
       reservedNewlineWords,
+      reservedTopLevelWordsNoIndent,
       stringTypes: [`""`, "N''", "''", '``', '[]'],
       openParens: ['(', 'CASE'],
       closeParens: [')', 'END'],
       indexedPlaceholderTypes: ['?'],
-      namedPlaceholderTypes: ['@', ':', '%'],
+      namedPlaceholderTypes: ['@', ':', '%', '$'],
       lineCommentTypes: ['#', '--'],
-      tableNamePrefixWords,
-    });
+      specialWordChars: []
+    };
   }
-  return tokenizer;
 }
-
-const tableNamePrefixWords = [
-  'UPDATE',
-  'DELETE FROM',
-  'FROM',
-  'CROSS JOIN',
-  'INNER JOIN',
-  'LEFT JOIN',
-  'LEFT OUTER JOIN',
-  'OUTER JOIN',
-  'RIGHT JOIN',
-  'RIGHT OUTER JOIN',
-  'JOIN',
-  'INSERT INTO',
-  'INSERT',
-  'ALTER TABLE',
-]
 
 const reservedWords = [
   'ACCESSIBLE',
@@ -99,15 +58,16 @@ const reservedWords = [
   'CONSTRAINT',
   'CONTAINS',
   'CONVERT',
+  'COUNT',
   'CREATE',
   'CROSS',
   'CURRENT_TIMESTAMP',
   'DATABASE',
   'DATABASES',
-  'DAY',
   'DAY_HOUR',
   'DAY_MINUTE',
   'DAY_SECOND',
+  'DAY',
   'DEFAULT',
   'DEFINER',
   'DELAYED',
@@ -208,7 +168,6 @@ const reservedWords = [
   'MINUTE_SECOND',
   'MIN_ROWS',
   'MODE',
-  'MODIFY',
   'MONTH',
   'MRG_MYISAM',
   'MYISAM',
@@ -335,7 +294,7 @@ const reservedWords = [
   'YEAR_MONTH',
 ];
 
-const reservedToplevelWords = [
+const reservedTopLevelWords = [
   'ADD',
   'AFTER',
   'ALTER COLUMN',
@@ -344,12 +303,11 @@ const reservedToplevelWords = [
   'EXCEPT',
   'FETCH FIRST',
   'FROM',
-  'GROUP BY',
   'GO',
+  'GROUP BY',
   'HAVING',
   'INSERT INTO',
   'INSERT',
-  'INTERSECT',
   'LIMIT',
   'MODIFY',
   'ORDER BY',
@@ -357,12 +315,12 @@ const reservedToplevelWords = [
   'SET CURRENT SCHEMA',
   'SET SCHEMA',
   'SET',
-  'UNION ALL',
-  'UNION',
   'UPDATE',
   'VALUES',
   'WHERE',
 ];
+
+const reservedTopLevelWordsNoIndent = ['INTERSECT', 'INTERSECT ALL', 'MINUS', 'UNION', 'UNION ALL'];
 
 const reservedNewlineWords = [
   'AND',

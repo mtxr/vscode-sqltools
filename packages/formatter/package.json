@@ -18,9 +18,7 @@
     "sqltools"
   ],
   "authors": [
-    "Matheus Teixeira <matheus@mteixeira.dev>",
-    "Rene Saarsoo",
-    "Uku Pattak"
+    "Matheus Teixeira <matheus@mteixeira.dev>"
   ],
   "files": [
     "lib"
@@ -47,6 +45,7 @@
   },
   "devDependencies": {
     "@types/jest": "^24.0.11",
+    "dedent-js": "^1.0.1",
     "husky": "^3.0.3",
     "jest": "^24.7.0",
     "jest-cli": "^24.7.0",

@@ -10,12 +10,12 @@ const INDENT_TYPE_BLOCK_LEVEL = 'block-level';
  * There are two types of indentation levels:
  *
  * - BLOCK_LEVEL : increased by open-parenthesis
- * - TOP_LEVEL : increased by RESERVED_TOPLEVEL words
+ * - TOP_LEVEL : increased by RESERVED_TOP_LEVEL words
  */
 export default class Indentation {
   public indentTypes = [];
   /**
-   * @param {String} indent Indent value, default is "  " (2 spaces)
+   * @param {string} indent Indent value, default is "  " (2 spaces)
    */
   constructor(public indent?: string) {
     this.indent = indent || '  ';
@@ -23,7 +23,7 @@ export default class Indentation {
 
   /**
    * Returns current indentation string.
-   * @return {String}
+   * @return {string}
    */
   getIndent() {
     return repeat(this.indent, this.indentTypes.length);
@@ -32,7 +32,7 @@ export default class Indentation {
   /**
    * Increases indentation by one top-level indent.
    */
-  increaseToplevel() {
+  increaseTopLevel() {
     this.indentTypes.push(INDENT_TYPE_TOP_LEVEL);
   }
 
@@ -65,5 +65,9 @@ export default class Indentation {
         break;
       }
     }
+  }
+
+  resetIndentation() {
+    this.indentTypes = [];
   }
 }

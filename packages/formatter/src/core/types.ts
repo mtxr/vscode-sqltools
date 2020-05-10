@@ -6,10 +6,10 @@ export enum TokenTypes {
   WORD = 'word',
   STRING = 'string',
   RESERVED = 'reserved',
-  RESERVED_TOPLEVEL = 'reserved-toplevel',
+  RESERVED_TOP_LEVEL = 'reserved-top-level',
+  RESERVED_TOP_LEVEL_NO_INDENT = 'reserved-top-level-no-indent',
   RESERVED_NEWLINE = 'reserved-newline',
   OPERATOR = 'operator',
-  QUERY_SEPARATOR = 'query-separator',
   OPEN_PAREN = 'open-paren',
   CLOSE_PAREN = 'close-paren',
   LINE_COMMENT = 'line-comment',
@@ -17,25 +17,26 @@ export enum TokenTypes {
   NUMBER = 'number',
   PLACEHOLDER = 'placeholder',
   SERVERVARIABLE = 'servervariable',
-  TABLENAME_PREFIX = 'tablename-prefix',
-  TABLENAME = 'tablename',
 }
 export interface Config {
   indent?: string;
   reservedWordCase?: string;
   params?: Object;
+  language?: 'sql' | 'db2' | 'n1ql' | 'pl/sql';
+  linesBetweenQueries?: number;
 }
 export interface TokenizerConfig {
   reservedWords: string[];
-  reservedToplevelWords: string[];
+  reservedTopLevelWords: string[];
   reservedNewlineWords: string[];
-  tableNamePrefixWords: string[];
+  reservedTopLevelWordsNoIndent: string[];
   stringTypes: string[];
   openParens: string[];
   closeParens: string[];
   indexedPlaceholderTypes?: string[];
   namedPlaceholderTypes: string[];
   lineCommentTypes: string[];
+  specialWordChars: string[];
 }
 
 export interface Token {

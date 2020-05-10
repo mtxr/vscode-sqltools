@@ -1,9 +1,10 @@
-import trimEnd from 'lodash/trimEnd';
 import { TokenTypes, Config, Token } from './types';
 import Indentation from './Indentation';
 import InlineBlock from './InlineBlock';
 import Params from './Params';
 import Tokenizer from './Tokenizer';
+
+const trimSpacesEnd = str => str.replace(/[ \t]+$/u, '');
 
 export default class Formatter {
   private tokens: Token[] = [];
@@ -18,7 +19,7 @@ export default class Formatter {
    *   @param {Object} cfg.params
    * @param {Tokenizer} tokenizer
    */
-  constructor(public cfg: Config, public tokenizer: Tokenizer) {
+  constructor(public cfg: Config, public tokenizer: Tokenizer, private tokenOverride?: (token: Token, previousToken?: Token) => Token) {
     this.indentation = new Indentation(this.cfg.indent);
     this.inlineBlock = new InlineBlock();
     this.params = new Params(this.cfg.params);
@@ -27,20 +28,14 @@ export default class Formatter {
   /**
    * Formats whitespaces in a SQL string to make it easier to read.
    *
-   * @param {String} query The SQL query string
-   * @return {String} formatted query
+   * @param {string} query The SQL query string
+   * @return {string} formatted query
    */
-  format(query) {
+  format(query: string) {
     this.tokens = this.tokenizer.tokenize(query);
     const formattedQuery = this.getFormattedQueryFromTokens();
 
     return formattedQuery.trim();
-  }
-
-  reservedWord(word) {
-    if (this.cfg.reservedWordCase === 'upper') return word.toUpperCase();
-    if (this.cfg.reservedWordCase === 'lower') return word.toLowerCase();
-    return word;
   }
 
   getFormattedQueryFromTokens() {
@@ -49,16 +44,19 @@ export default class Formatter {
     this.tokens.forEach((token, index) => {
       this.index = index;
 
+      if (this.tokenOverride) token = this.tokenOverride(token, this.previousReservedWord) || token;
+
       if (token.type === TokenTypes.WHITESPACE) {
         // ignore (we do our own whitespace formatting)
       } else if (token.type === TokenTypes.LINE_COMMENT) {
         formattedQuery = this.formatLineComment(token, formattedQuery);
       } else if (token.type === TokenTypes.BLOCK_COMMENT) {
         formattedQuery = this.formatBlockComment(token, formattedQuery);
-      } else if (token.type === TokenTypes.TABLENAME_PREFIX) {
-        formattedQuery = this.formatTablePrefix(token, formattedQuery);
-      } else if (token.type === TokenTypes.RESERVED_TOPLEVEL) {
-        formattedQuery = this.formatToplevelReservedWord(token, formattedQuery);
+      } else if (token.type === TokenTypes.RESERVED_TOP_LEVEL) {
+        formattedQuery = this.formatTopLevelReservedWord(token, formattedQuery);
+        this.previousReservedWord = token;
+      } else if (token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT) {
+        formattedQuery = this.formatTopLevelReservedWordNoIndent(token, formattedQuery);
         this.previousReservedWord = token;
       } else if (token.type === TokenTypes.RESERVED_NEWLINE) {
         formattedQuery = this.formatNewlineReservedWord(token, formattedQuery);
@@ -70,64 +68,79 @@ export default class Formatter {
         formattedQuery = this.formatOpeningParentheses(token, formattedQuery);
       } else if (token.type === TokenTypes.CLOSE_PAREN) {
         formattedQuery = this.formatClosingParentheses(token, formattedQuery);
-      } else if (token.type === TokenTypes.PLACEHOLDER) {
-        formattedQuery = this.formatPlaceholderOrVariable(token, formattedQuery);
-      } else if (token.type === TokenTypes.SERVERVARIABLE) {
-        formattedQuery = this.formatPlaceholderOrVariable(token, formattedQuery);
+      } else if (token.type === TokenTypes.PLACEHOLDER || token.type === TokenTypes.SERVERVARIABLE) {
+        formattedQuery = this.formatPlaceholder(token, formattedQuery);
       } else if (token.value === ',') {
         formattedQuery = this.formatComma(token, formattedQuery);
+      } else if (token.value === ':') {
+        formattedQuery = this.formatWithSpaceAfter(token, formattedQuery);
       } else if (token.value === '.') {
         formattedQuery = this.formatWithoutSpaces(token, formattedQuery);
-      } else if (token.value === ';' || token.type === TokenTypes.QUERY_SEPARATOR ) {
+      } else if (token.value === ';') {
         formattedQuery = this.formatQuerySeparator(token, formattedQuery);
       } else {
         formattedQuery = this.formatWithSpaces(token, formattedQuery);
+      }
+
+      if (this.previousToken().type === TokenTypes.RESERVED_TOP_LEVEL) {
+        this.indentation.increaseTopLevel();
       }
     });
     return formattedQuery;
   }
 
-  formatLineComment(token, query) {
+  formatLineComment(token: Token, query: string) {
     return this.addNewline(query + token.value);
   }
 
-  formatBlockComment(token, query) {
+  formatBlockComment(token: Token, query: string) {
     return this.addNewline(this.addNewline(query) + this.indentComment(token.value));
   }
 
-  indentComment(comment) {
-    return comment.replace(/\r\n|\n/g, '\n' + this.indentation.getIndent());
+  indentComment(comment: string) {
+    return comment.replace(/\n[ \t]*/gu, '\n' + this.indentation.getIndent() + ' ');
   }
 
-  formatToplevelReservedWord(token, query) {
+  formatTopLevelReservedWordNoIndent(token: Token, query: string) {
+    this.indentation.decreaseTopLevel();
+    query = this.addNewline(query) + this.equalizeWhitespace(this.formatReservedWord(token.value));
+    return this.addNewline(query);
+  }
+
+  formatTopLevelReservedWord(token: Token, query: string) {
     this.indentation.decreaseTopLevel();
 
     query = this.addNewline(query);
 
-    this.indentation.increaseToplevel();
+    return query + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
 
-    query += this.equalizeWhitespace(this.reservedWord(token.value));
-    return this.addNewline(query);
+    // return this.addNewline(query);
   }
 
-  formatNewlineReservedWord(token, query) {
-    return this.addNewline(query) + this.equalizeWhitespace(this.reservedWord(token.value)) + ' ';
+  formatNewlineReservedWord(token: Token, query: string) {
+    return (
+      this.addNewline(query) + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' '
+    );
   }
 
   // Replace any sequence of whitespace characters with single space
-  equalizeWhitespace(string) {
-    return string.replace(/\s+/g, ' ');
+  equalizeWhitespace(value: string) {
+    return value.replace(/\s+/gu, ' ');
   }
 
   // Opening parentheses increase the block indent level and start a new line
-  formatOpeningParentheses(token, query) {
+  formatOpeningParentheses(token: Token, query: string) {
     // Take out the preceding space unless there was whitespace there in the original query
     // or another opening parens or line comment
-    const preserveWhitespaceFor = [TokenTypes.WHITESPACE, TokenTypes.OPEN_PAREN, TokenTypes.LINE_COMMENT];
-    if (!preserveWhitespaceFor.includes(this.previousToken().type)) {
-      query = trimEnd(query);
+    const previousTokenType = this.previousToken().type;
+    if (
+      previousTokenType !== TokenTypes.WHITESPACE
+      && previousTokenType !== TokenTypes.OPEN_PAREN
+      && previousTokenType !== TokenTypes.LINE_COMMENT
+    ) {
+      query = trimSpacesEnd(query);
     }
-    query += token.value;
+    query += this.formatCase(token.value);
 
     this.inlineBlock.beginIfPossible(this.tokens, this.index);
 
@@ -139,7 +152,8 @@ export default class Formatter {
   }
 
   // Closing parentheses decrease the block indent level
-  formatClosingParentheses(token, query) {
+  formatClosingParentheses(token: Token, query: string) {
+    token.value = this.formatCase(token.value);
     if (this.inlineBlock.isActive()) {
       this.inlineBlock.end();
       return this.formatWithSpaceAfter(token, query);
@@ -149,70 +163,58 @@ export default class Formatter {
     }
   }
 
-  formatPlaceholderOrVariable(token, query) {
+  formatPlaceholder(token: Token, query: string) {
     return query + this.params.get(token) + ' ';
   }
 
   // Commas start a new line (unless within inline parentheses or SQL "LIMIT" clause)
-  formatComma(token, query) {
-    query = this.trimTrailingWhitespace(query) + token.value + ' ';
+  formatComma(token: Token, query: string) {
+    query = trimSpacesEnd(query) + token.value + ' ';
 
     if (this.inlineBlock.isActive()) {
       return query;
-    } else if (/^LIMIT$/i.test(this.previousReservedWord.value)) {
+    } else if (/^LIMIT$/iu.test(this.previousReservedWord.value)) {
       return query;
     } else {
       return this.addNewline(query);
     }
   }
 
-  formatWithSpaceAfter(token, query) {
-    return this.trimTrailingWhitespace(query) + token.value + ' ';
+  formatWithSpaceAfter(token: Token, query: string) {
+    return trimSpacesEnd(query) + token.value + ' ';
   }
 
-  formatWithoutSpaces(token, query) {
-    return this.trimTrailingWhitespace(query) + token.value;
+  formatWithoutSpaces(token: Token, query: string) {
+    return trimSpacesEnd(query) + token.value;
   }
 
-  formatWithSpaces(token, query) {
-    return query + token.value + ' ';
+  formatWithSpaces(token: Token, query: string) {
+    const value = token.type === TokenTypes.RESERVED ? this.formatReservedWord(token.value) : token.value;
+    return query + value + ' ';
   }
 
-  formatTablePrefix(token, query) {
-    this.indentation.decreaseTopLevel();
-
-    query = this.addNewline(query);
-
-    this.indentation.increaseToplevel();
-
-    return query + this.equalizeWhitespace(this.reservedWord(token.value)) + ' ';
+  formatReservedWord(value: string) {
+    return this.formatCase(value);
   }
 
-  formatQuerySeparator(token, query) {
-    return this.trimTrailingWhitespace(query) + trimEnd(token.value) + '\n';
+  formatQuerySeparator(token: Token, query: string) {
+    this.indentation.resetIndentation();
+    return trimSpacesEnd(query) + token.value + '\n'.repeat(this.cfg.linesBetweenQueries || 1);
   }
 
-  addNewline(query) {
-    return trimEnd(query) + '\n' + this.indentation.getIndent();
+  addNewline(query: string) {
+    query = trimSpacesEnd(query);
+    if (!query.endsWith('\n')) query += '\n';
+    return query + this.indentation.getIndent();
   }
 
-  trimTrailingWhitespace(query) {
-    if (this.previousNonWhitespaceToken().type === TokenTypes.LINE_COMMENT) {
-      return trimEnd(query) + '\n';
-    } else {
-      return trimEnd(query);
-    }
+  previousToken(): Token {
+    return this.tokens[this.index - 1] || { type: null, value: null };
   }
 
-  previousNonWhitespaceToken() {
-    let n = 1;
-    while (this.previousToken(n).type === TokenTypes.WHITESPACE) {
-      n++;
-    }
-    return this.previousToken(n);
-  }
-
-  previousToken(offset = 1): Token {
-    return this.tokens[this.index - offset] || { type: null, value: null };
+  formatCase(value: string) {
+    if (this.cfg.reservedWordCase === 'upper') return value.toUpperCase();
+    if (this.cfg.reservedWordCase === 'lower') return value.toLowerCase();
+    return value;
   }
 }

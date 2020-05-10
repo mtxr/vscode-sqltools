@@ -1,8 +1,10 @@
+import { Token } from './types';
+
 /**
  * Handles placeholder replacement with given params.
  */
 export default class Params {
-  public index = 0;
+  private index = 0;
   /**
    * @param {Object} params
    */
@@ -12,12 +14,12 @@ export default class Params {
 
   /**
    * Returns param value that matches given placeholder with param key.
-   * @param {Object} token
-   *   @param {String} token.key Placeholder key
-   *   @param {String} token.value Placeholder value
-   * @return {String} param or token.value when params are missing
+   * @param {Token} token
+   *   @param {string} token.key Placeholder key
+   *   @param {string} token.value Placeholder value
+   * @return {string} param or token.value when params are missing
    */
-  get({ key, value }) {
+  get({ key, value }: Token) {
     if (!this.params) {
       return value;
     }
