@@ -1,6 +1,6 @@
 {
     "name": "@sqltools/extension",
-    "displayName": "SQLTools - Database tools",
+    "displayName": "SQLTools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
     "version": "1.0.0",
     "publisher": "mtxr",

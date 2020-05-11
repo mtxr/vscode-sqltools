@@ -19,6 +19,7 @@ console.log(`
   Output dir: ${outdir}
   Display Name: ${constants.DISPLAY_NAME}
   IS_PRODUCTION: ${constants.IS_PRODUCTION}
+  IS_PREVIEW: ${constants.IS_PREVIEW}
 
 #################################
 `)
