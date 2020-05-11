@@ -311,6 +311,7 @@ const reservedTopLevelWords = [
   'LIMIT',
   'MODIFY',
   'ORDER BY',
+  'RETURNING',
   'SELECT',
   'SET CURRENT SCHEMA',
   'SET SCHEMA',

@@ -1,6 +1,6 @@
 import sqlFormatter from "../src/sqlFormatter";
 import behavesLikeSqlFormatter from "./behavesLikeSqlFormatter";
-
+import dedent from 'dedent-js';
 describe('StandardSqlFormatter', () => {
     behavesLikeSqlFormatter();
 
@@ -426,5 +426,16 @@ $$ language PLPGSQL;`);
 `select *
 from a
 where id = $1`);
+    });
+
+    it('Format query with returning as top level', () => {
+      expect(
+        format(`UPDATE "log" SET "time" = '2020-02-01 09:00:00' WHERE "id" = 1 RETURNING "time";`)
+      ).toEqual(dedent(`
+        UPDATE "log"
+        SET "time" = '2020-02-01 09:00:00'
+        WHERE "id" = 1
+        RETURNING "time";
+      `));
     });
 });
