@@ -438,4 +438,16 @@ where id = $1`);
         RETURNING "time";
       `));
     });
+
+    it('Format query with BETWEEN as top level', () => {
+      expect(
+        format(`SELECT NAME, DATE FROM TABLENAME WHERE NAME IS NOT NULL AND DATE BETWEEN '2019-09-01' AND '2019-09-03'`)
+      ).toEqual(dedent(`
+      SELECT NAME,
+        DATE
+      FROM TABLENAME
+      WHERE NAME IS NOT NULL
+        AND DATE BETWEEN '2019-09-01' AND '2019-09-03'
+      `));
+    })
 });

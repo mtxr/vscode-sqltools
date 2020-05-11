@@ -381,7 +381,7 @@ export default function behavesLikeSqlFormatter(language?: any) {
     });
 
     it("formats AND/OR operators", function() {
-        expect(format("foo BETWEEN bar AND baz")).toBe("foo BETWEEN bar\nAND baz");
+        expect(format("foo BETWEEN bar AND baz")).toBe("foo BETWEEN bar AND baz");
         expect(format("foo AND bar")).toBe("foo\nAND bar");
         expect(format("foo OR bar")).toBe("foo\nOR bar");
     });

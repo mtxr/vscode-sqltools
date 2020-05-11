@@ -21,14 +21,14 @@ export default class PlSqlFormatter extends AbstractFormatter {
   tokenOverride = (token: Token, previousReservedToken: Token) => {
     if (
       token.type === TokenTypes.RESERVED_TOP_LEVEL &&
-      token.value === 'SET' &&
-      previousReservedToken.value === 'BY'
+      previousReservedToken.value &&
+      token.value.toUpperCase() === 'SET' &&
+      previousReservedToken.value.toUpperCase() === 'BY'
     ) {
       token.type = TokenTypes.RESERVED;
       return token;
     }
   };
-
 }
 
 const reservedWords = [
