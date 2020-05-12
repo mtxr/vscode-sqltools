@@ -19,11 +19,13 @@ export default class StandardSqlFormatter extends AbstractFormatter {
   }
 
   tokenOverride = (token: Token, previousReservedToken: Token) => {
+    if (!previousReservedToken || !previousReservedToken.value) return;
+    const currentValue = token.value.toUpperCase();
+    const previousValue = previousReservedToken.value.toUpperCase();
     if (
       token.type === TokenTypes.RESERVED_NEWLINE &&
-      previousReservedToken.value &&
-      token.value.toUpperCase() === 'AND' &&
-      previousReservedToken.value === 'BETWEEN'
+      currentValue === 'AND' &&
+      previousValue === 'BETWEEN'
     ) {
       token.type = TokenTypes.RESERVED;
       return token;
@@ -311,6 +313,7 @@ const reservedTopLevelWords = [
   'AFTER',
   'ALTER COLUMN',
   'ALTER TABLE',
+  'CREATE OR REPLACE',
   'DELETE FROM',
   'EXCEPT',
   'FETCH FIRST',
@@ -333,7 +336,7 @@ const reservedTopLevelWords = [
   'WHERE',
 ];
 
-const reservedTopLevelWordsNoIndent = ['INTERSECT', 'INTERSECT ALL', 'MINUS', 'UNION', 'UNION ALL'];
+const reservedTopLevelWordsNoIndent = ['INTERSECT ALL', 'INTERSECT', 'MINUS', 'UNION ALL', 'UNION'];
 
 const reservedNewlineWords = [
   'AND',

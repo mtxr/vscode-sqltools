@@ -113,8 +113,6 @@ export default class Formatter {
     query = this.addNewline(query);
 
     return query + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
-
-    // return this.addNewline(query);
   }
 
   formatNewlineReservedWord(token: Token, query: string) {

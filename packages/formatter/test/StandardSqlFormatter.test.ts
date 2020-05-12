@@ -449,5 +449,18 @@ where id = $1`);
       WHERE NAME IS NOT NULL
         AND DATE BETWEEN '2019-09-01' AND '2019-09-03'
       `));
-    })
+    });
+
+    it('UNION ALL same line issue', () => {
+      expect(
+        format(`SELECT supplier_id FROM suppliers UNION ALL SELECT supplier_id FROM orders ORDER BY supplier_id;`)
+      ).toEqual(dedent(`
+      SELECT supplier_id
+      FROM suppliers
+      UNION ALL
+      SELECT supplier_id
+      FROM orders
+      ORDER BY supplier_id;
+      `));
+    });
 });
