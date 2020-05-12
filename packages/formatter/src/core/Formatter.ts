@@ -52,18 +52,13 @@ export default class Formatter {
         formattedQuery = this.formatLineComment(token, formattedQuery);
       } else if (token.type === TokenTypes.BLOCK_COMMENT) {
         formattedQuery = this.formatBlockComment(token, formattedQuery);
-      } else if (token.type === TokenTypes.RESERVED_TOP_LEVEL) {
-        formattedQuery = this.formatTopLevelReservedWord(token, formattedQuery);
-        this.previousReservedWord = token;
-      } else if (token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT) {
-        formattedQuery = this.formatTopLevelReservedWordNoIndent(token, formattedQuery);
-        this.previousReservedWord = token;
-      } else if (token.type === TokenTypes.RESERVED_NEWLINE) {
-        formattedQuery = this.formatNewlineReservedWord(token, formattedQuery);
-        this.previousReservedWord = token;
-      } else if (token.type === TokenTypes.RESERVED) {
-        formattedQuery = this.formatWithSpaces(token, formattedQuery);
-        this.previousReservedWord = token;
+      } else if (
+        token.type === TokenTypes.RESERVED_TOP_LEVEL
+        || token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT
+        || token.type === TokenTypes.RESERVED_NEWLINE
+        || token.type === TokenTypes.RESERVED
+      ) {
+        formattedQuery = this.formatReserved(token, formattedQuery);
       } else if (token.type === TokenTypes.OPEN_PAREN) {
         formattedQuery = this.formatOpeningParentheses(token, formattedQuery);
       } else if (token.type === TokenTypes.CLOSE_PAREN) {
@@ -87,6 +82,33 @@ export default class Formatter {
       }
     });
     return formattedQuery;
+  }
+
+  formatReserved(token: Token, query: string) {
+    // reserved words combination check
+    if (
+      token.type === TokenTypes.RESERVED_NEWLINE
+      && this.previousReservedWord
+      && this.previousReservedWord.value
+      && token.value.toUpperCase() === 'AND' &&
+      this.previousReservedWord.value.toUpperCase() === 'BETWEEN'
+    ) {
+      token.type = TokenTypes.RESERVED;
+    }
+
+    if (token.type === TokenTypes.RESERVED_TOP_LEVEL) {
+      query = this.formatTopLevelReservedWord(token, query);
+    } else if (token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT) {
+      query = this.formatTopLevelReservedWordNoIndent(token, query);
+    } else if (token.type === TokenTypes.RESERVED_NEWLINE) {
+      query = this.formatNewlineReservedWord(token, query);
+    } else {
+      // TokenTypes.RESERVED
+      query = this.formatWithSpaces(token, query);
+    }
+
+    this.previousReservedWord = token;
+    return query;
   }
 
   formatLineComment(token: Token, query: string) {

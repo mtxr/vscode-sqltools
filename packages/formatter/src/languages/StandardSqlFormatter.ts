@@ -1,5 +1,5 @@
 import AbstractFormatter from './utils/abstract';
-import { TokenizerConfig, Token, TokenTypes } from '../core/types';
+import { TokenizerConfig } from '../core/types';
 
 export default class StandardSqlFormatter extends AbstractFormatter {
   getTokenizerConfig() {
@@ -17,20 +17,6 @@ export default class StandardSqlFormatter extends AbstractFormatter {
       specialWordChars: []
     };
   }
-
-  tokenOverride = (token: Token, previousReservedToken: Token) => {
-    if (!previousReservedToken || !previousReservedToken.value) return;
-    const currentValue = token.value.toUpperCase();
-    const previousValue = previousReservedToken.value.toUpperCase();
-    if (
-      token.type === TokenTypes.RESERVED_NEWLINE &&
-      currentValue === 'AND' &&
-      previousValue === 'BETWEEN'
-    ) {
-      token.type = TokenTypes.RESERVED;
-      return token;
-    }
-  };
 }
 
 const reservedWords = [
