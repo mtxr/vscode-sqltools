@@ -481,11 +481,6 @@
                 "sqltools.format": {
                     "type": "object",
                     "properties": {
-                        "indentSize": {
-                            "type": "number",
-                            "default": 2,
-                            "description": "Indent size"
-                        },
                         "reservedWordCase": {
                             "type": [
                                 "string",
@@ -493,6 +488,38 @@
                             ],
                             "default": null,
                             "description": "Reserverd word case"
+                        },
+                        "language": {
+                            "type": "enum",
+                            "enum": [
+                                "sql",
+                                "db2",
+                                "n1ql",
+                                "pl/sql"
+                            ],
+                            "default": "sql",
+                            "description": "Language of formating"
+                        },
+                        "linesBetweenQueries": {
+                            "type": ["string", "number"],
+                            "enum": [
+                                "preserve",
+                                1,
+                                2,
+                                3,
+                                4,
+                                5
+                            ],
+                            "enumDescriptions": [
+                                "preserve means we will keep line breaks as is between queries",
+                                "1 line",
+                                "2 lines",
+                                "3 lines",
+                                "4 lines",
+                                "5 lines"
+                            ],
+                            "default": 1,
+                            "description": "Format line between queries"
                         }
                     }
                 },

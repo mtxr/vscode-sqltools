@@ -40,20 +40,26 @@ export interface IDependencyManagerSettings {
 
 export interface IFormatOptions {
   /**
-   * Indent Size
-   * @type {number}
-   * @default 2
-   * @memberof IFormatOptions
-   */
-  indentSize: number;
-
-  /**
    * Reserverd word case
    * @type {string}
    * @default null
    * @memberof IFormatOptions
    */
   reservedWordCase?: 'upper' | 'lower' | null;
+  /**
+   * Language of formating
+   * @type {string}
+   * @default 'sql'
+   * @memberof IFormatOptions
+   */
+  language?: 'sql' | 'db2' | 'n1ql' | 'pl/sql';
+  /**
+   * Format line between queries
+   * @type {number | 'preserve'}
+   * @default 1
+   * @memberof IFormatOptions
+   */
+  linesBetweenQueries?: number | 'preserve';
 }
 
 export interface IResultsOptions {
@@ -212,7 +218,7 @@ export interface ISettings {
    * @type {string}
    * @memberof ISettings
    */
-  sessionFilesFolder?: string;  
+  sessionFilesFolder?: string;
   /**
    * Set environment variables to be passed to language server. Eg: ORACLE_HOME, PATH...
    * @default {}
@@ -244,7 +250,7 @@ export interface ISettings {
 
   /**
    * SQLTools debug settings
-   * 
+   *
    * @type {{ namespaces?: string }}
    * @memberof ISettings
    */

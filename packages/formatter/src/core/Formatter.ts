@@ -47,7 +47,7 @@ export default class Formatter {
       if (this.tokenOverride) token = this.tokenOverride(token, this.previousReservedWord) || token;
 
       if (token.type === TokenTypes.WHITESPACE) {
-        // ignore (we do our own whitespace formatting)
+        formattedQuery = this.formatWhitespace(token, formattedQuery);
       } else if (token.type === TokenTypes.LINE_COMMENT) {
         formattedQuery = this.formatLineComment(token, formattedQuery);
       } else if (token.type === TokenTypes.BLOCK_COMMENT) {
@@ -82,6 +82,17 @@ export default class Formatter {
       }
     });
     return formattedQuery;
+  }
+
+  formatWhitespace(token: Token, query: string) {
+    if (
+      this.cfg.linesBetweenQueries === 'preserve'
+      && /((\r\n|\n)(\r\n|\n)+)/u.test(token.value)
+      && this.previousToken().value === ';'
+    ) {
+      return query.replace(/(\n|\r\n)$/m, '') + token.value;
+    }
+    return query
   }
 
   formatReserved(token: Token, query: string) {
@@ -221,7 +232,11 @@ export default class Formatter {
 
   formatQuerySeparator(token: Token, query: string) {
     this.indentation.resetIndentation();
-    return trimSpacesEnd(query) + token.value + '\n'.repeat(this.cfg.linesBetweenQueries || 1);
+    let lines = '\n';
+    if (this.cfg.linesBetweenQueries !== 'preserve') {
+      lines = '\n'.repeat(this.cfg.linesBetweenQueries || 1);
+    }
+    return trimSpacesEnd(query) + token.value + lines;
   }
 
   addNewline(query: string) {

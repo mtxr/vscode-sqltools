@@ -18,5 +18,8 @@ VNEXT:
     - SSL Certs PGSQL
     - PGSQL: auto connect on connection lost
     - Re-do Drivers integrations (except PG that was POC)
+    - add docs for formatting
+      - deprecation of indent options in favor of editor options
+    - update changelog
   DEP MANAGER:
     - Allow to use VSCode terminal api

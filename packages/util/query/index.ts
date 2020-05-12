@@ -98,10 +98,11 @@ function fixParameters(query: string, originalQuery: string) {
   }, query);
 }
 
-export function format(query: string, formatOptions: Partial<{ indentSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
-  const { reservedWordCase = null, indentSize = 2 } = formatOptions;
+export function format(query: string, formatOptions: Partial<{ insertSpaces: boolean, tabSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
+  const { reservedWordCase = null, insertSpaces = true, tabSize = 2, ...opts } = formatOptions;
   return fixParameters(formatter.format(query, {
-    indent: ' '.repeat(indentSize),
+    ...opts,
+    indent: insertSpaces ? ' '.repeat(tabSize) : '\t',
     reservedWordCase,
   }), query);
 }

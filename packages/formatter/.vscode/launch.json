@@ -10,6 +10,7 @@
         "${workspaceRoot}/node_modules/.bin/jest",
         "--runInBand",
         "--coverage=false",
+        // "--testPathPattern=standard"
       ],
       "console": "integratedTerminal",
       "internalConsoleOptions": "neverOpen",

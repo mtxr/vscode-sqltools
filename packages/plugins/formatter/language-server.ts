@@ -15,7 +15,7 @@ export default class FormatterPlugin implements ILanguageServerPlugin {
       if (Array.isArray(params)) {
         params = params[0];
       }
-      const { textDocument, range } = params as DocumentRangeFormattingParams;
+      const { textDocument, range, options: { insertSpaces, tabSize } } = params as DocumentRangeFormattingParams;
       const document = this.server.docManager.get(textDocument.uri);
       let text: string;
       let newRange: Range;
@@ -26,7 +26,11 @@ export default class FormatterPlugin implements ILanguageServerPlugin {
         newRange = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
       }
 
-      return [ TextEdit.replace(newRange || range, format(text, ConfigRO.format)) ];
+      return [ TextEdit.replace(newRange || range, format(text, {
+        ...ConfigRO.format,
+        tabSize,
+        insertSpaces
+      })) ];
     } catch (e) {
       telemetry.registerException(e);
     }

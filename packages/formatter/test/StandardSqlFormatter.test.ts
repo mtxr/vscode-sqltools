@@ -1,10 +1,11 @@
 import sqlFormatter from "../src/sqlFormatter";
 import behavesLikeSqlFormatter from "./behavesLikeSqlFormatter";
 import dedent from 'dedent-js';
+import { Config } from '../src/core/types';
 describe('StandardSqlFormatter', () => {
   behavesLikeSqlFormatter();
 
-  const format = (query, cfg = {}) => sqlFormatter.format(query, { ...cfg, language: 'sql' });
+  const format = (query, cfg: Config = {}) => sqlFormatter.format(query, { ...cfg, language: 'sql' });
 
   it('formats short CREATE TABLE', () => {
     expect(format(
@@ -461,13 +462,14 @@ where id = $1`);
       SELECT supplier_id
       FROM orders
       ORDER BY supplier_id;
-      `));
-    });
+      `
+    ));
+  });
 
-    it('convert case reserved word to UPPER', () => {
-      expect(
-        format(`select case when external_sub_ref_id is null then 'a' else 'b' end as ref_1, case when subscription_ref_id is null then 'c' else 'd' end as ref_2, count(1) c from table1 group by 1, 2;`, { reservedWordCase: 'upper' })
-      ).toEqual(dedent(`
+  it('convert case reserved word to UPPER', () => {
+    expect(
+      format(`select case when external_sub_ref_id is null then 'a' else 'b' end as ref_1, case when subscription_ref_id is null then 'c' else 'd' end as ref_2, count(1) c from table1 group by 1, 2;`, { reservedWordCase: 'upper' })
+    ).toEqual(dedent(`
         SELECT CASE
             WHEN external_sub_ref_id IS NULL THEN 'a'
             ELSE 'b'
@@ -480,7 +482,89 @@ where id = $1`);
         FROM table1
         GROUP BY 1,
           2;
-        `));
+        `
+      ));
+  });
 
+  it('preserve line breaks', () => {
+    let input = dedent`
+      CREATE TABLE foo (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+
+      CREATE TABLE bar (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+    `;
+    expect(format(input, { linesBetweenQueries: 'preserve' })).toEqual(input);
+    input = dedent`
+      CREATE TABLE foo (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+      CREATE TABLE bar (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+    `;
+    expect(format(input, { linesBetweenQueries: 'preserve' })).toEqual(input);
+    expect(format(dedent`
+    CREATE TABLE foo (
+
+
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+
+
+    CREATE TABLE bar (
+      id INTEGER PRIMARY KEY,
+
+      name VARCHAR(200) UNIQUE,
+    );
+    `, { linesBetweenQueries: 'preserve' })).toEqual(dedent`
+    CREATE TABLE foo (
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+
+
+    CREATE TABLE bar (
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+    `);
+
+    expect(format(dedent`
+    CREATE TABLE foo (
+
+
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+
+
+
+
+
+    CREATE TABLE bar (
+      id INTEGER PRIMARY KEY,
+
+      name VARCHAR(200) UNIQUE,
+    );
+    `, { linesBetweenQueries: 3 })).toEqual(dedent`
+    CREATE TABLE foo (
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+
+
+    CREATE TABLE bar (
+      id INTEGER PRIMARY KEY,
+      name VARCHAR(200) UNIQUE,
+    );
+    `);
   });
 });

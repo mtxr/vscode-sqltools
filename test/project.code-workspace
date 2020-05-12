@@ -39,8 +39,8 @@
       }
     },
     "sqltools.format": {
-      "indentSize": 2,
-      "reservedWordCase": "upper"
+      "reservedWordCase": "upper",
+      "linesBetweenQueries": "preserve"
     },
     // "sqltools.autoConnectTo": ["PGSQL"],
     "sqltools.flattenGroupsIfOne": false,

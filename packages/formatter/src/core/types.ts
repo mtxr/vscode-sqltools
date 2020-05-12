@@ -20,10 +20,10 @@ export enum TokenTypes {
 }
 export interface Config {
   indent?: string;
-  reservedWordCase?: string;
   params?: Object;
+  reservedWordCase?: string;
   language?: 'sql' | 'db2' | 'n1ql' | 'pl/sql';
-  linesBetweenQueries?: number;
+  linesBetweenQueries?: number | 'preserve';
 }
 export interface TokenizerConfig {
   reservedWords: string[];

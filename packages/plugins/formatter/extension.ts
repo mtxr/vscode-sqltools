@@ -1,9 +1,9 @@
 import logger from '@sqltools/util/log';
-import { TextEditor, TextEditorEdit, commands, SnippetString, env } from 'vscode';
+import { TextEditor, TextEditorEdit, commands, SnippetString, env, workspace } from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { generateInsert, format as queryFormat } from '@sqltools/util/query';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
-import { NSDatabase, IExtension, MConnectionExplorer } from '@sqltools/types';
+import { NSDatabase, IExtension } from '@sqltools/types';
 import { SidebarItem } from '../connection-manager/explorer';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
@@ -11,7 +11,12 @@ const log = logger.extend('formatter');
 
 function formatSqlHandler(editor: TextEditor, edit: TextEditorEdit) {
   try {
-    edit.replace(editor.selection, queryFormat(editor.document.getText(editor.selection), Config.format));
+    const options = {
+      ...Config.format,
+      insertSpaces: workspace.getConfiguration().get<boolean>('editor.insertSpaces'),
+      tabSize: workspace.getConfiguration().get<number>('editor.tabSize'),
+    };
+    edit.replace(editor.selection, queryFormat(editor.document.getText(editor.selection), options));
     commands.executeCommand('revealLine', { lineNumber: editor.selection.active.line, at: 'center' });
   } catch (error) {
     log.extend('error')('Error formatting query.', error);

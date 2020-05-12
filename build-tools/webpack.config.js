@@ -1,4 +1,5 @@
 const path = require('path');
+const fs = require('fs');
 
 require('dotenv').config({
   path: path.resolve(__dirname, '..', '.env')
@@ -24,9 +25,11 @@ console.log(`
 #################################
 `)
 
-require('fs').readdirSync(packagesDir).forEach((pkg) => {
-  console.log(`Reading package @sqltools/${pkg} config`);
+fs.readdirSync(packagesDir).forEach((pkg) => {
   const pkgPath = `${packagesDir}/${pkg}`;
+  if (!fs.lstatSync(pkgPath).isDirectory()) return;
+
+  console.log(`Reading package @sqltools/${pkg} config`);
   const pkgJson = require(`${pkgPath}/package.json`);
 
   if (pkgJson.build) {

@@ -12,7 +12,7 @@ import { Config, Token } from './core/types';
  *  @param {string} cfg.language Query language, default is Standard SQL
  *  @param {string} cfg.indent Characters used for indentation, default is "  " (2 spaces)
  *  @param {string} cfg.reservedWordCase Reserverd case change. Allowed upper, lower, null. Default null (no changes).
- *  @param {number} cfg.linesBetweenQueries How many line breaks between queries
+ *  @param {number | 'preserve'} cfg.linesBetweenQueries How many line breaks between queries
  *  @param {any} cfg.params Collection of params for placeholder replacement
  * @return {string}
  */
