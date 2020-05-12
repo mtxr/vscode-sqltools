@@ -150,6 +150,8 @@ export default class Formatter {
 
   // Opening parentheses increase the block indent level and start a new line
   formatOpeningParentheses(token: Token, query: string) {
+    token.value = this.formatCase(token.value);
+
     // Take out the preceding space unless there was whitespace there in the original query
     // or another opening parens or line comment
     const previousTokenType = this.previousToken().type;
@@ -160,7 +162,7 @@ export default class Formatter {
     ) {
       query = trimSpacesEnd(query);
     }
-    query += this.formatCase(token.value);
+    query += token.value;
 
     this.inlineBlock.beginIfPossible(this.tokens, this.index);
 

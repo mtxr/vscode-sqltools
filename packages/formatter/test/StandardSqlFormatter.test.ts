@@ -462,5 +462,25 @@ where id = $1`);
       FROM orders
       ORDER BY supplier_id;
       `));
+    });
+
+    it('convert case reserved word to UPPER', () => {
+      expect(
+        format(`select case when external_sub_ref_id is null then 'a' else 'b' end as ref_1, case when subscription_ref_id is null then 'c' else 'd' end as ref_2, count(1) c from table1 group by 1, 2;`, { reservedWordCase: 'upper' })
+      ).toEqual(dedent(`
+        SELECT CASE
+            WHEN external_sub_ref_id IS NULL THEN 'a'
+            ELSE 'b'
+          END AS ref_1,
+          CASE
+            WHEN subscription_ref_id IS NULL THEN 'c'
+            ELSE 'd'
+          END AS ref_2,
+          COUNT(1) c
+        FROM table1
+        GROUP BY 1,
+          2;
+        `));
+
   });
 });
