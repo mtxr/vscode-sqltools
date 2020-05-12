@@ -36,8 +36,8 @@ export default class Tokenizer {
    */
   constructor(cfg: TokenizerConfig) {
     this.WHITESPACE_REGEX = /^(\s+)/u;
-    this.NUMBER_REGEX = /^((-\s*)?[0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+)\b/u;
-    this.OPERATOR_REGEX = /^(!=|<>|==|<=|>=|!<|!>|\|\||::|->>|->|~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|.)/u;
+    this.NUMBER_REGEX = /^((-\s*)?[0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+|([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}))\b/u;
+    this.OPERATOR_REGEX = /^(!=|<>|>>|<<|==|<=|>=|!<|!>|\|\|\/|\|\/|\|\||::|->>|->|~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|@|.)/u;
 
     this.BLOCK_COMMENT_REGEX = /^(\/\*[^]*?(?:\*\/|$))/u;
     this.LINE_COMMENT_REGEX = this.createLineCommentRegex(cfg.lineCommentTypes);

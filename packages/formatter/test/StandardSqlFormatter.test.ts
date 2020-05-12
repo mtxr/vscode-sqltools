@@ -567,4 +567,18 @@ where id = $1`);
     );
     `);
   });
+
+  it('time uuid cassandra formating', () => {
+    expect(format(`
+    SELECT * FROM alphastore.alphaValueT0
+    where
+      exprid = 08eb9be4-77d2-11ea-a88d-28672d5f4dc4
+      and symbol = 'sh600008';
+    `)).toEqual(dedent(`
+    SELECT *
+    FROM alphastore.alphaValueT0
+    where exprid = 08eb9be4-77d2-11ea-a88d-28672d5f4dc4
+      and symbol = 'sh600008';
+    `))
+  })
 });
