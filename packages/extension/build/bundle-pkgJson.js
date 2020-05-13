@@ -18,7 +18,7 @@ module.exports = ({ EXT_NAMESPACE, IS_PREVIEW, DISPLAY_NAME, outdir, IS_PRODUCTI
     delete content.build;
 
     content = JSON.parse(JSON.stringify(content)
-      .replace(/(?:(?<!vscode\-))sqltools([\/\.\-])/g, `${EXT_NAMESPACE}$1`)
+      .replace(/(?:(?<!vscode\-))sqltools([A-Z\/\.\-])/g, `${EXT_NAMESPACE}$1`)
       .replace(/SQLTools/g, `${DISPLAY_NAME}`));
     content.contributes.configuration = configurationOriginal;
     content.name = EXT_NAMESPACE;

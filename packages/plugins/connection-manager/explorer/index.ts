@@ -128,12 +128,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     const groupConnected = Config['connectionExplorer.groupConnected'];
     const items = await this.getConnectionsTreeItems();
     if (items.length === 0) {
-      const addNew = new TreeItem('No Connections. Click here to add one', TreeItemCollapsibleState.None);
-      addNew.command = {
-        title: 'Add New Connections',
-        command: `${EXT_NAMESPACE}.openAddConnectionScreen`,
-      };
-      return [addNew];
+      return null;
     }
 
     let active = null;

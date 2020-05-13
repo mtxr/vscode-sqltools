@@ -960,6 +960,12 @@
                 }
             ]
         },
+        "viewsWelcome": [
+            {
+              "view": "sqltools/connectionExplorer",
+              "contents": "No connections found.\n[Add new](command:sqltools.openAddConnectionScreen)"
+            }
+        ],
         "menus": {
             "commandPalette": [
                 {

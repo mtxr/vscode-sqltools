@@ -123,7 +123,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       this.syncConsoleMessages(results[0].messages);
   }
 
-  private syncConsoleMessages = (messages: string[]) => {
+  private syncConsoleMessages = (messages: NSDatabase.IResult['messages']) => {
     this.explorer.addConsoleMessages(messages || []);
   }
 
