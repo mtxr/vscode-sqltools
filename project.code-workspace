@@ -39,6 +39,13 @@
       "sqltools"
     ],
     "cSpell.enabled": false,
+    "workbench.colorCustomizations": {
+      "statusBar.background": "#0066cc",
+      "statusBar.border": "#0066cc",
+      "statusBar.foreground": "#e7e7e7",
+      "statusBarItem.hoverBackground": "#007fff"
+    },
+    "peacock.color": "#007fff",
   },
   "tasks": {
     "version": "2.0.0",
