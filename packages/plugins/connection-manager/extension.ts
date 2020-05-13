@@ -653,9 +653,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
     clearInterval(this.notifications[params.id].interval);
     this.notifications[params.id].progress.report({ message: params.message, increment: 100 });
-    setTimeout(() => {
-      this.notifications[params.id].resolve();
-    }, 3000);
+    this.notifications[params.id].resolve();
   }
 
   public register(extension: IExtension) {
@@ -706,12 +704,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       window.onDidChangeActiveTextEditor(this.changeTextEditorHandler),
     );
 
-    if (window.activeTextEditor) {
-      setTimeout(() => {
-        this.changeTextEditorHandler(window.activeTextEditor);
-      }, 5000);
-    }
     this.explorer.refresh();
+    this.changeTextEditorHandler(window.activeTextEditor);
   }
 
   constructor(extension: IExtension) {

@@ -51,6 +51,7 @@ module.exports = function getNodeConfig(entries, packagePath) {
       ibm_db: 'commonjs ibm_db',
       sqlite3: 'commonjs sqlite3',
       oracledb: 'commonjs oracledb',
+      'original-fs': 'fs',
       '@sap/hana-client': 'commonjs @sap/hana-client'
     },
   };

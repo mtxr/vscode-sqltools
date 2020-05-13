@@ -44,7 +44,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     log.extend('info')('completion requested %O', position);
     const doc = this.server.docManager.get(textDocument.uri);
 
-    const { currentQuery } = getDocumentCurrentQuery(doc, position);
+    const { currentQuery, currentQueryTilCursor } = getDocumentCurrentQuery(doc, position);
     log.extend('debug')('got current query:\n%s', currentQuery);
     const queryTokens = doc.getText(Range.create(Math.max(0, position.line - 5), 0, position.line, position.character)).replace(/[\r\n|\n]+/g, ' ').split(/;/g).pop().split(/\s+/g);
     const currentWord = (queryTokens.pop() || '').trim().toUpperCase();
@@ -72,6 +72,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return {
       currentWord,
       currentQuery,
+      currentQueryTilCursor,
       prevWord,
       prev2Words,
       completionDialect,
@@ -87,11 +88,13 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     let completions = [];
     let suggestColumns = false;
     let usedTables: Select['from'] = [];
-    let staticCompletions = {}
+    let staticCompletions = {};
     try {
       if (conn)
         staticCompletions = await conn.getStaticCompletions();
-      completions = Object.values(staticCompletions);
+    } catch (_) {}
+
+    try {
       const { ast } = parseRetry(currentQuery, completionDialect, 5);
       usedTables = (ast as Select).from || [];
       log.extend('debug')('query ast parsed:\n%O', JSON.stringify(ast));
@@ -112,9 +115,12 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
             sortText: IS_WORD_REGEX.test(label) ? `3:${label}` : `4:${label}`,
             kind: CompletionItemKind[exp.type.charAt(0) + exp.type.substr(1)]
           }));
+          delete staticCompletions[label];
         })
       };
     }
+
+    completions.push(...Object.values(staticCompletions));
 
     return {
       completions,
@@ -195,6 +201,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
       capabilities: {
         completionProvider: {
           workDoneProgress: true,
+          triggerCharacters: [' ', '.', '(', '`', '\'']
         },
       }
     }));

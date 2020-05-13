@@ -15,7 +15,6 @@ interface SyntaxState {
 }
 export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
   private id = `syntax-${(Math.random() * 1000).toFixed(0)}`;
-  private interval = null;
 
   constructor(props) {
     super(props);
@@ -26,8 +25,7 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
   copyCode = () => {
     clipboardInsert(JSON.stringify(this.props.code, null, 2));
     this.setState({ copyMsg: 'Copied!' }, () => {
-      clearTimeout(this.interval);
-      this.interval = setTimeout(() => {
+      setTimeout(() => {
         this.setState({ copyMsg: 'Copy' });
       }, 1000);
     });

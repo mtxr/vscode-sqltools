@@ -59,9 +59,7 @@ export class SQLToolsExtension implements IExtension {
     }
     this.loadPlugins();
     activationTimer.end();
-    setTimeout(() => {
-      telemetry.registerTime('activation', activationTimer);
-    }, 5000);
+    telemetry.registerTime('activation', activationTimer);
     this.displayReleaseNotesMessage();
   }
 

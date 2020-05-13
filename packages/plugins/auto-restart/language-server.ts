@@ -5,13 +5,11 @@ import { ILanguageServerPlugin } from '@sqltools/types';
 const AutoRestartPlugin: ILanguageServerPlugin = {
   register: server => {
     const nodeExit = process.exit;
-    process.exit = ((code?: number): void => {
+    process.exit = ((code?: number) => {
       const stack = new Error('stack');
       server.sendNotification(ExitCalledNotification, [code ? code : 0, stack.stack]);
-      setTimeout(() => {
-        nodeExit(code);
-      }, 1000);
-    }) as any;
+      setTimeout(() => nodeExit(code), 500);
+    }) as typeof process.exit;
     process.on('uncaughtException', (error: any) => {
       let message: string;
       if (error) {
