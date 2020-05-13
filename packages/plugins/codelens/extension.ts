@@ -75,10 +75,8 @@ export default class CodeLensPlugin implements IExtensionPlugin {
       return;
     }
     try {
-      editor.setDecorations(currentQueryDecoration, []);
       const { range } = getEditorQueryDetails(editor);
-      const decoration = { range };
-      editor.setDecorations(currentQueryDecoration, [decoration]);
+      editor.setDecorations(currentQueryDecoration, [{ range }]);
     } catch (error) {
       log.extend('error')('update decorations failed: %O', error);
     }

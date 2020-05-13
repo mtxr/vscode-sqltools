@@ -1,6 +1,5 @@
 import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event, EventEmitter } from 'vscode';
 import * as Constants from '@sqltools/util/constants';
-import Selector from '@sqltools/vscode/utils/selector';
 import { getNameFromId } from '@sqltools/util/connection';
 import { extractConnName } from '@sqltools/util/query';
 import Context from '@sqltools/vscode/context';
@@ -15,10 +14,8 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
     this._onDidChangeCodeLenses.fire();
   }
   async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
-    const lines: string[] = document.getText().split(Constants.LINE_SPLITTER_REGEX);
-    const requestRanges: [number, number][] = Selector.getQueryRanges(lines);
-    const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
     const lenses: CodeLens[] = [];
+    const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
     const attachedId = Context.workspaceState.get('attachedFilesMap', {})[document.uri.toString()];
     if (attachedId) {
       // attached to a connection
@@ -30,23 +27,25 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
       };
       lenses.push(new CodeLens(new Range(0, 0, 0, 0), runCmd))
     }
-    requestRanges.forEach(([blockStart, blockEnd]) => {
-      const range = new Range(blockStart, 0, blockEnd, 0);
-      const queries = document.getText(range);
-      const connName = extractConnName(queries);
+
+    const text = document.getText();
+    const allBlocks = text.replace(Constants.DELIMITER_START_REGEX, '<#####>$1').split('<#####>');
+
+    if (allBlocks.length === 0) return lenses;
+
+    let textOffset = 0;
+    allBlocks.forEach(block => {
+      const startIndex = textOffset + text.substr(textOffset).indexOf(block);
+      const start = document.positionAt(startIndex);
+      const end = document.positionAt(startIndex + block.length);
+      textOffset = startIndex + block.length;
+      const connName = extractConnName(block);
       const runCmd: Command = {
-        arguments: [queries, (connName || defaultConn || '').trim() || undefined].filter(Boolean),
+        arguments: [block.replace(Constants.DELIMITER_START_REPLACE_REGEX, '').trim(), (connName || defaultConn || '').trim() || undefined].filter(Boolean),
         title: `Run query block on ${(connName || defaultConn || 'active connection').trim()}`,
         command: `${Constants.EXT_NAMESPACE}.executeQuery`,
       };
-      lenses.push(new CodeLens(range, runCmd));
-      // @todo select query block
-      // const selectBlock: Command = {
-      //   arguments: [new Selection(blockStart, 0, blockEnd + 1, 0)],
-      //   title: 'Select block',
-      //   command: `setSelection`,
-      // };
-      // lenses.push(new CodeLens(range, selectBlock));
+      lenses.push(new CodeLens(new Range(start, end), runCmd));
     });
 
     return lenses;

@@ -8,8 +8,8 @@ export const DOCS_ROOT_URL = 'https://vscode-sqltools.mteixeira.dev';
 export const TREE_SEP = '/-##-/';
 
 // query parsing
-export const LINE_SPLITTER_REGEX = /\r?\n/g;
-export const DELIMITER_START_REGEX = /^\s*-{2,}\s*@block.*$/;
+export const DELIMITER_START_REGEX = /(?:[\r\n]+)(\s*-{2,}\s*@block.*)$/guim;
+export const DELIMITER_START_REPLACE_REGEX = /^(\s*-{2,}\s*@block.*)$/guim;
 
 // notifications
 export const ElectronNotSupportedNotification = 'Core/electronNotSupported';
