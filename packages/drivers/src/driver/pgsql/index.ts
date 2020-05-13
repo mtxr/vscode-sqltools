@@ -1,4 +1,4 @@
-import { Pool, PoolConfig, types, FieldDef } from 'pg';
+import { Pool, PoolConfig, PoolClient, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer, IQueryOptions } from '@sqltools/types';
 import AbstractDriver from '../../lib/abstract';
@@ -74,10 +74,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   }
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     const messages = [];
+    let cli : PoolClient;
     const { requestId } = opt;
     return this.open()
       .then(async (pool) => {
-        const cli = await pool.connect();
+        cli = await pool.connect();
         cli.on('notice', notice => messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`)));
         const results = await cli.query({ text: query.toString(), rowMode: 'array' });
         cli.release();
@@ -106,22 +107,25 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           };
         });
       })
-      .catch(err => ([<NSDatabase.IResult>{
-        connId: this.getId(),
-        requestId,
-        resultId: generateId(),
-        cols: [],
-        messages: messages.concat([
-          this.prepareMessage ([
-            (err && err.message || err),
-            err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
-          ].filter(Boolean).join(' '))
-        ]),
-        error: true,
-        rawError: err,
-        query,
-        results: [],
-      }]))
+      .catch(err => {
+        cli && cli.release();
+        return [<NSDatabase.IResult>{
+          connId: this.getId(),
+          requestId,
+          resultId: generateId(),
+          cols: [],
+          messages: messages.concat([
+            this.prepareMessage ([
+              (err && err.message || err),
+              err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
+            ].filter(Boolean).join(' '))
+          ]),
+          error: true,
+          rawError: err,
+          query,
+          results: [],
+        }];
+      });
   }
 
   private getColumnNames(fields: FieldDef[]): string[] {
