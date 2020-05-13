@@ -1,7 +1,7 @@
-import { languages, Disposable, window, workspace, TextEditor } from 'vscode';
+import { languages, Disposable, window, workspace, TextEditor, Selection } from 'vscode';
 import SQLToolsCodeLensProvider from './provider';
 import { sortText } from '@sqltools/util/text';
-import { IExtensionPlugin } from '@sqltools/types';
+import { IExtensionPlugin, IExtension } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
@@ -56,8 +56,18 @@ export default class CodeLensPlugin implements IExtensionPlugin {
     this.updateDecorations(window.activeTextEditor);
   }
 
-  register() {
+  ext_setSelection = (arg: Selection | Selection[]) => {
+    if (!window.activeTextEditor || !arg) {
+      return;
+    }
+
+    window.activeTextEditor.selections = (Array.isArray(arg) ? arg : [arg]).filter(Boolean);
+  }
+
+  register(extension: IExtension) {
     Context.subscriptions.push(this);
+    extension
+      .registerCommand('setSelection', this.ext_setSelection)
     this.createCodelens();
     this.createDecorations();
     Config.addOnUpdateHook(({ event }) => {

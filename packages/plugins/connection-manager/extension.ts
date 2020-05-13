@@ -439,7 +439,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       if (active) return active;
     }
     const c: IConnection = await this._pickConnection(!force);
-    // history.clear();
     return this._setConnection(c);
   }
 

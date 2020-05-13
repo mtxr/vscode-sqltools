@@ -189,20 +189,20 @@ export class SQLToolsExtension implements IExtension {
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
-  public addBeforeCommandHook(command: string, handler: CommandEventHandler<ICommandEvent>) {
-    if (!this.willRunCommandHooks[command]) {
-      this.willRunCommandHooks[command] = [];
+  private addHook(prop: 'willRunCommandHooks' | 'didRunCommandSuccessfullyHooks', command: string, handler: any) {
+    if (!this[prop][command]) {
+      this[prop][command] = [];
     }
-    this.willRunCommandHooks[command].push(handler);
+    this[prop][command].push(handler);
     return this;
   }
 
+  public addBeforeCommandHook(command: string, handler: CommandEventHandler<ICommandEvent>) {
+    return this.addHook('willRunCommandHooks', command, handler);
+  }
+
   public addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<ICommandSuccessEvent>) {
-    if (!this.didRunCommandSuccessfullyHooks[command]) {
-      this.didRunCommandSuccessfullyHooks[command] = [];
-    }
-    this.didRunCommandSuccessfullyHooks[command].push(handler);
-    return this;
+    return this.addHook('didRunCommandSuccessfullyHooks', command, handler);
   }
 
   public registerPlugin(plugin: IExtensionPlugin) {

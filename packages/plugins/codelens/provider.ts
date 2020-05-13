@@ -1,4 +1,4 @@
-import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event, EventEmitter } from 'vscode';
+import { CodeLensProvider, TextDocument, CodeLens, Range, Command, Event, EventEmitter, Selection } from 'vscode';
 import * as Constants from '@sqltools/util/constants';
 import { getNameFromId } from '@sqltools/util/connection';
 import { extractConnName } from '@sqltools/util/query';
@@ -38,14 +38,22 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
       const startIndex = textOffset + text.substr(textOffset).indexOf(block);
       const start = document.positionAt(startIndex);
       const end = document.positionAt(startIndex + block.length);
+      const range = new Range(start, end);
       textOffset = startIndex + block.length;
       const connName = extractConnName(block);
       const runCmd: Command = {
         arguments: [block.replace(Constants.DELIMITER_START_REPLACE_REGEX, '').trim(), (connName || defaultConn || '').trim() || undefined].filter(Boolean),
-        title: `Run query block on ${(connName || defaultConn || 'active connection').trim()}`,
+        title: `$(debug-start) Run on ${(connName || defaultConn || 'active connection').trim()}`,
         command: `${Constants.EXT_NAMESPACE}.executeQuery`,
       };
-      lenses.push(new CodeLens(new Range(start, end), runCmd));
+      lenses.push(new CodeLens(range, runCmd));
+
+      const selectCmd: Command = {
+        arguments: [new Selection(start, end)],
+        title: `$(list-selection) Select block`,
+        command: `${Constants.EXT_NAMESPACE}.setSelection`,
+      };
+      lenses.push(new CodeLens(range, selectCmd));
     });
 
     return lenses;

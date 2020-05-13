@@ -46,16 +46,10 @@
   "devDependencies": {
     "@types/jest": "^24.0.11",
     "dedent-js": "^1.0.1",
-    "husky": "^3.0.3",
     "jest": "^24.7.0",
     "jest-cli": "^24.7.0",
     "rimraf": "^3.0.0",
     "ts-jest": "^24.0.1",
     "typescript": "^3.4.1"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn test"
-    }
   }
 }

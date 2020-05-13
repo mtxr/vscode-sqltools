@@ -10,6 +10,7 @@ import { HistoryTreeGroup, HistoryTreeItem } from './explorer/tree-items';
 const hookedCommands = [
   'executeFromInput',
   'executeQuery',
+  'executeCurrentQuery',
   'executeQueryFromFile',
 ];
 
