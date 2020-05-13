@@ -711,7 +711,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         this.changeTextEditorHandler(window.activeTextEditor);
       }, 5000);
     }
-    this.explorer.updateTreeRoot();
+    this.explorer.refresh();
   }
 
   constructor(extension: IExtension) {
