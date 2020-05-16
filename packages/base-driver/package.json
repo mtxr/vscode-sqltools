@@ -1,0 +1,30 @@
+{
+  "name": "@sqltools/base-driver",
+  "version": "0.0.1-alpha1",
+  "description": "SQLTools Base Driver",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/base-driver"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/issues"
+  },
+  "scripts": {
+    "prebuild": "rimraf -rf dist",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "yarn run build"
+  },
+  "devDependencies": {
+    "rimraf": "^3.0.0",
+    "typescript": "^3.7.3"
+  },
+  "dependencies": {
+    "@sqltools/types": "*",
+    "@sqltools/util": "*"
+  }
+}
