@@ -61,6 +61,7 @@ export class SQLToolsExtension implements IExtension {
     activationTimer.end();
     telemetry.registerTime('activation', activationTimer);
     this.displayReleaseNotesMessage();
+    return this;
   }
 
   public deactivate(): void {
