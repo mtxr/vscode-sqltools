@@ -1,5 +1,5 @@
 import { IConnection, TextDocuments } from 'vscode-languageserver';
-import { Arg0 } from '@sqltools/types/generic/utils';
+import { Arg0 } from '../generic/utils';
 
 export interface ILanguageServer {
   listen(): void;

@@ -1,4 +1,4 @@
-import { IConnection } from '@sqltools/types/generic/connection';
+import { IConnection } from '../generic/connection';
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];

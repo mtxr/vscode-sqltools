@@ -1,4 +1,4 @@
-import { ILanguageClient } from '@sqltools/types/plugin/language-client';
+import { ILanguageClient } from '../plugin/language-client';
 
 export interface ICommandEvent {
   command: string;

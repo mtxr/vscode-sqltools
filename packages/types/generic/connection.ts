@@ -1,5 +1,5 @@
-import { DatabaseDriver } from '@sqltools/types/driver';
-import { NSDatabase, InternalID } from '@sqltools/types/generic/database';
+import { DatabaseDriver } from './../driver';
+import { NSDatabase, InternalID } from './database';
 
 export interface IConnection<DriverOptions = any> {
   /**
