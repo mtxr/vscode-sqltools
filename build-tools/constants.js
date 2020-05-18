@@ -11,7 +11,6 @@ exports.EXT_NAMESPACE = exports.DISPLAY_NAME.toLowerCase().replace(/(?:^\w|[A-Z]
 exports.EXT_CONFIG_NAMESPACE = 'sqltools';
 
 exports.IS_PRODUCTION = process.env.NODE_ENV !== 'development';
-exports.IS_PREVIEW = exports.DISPLAY_NAME.toLowerCase().includes('preview');
 
 exports.author = author;
 exports.version = version;

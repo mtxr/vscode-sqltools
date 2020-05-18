@@ -4,7 +4,7 @@ import Config from '@sqltools/util/config-manager';
 import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
 import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
 import Timer from '@sqltools/util/telemetry/timer';
-import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
+import { commands, extensions,  env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
 import ErrorHandler from './api/error-handler';
 import Utils from './api/utils';
 import { openExternal } from '@sqltools/vscode/utils';
@@ -29,8 +29,9 @@ export class SQLToolsExtension implements IExtension {
   private willRunCommandHooks: { [commands: string]: Array<(evt: ICommandEvent) => void> } = {};
   private didRunCommandSuccessfullyHooks: { [commands: string]: Array<(evt: ICommandSuccessEvent) => void> } = {};
   public client: SQLToolsLanguageClient;
+  private loaded: boolean = false;
 
-  public activate() {
+  public activate = (): IExtension => {
     const activationTimer = new Timer();
     telemetry.updateOpts({
       extraInfo: {
@@ -61,14 +62,22 @@ export class SQLToolsExtension implements IExtension {
     activationTimer.end();
     telemetry.registerTime('activation', activationTimer);
     this.displayReleaseNotesMessage();
-    return this;
+    return {
+      client: this.client,
+      addAfterCommandSuccessHook: this.addAfterCommandSuccessHook,
+      registerPlugin: this.registerPlugin,
+      addBeforeCommandHook: this.addBeforeCommandHook,
+      registerCommand: this.registerCommand,
+      registerTextEditorCommand: this.registerTextEditorCommand,
+      errorHandler: this.errorHandler,
+    };
   }
 
-  public deactivate(): void {
+  public deactivate = (): void => {
     return Context.subscriptions.forEach((sub) => void sub.dispose());
   }
 
-  private getIssueTemplate(name: string) {
+  private getIssueTemplate = (name: string) => {
     const url = `https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/.github/ISSUE_TEMPLATE/${name}`;
     return new Promise<string>((resolve) => {
       https.get(url, (resp) => {
@@ -132,7 +141,7 @@ export class SQLToolsExtension implements IExtension {
   /**
    * Management functions
    */
-  private async displayReleaseNotesMessage() {
+  private displayReleaseNotesMessage = async () => {
     try {
       const current = Utils.getlastRunInfo();
       const { lastNotificationDate = 0, updated } = current;
@@ -169,8 +178,10 @@ export class SQLToolsExtension implements IExtension {
     } catch (e) { /***/ }
   }
 
-  private loadPlugins() {
+  private loadPlugins = () => {
+    this.loaded = this.loaded || true;
     this.pluginsQueue.forEach(plugin => plugin.register(this));
+    this.pluginsQueue = [];
   }
 
   private onWillRunCommandHandler = (evt: ICommandEvent): void => {
@@ -188,7 +199,7 @@ export class SQLToolsExtension implements IExtension {
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
-  private addHook(prop: 'willRunCommandHooks' | 'didRunCommandSuccessfullyHooks', command: string, handler: any) {
+  private addHook = (prop: 'willRunCommandHooks' | 'didRunCommandSuccessfullyHooks', command: string, handler: any) => {
     if (!this[prop][command]) {
       this[prop][command] = [];
     }
@@ -196,24 +207,27 @@ export class SQLToolsExtension implements IExtension {
     return this;
   }
 
-  public addBeforeCommandHook(command: string, handler: CommandEventHandler<ICommandEvent>) {
+  public addBeforeCommandHook = (command: string, handler: CommandEventHandler<ICommandEvent>) => {
     return this.addHook('willRunCommandHooks', command, handler);
   }
 
-  public addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<ICommandSuccessEvent>) {
+  public addAfterCommandSuccessHook = (command: string, handler: CommandEventHandler<ICommandSuccessEvent>) => {
     return this.addHook('didRunCommandSuccessfullyHooks', command, handler);
   }
 
-  public registerPlugin(plugin: IExtensionPlugin) {
+  public registerPlugin = (plugin: IExtensionPlugin) => {
     this.pluginsQueue.push(plugin);
+    if (this.loaded) {
+      this.loadPlugins();
+    }
     return this;
   }
 
-  public registerCommand(command: string, handler: Function) {
+  public registerCommand = (command: string, handler: Function) => {
     return this.decorateAndRegisterCommand(command, handler);
   }
 
-  public registerTextEditorCommand(command: string, handler: Function) {
+  public registerTextEditorCommand = (command: string, handler: Function) => {
     return this.decorateAndRegisterCommand(command, handler, 'registerTextEditorCommand');
   }
 
@@ -221,7 +235,7 @@ export class SQLToolsExtension implements IExtension {
     return ErrorHandler.create(message)(error);
   }
 
-  private decorateAndRegisterCommand(command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') {
+  private decorateAndRegisterCommand = (command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') => {
     Context.subscriptions.push(
       commands[type](`${EXT_NAMESPACE}.${command}`, async (...args) => {
         process.env.NODE_ENV === 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command} %O`, args);

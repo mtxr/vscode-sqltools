@@ -2,6 +2,7 @@
   "folders": [
     { "path": "./packages/base-driver" },
     { "path": "./packages/drivers" },
+    { "path": "./packages/driver.pg" },
     { "path": "./packages/extension" },
     { "path": "./packages/formatter" },
     { "path": "./packages/language-server" },

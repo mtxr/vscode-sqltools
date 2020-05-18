@@ -4,7 +4,7 @@ import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from '
 import queryResultsCache from './query-results.model';
 
 async function CleanUpCache(conn: Connection) {
-  return Promise.all([
+  return conn && Promise.all([
     queryResultsCache.delStartWith(`[${conn.getId()}]`),
     connectionStateCache.delStartWith(`[${conn.getId()}]`),
   ]).then(() => true);
@@ -28,9 +28,9 @@ async function Disconnect(conn: Connection) {
     connectionStateCache.get(LAST_USED_ID_KEY),
     CleanUpCache(conn),
   ]);
-  delete activeConnections[conn.getId()];
+  conn && delete activeConnections[conn.getId()];
 
-  const newLastUsedId = lastUsedId === conn.getId() ? undefined : lastUsedId;
+  const newLastUsedId = conn && lastUsedId === conn.getId() ? undefined : lastUsedId;
 
   return Promise.all([
     connectionStateCache.set(ACTIVE_CONNECTIONS_KEY, activeConnections),

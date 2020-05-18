@@ -1,5 +1,6 @@
 const path = require('path');
 const setDefaults = require('./../common/set-defaults');
+const parseEntries = require('./../common/parse-entries');
 const webpack = require('webpack');
 
 /**
@@ -10,14 +11,13 @@ const webpack = require('webpack');
  */
 module.exports = function getNodeConfig(entries, packagePath) {
   const babelOptions = require(path.join(packagePath, '.babelrc'));
+  const { entry, outDir } = parseEntries(entries, packagePath);
+
   /** @type webpack.Configuration */
   let config = {
     name: 'ls',
     target: 'node',
-    entry: Object.keys(entries).reduce((agg, name) => ({
-      ...agg,
-      [name]: path.resolve(packagePath, entries[name]),
-    }), {}),
+    entry,
     module: {
       rules: [
         {
@@ -46,7 +46,11 @@ module.exports = function getNodeConfig(entries, packagePath) {
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
+      ...(outDir ? {
+        path: outDir
+      } : {}),
     },
+    // @TODO
     externals: {
       ibm_db: 'commonjs ibm_db',
       sqlite3: 'commonjs sqlite3',

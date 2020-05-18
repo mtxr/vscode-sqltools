@@ -3,9 +3,6 @@ const webpack = require('webpack');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
 const NoEmitPlugin = require('no-emit-webpack-plugin');
 const setDefaults = require('./../common/set-defaults');
-
-const { outdir } = require('../constants');
-
 /**
  *
  * @param {object[]} entries

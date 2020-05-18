@@ -6,22 +6,6 @@
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
-    "build": [
-      {
-        "entries": {
-          "icons": "icons",
-          "language": "language",
-          "package.json": "file:build/bundle-pkgJson.js"
-        },
-        "type": "copy"
-      },
-      {
-        "entries": {
-          "extension": "index.ts"
-        },
-        "type": "extension"
-      }
-    ],
     "repository": {
         "url": "https://github.com/mtxr/vscode-sqltools.git",
         "type": "git"
@@ -1216,5 +1200,21 @@
         "@sqltools/util": "*",
         "@sqltools/plugins": "*",
         "vscode-languageclient": "6.1.2"
-    }
+    },
+    "build": [
+      {
+        "entries": {
+          "icons": "icons",
+          "language": "language",
+          "package.json": "file:build/bundle-pkgJson.js"
+        },
+        "type": "copy"
+      },
+      {
+        "entries": {
+          "extension": "index.ts"
+        },
+        "type": "extension"
+      }
+    ]
 }

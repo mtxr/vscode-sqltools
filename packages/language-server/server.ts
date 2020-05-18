@@ -4,8 +4,10 @@ import { TextDocument } from 'vscode-languageserver-textdocument';
 import { InvalidActionError } from '@sqltools/util/exception';
 import log from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
-import { ILanguageServer, ILanguageServerPlugin, Arg0 } from '@sqltools/types';
+import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContextMap } from '@sqltools/types';
 import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import { RegisterPlugin } from './contracts';
+import LSContext from './context';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -20,6 +22,20 @@ class SQLToolsLanguageServer implements ILanguageServer {
     this._server.onInitialize(this.onInitialize);
     this._server.onDidChangeConfiguration(this.onDidChangeConfiguration);
     this._docManager.listen(this._server);
+    this.onRequest(RegisterPlugin, this.onRegisterPlugin);
+  }
+
+  private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = ({ path: pluginPath } = { path: '' }) => {
+    try {
+      const plugin = (__non_webpack_require__ || require)(pluginPath).default;
+      this.registerPlugin(plugin);
+    } catch (error) {
+      return Promise.reject(error);
+    }
+  }
+
+  public getContext = (): LSContextMap => {
+    return LSContext;
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {

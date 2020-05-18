@@ -1,8 +1,12 @@
 import { IConnection, TextDocuments } from 'vscode-languageserver';
 import { Arg0 } from '../generic/utils';
+import { IConnectionDriverConstructor } from '../generic';
+
+export type LSContextMap =  Omit<Map<string, any>, 'clear' | 'delete'> & { drivers: Map<string, IConnectionDriverConstructor> };
 
 export interface ILanguageServer {
   listen(): void;
+  getContext(): LSContextMap;
   registerPlugin(plugin: ILanguageServerPlugin): this;
   sendNotification: IConnection['sendNotification'];
   onRequest: IConnection['onRequest'];

@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const setDefaults = require('./../common/set-defaults');
 const webpack = require('webpack');
+const parseEntries = require('./../common/parse-entries');
 
 const { rootdir, IS_PRODUCTION } = require('../constants');
 
@@ -13,13 +14,12 @@ const { rootdir, IS_PRODUCTION } = require('../constants');
  */
 module.exports = exports = function getWebviewConfig(entries, packagePath) {
   const babelOptions = require(path.join(packagePath, '.babelrc'));
+  const { entry, outDir } = parseEntries(entries, packagePath);
+
   /** @type webpack.Configuration */
   const config = {
     name: 'ui',
-    entry: Object.keys(entries).reduce((agg, name) => ({
-      ...agg,
-      [name]: path.resolve(packagePath, entries[name]),
-    }), {}),
+    entry,
     module: {
       rules: [
         {
@@ -99,6 +99,9 @@ module.exports = exports = function getWebviewConfig(entries, packagePath) {
     output: {
       chunkFilename: 'ui/[name].js',
       filename: 'ui/[name].js',
+      ...(outDir ? {
+        path: outDir
+      } : {}),
     },
     plugins: [
       new MiniCssExtractPlugin({

@@ -39,7 +39,7 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
   config.devtool = false;
   config.mode = IS_PRODUCTION ? 'production' : 'development';
   config.output = config.output || {};
-  config.output.path = outdir;
+  config.output.path = config.output.path || outdir;
   config.stats = 'minimal';
   return config;
 }

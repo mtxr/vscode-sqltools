@@ -14,8 +14,6 @@ export type CommandEventHandler<T> = (evt: T) => void;
 
 export interface IExtension {
   client: ILanguageClient;
-  activate(): void;
-  deactivate(): void;
   registerPlugin(plugin: IExtensionPlugin): this;
   addBeforeCommandHook(command: string, handler: CommandEventHandler<ICommandEvent>): this;
   addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<ICommandSuccessEvent>): this;

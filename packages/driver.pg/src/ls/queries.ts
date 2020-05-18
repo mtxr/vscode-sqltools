@@ -233,4 +233,4 @@ export default {
   fetchMaterializedViews,
   searchTables,
   searchColumns,
-}
+};

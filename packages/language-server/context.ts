@@ -1,8 +1,22 @@
 import { InvalidActionError } from '@sqltools/util/exception';
-import { IConnectionDriverConstructor } from '@sqltools/types';
+import { IConnectionDriverConstructor, LSContextMap } from '@sqltools/types';
+import logger from '@sqltools/util/log';
 
-const Context = new Map();
-const DriversContext = new Map<string, IConnectionDriverConstructor>();
+const log = logger.extend('ls-context');
+
+const Context: Omit<LSContextMap, 'drivers'> = new Map();
+class DriverMap<V = IConnectionDriverConstructor> extends Map<string, V> {
+  set (key: string, value: V): this {
+    if (typeof key !== 'string') throw 'invalid driver name!';
+    key = key.toLowerCase();
+    log.extend('register-driver')(`Driver ${key} registered!`);
+    return super.set(key, value);
+  }
+  get(key: string) { return super.get(key.toLowerCase()); }
+  has(key: string) { return super.has(key.toLowerCase()); }
+  delete(key: string) { return super.delete(key.toLowerCase()); }
+}
+const DriversContext: LSContextMap['drivers'] = new DriverMap();
 
 const handler = {
   get(_: never, prop: string) {
@@ -20,5 +34,5 @@ const handler = {
   },
 };
 
-const LSContext = new Proxy<Omit<typeof Context, 'clear' | 'delete'> & { drivers: typeof DriversContext }>(Context as any, handler);
+const LSContext = new Proxy<LSContextMap>(Context as any, handler);
 export default LSContext;

@@ -6,17 +6,9 @@
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "private": true,
-  "build": [
-    {
-      "entries": {
-        "languageserver": "index.ts"
-      },
-      "type": "node"
-    }
-  ],
   "dependencies": {
-    "@sqltools/util": "*",
     "@sqltools/plugins": "*",
+    "@sqltools/util": "*",
     "vscode-languageserver": "6.1.1",
     "vscode-languageserver-textdocument": "^1.0.1"
   },
@@ -27,9 +19,18 @@
     "@babel/preset-env": "^7.5.5",
     "@types/jest": "^24.0.11",
     "@types/node": "^12.7.1",
+    "@types/webpack-env": "^1.15.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.7.3"
-  }
+  },
+  "build": [
+    {
+      "entries": {
+        "languageserver": "index.ts"
+      },
+      "type": "node"
+    }
+  ]
 }

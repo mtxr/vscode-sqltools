@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const setDefaults = require('./../common/set-defaults');
+const parseEntries = require('./../common/parse-entries');
 /**
  *
  * @param {object} entries
@@ -9,13 +10,11 @@ const setDefaults = require('./../common/set-defaults');
  */
 module.exports = function getExtensionConfig(entries, packagePath) {
   /** @type webpack.Configuration */
+  const { entry, outDir } = parseEntries(entries, packagePath);
   let config = {
     name: 'ext',
     target: 'node',
-    entry: Object.keys(entries).reduce((agg, name) => ({
-      ...agg,
-      [name]: path.resolve(packagePath, entries[name]),
-    }), {}),
+    entry,
     module: {
       rules: [
         {
@@ -31,6 +30,9 @@ module.exports = function getExtensionConfig(entries, packagePath) {
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
+      ...(outDir ? {
+        path: outDir
+      } : {}),
     },
     externals: {
       vscode: 'commonjs vscode',
