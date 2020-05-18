@@ -176,10 +176,12 @@ export interface IQueryOptions {
   connId?: string;
   [k: string]: any;
 }
-
+export interface IConnectionDriverConstructor {
+  new (credentials: IConnection<any>): IConnectionDriver;
+}
 export interface IConnectionDriver {
   connection: any;
-  credentials: IConnection;
+  credentials: IConnection<any>;
   open(): Promise<any>;
   close(): Promise<any>;
   describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;

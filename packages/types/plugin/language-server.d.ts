@@ -18,7 +18,7 @@ export interface ILanguageServer {
   notifyError(message: string, error?: any): any;
   client: IConnection['client'];
   server: IConnection;
-  docManager: TextDocuments;
+  docManager: TextDocuments<any>;
 }
 
 export interface ILanguageServerPlugin<T = ILanguageServer> {

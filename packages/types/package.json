@@ -1,14 +1,33 @@
 {
   "name": "@sqltools/types",
-  "version": "1.0.0",
+  "version": "0.0.1-alpha1",
   "description": "SQLTools interfaces and types",
   "types": "index.d.ts",
   "main": "index.js",
   "license": "MIT",
+  "private": false,
+  "publishConfig": {
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
+  },
+  "keywords": [
+    "sqltools",
+    "vscode-sqltools"
+  ],
+  "authors": [
+    "Matheus Teixeira <matheus@mteixeira.dev>"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/types"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/issues"
+  },
   "devDependencies": {
     "typescript": "^3.7.3"
   },
-  "private": false,
   "peerDependencies": {
     "vscode-languageclient": "*",
     "vscode-languageserver": "*",

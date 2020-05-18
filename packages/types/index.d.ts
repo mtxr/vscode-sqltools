@@ -3,7 +3,7 @@ export * from './driver';
 export * from './settings';
 export * from './plugin';
 
-declare namespace NodeJS {
+export declare namespace NodeJS {
   interface ProcessEnv {
     PRODUCT: 'ext' | 'ls' | 'ui';
     NODE_ENV: 'development' | 'production';
