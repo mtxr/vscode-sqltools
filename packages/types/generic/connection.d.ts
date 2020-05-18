@@ -193,20 +193,16 @@ export interface IConnectionDriver {
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
 }
 
-export const enum ContextValue {
-  CONNECTION ='connection',
-  CONNECTED_CONNECTION ='connectedConnection',
-  /**
-   * @deprecated replaced by table and view values
-   */
-  TABLEORVIEW ='connection.tableOrView',
-  COLUMN ='connection.column',
-  FUNCTION ='connection.function',
-  SCHEMA ='connection.schema',
-  RESOURCE_GROUP ='connection.resource_group',
-  DATABASE ='connection.database',
-  TABLE ='connection.table',
-  VIEW ='connection.view',
+export declare enum ContextValue {
+  CONNECTION = 'connection',
+  CONNECTED_CONNECTION = 'connectedConnection',
+  COLUMN = 'connection.column',
+  FUNCTION = 'connection.function',
+  SCHEMA = 'connection.schema',
+  RESOURCE_GROUP = 'connection.resource_group',
+  DATABASE = 'connection.database',
+  TABLE = 'connection.table',
+  VIEW = 'connection.view',
   MATERIALIZED_VIEW = 'connection.materializedView',
   NO_CHILD = 'NO_CHILD',
   KEYWORDS = 'KEYWORDS',

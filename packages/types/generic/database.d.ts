@@ -56,7 +56,7 @@ export namespace NSDatabase {
     sortText?: string;
     detail: string;
     documentation: { kind: 'markdown', value: string};
-  };
+  }
 
   export interface IResult<T extends { [key: string]: any } = any> {
     /**
