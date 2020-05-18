@@ -4,13 +4,19 @@ import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
 import telemetry from '@sqltools/util/telemetry';
 import generateId from '@sqltools/util/internal-id';
-import Drivers from '@sqltools/drivers/src';
+import LSContext from './context';
 
 export default class Connection {
   private connected: boolean = false;
   private conn: IConnectionDriver;
   constructor(private credentials: IConnection) {
-    this.conn = new Drivers[credentials.driver](this.credentials);
+    if (!LSContext.drivers.has(credentials.driver)) {
+      throw new Error(`Driver ${credentials.driver} is not installed`);
+    }
+
+    const DriverClass = LSContext.drivers.get(credentials.driver);
+
+    this.conn = new DriverClass(this.credentials);
   }
 
   private decorateException = (e: Error) => {

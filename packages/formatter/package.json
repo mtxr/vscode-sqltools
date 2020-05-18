@@ -38,7 +38,7 @@
     "directory": "packages/formatter"
   },
   "bugs": {
-    "url": "https://github.com/mtxr/sqltools-formatter/issues"
+    "url": "https://github.com/mtxr/vscode-sqltools/labels/formatting"
   },
   "dependencies": {
     "lodash": "^4.17.11"

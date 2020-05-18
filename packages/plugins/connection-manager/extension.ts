@@ -1,7 +1,7 @@
 import logger from '@sqltools/util/log';
 import Config from '@sqltools/util/config-manager';
 import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, DatabaseDriver, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue, IQueryOptions } from '@sqltools/types';
+import { IConnection, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue, IQueryOptions } from '@sqltools/types';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
 import { getSelectedText, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
@@ -15,7 +15,6 @@ import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
 import statusBar from './status-bar';
-import parseWorkspacePath from '@sqltools/vscode/utils/parse-workspace-path';
 import telemetry from '@sqltools/util/telemetry';
 import generateId from '@sqltools/util/internal-id';
 import Context from '@sqltools/vscode/context';
@@ -48,7 +47,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_testConnection = async (c: IConnection) => {
     let password = null;
 
-    if (c.driver !== DatabaseDriver.SQLite && c.askForPassword) password = await this._askForPassword(c);
+    if (c.askForPassword) password = await this._askForPassword(c);
     if (c.askForPassword && password === null) return;
     return this.client.sendRequest(
       TestConnectionRequest,
@@ -493,15 +492,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     let password = null;
 
     if (c && getConnectionId(c) !== (await this.explorer.getActiveId())) {
-      if (c.driver === DatabaseDriver.SQLite) {
-        c.database = parseWorkspacePath(c.database);
-      }
-      if (c.driver === DatabaseDriver.PostgreSQL && c.pgOptions && typeof c.pgOptions.ssl === 'object') {
-        Object.keys(c.pgOptions.ssl).forEach(key => {
-          if (typeof c.pgOptions.ssl[key] === 'string' && c.pgOptions.ssl[key].startsWith('file://')) return;
-          c.pgOptions.ssl[key] = `file://${parseWorkspacePath(c.pgOptions.ssl[key].replace('file://', ''))}`;
-        });
-      }
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });

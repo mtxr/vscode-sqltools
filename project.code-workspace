@@ -1,5 +1,6 @@
 {
   "folders": [
+    { "path": "./packages/base-driver" },
     { "path": "./packages/drivers" },
     { "path": "./packages/extension" },
     { "path": "./packages/formatter" },

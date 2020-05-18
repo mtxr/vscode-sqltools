@@ -1,7 +1,7 @@
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import queries from './queries';
 import OracleDBLib from 'oracledb';
-import AbstractDriver from '../../lib/abstract';
+import AbstractDriver from '@sqltools/base-driver';
 import { trim, pipe, trimCharsEnd } from 'lodash/fp';
 import sqltoolsRequire from '@sqltools/util/dependencies/require';
 import { getConnectionId } from '@sqltools/util/connection';

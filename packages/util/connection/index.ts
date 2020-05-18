@@ -1,4 +1,4 @@
-import { IConnection, DatabaseDriver } from '@sqltools/types';
+import { IConnection } from '@sqltools/types';
 import path from 'path';
 export const idSep = '|';
 
@@ -44,7 +44,7 @@ export function getSessionBasename(connName: string) {
 export function getConnectionDescription(c: IConnection): string | null {
   if (!c) return null;
 
-  if (c.driver === DatabaseDriver.SQLite) {
+  if (/workspaceFolder:/.test(c.database)) {
     return c.database.replace(/\$\{workspaceFolder:(.+)}/g, '$1').replace(/\$\{workspaceFolder}/g, '.');
   }
 

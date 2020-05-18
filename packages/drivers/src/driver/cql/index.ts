@@ -1,7 +1,7 @@
 import * as CassandraLib from 'cassandra-driver';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import { replacer } from '@sqltools/util/text';
-import AbstractDriver from '../../lib/abstract';
+import AbstractDriver from '@sqltools/base-driver';
 import Queries from './queries';
 import { TREE_SEP } from '@sqltools/util/constants';
 import { parse as queryParse } from '@sqltools/util/query';

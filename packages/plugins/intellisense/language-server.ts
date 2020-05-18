@@ -1,5 +1,5 @@
 import { CompletionItem, CompletionItemKind, Range } from 'vscode-languageserver';
-import { ILanguageServerPlugin, ILanguageServer, DatabaseDriver, ContextValue, Arg0, NSDatabase } from '@sqltools/types';
+import { ILanguageServerPlugin, ILanguageServer, ContextValue, Arg0, NSDatabase } from '@sqltools/types';
 import { getDocumentCurrentQuery } from './query';
 import connectionStateCache, { LAST_USED_ID_KEY, ACTIVE_CONNECTIONS_KEY } from '../connection-manager/cache/connections-state.model';
 import { Parser, Select } from 'node-sql-parser';
@@ -55,19 +55,20 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     const conn = activeConnections[lastUsedId];
     let completionDialect: string;
 
-    switch (conn && conn.getDriver()) {
-      case DatabaseDriver['AWS Redshift']:
-        completionDialect = DatabaseDriver.PostgreSQL;
-        break;
-      case DatabaseDriver.MSSQL:
-        completionDialect = 'transactsql';
-        break;
-      case DatabaseDriver.MySQL:
-      case DatabaseDriver.MariaDB:
-        break;
-      default:
-        completionDialect = null;
-    }
+    // @TODO
+    // switch (conn && conn.getDriver()) {
+    //   case DatabaseDriver['AWS Redshift']:
+    //     completionDialect = DatabaseDriver.PostgreSQL;
+    //     break;
+    //   case DatabaseDriver.MSSQL:
+    //     completionDialect = 'transactsql';
+    //     break;
+    //   case DatabaseDriver.MySQL:
+    //   case DatabaseDriver.MariaDB:
+    //     break;
+    //   default:
+    //     completionDialect = null;
+    // }
 
     return {
       currentWord,

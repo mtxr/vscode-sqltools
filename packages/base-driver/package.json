@@ -4,6 +4,7 @@
   "description": "SQLTools Base Driver",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "files": ["dist"],
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
   "repository": {

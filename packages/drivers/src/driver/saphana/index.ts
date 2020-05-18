@@ -1,6 +1,6 @@
 
 import queries from './queries';
-import AbstractDriver from '../../lib/abstract';
+import AbstractDriver from '@sqltools/base-driver';
 import sqltoolsRequire from '@sqltools/util/dependencies/require';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 
@@ -50,12 +50,12 @@ export default class SAPHana extends AbstractDriver<HanaConnection, any> impleme
     if (this.credentials.connectionTimeout && this.credentials.connectionTimeout > 0) {
       connOptions["CONNECTTIMEOUT"] = this.credentials.connectionTimeout * 1000;
     }
-    
+
     connOptions = {
       ...connOptions,
       ...(this.credentials["hanaOptions"] || {}),
     };
-    
+
     try {
       let conn = this.lib.createConnection(connOptions);
 
@@ -207,5 +207,5 @@ export default class SAPHana extends AbstractDriver<HanaConnection, any> impleme
       })
     });
   }
-  
+
 }

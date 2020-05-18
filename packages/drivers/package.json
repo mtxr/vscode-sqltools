@@ -21,6 +21,7 @@
     "compile": "tsc -p tsconfig.json"
   },
   "dependencies": {
+    "@sqltools/base-driver": "*",
     "@sqltools/util": "*",
     "@mysql/xdevapi": "^8.0.15",
     "cassandra-driver": "^4.1.0",

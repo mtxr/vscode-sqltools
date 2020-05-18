@@ -1,5 +1,5 @@
 import SQLiteLib from 'sqlite3';
-import AbstractDriver from '../../lib/abstract';
+import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
 import sqltoolsRequire from '@sqltools/util/dependencies/require';
 import mkdir from '@sqltools/util/path/mkdir';
