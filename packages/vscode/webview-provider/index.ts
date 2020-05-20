@@ -31,7 +31,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 </head>
 <body>
   <link rel="stylesheet" type="text/css" href="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/theme.css`)))}">
-  <div id="root"></div>
+  <div id="app-root"></div>
   <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/vendor.js`)))}" type="text/javascript" charset="UTF-8"></script>
   <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/commons.js`)))}" type="text/javascript" charset="UTF-8"></script>
   <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/${this.id}.js`)))}" type="text/javascript" charset="UTF-8"></script>

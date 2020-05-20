@@ -11,21 +11,17 @@ yarn run build --env.pkg=driver.mssql --env.pkg=driver.mysql --env.pkg=driver.pg
 
 (
   cd packages/driver.mssql/ &&
-  vsce package --yarn &&
-  mv *.vsix ../../.
+  vsce package --yarn -o ../../.
 )&
 (
   cd packages/driver.mysql/ &&
-  vsce package --yarn &&
-  mv *.vsix ../../.
+  vsce package --yarn -o ../../.
 )&
 (
   cd packages/driver.pg/ &&
-  vsce package --yarn &&
-  mv *.vsix ../../.
+  vsce package --yarn -o ../../.
 )&
 (
   cd packages/driver.sqlite/ &&
-  vsce package --yarn &&
-  mv *.vsix ../../.
+  vsce package --yarn -o ../../.
 )&

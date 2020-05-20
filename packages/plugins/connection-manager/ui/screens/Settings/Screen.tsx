@@ -13,7 +13,7 @@ import { SettingsScreenState } from './interfaces';
 import { IConnection } from '@sqltools/types';
 import { UIAction } from '../../../actions';
 import Header from './Header';
-import { ISubmitEvent } from '@rjsf/core';
+import { ISubmitEvent, IChangeEvent } from '@rjsf/core';
 
 const log = logger.extend('settings');
 
@@ -97,6 +97,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     installedDrivers: [],
     schema: {},
     uiSchema: {},
+    formData: {}
   };
 
   state = this.initialState;
@@ -110,7 +111,10 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   }
 
   onSelectDriver = (driver: SettingsScreenState['driver']) => {
-    this.setState({ loading: true, driver }, () => {
+    if (!driver) {
+      return this.setState({ loading: false, driver, formData: { } });
+    }
+    this.setState({ loading: true, driver, formData: { driver: driver.value } }, () => {
       sendMessage(UIAction.REQUEST_DRIVER_SCHEMAS, { driver: this.state.driver.value });
     });
   }
@@ -132,6 +136,10 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     // });
   }
 
+  onChangeFormData = (data: IChangeEvent<IConnection>) => {
+    this.setState({ formData: data.formData });
+  }
+
   onTestConnection = () => {
     // @TODO
     // this.setState({ loading: true }, () => {
@@ -146,7 +154,18 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   onOpenConnectionFile = () => sendMessage(UIAction.REQUEST_OPEN_CONNECTION_FILE);
 
   public render() {
-    const { step, driver, loading, installedDrivers, saved, action, errors, schema, uiSchema } = this.state;
+    const {
+      step,
+      driver,
+      loading,
+      installedDrivers,
+      saved,
+      action,
+      errors,
+      schema,
+      uiSchema,
+      formData
+    } = this.state;
     return (
       <>
         <Container maxWidth='md' className={`blur ${loading ? 'blur-active' : ''}`}>
@@ -170,6 +189,8 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
               action={action}
               errors={errors}
               driver={driver}
+              onChange={this.onChangeFormData}
+              formData={formData}
             />
           )}
           {step === Step.CONNECTION_CREATED && (

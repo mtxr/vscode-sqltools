@@ -18,4 +18,5 @@ export interface SettingsScreenState {
   } & IDriverAlias)[];
   schema: FormProps<IConnection>['schema'];
   uiSchema: FormProps<IConnection>['uiSchema'];
+  formData: Partial<IConnection>;
 }

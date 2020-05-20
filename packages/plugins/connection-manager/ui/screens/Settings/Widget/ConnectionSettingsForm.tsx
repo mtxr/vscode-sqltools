@@ -5,11 +5,15 @@ import A from '../../../components/A';
 import { SettingsScreenState } from '../interfaces';
 import Form, { FormProps } from '@rjsf/core';
 import { IConnection } from '@sqltools/types';
+import Syntax from '../../../components/Syntax';
+import FileWidget from './FileWidget';
 
 const ConnectionSettingsForm = ({
   onSubmit,
+  onChange,
   testConnection,
   openConnectionFile,
+  formData = {},
   schema = {},
   uiSchema = {},
   driver,
@@ -17,8 +21,10 @@ const ConnectionSettingsForm = ({
   errors,
 }: {
   onSubmit: FormProps<any>['onSubmit'];
+  onChange: FormProps<any>['onChange'];
   testConnection: () => void;
   openConnectionFile: () => void;
+  formData: FormProps<Partial<IConnection>>['formData'];
   schema: FormProps<IConnection>['schema'];
   uiSchema: FormProps<IConnection>['uiSchema'];
   driver: SettingsScreenState['driver'];
@@ -31,13 +37,29 @@ const ConnectionSettingsForm = ({
       <h5>Connection Settings</h5>
       <hr />
       <DriverIcon driver={driver} />
-      <Form schema={schema} uiSchema={uiSchema} onSubmit={onSubmit} />
-      <ConnectionSettingsForm.Footer
-        errors={errors}
-        action={action}
-        testConnection={testConnection}
-        openConnectionFile={openConnectionFile}
-      />
+      <Form
+        schema={schema}
+        uiSchema={uiSchema}
+        onSubmit={onSubmit}
+        onChange={onChange}
+        formData={formData}
+        widgets={widgets}
+        liveValidate
+      >
+        <ConnectionSettingsForm.Footer
+          errors={errors}
+          action={action}
+          testConnection={testConnection}
+          openConnectionFile={openConnectionFile}
+        />
+      </Form>
+      {process.env.NODE_ENV !== 'production' &&
+        <div>
+          <blockquote> -- DEV ONLY -- </blockquote>
+          <a onClick={() => location.reload()}>Realod webview</a>
+          <Syntax code={formData} language='json' />
+        </div>
+      }
     </>
   );
 };
@@ -57,5 +79,9 @@ ConnectionSettingsForm.Footer = ({ errors, testConnection, action, openConnectio
     )}
   </footer>
 );
+
+const widgets: FormProps<any>['widgets'] = {
+  FileWidget: FileWidget,
+};
 
 export default ConnectionSettingsForm;

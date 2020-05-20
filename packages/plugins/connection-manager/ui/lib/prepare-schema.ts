@@ -1,5 +1,6 @@
 import { FormProps } from '@rjsf/core';
 import { IConnection } from '@sqltools/types';
+import uniq from 'lodash/uniq';
 
 export default function prepareSchema(
   schema: FormProps<IConnection>['schema'],
@@ -21,6 +22,7 @@ export default function prepareSchema(
         type: 'string',
         title: 'Connection group',
       },
+      driver: { title: 'driver', type: 'string' },
       ...(schema.properties || {}),
       previewLimit: {
         default: 50,
@@ -28,11 +30,14 @@ export default function prepareSchema(
         title: 'Show records default limit',
       },
     },
-    required: ['name', ...(schema.required || [])],
+    required: ['name', 'driver', ...(schema.required || [])],
   };
 
   const uiCombinedSchema: FormProps<IConnection>['uiSchema'] = {
+    name: { 'ui:autofocus': true },
+    driver: { 'ui:widget': 'hidden' },
     ...uiSchema,
+    'ui:order': uniq(['name', 'group', ...(uiSchema['ui:order'] || []), '*']),
   };
 
   return {

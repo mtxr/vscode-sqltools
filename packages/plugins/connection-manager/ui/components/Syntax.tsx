@@ -4,7 +4,7 @@ import { clipboardInsert } from '../lib/utils';
 interface SyntaxProps {
   language?: string;
   width?: string;
-  code: any;
+  code?: any;
   strong?: boolean;
   allowCopy?: boolean;
   style?: React.CSSProperties;

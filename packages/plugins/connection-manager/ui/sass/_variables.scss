@@ -33,18 +33,71 @@ $darkThemeWhite14: rgba(255, 255, 255, 0.70);
 $darkThemeWhite16: rgba(255, 255, 255, 0.80);
 
 $radius: 3px;
+html {
+  font-size: $fontSize;
+}
+* {
+  box-sizing: border-box;
+  &::before, &::after {
+    box-sizing: border-box;
+  }
+}
 
 input, select, select > option {
   border-radius: 0;
   background: var(--vscode-settings-textInputBackground);
   border: 1px solid var(--vscode-input-border);
   color: var(--vscode-settings-textInputForeground);
-  padding: 4px 8px;
-}
-select {
-  padding: 4px 6px;
+  vertical-align: middle;
+  line-height: 26px;
+  height: 26px;
+  padding: 0px 8px;
+  appearance: none;
+  -webkit-appearance: none;
 }
 
+input[type=checkbox] {
+  appearance: none;
+  -webkit-appearance: none;
+  background: var(--vscode-settings-textInputBackground);
+  border: 1px solid transparent;
+  height: 18px;
+  width: 18px;
+  padding: 0;
+  margin: 0;
+  margin-right: 9px;
+  border-radius: 3px;
+  position: relative;
+  color: var(--vscode-settings-textInputForeground);
+  &::before {
+    position: absolute;
+    content: '';
+    display: block;
+    top: 0px;
+    left: 5px;
+    width: 6px;
+    height: 12px;
+    border-style: solid;
+    border-color: var(--vscode-settings-textInputForeground);
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+    opacity: 0;
+  }
+  &:checked {
+    &::before {
+      opacity: 1;
+    }
+  }
+  &:hover, &:focus, &:active {
+    border: 1px solid var(--vscode-input-border);
+  }
+}
+
+
+input[type=number]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  display:none;
+}
 
 .fullscreen-container {
   @include full-screen();

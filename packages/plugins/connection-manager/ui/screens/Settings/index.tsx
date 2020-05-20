@@ -4,4 +4,4 @@ import SettingsScreen from './Screen';
 import '../../sass/jsonschema.form.scss';
 
 
-render(<SettingsScreen />, document.getElementById('root'));
+render(<SettingsScreen />, document.getElementById('app-root'));

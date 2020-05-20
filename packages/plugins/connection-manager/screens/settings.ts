@@ -129,14 +129,15 @@ export default class SettingsWebview extends WebviewProvider {
     this.postMessage({ action: UIAction.RESPONSE_INSTALLED_DRIVERS, payload: installedDrivers.sort((a, b) => a.displayName.localeCompare(b.displayName)) });
   }
 
-  private getDriverSchemas = ({ driver }: { driver: string } = { driver: null}) => {
+  private getDriverSchemas = ({ driver }: { driver: string } = { driver: null }) => {
+    if (!driver) return;
     let schema = {};
     let uiSchema = {};
     try {
-      schema = __non_webpack_require__(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'connection-schema' })));
+      schema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'connection-schema' }))).toString()) || {};
     } catch (error) { }
     try {
-      uiSchema = __non_webpack_require__(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'ui-schema' })));
+      uiSchema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'ui-schema' }))).toString()) || {};
     } catch (error) { }
 
     this.postMessage({ action: UIAction.RESPONSE_DRIVER_SCHEMAS, payload: prepareSchema(schema, uiSchema) });
