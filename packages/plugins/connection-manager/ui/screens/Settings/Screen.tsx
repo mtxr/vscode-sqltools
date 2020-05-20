@@ -2,7 +2,7 @@ import React from 'react';
 import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
-import { Step, totalSteps } from './lib/steps';
+import { Step } from './lib/steps';
 import ConnectionSettingsForm from './Widget/ConnectionSettingsForm';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/util/log';
@@ -12,6 +12,8 @@ import sendMessage from '../../lib/messages';
 import { SettingsScreenState } from './interfaces';
 import { IConnection } from '@sqltools/types';
 import { UIAction } from '../../../actions';
+import Header from './Header';
+import { ISubmitEvent } from '@rjsf/core';
 
 const log = logger.extend('settings');
 
@@ -57,6 +59,13 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
           loading: false,
           installedDrivers,
         });
+      case UIAction.RESPONSE_DRIVER_SCHEMAS:
+        const { schema = {}, uiSchema = {} } = payload;
+        return this.setState({
+          loading: false,
+          schema,
+          uiSchema,
+        }, () => this.goTo(Step.CONNECTION_FORM));
       case UIAction.RESPONSE_UPDATE_CONNECTION_ERROR:
       case UIAction.RESPONSE_CREATE_CONNECTION_ERROR:
       case UIAction.RESPONSE_TEST_CONNECTION_ERROR:
@@ -85,36 +94,29 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     step: Step.CONNECTION_TYPE,
     externalMessage: null,
     externalMessageType: null,
-    installedDrivers: []
+    installedDrivers: [],
+    schema: {},
+    uiSchema: {},
   };
 
   state = this.initialState;
 
-  constructor(props: any) {
-    super(props);
-    window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
-  }
-
   componentDidMount() {
+    window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
     sendMessage(UIAction.NOTIFY_VIEW_READY, true);
     this.setState({ loading: true }, () => {
       sendMessage(UIAction.REQUEST_INSTALLED_DRIVERS);
     });
   }
 
-  onSelectDriver = (driver: (SettingsScreenState['installedDrivers'])[number]) => {
-    this.setState({ loading: true, driver });
-    // this.updateConnectionSettings({
-    //   driver: driver.value,
-    //   port: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || driver.port || null),
-    //   server: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
-    //   askForPassword: driver.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
-    // }, () => this.setState({ step: Step.CONNECTION_INFO }));
-
+  onSelectDriver = (driver: SettingsScreenState['driver']) => {
+    this.setState({ loading: true, driver }, () => {
+      sendMessage(UIAction.REQUEST_DRIVER_SCHEMAS, { driver: this.state.driver.value });
+    });
   }
 
-  onSubmitSetting = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
+  onSubmitSetting = (data: ISubmitEvent<IConnection>) => {
+    console.log({ data });
     // @TODO
     // this.validateSettings(() => {
     //   if (Object.keys(this.state.errors).length > 0) return;
@@ -139,32 +141,16 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     // });
   }
 
-
   goTo = (step: Step) => this.setState({ step });
 
   onOpenConnectionFile = () => sendMessage(UIAction.REQUEST_OPEN_CONNECTION_FILE);
 
   public render() {
-    const { step, driver, loading, installedDrivers, saved, action, errors } = this.state;
+    const { step, driver, loading, installedDrivers, saved, action, errors, schema, uiSchema } = this.state;
     return (
       <>
         <Container maxWidth='md' className={`blur ${loading ? 'blur-active' : ''}`}>
-          <h3>
-            Connection Assistant
-            <small style={{ float: 'right' }} className='stepper'>
-              {
-                step - 1 >= Step.CONNECTION_TYPE
-                && <a onClick={() => this.goTo(step - 1)}>{'<'}</a>
-              }
-              Step {step}/{totalSteps}
-              {
-                step + 1 <= Step.CONNECTION_CREATED
-                && driver
-                && (step + 1 !== Step.CONNECTION_CREATED || saved)
-                && <a onClick={() => this.goTo(step + 1)}>{'>'}</a>
-              }
-            </small>
-          </h3>
+          <Header step={step} driver={driver} saved={saved} />
           {step === Step.CONNECTION_TYPE && (
             <DriverSelector
               loading={loading}
@@ -173,10 +159,12 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
               selected={driver}
             />
           )}
-          {step === Step.CONNECTION_INFO && (
+          {step === Step.CONNECTION_FORM && (
             <ConnectionSettingsForm
+              schema={schema}
+              uiSchema={uiSchema}
               installedDrivers={installedDrivers}
-              submit={this.onSubmitSetting}
+              onSubmit={this.onSubmitSetting}
               testConnection={this.onTestConnection}
               openConnectionFile={this.onOpenConnectionFile}
               action={action}

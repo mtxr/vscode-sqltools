@@ -1,8 +1,7 @@
 import logger from '@sqltools/util/log';
-import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
+import { EventEmitter, TreeDataProvider } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
-import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { getDataPath } from '@sqltools/util/path';
 import fs from 'fs';
 import Context from '@sqltools/vscode/context';
@@ -11,7 +10,6 @@ const log = logger.extend('book-man:explorer');
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
 
 export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> {
-  private treeView: TreeView<BookmarkExplorerItem>;
   private _onDidChangeTreeData: EventEmitter<BookmarkExplorerItem | undefined> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   private tree: { [group: string]: BookmarkTreeGroup } = {};
@@ -116,8 +114,6 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
 
 
   constructor() {
-    this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAMESPACE}/bookmarksExplorer`, { treeDataProvider: this });
-    Context.subscriptions.push(this.treeView);
     this.readFromFile();
   }
 }

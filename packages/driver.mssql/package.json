@@ -18,6 +18,9 @@
   "bugs": {
     "url": "https://github.com/mtxr/vscode-sqltools/labels/mssql"
   },
+  "keywords": [
+    "sqltools-driver"
+  ],
   "categories": [
     "Programming Languages",
     "Snippets",

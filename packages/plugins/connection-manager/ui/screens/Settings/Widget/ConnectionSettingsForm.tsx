@@ -3,18 +3,24 @@ import DriverIcon from '../../../components/DriverIcon';
 import Button from '../../../components/Button';
 import A from '../../../components/A';
 import { SettingsScreenState } from '../interfaces';
+import Form, { FormProps } from '@rjsf/core';
+import { IConnection } from '@sqltools/types';
 
 const ConnectionSettingsForm = ({
-  submit,
+  onSubmit,
   testConnection,
   openConnectionFile,
+  schema = {},
+  uiSchema = {},
   driver,
   action,
   errors,
 }: {
-  submit: (e: React.FormEvent<HTMLFormElement>) => void;
+  onSubmit: FormProps<any>['onSubmit'];
   testConnection: () => void;
   openConnectionFile: () => void;
+  schema: FormProps<IConnection>['schema'];
+  uiSchema: FormProps<IConnection>['uiSchema'];
   driver: SettingsScreenState['driver'];
   action: SettingsScreenState['action'];
   errors: SettingsScreenState['errors'];
@@ -25,20 +31,19 @@ const ConnectionSettingsForm = ({
       <h5>Connection Settings</h5>
       <hr />
       <DriverIcon driver={driver} />
-      <form onSubmit={submit}>
-        <ConnectionSettingsForm.Footer
-          errors={errors}
-          action={action}
-          testConnection={testConnection}
-          openConnectionFile={openConnectionFile}
-        />
-      </form>
+      <Form schema={schema} uiSchema={uiSchema} onSubmit={onSubmit} />
+      <ConnectionSettingsForm.Footer
+        errors={errors}
+        action={action}
+        testConnection={testConnection}
+        openConnectionFile={openConnectionFile}
+      />
     </>
   );
 };
 
 ConnectionSettingsForm.Footer = ({ errors, testConnection, action, openConnectionFile }) => (
-  <div style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
+  <footer style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
     <Button bg="var(--vscode-list-highlightForeground)" type="submit" disabled={Object.keys(errors).length > 0}>
       Save Connection
     </Button>
@@ -50,7 +55,7 @@ ConnectionSettingsForm.Footer = ({ errors, testConnection, action, openConnectio
         Open settings
       </A>
     )}
-  </div>
+  </footer>
 );
 
 export default ConnectionSettingsForm;

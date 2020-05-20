@@ -26,7 +26,7 @@ export interface IConnection<DriverOptions = any> {
    * @type {number}
    * @memberof IConnection
    */
-  port: number;
+  port?: number;
   /**
    * Path of socket file to connect using UNIX sockets
    * @type {string}
@@ -75,6 +75,7 @@ export interface IConnection<DriverOptions = any> {
   /**
    * Connection show records limit
    * @type {number}
+   * @default {50}
    * @memberof IConnection
    */
   previewLimit?: number;

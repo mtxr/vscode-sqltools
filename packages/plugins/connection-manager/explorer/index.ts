@@ -86,7 +86,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAMESPACE}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
+    this.treeView = window.createTreeView(`${EXT_NAMESPACE}-view-connectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
     Config.addOnUpdateHook(({ event }) => {
       if (
         event.affectsConfig('flattenGroupsIfOne')
@@ -98,7 +98,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
     });
     this.messagesTreeViewProvider = new MessagesProvider();
-    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}/consoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: false });
+    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}-view-consoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: true });
     Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 

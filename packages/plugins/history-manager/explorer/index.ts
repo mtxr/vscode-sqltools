@@ -48,9 +48,9 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
     this.treeGroupOrder = [];
     this.refresh();
   }
-  
+
   constructor() {
-    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}/historyExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}-view-historyExplorer`, { treeDataProvider: this, showCollapseAll: true });
     Context.subscriptions.push(this.treeView);
   }
 }

@@ -361,7 +361,7 @@
                 "command": "sqltools.copyTextFromTreeItem",
                 "key": "ctrl+c",
                 "mac": "cmd+c",
-                "when": "focusedView == sqltools/connectionExplorer && sideBarFocus"
+                "when": "focusedView == sqltools-view-connectionExplorer && sideBarFocus"
             },
             {
                 "command": "sqltools.executeQuery",
@@ -704,6 +704,7 @@
                             },
                             "previewLimit": {
                                 "type": "number",
+                                "default": 50,
                                 "description": "Connection show records limit"
                             },
                             "icons": {
@@ -888,21 +889,21 @@
         "views": {
             "sqltoolsActivityBarContainer": [
                 {
-                    "id": "sqltools/connectionExplorer",
+                    "id": "sqltools-view-connectionExplorer",
                     "name": "Connections"
                 },
                 {
-                    "id": "sqltools/bookmarksExplorer",
+                    "id": "sqltools-view-bookmarksExplorer",
                     "name": "Bookmarks"
                 },
                 {
-                    "id": "sqltools/historyExplorer",
+                    "id": "sqltools-view-historyExplorer",
                     "name": "Query History"
                 }
             ],
             "sqltoolsPanelContainer": [
                 {
-                    "id": "sqltools/consoleMessages",
+                    "id": "sqltools-view-consoleMessages",
                     "name": "Messages"
                 }
             ]
@@ -925,7 +926,7 @@
         },
         "viewsWelcome": [
             {
-              "view": "sqltools/connectionExplorer",
+              "view": "sqltools-view-connectionExplorer",
               "contents": "No connections found.\n[Add new connection](command:sqltools.openAddConnectionScreen)"
             }
         ],
@@ -975,149 +976,149 @@
             "view/title": [
                 {
                     "command": "sqltools.openAddConnectionScreen",
-                    "when": "view == sqltools/connectionExplorer",
+                    "when": "view == sqltools-view-connectionExplorer",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.newSqlFile",
-                    "when": "view == sqltools/connectionExplorer",
+                    "when": "view == sqltools-view-connectionExplorer",
                     "group": "navigation@2"
                 },
                 {
                     "command": "sqltools.refreshTree",
-                    "when": "view == sqltools/connectionExplorer",
+                    "when": "view == sqltools-view-connectionExplorer",
                     "group": "navigation@3"
                 },
                 {
                     "command": "sqltools.clearBookmarks",
-                    "when": "view == sqltools/bookmarksExplorer",
+                    "when": "view == sqltools-view-bookmarksExplorer",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.clearHistory",
-                    "when": "view == sqltools/historyExplorer",
+                    "when": "view == sqltools-view-historyExplorer",
                     "group": "navigation@1"
                 }
             ],
             "view/item/context": [
                 {
                     "command": "sqltools.selectConnection",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connection",
                     "group": "navigation@0"
                 },
                 {
                     "command": "sqltools.closeConnection",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connectedConnection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connectedConnection",
                     "group": "navigation@0"
                 },
                 {
                     "command": "sqltools.refreshTree",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connectedConnection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connectedConnection",
                     "group": "navigation@0"
                 },
                 {
                     "command": "sqltools.openEditConnectionScreen",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.openSettings",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connection",
                     "group": "sqltools.dbExplorer.edit@0"
                 },
                 {
                     "command": "sqltools.deleteConnection",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
                     "group": "sqltools.dbExplorer@0"
                 },
                 {
                     "command": "sqltools.showRecords",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.describeTable",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "navigation@2"
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
+                    "when": "!editorReadonly && view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "navigation@3"
                 },
                 {
                     "command": "sqltools.insertText",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(.+)/",
+                    "when": "!editorReadonly && view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(.+)/",
                     "group": "sqltools.connectionExplorer.edit@0"
                 },
                 {
                     "command": "sqltools.copyTextFromTreeItem",
-                    "when": "!editorReadonly && view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(.+)/",
+                    "when": "!editorReadonly && view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(.+)/",
                     "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {
                     "command": "sqltools.selectConnection",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connection",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.closeConnection",
-                    "when": "view == sqltools/connectionExplorer && viewItem == connectedConnection",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem == connectedConnection",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.generateInsertQuery",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.showRecords",
-                    "when": "view == sqltools/connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "when": "view == sqltools-view-connectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
                     "group": "inline@1"
                 },
                 {
                     "command": "sqltools.editHistory",
-                    "when": "view == sqltools/historyExplorer && viewItem == history.item",
+                    "when": "view == sqltools-view-historyExplorer && viewItem == history.item",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.runFromHistory",
-                    "when": "view == sqltools/historyExplorer && viewItem == history.item",
+                    "when": "view == sqltools-view-historyExplorer && viewItem == history.item",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.runFromHistory",
-                    "when": "view == sqltools/historyExplorer && viewItem == history.item",
+                    "when": "view == sqltools-view-historyExplorer && viewItem == history.item",
                     "group": "navigation@0"
                 },
                 {
                     "command": "sqltools.editHistory",
-                    "when": "view == sqltools/historyExplorer && viewItem == history.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == history.item",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.runFromBookmarks",
-                    "when": "view == sqltools/bookmarksExplorer && viewItem == bookmark.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == bookmark.item",
                     "group": "inline@1"
                 },
                 {
                     "command": "sqltools.editBookmark",
-                    "when": "view == sqltools/bookmarksExplorer && viewItem == bookmark.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == bookmark.item",
                     "group": "inline@0"
                 },
                 {
                     "command": "sqltools.runFromBookmarks",
-                    "when": "view == sqltools/bookmarksExplorer && viewItem == bookmark.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == bookmark.item",
                     "group": "navigation@0"
                 },
                 {
                     "command": "sqltools.editBookmark",
-                    "when": "view == sqltools/bookmarksExplorer && viewItem == bookmark.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == bookmark.item",
                     "group": "navigation@1"
                 },
                 {
                     "command": "sqltools.deleteBookmark",
-                    "when": "view == sqltools/bookmarksExplorer && viewItem == bookmark.item",
+                    "when": "view == sqltools-view-bookmarksExplorer && viewItem == bookmark.item",
                     "group": "sqltools.bmExplorer@0"
                 }
             ],

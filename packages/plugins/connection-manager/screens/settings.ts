@@ -7,6 +7,7 @@ import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resou
 import { IDriverExtensionApi, IDriverAlias, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import { UIAction } from '../actions';
+import prepareSchema from '../ui/lib/prepare-schema';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
@@ -26,6 +27,8 @@ export default class SettingsWebview extends WebviewProvider {
           this.openConnectionFile();
         case UIAction.REQUEST_INSTALLED_DRIVERS:
           return this.getInstalledDrivers();
+        case UIAction.REQUEST_DRIVER_SCHEMAS:
+          return this.getDriverSchemas(payload);
         default:
         break;
       }
@@ -121,9 +124,22 @@ export default class SettingsWebview extends WebviewProvider {
       }
     }));
 
-    if (installedDrivers.length === 0) return setTimeout(() => this.getInstalledDrivers(retry++), 250);
+    if (installedDrivers.length === 0 && driverExtensions.length > 0) return setTimeout(() => this.getInstalledDrivers(retry++), 250);
 
     this.postMessage({ action: UIAction.RESPONSE_INSTALLED_DRIVERS, payload: installedDrivers.sort((a, b) => a.displayName.localeCompare(b.displayName)) });
+  }
+
+  private getDriverSchemas = ({ driver }: { driver: string } = { driver: null}) => {
+    let schema = {};
+    let uiSchema = {};
+    try {
+      schema = __non_webpack_require__(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'connection-schema' })));
+    } catch (error) { }
+    try {
+      uiSchema = __non_webpack_require__(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'ui-schema' })));
+    } catch (error) { }
+
+    this.postMessage({ action: UIAction.RESPONSE_DRIVER_SCHEMAS, payload: prepareSchema(schema, uiSchema) });
   }
   private openConnectionFile = async () => {
     return commands.executeCommand('workbench.action.openSettings', `${EXT_CONFIG_NAMESPACE}.connections`);

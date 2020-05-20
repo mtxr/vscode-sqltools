@@ -57,7 +57,7 @@ const DriverSelector = ({
       </Grid>}
       {!loading && drivers.length === 0 && <Grid style={{ textAlign: 'center', padding: '5rem', height: '10rem', justifyContent: 'space-evenly', flexDirection: 'column', display: 'flex' }}>
         <div><Message type='error' >No drivers installed</Message></div>
-        <div><a href='https://marketplace.visualstudio.com/search?term=sqltools%20driver&target=VSCode'>Search VSCode marketplace</a></div>
+        <div><a href='https://marketplace.visualstudio.com/search?term=tag%3Asqltools-driver&target=VSCode'>Search VSCode marketplace</a></div>
       </Grid>}
     </Container>
   </>

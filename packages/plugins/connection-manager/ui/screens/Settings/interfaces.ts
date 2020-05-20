@@ -1,5 +1,6 @@
-import { IDriverAlias } from '@sqltools/types';
+import { IDriverAlias, IConnection } from '@sqltools/types';
 import { Step } from './lib/steps';
+import { FormProps } from '@rjsf/core';
 export interface SettingsScreenState {
   loading?: boolean;
   step: Step;
@@ -15,4 +16,6 @@ export interface SettingsScreenState {
   installedDrivers: ({
     icon: string;
   } & IDriverAlias)[];
+  schema: FormProps<IConnection>['schema'];
+  uiSchema: FormProps<IConnection>['uiSchema'];
 }

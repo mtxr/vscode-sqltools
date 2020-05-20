@@ -1,10 +1,11 @@
 import BookmarksExplorer from './explorer';
 import { insertText, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { quickPick } from '@sqltools/vscode/utils/quickPick';
-import { QuickPickItem, commands } from 'vscode';
+import { QuickPickItem, commands, window } from 'vscode';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
+import Context from '@sqltools/vscode/context';
 
 export default class BookmarksManagerPlugin implements IExtensionPlugin {
   public readonly name = 'Bookmarks Manager Plugin';
@@ -86,6 +87,9 @@ export default class BookmarksManagerPlugin implements IExtensionPlugin {
     if (this.explorer) return; // do not register twice
 
     this.explorer = new BookmarksExplorer();
+
+    Context.subscriptions.push(window.registerTreeDataProvider(`${EXT_NAMESPACE}-view-bookmarksExplorer`, this.explorer));
+
     this.errorHandler = extension.errorHandler;
 
     extension
