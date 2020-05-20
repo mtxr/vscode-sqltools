@@ -8,7 +8,7 @@ const parseEntries = require('./../common/parse-entries');
  * @param {string} packagePath
  * @returns {webpack.Configuration['plugins']}
  */
-module.exports = function getExtensionConfig(entries, packagePath) {
+module.exports = function getExtensionConfig({ entries, packagePath, externals = {} }) {
   /** @type webpack.Configuration */
   const { entry, outDir } = parseEntries(entries, packagePath);
   let config = {
@@ -35,6 +35,7 @@ module.exports = function getExtensionConfig(entries, packagePath) {
       } : {}),
     },
     externals: {
+      ...externals,
       vscode: 'commonjs vscode',
     },
   };

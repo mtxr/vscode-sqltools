@@ -9,9 +9,8 @@ const webpack = require('webpack');
  * @param {string} packagePath
  * @returns {webpack.Configuration['plugins']}
  */
-module.exports = function getNodeConfig(entries, packagePath) {
-  const babelOptions = require(path.join(packagePath, '.babelrc'));
-  const { entry, outDir } = parseEntries(entries, packagePath);
+module.exports = function getNodeConfig({ entries, packagePath, externals = {} }) {
+  const { entry, outDir, babelOptions } = parseEntries(entries, packagePath);
 
   /** @type webpack.Configuration */
   let config = {
@@ -50,13 +49,13 @@ module.exports = function getNodeConfig(entries, packagePath) {
         path: outDir
       } : {}),
     },
-    // @TODO
     externals: {
-      ibm_db: 'commonjs ibm_db',
-      sqlite3: 'commonjs sqlite3',
-      oracledb: 'commonjs oracledb',
-      'original-fs': 'fs',
-      '@sap/hana-client': 'commonjs @sap/hana-client'
+      // @TODO move to driver package
+      // ibm_db: 'commonjs ibm_db',
+      // oracledb: 'commonjs oracledb',
+      // 'original-fs': 'fs',
+      // '@sap/hana-client': 'commonjs @sap/hana-client',
+      ...externals,
     },
   };
 

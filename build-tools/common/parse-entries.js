@@ -9,9 +9,15 @@ function parseEntries(entries, packagePath) {
       [name]: path.resolve(packagePath, entries[name].file || entries[name]),
     };
   }, {});
+  let babelOptions = undefined;
+  try {
+    babelOptions = require(path.join(packagePath, '.babelrc'));
+  } catch (error) { }
+
   return {
     outDir: outDir ? path.resolve(packagePath, outDir) : undefined,
-    entry
+    entry,
+    babelOptions
   }
 }
 

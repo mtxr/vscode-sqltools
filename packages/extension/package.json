@@ -416,7 +416,6 @@
                         "array"
                     ],
                     "default": [],
-                    "required": false,
                     "markdownDescription": "Name(s) of the connection to auto connect on start",
                     "items": {
                         "type": "string"
@@ -510,8 +509,7 @@
                 "sqltools.queryParams.enableReplace": {
                     "type": "boolean",
                     "default": false,
-                    "description": "Enables query parameter checking",
-                    "required": false
+                    "description": "Enables query parameter checking"
                 },
                 "sqltools.queryParams.regex": {
                     "type": "string",
@@ -545,12 +543,10 @@
                             },
                             "socketPath": {
                                 "type": "string",
-                                "required": false,
                                 "description": "Path of socket file to connect using UNIX sockets. MySQL only for now."
                             },
                             "database": {
                                 "type": "string",
-                                "required": false,
                                 "description": "Database name"
                             },
                             "domain": {
@@ -558,8 +554,7 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Connection domain (for MSSQL/Azure only)",
-                                "required": false
+                                "description": "Connection domain (for MSSQL/Azure only)"
                             },
                             "username": {
                                 "type": "string",
@@ -570,13 +565,11 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Connection password",
-                                "required": false
+                                "description": "Connection password"
                             },
                             "askForPassword": {
                                 "type": "boolean",
                                 "description": "Ask for password instead of set it in your settings",
-                                "required": false,
                                 "default": false
                             },
                             "driver": {
@@ -593,8 +586,7 @@
                                     "SAPHana",
                                     "SQLite"
                                 ],
-                                "description": "Connection Driver",
-                                "required": false
+                                "description": "Connection Driver"
                             },
                             "databaseFilter": {
                                 "type": [
@@ -632,8 +624,7 @@
                                     "string",
                                     "null"
                                 ],
-                                "description": "Connect string. Support for Oracle, PostgreSQL and AWS Redshift.",
-                                "required": false
+                                "description": "Connect string. Support for Oracle, PostgreSQL and AWS Redshift."
                             },
                             "mssqlOptions": {
                                 "type": [
@@ -641,7 +632,6 @@
                                     "object"
                                 ],
                                 "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
-                                "required": false,
                                 "default": {},
                                 "properties": {
                                     "encrypt": {
@@ -661,10 +651,8 @@
                                 ],
                                 "description": "See https://vscode-sqltools.mteixeira.dev/connections/mysql#2-mysqloptions for more details.",
                                 "default": {},
-                                "required": false,
                                 "properties": {
                                     "authProtocol": {
-                                        "required": false,
                                         "type": "string",
                                         "enum": [
                                             "xprotocol",
@@ -673,7 +661,6 @@
                                         "default": "default"
                                     },
                                     "ssl": {
-                                        "required": false,
                                         "type": [
                                             "boolean",
                                             "object",
@@ -690,11 +677,9 @@
                                     "null"
                                 ],
                                 "default": {},
-                                "required": false,
                                 "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
-                                        "required": false,
                                         "type": [
                                             "boolean",
                                             "object",
@@ -710,13 +695,11 @@
                                     "null"
                                 ],
                                 "default": {},
-                                "required": false,
                                 "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
                                 "description": "Connection timeout in seconds",
-                                "required": false,
                                 "default": 15
                             },
                             "previewLimit": {
@@ -729,21 +712,17 @@
                                     "null"
                                 ],
                                 "default": null,
-                                "required": false,
                                 "description": "Define an icon for this connection. If not specified, use defaults",
                                 "properties": {
                                     "active": {
-                                        "required": false,
                                         "type": "string",
                                         "default": null
                                     },
                                     "connected": {
-                                        "required": false,
                                         "type": "string",
                                         "default": null
                                     },
                                     "disconnected": {
-                                        "required": false,
                                         "type": "string",
                                         "default": null
                                     }
@@ -1188,10 +1167,12 @@
     "devDependencies": {
         "@babel/cli": "^7.5.5",
         "@types/jest": "^24.0.11",
+        "@types/lodash": "^4.14.123",
         "@types/vscode": "^1.42.0",
         "cross-env": "^5.2.0",
-        "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
+        "jest": "^24.5.0",
+        "lodash": "^4.17.13",
         "ts-jest": "^24.0.2",
         "typescript": "^3.7.3",
         "vscode-test": "^1.2.3"

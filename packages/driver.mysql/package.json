@@ -1,0 +1,69 @@
+{
+  "name": "sqltools-driver-mysql",
+  "displayName": "SQLTools MySQL/MariaDB",
+  "description": "SQLTools MySQL/MariaDB",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.42.0"
+  },
+  "publisher": "mtxr",
+  "license": "MIT",
+  "preview": true,
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/drivers.mysql"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/labels/mysql"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Formatters",
+    "Other"
+  ],
+  "extensionDependencies": [
+    "mtxr.sqltools"
+  ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onCommand:sqltools.*"
+  ],
+  "main": "./out/extension.js",
+  "devDependencies": {
+    "@babel/preset-env": "^7.5.5",
+    "@mysql/xdevapi": "^8.0.15",
+    "@sqltools/base-driver": "*",
+    "@types/lodash": "^4.14.123",
+    "@types/mysql": "^2.15.5",
+    "@types/vscode": "^1.42.0",
+    "@types/webpack-env": "^1.15.2",
+    "compare-versions": "3.6.0",
+    "lodash": "^4.17.13",
+    "mysql": "^2.16.0",
+    "typescript": "^3.7.3"
+  },
+  "build": [
+    {
+      "entries": {
+        "plugin": {
+          "file": "src/ls/plugin.ts",
+          "outDir": "out/ls"
+        }
+      },
+      "type": "node"
+    },
+    {
+      "entries": {
+        "extension": {
+          "file": "src/extension.ts",
+          "outDir": "out"
+        }
+      },
+      "type": "extension"
+    }
+  ]
+}

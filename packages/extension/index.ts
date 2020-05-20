@@ -1,16 +1,18 @@
-import { migrateFilesToNewPaths } from '@sqltools/util/path';
-import https from 'https';
-import Config from '@sqltools/util/config-manager';
+import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
 import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
 import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
-import Timer from '@sqltools/util/telemetry/timer';
-import { commands, extensions,  env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
-import ErrorHandler from './api/error-handler';
-import Utils from './api/utils';
+import { migrateFilesToNewPaths } from '@sqltools/util/path';
 import { openExternal } from '@sqltools/vscode/utils';
-import SQLToolsLanguageClient from './language-client';
-import logger from '@sqltools/util/log';
+import Config from '@sqltools/util/config-manager';
 import Context from '@sqltools/vscode/context';
+import debounce from '@sqltools/util/debounce';
+import ErrorHandler from './api/error-handler';
+import https from 'https';
+import logger from '@sqltools/util/log';
+import PluginResourcesMap from '@sqltools/util/plugin-resources';
+import SQLToolsLanguageClient from './language-client';
+import Timer from '@sqltools/util/telemetry/timer';
+import Utils from './api/utils';
 
 const log = logger.extend('main');
 // plugins
@@ -24,6 +26,7 @@ import telemetry from '@sqltools/util/telemetry';
 
 export class SQLToolsExtension implements IExtension {
   private pluginsQueue: IExtensionPlugin<this>[] = [];
+  private extPlugins: { [type: string]: string[] } = {};
   private onWillRunCommandEmitter: EventEmitter<ICommandEvent>;
   private onDidRunCommandSuccessfullyEmitter: EventEmitter<ICommandSuccessEvent>;
   private willRunCommandHooks: { [commands: string]: Array<(evt: ICommandEvent) => void> } = {};
@@ -31,8 +34,10 @@ export class SQLToolsExtension implements IExtension {
   public client: SQLToolsLanguageClient;
   private loaded: boolean = false;
 
-  public activate = (): IExtension => {
+  public activate = async (): Promise<IExtension> => {
     const activationTimer = new Timer();
+    const { installedExtPlugins = {} } = Utils.getlastRunInfo();
+    Context.globalState.update('extPlugins', installedExtPlugins || {});
     telemetry.updateOpts({
       extraInfo: {
         sessId: VSCodeEnv.sessionId,
@@ -70,11 +75,16 @@ export class SQLToolsExtension implements IExtension {
       registerCommand: this.registerCommand,
       registerTextEditorCommand: this.registerTextEditorCommand,
       errorHandler: this.errorHandler,
+      resourcesMap: this.resourcesMap,
     };
   }
 
   public deactivate = (): void => {
     return Context.subscriptions.forEach((sub) => void sub.dispose());
+  }
+
+  public resourcesMap = (): typeof PluginResourcesMap => {
+    return PluginResourcesMap;
   }
 
   private getIssueTemplate = (name: string) => {
@@ -179,10 +189,29 @@ export class SQLToolsExtension implements IExtension {
   }
 
   private loadPlugins = () => {
-    this.loaded = this.loaded || true;
-    this.pluginsQueue.forEach(plugin => plugin.register(this));
+    const pluginsQueue = this.pluginsQueue;
     this.pluginsQueue = [];
+    this.loaded = this.loaded || true;
+    for (let plugin of pluginsQueue) {
+      try {
+        plugin.register(this);
+        if (plugin.extensionId) {
+          this.extPlugins[plugin.type || 'general'] = this.extPlugins[plugin.type || 'general'] || [];
+          if (!this.extPlugins[plugin.type || 'general'].includes(plugin.extensionId)) {
+            this.extPlugins[plugin.type || 'general'].push(plugin.extensionId);
+          }
+        }
+      } catch (error) {
+        this.errorHandler(`Error loading plugin ${plugin.name}`, error);
+      }
+    }
+    this.updateExtPluginsInfo();
   }
+
+  private updateExtPluginsInfo = debounce(async () => {
+    Utils.updateLastRunInfo({ installedExtPlugins: this.extPlugins });
+    await Context.globalState.update('extPlugins', this.extPlugins);
+  });
 
   private onWillRunCommandHandler = (evt: ICommandEvent): void => {
     if (!evt.command) return;
@@ -215,8 +244,8 @@ export class SQLToolsExtension implements IExtension {
     return this.addHook('didRunCommandSuccessfullyHooks', command, handler);
   }
 
-  public registerPlugin = (plugin: IExtensionPlugin) => {
-    this.pluginsQueue.push(plugin);
+  public registerPlugin = (plugins: IExtensionPlugin | IExtensionPlugin[]) => {
+    this.pluginsQueue.push(...(Array.isArray(plugins) ? plugins : [plugins]));
     if (this.loaded) {
       this.loadPlugins();
     }
@@ -246,7 +275,7 @@ export class SQLToolsExtension implements IExtension {
         let result = handler(...args);
         if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
           result = await result;
-          // @TODO: add on fail hook
+          // @FEATURE: add on fail hook
         }
         this.onDidRunCommandSuccessfullyEmitter.fire({ args, command, result });
         return result;
@@ -264,14 +293,14 @@ export function activate(ctx: ExtensionContext) {
     if (instance) return;
     migrateFilesToNewPaths();
     instance = new SQLToolsExtension();
-    instance
-      .registerPlugin(FormatterPlugin)
-      .registerPlugin(AutoRestartPlugin)
-      .registerPlugin(new ConnectionManagerPlugin(instance))
-      .registerPlugin(new DependencyManagerPlugin)
-      .registerPlugin(new HistoryManagerPlugin)
-      .registerPlugin(new BookmarksManagerPlugin);
-
+    instance.registerPlugin([
+      FormatterPlugin,
+      AutoRestartPlugin,
+      new ConnectionManagerPlugin(instance),
+      new DependencyManagerPlugin,
+      new HistoryManagerPlugin,
+      new BookmarksManagerPlugin,
+    ])
     return instance.activate();
 
   } catch (err) {

@@ -3,7 +3,7 @@ import Queries from './queries';
 import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer, IQueryOptions } from '@sqltools/types';
 import AbstractDriver from '@sqltools/base-driver';
 import fs from 'fs';
-import { zipObject } from 'lodash';
+import zipObject from 'lodash/zipObject';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 

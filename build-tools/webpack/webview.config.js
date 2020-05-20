@@ -12,9 +12,8 @@ const { rootdir, IS_PRODUCTION } = require('../constants');
  * @param {string} packagePath
  * @returns {webpack.Configuration['plugins']}
  */
-module.exports = exports = function getWebviewConfig(entries, packagePath) {
-  const babelOptions = require(path.join(packagePath, '.babelrc'));
-  const { entry, outDir } = parseEntries(entries, packagePath);
+module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
+  const { entry, outDir, babelOptions } = parseEntries(entries, packagePath);
 
   /** @type webpack.Configuration */
   const config = {

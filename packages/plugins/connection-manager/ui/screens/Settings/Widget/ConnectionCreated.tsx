@@ -1,17 +1,16 @@
 import React from 'react';
 import get from 'lodash/get';
-import availableDrivers from '../lib/availableDrivers';
 import Syntax from '../../../components/Syntax';
 import Button from '../../../components/Button';
 import DriverIcon  from '../../../components/DriverIcon';
 
-const ConnectionCreated = ({ settings, action, reset }) => {
+const ConnectionCreated = ({ settings, action, reset, installedDrivers }) => {
   const { id, ...connSettings } = settings;
   return (
     <>
       <h5>Review connection details</h5>
       <hr />
-      <DriverIcon icon={get(availableDrivers, [settings.driver, 'icon'])} />
+      <DriverIcon icon={get(installedDrivers, [settings.driver, 'icon'])} />
       <div style={{ minHeight: '150px' }}>
         <h5>
           {action === 'createConnectionSuccess' && `${settings.name} added to your settings!`}

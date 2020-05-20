@@ -4,8 +4,6 @@ import { QueryResultsState } from '../ui/screens/Results/interfaces';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';
-import path from 'path';
-import Context from '@sqltools/vscode/context';
 import { DISPLAY_NAME } from '@sqltools/util/constants';
 
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
@@ -13,8 +11,8 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected title: string = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
 
-  constructor(public requestId: string, iconsPath: vscode.Uri, viewsPath: vscode.Uri, private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
-    super(iconsPath, viewsPath);
+  constructor(public requestId: string, private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
+    super();
 
     this.onDidDispose(() => {
       this.isOpen = false;
@@ -111,20 +109,14 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
 export default class ResultsWebviewManager {
   private viewsMap: { [id: string]: ResultsWebview } = {};
-  private iconsPath: vscode.Uri;
-  private viewsPath: vscode.Uri;
-
-  constructor(private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
-    this.iconsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' });
-    this.viewsPath = vscode.Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' });
-  }
+  constructor(private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) { }
 
   dispose = () => {
     return Promise.all(Object.keys(this.viewsMap).map(id => this.viewsMap[id].dispose()));
   }
 
   private createForId = (requestId: InternalID) => {
-    this.viewsMap[requestId] = new ResultsWebview(requestId, this.iconsPath, this.viewsPath, this.syncConsoleMessages);
+    this.viewsMap[requestId] = new ResultsWebview(requestId, this.syncConsoleMessages);
     this.viewsMap[requestId].onDidDispose(() => {
       delete this.viewsMap[requestId];
     });

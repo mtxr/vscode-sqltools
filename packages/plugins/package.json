@@ -6,6 +6,7 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
+    "@rjsf/core": "^2.0.1",
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
     "@sqltools/types": "*",

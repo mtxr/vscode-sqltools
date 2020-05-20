@@ -75,4 +75,4 @@ const register = (extension: IExtension) => {
     .registerCommand(`newSqlFile`, newSqlFileHandler);
 }
 
-export default { register };
+export default { register, name: 'Formatter Plugin' };

@@ -43,6 +43,7 @@ module.exports = function(env = {}) {
       pkgJson.build.forEach(({
         entries,
         type,
+        externals = {},
       }) => {
         if (type === 'copy') {
           Object.keys(entries).forEach((name) => {
@@ -62,7 +63,11 @@ module.exports = function(env = {}) {
             copyEntries.push(copyEntry);
           });
         } else {
-          webpackConfigs.push(require(`./webpack/${type}.config.js`)(entries, pkgPath));
+          webpackConfigs.push(require(`./webpack/${type}.config.js`)({
+            entries,
+            packagePath: pkgPath,
+            externals,
+          }));
         }
       })
     } else {

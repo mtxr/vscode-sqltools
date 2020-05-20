@@ -15,24 +15,14 @@
   "dependencies": {
     "@sqltools/base-driver": "*",
     "@sqltools/util": "*",
-    "@mysql/xdevapi": "^8.0.15",
-    "cassandra-driver": "^4.1.0",
-    "compare-versions": "3.6.0",
-    "debug": "https://github.com/mtxr/debug.git",
-    "mssql": "^5.0.5",
-    "mysql": "^2.16.0",
-    "pg": "^7.12.1"
+    "cassandra-driver": "^4.1.0"
   },
   "devDependencies": {
     "@sqltools/types": "*",
     "@types/cassandra-driver": "^4.1.1",
     "@types/ibm_db": "^2.0.5",
     "@types/jest": "^24.0.11",
-    "@types/mssql": "^4.0.12",
-    "@types/mysql": "^2.15.5",
     "@types/oracledb": "^4.0.0",
-    "@types/pg": "^7.4.14",
-    "@types/sqlite3": "^3.1.5",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",

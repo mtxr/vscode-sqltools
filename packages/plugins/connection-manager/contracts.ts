@@ -62,7 +62,7 @@ export const GetChildrenForTreeItemRequest = new RequestType<
 >('connection/GetChildrenForTreeItemRequest');
 
 
-// @TODO: later this will be replace by the native library when available
+// @OPTIMIZE: later this will be replace by the native library when available
 export interface ProgressNotificationStartParams {
   title: string;
   message: string;

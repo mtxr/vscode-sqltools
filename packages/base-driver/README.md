@@ -1,0 +1,10 @@
+# SQLTools Base Driver
+
+
+## Creating icon
+
+PNG Images
+Size: 64x64px
+Default Icon: Opacity 100%, no margins and paddings
+Active icon: Opacity 100%, no margins and paddings, green (#00FF00) circle 24x24 bottom right
+Inactive icon: Opacity 50%, no margins and paddings

@@ -4,7 +4,7 @@ import logger from '@sqltools/util/log';
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
 type Key = string;
-type Value = any; // @todo check types later
+type Value = any;
 
 interface CacheOptions {
   maxEntries?: number;

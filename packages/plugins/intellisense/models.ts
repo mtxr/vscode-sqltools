@@ -8,10 +8,6 @@ import escapeColumnNames from '@sqltools/util/query/escape-column-names';
 export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = `${tableOrView}: ${table.label}\n`;
-  // @TODO
-  // if (table.catalog) {
-  //   yml += `Table Catalog: ${table.tableCatalog}\n`;
-  // }
   if (table.schema) {
     yml += `${tableOrView} Schema: ${table.schema}\n`;
   }

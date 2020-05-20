@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import Text from '../../Fields/Text';
 import Checkbox from '../../Fields/Checkbox';
 import Select from '../../Fields/Select';
-import availableDrivers from '../../lib/availableDrivers';
 import FileInput from '../../Fields/FileInput';
 
 enum ConnectionMethod {
@@ -18,7 +17,7 @@ const ConnectionMethods = [
 ];
 
 
-const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', dbFieldRequired = true, defaultMethod = ConnectionMethod.ServerAndPort, allowChangeMethod = true, errors = {} }) => {
+const GenericSettings = ({ installedDrivers = {}, settings, updateSettings, dbFieldName = 'Database', dbFieldRequired = true, defaultMethod = ConnectionMethod.ServerAndPort, allowChangeMethod = true, errors = {} }) => {
   const [ method, setMethod ] = useState(defaultMethod || ConnectionMethod.ServerAndPort);
   const changeMethod = method => {
     const newSettings = settings;
@@ -26,7 +25,7 @@ const GenericSettings = ({ settings, updateSettings, dbFieldName = 'Database', d
       case ConnectionMethod.ServerAndPort:
         delete newSettings.socketPath;
         delete newSettings.connectString;
-        newSettings.port = availableDrivers[settings.driver].port;
+        newSettings.port = installedDrivers[settings.driver].port;
         newSettings.server = 'localhost';
         newSettings.askForPassword = true;
         break;

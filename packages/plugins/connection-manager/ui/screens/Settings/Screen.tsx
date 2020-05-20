@@ -1,9 +1,8 @@
 import React from 'react';
 import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading';
-import { IConnection } from '@sqltools/types';
+import { IConnection, IDriverAlias } from '@sqltools/types';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
-import availableDrivers from './lib/availableDrivers';
 import { Step, totalSteps } from './lib/steps';
 import ConnectionInfo from './Widget/ConnectionInfo';
 import ConnectionCreated from './Widget/ConnectionCreated';
@@ -32,6 +31,7 @@ interface SettingsScreenState {
   saved?: boolean;
   globalSetting?: boolean;
   transformToRelative?: boolean;
+  installedDrivers: ({ icon: string } & IDriverAlias)[];
 }
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
@@ -70,6 +70,13 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
           externalMessageType: 'warning'
         });
         break;
+      case 'installedDrivers:response':
+        const installedDrivers = (payload as SettingsScreenState['installedDrivers']);
+        this.setState({
+          loading: false,
+          installedDrivers,
+        });
+        break;
       case 'updateConnectionError':
       case 'createConnectionError':
       case 'testConnectionError':
@@ -101,6 +108,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     step: Step.CONNECTION_TYPE,
     externalMessage: null,
     externalMessageType: null,
+    installedDrivers: []
   };
 
   state = this.initialState;
@@ -122,7 +130,10 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   }, () => this.validateSettings(cb))
 
   componentDidMount() {
-    this.setState({ loading: false }, () => sendMessage('viewReady', true));
+    sendMessage('viewReady', true);
+    this.setState({ loading: true }, () => {
+      sendMessage('installedDrivers:request');
+    });
   }
 
   public focusField = (field) => {
@@ -131,25 +142,26 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     } catch (e) { /**/ }
   }
 
-  driverSelector = (driver: (typeof availableDrivers)[string]) => {
-    this.updateConnectionSettings({
-      driver: driver.value,
-      port: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || driver.port || null),
-      server: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
-      askForPassword: driver.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
-    }, () => this.setState({ step: Step.CONNECTION_INFO }));
+  driverSelector = (driver: (SettingsScreenState['installedDrivers'])[number]) => {
+    console.log(driver);
+    // this.updateConnectionSettings({
+    //   driver: driver.value,
+    //   port: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || driver.port || null),
+    //   server: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.server || 'localhost' || null),
+    //   askForPassword: driver.value !== 'SQLite' ? this.initialState.connectionSettings.askForPassword : undefined,
+    // }, () => this.setState({ step: Step.CONNECTION_INFO }));
 
   }
 
   validateSettings = (cb = undefined) => {
-    const requiredFields = availableDrivers[this.state.connectionSettings.driver].requiredProps(this.state.connectionSettings);
+    const requiredProps = this.state.installedDrivers[this.state.connectionSettings.driver].requiredProps(this.state.connectionSettings);
     Object.keys(this.state.connectionSettings).forEach(key => {
       if (typeof this.state.connectionSettings[key] === 'undefined') return;
       if (this.state.connectionSettings[key] === null) return;
       if (this.state.connectionSettings[key] === '') return;
-      delete requiredFields[key]
+      delete requiredProps[key]
     });
-    this.setState({ loading: false, errors: requiredFields }, cb);
+    this.setState({ loading: false, errors: requiredProps }, cb);
   }
 
   submitSettings = (e) => {
@@ -204,12 +216,14 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
           </h3>
           {step === Step.CONNECTION_TYPE && (
             <DriverSelector
+              drivers={[] || Object.values(this.state.installedDrivers).sort((a, b) => a.displayName.localeCompare(b.displayName))}
               onSelect={this.driverSelector}
               selected={this.state.connectionSettings['driver']}
             />
           )}
           {step === Step.CONNECTION_INFO && (
             <ConnectionInfo
+              installedDrivers={this.state.installedDrivers}
               updateSettings={this.updateConnectionSettings}
               submit={this.submitSettings}
               testConnection={this.testConnection}
@@ -221,6 +235,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
           )}
           {step === Step.CONNECTION_CREATED && (
             <ConnectionCreated
+              installedDrivers={this.state.installedDrivers}
               settings={this.state.connectionSettings}
               action={this.state.action}
               reset={() => this.reset()}

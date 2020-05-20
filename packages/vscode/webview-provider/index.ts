@@ -2,6 +2,7 @@ import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, wind
 import { getIconPaths } from '@sqltools/vscode/icons';
 import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
+import path from 'path';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   get serializationId() {
@@ -15,9 +16,6 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   protected cssVariables: { [name: string]: string };
   private get baseHtml(): string {
     const cssVariables = Object.keys(this.cssVariables || {}).map(k => `--sqltools-${k}: ${this.cssVariables[k]}`).join(';');
-    const extRoot = Uri.file(Context.asAbsolutePath('.'))
-    .with({ scheme: 'vscode-resource' })
-    .toString();
 
     return `<!DOCTYPE html>
 <html>
@@ -28,15 +26,14 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   <style>
   :root {${cssVariables}}
   </style>
-  <link rel="stylesheet" type="text/css" href="${extRoot}/ui/commons.css">
-  <script type="text/javascript" charset="UTF-8">window.extRoot = ${JSON.stringify(extRoot)};</script>
+  <link rel="stylesheet" type="text/css" href="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/commons.css`)))}">
 </head>
 <body>
-  <link rel="stylesheet" type="text/css" href="${extRoot}/ui/theme.css">
+  <link rel="stylesheet" type="text/css" href="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/theme.css`)))}">
   <div id="root"></div>
-  <script src="${extRoot}/ui/vendor.js" type="text/javascript" charset="UTF-8"></script>
-  <script src="${extRoot}/ui/commons.js" type="text/javascript" charset="UTF-8"></script>
-  <script src="${extRoot}/ui/${this.id}.js" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/vendor.js`)))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/commons.js`)))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/${this.id}.js`)))}" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
   }
@@ -47,7 +44,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   private disposables: Disposable[] = [];
   private messageCb;
 
-  public constructor(private iconsPath: Uri, private viewsPath: Uri) {}
+  public constructor() {}
   public preserveFocus = true;
   public wereToShow = ViewColumn.One;
   public show() {
@@ -58,9 +55,9 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         this.wereToShow,
         {
           enableScripts: true,
-          retainContextWhenHidden: true, // @TODO remove and migrate to state restore
+          retainContextWhenHidden: true, // @OPTIMIZE remove and migrate to state restore
           enableCommandUris: true,
-          localResourceRoots: [this.iconsPath, this.viewsPath],
+          localResourceRoots: [Uri.file(path.resolve(Context.extensionPath, '..')).with({ scheme: 'vscode-resource' })],
           // enableFindWidget: true,
         },
       );
@@ -100,6 +97,10 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 
   public get isActive() {
     return this.panel && this.panel.active;
+  }
+
+  public get asWebviewUri() {
+    return this.panel ? this.panel.webview.asWebviewUri : (() => '');
   }
   public hide = () => {
     if (this.panel === undefined) return;

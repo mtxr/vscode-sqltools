@@ -33,23 +33,15 @@
     "onCommand:sqltools.*"
   ],
   "main": "./out/extension.js",
-  "contributes": {
-    "commands": [
-      {
-        "command": "sqltools-driver-pg.helloWorld",
-        "title": "Hello World"
-      }
-    ]
-  },
-  "scripts": {
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./"
-  },
   "devDependencies": {
     "@babel/preset-env": "^7.5.5",
     "@sqltools/base-driver": "*",
+    "@types/lodash": "^4.14.123",
+    "@types/pg": "^7.4.14",
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",
+    "lodash": "^4.17.13",
+    "pg": "^7.12.1",
     "typescript": "^3.7.3"
   },
   "build": [

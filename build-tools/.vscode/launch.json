@@ -5,7 +5,7 @@
   "version": "0.2.0",
   "configurations": [
     {
-      "name": "Launch Extension",
+      "name": "Launch SQLTools",
       "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
@@ -28,7 +28,7 @@
     {
       "type": "node",
       "request": "attach",
-      "name": "Attach LS",
+      "name": "Attach SQLTools LS",
       "port": 6010,
       "restart": true,
       "sourceMaps": true,
@@ -43,8 +43,8 @@
   ],
   "compounds": [
     {
-      "name": "Launch Extension and Attach LS",
-      "configurations": ["Launch Extension", "Attach LS"]
+      "name": "Launch SQLTools and Attach LS",
+      "configurations": ["Launch SQLTools", "Attach SQLTools LS"]
     }
   ],
 }

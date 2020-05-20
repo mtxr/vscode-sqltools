@@ -2,7 +2,7 @@ import logger from '@sqltools/util/log';
 import path from 'path';
 import fs from 'fs';
 import Config from '@sqltools/util/config-manager';
-import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
 import commandExists from '@sqltools/util/dependencies/command-exists';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget, workspace } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
@@ -185,10 +185,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     const onError = ({ err = '', errMessage, message }: Partial<{ err: any, [id: string]: any }>) => {
       ErrorHandler.create(message)((errMessage || err.message || err).toString());
     };
-    this.client.onNotification(
-      'serverError', // @TODO: constant
-      onError,
-    );
+    this.client.onNotification(ServerErrorNotification, onError);
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
 
     telemetry.registerMessage('info', 'LanguageClient ready');

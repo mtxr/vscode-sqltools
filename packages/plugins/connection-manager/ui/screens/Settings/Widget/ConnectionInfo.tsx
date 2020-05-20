@@ -1,6 +1,5 @@
 import React from 'react';
 import get from 'lodash/get';
-import availableDrivers from '../lib/availableDrivers';
 import DriverSettings from './../Drivers';
 import Checkbox from '../Fields/Checkbox';
 import Text from '../Fields/Text';
@@ -16,6 +15,7 @@ const ConnectionInfo = ({
   toggleUseRelative,
   testConnection,
   openConnectionFile,
+  installedDrivers = {},
   state: { connectionSettings, errors = {}, defaultMethod = null, ...state },
 }) => {
   const SelectedDriverSettings = DriverSettings[connectionSettings.driver] || ((() => null) as any);
@@ -23,7 +23,7 @@ const ConnectionInfo = ({
     <>
       <h5>Connection Settings</h5>
       <hr />
-      <DriverIcon icon={get(availableDrivers, [connectionSettings.driver, 'icon'])} />
+      <DriverIcon icon={get(installedDrivers, [connectionSettings.driver, 'icon'])} />
       <form onSubmit={submit}>
         <SelectedDriverSettings
           settings={connectionSettings}

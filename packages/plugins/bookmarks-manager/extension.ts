@@ -7,6 +7,7 @@ import { BookmarkTreeGroup, BookmarkTreeItem } from './explorer/tree-items';
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
 
 export default class BookmarksManagerPlugin implements IExtensionPlugin {
+  public readonly name = 'Bookmarks Manager Plugin';
   private explorer: BookmarksExplorer;
   private errorHandler: IExtension['errorHandler'];
 

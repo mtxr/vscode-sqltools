@@ -15,6 +15,7 @@ const hookedCommands = [
 ];
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
+  public readonly name = 'History Manager Plugin';
   private explorer: HistoryExplorer;
   private errorHandler: IExtension['errorHandler'];
   private addToHistoryHook = (evt: ICommandSuccessEvent<NSDatabase.IResult[]>) => {

@@ -7,6 +7,7 @@ import Config from '@sqltools/util/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
 
 export default class DependencyManager implements IExtensionPlugin {
+  public readonly name = 'Dependency Manager Plugin';
   public client: ILanguageClient;
   private extension: IExtension;
   register(extension: IExtension) {

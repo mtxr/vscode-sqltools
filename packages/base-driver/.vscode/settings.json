@@ -1,0 +1,8 @@
+{
+  "files.exclude": {
+    "**/dist": true
+  },
+  "search.exclude": {
+      "**/dist": true
+  }
+}

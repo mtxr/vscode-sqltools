@@ -1,4 +1,6 @@
 TODO:
+  DRIVERS:
+    - build all script
   QUERY BUILDER:
     - Insert queries should consider columns ordinal position
   EXPLORER:

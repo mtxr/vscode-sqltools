@@ -55,7 +55,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     const conn = activeConnections[lastUsedId];
     let completionDialect: string;
 
-    // @TODO
+    // @REVIEW check intellisense dialect
     // switch (conn && conn.getDriver()) {
     //   case DatabaseDriver['AWS Redshift']:
     //     completionDialect = DatabaseDriver.PostgreSQL;

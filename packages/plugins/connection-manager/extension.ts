@@ -9,7 +9,7 @@ import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
 import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
+import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource, extensions } from 'vscode';
 import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
@@ -24,6 +24,7 @@ import { isEmpty } from '@sqltools/util/validation';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
+  public readonly name = 'Connection Manager Plugin';
   public client: ILanguageClient;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
@@ -183,6 +184,10 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
+    const dependencies: string[] = (Context.globalState.get<any>('extPlugins') || {}).drivers || [];
+
+    await Promise.all(dependencies.map(async n => extensions.getExtension(n).isActive || await extensions.getExtension(n).activate()))
+
     if (connIdOrNode) {
       let conn = await this.getConnFromIdOrNode(connIdOrNode);
 
@@ -276,7 +281,6 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_executeQueryFromFile = async () => {
-    // @TODO: add option read from file and run
     return this.ext_executeQuery(await getSelectedText('execute file', true));
   }
 
@@ -696,6 +700,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
     this.explorer.refresh();
     this.changeTextEditorHandler(window.activeTextEditor);
+    setTimeout(() => {
+      this.explorer.refresh();
+    }, 2000);
   }
 
   constructor(extension: IExtension) {

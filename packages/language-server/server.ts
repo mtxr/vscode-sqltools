@@ -5,7 +5,7 @@ import { InvalidActionError } from '@sqltools/util/exception';
 import log from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContextMap } from '@sqltools/types';
-import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
 import { RegisterPlugin } from './contracts';
 import LSContext from './context';
 
@@ -155,7 +155,7 @@ ExecPath: ${process.execPath}
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       telemetry.registerException(err, { message, languageServer: true });
-      this._server.sendNotification('serverError', { err, message, errMessage: (err.message || err).toString() }); // @TODO: constant
+      this._server.sendNotification(ServerErrorNotification, { err, message, errMessage: (err.message || err).toString() });
     };
     if (typeof error !== 'undefined') return cb(error);
     return cb;

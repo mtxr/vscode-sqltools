@@ -28,7 +28,7 @@ export default class SerializableStorage<Item, Key = string | number | Symbol> {
   }
 
   private serializeContent(): Buffer {
-    return new Buffer(JSON.stringify(this.items), 'utf8');
+    return new Buffer(JSON.stringify(this.items, null, 2), 'utf8');
   }
   public save(): this {
     return this.write();

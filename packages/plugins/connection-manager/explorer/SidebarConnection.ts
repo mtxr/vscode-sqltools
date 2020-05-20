@@ -1,13 +1,13 @@
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, MConnectionExplorer, ContextValue } from '@sqltools/types';
+import { IConnection, MConnectionExplorer, ContextValue, IIcons } from '@sqltools/types';
 import { getConnectionDescription, getConnectionId } from '@sqltools/util/connection';
 import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
-import { getIconPathForDriver } from '@sqltools/util/path/driver';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarItem from "./SidebarItem";
 import get from 'lodash/get';
 import logger from '@sqltools/util/log';
-import Context from '@sqltools/vscode/context';
+import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
+
 const log = logger.extend('conn-explorer');
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> {
@@ -99,6 +99,6 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       disconnected: 'inactive',
     };
 
-    return Uri.parse(Context.asAbsolutePath(getIconPathForDriver(this.conn.driver, typeMap[type] as any || 'default')));
+    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResouceKey({type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
   }
 }

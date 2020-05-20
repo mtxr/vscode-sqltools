@@ -14,18 +14,20 @@
     "postdocz:build": "cp _redirects dist/.; cp -R public/* dist/public/.; ls -hal ./dist/*"
   },
   "dependencies": {
-    "docz": "^1.2.0",
+    "@mdx-js/runtime": "^1.5.1",
     "docz-core": "^1.2.0",
     "docz-theme-default": "^1.2.0",
+    "docz": "^1.2.0",
     "gatsby-plugin-offline": "^2.2.7",
-    "@mdx-js/runtime": "^1.5.1",
-    "react": "^16.8.3",
+    "lodash": "^4.17.13",
     "react-dom": "^16.8.3",
+    "react-feather": "^2.0.3",
+    "react": "^16.8.3",
     "scheduler": "^0.15.0",
-    "styled-components": "^4.4.0",
-    "react-feather": "^2.0.3"
+    "styled-components": "^4.4.0"
   },
   "devDependencies": {
+    "@types/lodash": "^4.14.123",
     "@types/react": "^16.8.13",
     "@types/react-dom": "^16.8.4",
     "@types/styled-components": "^4.1.20"

@@ -11,6 +11,7 @@ import logger from '@sqltools/util/log';
 const log = logger.extend('codelens');
 
 export default class CodeLensPlugin implements IExtensionPlugin {
+  public readonly name = 'CodeLens Plugin';
   private codelensDisposable: Disposable;
   private registeredLanguages: string[] = [];
   private provider: SQLToolsCodeLensProvider;

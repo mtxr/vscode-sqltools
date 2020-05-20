@@ -1,7 +1,6 @@
 import { TextDocument, Position, Range } from 'vscode-languageserver';
 import { parse } from '@sqltools/util/query';
 
-// @TODO merge this and @sqltools/vscode/utils/query file
 export const getDocumentCurrentQuery = (document: TextDocument, position: Position): { currentQuery: string; currentQueryTilCursor: string, range: Range } => {
   if (!document || document.uri.startsWith('output')) {
     return {

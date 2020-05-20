@@ -1,21 +1,18 @@
 import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
-import { commands, Uri } from 'vscode';
-import path from 'path';
-import { DatabaseDriver } from '@sqltools/types';
-import relativeToWorkspace from '@sqltools/vscode/utils/relative-to-workspace';
+import { commands, extensions } from 'vscode';
 import Context from '@sqltools/vscode/context';
+import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
+import { IDriverExtensionApi, IDriverAlias, IIcons } from '@sqltools/types';
+import fs from 'fs';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
   protected title: string = `${DISPLAY_NAME} Settings`;
 
   constructor() {
-    super(
-      Uri.file(path.resolve(Context.extensionPath, 'icons')).with({ scheme: 'vscode-resource' }),
-      Uri.file(path.resolve(Context.extensionPath, 'ui')).with({ scheme: 'vscode-resource' })
-    );
+    super();
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {
         case 'createConnection':
@@ -26,6 +23,8 @@ export default class SettingsWebview extends WebviewProvider {
           return this.testConnection(payload);
         case 'openConnectionFile':
           this.openConnectionFile();
+        case 'installedDrivers:request':
+          return this.getInstalledDrivers();
         default:
         break;
       }
@@ -33,9 +32,8 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private updateConnection = async ({ connInfo, globalSetting, transformToRelative, editId }) => {
-    if (connInfo.driver === DatabaseDriver.SQLite && transformToRelative) {
-      connInfo.database = relativeToWorkspace(connInfo.database);
-    }
+    connInfo = await this.parseBeforeSave({ connInfo, transformToRelative });
+
     return commands.executeCommand(`${EXT_NAMESPACE}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       this.postMessage({ action: 'updateConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
@@ -48,9 +46,8 @@ export default class SettingsWebview extends WebviewProvider {
   }
 
   private createConnection = async ({ connInfo, globalSetting, transformToRelative }) => {
-    if (connInfo.driver === DatabaseDriver.SQLite && transformToRelative) {
-      connInfo.database = relativeToWorkspace(connInfo.database);
-    }
+    connInfo = await this.parseBeforeSave({ connInfo, transformToRelative });
+
     return commands.executeCommand(`${EXT_NAMESPACE}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       this.postMessage({ action: 'createConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
@@ -62,10 +59,9 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
-  private testConnection = async ({ connInfo }) => {
-    if (connInfo.driver === DatabaseDriver.SQLite) {
-      connInfo.database = relativeToWorkspace(connInfo.database);
-    }
+  private testConnection = async ({ connInfo, transformToRelative }) => {
+    connInfo = await this.parseBeforeSave({ connInfo, transformToRelative });
+
     return commands.executeCommand(`${EXT_NAMESPACE}.testConnection`, connInfo)
     .then((res: any) => {
       if (res && res.notification) {
@@ -81,6 +77,53 @@ export default class SettingsWebview extends WebviewProvider {
     });
   }
 
+  private parseBeforeSave = async ({ connInfo, transformToRelative }) => {
+    const pluginExtenxion = await this.driverPluginExtension(connInfo.driver);
+    if (pluginExtenxion && pluginExtenxion.parseBeforeSaveConnection) {
+      connInfo = await pluginExtenxion.parseBeforeSaveConnection({ connInfo, transformToRelative });
+    }
+    return connInfo;
+  }
+
+  private getExtension = async (id?: string): Promise<IDriverExtensionApi> => {
+    if (id) {
+      const ext = extensions.getExtension(id);
+      !ext.isActive && await ext.activate();
+      return ext.exports;
+    }
+    return null;
+  }
+  private driverPluginExtension = async (driverName: string) => {
+    const pluginExtenxionId = PluginResourcesMap.get(buildResouceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
+    return this.getExtension(pluginExtenxionId);
+  }
+
+  private getInstalledDrivers = async (retry = 0) => {
+    if (retry > 20) return;
+    const driverExtensions: string[] = (Context.globalState.get<{ driver: string[] }>('extPlugins') || { driver: [] }).driver || [];
+    const installedDrivers: (IDriverAlias & { icon: string })[] = [];
+    await Promise.all(driverExtensions.map(async id => {
+      const ext = await this.getExtension(id);
+      if (ext && ext.driverAliases) {
+        ext.driverAliases.map(({ displayName, value }) => {
+          const iconsPath = PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: value, resource: 'icons' }));
+          let icon: string;
+          if (iconsPath && iconsPath.default) {
+            icon = 'data:application/octet-stream;base64,' + fs.readFileSync(iconsPath.default).toString('base64');
+          }
+          installedDrivers.push({
+            displayName,
+            value,
+            icon,
+          });
+        });
+      }
+    }));
+
+    if (installedDrivers.length === 0) return setTimeout(() => this.getInstalledDrivers(retry++), 250);
+
+    this.postMessage({ action: 'installedDrivers:response', payload: installedDrivers });
+  }
   private openConnectionFile = async () => {
     return commands.executeCommand('workbench.action.openSettings', `${EXT_CONFIG_NAMESPACE}.connections`);
   }
