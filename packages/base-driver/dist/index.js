@@ -108,7 +108,7 @@ var AbstractDriver = (function () {
             this.deps.forEach(function (dep) {
                 var mustUpgrade = false;
                 switch (dep.type) {
-                    case 'package':
+                    case AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE:
                         try {
                             delete require_1.default.cache[require_1.default.resolve(dep.name + '/package.json')];
                             var version = require_1.default(dep.name + '/package.json').version;
@@ -145,6 +145,10 @@ var AbstractDriver = (function () {
     };
     AbstractDriver.prototype.prepareMessage = function (message) {
         return { message: message.toString(), date: new Date() };
+    };
+    AbstractDriver.CONSTANTS = {
+        DEPENDENCY_PACKAGE: 'package',
+        DEPENDENCY_NPM_SCRIPT: 'npmscript',
     };
     return AbstractDriver;
 }());

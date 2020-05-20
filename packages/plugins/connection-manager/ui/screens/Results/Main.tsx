@@ -13,6 +13,7 @@ import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 import sendMessage, { messageLog } from '../../lib/messages';
 import { QueryResultsState } from './interfaces';
 import { MenuActions } from './constants';
+import { UIAction } from '../../../actions';
 
 
 const log = logger.extend('results');
@@ -71,34 +72,33 @@ const Screen: React.SFC<Props> = () => {
     return queryResults[index] as NSDatabase.IResult;
   }
   const set = (payload: Partial<QueryResultsState>) => dispatch({ type: ACTION.SET, payload });
-  const resetRequest = () => dispatch({ type: ACTION.RESULTS_RECEIVED });
+  const resetRequest = () => dispatch({ type: ACTION.RESET });
   const toggleTab = (value: number) => dispatch({ type: ACTION.TOGGLE_TAB, payload: value });
   const resultsReceived = (changes: Partial<QueryResultsState>) => dispatch({ type: ACTION.RESULTS_RECEIVED, payload: changes });
-  const focusMessages = () => sendMessage('call', { command: `${process.env.EXT_NAMESPACE}/consoleMessages.focus` });
+  const focusMessages = () => sendMessage(UIAction.CALL, { command: `${process.env.EXT_NAMESPACE}/consoleMessages.focus` });
   const exportResults = (choice?: MenuActions.SaveCSVOption | MenuActions.SaveJSONOption | any) => {
     const activeResult = getCurrentResult(stateRef.current);
     if (!activeResult) return;
-    sendMessage('call', {
+    sendMessage(UIAction.CALL, {
       command: `${process.env.EXT_NAMESPACE}.saveResults`,
       args: [{
         ...getCurrentQueryOptions(activeResult),
         fileType: Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined,
       }],
     });
-    const a = Object.values(MenuActions);
   };
   const reRunQuery = () => {
     const activeResult = getCurrentResult(stateRef.current);
     if (!activeResult) return;
     const { queryType, query, queryParams, pageSize, page } = activeResult;
     if (queryType) {
-      sendMessage('call', {
+      sendMessage(UIAction.CALL, {
         command: `${process.env.EXT_NAMESPACE}.${queryType}`,
         args: [queryParams, { ...getCurrentQueryOptions(activeResult), page: page, pageSize: pageSize || 50 }],
       });
       return set({ loading: true });
     }
-    sendMessage('call', {
+    sendMessage(UIAction.CALL, {
       command: `${process.env.EXT_NAMESPACE}.executeQuery`,
       args: [
         query,
@@ -111,7 +111,7 @@ const Screen: React.SFC<Props> = () => {
   const changePage = (page: number) => {
     set({ loading: true });
     const activeResult = state.resultTabs[activeTab];
-    sendMessage('call', {
+    sendMessage(UIAction.CALL, {
       command: `${process.env.EXT_NAMESPACE}.${activeResult.queryType}`,
       args: [activeResult.queryParams, { page, pageSize: activeResult.pageSize || 50, requestId: activeResult.requestId }],
     });
@@ -122,7 +122,7 @@ const Screen: React.SFC<Props> = () => {
     if (!action) return;
     messageLog('received => %s %O', action, payload || 'NO_PAYLOAD');
     switch (action) {
-      case 'queryResults':
+      case UIAction.RESPONSE_QUERY_RESULTS:
         const changes: Partial<QueryResultsState> = {
           resultTabs: payload,
           activeTab: 0,
@@ -132,10 +132,10 @@ const Screen: React.SFC<Props> = () => {
         if (changes.error) {
         }
         return resultsReceived(changes);
-      case 'reset':
+      case UIAction.REQUEST_RESET:
         return resetRequest();
-      case 'getState':
-        return sendMessage('receivedState', stateRef.current);
+      case UIAction.REQUEST_STATE:
+        return sendMessage(UIAction.RESPONSE_STATE, stateRef.current);
       default:
         return log.extend('warn')(`No handler set for %s`, action);
     }
@@ -145,7 +145,7 @@ const Screen: React.SFC<Props> = () => {
     // did mount component
     const listener =  ev => messagesHandler(ev.data as IWebviewMessage);
     window.addEventListener('message', listener);
-    sendMessage('viewReady', true);
+    sendMessage(UIAction.NOTIFY_VIEW_READY, true);
     return () => {
       // cleanup function. onWillUnmount
       window.removeEventListener('message', listener);
@@ -163,7 +163,7 @@ const Screen: React.SFC<Props> = () => {
   useEffect(() => {
     const { resultTabs: results, activeTab: index } = stateRef.current;
     const activeResult = results[index];
-    sendMessage('syncConsoleMessages', (activeResult && activeResult.messages) || []);
+    sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, (activeResult && activeResult.messages) || []);
   }, [activeTab, state.resultTabs, state.resultTabs.length]);
 
   useEffect(() => {

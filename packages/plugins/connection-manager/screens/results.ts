@@ -5,6 +5,7 @@ import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';
 import { DISPLAY_NAME } from '@sqltools/util/constants';
+import { UIAction } from '../actions';
 
 class ResultsWebview extends WebviewProvider<QueryResultsState> {
   protected id: string = 'Results';
@@ -20,10 +21,10 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {
-        case 'viewReady':
+        case UIAction.NOTIFY_VIEW_READY:
           this.isOpen = payload;
           break;
-        case 'syncConsoleMessages':
+        case UIAction.REQUEST_SYNC_CONSOLE_MESSAGES:
           this.syncConsoleMessages(payload);
         default:
         break;
@@ -101,7 +102,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       this.title = `${prefix}: ${suffix}`;
     } catch (error) {}
     this.updatePanelName();
-    this.postMessage({ action: 'queryResults', payload });
+    this.postMessage({ action: UIAction.RESPONSE_QUERY_RESULTS, payload });
   }
 
   wereToShow = vscode.ViewColumn.Active;

@@ -6,6 +6,7 @@ import Context from '@sqltools/vscode/context';
 import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
 import { IDriverExtensionApi, IDriverAlias, IIcons } from '@sqltools/types';
 import fs from 'fs';
+import { UIAction } from '../actions';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';
@@ -15,15 +16,15 @@ export default class SettingsWebview extends WebviewProvider {
     super();
     this.setMessageCallback(({ action, payload }) => {
       switch (action) {
-        case 'createConnection':
+        case UIAction.REQUEST_CREATE_CONNECTION:
           return this.createConnection(payload);
-        case 'updateConnection':
+        case UIAction.REQUEST_UPDATE_CONNECTION:
           return this.updateConnection(payload);
-        case 'testConnection':
+        case UIAction.REQUEST_TEST_CONNECTION:
           return this.testConnection(payload);
-        case 'openConnectionFile':
+        case UIAction.REQUEST_OPEN_CONNECTION_FILE:
           this.openConnectionFile();
-        case 'installedDrivers:request':
+        case UIAction.REQUEST_INSTALLED_DRIVERS:
           return this.getInstalledDrivers();
         default:
         break;
@@ -36,12 +37,12 @@ export default class SettingsWebview extends WebviewProvider {
 
     return commands.executeCommand(`${EXT_NAMESPACE}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'updateConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS, payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
         }
-        this.postMessage({ action: 'updateConnectionError', payload });
+        this.postMessage({ action: UIAction.RESPONSE_UPDATE_CONNECTION_ERROR, payload });
     });
   }
 
@@ -50,12 +51,12 @@ export default class SettingsWebview extends WebviewProvider {
 
     return commands.executeCommand(`${EXT_NAMESPACE}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
-      this.postMessage({ action: 'createConnectionSuccess', payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
+      this.postMessage({ action: UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS, payload: { globalSetting, connInfo: { ...connInfo, id: getConnectionId(connInfo) } } });
     }, (payload = {}) => {
         payload = {
           message: (payload.message || payload || '').toString(),
         }
-        this.postMessage({ action: 'createConnectionError', payload });
+        this.postMessage({ action: UIAction.RESPONSE_CREATE_CONNECTION_ERROR, payload });
     });
   }
 
@@ -66,14 +67,14 @@ export default class SettingsWebview extends WebviewProvider {
     .then((res: any) => {
       if (res && res.notification) {
         const message = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
-        return this.postMessage({ action: 'testConnectionWarning', payload: { message } });
+        return this.postMessage({ action: UIAction.RESPONSE_TEST_CONNECTION_WARNING, payload: { message } });
       }
-      this.postMessage({ action: 'testConnectionSuccess', payload: { connInfo } });
+      this.postMessage({ action: UIAction.RESPONSE_TEST_CONNECTION_SUCCESS, payload: { connInfo } });
     }, (payload = {}) => {
       payload = {
         message: (payload.message || payload || '').toString(),
       }
-      this.postMessage({ action: 'testConnectionError', payload });
+      this.postMessage({ action: UIAction.RESPONSE_TEST_CONNECTION_ERROR, payload });
     });
   }
 
@@ -122,7 +123,7 @@ export default class SettingsWebview extends WebviewProvider {
 
     if (installedDrivers.length === 0) return setTimeout(() => this.getInstalledDrivers(retry++), 250);
 
-    this.postMessage({ action: 'installedDrivers:response', payload: installedDrivers });
+    this.postMessage({ action: UIAction.RESPONSE_INSTALLED_DRIVERS, payload: installedDrivers.sort((a, b) => a.displayName.localeCompare(b.displayName)) });
   }
   private openConnectionFile = async () => {
     return commands.executeCommand('workbench.action.openSettings', `${EXT_CONFIG_NAMESPACE}.connections`);

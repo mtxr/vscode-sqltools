@@ -22,7 +22,7 @@ interface HanaConnection {
 export default class SAPHana extends AbstractDriver<HanaConnection, any> implements IConnectionDriver {
 
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: 'package',
+    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
     name: '@sap/hana-client',
     args: ['--@sap:registry=https://npm.sap.com']
   }];

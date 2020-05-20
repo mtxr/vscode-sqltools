@@ -21,6 +21,7 @@ import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { isEmpty } from '@sqltools/util/validation';
+import { UIAction } from './actions';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -343,7 +344,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     const conn = await this.getConnFromIdOrNode(connIdOrNode);
     if (!conn) return;
     this.settingsWebview.show();
-    this.settingsWebview.postMessage({ action: 'editConnection', payload: { conn } });
+    this.settingsWebview.postMessage({ action: UIAction.REQUEST_EDIT_CONNECTION, payload: { conn } });
   }
 
   private ext_openSettings = async () => {

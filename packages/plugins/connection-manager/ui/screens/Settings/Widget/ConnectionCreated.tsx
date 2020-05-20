@@ -1,16 +1,27 @@
 import React from 'react';
-import get from 'lodash/get';
 import Syntax from '../../../components/Syntax';
 import Button from '../../../components/Button';
 import DriverIcon  from '../../../components/DriverIcon';
+import { IConnection } from '@sqltools/types';
+import { SettingsScreenState } from '../interfaces';
 
-const ConnectionCreated = ({ settings, action, reset, installedDrivers }) => {
+const ConnectionCreated = ({
+  settings = ({} as IConnection),
+  action,
+  reset,
+  driver
+}: {
+  settings: IConnection;
+  action: SettingsScreenState['action']
+  reset: () => void;
+  driver: SettingsScreenState['driver']
+}) => {
   const { id, ...connSettings } = settings;
   return (
     <>
       <h5>Review connection details</h5>
       <hr />
-      <DriverIcon icon={get(installedDrivers, [settings.driver, 'icon'])} />
+      <DriverIcon driver={driver} />
       <div style={{ minHeight: '150px' }}>
         <h5>
           {action === 'createConnectionSuccess' && `${settings.name} added to your settings!`}

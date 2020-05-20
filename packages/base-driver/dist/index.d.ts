@@ -28,4 +28,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     }): Promise<MConnectionExplorer.IChildItem[]>;
     searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]>;
     protected prepareMessage(message: any): NSDatabase.IResult['messages'][number];
+    static readonly CONSTANTS: {
+        DEPENDENCY_PACKAGE: "package" | "npmscript";
+        DEPENDENCY_NPM_SCRIPT: "package" | "npmscript";
+    };
 }

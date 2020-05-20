@@ -3,6 +3,7 @@ import { getIconPaths } from '@sqltools/vscode/icons';
 import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import path from 'path';
+import { DefaultUIAction } from './action';
 
 export default abstract class WebviewProvider<State = any> implements Disposable {
   get serializationId() {
@@ -80,13 +81,12 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   public onViewActive?: (active: boolean) => any;
   private onDidReceiveMessage = ({ action, payload, ...rest}) => {
     switch(action) {
-      case 'receivedState':
+      case DefaultUIAction.RESPONSE_STATE:
         this.lastState = payload;
         break;
-      case 'call':
-        commands.executeCommand(payload.command, ...(payload.args || []));
-        break;
-      case 'viewReady':
+      case DefaultUIAction.CALL:
+        return commands.executeCommand(payload.command, ...(payload.args || []));
+      case DefaultUIAction.NOTIFY_VIEW_READY:
         process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
         break;
     }
@@ -145,7 +145,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         this.lastState = undefined;
         return resolve(state);
       }, 200);
-      this.panel.webview.postMessage({ action: 'getState' });
+      this.panel.webview.postMessage({ action: DefaultUIAction.REQUEST_STATE });
     })
   }
 

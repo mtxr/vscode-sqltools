@@ -7,7 +7,7 @@ import { parse as queryParse } from '@sqltools/util/query';
 const D2BLibVersion = '2.6.1';
 export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements IConnectionDriver {
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: 'package',
+    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
     name: 'ibm_db',
     version: D2BLibVersion
   }];

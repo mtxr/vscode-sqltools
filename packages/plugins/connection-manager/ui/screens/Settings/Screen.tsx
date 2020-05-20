@@ -1,6 +1,5 @@
 import React from 'react';
 import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading';
-import { IConnection, IDriverAlias } from '@sqltools/types';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
 import { Step, totalSteps } from './lib/steps';
@@ -10,84 +9,64 @@ import logger from '@sqltools/util/log';
 import '@sqltools/plugins/connection-manager/ui/sass/app.scss';
 import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 import sendMessage from '../../lib/messages';
+import { SettingsScreenState } from './interfaces';
+import { IConnection } from '@sqltools/types';
+import { UIAction } from '../../../actions';
 
 const log = logger.extend('settings');
-
-enum ConnectionMethod {
-  ServerAndPort = 'Server and Port',
-  SocketFile = 'Socket File',
-  ConnectionString = 'Connection String'
-};
-
-interface SettingsScreenState {
-  loading?: boolean;
-  step: Step;
-  connectionSettings: IConnection;
-  defaultMethod?: string,
-  externalMessage: string,
-  externalMessageType: string,
-  errors: {[id: string]: boolean};
-  action: 'create' | 'update' | 'updateConnectionSuccess' | 'createConnectionSuccess';
-  saved?: boolean;
-  globalSetting?: boolean;
-  transformToRelative?: boolean;
-  installedDrivers: ({ icon: string } & IDriverAlias)[];
-}
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
   messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
-      case 'editConnection':
-        const conn = payload.conn || {};
-        this.setState({
-          action: 'update',
-          loading: true,
-          connectionSettings: conn,
-          step: Step.CONNECTION_INFO,
-          externalMessage: null,
-          externalMessageType: null,
-          globalSetting: payload.globalSetting,
-          defaultMethod: (
-            conn.socketPath ? ConnectionMethod.SocketFile : (
-              conn.connectString ? ConnectionMethod.ConnectionString : ConnectionMethod.ServerAndPort
-            )
-          )
-        }, this.validateSettings);
+      case UIAction.REQUEST_EDIT_CONNECTION:
+        // @TODO
+        // const conn = payload.conn || {};
+        // return this.setState({
+        //   action: 'update',
+        //   loading: true,
+        //   connectionSettings: conn,
+        //   step: Step.CONNECTION_INFO,
+        //   externalMessage: null,
+        //   externalMessageType: null,
+        //   globalSetting: payload.globalSetting,
+        //   defaultMethod: (
+        //     conn.socketPath ? ConnectionMethod.SocketFile : (
+        //       conn.connectString ? ConnectionMethod.ConnectionString : ConnectionMethod.ServerAndPort
+        //     )
+        //   )
+        // }, this.validateSettings);
         break;
-      case 'updateConnectionSuccess':
-      case 'createConnectionSuccess':
-        this.setState({ step: Step.CONNECTION_CREATED, loading: false, connectionSettings: payload.connInfo, action, saved: true });
+      case UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS:
+      case UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS:
+        // @TODO
+        // return this.setState({ step: Step.CONNECTION_CREATED, loading: false, connectionSettings: payload.connInfo, action, saved: true });
         break;
-      case 'testConnectionSuccess':
-        this.setState({ loading: false, externalMessage: 'Successfully connected!', externalMessageType: 'success' });
-        break;
-      case 'testConnectionWarning':
-        this.setState({
+      case UIAction.RESPONSE_TEST_CONNECTION_SUCCESS:
+        return this.setState({ loading: false, externalMessage: 'Successfully connected!', externalMessageType: 'success' });
+      case UIAction.RESPONSE_TEST_CONNECTION_WARNING:
+        return this.setState({
           loading: false,
           externalMessage: ((payload && payload.message ? payload.message : payload) || '').toString(),
           externalMessageType: 'warning'
         });
-        break;
-      case 'installedDrivers:response':
+      case UIAction.RESPONSE_INSTALLED_DRIVERS:
         const installedDrivers = (payload as SettingsScreenState['installedDrivers']);
-        this.setState({
+        return this.setState({
           loading: false,
           installedDrivers,
         });
-        break;
-      case 'updateConnectionError':
-      case 'createConnectionError':
-      case 'testConnectionError':
-        this.setState({
+      case UIAction.RESPONSE_UPDATE_CONNECTION_ERROR:
+      case UIAction.RESPONSE_CREATE_CONNECTION_ERROR:
+      case UIAction.RESPONSE_TEST_CONNECTION_ERROR:
+        return this.setState({
           loading: false,
           externalMessage: ((payload && payload.message ? payload.message : payload) || '').toString(),
           externalMessageType: 'error'
         });
-        break;
-      case 'reset':
-        this.reset();
+      case UIAction.REQUEST_RESET:
+        return this.reset();
       default:
         log.extend('warn')(`No handler set for %s`, action);
         break;
@@ -102,9 +81,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     action: 'create',
     errors: {},
     loading: false,
-    connectionSettings: {
-      askForPassword: true,
-    } as IConnection,
+    driver: null,
     step: Step.CONNECTION_TYPE,
     externalMessage: null,
     externalMessageType: null,
@@ -113,37 +90,20 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
 
   state = this.initialState;
 
-  constructor(props) {
+  constructor(props: any) {
     super(props);
     window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
   }
 
-  toggleGlobal = globalSetting => this.setState({ globalSetting });
-
-  toggleUseRelative = transformToRelative => this.setState({ transformToRelative });
-
-  updateConnectionSettings = (options: Partial<IConnection> = {}, cb?: any) => this.setState({
-    connectionSettings: {
-      ...this.state.connectionSettings,
-      ...options,
-    }
-  }, () => this.validateSettings(cb))
-
   componentDidMount() {
-    sendMessage('viewReady', true);
+    sendMessage(UIAction.NOTIFY_VIEW_READY, true);
     this.setState({ loading: true }, () => {
-      sendMessage('installedDrivers:request');
+      sendMessage(UIAction.REQUEST_INSTALLED_DRIVERS);
     });
   }
 
-  public focusField = (field) => {
-    try {
-      document.getElementById(field) && document.getElementById(field).focus();
-    } catch (e) { /**/ }
-  }
-
-  driverSelector = (driver: (SettingsScreenState['installedDrivers'])[number]) => {
-    console.log(driver);
+  onSelectDriver = (driver: (SettingsScreenState['installedDrivers'])[number]) => {
+    this.setState({ loading: true, driver });
     // this.updateConnectionSettings({
     //   driver: driver.value,
     //   port: driver.value === 'SQLite' ? undefined : (this.state.connectionSettings.port || driver.port || null),
@@ -153,96 +113,87 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
 
   }
 
-  validateSettings = (cb = undefined) => {
-    const requiredProps = this.state.installedDrivers[this.state.connectionSettings.driver].requiredProps(this.state.connectionSettings);
-    Object.keys(this.state.connectionSettings).forEach(key => {
-      if (typeof this.state.connectionSettings[key] === 'undefined') return;
-      if (this.state.connectionSettings[key] === null) return;
-      if (this.state.connectionSettings[key] === '') return;
-      delete requiredProps[key]
-    });
-    this.setState({ loading: false, errors: requiredProps }, cb);
-  }
-
-  submitSettings = (e) => {
+  onSubmitSetting = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    this.validateSettings(() => {
-      if (Object.keys(this.state.errors).length > 0) return;
-      const { id: editId, ...connInfo } = this.state.connectionSettings;
-      this.setState({ loading: true }, () => {
-        sendMessage(!editId ? 'createConnection' : 'updateConnection', {
-          editId,
-          connInfo,
-          globalSetting: !!this.state.globalSetting,
-          transformToRelative: this.state.transformToRelative
-        });
-      });
-    });
+    // @TODO
+    // this.validateSettings(() => {
+    //   if (Object.keys(this.state.errors).length > 0) return;
+    //   const { id: editId, ...connInfo } = this.state.connectionSettings;
+    //   this.setState({ loading: true }, () => {
+    //     sendMessage(!editId ? 'createConnection' : 'updateConnection', {
+    //       editId,
+    //       connInfo,
+    //       globalSetting: !!this.state.globalSetting,
+    //       transformToRelative: this.state.transformToRelative
+    //     });
+    //   });
+    // });
   }
 
-  testConnection = () => {
-    this.setState({ loading: true }, () => {
-      sendMessage('testConnection', {
-        connInfo: this.state.connectionSettings,
-      });
-    });
+  onTestConnection = () => {
+    // @TODO
+    // this.setState({ loading: true }, () => {
+    //   sendMessage('testConnection', {
+    //     connInfo: this.state.connectionSettings,
+    //   });
+    // });
   }
 
 
   goTo = (step: Step) => this.setState({ step });
 
-  openConnectionFile = () => sendMessage('openConnectionFile');
+  onOpenConnectionFile = () => sendMessage(UIAction.REQUEST_OPEN_CONNECTION_FILE);
 
   public render() {
-    const { step } = this.state;
+    const { step, driver, loading, installedDrivers, saved, action, errors } = this.state;
     return (
       <>
-        <Container maxWidth='md' className={`blur ${this.state.loading ? 'blur-active' : ''}`}>
+        <Container maxWidth='md' className={`blur ${loading ? 'blur-active' : ''}`}>
           <h3>
             Connection Assistant
             <small style={{ float: 'right' }} className='stepper'>
               {
-                this.state.step - 1 >= Step.CONNECTION_TYPE
-                && <a onClick={() => this.goTo(this.state.step - 1)}>{'<'}</a>
+                step - 1 >= Step.CONNECTION_TYPE
+                && <a onClick={() => this.goTo(step - 1)}>{'<'}</a>
               }
-              Step {this.state.step}/{totalSteps}
+              Step {step}/{totalSteps}
               {
-                this.state.step + 1 <= Step.CONNECTION_CREATED
-                && this.state.connectionSettings.driver
-                && (this.state.step + 1 !== Step.CONNECTION_CREATED || this.state.saved)
-                && <a onClick={() => this.goTo(this.state.step + 1)}>{'>'}</a>
+                step + 1 <= Step.CONNECTION_CREATED
+                && driver
+                && (step + 1 !== Step.CONNECTION_CREATED || saved)
+                && <a onClick={() => this.goTo(step + 1)}>{'>'}</a>
               }
             </small>
           </h3>
           {step === Step.CONNECTION_TYPE && (
             <DriverSelector
-              drivers={[] || Object.values(this.state.installedDrivers).sort((a, b) => a.displayName.localeCompare(b.displayName))}
-              onSelect={this.driverSelector}
-              selected={this.state.connectionSettings['driver']}
+              loading={loading}
+              drivers={installedDrivers}
+              onSelect={this.onSelectDriver}
+              selected={driver}
             />
           )}
           {step === Step.CONNECTION_INFO && (
             <ConnectionInfo
-              installedDrivers={this.state.installedDrivers}
-              updateSettings={this.updateConnectionSettings}
-              submit={this.submitSettings}
-              testConnection={this.testConnection}
-              state={this.state}
-              toggleGlobal={this.toggleGlobal}
-              toggleUseRelative={this.toggleUseRelative}
-              openConnectionFile={this.openConnectionFile}
+              installedDrivers={installedDrivers}
+              submit={this.onSubmitSetting}
+              testConnection={this.onTestConnection}
+              openConnectionFile={this.onOpenConnectionFile}
+              action={action}
+              errors={errors}
+              driver={driver}
             />
           )}
           {step === Step.CONNECTION_CREATED && (
             <ConnectionCreated
-              installedDrivers={this.state.installedDrivers}
-              settings={this.state.connectionSettings}
-              action={this.state.action}
-              reset={() => this.reset()}
+              settings={{} as IConnection}
+              driver={driver}
+              action={action}
+              reset={this.reset}
             />
           )}
         </Container>
-        <Loading active={this.state.loading} />
+        <Loading active={loading} />
       </>
     );
   }

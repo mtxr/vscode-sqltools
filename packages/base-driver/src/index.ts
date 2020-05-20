@@ -71,7 +71,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       this.deps.forEach(dep => {
         let mustUpgrade = false;
         switch (dep.type) {
-          case 'package':
+          case AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE:
             try {
               delete sqltoolsRequire.cache[sqltoolsRequire.resolve(dep.name + '/package.json')];
               const { version } = sqltoolsRequire(dep.name + '/package.json');
@@ -111,5 +111,10 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
 
   protected prepareMessage(message: any): NSDatabase.IResult['messages'][number] {
     return { message: message.toString(), date: new Date() };
+  }
+
+  static readonly CONSTANTS = {
+    DEPENDENCY_PACKAGE: 'package' as NodeDependency['type'],
+    DEPENDENCY_NPM_SCRIPT: 'npmscript' as NodeDependency['type'],
   }
 }

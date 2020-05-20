@@ -13,7 +13,7 @@ const SQLite3Version = '4.1.1';
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: 'package',
+    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
     name: 'sqlite3',
     version: SQLite3Version,
   }];

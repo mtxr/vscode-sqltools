@@ -34,10 +34,10 @@ import FilterIcon from './FilterIcon';
 import TableCell from './TableCell';
 import GridRoot from './GridRoot';
 import generateColumnExtensions from './generateColumnExtensions';
-import { IQueryOptions } from '@sqltools/types';
 import { initialState, TableState } from './state';
 import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
+import { UIAction } from '../../../../../actions';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -107,7 +107,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
         return this.setState({ contextMenu: initialState.contextMenu, selection: [] });
       case MenuActions.OpenEditorWithValueOption:
       case MenuActions.OpenEditorWithRowOption:
-        sendMessage('call', {
+        sendMessage(UIAction.CALL, {
           command: `${process.env.EXT_NAMESPACE}.insertText`,
           args: [choice === MenuActions.OpenEditorWithValueOption ? `${cellValue}` : JSON.stringify(selectedRows, null, 2)],
         });

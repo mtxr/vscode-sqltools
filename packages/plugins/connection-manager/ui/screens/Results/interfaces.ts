@@ -11,7 +11,7 @@ export interface TableProps {
     [key: string]: any;
   }[];
   query: string;
-  queryType?: string; // for pagination
+  queryType?: NSDatabase.IResult['queryType']; // for pagination
   queryParams?: { [k: string]: any };
   queryOptions: IQueryOptions;
   pageSize: number;

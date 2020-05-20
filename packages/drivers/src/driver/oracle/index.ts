@@ -10,7 +10,7 @@ import { replacer } from '@sqltools/util/text';
 const OracleDBLibVersion = '4.0.0';
 export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, OracleDBLib.PoolAttributes> implements IConnectionDriver {
   public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: 'package',
+    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
     name: 'oracledb',
     version: OracleDBLibVersion,
   }];
