@@ -101,6 +101,6 @@
     }
   },
   "required": [
-    "database"
+    "connectionMethod"
   ]
 }

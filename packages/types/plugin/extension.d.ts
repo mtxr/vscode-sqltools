@@ -33,7 +33,8 @@ export interface IDriverExtensionApi {
    * @returns {(Promise<IConnection> | IConnection)}
    * @memberof IDriverExtensionApi
    */
-  parseBeforeSaveConnection?(arg: { connInfo: IConnection, transformToRelative?: boolean }): Promise<IConnection> | IConnection;
+  parseBeforeSaveConnection?(arg: { connInfo: IConnection }): Promise<IConnection> | IConnection;
+  parseBeforeEditConnection?(arg: { connInfo: IConnection }): Promise<IConnection> | IConnection;
   readonly driverName?: string;
   readonly driverAliases: IDriverAlias[];
 }

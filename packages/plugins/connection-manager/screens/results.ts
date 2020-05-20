@@ -18,19 +18,17 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     this.onDidDispose(() => {
       this.isOpen = false;
     });
-
-    this.setMessageCallback(({ action, payload }) => {
-      switch (action) {
-        case UIAction.NOTIFY_VIEW_READY:
-          this.isOpen = payload;
-          break;
-        case UIAction.REQUEST_SYNC_CONSOLE_MESSAGES:
-          this.syncConsoleMessages(payload);
-        default:
-        break;
-      }
-    });
   }
+
+  protected messagesHandler = ({ action, payload }) => {
+    switch (action) {
+      case UIAction.NOTIFY_VIEW_READY:
+        this.isOpen = payload;
+        return;
+      case UIAction.REQUEST_SYNC_CONSOLE_MESSAGES:
+        return this.syncConsoleMessages(payload);
+    }
+  };
 
   onViewActive = async (active: boolean) => {
     if (!active) {
@@ -102,7 +100,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       this.title = `${prefix}: ${suffix}`;
     } catch (error) {}
     this.updatePanelName();
-    this.postMessage({ action: UIAction.RESPONSE_QUERY_RESULTS, payload });
+    this.sendMessage(UIAction.RESPONSE_QUERY_RESULTS, payload);
   }
 
   wereToShow = vscode.ViewColumn.Active;

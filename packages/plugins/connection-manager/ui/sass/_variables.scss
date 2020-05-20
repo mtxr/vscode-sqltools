@@ -38,6 +38,7 @@ html {
 }
 * {
   box-sizing: border-box;
+  outline: none;
   &::before, &::after {
     box-sizing: border-box;
   }

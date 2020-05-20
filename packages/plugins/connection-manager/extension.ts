@@ -9,7 +9,7 @@ import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
 import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource, extensions } from 'vscode';
+import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
 import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
@@ -21,7 +21,7 @@ import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { isEmpty } from '@sqltools/util/validation';
-import { UIAction } from './actions';
+import { getExtension } from './exntension-util';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -187,7 +187,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
     const dependencies: string[] = (Context.globalState.get<any>('extPlugins') || {}).drivers || [];
 
-    await Promise.all(dependencies.map(async n => extensions.getExtension(n).isActive || await extensions.getExtension(n).activate()))
+    await Promise.all(dependencies.map(getExtension));
 
     if (connIdOrNode) {
       let conn = await this.getConnFromIdOrNode(connIdOrNode);
@@ -341,10 +341,14 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {
-    const conn = await this.getConnFromIdOrNode(connIdOrNode);
-    if (!conn) return;
-    this.settingsWebview.show();
-    this.settingsWebview.postMessage({ action: UIAction.REQUEST_EDIT_CONNECTION, payload: { conn } });
+    let conn: IConnection;
+    try {
+      conn = await this.getConnFromIdOrNode(connIdOrNode);
+      if (!conn) return;
+      return this.settingsWebview.editConnection({ conn });
+    } catch (error) {
+      return this.errorHandler(`Error while trying to edit ${(conn && conn.name) || 'connection'}`, error);
+    }
   }
 
   private ext_openSettings = async () => {
@@ -551,7 +555,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     return commands.executeCommand(`${EXT_NAMESPACE}.copyText`, null, nodes);
   }
 
-  private async getConnFromIdOrNode(connIdOrNode?: string | SidebarConnection) {
+  private async getConnFromIdOrNode(connIdOrNode?: string | SidebarConnection): Promise<IConnection | null> {
     let id: string;
     let conn: IConnection = null;
     if (connIdOrNode) {

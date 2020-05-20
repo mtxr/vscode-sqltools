@@ -5,6 +5,7 @@ import styled from 'styled-components';
 import { OverridableComponent } from '@material-ui/core/OverridableComponent';
 import Message from '../../../components/Message';
 import { SettingsScreenState } from '../interfaces';
+import { CircularProgress } from '@material-ui/core';
 
 const DBDriverItem = styled<OverridableComponent<GridTypeMap<{ selected?: boolean }, 'div'>>>(Grid)`
   max-width: 250px;
@@ -55,9 +56,23 @@ const DriverSelector = ({
           </DBDriverItem>
         ))}
       </Grid>}
-      {!loading && drivers.length === 0 && <Grid style={{ textAlign: 'center', padding: '5rem', height: '10rem', justifyContent: 'space-evenly', flexDirection: 'column', display: 'flex' }}>
-        <div><Message type='error' >No drivers installed</Message></div>
-        <div><a href='https://marketplace.visualstudio.com/search?term=tag%3Asqltools-driver&target=VSCode'>Search VSCode marketplace</a></div>
+      {!loading && drivers.length === 0 && <Grid style={{ textAlign: 'center', height: '400px', justifyContent: 'space-evenly', flexDirection: 'column', display: 'flex', boxSizing: 'content-box' }}>
+        <div>
+          <Message>
+            Couldn't find any drivers installed yet.
+            <p>
+              <a href='https://marketplace.visualstudio.com/search?term=tag%3Asqltools-driver&target=VSCode'>
+                Search VSCode marketplace
+              </a>
+            </p>
+          </Message>
+        </div>
+        <div>
+          <CircularProgress size='20px'/>
+          <p>
+            <strong>Don't worry, we are still looking up for drivers.<br />Try to install drivers before move forward.</strong>
+          </p>
+        </div>
       </Grid>}
     </Container>
   </>

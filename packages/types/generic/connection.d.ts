@@ -135,19 +135,6 @@ export interface IConnection<DriverOptions = any> {
    */
   id: string;
   /**
-   * Connection flag. This is not a settings. It's generated in runtime
-   * @type {boolean}
-   * @memberof IConnection
-   */
-  isConnected: boolean;
-  /**
-   * Connection flag. This is not a settings. It's generated in runtime
-   * @type {boolean}
-   * @memberof IConnection
-   */
-  isActive: boolean;
-
-  /**
    * Define an icon for this connection. If not specified, use defaults
    *
    * @type {string}
@@ -165,6 +152,22 @@ export interface IConnection<DriverOptions = any> {
    * @memberof IConnection
    */
    databaseFilter?: IDatabaseFilter;
+
+
+
+   // WONT BE INCLUDED IN SETTINGS
+   /**
+   * Connection flag. This is not a settings. It's generated in runtime
+   * @type {boolean}
+   * @memberof IConnection
+   */
+  isConnected: boolean;
+  /**
+   * Connection flag. This is not a settings. It's generated in runtime
+   * @type {boolean}
+   * @memberof IConnection
+   */
+  isActive: boolean;
 }
 
 export interface IDatabaseFilter {

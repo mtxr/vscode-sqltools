@@ -1,14 +1,19 @@
 #!/bin/bash
 
 # temporary script
-
+rm -rf *.vsix
+rm -rf dist
 rm -rf packages/driver.mssql/out
 rm -rf packages/driver.mysql/out
 rm -rf packages/driver.pg/out
 rm -rf packages/driver.sqlite/out
 
-yarn run build --env.pkg=driver.mssql --env.pkg=driver.mysql --env.pkg=driver.pg --env.pkg=driver.sqlite
+yarn run build
 
+(
+  cd dist &&
+  vsce package --yarn -o ../.
+)&
 (
   cd packages/driver.mssql/ &&
   vsce package --yarn -o ../../.

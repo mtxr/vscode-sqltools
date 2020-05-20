@@ -7,6 +7,7 @@ import Form, { FormProps } from '@rjsf/core';
 import { IConnection } from '@sqltools/types';
 import Syntax from '../../../components/Syntax';
 import FileWidget from './FileWidget';
+import { UIAction } from '../../../../actions';
 
 const ConnectionSettingsForm = ({
   onSubmit,
@@ -18,7 +19,6 @@ const ConnectionSettingsForm = ({
   uiSchema = {},
   driver,
   action,
-  errors,
 }: {
   onSubmit: FormProps<any>['onSubmit'];
   onChange: FormProps<any>['onChange'];
@@ -29,7 +29,6 @@ const ConnectionSettingsForm = ({
   uiSchema: FormProps<IConnection>['uiSchema'];
   driver: SettingsScreenState['driver'];
   action: SettingsScreenState['action'];
-  errors: SettingsScreenState['errors'];
   installedDrivers: SettingsScreenState['installedDrivers'];
 }) => {
   return (
@@ -44,10 +43,9 @@ const ConnectionSettingsForm = ({
         onChange={onChange}
         formData={formData}
         widgets={widgets}
-        liveValidate
+        // liveValidate
       >
         <ConnectionSettingsForm.Footer
-          errors={errors}
           action={action}
           testConnection={testConnection}
           openConnectionFile={openConnectionFile}
@@ -64,15 +62,15 @@ const ConnectionSettingsForm = ({
   );
 };
 
-ConnectionSettingsForm.Footer = ({ errors, testConnection, action, openConnectionFile }) => (
+ConnectionSettingsForm.Footer = ({ testConnection, action, openConnectionFile }) => (
   <footer style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
-    <Button bg="var(--vscode-list-highlightForeground)" type="submit" disabled={Object.keys(errors).length > 0}>
+    <Button bg="var(--vscode-list-highlightForeground)" type="submit">
       Save Connection
     </Button>
-    <Button disabled={Object.keys(errors).length > 0} onClick={testConnection} float="right" type="button">
+    <Button onClick={testConnection} float="right" type="button">
       Test Connection
     </Button>
-    {!`${action || 'create'}`.startsWith('create') && Object.keys(errors).length === 0 && (
+    {!`${action || UIAction.REQUEST_CREATE_CONNECTION}`.toLowerCase().includes('create') && (
       <A onClick={openConnectionFile} float="right" style={{ marginRight: '2em' }}>
         Open settings
       </A>

@@ -2,31 +2,31 @@ import React from 'react';
 import Syntax from '../../../components/Syntax';
 import Button from '../../../components/Button';
 import DriverIcon  from '../../../components/DriverIcon';
-import { IConnection } from '@sqltools/types';
 import { SettingsScreenState } from '../interfaces';
+import { UIAction } from '../../../../actions';
 
 const ConnectionCreated = ({
-  settings = ({} as IConnection),
+  formData,
   action,
   reset,
   driver
 }: {
-  settings: IConnection;
+  formData: SettingsScreenState['formData'];
   action: SettingsScreenState['action']
   reset: () => void;
   driver: SettingsScreenState['driver']
 }) => {
-  const { id, ...connSettings } = settings;
+  const { id, ...connSettings } = formData;
   return (
     <>
       <h5>Review connection details</h5>
       <hr />
       <DriverIcon driver={driver} />
       <div style={{ minHeight: '150px' }}>
-        <h5>
-          {action === 'createConnectionSuccess' && `${settings.name} added to your settings!`}
-          {action === 'updateConnectionSuccess' && `${settings.name} updated!`}
-        </h5>
+        <h4>
+          {action === UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS && `${formData.name} was added to your settings!`}
+          {action === UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS && `${formData.name} updated!`}
+        </h4>
         <details open>
           <summary>Review JSON Syntax</summary>
           <Syntax code={connSettings} language="json" width='calc(100% - 100px)' />
@@ -36,7 +36,7 @@ const ConnectionCreated = ({
             onClick={reset}
             bg="var(--vscode-list-highlightForeground)"
             href={encodeURI(
-              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.selectConnection?${JSON.stringify(settings.id)}`
+              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.selectConnection?${JSON.stringify(formData.id)}`
             )}
           >
             Connect now
@@ -46,10 +46,10 @@ const ConnectionCreated = ({
             bg="var(--vscode-editorError-foreground)"
             float="right"
             href={encodeURI(
-              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.deleteConnection?${JSON.stringify(settings.id)}`
+              `command:${process.env.EXT_NAMESPACE || 'sqltools'}.deleteConnection?${JSON.stringify(formData.id)}`
             )}
           >
-            Delete {settings.name}
+            Delete {formData.name}
           </Button.a>
           <Button onClick={reset} float="right">
             Create another

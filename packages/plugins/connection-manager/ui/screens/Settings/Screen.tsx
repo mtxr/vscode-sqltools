@@ -18,35 +18,35 @@ import { ISubmitEvent, IChangeEvent } from '@rjsf/core';
 const log = logger.extend('settings');
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
+  checkDriversInterval: number;
   messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
       case UIAction.REQUEST_EDIT_CONNECTION:
-        // @TODO
-        // const conn = payload.conn || {};
-        // return this.setState({
-        //   action: 'update',
-        //   loading: true,
-        //   connectionSettings: conn,
-        //   step: Step.CONNECTION_INFO,
-        //   externalMessage: null,
-        //   externalMessageType: null,
-        //   globalSetting: payload.globalSetting,
-        //   defaultMethod: (
-        //     conn.socketPath ? ConnectionMethod.SocketFile : (
-        //       conn.connectString ? ConnectionMethod.ConnectionString : ConnectionMethod.ServerAndPort
-        //     )
-        //   )
-        // }, this.validateSettings);
-        break;
+        return this.setState({
+          action: UIAction.REQUEST_EDIT_CONNECTION,
+          loading: false,
+          step: Step.CONNECTION_FORM,
+          externalMessage: null,
+          externalMessageType: null,
+          ...payload,
+        });
       case UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS:
       case UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS:
-        // @TODO
-        // return this.setState({ step: Step.CONNECTION_CREATED, loading: false, connectionSettings: payload.connInfo, action, saved: true });
-        break;
+        return this.setState({
+          step: Step.CONNECTION_CREATED,
+          loading: false,
+          action,
+          saved: true,
+          ...payload,
+        });
       case UIAction.RESPONSE_TEST_CONNECTION_SUCCESS:
-        return this.setState({ loading: false, externalMessage: 'Successfully connected!', externalMessageType: 'success' });
+        return this.setState({
+          loading: false,
+          externalMessage: 'Successfully connected!',
+          externalMessageType: 'success',
+        });
       case UIAction.RESPONSE_TEST_CONNECTION_WARNING:
         return this.setState({
           loading: false,
@@ -55,6 +55,15 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
         });
       case UIAction.RESPONSE_INSTALLED_DRIVERS:
         const installedDrivers = (payload as SettingsScreenState['installedDrivers']);
+        if (!installedDrivers || installedDrivers.length === 0) {
+          this.checkDriversInterval = this.checkDriversInterval || setInterval(() => {
+            sendMessage(UIAction.REQUEST_INSTALLED_DRIVERS);
+          }, 2000);
+        }
+        if (installedDrivers.length > 0) {
+          clearInterval(this.checkDriversInterval);
+          this.checkDriversInterval = null;
+        }
         return this.setState({
           loading: false,
           installedDrivers,
@@ -71,8 +80,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       case UIAction.RESPONSE_TEST_CONNECTION_ERROR:
         return this.setState({
           loading: false,
-          externalMessage: ((payload && payload.message ? payload.message : payload) || '').toString(),
-          externalMessageType: 'error'
+          ...payload,
         });
       case UIAction.REQUEST_RESET:
         return this.reset();
@@ -82,13 +90,12 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     }
   }
 
-  reset = (cb = undefined) => {
-    this.setState(this.initialState, cb);
+  reset = () => {
+    this.setState(this.initialState, () => this.loadDrivers());
   }
 
   readonly initialState: SettingsScreenState = {
-    action: 'create',
-    errors: {},
+    action: UIAction.REQUEST_CREATE_CONNECTION,
     loading: false,
     driver: null,
     step: Step.CONNECTION_TYPE,
@@ -105,6 +112,10 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   componentDidMount() {
     window.addEventListener('message', ev => this.messagesHandler(ev.data as IWebviewMessage));
     sendMessage(UIAction.NOTIFY_VIEW_READY, true);
+    this.loadDrivers();
+  }
+
+  loadDrivers = () => {
     this.setState({ loading: true }, () => {
       sendMessage(UIAction.REQUEST_INSTALLED_DRIVERS);
     });
@@ -120,20 +131,15 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   }
 
   onSubmitSetting = (data: ISubmitEvent<IConnection>) => {
-    console.log({ data });
-    // @TODO
-    // this.validateSettings(() => {
-    //   if (Object.keys(this.state.errors).length > 0) return;
-    //   const { id: editId, ...connInfo } = this.state.connectionSettings;
-    //   this.setState({ loading: true }, () => {
-    //     sendMessage(!editId ? 'createConnection' : 'updateConnection', {
-    //       editId,
-    //       connInfo,
-    //       globalSetting: !!this.state.globalSetting,
-    //       transformToRelative: this.state.transformToRelative
-    //     });
-    //   });
-    // });
+    if (data.errors.length > 0) return;
+    const { id: editId, ...connInfo } = data.formData;
+    this.setState({ loading: true }, () => {
+      sendMessage(!editId ? UIAction.REQUEST_CREATE_CONNECTION : UIAction.REQUEST_UPDATE_CONNECTION, {
+        editId,
+        connInfo,
+        globalSetting: false,
+      });
+    });
   }
 
   onChangeFormData = (data: IChangeEvent<IConnection>) => {
@@ -161,7 +167,6 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       installedDrivers,
       saved,
       action,
-      errors,
       schema,
       uiSchema,
       formData
@@ -187,7 +192,6 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
               testConnection={this.onTestConnection}
               openConnectionFile={this.onOpenConnectionFile}
               action={action}
-              errors={errors}
               driver={driver}
               onChange={this.onChangeFormData}
               formData={formData}
@@ -195,7 +199,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
           )}
           {step === Step.CONNECTION_CREATED && (
             <ConnectionCreated
-              settings={{} as IConnection}
+              formData={formData}
               driver={driver}
               action={action}
               reset={this.reset}

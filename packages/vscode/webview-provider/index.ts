@@ -43,7 +43,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   protected abstract title: string;
   private panel: WebviewPanel;
   private disposables: Disposable[] = [];
-  private messageCb;
+  protected messagesHandler: (...args: any) => void;
 
   public constructor() {}
   public preserveFocus = true;
@@ -90,8 +90,8 @@ export default abstract class WebviewProvider<State = any> implements Disposable
         process.env.NODE_ENV === 'development' && commands.executeCommand('workbench.action.webview.openDeveloperTools');
         break;
     }
-    if (this.messageCb) {
-      this.messageCb(({ action, payload, ...rest }));
+    if (this.messagesHandler) {
+      this.messagesHandler({ action, payload, ...rest });
     }
   }
 
@@ -115,12 +115,13 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.disposeEvent.fire();
   }
 
-  public postMessage = (message: any) => {
+  public postMessage(message: any) {
     if (!this.panel) return;
     this.panel.webview.postMessage(message);
   }
-  public setMessageCallback = (cb) => {
-    this.messageCb = cb;
+
+  public sendMessage(action: string, payload?: any) {
+    return this.postMessage({ action, payload });
   }
 
   private setPreviewActiveContext = (value: boolean) => {
