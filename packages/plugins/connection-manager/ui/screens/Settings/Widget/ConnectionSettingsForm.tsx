@@ -4,7 +4,7 @@ import Button from '../../../components/Button';
 import A from '../../../components/A';
 import { SettingsScreenState } from '../interfaces';
 
-const ConnectionInfo = ({
+const ConnectionSettingsForm = ({
   submit,
   testConnection,
   openConnectionFile,
@@ -26,7 +26,7 @@ const ConnectionInfo = ({
       <hr />
       <DriverIcon driver={driver} />
       <form onSubmit={submit}>
-        <ConnectionInfo.Footer
+        <ConnectionSettingsForm.Footer
           errors={errors}
           action={action}
           testConnection={testConnection}
@@ -37,7 +37,7 @@ const ConnectionInfo = ({
   );
 };
 
-ConnectionInfo.Footer = ({ errors, testConnection, action, openConnectionFile }) => (
+ConnectionSettingsForm.Footer = ({ errors, testConnection, action, openConnectionFile }) => (
   <div style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
     <Button bg="var(--vscode-list-highlightForeground)" type="submit" disabled={Object.keys(errors).length > 0}>
       Save Connection
@@ -53,4 +53,4 @@ ConnectionInfo.Footer = ({ errors, testConnection, action, openConnectionFile })
   </div>
 );
 
-export default ConnectionInfo;
+export default ConnectionSettingsForm;

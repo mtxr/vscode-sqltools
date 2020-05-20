@@ -3,7 +3,7 @@ import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading'
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
 import { Step, totalSteps } from './lib/steps';
-import ConnectionInfo from './Widget/ConnectionInfo';
+import ConnectionSettingsForm from './Widget/ConnectionSettingsForm';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/util/log';
 import '@sqltools/plugins/connection-manager/ui/sass/app.scss';
@@ -174,7 +174,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
             />
           )}
           {step === Step.CONNECTION_INFO && (
-            <ConnectionInfo
+            <ConnectionSettingsForm
               installedDrivers={installedDrivers}
               submit={this.onSubmitSetting}
               testConnection={this.onTestConnection}

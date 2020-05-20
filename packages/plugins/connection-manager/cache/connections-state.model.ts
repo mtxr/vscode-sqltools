@@ -9,4 +9,4 @@ export default connectionStateCache;
 
 export const ACTIVE_CONNECTIONS_KEY = 'activeConnections';
 export const LAST_USED_ID_KEY = 'lastUsedId';
-export const CONNECTION_INFO_KEY = 'connectionInfo';
+export const CONNECTION_INFO_KEY = 'ConnectionSettingsForm';
