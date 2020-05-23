@@ -25,7 +25,7 @@ export default class CQL
     }
     const cqlOptions: CassandraLib.ClientOptions = this.credentials.cqlOptions || {};
     const clientOptions: CassandraLib.ClientOptions = {
-      contactPoints: [this.credentials.server],
+      contactPoints: this.credentials.server.split(','),
       keyspace: this.credentials.database ? this.credentials.database : undefined,
       authProvider: new CassandraLib.auth.PlainTextAuthProvider(
         this.credentials.username,

@@ -25,7 +25,25 @@ Connection example:
 }
 ```
 
-### 1.1 Specific Options
+### 1.1 Multiple Hosts
+
+You can pass a list of hosts by separating them with a comma (`,`), instead of a single server:
+
+```json
+{
+  "name": "Cassandra",
+  "server": "host1.example.com,host2.example.com,2001:0db8:85a3::1",
+  "driver": "CQL",
+  "port": 9042,
+  "database": "my_keyspace",
+  "username": "sa",
+  "askForPassword": false,
+  "password": "root(!)Password",
+  "connectionTimeout": 15,
+}
+```
+
+### 1.2 Specific Options
 
 Cassandra driver specific options can be passed using `cqlOptions` settings.
 
