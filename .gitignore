@@ -23,3 +23,5 @@ test/docker/**/local*
 public
 .cache
 add-new.diff
+*.tar.gz
+*.tgz
