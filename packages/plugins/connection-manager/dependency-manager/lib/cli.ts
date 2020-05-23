@@ -1,4 +1,4 @@
-import commandExists from '@sqltools/util/dependencies/command-exists';
+import { sync as commandExists } from 'command-exists';
 import execPromise from './execPromise';
 import { SpawnOptions } from 'child_process';
 import { getDataPath } from '@sqltools/util/path';

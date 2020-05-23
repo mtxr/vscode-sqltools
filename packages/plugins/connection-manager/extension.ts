@@ -22,6 +22,7 @@ import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { isEmpty } from '@sqltools/util/validation';
 import { getExtension } from './exntension-util';
+import DependencyManager from './dependency-manager/extension';
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -658,6 +659,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   public register(extension: IExtension) {
     if (this.client) return; // do not register twice
+
+    extension.registerPlugin(new DependencyManager);
+
     this.client = extension.client;
 
     // register extension commands

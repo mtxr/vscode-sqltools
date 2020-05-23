@@ -18,7 +18,6 @@ const log = logger.extend('main');
 // plugins
 import AutoRestartPlugin from '@sqltools/plugins/auto-restart/extension';
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
-import DependencyManagerPlugin from '@sqltools/plugins/dependency-manager/extension';
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
@@ -297,7 +296,6 @@ export function activate(ctx: ExtensionContext) {
       FormatterPlugin,
       AutoRestartPlugin,
       new ConnectionManagerPlugin(instance),
-      new DependencyManagerPlugin,
       new HistoryManagerPlugin,
       new BookmarksManagerPlugin,
     ])

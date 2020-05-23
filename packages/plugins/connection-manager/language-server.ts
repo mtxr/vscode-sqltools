@@ -7,8 +7,8 @@ import { writeFile as writeFileWithCb } from 'fs';
 import { promisify } from 'util';
 import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
 import Handlers from './cache/handlers';
-import DependencyManager from '../dependency-manager/language-server';
-import { DependeciesAreBeingInstalledNotification } from '../dependency-manager/contracts';
+import DependencyManager from './dependency-manager/language-server';
+import { DependeciesAreBeingInstalledNotification } from './dependency-manager/contracts';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import logger from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
@@ -231,6 +231,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   };
 
   public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
+    server.registerPlugin(new DependencyManager);
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);

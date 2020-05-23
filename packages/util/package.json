@@ -9,7 +9,6 @@
     "@sentry/node": "5.12.4",
     "@sqltools/types": "latest",
     "@sqltools/vscode": "*",
-    "command-exists": "1.2.8",
     "debug": "https://github.com/mtxr/debug.git",
     "env-paths": "^2.2.0",
     "lru-cache": "5.1.1",
