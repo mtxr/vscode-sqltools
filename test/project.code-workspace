@@ -223,6 +223,17 @@
         "server": "localhost",
         "username": "cassandra",
         "group": "CQL"
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 15,
+        "driver": "Cassandra",
+        "name": "CQL Cassandra Legacy",
+        "password": "cassandra",
+        "port": 9045,
+        "server": "localhost",
+        "username": "cassandra",
+        "group": "CQL"
       }
     ],
     "sqltools.languageServerEnv": {

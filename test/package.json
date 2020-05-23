@@ -9,8 +9,9 @@
     "up:mysql_xprotocol": "yarn run up mysql_xprotocol",
     "up:oracle": "echo 'Oracle docker image currently not working'",
     "up:pgsql": "yarn run up pgsql",
-    "up:cql_cassandra": "yarn run up cql_cassandra",
+    "up:cql_cassandra": "docker pull cassandra:latest && yarn run up cql_cassandra",
     "up:cql_scylla": "yarn run up cql_scylla",
+    "up:cql_cassandra_legacy": "yarn run up cql_cassandra_legacy",
     "preup:mysql": "bash ./docker/mysql/prepare.sh"
   }
 }

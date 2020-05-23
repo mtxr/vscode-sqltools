@@ -1,4 +1,4 @@
-FROM cassandra
+FROM cassandra:latest
 
 RUN sed -i 's/start_rpc/start_rpc enable_user_defined_functions/' /usr/local/bin/docker-entrypoint.sh
 RUN sed -i 's/enable_user_defined_functions: false/enable_user_defined_functions: true/' /etc/cassandra/cassandra.yaml
