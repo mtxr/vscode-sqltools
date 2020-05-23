@@ -20,7 +20,7 @@ export default class CQL extends AbstractDriver<CassandraLib.Client, CassandraLi
     }
     const cqlOptions: CassandraLib.ClientOptions = this.credentials.cqlOptions || {};
     const clientOptions: CassandraLib.ClientOptions = {
-      contactPoints: [this.credentials.server],
+      contactPoints: this.credentials.server.split(','),
       keyspace: this.credentials.database ? this.credentials.database : undefined,
       authProvider: new CassandraLib.auth.PlainTextAuthProvider(this.credentials.username, this.credentials.password),
       protocolOptions: {
