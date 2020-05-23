@@ -7,7 +7,7 @@
   "private": true,
   "dependencies": {
     "@sentry/node": "5.12.4",
-    "@sqltools/types": "*",
+    "@sqltools/types": "latest",
     "@sqltools/vscode": "*",
     "command-exists": "1.2.8",
     "debug": "https://github.com/mtxr/debug.git",

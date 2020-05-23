@@ -1,13 +1,11 @@
 import envPaths from 'env-paths';
 import path from 'path';
 import fs from 'fs';
-import EnvironmentError from '@sqltools/util/exception/environment';
 import logger from '@sqltools/util/log';
-import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import mkdir from './mkdir';
 
 const log = logger.extend('persistence');
-const SQLTOOLS_PATHS = envPaths(`vscode-${EXT_NAMESPACE}`, { suffix: null });
+const SQLTOOLS_PATHS = envPaths(`vscode-${process.env.EXT_NAMESPACE || 'sqltools'}`, { suffix: null });
 let home: string;
 
 if (!fs.existsSync(SQLTOOLS_PATHS.config)) {
@@ -39,7 +37,7 @@ export function getHome(...args: string[]): string {
     if (process && process.env && (process.env.HOME || process.env.USERPROFILE)) {
       home = process.env.HOME || process.env.USERPROFILE;
     } else {
-      throw new EnvironmentError('Could not find user home path');
+      throw new Error('Could not find user home path');
     }
   }
   return path.resolve(home, ...args);

@@ -1,10 +1,11 @@
 import { window as Win, window, ProgressLocation, commands } from 'vscode';
 import { InstallDepRequest, DependeciesAreBeingInstalledNotification } from '@sqltools/plugins/dependency-manager/contracts';
 import { openExternal } from '@sqltools/vscode/utils';
-import { EXT_NAMESPACE, DOCS_ROOT_URL, MissingModuleNotification, DISPLAY_NAME } from '@sqltools/util/constants';
+import { EXT_NAMESPACE, DOCS_ROOT_URL, DISPLAY_NAME } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
 import Config from '@sqltools/util/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
+import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
 
 export default class DependencyManager implements IExtensionPlugin {
   public readonly name = 'Dependency Manager Plugin';
@@ -16,8 +17,6 @@ export default class DependencyManager implements IExtensionPlugin {
     this.client.onNotification(MissingModuleNotification, this.requestToInstall);
     this.client.onNotification(DependeciesAreBeingInstalledNotification, this.jobRunning);
   }
-
-  c
 
   private installingDrivers: string[] = [];
   private requestToInstall = async ({ conn, action = 'install', deps = [] }: { conn: IConnection; action: 'upgrade' | 'install'; deps: NodeDependency[]}) => {

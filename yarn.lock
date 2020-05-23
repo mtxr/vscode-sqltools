@@ -1204,13 +1204,18 @@
     tslib "^1.9.3"
 
 "@sqltools/base-driver@*":
-  version "0.0.1-alpha1"
+  version "0.0.1-alpha2"
   dependencies:
-    "@sqltools/types" "*"
-    "@sqltools/util" "*"
+    "@sqltools/types" latest
+    debug "^4.1.1"
+    env-paths "^2.2.0"
+    make-dir "^3.1.0"
+    vscode-languageserver "6.1.1"
 
-"@sqltools/types@*":
-  version "0.0.1-alpha1"
+"@sqltools/types@latest":
+  version "0.0.2"
+  resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.0.2.tgz#5453a82bc74cc3b4dad188da8b52d76cea6593b7"
+  integrity sha512-1z+BNE82qs/8Y//Qmu319C7J9sTHWSOXbsR48yHaW4xwo+PJ778l8cCeF+CLv/+HM1+z97AxVT16ALthi/ASLQ==
 
 "@types/babel__core@^7.1.0":
   version "7.1.3"
@@ -3772,6 +3777,13 @@ make-dir@^2.1.0:
   dependencies:
     pify "^4.0.1"
     semver "^5.6.0"
+
+make-dir@^3.1.0:
+  version "3.1.0"
+  resolved "https://registry.yarnpkg.com/make-dir/-/make-dir-3.1.0.tgz#415e967046b3a7f1d185277d84aa58203726a13f"
+  integrity sha512-g3FeP20LNwhALb/6Cz6Dd4F2ngze0jz7tbzrD2wAV+o9FeNHe4rL+yK2md0J/fiSf1sa1ADhXqi5+oVwOM/eGw==
+  dependencies:
+    semver "^6.0.0"
 
 make-error@1.x:
   version "1.3.5"

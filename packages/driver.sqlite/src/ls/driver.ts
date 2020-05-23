@@ -1,7 +1,7 @@
 import SQLiteLib from 'sqlite3';
 import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
-import sqltoolsRequire from '@sqltools/util/dependencies/require';
+import sqltoolsRequire from '@sqltools/base-driver/dist/lib/require';
 import mkdir from '@sqltools/util/path/mkdir';
 import { dirname } from 'path';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';

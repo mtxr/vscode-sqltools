@@ -7,9 +7,10 @@
   "private": true,
   "dependencies": {
     "@rjsf/core": "^2.0.1",
+    "@sqltools/base-driver": "latest",
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
-    "@sqltools/types": "*",
+    "@sqltools/types": "latest",
     "@sqltools/util": "*",
     "@sqltools/vscode": "*",
     "@devexpress/dx-react-core": "^2.5.1",

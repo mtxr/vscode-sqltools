@@ -8,19 +8,19 @@ import {
   ContextValue,
   MConnectionExplorer,
   IQueryOptions,
+  NSDatabase,
 } from '@sqltools/types';
-import { getConnectionId } from '@sqltools/util/connection';
-import { MissingModuleError, ElectronNotSupportedError } from '@sqltools/util/exception';
-import { NSDatabase } from '@sqltools/types';
-import sqltoolsRequire from '@sqltools/util/dependencies/require';
-import log from '@sqltools/util/log';
+import ElectronNotSupportedError from './lib/exception/electron-not-supported';
+import MissingModuleError from './lib/exception/missing-module';
+import sqltoolsRequire from './lib/require';
+import log from './lib/log';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
   public readonly deps: NodeDependency[] = [];
 
   public getId() {
-    return getConnectionId(this.credentials) || 'BROKEN';
+    return this.credentials.id;
   }
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;

@@ -38,7 +38,7 @@
   "main": "./out/extension.js",
   "devDependencies": {
     "@babel/preset-env": "^7.5.5",
-    "@sqltools/base-driver": "*",
+    "@sqltools/base-driver": "latest",
     "@types/sqlite3": "^3.1.5",
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",

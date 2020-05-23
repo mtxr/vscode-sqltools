@@ -13,12 +13,12 @@
     "compile": "tsc -p tsconfig.json"
   },
   "dependencies": {
-    "@sqltools/base-driver": "*",
+    "@sqltools/base-driver": "latest",
     "@sqltools/util": "*",
     "cassandra-driver": "^4.1.0"
   },
   "devDependencies": {
-    "@sqltools/types": "*",
+    "@sqltools/types": "latest",
     "@types/cassandra-driver": "^4.1.1",
     "@types/ibm_db": "^2.0.5",
     "@types/jest": "^24.0.11",

@@ -503,6 +503,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     if (c && getConnectionId(c) !== (await this.explorer.getActiveId())) {
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
+      c.id = getConnectionId(c);
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     this.explorer.refresh();

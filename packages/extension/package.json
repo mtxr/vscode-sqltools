@@ -1181,6 +1181,7 @@
     "dependencies": {
         "@sqltools/util": "*",
         "@sqltools/plugins": "*",
+        "command-exists": "1.2.8",
         "vscode-languageclient": "6.1.2"
     },
     "build": [

@@ -12,6 +12,4 @@ export const DELIMITER_START_REGEX = /(?:[\r\n]+)(\s*-{2,}\s*@block.*)$/guim;
 export const DELIMITER_START_REPLACE_REGEX = /^(\s*-{2,}\s*@block.*)$/guim;
 
 // notifications
-export const ElectronNotSupportedNotification = 'Core/electronNotSupported';
-export const MissingModuleNotification = 'Core/missingModule';
 export const ServerErrorNotification = 'Core/errorNotification';

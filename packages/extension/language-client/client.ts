@@ -2,7 +2,7 @@ import logger from '@sqltools/util/log';
 import path from 'path';
 import fs from 'fs';
 import Config from '@sqltools/util/config-manager';
-import { DISPLAY_NAME, EXT_NAMESPACE, ElectronNotSupportedNotification, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
+import { DISPLAY_NAME, EXT_NAMESPACE, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
 import commandExists from '@sqltools/util/dependencies/command-exists';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget, workspace } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
@@ -11,6 +11,7 @@ import telemetry from '@sqltools/util/telemetry';
 import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 import uniq from 'lodash/uniq';
+import { ElectronNotSupportedNotification } from '@sqltools/base-driver/dist/lib/notification';
 
 const log = logger.extend('lc');
 
