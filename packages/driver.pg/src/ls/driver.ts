@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, PoolClient, types, FieldDef } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer, IQueryOptions } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
 import AbstractDriver from '@sqltools/base-driver';
 import fs from 'fs';
 import zipObject from 'lodash/zipObject';
@@ -67,11 +67,6 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     pool.end();
   }
 
-  private queryResults = async <R = any, Q = any>(query: Q | string | String, opt?: IQueryOptions) => {
-    const result = await this.singleQuery<R, Q>(query, opt);
-    if (result.error) throw result.rawError;
-    return result.results;
-  }
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     const messages = [];
     let cli : PoolClient;

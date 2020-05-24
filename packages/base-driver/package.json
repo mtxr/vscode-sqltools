@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.0.1-alpha4",
+  "version": "0.0.1-alpha8",
   "description": "SQLTools Base Driver",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -16,7 +16,6 @@
     "url": "https://github.com/mtxr/vscode-sqltools/issues"
   },
   "scripts": {
-    "prepare": "yarn run build",
     "prebuild": "rimraf -rf dist",
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run build"

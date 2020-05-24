@@ -12,7 +12,7 @@
     "resolveJsonModule": true,
     "sourceMap": false,
     "declaration": true,
-    "target": "ES5",
+    "target": "es6",
     "outDir": "./dist"
   },
   "include": [

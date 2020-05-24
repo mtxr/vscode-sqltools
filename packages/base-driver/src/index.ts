@@ -37,6 +37,12 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return this.query<R, Q>(query, opt).then(([ res ]) => res);
   }
 
+  protected queryResults = async <R = any, Q = any>(query: Q | string | String, opt?: IQueryOptions) => {
+    const result = await this.singleQuery<R, Q>(query, opt);
+    if (result.error) throw result.rawError;
+    return result.results;
+  }
+
   public async describeTable(metadata: NSDatabase.ITable, opt: IQueryOptions) {
     const result = await this.singleQuery(this.queries.describeTable(metadata), opt);
     result.baseQuery = this.queries.describeTable.raw;

@@ -7,6 +7,7 @@ import { dirname } from 'path';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import { replacer } from '@sqltools/util/text';
 import { parse as queryParse } from '@sqltools/util/query';
+import generateId from '@sqltools/util/internal-id';
 
 const SQLite3Version = '4.1.1';
 
@@ -68,25 +69,26 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     });
   }
 
-  public async query(query: string): Promise<NSDatabase.IResult[]> {
+  public query: (typeof AbstractDriver)['prototype']['query'] = async (query, opt = {}) => {
     const db = await this.open();
-    const queries = queryParse(query).filter(Boolean);
-    const results: NSDatabase.IResult[] = [];
-    for(let i = 0; i < queries.length; i++) {
-      const res: any[][] = (await this.runSingleQuery(db, queries[i])) || [];
+    const { requestId } = opt;
+    const queries = queryParse(query.toString()).filter(Boolean);
+    return Promise.all(queries.map(async query => {
+      const results: any[][] = (await this.runSingleQuery(db, query)) || [];
       const messages = [];
-      if (res.length === 0 && queries[i].toLowerCase() !== 'select') {
-        messages.push(`${res.length} rows were affected.`);
+      if (results.length === 0 && query.toLowerCase() !== 'select') {
+        messages.push(`${results.length} rows were affected.`);
       }
-      results.push({
+      return <NSDatabase.IResult>{
+        requestId,
+        resultId: generateId(),
         connId: this.getId(),
-        cols: res && res.length ? Object.keys(res[0]) : [],
+        cols: results && results.length ? Object.keys(results[0]) : [],
         messages,
-        query: queries[i],
-        results: res,
-      });
-    }
-    return results;
+        query,
+        results,
+      };
+    }));
   }
 
   public async getTables(): Promise<NSDatabase.ITable[]> {

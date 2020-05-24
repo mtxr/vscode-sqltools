@@ -5,7 +5,6 @@ import { DRIVER_ALIASES } from './../constants';
 const SQLiteDriverPlugin: ILanguageServerPlugin = {
   register(server) {
     DRIVER_ALIASES.forEach(({ value }) => {
-      // @TODO
       server.getContext().drivers.set(value, SQLite as any);
     });
   }

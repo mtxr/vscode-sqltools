@@ -1203,8 +1203,10 @@
     "@sentry/types" "5.12.4"
     tslib "^1.9.3"
 
-"@sqltools/base-driver@*":
-  version "0.0.1-alpha2"
+"@sqltools/base-driver@latest":
+  version "0.0.1-alpha6"
+  resolved "https://registry.yarnpkg.com/@sqltools/base-driver/-/base-driver-0.0.1-alpha6.tgz#f51f96c3b122dea521e5d32e7ceb24eb0d8662ad"
+  integrity sha512-P6cMxQLCFbCTvzrcnq2jYvfdAdBTClJDANdhDJn8Cp6Eij9KMOujMLKvOu88vouOvT+wMgqKbgdTS2t2ZKJsaw==
   dependencies:
     "@sqltools/types" latest
     debug "^4.1.1"
@@ -1256,6 +1258,11 @@
   integrity sha512-yAaAk7gtmX+eHW1SkUokpfi8yZlJ18aEuO9lA6ZWvjnpgPSQtq/hYaIYiztVdF/dhTJ7SWA9utjMveNE2Af+Nw==
   dependencies:
     cassandra-driver "*"
+
+"@types/command-exists@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.yarnpkg.com/@types/command-exists/-/command-exists-1.2.0.tgz#d97e0ed10097090e4ab0367ed425b0312fad86f3"
+  integrity sha512-ugsxEJfsCuqMLSuCD4PIJkp5Uk2z6TCMRCgYVuhRo5cYQY3+1xXTQkSlPtkpGHuvWMjS2KTeVQXxkXRACMbM6A==
 
 "@types/debug@^4.1.5":
   version "4.1.5"
@@ -1441,7 +1448,7 @@
   dependencies:
     "@types/node" "*"
 
-"@types/sqlite3@^3.1.5":
+"@types/sqlite3@^3.1.6":
   version "3.1.6"
   resolved "https://registry.yarnpkg.com/@types/sqlite3/-/sqlite3-3.1.6.tgz#554ce76f886eb187cfc86e2f0bb67cbac4f568ce"
   integrity sha512-OBsK0KIGUICExQ/ZvnPY4cKx5Kz4NcrVyGTIvOL5y4ajXu7r++RfBajfpGfGDmDVCKcoCDX1dO84/oeyeITnxA==

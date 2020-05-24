@@ -1,4 +1,4 @@
-import queryFactory from '@sqltools/util/query/factory';
+import queryFactory from '@sqltools/base-driver/dist/lib/factory';
 import prefixedTableName from '@sqltools/util/query/prefixed-tablenames';
 import { IBaseQueries, ContextValue } from '@sqltools/types';
 
