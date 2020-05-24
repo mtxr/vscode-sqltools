@@ -17,8 +17,8 @@ SELECT
   C.CHARACTER_MAXIMUM_LENGTH::INT AS size,
   C.TABLE_CATALOG AS database,
   C.TABLE_SCHEMA AS schema,
-  C.COLUMN_DEFAULT AS defaultValue,
-  C.IS_NULLABLE AS isNullable,
+  C.COLUMN_DEFAULT AS "defaultValue",
+  C.IS_NULLABLE AS "isNullable",
   (CASE WHEN LOWER(TC.constraint_type) = 'primary key' THEN TRUE ELSE FALSE END) as "isPk",
   (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk",
   TC.constraint_type AS keytype

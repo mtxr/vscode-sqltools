@@ -202,7 +202,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
       capabilities: {
         completionProvider: {
           workDoneProgress: true,
-          triggerCharacters: [' ', '.', '(', '`', '\'']
+          triggerCharacters: [' ', '.', '(', '`', , '[']
         },
       }
     }));

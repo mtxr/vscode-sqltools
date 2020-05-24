@@ -2,14 +2,14 @@ import SQLiteLib from 'sqlite3';
 import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
 import sqltoolsRequire from '@sqltools/base-driver/dist/lib/require';
-import mkdir from '@sqltools/util/path/mkdir';
+import * as mkdir from 'make-dir';
 import { dirname } from 'path';
-import { IConnectionDriver, NSDatabase } from '@sqltools/types';
-import { replacer } from '@sqltools/util/text';
+import { IConnectionDriver, NSDatabase, ContextValue } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
+import keywordsCompletion from './keywords';
 
-const SQLite3Version = '4.1.1';
+const SQLite3Version = '4.2.0';
 
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 
@@ -91,18 +91,9 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     }));
   }
 
-  public async getTables(): Promise<NSDatabase.ITable[]> {
-    const [ queryRes ] = await this.query(this.queries.fetchTables);
-    return queryRes.results
-      .reduce((prev, curr) => prev.concat(curr), [])
-      .map((obj) => {
-        return {
-          name: obj.tableName,
-          isView: obj.type === 'view',
-          tableDatabase: this.credentials.database,
-          tree: obj.tree,
-        } as NSDatabase.ITable;
-      });
+  public async testConnection() {
+    await this.open()
+    await this.query('SELECT 1', {});
   }
 
   public async getColumns(): Promise<NSDatabase.IColumn[]> {
@@ -133,15 +124,15 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
       return Promise.resolve();
     }));
 
-    return columns;
+  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
+    switch (itemType) {
+      case ContextValue.TABLE:
+        return this.queryResults(this.queries.searchTables({ search }));
+      case ContextValue.COLUMN:
+        return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
+    }
   }
-
-  public getFunctions() {
-    // this doesn exists for SQLite. It's just to avoid watning messages
-    return Promise.resolve([]);
-  }
-
-  public describeTable(prefixedTable: string) {
-    return super.describeTable(prefixedTable.replace(/^("(.+)")$/g, '$2'));
+  public getStaticCompletions = async () => {
+    return keywordsCompletion;
   }
 }
