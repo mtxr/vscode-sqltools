@@ -9,11 +9,13 @@ import {
   MConnectionExplorer,
   IQueryOptions,
   NSDatabase,
+  LSIConnection,
 } from '@sqltools/types';
 import ElectronNotSupportedError from './lib/exception/electron-not-supported';
 import MissingModuleError from './lib/exception/missing-module';
 import sqltoolsRequire from './lib/require';
 import log from './lib/log';
+import path from 'path';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
@@ -24,7 +26,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;
-  constructor(public credentials: IConnection<DriverOptions>) {
+  constructor(public credentials: IConnection<DriverOptions>, protected getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders']) {
     this.log = log.extend(credentials.driver.toLowerCase());
   }
 
@@ -113,6 +115,18 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   public searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]> {
     this.log.extend('error')(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
+  }
+
+  public async toAbsolutePath(fsPath: string) {
+    if (!path.isAbsolute(fsPath) && /\$\{workspaceFolder:(.+)}/g.test(fsPath)) {
+      const workspaceName = fsPath.match(/\$\{workspaceFolder:(.+)}/)[1];
+      if (workspaceName) {
+        const workspaceFolders = await this.getWorkspaceFolders();
+        const dbWorkspace = workspaceFolders.find(w => w.name === workspaceName);
+        fsPath = path.resolve(dbWorkspace.uri.replace(/^(\w+):\/\//, ''), fsPath.replace(/\$\{workspaceFolder:(.+)}/g, './'));
+      }
+    }
+    return fsPath;
   }
 
   protected prepareMessage(message: any): NSDatabase.IResult['messages'][number] {

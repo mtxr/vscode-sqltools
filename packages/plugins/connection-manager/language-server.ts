@@ -131,7 +131,9 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         await Handlers.Connect(c);
         return this.serializarConnectionState(req.conn);
       }
-      c = new Connection(req.conn);
+      c = new Connection(req.conn, () => this.server.server.workspace.getWorkspaceFolders());
+
+      // @OPTIMIZE
       progressBase = {
         id: `progress:${c.getId()}`,
         title: c.getName(),
@@ -146,6 +148,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
     } catch (e) {
+      log.extend('Connecting error: %O', e);
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: req.conn });
@@ -179,7 +182,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         ...req.conn,
         password: req.conn.password || req.password,
       }
-      await Connection.testConnection(creds);
+      await Connection.testConnection(creds, () => this.server.server.workspace.getWorkspaceFolders());
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connection test successful!' });
       return req.conn;
     } catch (e) {

@@ -3,8 +3,12 @@ import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/typ
 import { ExtensionContext } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
 import { publisher, name } from '../package.json';
+import { workspace } from 'vscode';
+import { Uri } from 'vscode';
+import path from 'path';
 
 const driverName = 'SQLite';
+
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
   const sqltools = vscode.extensions.getExtension<IExtension>('mtxr.sqltools');
   if (!sqltools) {
@@ -37,7 +41,25 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
   api.registerPlugin(plugin);
   return {
     driverName,
-    parseBeforeSaveConnection: ({ connInfo }) => connInfo,
+    parseBeforeSaveConnection: ({ connInfo }) => {
+      if (path.isAbsolute(connInfo.database)) {
+        const databaseUri = Uri.file(connInfo.database);
+        const dbWorkspace = workspace.getWorkspaceFolder(databaseUri);
+        if (dbWorkspace) {
+          connInfo.database = `\$\{workspaceFolder:${dbWorkspace.name}\}/${workspace.asRelativePath(connInfo.database, false)}`;
+        }
+      }
+      return connInfo;
+    },
+    parseBeforeEditConnection: ({ connInfo }) => {
+      if (!path.isAbsolute(connInfo.database) && /\$\{workspaceFolder:(.+)}/g.test(connInfo.database)) {
+        const workspaceName = connInfo.database.match(/\$\{workspaceFolder:(.+)}/)[1];
+        const dbWorkspace = workspace.workspaceFolders.find(w => w.name === workspaceName);
+        if (dbWorkspace)
+          connInfo.database = path.resolve(dbWorkspace.uri.fsPath, connInfo.database.replace(/\$\{workspaceFolder:(.+)}/g, './'));
+      }
+      return connInfo;
+    },
     driverAliases: DRIVER_ALIASES,
   }
 }

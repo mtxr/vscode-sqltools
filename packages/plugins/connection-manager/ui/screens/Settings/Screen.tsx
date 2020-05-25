@@ -147,12 +147,11 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
   }
 
   onTestConnection = () => {
-    // @TODO
-    // this.setState({ loading: true }, () => {
-    //   sendMessage('testConnection', {
-    //     connInfo: this.state.connectionSettings,
-    //   });
-    // });
+    this.setState({ loading: true }, () => {
+      sendMessage(UIAction.REQUEST_TEST_CONNECTION, {
+        connInfo: this.state.formData,
+      });
+    });
   }
 
   goTo = (step: Step) => this.setState({ step });
@@ -169,7 +168,9 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       action,
       schema,
       uiSchema,
-      formData
+      formData,
+      externalMessage,
+      externalMessageType,
     } = this.state;
     return (
       <>
@@ -195,6 +196,10 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
               driver={driver}
               onChange={this.onChangeFormData}
               formData={formData}
+              testResults={{
+                externalMessage,
+                externalMessageType
+              }}
             />
           )}
           {step === Step.CONNECTION_CREATED && (

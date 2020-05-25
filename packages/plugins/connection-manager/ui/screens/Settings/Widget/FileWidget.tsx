@@ -3,13 +3,11 @@ import { WidgetProps } from '@rjsf/core';
 
 interface State {
   value: string;
-  name: string;
 }
 
 class FileWidget extends Component<WidgetProps, State> {
   state = {
     value: '',
-    name: '',
   }
   constructor(props: WidgetProps) {
     super(props);
@@ -19,24 +17,30 @@ class FileWidget extends Component<WidgetProps, State> {
 
   onChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const value = event.target.files && event.target.files.length > 0 ? event.target.files[0]['path'] : undefined;
-    const name = event.target.files && event.target.files.length > 0 ? event.target.files[0].name : undefined;
-    this.setState({
-      value,
-      name,
-    }, () => {
-      this.props.onChange(this.state.value);
-    });
-
+    this.setState({ value }, this.callOnChange);
   };
+
+  onChangeInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const value = event.target.value;
+    this.setState({ value }, this.callOnChange);
+  }
+
+  callOnChange = () => this.props.onChange(this.state.value);
+
+  componentDidUpdate(prevProps: WidgetProps) {
+    if (prevProps.value !== this.props.value) {
+      this.setState({ value: this.props.value }, this.callOnChange);
+    }
+  }
 
   inputRef = null;
 
   render() {
     const { id, readonly, disabled, options } = this.props;
-    const { name, value } = this.state;
+    const { value } = this.state;
     return (
       <span title={value} className="file-field">
-        <input type='text' value={name || ''} readOnly disabled />
+        <input type='text' value={value || ''} disabled={readonly || disabled} onChange={this.onChangeInput}/>
         <button type='button' disabled={readonly || disabled}>
           <input
             ref={ref => (this.inputRef = ref)}

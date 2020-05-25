@@ -12,6 +12,10 @@
         flex-grow: 0;
         min-width: 200px;
       }
+      > span {
+        flex-grow: 1;
+        min-width: 400px;
+      }
       label {
         font-weight: 500;
         flex-grow: 0;

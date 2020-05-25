@@ -452,7 +452,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_getConnections = async ({ connectedOnly, connId, sort }: (typeof GetConnectionsRequest)['_']['0'] = {}) => {
-    return this.client.sendRequest(GetConnectionsRequest, { connectedOnly, connId, sort });
+    try {
+      return this.client.sendRequest(GetConnectionsRequest, { connectedOnly, connId, sort });
+    } catch (error) {
+      console.log(error);
+    }
   }
   private async _pickConnection(connectedOnly = false): Promise<IConnection> {
     const connections: IConnection[] = await this.ext_getConnections({ connectedOnly });

@@ -26,12 +26,13 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     return sqltoolsRequire('sqlite3') as SQLiteLib.sqlite3;
   }
 
-  createFileIfNotExists = () => {
+  createDirIfNotExists = async () => {
     if (this.credentials.database.toLowerCase() === ':memory:') return;
 
-    const baseDir = dirname(this.credentials.database);
+    const baseDir = dirname(await this.getDatabase());
     mkdir.sync(baseDir);
   }
+  private getDatabase = () => this.toAbsolutePath(this.credentials.database);
 
   public async open() {
     if (this.connection) {
@@ -39,9 +40,9 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     }
 
     this.needToInstallDependencies();
-    this.createFileIfNotExists();
-    const db = await new Promise<SQLiteLib.Database>((resolve, reject) => {
-      const instance = new (this.lib).Database(this.credentials.database, (err) => {
+    await this.createDirIfNotExists();
+    const db = await new Promise<SQLiteLib.Database>(async (resolve, reject) => {
+      const instance = new (this.lib).Database(await this.getDatabase(), (err) => {
         if (err) return reject(err);
         return resolve(instance);
       });

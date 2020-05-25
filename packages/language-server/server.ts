@@ -64,6 +64,12 @@ class SQLToolsLanguageServer implements ILanguageServer {
           documentFormattingProvider: true,
           documentRangeFormattingProvider: true,
           textDocumentSync: TextDocumentSyncKind.Incremental,
+          workspace: {
+            workspaceFolders: {
+              supported: true,
+              changeNotifications: true
+            },
+          }
         },
       }
     );

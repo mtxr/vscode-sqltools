@@ -5,18 +5,19 @@ import ConfigRO from '@sqltools/util/config-manager';
 import telemetry from '@sqltools/util/telemetry';
 import generateId from '@sqltools/util/internal-id';
 import LSContext from './context';
+import { IConnection as LSIconnection } from 'vscode-languageserver';
 
 export default class Connection {
   private connected: boolean = false;
   private conn: IConnectionDriver;
-  constructor(private credentials: IConnection) {
+  constructor(private credentials: IConnection, getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']) {
     if (!LSContext.drivers.has(credentials.driver)) {
       throw new Error(`Driver ${credentials.driver} is not installed`);
     }
 
     const DriverClass = LSContext.drivers.get(credentials.driver);
 
-    this.conn = new DriverClass(this.credentials);
+    this.conn = new DriverClass(this.credentials, getWorkspaceFolders);
   }
 
   private decorateException = (e: Error) => {
@@ -138,8 +139,8 @@ export default class Connection {
     };
   }
 
-  public static async testConnection(credentials: IConnection) {
-    const testConn = new Connection(credentials);
+  public static async testConnection(credentials: IConnection, getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']) {
+    const testConn = new Connection(credentials, getWorkspaceFolders);
     await testConn.connect();
     await testConn.close();
     return true;

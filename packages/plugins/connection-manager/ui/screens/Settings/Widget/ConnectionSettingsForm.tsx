@@ -8,6 +8,7 @@ import { IConnection } from '@sqltools/types';
 import Syntax from '../../../components/Syntax';
 import FileWidget from './FileWidget';
 import { UIAction } from '../../../../actions';
+import Message from '../../../components/Message';
 
 const ConnectionSettingsForm = ({
   onSubmit,
@@ -19,6 +20,10 @@ const ConnectionSettingsForm = ({
   uiSchema = {},
   driver,
   action,
+  testResults: {
+    externalMessage,
+    externalMessageType
+  } = {},
 }: {
   onSubmit: FormProps<any>['onSubmit'];
   onChange: FormProps<any>['onChange'];
@@ -30,6 +35,10 @@ const ConnectionSettingsForm = ({
   driver: SettingsScreenState['driver'];
   action: SettingsScreenState['action'];
   installedDrivers: SettingsScreenState['installedDrivers'];
+  testResults?: {
+    externalMessage?: string;
+    externalMessageType?: SettingsScreenState['externalMessageType'];
+  };
 }) => {
   return (
     <>
@@ -45,6 +54,7 @@ const ConnectionSettingsForm = ({
         widgets={widgets}
         // liveValidate
       >
+        {externalMessage && <div><Message type={externalMessageType}>{externalMessage}</Message></div>}
         <ConnectionSettingsForm.Footer
           action={action}
           testConnection={testConnection}

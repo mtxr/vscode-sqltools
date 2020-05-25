@@ -44,8 +44,8 @@ export function getSessionBasename(connName: string) {
 export function getConnectionDescription(c: IConnection): string | null {
   if (!c) return null;
 
-  if (/workspaceFolder:/.test(c.database)) {
-    return c.database.replace(/\$\{workspaceFolder:(.+)}/g, '$1').replace(/\$\{workspaceFolder}/g, '.');
+  if (/workspaceFolder:/.test(c.database) || /^\.\//.test(c.database)) {
+    return c.database;
   }
 
   if (c.connectString) {

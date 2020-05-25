@@ -227,7 +227,7 @@ export interface IQueryOptions {
   [k: string]: any;
 }
 export interface IConnectionDriverConstructor {
-  new (credentials: IConnection<any>): IConnectionDriver;
+  new (credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
 }
 export interface IConnectionDriver {
   connection: any;
@@ -816,3 +816,5 @@ export interface ILanguageServer {
 export interface ILanguageServerPlugin<T = ILanguageServer> {
   register: (server: T) => void;
 }
+
+export { LSIConnection };
