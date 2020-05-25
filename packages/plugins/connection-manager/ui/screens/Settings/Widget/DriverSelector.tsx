@@ -61,7 +61,7 @@ const DriverSelector = ({
           <Message>
             Couldn't find any drivers installed yet.
             <p>
-              <a href='https://marketplace.visualstudio.com/search?term=tag%3Asqltools-driver&target=VSCode'>
+              <a href={`command:workbench.extensions.search?${encodeURIComponent('"@tag:sqltools-driver"')}`}>
                 Search VSCode marketplace
               </a>
             </p>
@@ -74,6 +74,13 @@ const DriverSelector = ({
           </p>
         </div>
       </Grid>}
+      {!loading && drivers.length > 0 && <div>
+        <p>
+          <a href={`command:workbench.extensions.search?${encodeURIComponent('"@tag:sqltools-driver"')}`}>
+            Get more drivers
+          </a>
+        </p>
+      </div>}
     </Container>
   </>
 );
