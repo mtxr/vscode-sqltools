@@ -1,9 +1,10 @@
 # gatsby files
 .cache/
-public/
 .docz/
 
 # dependencies
 node_modules
 
-!public/favicon.png
+!public/*.png
+!public/*.js
+!public/*.css

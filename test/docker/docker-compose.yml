@@ -29,3 +29,7 @@ services:
       extends:
         file: ./cql/docker-compose.yml
         service: db_scylla
+    cql_cassandra_legacy:
+      extends:
+        file: ./cql/docker-compose.yml
+        service: db_cassandra_legacy

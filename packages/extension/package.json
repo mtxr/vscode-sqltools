@@ -2,7 +2,7 @@
     "name": "@sqltools/extension",
     "displayName": "SQLTools - Database tools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.21.6",
+    "version": "0.21.7",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -61,27 +61,27 @@
     "badges": [
         {
             "description": "Docs",
-            "url": "https://img.shields.io/badge/docs-here-blueviolet?style=flat-square",
+            "url": "https://img.shields.io/badge/docs-here-blueviolet?style=for-the-badge",
             "href": "https://vscode-sqltools.mteixeira.dev"
         },
         {
+            "description": "VSCode.pro",
+            "url": "https://img.shields.io/badge/Supported%20by-VSCode%20Power%20User%20Course%20%E2%86%92-gray.svg?colorA=655BE1&colorB=4F44D6&style=for-the-badge",
+            "href": "https://a.paddle.com/v2/click/16413/111711?link=1227"
+        },
+        {
             "description": "Patreon Support",
-            "url": "https://img.shields.io/badge/patreon-support-blue.svg?logo=patreon?style=flat-square",
+            "url": "https://img.shields.io/badge/patreon-support-blue.svg?logo=patreon?style=for-the-badge",
             "href": "https://www.patreon.com/mteixeira"
         },
         {
             "description": "PayPal Donate",
-            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?logo=paypal?style=flat-square",
+            "url": "https://img.shields.io/badge/paypal-donate-blue.svg?logo=paypal?style=for-the-badge",
             "href": "https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8"
         },
         {
-            "description": "Gitter",
-            "url": "https://img.shields.io/gitter/room/mtxr/vscode-sqltools.svg?style=flat-square",
-            "href": "https://gitter.im/vscode-sqltools"
-        },
-        {
             "description": "LICENSE",
-            "url": "https://img.shields.io/github/license/mtxr/vscode-sqltools?style=flat-square",
+            "url": "https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge",
             "href": "https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md"
         }
     ],
