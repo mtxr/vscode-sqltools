@@ -38,15 +38,15 @@
   "main": "./out/extension.js",
   "devDependencies": {
     "@babel/preset-env": "^7.5.5",
-    "@mysql/xdevapi": "^8.0.15",
+    "@mysql/xdevapi": "^8.0.20",
     "@sqltools/base-driver": "latest",
     "@types/lodash": "^4.14.123",
-    "@types/mysql": "^2.15.5",
+    "@types/mysql": "^2.15.12",
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",
     "compare-versions": "3.6.0",
     "lodash": "^4.17.13",
-    "mysql": "^2.16.0",
+    "mysql": "^2.18.1",
     "typescript": "^3.7.3"
   },
   "build": [

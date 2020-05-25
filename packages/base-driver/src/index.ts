@@ -2,7 +2,6 @@ import {
   IConnectionDriver,
   IBaseQueries,
   IConnection,
-  IDatabaseFilter,
   IExpectedResult,
   NodeDependency,
   ContextValue,
@@ -96,16 +95,6 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       });
     }
     return false
-  }
-
-  public getBaseQueryFilters() {
-    const databaseFilter: IDatabaseFilter = this.credentials.databaseFilter || <IDatabaseFilter>{};
-    databaseFilter.show = databaseFilter.show || (!databaseFilter.hide ? [this.credentials.database] : []);
-    databaseFilter.hide = databaseFilter.hide || [];
-
-    return {
-      databaseFilter
-    };
   }
 
   public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {

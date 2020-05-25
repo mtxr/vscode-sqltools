@@ -2,7 +2,8 @@ import MySQLXLib from '@mysql/xdevapi';
 import { IConnectionDriver, IConnection, NSDatabase } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
 import AbstractDriver from '@sqltools/base-driver';
-import Queries from './queries';
+import * as Queries from './queries';
+import generateId from '@sqltools/util/internal-id';
 
 export default class MySQLX extends AbstractDriver<any, any> implements IConnectionDriver {
   queries = Queries;
@@ -47,11 +48,12 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
     this.connection = null;
   }
 
-  private async runSingleQuery(query: string, session): Promise<NSDatabase.IResult> {
+  private async runSingleQuery(query: string, session: any, opt: any = {}): Promise<NSDatabase.IResult> {
     const results: any[] = [];
     const messages: string[] = [];
     const cols: string[] = [];
     const props = {};
+    const { requestId } = opt;
 
     function toMappedRow(row = []) {
       const mapped = {};
@@ -77,6 +79,8 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
     });
 
     return {
+      requestId,
+      resultId: generateId(),
       connId: this.getId(),
       cols,
       messages,
@@ -85,12 +89,12 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
     }
   }
 
-  public async query(query: string): Promise<NSDatabase.IResult[]> {
+  public query: (typeof AbstractDriver)['prototype']['query'] = async (query, opt = {}) => {
     const session = await this.open().then(client => client.getSession());
-    const queries = queryParse(query);
+    const queries = queryParse(query.toString());
     const results = [];
     for(let q of queries) {
-      const res = await this.runSingleQuery(q, session);
+      const res = await this.runSingleQuery(q, session, opt);
       res && results.push(res);
     }
     await session.close();

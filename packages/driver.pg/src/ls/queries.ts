@@ -20,8 +20,7 @@ SELECT
   C.COLUMN_DEFAULT AS "defaultValue",
   C.IS_NULLABLE AS "isNullable",
   (CASE WHEN LOWER(TC.constraint_type) = 'primary key' THEN TRUE ELSE FALSE END) as "isPk",
-  (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk",
-  TC.constraint_type AS keytype
+  (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk"
 FROM
   INFORMATION_SCHEMA.COLUMNS C
 LEFT JOIN information_schema.key_column_usage KC ON KC.table_name = C.table_name
@@ -127,8 +126,7 @@ SELECT
   C.COLUMN_DEFAULT AS defaultValue,
   C.IS_NULLABLE AS isNullable,
   (CASE WHEN LOWER(TC.constraint_type) = 'primary key' THEN TRUE ELSE FALSE END) as "isPk",
-  (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk",
-  TC.constraint_type AS keytype
+  (CASE WHEN LOWER(TC.constraint_type) = 'foreign key' THEN TRUE ELSE FALSE END) as "isFk"
 FROM
   INFORMATION_SCHEMA.COLUMNS C
 LEFT JOIN information_schema.key_column_usage KC ON KC.table_name = C.table_name

@@ -74,22 +74,24 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     const db = await this.open();
     const { requestId } = opt;
     const queries = queryParse(query.toString()).filter(Boolean);
-    return Promise.all(queries.map(async query => {
-      const results: any[][] = (await this.runSingleQuery(db, query)) || [];
+    let resultsAgg: NSDatabase.IResult[] = [];
+    for (let q of queries) {
+      const results: any[][] = (await this.runSingleQuery(db, q)) || [];
       const messages = [];
-      if (results.length === 0 && query.toLowerCase() !== 'select') {
+      if (results.length === 0 && q.toLowerCase() !== 'select') {
         messages.push(`${results.length} rows were affected.`);
       }
-      return <NSDatabase.IResult>{
+      resultsAgg.push(<NSDatabase.IResult>{
         requestId,
         resultId: generateId(),
         connId: this.getId(),
         cols: results && results.length ? Object.keys(results[0]) : [],
         messages,
-        query,
+        query: q,
         results,
-      };
-    }));
+      });
+    }
+    return resultsAgg;
   }
 
   public async testConnection() {

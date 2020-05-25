@@ -44,7 +44,24 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
   api.registerPlugin(plugin);
   return {
     driverName,
-    parseBeforeSaveConnection: ({ connInfo }) => connInfo,
+    parseBeforeSaveConnection: ({ connInfo }) => {
+
+      ['connectionMethod', 'id'].forEach(p => delete connInfo[p]);
+
+      return connInfo;
+    },
+    parseBeforeEditConnection: ({ connInfo }) => {
+      const formData = {
+        ...connInfo,
+        connectionMethod: 'Server and Port',
+      };
+      if (connInfo.socketPath) {
+        formData.connectionMethod = 'Socket File';
+      } else if (connInfo.connectString) {
+        formData.connectionMethod = 'Connection String';
+      }
+      return formData;
+    },
     driverAliases: DRIVER_ALIASES,
   }
 }

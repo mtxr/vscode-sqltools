@@ -1074,7 +1074,7 @@
     prop-types "^15.7.2"
     react-is "^16.8.0"
 
-"@mysql/xdevapi@^8.0.15":
+"@mysql/xdevapi@^8.0.20":
   version "8.0.20"
   resolved "https://registry.yarnpkg.com/@mysql/xdevapi/-/xdevapi-8.0.20.tgz#f538f2d176b188e7ff5fd0f3af268d32854304b1"
   integrity sha512-7XIMfrl4S76NV2vkIbiIvdHR75po+LgqokscIdH1Te1bhLFjEIcHnpCiDUXWSK7z1HiJndNnZovg+s5qEs5eNQ==
@@ -1326,7 +1326,7 @@
     "@types/node" "*"
     "@types/tedious" "*"
 
-"@types/mysql@^2.15.5":
+"@types/mysql@^2.15.12":
   version "2.15.12"
   resolved "https://registry.yarnpkg.com/@types/mysql/-/mysql-2.15.12.tgz#93c18b7941286a4dd850b5838eea486c570ec498"
   integrity sha512-LZAiEBtuDhvS4nb6FcRX9oVYYds/JIuE3yjidu1cmMI/OvN10SP3OuszRqL1LDF3AJKw0gpEJ4wrkZuEynxMMw==
@@ -3869,7 +3869,7 @@ mssql@^5.0.5:
     generic-pool "^3.7.1"
     tedious "^4.2.0"
 
-mysql@^2.16.0:
+mysql@^2.18.1:
   version "2.18.1"
   resolved "https://registry.yarnpkg.com/mysql/-/mysql-2.18.1.tgz#2254143855c5a8c73825e4522baf2ea021766717"
   integrity sha512-Bca+gk2YWmqp2Uf6k5NFEurwY/0td0cpebAucFpY/3jhrwrVGuxU2uQFCHjU19SJfje0yQvi+rVWdq78hR5lig==

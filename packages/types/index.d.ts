@@ -191,13 +191,6 @@ export interface IConnection<DriverOptions = any> {
     connected?: string;
     disconnected?: string;
   };
-  /**
-   * Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all
-   *
-   * @type {IDatabaseFilter}
-   * @memberof IConnection
-   */
-   databaseFilter?: IDatabaseFilter;
 
 
 
@@ -214,11 +207,6 @@ export interface IConnection<DriverOptions = any> {
    * @memberof IConnection
    */
   isActive: boolean;
-}
-
-export interface IDatabaseFilter {
-  show: string[];
-  hide: string[];
 }
 
 export interface IQueryOptions {

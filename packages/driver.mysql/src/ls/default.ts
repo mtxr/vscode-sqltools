@@ -1,10 +1,11 @@
 import MySQLLib from 'mysql';
 import AbstractDriver from '@sqltools/base-driver';
-import Queries from './queries';
+import * as Queries from './queries';
 import fs from 'fs';
 import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import {countBy} from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
+import generateId from '@sqltools/util/internal-id';
 
 export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolConfig> implements IConnectionDriver {
   queries = Queries;
@@ -63,12 +64,13 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     });
   }
 
-  public query(query: string): Promise<NSDatabase.IResult[]> {
+  public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
+    const { requestId } = opt;
     return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
       return new Promise((resolve, reject) => {
-        conn.query({sql: query, nestTables: true}, (error, results, fields) => {
+        conn.query({ sql: query.toString(), nestTables: true }, (error, results, fields) => {
           if (error) return reject(error);
-          const queries = queryParse(query);
+          const queries = queryParse(query.toString());
           if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
             results = [results];
           }
@@ -83,6 +85,8 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
             }
             return {
               connId: this.getId(),
+              requestId,
+              resultId: generateId(),
               cols: Array.isArray(fields) ? this.getColumnNames(fields) : [],
               messages,
               query: q,

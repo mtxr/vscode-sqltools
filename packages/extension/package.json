@@ -591,32 +591,6 @@
                                 ],
                                 "description": "Connection Driver"
                             },
-                            "databaseFilter": {
-                                "type": [
-                                    "object",
-                                    "null"
-                                ],
-                                "description": "Allow user to select databases to be shown or not on explorer. Default is to show connected database only. Set to null to show all",
-                                "default": null,
-                                "properties": {
-                                    "show": {
-                                        "type": "array",
-                                        "default": [],
-                                        "description": "Name database you want to show",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    },
-                                    "hide": {
-                                        "type": "array",
-                                        "default": [],
-                                        "description": "Name database you don't want to show",
-                                        "items": {
-                                            "type": "string"
-                                        }
-                                    }
-                                }
-                            },
                             "dialect": {
                                 "type": "string",
                                 "description": "Connection Driver",

@@ -52,7 +52,8 @@ const ConnectionSettingsForm = ({
         onChange={onChange}
         formData={formData}
         widgets={widgets}
-        // liveValidate
+        showErrorList={false}
+        noHtml5Validate={true}
       >
         {externalMessage && <div><Message type={externalMessageType}>{externalMessage}</Message></div>}
         <ConnectionSettingsForm.Footer
