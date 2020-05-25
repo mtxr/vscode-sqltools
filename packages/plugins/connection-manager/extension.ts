@@ -656,6 +656,7 @@ export default class ConnectionManagerPlugin implements SQLTools.ExtensionPlugin
         this.changeTextEditorHandler(window.activeTextEditor);
       }, 5000);
     }
+    this.explorer.updateTreeRoot();
   }
 
   constructor(extension: SQLTools.ExtensionInterface) {

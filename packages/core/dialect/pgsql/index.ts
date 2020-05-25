@@ -1,9 +1,10 @@
-import { Pool, PoolConfig, types } from 'pg';
+import { Pool, PoolConfig, PoolClient, types, FieldDef } from 'pg';
 import Queries from './queries';
 import { ConnectionDialect, ConnectionInterface } from '@sqltools/core/interface';
 import GenericDialect from '@sqltools/core/dialect/generic';
 import * as Utils from '@sqltools/core/utils';
 import { DatabaseInterface } from '@sqltools/core/plugin-api';
+import {zipObject} from 'lodash';
 
 const rawValue = (v: string) => v;
 
@@ -59,11 +60,12 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
 
   public query(query: string): Promise<DatabaseInterface.QueryResults[]> {
     const messages = [];
+    let cli : PoolClient;
     return this.open()
       .then(async (pool) => {
-        const cli = await pool.connect();
+        cli = await pool.connect();
         cli.on('notice', notice => messages.push(`${notice.name.toUpperCase()}: ${notice.message}`));
-        const results = await cli.query(query);
+        const results = await cli.query({text: query, rowMode: 'array'});
         cli.release();
         return results;
       })
@@ -75,16 +77,19 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
 
         return results.map((r, i): DatabaseInterface.QueryResults => {
           messages.push(`${r.command} successfully executed.${r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''}`);
+          const cols = this.getColumnNames(r.fields || []);
           return {
             connId: this.getId(),
-            cols: (r.fields || []).map(({ name }) => name),
+            cols,
             messages,
             query: queries[i],
-            results: r.rows,
+            results: this.mapRows(r.rows, cols),
           };
         });
       })
-      .catch(err => ([{
+      .catch(err => {
+        cli && cli.release();
+        return [{
           connId: this.getId(),
           cols: [],
           messages: messages.concat([
@@ -96,7 +101,19 @@ export default class PostgreSQL extends GenericDialect<Pool> implements Connecti
           error: true,
           query,
           results: [],
-      }]))
+        }];
+      });
+  }
+
+  private getColumnNames(fields: FieldDef[]): string[] {
+    return fields.reduce((names, {name}) => {
+      const count = names.filter((n) => n === name).length;
+      return names.concat(count > 0 ? `${name} (${count})` : name);
+    }, []);
+  }
+
+  private mapRows(rows: any[], columns: string[]): any[] {
+    return rows.map((r) => zipObject(columns, r));
   }
 
   public getTables(): Promise<DatabaseInterface.Table[]> {
