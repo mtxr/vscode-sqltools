@@ -4,7 +4,7 @@ import queries from './queries';
 import sqltoolsRequire from '@sqltools/base-driver/dist/lib/require';
 import * as mkdir from 'make-dir';
 import { dirname } from 'path';
-import { IConnectionDriver, NSDatabase, ContextValue } from '@sqltools/types';
+import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
@@ -96,33 +96,32 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     await this.query('SELECT 1', {});
   }
 
-  public async getColumns(): Promise<NSDatabase.IColumn[]> {
-    const allTables = await this.getTables();
-    const columns: NSDatabase.IColumn[] = [];
+  public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch (item.type) {
+      case ContextValue.CONNECTION:
+      case ContextValue.CONNECTED_CONNECTION:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TABLE },
+          { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
+        ];
+      case ContextValue.TABLE:
+      case ContextValue.VIEW:
+        return this.queryResults(this.queries.fetchColumns(item as NSDatabase.ITable));
+      case ContextValue.RESOURCE_GROUP:
+        return this.getChildrenForGroup({ item, parent });
+    }
+    return [];
+  }
 
-    await Promise.all(allTables.map(async t => {
-      const [[{ results: tableColumns }], [{ results: fks }]] = await Promise.all([
-        this.query(replacer(this.queries.fetchColumns, { table: t.name })),
-        this.query(replacer(this.queries.listFks as string, { table: t.name })),
-      ]);
-
-      const fksMap = fks.reduce((agg, fk) => ({ ...agg, [fk.from]: true }), {});
-
-      tableColumns.forEach(obj => columns.push({
-          columnName: obj.name,
-          defaultValue: obj.dftl_value || undefined,
-          isNullable: obj.notnull ? obj.notnull.toString() === '1' : null,
-          tableCatalog: obj.tablecatalog,
-          tableDatabase: this.credentials.database,
-          tableName: t.name,
-          type: obj.type,
-          size: null,
-          isPk: Boolean(obj.pk),
-          isFk: !!fksMap[obj.name],
-          tree: obj.tree,
-      }));
-      return Promise.resolve();
-    }));
+  private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch (item.childType) {
+      case ContextValue.TABLE:
+        return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema));
+      case ContextValue.VIEW:
+        return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema));
+    }
+    return [];
+  }
 
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {

@@ -8,21 +8,19 @@ const describeTable: IBaseQueries['describeTable'] = queryFactory`
 `;
 
 const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory`
-SELECT
-  C.name AS label,
+SELECT C.name AS label,
   C.*,
   C.type AS dataType,
   C."notnull" AS isNullable,
   C.pk AS isPk,
-  '${ContextValue.COLUMN}' as type,
-FROM
-  pragma_table_info('${p => p.label}') AS C
-ORDER BY
-  cid ASC
+  '${ContextValue.COLUMN}' as type
+FROM pragma_table_info('${p => p.label}') AS C
+ORDER BY cid ASC
 `;
 
 const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
-SELECT * FROM ${p => (p.table.label || p.table)}
+SELECT *
+FROM ${p => (p.table.label || p.table)}
 LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
@@ -33,13 +31,11 @@ FROM ${p => (p.table.label || p.table)};
 `;
 
 const fetchTablesAndViews = (type: ContextValue, tableType = 'table'): IBaseQueries['fetchTables'] => queryFactory`
-SELECT
-  name AS label,
+SELECT name AS label,
   '${type}' AS type
-FROM
-  sqlite_master
+FROM sqlite_master
 WHERE LOWER(type) LIKE '${tableType.toLowerCase()}'
-  AND tableName NOT LIKE 'sqlite_%'
+  AND name NOT LIKE 'sqlite_%'
 ORDER BY name
 `;
 
@@ -47,25 +43,21 @@ const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValu
 const fetchViews: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.VIEW , 'view');
 
 const searchTables: IBaseQueries['searchTables'] = queryFactory`
-SELECT
-  name AS label,
+SELECT name AS label,
   type
-FROM
-  sqlite_master
+FROM sqlite_master
 ${p => p.search ? `WHERE LOWER(name) LIKE '%${p.search.toLowerCase()}%'` : ''}
 ORDER BY name
 `;
 const searchColumns: IBaseQueries['searchColumns'] = queryFactory`
-SELECT
-  C.name AS label,
+SELECT C.name AS label,
   T.name AS "table",
   C.type AS dataType,
   C."notnull" AS isNullable,
   C.pk AS isPk,
   '${ContextValue.COLUMN}' as type
-FROM
-  sqlite_master AS T
-  LEFT OUTER JOIN pragma_table_info((T.name)) AS C ON 1 = 1
+FROM sqlite_master AS T
+LEFT OUTER JOIN pragma_table_info((T.name)) AS C ON 1 = 1
 WHERE 1 = 1
 ${p => p.tables.filter(t => !!t.label).length
   ? `AND LOWER(T.name) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
@@ -78,8 +70,7 @@ ${p => p.search
   )`
   : ''
 }
-ORDER BY
-  C.name ASC,
+ORDER BY C.name ASC,
   C.cid ASC
 LIMIT ${p => p.limit || 100}
 `;
