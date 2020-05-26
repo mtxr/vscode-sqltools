@@ -1,0 +1,77 @@
+{
+  "name": "generator-sqltools-driver",
+  "version": "0.0.0",
+  "description": "SQLTools driver generator",
+  "homepage": "https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers",
+  "author": {
+    "name": "Matheus Teixeira",
+    "email": "github@mteixeira.dev",
+    "url": "https://mteixeira.dev"
+  },
+  "files": [
+    "generators"
+  ],
+  "main": "generators/index.js",
+  "keywords": [
+    "sqltools",
+    "sqltools-driver",
+    "yeoman-generator"
+  ],
+  "devDependencies": {
+    "yeoman-test": "^1.7.0",
+    "yeoman-assert": "^3.1.0",
+    "jest": "^24.8.0"
+  },
+  "engines": {
+    "npm": ">= 4.0.0"
+  },
+  "dependencies": {
+    "yeoman-generator": "^2.0.1",
+    "chalk": "^2.1.0",
+    "yosay": "^2.0.1"
+  },
+  "jest": {
+    "testEnvironment": "node"
+  },
+  "lint-staged": {
+    "*.js": [
+      "eslint --fix",
+      "git add"
+    ],
+    "*.json": [
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
+  },
+  "eslintConfig": {
+    "extends": [
+      "xo",
+      "prettier"
+    ],
+    "env": {
+      "jest": true,
+      "node": true
+    },
+    "rules": {
+      "prettier/prettier": "error"
+    },
+    "plugins": [
+      "prettier"
+    ]
+  },
+  "scripts": {
+    "pretest": "eslint .",
+    "test": "jest"
+  },
+  "repository": {
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "type": "git",
+    "directory": "packages/generator-sqltools-driver"
+  },
+  "license": "MIT"
+}
