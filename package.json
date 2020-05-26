@@ -17,7 +17,6 @@
     "packages/*"
   ],
   "scripts": {
-    "dev:add-driver": "node ./tools/add-driver.js",
     "build": "yarn --cwd ./build-tools run build",
     "docs:build": "yarn --cwd ./docs run docz:build",
     "docs:dev": "yarn --cwd ./docs run docz:dev",

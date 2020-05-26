@@ -6,21 +6,19 @@ route: /contributing/support-new-drivers
 
 # Support new Drivers
 
-> This page still under construction
+Starting on v0.22, drivers are VSCode extensions as well. They plug into SQLTools to become available for usage
 
-If you plan to add a new driver to the project, we have a tool that can help you.
+To create a new driver, first, install [Yeoman](http://yeoman.io) and generator-sqltools-driver using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
 
-Steps:
-- Checkout the project
-  - `git clone https://github.com/mtxr/vscode-sqltools.git`
-- Install all dependencies
-  - `yarn`
-- Use add drive tool to create initial files for you
-  - `yarn run dev:add-driver` or `yarn run dev:add-driver --name "your driver name"`
-  - This will create a lot of files inside the project. Change them as you need.
-- Don't forget to add all existing features (if possible) to this new driver.
-- After changing the files, test it and submit a PR to be reviewed.
+```bash
+npm install -g yo
+npm install -g generator-sqltools-driver
+```
 
-If you need help, to hesitate to submit an issue with your doubts. I'll be glad to help!
+Then generate your new project:
 
-You can see the changes required to add a new driver comparing branches `add-driver-example` and `master`. See the [comparison of master and add-driver-example](https://github.com/mtxr/vscode-sqltools/compare/master...add-driver-example).
+```bash
+yo sqltools-driver
+```
+
+This page still underconstruction, so please check the code comments and open issues if you have problems during your development.
