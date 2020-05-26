@@ -13,6 +13,7 @@
     { "path": "./packages/types" },
     { "path": "./packages/util" },
     { "path": "./packages/vscode"},
+    { "path": "./packages/generator-sqltools-driver", "name": "driver-generator" },
     { "path": "./build-tools" },
     { "path": "./docs" },
     // { "path": ".", "name": "root" }
