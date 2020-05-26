@@ -8,6 +8,7 @@ import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContext
 import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
 import { RegisterPlugin } from './contracts';
 import LSContext from './context';
+import { ExitCalledNotification } from '../extension/api/contracts';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -22,7 +23,35 @@ class SQLToolsLanguageServer implements ILanguageServer {
     this._server.onInitialize(this.onInitialize);
     this._server.onDidChangeConfiguration(this.onDidChangeConfiguration);
     this._docManager.listen(this._server);
+    this.setAutoStart();
     this.onRequest(RegisterPlugin, this.onRegisterPlugin);
+  }
+
+  private setAutoStart() {
+    const nodeExit = process.exit;
+    process.exit = ((code?: number) => {
+      const stack = new Error('stack');
+      this.sendNotification(ExitCalledNotification, [code ? code : 0, stack.stack]);
+      setTimeout(() => nodeExit(code), 500);
+    }) as typeof process.exit;
+    process.on('uncaughtException', (error: any) => {
+      let message: string;
+      if (error) {
+        telemetry.registerException(error, { type: 'uncaughtException' })
+        if (typeof error.stack === 'string') {
+          message = error.stack;
+        } else if (typeof error.message === 'string') {
+          message = error.message;
+        } else if (typeof error === 'string') {
+          message = error;
+        } else {
+          message = (error || '').toString()
+        }
+      }
+      if (message) {
+        telemetry.registerMessage('error', message);
+      }
+    });
   }
 
   private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = ({ path: pluginPath } = { path: '' }) => {

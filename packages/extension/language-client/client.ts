@@ -12,6 +12,7 @@ import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 import uniq from 'lodash/uniq';
 import { ElectronNotSupportedNotification } from '@sqltools/base-driver/dist/lib/notification';
+import { ExitCalledNotification } from '../api/contracts';
 
 const log = logger.extend('lc');
 
@@ -19,6 +20,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   public client: LanguageClient;
   public clientErrorHandler: LanguageClientErrorHandler;
 
+  private avoidRestart = false;
   constructor() {
     this.client = new LanguageClient(
       EXT_CONFIG_NAMESPACE,
@@ -26,7 +28,21 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       this.getServerOptions(),
       this.getClientOptions(),
       );
-    this.clientErrorHandler = this.client.createDefaultErrorHandler();
+    const defaultErrorHandler = this.client.createDefaultErrorHandler();
+
+    this.clientErrorHandler = {
+      error: defaultErrorHandler.error,
+      closed: (): CloseAction => {
+        if (this.avoidRestart) {
+          return CloseAction.DoNotRestart;
+        }
+        return defaultErrorHandler.closed();
+      },
+    };
+
+    this.onNotification(ExitCalledNotification, () => {
+      this.avoidRestart = true;
+    });
 
     this.registerBaseNotifications();
 
