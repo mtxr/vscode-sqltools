@@ -9,7 +9,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   get serializationId() {
     return this.id;
   }
-  public disposeEvent: EventEmitter<never> = new EventEmitter();
+  public disposeEvent: EventEmitter<void> = new EventEmitter();
   public get onDidDispose() {
     return this.disposeEvent.event;
   }

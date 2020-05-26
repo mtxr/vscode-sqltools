@@ -34,6 +34,7 @@ module.exports = function(env = {}) {
     }
     const pkgPath = `${packagesDir}/${pkg}`;
     if (!fs.lstatSync(pkgPath).isDirectory()) return;
+    if (!fs.existsSync(`${pkgPath}/package.json`)) return;
 
     console.log(`Reading package @sqltools/${pkg} config`);
     const pkgJson = require(`${pkgPath}/package.json`);

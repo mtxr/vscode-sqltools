@@ -12,6 +12,10 @@
     "url": "https://github.com/mtxr/vscode-sqltools.git",
     "type": "git"
   },
+  "engines": {
+    "vscode": "^1.42.0",
+    "node": ">=10"
+  },
   "private": true,
   "workspaces": [
     "packages/*"
@@ -30,7 +34,7 @@
     "test:docker": "yarn --cwd ./test run",
     "test:older": "cross-env CODE_VERSION=1.41.0 yarn test",
     "test:watch": "cross-env WATCH=1 yarn run test",
-    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
+    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_EXTENSIONS_PATH=./dist CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
     "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch"
   },
   "devDependencies": {
