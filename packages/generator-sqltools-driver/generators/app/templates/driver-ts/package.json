@@ -1,0 +1,47 @@
+{
+  "name": <%- JSON.stringify(name) %>,
+	"displayName": <%- JSON.stringify(displayName) %>,
+	"description": <%- JSON.stringify(description) %>,
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.42.0"
+  },
+  "publisher": "mtxr",
+  "license": "MIT",
+  "repository": {},
+  "bugs": {},
+  "scripts": {
+		"vscode:prepublish": "npm run compile",
+		"compile": "tsc -p ./",
+		"watch": "tsc -watch -p ./"
+	},
+  "keywords": [
+    <%- JSON.stringify(name) %>,
+    "sqltools-driver"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Formatters",
+    "Other"
+  ],
+  "extensionDependencies": [
+    "mtxr.sqltools"
+  ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onCommand:sqltools.*"
+  ],
+  "main": "./out/extension.js",
+  "dependencies": {
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.5.5",
+    "@sqltools/base-driver": "latest",
+    "@types/vscode": "^1.42.0",
+    "@types/webpack-env": "^1.15.2",
+    "typescript": "^3.7.3"
+  }
+}
