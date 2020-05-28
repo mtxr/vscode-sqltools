@@ -5,8 +5,7 @@ import { DRIVER_ALIASES } from './../constants';
 const MSSQLDriverPlugin: ILanguageServerPlugin = {
   register(server) {
     DRIVER_ALIASES.forEach(({ value }) => {
-      // @TODO
-      server.getContext().drivers.set(value, MSSQL as any);
+      server.getContext().drivers.set(value, MSSQL);
     });
   }
 }

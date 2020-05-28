@@ -86,7 +86,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAMESPACE}-view-connectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
+    this.treeView = window.createTreeView(`${EXT_NAMESPACE}ViewConnectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
     Config.addOnUpdateHook(({ event }) => {
       if (
         event.affectsConfig('flattenGroupsIfOne')
@@ -98,7 +98,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       }
     });
     this.messagesTreeViewProvider = new MessagesProvider();
-    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}-view-consoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: true });
+    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}ViewConsoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: true });
     Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 
@@ -216,12 +216,23 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
 
   addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
     this.items = messages.map(m => {
-      if (typeof m === 'string')
-        return new TreeItem(m, TreeItemCollapsibleState.None);
-      const date = new Date(m.date || undefined);
-      const item = new TreeItem(m.message, TreeItemCollapsibleState.None);
-      item.description = date.toLocaleTimeString();
-      item.tooltip = date.toString();
+      let item: TreeItem;
+      if (typeof m === 'string') {
+        item = new TreeItem(m, TreeItemCollapsibleState.None);
+        item.tooltip = m;
+      } else {
+        item = new TreeItem(m.message, TreeItemCollapsibleState.None);
+        const date = new Date(m.date || undefined);
+        item.description = date.toLocaleTimeString();
+        item.tooltip = date.toString();
+      }
+      (<any>item).detail = 'DETAIL';
+      item.contextValue = 'consoleMessage';
+      item.command = {
+        title: 'Copy message',
+        command: `${EXT_NAMESPACE}.copyText`,
+        arguments: [item.label]
+      };
       return item;
     });
     this._onDidChangeTreeData.fire(null);

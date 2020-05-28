@@ -14,7 +14,7 @@ export const getEditorQueryDetails = (editor: TextEditor): { currentQuery: strin
       range: editor.selection
     };
   }
-  const currentLine = editor.document.getText(new Range(editor.selection.active.line, 0, editor.selection.active.line + 1, 0)).replace(/[\n\r\s]/g, '');
+  const currentLine = editor.document.getText(new Range(Math.max(0, editor.selection.active.line - 4), 0, editor.selection.active.line + 1, 0)).replace(/[\n\r\s]/g, '');
   if (currentLine.length === 0) return {
     currentQuery: '',
     range: editor.selection,

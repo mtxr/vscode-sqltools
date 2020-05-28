@@ -1,4 +1,5 @@
 import { cleanUp, parse, generateInsert } from './index';
+import { ContextValue } from '@sqltools/types/index.js';
 
 describe('query cleanUp', () => {
   it('returns empty string for empty inputs', () => {
@@ -74,10 +75,17 @@ GO`
 
 describe('generateInsert query', () => {
   const generated = generateInsert('tablename', [
-    { type: 'integer', tableName: 'tablename', columnName: 'col1', isNullable: false },
+    {
+      type: ContextValue.COLUMN,
+      table: 'tablename',
+      label: 'col1',
+      isNullable: false,
+      dataType: 'integer',
+      database: 'database',
+      schema: 'schema'
+    },
   ]);
   const expected = `INSERT INTO tablename (col1)
-VALUES
-  (\${1:col1:integer});$0`;
+VALUES (\${1:col1:integer});$0`;
   expect(generated).toBe(expected);
 });

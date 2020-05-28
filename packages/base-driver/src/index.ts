@@ -51,8 +51,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
 
   public async showRecords(table: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }) {
-    const { limit, page = 0} = opt;
-    const params = { limit, table, offset: page * limit };
+    const { limit, page = 0 } = opt;
+    const params = { ...opt, limit, table, offset: page * limit };
     if (typeof this.queries.fetchRecords === 'function' && typeof this.queries.countRecords === 'function') {
       const [ records, totalResult ] = await (Promise.all([
         this.singleQuery(this.queries.fetchRecords(params), opt),

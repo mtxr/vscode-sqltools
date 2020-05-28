@@ -17,6 +17,9 @@ if (process.env.CODE_TESTS_PATH) {
 
 var testsWorkspace = process.env.CODE_TESTS_WORKSPACE || testsFolder;
 var extensionsFolder = process.env.CODE_EXTENSIONS_PATH || process.cwd();
+if (!path.isAbsolute(extensionsFolder)) {
+  extensionsFolder = path.resolve(process.cwd(), process.env.CODE_EXTENSIONS_PATH);
+}
 var locale = process.env.CODE_LOCALE || 'en';
 var userDataDir = process.env.CODE_TESTS_DATA_DIR;
 

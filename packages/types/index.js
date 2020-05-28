@@ -15,6 +15,6 @@ const ContextValue = {
 
 Object.freeze(ContextValue);
 
-export {
+module.exports = {
   ContextValue
-}
+};
