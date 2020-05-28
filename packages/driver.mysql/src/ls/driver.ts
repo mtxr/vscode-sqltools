@@ -2,7 +2,7 @@ import AbstractDriver from '@sqltools/base-driver';
 import * as Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';
-import compareVersions from 'compare-versions';
+// import compareVersions from 'compare-versions';
 import { IConnectionDriver, IConnection, NSDatabase, Arg0, MConnectionExplorer, ContextValue } from '@sqltools/types';
 import generateId from '@sqltools/util/internal-id';
 
@@ -125,22 +125,22 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   //     })
   // }
 
-  mysqlVersion: string = null;
+  // mysqlVersion: string = null;
 
-  private async getVersion() {
-    if (this.mysqlVersion) return Promise.resolve(this.mysqlVersion);
-    this.mysqlVersion = await this.queryResults<any>(`SHOW variables WHERE variable_name = 'version'`).then((res) => res[0].Value);
-    return this.mysqlVersion;
-  }
+  // private async getVersion() {
+  //   if (this.mysqlVersion) return Promise.resolve(this.mysqlVersion);
+  //   this.mysqlVersion = await this.queryResults<any>(`SHOW variables WHERE variable_name = 'version'`).then((res) => res[0].Value);
+  //   return this.mysqlVersion;
+  // }
 
-  private async is55OrNewer() {
-    try {
-      await this.getVersion();
-      return compareVersions.compare(this.mysqlVersion, '5.5.0', '>=');
-    } catch (error) {
-      return true;
-    }
-  }
+  // private async is55OrNewer() {
+  //   try {
+  //     await this.getVersion();
+  //     return compareVersions.compare(this.mysqlVersion, '5.5.0', '>=');
+  //   } catch (error) {
+  //     return true;
+  //   }
+  // }
 
   private completionsCache: { [w: string]: NSDatabase.IStaticCompletion } = null;
   public getStaticCompletions = async () => {

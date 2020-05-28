@@ -14,7 +14,7 @@ const jestConfig = {
 
 async function run(_testRoot, callback) {
   console.log('Wating vscode to load completelly');
-  await new Promise(resolve => setTimeout(resolve, 15000));
+  await new Promise(resolve => setTimeout(resolve, 10000));
   console.log("Let's run this tests!");
   const rootDir = path.resolve(_testRoot, '..');
   (jestConfig.rootDir = rootDir),

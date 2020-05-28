@@ -2,7 +2,7 @@ import fs from 'fs';
 import { NotFoundError } from '@sqltools/util/exception';
 
 export default class SerializableStorage<Item, Key = string | number | Symbol> {
-  public encoding: string = 'utf8';
+  public encoding: BufferEncoding = 'utf8';
   public storagePath: string = null;
   protected defaultSerializable: string = '{}';
   protected items: any = {};
@@ -15,7 +15,7 @@ export default class SerializableStorage<Item, Key = string | number | Symbol> {
 
   public read(): this {
     try {
-      const content = fs.readFileSync(this.storagePath, this.encoding);
+      const content = fs.readFileSync(this.storagePath, { encoding: this.encoding });
       if (content && content.length > 0) {
         this.items = JSON.parse(content);
       } else {

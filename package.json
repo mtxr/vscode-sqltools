@@ -38,7 +38,7 @@
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
-    "cross-env": "^5.2.0",
+    "cross-env": "^7.0.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "jest-environment-node": "^24.5.0",

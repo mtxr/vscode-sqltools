@@ -35,6 +35,7 @@ jobs:
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
       run: |
+        yarn run build
         yarn test:older --no-coverage
         yarn test
 
