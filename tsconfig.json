@@ -14,5 +14,5 @@
     "sourceMap": true,
     "target": "es6"
   },
-  "exclude": ["**/test/**", "**/node_modules/**", "**/__mocks__/**", "**/*.js"]
+  "exclude": ["**/test/**", "**/node_modules/**", "**/__mocks__/**", "**/*.js", "**/packages/drivers/**", "*.json"]
 }
