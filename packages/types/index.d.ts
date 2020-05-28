@@ -298,7 +298,7 @@ export namespace NSDatabase {
     isPk?: boolean;
     isFk?: boolean;
     columnKey?: string;
-    extra?: string;
+    extra?: { [k: string]: any; };
     table: ITable | string;
   }
 

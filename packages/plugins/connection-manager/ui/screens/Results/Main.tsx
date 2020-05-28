@@ -75,7 +75,7 @@ const Screen: React.SFC<Props> = () => {
   const resetRequest = () => dispatch({ type: ACTION.RESET });
   const toggleTab = (value: number) => dispatch({ type: ACTION.TOGGLE_TAB, payload: value });
   const resultsReceived = (changes: Partial<QueryResultsState>) => dispatch({ type: ACTION.RESULTS_RECEIVED, payload: changes });
-  const focusMessages = () => sendMessage(UIAction.CALL, { command: `${process.env.EXT_NAMESPACE}-view-consoleMessages.focus` });
+  const focusMessages = () => sendMessage(UIAction.CALL, { command: `${process.env.EXT_NAMESPACE}ViewConsoleMessages.focus` });
   const exportResults = (choice?: MenuActions.SaveCSVOption | MenuActions.SaveJSONOption | any) => {
     const activeResult = getCurrentResult(stateRef.current);
     if (!activeResult) return;

@@ -35,18 +35,25 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 ## Supported Drivers
 
+**Official Drivers**
+
 |Driver||Main Maintainer(s)|
 |-|-|-|
-|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/awsredshift/default.png)|AWS Redshift|[@mtxr](https://github.com/mtxr)|
+|![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.pg/icons/redshift/default.png)|AWS Redshift|[@mtxr](https://github.com/mtxr)|
+|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.mysql/icons/mariadb/default.png)|MariaDB|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.mssql/icons/default.png)|Microsoft SQL Server|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.mysql/icons/default.png)|MySQL|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.pg/icons/pg/default.png)|PostgreSQL|[@mtxr](https://github.com/mtxr)|
+|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/driver.sqlite/icons/default.png)|SQLite|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+
+**Community Drivers:**
+
+|Driver||Main Maintainer(s)|
+|-|-|-|
 |![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/cassandra/default.png)|Cassandra|[@EpicEric](https://github.com/EpicEric)|
 |![IBM DB2](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/db2/default.png)|IBM DB2|[@snyang](https://github.com/snyang)|
-|![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/mariadb/default.png)|MariaDB|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/mssql/default.png)|Microsoft SQL Server|[@mtxr](https://github.com/mtxr) - ***looking for help***|
-|![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/mysql/default.png)|MySQL|[@mtxr](https://github.com/mtxr) - ***looking for help***|
 |![OracleDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/oracledb/default.png)|OracleDB|[@mickeypearce](https://github.com/mickeypearce)|
-|![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/postgresql/default.png)|PostgreSQL|[@mtxr](https://github.com/mtxr)|
-|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/saphana/default.png)|SAPHana|[ariel-bentu](https://github.com/ariel-bentu)|
-|![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/sqlite/default.png)|SQLite|[@mtxr](https://github.com/mtxr) - ***looking for help***|
+|![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/saphana/default.png)|SAPHana|[@ariel-bentu](https://github.com/ariel-bentu)|
 
 
 Special thanks to this amazing developers that keep the project running!

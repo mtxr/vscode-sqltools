@@ -7,14 +7,17 @@
 	"configurations": [
 		{
 			"name": "Run MSSQL Extension",
-			"type": "extensionHost",
+			"type": "pwa-extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"--extensionDevelopmentPath=${workspaceFolder}"
+        "${workspaceFolder}/../../test/project.code-workspace",
+				"--extensionDevelopmentPath=${workspaceFolder}/../../dist",
+				"--extensionDevelopmentPath=${workspaceFolder}",
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/../../dist/*.js",
+				"${workspaceFolder}/out/**/*.js",
 			],
 			// "preLaunchTask": "${defaultBuildTask}"
 		},

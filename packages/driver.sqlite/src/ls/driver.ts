@@ -79,7 +79,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
       const results: any[][] = (await this.runSingleQuery(db, q)) || [];
       const messages = [];
       if (results.length === 0 && q.toLowerCase() !== 'select') {
-        messages.push(`${results.length} rows were affected.`);
+        messages.push(this.prepareMessage(`${results.length} rows were affected.`));
       }
       resultsAgg.push(<NSDatabase.IResult>{
         requestId,

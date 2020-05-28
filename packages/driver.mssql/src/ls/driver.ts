@@ -1,13 +1,14 @@
 import MSSQLLib, { IResult, Binary } from 'mssql';
-import { replacer } from '@sqltools/util/text';
-import queries from './queries';
+import * as Queries from './queries';
 import AbstractDriver from '@sqltools/base-driver';
 import get from 'lodash/get';
-import { IConnectionDriver, NSDatabase } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, ContextValue, Arg0, MConnectionExplorer } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
+import generateId from '@sqltools/util/internal-id';
+import reservedWordsCompletion from './reserved-words';
 
 export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> implements IConnectionDriver {
-  queries = queries;
+  queries = Queries;
 
   private retryCount = 0;
   public async open(encryptOverride?: boolean) {
@@ -72,11 +73,12 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     this.connection = null;
   }
 
-  public async query(query: string): Promise<NSDatabase.IResult[]> {
+  public query: (typeof AbstractDriver)['prototype']['query'] = async (originalQuery, opt = {}) => {
     const pool = await this.open();
+    const { requestId } = opt;
     const request = pool.request();
     request.multiple = true;
-    query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
+    const query = originalQuery.toString().replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
     const { recordsets = [], rowsAffected, error } = <IResult<any> & { error: any }>(await request.query(query).catch(error => Promise.resolve({ error, recordsets: [], rowsAffected: [] })));
     const queries = queryParse(query, 'mssql');
     return queries.map((q, i): NSDatabase.IResult => {
@@ -91,12 +93,14 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
       })
       const messages = [];
       if (error) {
-        messages.push(error.message || error.toString());
+        messages.push(this.prepareMessage(error.message || error.toString()));
       }
       if (typeof rowsAffected[i] === 'number')
-        messages.push(`${rowsAffected[i]} rows were affected.`);
+        messages.push(this.prepareMessage(`${rowsAffected[i]} rows were affected.`));
 
       return {
+        requestId,
+        resultId: generateId(),
         connId: this.getId(),
         cols: columnNames,
         messages,
@@ -114,63 +118,105 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     })
   }
 
-  public getTables(): Promise<NSDatabase.ITable[]> {
-    return this.query(this.queries.fetchTables)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              name: obj.tableName,
-              isView: !!obj.isView,
-              numberOfColumns: parseInt(obj.numberOfColumns, 10),
-              tableCatalog: obj.tableCatalog,
-              tableDatabase: obj.dbName,
-              tableSchema: obj.tableSchema,
-              tree: obj.tree,
-            } as NSDatabase.ITable;
-          });
-      });
+  public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch (item.type) {
+      case ContextValue.CONNECTION:
+      case ContextValue.CONNECTED_CONNECTION:
+        return this.queryResults(this.queries.fetchDatabases());
+      case ContextValue.TABLE:
+      case ContextValue.VIEW:
+        return this.getColumns(item as NSDatabase.ITable);
+      case ContextValue.DATABASE:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.SCHEMA },
+        ];
+      case ContextValue.RESOURCE_GROUP:
+        return this.getChildrenForGroup({ item, parent });
+      case ContextValue.SCHEMA:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TABLE },
+          { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
+          // { label: 'Functions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.FUNCTION },
+        ];
+    }
+    return [];
   }
 
-  public getColumns(): Promise<NSDatabase.IColumn[]> {
-    return this.query(this.queries.fetchColumns)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return <NSDatabase.IColumn>{
-              ...obj,
-              isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
-              size: obj.size !== null ? parseInt(obj.size, 10) : null,
-              tableDatabase: obj.dbName,
-              isPk: (obj.constraintType || '').toLowerCase() === 'primary key',
-              isFk: (obj.constraintType || '').toLowerCase() === 'foreign key',
-              tree: obj.tree,
-            };
-          });
-      });
+  public async showRecords(table, opt) {
+    const col = await this.searchItems(ContextValue.COLUMN, '', { tables: [table], limit: 1 });
+    opt.orderCol = col[0].label;
+    return super.showRecords(table, opt);
+  }
+  private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
+    switch (item.childType) {
+      case ContextValue.SCHEMA:
+        return this.queryResults(this.queries.fetchSchemas(parent as NSDatabase.IDatabase));
+      case ContextValue.TABLE:
+        return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema));
+      case ContextValue.VIEW:
+        return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema));
+      case ContextValue.FUNCTION:
+        return []; //this.queryResults(this.queries.fetchFunctions(parent as NSDatabase.ISchema));
+    }
+    return [];
   }
 
-  public getFunctions(): Promise<NSDatabase.IFunction[]> {
-    return this.query(this.queries.fetchFunctions)
-      .then(([queryRes]) => {
-        return queryRes.results
-          .reduce((prev, curr) => prev.concat(curr), [])
-          .map((obj) => {
-            return {
-              ...obj,
-              source: obj.source || '',
-              args: obj.args ? obj.args.split(/, */g) : [],
-              database: obj.dbName,
-              schema: obj.dbSchema,
-            } as NSDatabase.IFunction;
-          });
-      });
+  private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
+    const results = await this.queryResults(this.queries.fetchColumns(parent));
+    return results.map(col => ({
+      ...col,
+      iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null),
+      childType: ContextValue.NO_CHILD,
+      table: parent
+    }));
   }
 
-  public describeTable(prefixedTable: string) {
-    prefixedTable.split('].[').reverse().join('], [');
-    return this.query(replacer(this.queries.describeTable, { table: prefixedTable.split(/\.(?=\[)/g).reverse().join(',') }));
+  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
+    switch (itemType) {
+      case ContextValue.TABLE:
+        return this.queryResults(this.queries.searchTables({ search }));
+      case ContextValue.COLUMN:
+        return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
+    }
   }
+
+  public getStaticCompletions = async () => {
+    return reservedWordsCompletion;
+  }
+
+    // public getColumns(): Promise<NSDatabase.IColumn[]> {
+  //   return this.query(this.queries.fetchColumns)
+  //     .then(([queryRes]) => {
+  //       return queryRes.results
+  //         .reduce((prev, curr) => prev.concat(curr), [])
+  //         .map((obj) => {
+  //           return <NSDatabase.IColumn>{
+  //             ...obj,
+  //             isNullable: !!obj.isNullable ? obj.isNullable.toString() === 'yes' : null,
+  //             size: obj.size !== null ? parseInt(obj.size, 10) : null,
+  //             tableDatabase: obj.dbName,
+  //             isPk: (obj.constraintType || '').toLowerCase() === 'primary key',
+  //             isFk: (obj.constraintType || '').toLowerCase() === 'foreign key',
+  //             tree: obj.tree,
+  //           };
+  //         });
+  //     });
+  // }
+
+  // public getFunctions(): Promise<NSDatabase.IFunction[]> {
+  //   return this.query(this.queries.fetchFunctions)
+  //     .then(([queryRes]) => {
+  //       return queryRes.results
+  //         .reduce((prev, curr) => prev.concat(curr), [])
+  //         .map((obj) => {
+  //           return {
+  //             ...obj,
+  //             source: obj.source || '',
+  //             args: obj.args ? obj.args.split(/, */g) : [],
+  //             database: obj.dbName,
+  //             schema: obj.dbSchema,
+  //           } as NSDatabase.IFunction;
+  //         });
+  //     });
+  // }
 }

@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "SQLTools Base Driver",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",

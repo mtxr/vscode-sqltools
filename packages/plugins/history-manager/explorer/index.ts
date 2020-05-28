@@ -50,7 +50,7 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   }
 
   constructor() {
-    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}-view-historyExplorer`, { treeDataProvider: this, showCollapseAll: true });
+    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}ViewHistoryExplorer`, { treeDataProvider: this, showCollapseAll: true });
     Context.subscriptions.push(this.treeView);
   }
 }
