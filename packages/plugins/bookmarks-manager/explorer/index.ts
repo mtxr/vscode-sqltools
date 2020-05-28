@@ -125,7 +125,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
 
   constructor(context: ExtensionContext) {
     this.asAbsolutePath = context.asAbsolutePath;
-    this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAME}/bookmarksExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView<BookmarkExplorerItem>(`${EXT_NAME}-bookmarksExplorer`, { treeDataProvider: this });
     context.subscriptions.push(this.treeView);
     this.readFromFile();
   }

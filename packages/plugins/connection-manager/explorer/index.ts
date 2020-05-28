@@ -139,7 +139,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   private getGroup(...k: string[]): SidebarAbstractItem {
-    return safeGet(this.tree, k.reduce((agg, v, i) => ([ ...agg, v, ...(i === k.length - 1 ? [] : ['tree'])]), []));
+    return safeGet(this.tree, k.reduce((agg, v, i) => ([ ...agg, v, ...(i === k.length - 1 ? [] : ['tree'])]), <string[]>[]));
   }
 
   private getOrCreateGroups(connId: string, dialect: DatabaseDialect, path: string, ignoreLasts: number = 0): SidebarAbstractItem {
@@ -294,7 +294,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor(private extension: SQLTools.ExtensionInterface) {
-    this.treeView = window.createTreeView(`${EXT_NAME}/connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
+    this.treeView = window.createTreeView(`${EXT_NAME}-connectionExplorer`, { treeDataProvider: this, canSelectMany: true });
     ConfigManager.addOnUpdateHook(this.updateTreeRoot);
     this.updateTreeRoot();
     this.extension.context.subscriptions.push(this.treeView);

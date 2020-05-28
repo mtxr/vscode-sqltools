@@ -43,7 +43,7 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   }
 
   constructor(context: ExtensionContext) {
-    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAME}/historyExplorer`, { treeDataProvider: this });
+    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAME}-historyExplorer`, { treeDataProvider: this });
     context.subscriptions.push(this.treeView);
   }
 }
