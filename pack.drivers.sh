@@ -1,6 +1,9 @@
 #!/bin/bash
 
 # temporary script
+export DISPLAY_NAME=\"SQLTools\"
+export NODE_ENV=production
+
 rm -rf *.vsix
 rm -rf dist
 rm -rf packages/driver.mssql/out

@@ -19,6 +19,7 @@
     "prebuild": "rimraf -rf dist *.tgz",
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run build",
+    "prepare": "yarn run build",
     "release": "npm pack && npm publish *.tgz --latest"
   },
   "devDependencies": {
