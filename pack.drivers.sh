@@ -11,7 +11,7 @@ rm -rf packages/driver.mysql/out
 rm -rf packages/driver.pg/out
 rm -rf packages/driver.sqlite/out
 
-yarn run build
+yarn run build || exit 1
 
 (
   cd dist &&
