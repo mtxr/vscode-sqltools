@@ -1274,9 +1274,9 @@
   integrity sha512-+iTbntw2IZPb/anVDbypzfQa+ay64MW0Zo8aJ8gZPWMMK6/OubMVb6lUPMagqjOPnmtauXnFCACVl3O7ogjeqQ==
 
 "@sqltools/base-driver@latest":
-  version "0.1.1"
-  resolved "https://registry.yarnpkg.com/@sqltools/base-driver/-/base-driver-0.1.1.tgz#6831161eced06812cb5661e3565dbf7236859367"
-  integrity sha512-j+lcF36Jk6vsIYaZhEFk7Cx0nI2ChTJTagz4zr6x8i/jR5k2JbQcfQkI21zUpZ4imCCS2h48aCvOzDnVjQ0WPA==
+  version "0.1.2"
+  resolved "https://registry.yarnpkg.com/@sqltools/base-driver/-/base-driver-0.1.2.tgz#52e0d7c7f51dd904fdfe3882e69bba80a9026e07"
+  integrity sha512-yqx/qiPglMoVSjY7kSfHv+s7hCNL4UfReGtj4EPqELpaMq7vvNBbHpYAQ5jctBeM0oxwSkPmf3o9pOROggrBbg==
   dependencies:
     "@sqltools/types" latest
     debug "^4.1.1"
@@ -1285,9 +1285,9 @@
     vscode-languageserver "6.1.1"
 
 "@sqltools/types@latest":
-  version "0.0.8"
-  resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.0.8.tgz#d66fcb4d56cd8760c903e7dda4c779331d7638d0"
-  integrity sha512-uHQCZmI5XS7QAq3mKxmBL5uthuAeRwbMA9Yr4Yt+b71zzVgn5eZ+iRokJ9KGOxh+m/9AJQCwKBi1uNOTWfrKrg==
+  version "0.1.0"
+  resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.1.0.tgz#57f6d265b36db4e5314432f6482f0efcf791e885"
+  integrity sha512-VY305iGD+1X6qAd399zN2Ie6QGaa4BRvYopk2drS3OjY38wMVs6ER3JXwdhoiE/yTqybFQB1UzhWzLt9Swmq9g==
 
 "@types/babel__core@^7.1.0":
   version "7.1.7"

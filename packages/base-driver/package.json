@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SQLTools Base Driver",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -19,7 +19,7 @@
     "prebuild": "rimraf -rf dist *.tgz",
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run build",
-    "release": "npm pack && npm publish *.tgz"
+    "release": "npm pack && npm publish *.tgz --latest"
   },
   "devDependencies": {
     "rimraf": "^3.0.0",

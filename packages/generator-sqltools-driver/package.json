@@ -1,6 +1,6 @@
 {
   "name": "generator-sqltools-driver",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "description": "SQLTools driver generator",
   "homepage": "https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers",
   "author": {
@@ -34,7 +34,8 @@
     "testEnvironment": "node"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest",
+    "release": "rm *.tgz; npm pack && npm publish *.tgz --latest"
   },
   "repository": {
     "url": "https://github.com/mtxr/vscode-sqltools.git",
