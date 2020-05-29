@@ -35,11 +35,12 @@
   ],
   "main": "./out/extension.js",
   "dependencies": {
+    "@sqltools/base-driver": "latest",
+    "@sqltools/types": "latest",
     "uuid": "^7.0.2"
   },
   "devDependencies": {
     "@babel/preset-env": "^7.5.5",
-    "@sqltools/base-driver": "latest",
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",
     "typescript": "^3.7.3"

@@ -28,7 +28,7 @@ export interface IExpectedResult<T = any> extends String {
 
 
 export interface QueryBuilder<P, R> {
-  (params?: P): IExpectedResult<R>;
+  (params?: P & { [k: string]: any }): IExpectedResult<R>;
   raw?: string;
 }
 

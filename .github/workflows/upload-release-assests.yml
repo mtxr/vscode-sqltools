@@ -36,8 +36,7 @@ jobs:
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
       run: |
-        yarn run build:pack
-        cp ./dist/*.vsix .
+        ./pack.drivers.sh
 
     - name: Upload to Release
       uses: OmgImAlexis/upload-to-release@12da88e

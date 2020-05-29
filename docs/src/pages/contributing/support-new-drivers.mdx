@@ -6,7 +6,7 @@ route: /contributing/support-new-drivers
 
 # Support new Drivers
 
-Starting on v0.22, drivers are VSCode extensions as well. They plug into SQLTools to become available for usage
+Starting on v0.22, drivers are VSCode extensions as well. They plug into SQLTools to become available for usage. If it's you first time developing an extenion, check out VSCode docs for more information at https://code.visualstudio.com/api/get-started/your-first-extension.
 
 To create a new driver, first, install [Yeoman](http://yeoman.io) and generator-sqltools-driver using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
 
@@ -21,4 +21,19 @@ Then generate your new project:
 yo sqltools-driver
 ```
 
-This page still underconstruction, so please check the code comments and open issues if you have problems during your development.
+> This page still under developement and may change often. Please, take a look at the code comments and open issues if you have proplems during the integration.
+
+The driver boilerplate will be created as well with the launch entries for debugging.
+
+Remember to install *VSCode SQLTools* before you run you driver extension.
+
+Launch you extension and happy coding!
+
+# Publishing your driver
+
+1. Ensure your driver has `connection.schema.json` and `ui.schema.json` packed with the extension to make it compatible with the connection assistant.
+2. Test your driver with the connection assistant, create the icons for the `default`, `active` and `incative` states.
+3. Follow this guide to publish on VSCode Marketpalce: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
+4. Submit a PR to https://github.com/mtxr/vscode-sqltools updating this files to list your driver:
+  - https://github.com/mtxr/vscode-sqltools/blob/master/README.md
+  - https://github.com/mtxr/vscode-sqltools/blob/master/docs/src/pages/contributing/support-new-drivers.mdx

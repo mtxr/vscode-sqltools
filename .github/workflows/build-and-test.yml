@@ -22,7 +22,6 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - env:
-        HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
@@ -32,11 +31,11 @@ jobs:
 
     - name: test & build
       env:
-        HUSKY_SKIP_INSTALL: "true"
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
       run: |
+        yarn run build
         yarn test:older --no-coverage
         yarn test
 
