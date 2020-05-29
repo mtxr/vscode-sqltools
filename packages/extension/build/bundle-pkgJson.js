@@ -21,8 +21,7 @@ module.exports = ({ EXT_NAMESPACE, DISPLAY_NAME, outdir, IS_PRODUCTION }) => ({
     //   .replace(/(?:(?<!vscode\-))sqltools([A-Z\/\.\-])/g, `${EXT_NAMESPACE}$1`)
     //   .replace(/SQLTools/g, `${DISPLAY_NAME}`));
     content.contributes.configuration = configurationOriginal;
-    content.name = EXT_NAMESPACE;
-    content.displayName = DISPLAY_NAME;
+    content.name = 'sqltools';
     content.version = rootPkgJson.version;
     return JSON.stringify(content, null, IS_PRODUCTION ? undefined : 2);
   }
