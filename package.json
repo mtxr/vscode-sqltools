@@ -21,13 +21,12 @@
     "packages/*"
   ],
   "scripts": {
-    "preinstall": "yarn workspace @sqltools/base-driver run prepare",
     "build": "yarn --cwd ./build-tools run build",
     "docs:build": "yarn --cwd ./docs run docz:build",
     "docs:dev": "yarn --cwd ./docs run docz:dev",
     "dev:jest": "jest --config jest.config.js --passWithNoTests",
     "build:pack": "yarn --cwd ./build-tools run build:pack",
-    "postinstall": "yarn workspace @sqltools/formatter install && yarn --cwd ./build-tools && yarn --cwd ./docs",
+    "postinstall": "yarn workspace @sqltools/base-driver run prepare && yarn workspace @sqltools/formatter install && yarn --cwd ./build-tools && yarn --cwd ./docs",
     "pretest": "rimraf -rf ./coverage",
     "pack:release": "cross-env DISPLAY_NAME=\"SQLTools\" NODE_ENV=production yarn run build:pack",
     "test:docker": "yarn --cwd ./test run",
