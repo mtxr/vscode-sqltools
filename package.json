@@ -21,6 +21,7 @@
     "packages/*"
   ],
   "scripts": {
+    "preinstall": "yarn workspace @sqltools/base-driver run prepare",
     "build": "yarn --cwd ./build-tools run build",
     "docs:build": "yarn --cwd ./docs run docz:build",
     "docs:dev": "yarn --cwd ./docs run docz:dev",
