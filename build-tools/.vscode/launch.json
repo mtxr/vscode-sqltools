@@ -6,14 +6,13 @@
   "configurations": [
     {
       "name": "Launch SQLTools",
-      "type": "extensionHost",
+      "type": "pwa-extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
         "${workspaceFolder}/../test/project.code-workspace",
         "--extensionDevelopmentPath=${workspaceFolder}/../dist",
       ],
-      "stopOnEntry": false,
       "sourceMaps": true,
       "skipFiles": [
         "<node_internals>/**/*.js"
@@ -26,7 +25,7 @@
       }
     },
     {
-      "type": "node",
+      "type": "pwa-node",
       "request": "attach",
       "name": "Attach SQLTools LS",
       "port": 6010,
@@ -38,7 +37,6 @@
       "outFiles": [
         "${workspaceFolder}/../dist/*.js"
       ],
-      "protocol": "inspector"
     }
   ],
   "compounds": [

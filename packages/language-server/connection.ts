@@ -6,13 +6,14 @@ import telemetry from '@sqltools/util/telemetry';
 import generateId from '@sqltools/util/internal-id';
 import LSContext from './context';
 import { IConnection as LSIconnection } from 'vscode-languageserver';
+import DriverNotInstalledError from './exception/driver-not-installed';
 
 export default class Connection {
   private connected: boolean = false;
   private conn: IConnectionDriver;
   constructor(private credentials: IConnection, getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']) {
     if (!LSContext.drivers.has(credentials.driver)) {
-      throw new Error(`Driver ${credentials.driver} is not installed`);
+      throw new DriverNotInstalledError(credentials.driver);
     }
 
     const DriverClass = LSContext.drivers.get(credentials.driver);

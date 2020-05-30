@@ -4,8 +4,9 @@ import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL, DISPLAY_NAME } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
 import Config from '@sqltools/util/config-manager';
-import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency } from '@sqltools/types';
+import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency, DatabaseDriver } from '@sqltools/types';
 import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
+import { DriverNotInstalledNotification } from '@sqltools/language-server/notifications';
 
 export default class DependencyManager implements IExtensionPlugin {
   public readonly name = 'Dependency Manager Plugin';
@@ -14,6 +15,7 @@ export default class DependencyManager implements IExtensionPlugin {
   register(extension: IExtension) {
     this.extension = extension;
     this.client = extension.client;
+    this.client.onNotification(DriverNotInstalledNotification, this.driverNotInstalled);
     this.client.onNotification(MissingModuleNotification, this.requestToInstall);
     this.client.onNotification(DependeciesAreBeingInstalledNotification, this.jobRunning);
   }
@@ -63,6 +65,20 @@ Go ahead and connect!`,
       this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
       this.extension.errorHandler(`Failed to install dependencies for ${conn.driver}:`, error);
     }
+  }
+
+  private driverNotInstalled = async ({ driverName }: { driverName: DatabaseDriver }) => {
+    if (!driverName) return;
+    const options = ['Search VSCode Marketplace'];
+    try {
+      const r = await Win.showInformationMessage(
+        `Driver ${driverName} is not installed.`,
+        ...options,
+      );
+      if (r === options[0]) {
+        await commands.executeCommand('workbench.extensions.search', `@tag:"sqltools-driver" ${driverName}`);
+      }
+    } catch (error) { }
   }
 
   private jobRunning = async ({ moduleName, moduleVersion, conn }) =>  {

@@ -7,7 +7,7 @@
 	"configurations": [
 		{
 			"name": "Run SQLite Extension",
-			"type": "extensionHost",
+			"type": "pwa-extensionHost",
 			"request": "launch",
 			"args": [
         "${workspaceFolder}/../../test/project.code-workspace",
