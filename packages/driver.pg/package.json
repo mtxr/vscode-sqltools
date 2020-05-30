@@ -19,8 +19,17 @@
     "url": "https://github.com/mtxr/vscode-sqltools/labels/pg"
   },
   "keywords": [
-    "sqltools-driver"
+    "sqltools-driver",
+    "postgre",
+    "postgresql",
+    "redshift",
+    "aws redshift"
   ],
+  "galleryBanner": {
+    "theme": "dark",
+    "color": "#333333"
+  },
+  "icon": "icon.png",
   "categories": [
     "Programming Languages",
     "Snippets",

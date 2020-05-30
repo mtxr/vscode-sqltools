@@ -19,8 +19,15 @@
     "url": "https://github.com/mtxr/vscode-sqltools/labels/mysql"
   },
   "keywords": [
-    "sqltools-driver"
+    "sqltools-driver",
+    "mysql",
+    "mariadb"
   ],
+  "galleryBanner": {
+    "theme": "light",
+    "color": "#fafafa"
+  },
+  "icon": "icon.png",
   "categories": [
     "Programming Languages",
     "Snippets",

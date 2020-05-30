@@ -1,10 +1,10 @@
 {
   "folders": [
     { "path": "./packages/base-driver" },
-    { "path": "./packages/driver.mssql", "name": "mssql" },
-    { "path": "./packages/driver.mysql", "name": "mysql" },
-    { "path": "./packages/driver.pg", "name": "pg" },
-    { "path": "./packages/driver.sqlite", "name": "sqlite" },
+    { "path": "./packages/driver.mssql" },
+    { "path": "./packages/driver.mysql" },
+    { "path": "./packages/driver.pg" },
+    { "path": "./packages/driver.sqlite" },
     { "path": "./packages/drivers" },
     { "path": "./packages/extension" },
     { "path": "./packages/formatter" },
@@ -13,7 +13,7 @@
     { "path": "./packages/types" },
     { "path": "./packages/util" },
     { "path": "./packages/vscode"},
-    { "path": "./packages/generator-sqltools-driver", "name": "driver-generator" },
+    { "path": "./packages/generator-sqltools-driver" },
     { "path": "./build-tools" },
     { "path": "./docs" },
   ],

@@ -19,8 +19,16 @@
     "url": "https://github.com/mtxr/vscode-sqltools/labels/mssql"
   },
   "keywords": [
-    "sqltools-driver"
+    "sqltools-driver",
+    "mssql",
+    "sqlserver",
+    "azure"
   ],
+  "galleryBanner": {
+    "theme": "light",
+    "color": "#ffffff"
+  },
+  "icon": "icon.png",
   "categories": [
     "Programming Languages",
     "Snippets",
