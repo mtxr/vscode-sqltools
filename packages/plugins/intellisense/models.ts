@@ -3,7 +3,6 @@ import {
   CompletionItemKind,
 } from 'vscode-languageserver';
 import { NSDatabase, DatabaseDriver } from '@sqltools/types';
-import escapeColumnNames from '@sqltools/util/query/escape-column-names';
 
 export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
@@ -27,7 +26,7 @@ export function TableCompletionItem(table: NSDatabase.ITable, priority: number =
   };
 }
 
-export function TableColumnCompletionItem(col: NSDatabase.IColumn, { driver, addTable = false }: { driver?: DatabaseDriver; addTable?: boolean } = {}): CompletionItem {
+export function TableColumnCompletionItem(col: NSDatabase.IColumn, _ignored: { driver?: DatabaseDriver; addTable?: boolean } = {}): CompletionItem {
   const colInfo = [ col.label ];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);
@@ -53,7 +52,7 @@ export function TableColumnCompletionItem(col: NSDatabase.IColumn, { driver, add
   }
   const table = (<NSDatabase.ITable>col.table).label || col.table;
   yml += `Table: ${table}`;
-  const label = addTable ? escapeColumnNames(col, { driver }) : col.label;
+  const label = col.label;
   return <CompletionItem>{
     detail: `${table} Col`,
     documentation: {

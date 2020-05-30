@@ -32,7 +32,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public settingsWebview: SettingsWebview;
   private errorHandler: IExtension['errorHandler'];
   private explorer: ConnectionExplorer;
-  private attachedFilesMap: { [fileUri: string ]: string } = {};
+  private attachedFilesMap: { [fileUri: string]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 
   // extension commands
@@ -171,7 +171,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         await this.openSessionFileWithProtocol(sessionFilePath, 'file'),
         getConnectionId(conn)
       );
-    } catch(e) {
+    } catch (e) {
       this.updateAttachedConnectionsMap(
         await this.openSessionFileWithProtocol(sessionFilePath),
         getConnectionId(conn)
@@ -251,7 +251,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
       if (connNameOrId && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
-        const conn = (await this.ext_getConnections({ connectedOnly: false, sort: 'connectedFirst'})).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
+        const conn = (await this.ext_getConnections({ connectedOnly: false, sort: 'connectedFirst' })).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
           throw new Error(`Trying to run query on '${connNameOrId}' but it does not exist.`)
         }
@@ -273,7 +273,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_executeCurrentQuery = async () => {
     const activeEditor = await getOrCreateEditor();
     if (!activeEditor) {
-        return;
+      return;
     }
     if (!activeEditor.selection.isEmpty) {
       return this.ext_executeQuery();
@@ -428,11 +428,11 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     const conn = await this._connect();
     const loadOptions = (search: string) => this.client.sendRequest(SearchConnectionItemsRequest, { conn, itemType: ContextValue.TABLE, search }).then(({ results }) => results);
     return quickPickSearch<NSDatabase.ITable>(loadOptions, {
-        matchOnDescription: true,
-        matchOnDetail: true,
-        title: `Tables in ${conn.database}`,
-        placeHolder: 'Type something to search tables...',
-      });
+      matchOnDescription: true,
+      matchOnDetail: true,
+      title: `Tables in ${conn.database}`,
+      placeHolder: 'Type something to search tables...',
+    });
   }
 
 

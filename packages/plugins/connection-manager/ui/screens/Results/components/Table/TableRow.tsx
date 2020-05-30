@@ -1,5 +1,5 @@
 import React from 'react';
-import { Table, TableSelection } from '@devexpress/dx-react-grid-material-ui';
+import { TableSelection } from '@devexpress/dx-react-grid-material-ui';
 import MTableRow from '@material-ui/core/TableRow';
 import { withStyles, createStyles, WithStyles } from '@material-ui/core/styles';
 
