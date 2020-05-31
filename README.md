@@ -31,7 +31,7 @@ Some feature provided by SQLTools:
 * Connection explorer
 * Query generators (INSERT only)
 
-Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/features).
+Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/#features).
 
 ## Supported Drivers
 
