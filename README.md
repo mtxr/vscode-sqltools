@@ -35,6 +35,8 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 ## Supported Drivers
 
+Unable to connect with "Drivers XXXX is not installed"? Check ![this issue](https://github.com/mtxr/vscode-sqltools/issues/590).
+
 **Official Drivers**
 
 |Driver||Main Maintainer(s)|
