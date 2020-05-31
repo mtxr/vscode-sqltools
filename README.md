@@ -56,7 +56,7 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 |![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/saphana/default.png)|SAPHana|[@ariel-bentu](https://github.com/ariel-bentu)|
 
 
-Special thanks to this amazing developers that keep the project running!
+Special thanks to these amazing developers that keep the project running!
 
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
@@ -67,7 +67,7 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 
 Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
-Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
+Join all these amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
 
 ## Donate and Support
