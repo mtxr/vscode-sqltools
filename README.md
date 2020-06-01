@@ -56,7 +56,7 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 |![SAPHana](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/saphana/default.png)|SAPHana|[@ariel-bentu](https://github.com/ariel-bentu)|
 
 
-Special thanks to this amazing developers that keep the project running!
+Special thanks to these amazing developers that keep the project running!
 
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
@@ -67,7 +67,7 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 
 Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
-Join all this amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
+Join all these amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
 
 
 ## Donate and Support
@@ -86,14 +86,14 @@ You can also fund specific issues via Issuehunt. That can boost the development 
 
 ### Want to contribute without spending money? Yeah, free contribution!
 
-Pesonally I use Brave Browser because it's chromium based and has a builtin Ad-Block. Also its shipped with a lot of cross-site tracker blocker and other tools to take care of my privacy.
-Brave also has its own Crypto wallet and coin, and this coind helps to fund projects and publishers around the web, want to see more? Check BAT tokens and BAT project [here](https://brave.com/mtx234).
+Personally I use Brave Browser because it's chromium based and has a builtin Ad-Block. Also its shipped with a lot of cross-site tracker blocker and other tools to take care of my privacy.
+Brave also has its own Crypto wallet and coin, and this coin helps to fund projects and publishers around the web, want to see more? Check BAT tokens and BAT project [here](https://brave.com/mtx234).
 
 That said, if you use Brave Browser and download using this link [https://brave.com/mtx234](https://brave.com/mtx234), you will be contributing (with ~$7) to the project without spending any money. Pretty cool, huh?
 
 [Download Brave](https://brave.com/mtx234)
 
-If you don't want to contribute, but still want to try Brave, I do encourange you to try, you can search anywhere and use any link you want.
+If you don't want to contribute, but still want to try Brave, I do encourage you to try, you can search anywhere and use any link you want.
 
 
 
@@ -104,5 +104,3 @@ See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
 ## Feedback
 
 Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
-
-By default we collect anonymous data like stacktraces to fix to errors/bugs. You can always opt-out.
