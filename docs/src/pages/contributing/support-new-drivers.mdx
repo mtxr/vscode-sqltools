@@ -6,9 +6,9 @@ route: /contributing/support-new-drivers
 
 # Support new Drivers
 
-Starting on v0.22, drivers are VSCode extensions as well. They plug into SQLTools to become available for usage. If it's you first time developing an extenion, check out VSCode docs for more information at https://code.visualstudio.com/api/get-started/your-first-extension.
+Starting on v0.22, drivers are VSCode extensions as well. They plug into SQLTools to become available for usage. If it's you first time developing an extension, check out VSCode docs for more information at https://code.visualstudio.com/api/get-started/your-first-extension.
 
-To create a new driver, first, install [Yeoman](http://yeoman.io) and generator-sqltools-driver using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
+To create a new driver, first, install [Yeoman](http://yeoman.io) and generator-sqltools-driver using [npm](https://www.npmjs.com/) (assuming you have pre-installed [node.js](https://nodejs.org/)).
 
 ```bash
 npm install -g yo
@@ -21,7 +21,7 @@ Then generate your new project:
 yo sqltools-driver
 ```
 
-> This page still under developement and may change often. Please, take a look at the code comments and open issues if you have proplems during the integration.
+> This page still under development and may change often. Please, take a look at the code comments and open issues if you have problems during the integration.
 
 The driver boilerplate will be created as well with the launch entries for debugging.
 
@@ -33,7 +33,7 @@ Launch you extension and happy coding!
 
 1. Ensure your driver has `connection.schema.json` and `ui.schema.json` packed with the extension to make it compatible with the connection assistant.
 2. Check your extension keywords and make sure it has `sqltools-driver` as one of them to allow them to be found by users.
-3. Test your driver with the connection assistant, create the icons for the `default`, `active` and `incative` states.
+3. Test your driver with the connection assistant, create the icons for the `default`, `active` and `inactive` states.
 4. Follow this guide to publish on VSCode Marketpalce: https://code.visualstudio.com/api/working-with-extensions/publishing-extension
 5. Submit a PR to https://github.com/mtxr/vscode-sqltools updating this files to list your driver:
   - https://github.com/mtxr/vscode-sqltools/blob/master/README.md
