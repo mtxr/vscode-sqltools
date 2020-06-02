@@ -10,6 +10,7 @@ import { RegisterPlugin } from './contracts';
 import LSContext from './context';
 import { ExitCalledNotification } from '../extension/api/contracts';
 import { resolve as pathResolve } from 'path';
+import logger from '@sqltools/util/log';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -113,6 +114,9 @@ class SQLToolsLanguageServer implements ILanguageServer {
     ConfigRO.replaceAll(changes.settings[EXT_CONFIG_NAMESPACE]);
     if (changes.settings.telemetry && changes.settings.telemetry.enableTelemetry) telemetry.enable();
     else telemetry.disable();
+    if (changes.settings['sqltools.debug'] && changes.settings['sqltools.debug'].namespaces) {
+      (<any>logger)._debug.enable(changes.settings['sqltools.debug'].namespaces || '*,-babel*');
+    }
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -141,8 +145,8 @@ ExecPath: ${process.execPath}
     return this;
   }
 
-  public registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]) {
-    return Promise.all(
+  public async registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]) {
+    await Promise.all(
       (Array.isArray(plugin) ? plugin : [plugin].filter(Boolean))
       .map(p => p.register(this))
     );

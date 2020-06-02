@@ -25,12 +25,14 @@
       }
     },
     {
-      "type": "pwa-node",
+      "type": "node",
       "request": "attach",
       "name": "Attach SQLTools LS",
       "port": 6010,
       "restart": true,
       "sourceMaps": true,
+      "protocol": "inspector",
+      "timeout": 100000,
       "skipFiles": [
         "<node_internals>/**/*.js"
       ],

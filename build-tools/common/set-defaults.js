@@ -36,7 +36,7 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
     config.optimization.minimize = false;
     config.optimization.minimizer = undefined;
   }
-  config.devtool = false;
+  config.devtool = !IS_PRODUCTION ? 'source-map' : false;
   config.mode = IS_PRODUCTION ? 'production' : 'development';
   config.output = config.output || {};
   config.output.path = config.output.path || outdir;

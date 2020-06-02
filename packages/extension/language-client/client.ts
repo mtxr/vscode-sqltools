@@ -169,6 +169,8 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         extensionPath: Context.extensionPath,
         userEnvVars: Config.languageServerEnv
       },
+      progressOnInitialization: true,
+      outputChannel: logger.outputChannel,
       synchronize: {
         configurationSection: [EXT_CONFIG_NAMESPACE, 'telemetry'],
         fileEvents: Wspc.createFileSystemWatcher(`**/.${EXT_NAMESPACE}rc`),

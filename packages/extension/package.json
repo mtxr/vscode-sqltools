@@ -104,9 +104,9 @@
                 "id": "sqltools.currentQueryOutline",
                 "description": "Background decoration color for current query",
                 "defaults": {
-                    "dark": "#00a2ff50",
-                    "light": "#00a2ff50",
-                    "highContrast": "#00a2ff50"
+                    "dark": "#00a2ff20",
+                    "light": "#00a2ff20",
+                    "highContrast": "#00a2ff20"
                 }
             }
         ],
@@ -460,6 +460,11 @@
                         "type": "string"
                     },
                     "markdownDescription": "Languages with SQL codelens enabled.\n\nYou can use any language identifier defined on https://code.visualstudio.com/docs/languages/identifiers.\n\nMore info about codelens, see https://vscode-sqltools.mteixeira.dev/features/codelens"
+                },
+                "sqltools.highlightQuery": {
+                    "type": "boolean",
+                    "default": true,
+                    "markdownDescription": "Enable or disable hightlight current query under cursor."
                 },
                 "sqltools.format": {
                     "type": "object",

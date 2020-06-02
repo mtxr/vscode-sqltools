@@ -5,7 +5,7 @@ import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connec
 import csvStringify from 'csv-stringify/lib/sync';
 import { writeFile as writeFileWithCb } from 'fs';
 import { promisify } from 'util';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh } from './contracts';
 import Handlers from './cache/handlers';
 import DependencyManager from './dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from './dependency-manager/contracts';
@@ -17,7 +17,7 @@ import queryResultsCache from './cache/query-results.model';
 
 const writeFile = promisify(writeFileWithCb);
 
-const log = logger.extend('conn-mann');
+const log = logger.extend('conn-manager');
 
 export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   private server: ILanguageServer;
@@ -120,18 +120,22 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   private openConnectionHandler: RequestHandler<typeof ConnectRequest> = async (req: {
     conn: IConnection;
     password?: string;
+    internalRequest: boolean;
   }): Promise<IConnection> => {
     if (!req || !req.conn) {
       return undefined;
     }
-    let c = await this.getConnectionInstance(req.conn);
-    let progressBase;
+    let progressBase: any;
+    let c: Connection;
     try {
+      let c = await this.getConnectionInstance(req.conn);
       if (c) {
+        log.extend('debug')('Connection instance already exists for %s.', c.getName());
         await Handlers.Connect(c);
         return this.serializarConnectionState(req.conn);
       }
       c = new Connection(req.conn, () => this.server.server.workspace.getWorkspaceFolders());
+      log.extend('debug')('Connection instance created for %s.', c.getName());
 
       // @OPTIMIZE
       progressBase = {
@@ -141,13 +145,14 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       if (req.password) c.setPassword(req.password);
 
+      this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
       await Handlers.Connect(c);
 
-      this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
       await c.connect();
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.serializarConnectionState(req.conn);
     } catch (e) {
+      if (req.internalRequest) return Promise.reject(e);
       log.extend('Connecting error: %O', e);
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
@@ -161,7 +166,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       telemetry.registerException(e);
 
-      throw e;
+      throw Promise.resolve(e);
     }
   };
 
@@ -250,7 +255,8 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   }
 
   // internal utils
-  public _autoConnectIfActive = async () => {
+  public _autoConnectIfActive = async (retryCount = 0) => {
+    if (retryCount >= RETRY_LIMIT) return;
     const defaultConnections: IConnection[] = [];
     const [ activeConnections, lastUsedId ] = await Promise.all([
       connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}),
@@ -259,37 +265,51 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (lastUsedId && activeConnections[lastUsedId]) {
       defaultConnections.push(await this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
     }
-    if (defaultConnections.length === 0
-      && (
-        typeof ConfigRO.autoConnectTo === 'string'
-        || (
-          Array.isArray(ConfigRO.autoConnectTo) && ConfigRO.autoConnectTo.length > 0
-          )
-        )
+    if (
+      typeof ConfigRO.autoConnectTo === 'string'
+      || (
+        Array.isArray(ConfigRO.autoConnectTo) && ConfigRO.autoConnectTo.length > 0
+      )
     ) {
       const autoConnectTo = Array.isArray(ConfigRO.autoConnectTo)
       ? ConfigRO.autoConnectTo
       : [ConfigRO.autoConnectTo];
-      log.extend('info')(`Configuration set to auto connect to: ${autoConnectTo}`);
+      log.extend('info')(`Configuration set to auto connect to: %s. retry count: %d`, autoConnectTo.join(', '), retryCount);
 
-      defaultConnections.push(...ConfigRO.connections
-        .filter((conn) => conn && autoConnectTo.indexOf(conn.name) >= 0)
-        .filter(Boolean));
+      const existingConnections = ConfigRO.connections;
+      autoConnectTo.forEach(connName => {
+        if (defaultConnections.find(c => c.name === connName)) return;
+        const foundConn = existingConnections.find(c => connName === c.name);
+        if (!foundConn) return;
+        defaultConnections.push(foundConn);
+      });
     }
     if (defaultConnections.length === 0) {
       return;
     }
+    log.extend('debug')(`Found connections: %s. retry count: %d`, defaultConnections.map(c => c.name).join(', '), retryCount);
     try {
-      await Promise.all(defaultConnections.slice(1).map(conn =>
-        (<Promise<IConnection>>this.openConnectionHandler({ conn }))
+      await Promise.all(defaultConnections.slice(1).map(conn => {
+        log.extend('info')(`Auto connect to %s`, conn.name);
+        return Promise.resolve(this.openConnectionHandler({ conn, internalRequest: true }))
           .catch(e => {
-            this.server.notifyError(`Failed to auto connect to  ${conn.name}`, e);
+            if (retryCount < RETRY_LIMIT) return Promise.reject(e);
+            this.server.notifyError(`Failed to auto connect to ${conn.name}`, e);
             return Promise.resolve();
-          }),
-      ));
-
-      await this.openConnectionHandler({ conn: defaultConnections[0] });
+          });
+      }));
+      log.extend('debug')('Will mark %s as active', defaultConnections[0].name);
+      // leave the last one active
+      await this.openConnectionHandler({ conn: defaultConnections[0], internalRequest: true });
+      this.server.sendRequest(ForceListRefresh, undefined);
     } catch (error) {
+      if (retryCount < RETRY_LIMIT) {
+        log.extend('info')('auto connect will retry: attempts %d', retryCount + 1);
+        return new Promise((res) => {
+          setTimeout(res, 1000);
+        }).then(() => this._autoConnectIfActive(retryCount++));
+      }
+      log.extend('error')('auto connect error >> %O', error);
       if (error.data && error.data.notification) {
         return void this.server.sendNotification(error.data.notification, error.data.args);
       }
@@ -297,3 +317,4 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   }
 }
+const RETRY_LIMIT = 15;

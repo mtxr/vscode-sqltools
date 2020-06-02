@@ -20,7 +20,7 @@ Config.addOnUpdateHook(({ event }) => {
     let newNS = Config.get('debug', {}).namespaces;
 
     if (!newNS) {
-      newNS = process.env.NODE_ENV === 'development' ? '*' : '*,-*:debug,-*:*:debug,-*:*:*:debug,-*:*:*:*:debug,-*:*:*:*:*:debug';
+      newNS = process.env.NODE_ENV === 'development' ? '*,-babel*' : '*,-babel*,-*:debug,-*:*:debug,-*:*:*:debug,-*:*:*:*:debug,-*:*:*:*:*:debug';
     }
     if (currentNS !== newNS) productLogger._debug.enable(newNS);
   }

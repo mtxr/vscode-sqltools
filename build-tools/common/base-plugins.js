@@ -21,11 +21,11 @@ const basePlugins = (name) => [
     'process.env.AUTHOR': JSON.stringify(author),
     'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'production'),
   }),
-  new webpack.SourceMapDevToolPlugin({
-    moduleFilenameTemplate: (info) => path.relative(rootdir, info.absoluteResourcePath),
-    filename: IS_PRODUCTION ? '[file].map' : undefined,
-    sourceRoot: path.relative(outdir, rootdir)
-  }),
+  // new webpack.SourceMapDevToolPlugin({
+  //   moduleFilenameTemplate: (info) => path.relative(rootdir, info.absoluteResourcePath),
+  //   filename: IS_PRODUCTION ? '[file].map' : undefined,
+  //   sourceRoot: path.relative(outdir, rootdir)
+  // }),
   new WebpackNotifierPlugin({ excludeWarnings: true }),
 ];
 

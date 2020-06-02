@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/pl
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest, ForceListRefresh } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
@@ -701,6 +701,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     });
     this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
+    this.client.onRequest(ForceListRefresh, () => {
+      this.explorer.refresh();
+    });
 
     // extension stuff
     Context.subscriptions.push(
