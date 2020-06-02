@@ -56,7 +56,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
 
   private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = ({ path: pluginPath } = { path: '' }) => {
     try {
-      const plugin = (__non_webpack_require__ || require)(pluginPath).default;
+      const plugin = (global.__non_webpack_require__ || require)(pluginPath).default;
       this.registerPlugin(plugin);
     } catch (error) {
       return Promise.reject(error);

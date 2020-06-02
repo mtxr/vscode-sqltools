@@ -70,7 +70,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return this.query(this.queries.fetchRecords(params), opt);
   }
 
-  protected needToInstallDependencies() {
+  public async checkDependencies() {
     if (parseInt(process.env.IS_NODE_RUNTIME || '0') !== 1) {
       throw new ElectronNotSupportedError();
     }
@@ -94,7 +94,6 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
         }
       });
     }
-    return false
   }
 
   public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {

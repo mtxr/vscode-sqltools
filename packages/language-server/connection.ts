@@ -31,6 +31,10 @@ export default class Connection {
   }
 
   public async connect() {
+    if (!this.connected && this.conn.checkDependencies) {
+      await this.conn.checkDependencies();
+    }
+
     if (typeof this.conn.testConnection === 'function')
       await this.conn.testConnection().catch(this.decorateException);
     else

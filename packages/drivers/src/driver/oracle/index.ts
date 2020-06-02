@@ -49,8 +49,6 @@ export default class OracleDB extends AbstractDriver<OracleDBLib.Connection, Ora
       return this.connection;
     }
 
-    this.needToInstallDependencies();
-
     let { connectString } = this.credentials;
     if (!connectString) {
       if (this.credentials.server && this.credentials.port) {

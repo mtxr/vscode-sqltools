@@ -20,8 +20,6 @@ export default class DB2 extends AbstractDriver<db2Lib.Database, any> implements
   }
 
   public async open() {
-    this.needToInstallDependencies();
-
     if (this.connection) {
       return this.connection;
     }

@@ -222,6 +222,7 @@ export interface IConnectionDriver {
   credentials: IConnection<any>;
   open(): Promise<any>;
   close(): Promise<any>;
+  checkDependencies(): Promise<void>;
   describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   showRecords(tableName: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }): Promise<NSDatabase.IResult[]>;
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;

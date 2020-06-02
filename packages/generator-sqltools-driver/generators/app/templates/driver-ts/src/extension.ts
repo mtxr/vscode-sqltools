@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
 import { ExtensionContext } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
-import { publisher, name } from '../package.json';
+const { publisher, name } = require('../package.json');
 // import { workspace } from 'vscode';
 // import { Uri } from 'vscode';
 // import path from 'path';

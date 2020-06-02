@@ -10,7 +10,8 @@
     "noEmit": false,
     "removeComments": true,
     "resolveJsonModule": true,
-    "sourceMap": false,
+    "sourceMap": true,
+    "skipLibCheck": true,
     "declaration": false,
     "target": "es2017",
 		"outDir": "out"

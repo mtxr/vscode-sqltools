@@ -21,7 +21,7 @@ function getDataPath(...args: string[]) {
   return path.resolve(SQLTOOLS_PATHS.data, ...args);
 }
 
-const _require: NodeRequire = __non_webpack_require__ || require;
+const _require: NodeRequire = global.__non_webpack_require__ || require;
 function _sqltoolsRequire(id) {
   log(`Require module ${getDataPath('node_modules', id)}`)
   return _require(getDataPath('node_modules', id));

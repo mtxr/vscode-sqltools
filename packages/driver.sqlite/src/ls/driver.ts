@@ -39,7 +39,6 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
       return this.connection;
     }
 
-    this.needToInstallDependencies();
     await this.createDirIfNotExists();
     const db = await new Promise<SQLiteLib.Database>(async (resolve, reject) => {
       const instance = new (this.lib).Database(await this.getDatabase(), (err) => {

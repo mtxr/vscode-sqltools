@@ -39,8 +39,6 @@ export default class SAPHana extends AbstractDriver<HanaConnection, any> impleme
       return this.connection;
     }
 
-    this.needToInstallDependencies();
-
     let connOptions = {
       HOST: this.credentials.server,
       PORT: this.credentials.port,
