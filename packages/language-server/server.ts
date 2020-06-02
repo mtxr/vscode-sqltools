@@ -54,11 +54,12 @@ class SQLToolsLanguageServer implements ILanguageServer {
     });
   }
 
-  private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = ({ path: pluginPath } = { path: '' }) => {
+  private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = async ({ path: pluginPath } = { path: '' }) => {
     try {
-      const plugin = (global.__non_webpack_require__ || require)(pluginPath).default;
-      this.registerPlugin(plugin);
+      const plugin = (__non_webpack_require__ || require)(pluginPath).default;
+      await this.registerPlugin(plugin);
     } catch (error) {
+      log.extend('error')('Error registering plugin: %O', error);
       return Promise.reject(error);
     }
   }
@@ -136,9 +137,11 @@ ExecPath: ${process.execPath}
     return this;
   }
 
-  public registerPlugin(plugin: ILanguageServerPlugin) {
-    plugin.register(this);
-    return this;
+  public registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]) {
+    return Promise.all(
+      (Array.isArray(plugin) ? plugin : [plugin].filter(Boolean))
+      .map(p => p.register(this))
+    );
   }
 
   public get sendNotification(): IConnection['sendNotification'] {

@@ -5,6 +5,8 @@ import IntellisensePlugin from '@sqltools/plugins/intellisense/language-server';
 
 new Server()
   .listen()
-  .registerPlugin(new FormatterPlugin())
-  .registerPlugin(new ConnectionManagerPlugin())
-  .registerPlugin(new IntellisensePlugin());
+  .registerPlugin([
+    new FormatterPlugin(),
+    new ConnectionManagerPlugin(),
+    new IntellisensePlugin(),
+  ]);

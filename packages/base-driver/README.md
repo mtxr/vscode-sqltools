@@ -11,6 +11,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.1.4
+
+- Update @sqltool/types fixing `checkDependencies` being requred. It's optional
+
 ### v0.1.3
 
 - Fix dynamic dependecy require issue.

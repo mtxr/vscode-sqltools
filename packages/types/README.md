@@ -12,6 +12,10 @@ This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltool
 
 # Changelog
 
+### v0.1.3
+
+- fixed `checkDependencies` being requred. It's optional
+
 ### v0.1.2
 
 - updated IConnectionDriver to export checkDependencies internal method

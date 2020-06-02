@@ -192,13 +192,16 @@ export class SQLToolsExtension implements IExtension {
     this.loaded = this.loaded || true;
     for (let plugin of pluginsQueue) {
       try {
-        plugin.register(this);
-        if (plugin.extensionId) {
-          this.extPlugins[plugin.type || 'general'] = this.extPlugins[plugin.type || 'general'] || [];
-          if (!this.extPlugins[plugin.type || 'general'].includes(plugin.extensionId)) {
-            this.extPlugins[plugin.type || 'general'].push(plugin.extensionId);
+        Promise.resolve(plugin.register(this)).then(() => {
+          if (plugin.extensionId) {
+            this.extPlugins[plugin.type || 'general'] = this.extPlugins[plugin.type || 'general'] || [];
+            if (!this.extPlugins[plugin.type || 'general'].includes(plugin.extensionId)) {
+              this.extPlugins[plugin.type || 'general'].push(plugin.extensionId);
+            }
           }
-        }
+        }).catch(err => {
+          this.errorHandler(`Error loading plugin ${plugin.name}`, err);
+        });
       } catch (error) {
         this.errorHandler(`Error loading plugin ${plugin.name}`, error);
       }
