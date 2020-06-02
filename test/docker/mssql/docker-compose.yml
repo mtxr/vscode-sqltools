@@ -3,7 +3,7 @@ version: '2.1'
 services:
   db:
     container_name: sqltools_mssql
-    image: mcr.microsoft.com/mssql/server
+    image: mcr.microsoft.com/mssql/server:latest
     restart: unless-stopped
     ports:
       - '1433:1433'
@@ -15,4 +15,20 @@ services:
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: root(!)Password
+      # USER: sa
+  db2017:
+    container_name: sqltools_mssql-2017
+    image: mcr.microsoft.com/mssql/server:2017-latest
+    restart: unless-stopped
+    ports:
+      - '1434:1433'
+    volumes:
+      - ./entrypoint.sh:/entrypoint.sh:Z
+      - ./import-data.sh:/import-data.sh:Z
+      - ./setup.sql:/setup.sql:Z
+    command: bash /entrypoint.sh
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: root(!)Password
+      MSSQL_PID: Express
       # USER: sa

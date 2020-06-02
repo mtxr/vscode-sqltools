@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mssql",
   "displayName": "SQLTools Microsoft SQL Server/Azure",
   "description": "SQLTools Microsoft SQL Server/Azure",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "engines": {
     "vscode": "^1.42.0"
   },
