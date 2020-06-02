@@ -1,6 +1,6 @@
 {
   "name": "generator-sqltools-driver",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "SQLTools driver generator",
   "homepage": "https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers",
   "author": {

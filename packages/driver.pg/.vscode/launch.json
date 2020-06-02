@@ -7,7 +7,7 @@
 	"configurations": [
 		{
 			"name": "Run PG Extension",
-			"type": "pwa-extensionHost",
+			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [

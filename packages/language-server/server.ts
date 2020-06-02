@@ -9,6 +9,7 @@ import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sq
 import { RegisterPlugin } from './contracts';
 import LSContext from './context';
 import { ExitCalledNotification } from '../extension/api/contracts';
+import { resolve as pathResolve } from 'path';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -55,8 +56,11 @@ class SQLToolsLanguageServer implements ILanguageServer {
   }
 
   private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = async ({ path: pluginPath } = { path: '' }) => {
+    log.extend('info')('request to register plugin: "%s"', pluginPath);
     try {
-      const plugin = (__non_webpack_require__ || require)(pluginPath).default;
+      let plugin = (__non_webpack_require__ || require)(pathResolve(pluginPath));
+      plugin = plugin.default || plugin;
+      log.extend('debug')('plugin object: "%O"', plugin);
       await this.registerPlugin(plugin);
     } catch (error) {
       log.extend('error')('Error registering plugin: %O', error);

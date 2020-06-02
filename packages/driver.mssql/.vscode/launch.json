@@ -7,7 +7,7 @@
 	"configurations": [
 		{
 			"name": "Run MSSQL Extension",
-			"type": "pwa-extensionHost",
+			"type": "extensionHost",
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [

@@ -3,7 +3,7 @@
 	"configurations": [
 		{
 			"name": "Run driver extension",
-			"type": "pwa-extensionHost",
+			"type": "extensionHost",
 			"request": "launch",
 			"args": [
 				"--extensionDevelopmentPath=${workspaceFolder}"

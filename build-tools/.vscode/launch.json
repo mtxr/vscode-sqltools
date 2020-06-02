@@ -6,7 +6,7 @@
   "configurations": [
     {
       "name": "Launch SQLTools",
-      "type": "pwa-extensionHost",
+      "type": "extensionHost",
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [

@@ -7,7 +7,7 @@
 	"configurations": [
 		{
 			"name": "Run MySQL Extension",
-			"type": "pwa-extensionHost",
+			"type": "extensionHost",
 			"request": "launch",
 			"args": [
         "${workspaceFolder}/../../test/project.code-workspace",
