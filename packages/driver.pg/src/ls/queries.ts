@@ -14,6 +14,11 @@ SELECT
   '${ContextValue.COLUMN}' as type,
   C.TABLE_NAME AS table,
   C.DATA_TYPE AS "dataType",
+  UPPER(C.DATA_TYPE || (
+    CASE WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
+      '(' || C.CHARACTER_MAXIMUM_LENGTH || ')'
+    ) ELSE '' END
+  )) AS "detail",
   C.CHARACTER_MAXIMUM_LENGTH::INT AS size,
   C.TABLE_CATALOG AS database,
   C.TABLE_SCHEMA AS schema,

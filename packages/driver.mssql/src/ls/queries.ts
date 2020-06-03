@@ -12,6 +12,11 @@ SELECT
   '${ContextValue.COLUMN}' as "type",
   C.TABLE_NAME AS "table",
   C.DATA_TYPE AS "dataType",
+  UPPER(C.DATA_TYPE + (
+    CASE WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
+      '(' + CONVERT(VARCHAR, C.CHARACTER_MAXIMUM_LENGTH) + ')'
+    ) ELSE '' END
+  )) AS "detail",
   C.CHARACTER_MAXIMUM_LENGTH AS size,
   C.TABLE_CATALOG AS "database",
   C.TABLE_SCHEMA AS "schema",
@@ -112,9 +117,9 @@ WHERE
   LOWER(T.TABLE_SCHEMA) NOT IN ('information_schema', 'sys', 'guest')
   AND LOWER(T.TABLE_SCHEMA) NOT LIKE 'db\\_%' ESCAPE '\\'
   ${p => p.search ? `AND (
-    LOWER(T.TABLE_CATALOG + '.' + T.TABLE_SCHEMA + '.' + T.TABLE_NAME) ILIKE '%${p.search.toLowerCase()}%'
-    OR LOWER('[' + T.TABLE_CATALOG + '].[' + T.TABLE_SCHEMA + '].[' + T.TABLE_NAME + ']') ILIKE '%${p.search.toLowerCase()}%'
-    OR LOWER(T.TABLE_NAME) ILIKE '%${p.search}%'
+    LOWER(T.TABLE_CATALOG + '.' + T.TABLE_SCHEMA + '.' + T.TABLE_NAME) LIKE '%${p.search.toLowerCase()}%'
+    OR LOWER('[' + T.TABLE_CATALOG + '].[' + T.TABLE_SCHEMA + '].[' + T.TABLE_NAME + ']') LIKE '%${p.search.toLowerCase()}%'
+    OR LOWER(T.TABLE_NAME) LIKE '%${p.search}%'
   )` : ''}
 ORDER BY
   T.TABLE_NAME
@@ -160,8 +165,8 @@ WHERE LOWER(C.TABLE_SCHEMA) NOT IN ('information_schema', 'sys', 'guest')
   }
   ${p => p.search
     ? `AND (
-      (C.TABLE_NAME + '.' + C.COLUMN_NAME) ILIKE '%${p.search}%'
-      OR C.COLUMN_NAME ILIKE '%${p.search}%'
+      (C.TABLE_NAME + '.' + C.COLUMN_NAME) LIKE '%${p.search}%'
+      OR C.COLUMN_NAME LIKE '%${p.search}%'
     )`
     : ''
   }

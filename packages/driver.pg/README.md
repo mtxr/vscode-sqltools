@@ -1,2 +1,4 @@
-# sqltools-driver-pg
+# SQLTools PostgreSQL/Redshift Driver
+
+[CHANGELOG](./CHANGELOG.md)
 

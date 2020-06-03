@@ -19,7 +19,14 @@ route: /changelog
 
 ### 0.22.1 - (May 29, 2020)
 
-@TODO
+- Drop support for NodeJS 9 or older.
+  - Old node versions required me to pack a bigger package and it was slower than NodeJS v10 or newer.
+- Deprecation of indent options in favor of editor options. This will make `sqltools.format.indentSize` unuseful and can be removed.
+- Add support to set number of lines between queries using `sqltools.format.linesBetweenQueries`. Default to 1. You can use `preserve` to keep the lines as is.
+- Renamed `dialect` option to `driver` on connection settings. Dialect still works, but will be removed on newer versions
+- Add option `sqltools.sessionFilesFolder` to set session files folder.
+- Add option `sqltools.connectionExplorer.groupConnected` to group connected connections.
+- Add Query Console panel to display messages instead of using the UI.
 
 ### 0.22.0 - (May 29, 2020)
 

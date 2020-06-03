@@ -1,27 +1,17 @@
 TODO:
   DRIVERS:
     - build all script
-  QUERY BUILDER:
-    - Insert queries should consider columns ordinal position
   EXPLORER:
     - Allow to add to auto connect using explorer
     - Allow to open Bookmarks file
   RESULTS:
     - Add option to refresh query results with hotkey or button
-  DOCS:
-    - LICENSE links
 
 VNEXT:
   DOCS:
-    - add notice drop support node < 8
-    - add version selector
     - write docs about settings
-    - Update add driver tool. Rename to `Example Driver`
     - SSL Certs PGSQL
     - PGSQL: auto connect on connection lost
-    - Re-do Drivers integrations (except PG that was POC)
     - add docs for formatting
-      - deprecation of indent options in favor of editor options
-    - update changelog
   DEP MANAGER:
     - Allow to use VSCode terminal api

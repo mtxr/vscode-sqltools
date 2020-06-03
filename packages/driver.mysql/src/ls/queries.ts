@@ -12,6 +12,22 @@ SELECT
   C.TABLE_NAME AS "table",
   C.DATA_TYPE AS "dataType",
   CAST(C.CHARACTER_MAXIMUM_LENGTH AS UNSIGNED) AS size,
+  UPPER(
+    CONCAT(
+      C.DATA_TYPE,
+      CASE
+        WHEN C.DATA_TYPE = 'text' THEN ''
+        ELSE (
+          CASE
+            WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
+              CONCAT('(', C.CHARACTER_MAXIMUM_LENGTH, ')')
+            )
+            ELSE ''
+          END
+        )
+      END
+    )
+  ) AS "detail",
   C.TABLE_CATALOG AS "catalog",
   C.TABLE_SCHEMA AS "database",
   C.TABLE_SCHEMA AS "schema",

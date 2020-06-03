@@ -162,7 +162,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
 
     if (Config.sessionFilesFolder && Config.sessionFilesFolder != '') {
-      baseFolder = Uri.file(getDataPath(Config.sessionFilesFolder));
+      baseFolder = Uri.file(Config.sessionFilesFolder);
     }
 
     const sessionFilePath = path.resolve(baseFolder.fsPath, getSessionBasename(conn.name));

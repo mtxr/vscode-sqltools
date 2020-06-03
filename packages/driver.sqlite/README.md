@@ -1,2 +1,3 @@
-# sqltools-driver-sqlite
+# SQLTools SQLite Driver
 
+[CHANGELOG](./CHANGELOG.md)
