@@ -75,6 +75,9 @@ export default class CodeLensPlugin implements IExtensionPlugin {
       if (event.affectsConfig('codelensLanguages')) {
         this.createCodelens();
       }
+      if (event.affectsConfig('highlightQuery')) {
+        this.updateDecorations(window.activeTextEditor);
+      }
     });
   }
 
@@ -82,6 +85,7 @@ export default class CodeLensPlugin implements IExtensionPlugin {
     return this.provider.reset();
   }
   updateDecorations = (editor: TextEditor) => {
+    if (!Config.highlightQuery) return;
     if (!editor || !editor.document || editor.document.uri.scheme === 'output' || !this.registeredLanguages.includes(editor.document.languageId)) {
       return;
     }

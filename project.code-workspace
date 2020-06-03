@@ -33,11 +33,13 @@
       "**/.git/subtree-cache/**": true,
       "**/node_modules/**": true,
       "**/.vscode-test": true,
+      "**/dist/**": true
     },
     "search.exclude": {
       "**/node_modules": true,
       "**/bower_components": true,
       "**/.vscode-test": true,
+      "**/dist": true
     },
     "typescript.tsdk": "root/node_modules/typescript/lib",
     "cSpell.words": [

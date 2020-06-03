@@ -7,7 +7,6 @@
     "experimentalDecorators": true,
     "lib": ["es6"],
     "module": "commonjs",
-    "noEmit": true,
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,

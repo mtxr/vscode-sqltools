@@ -12,6 +12,10 @@ This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltool
 
 # Changelog
 
+### v0.1.4
+
+- Add boolean option `highlightQuery` to extension configuration so query highlight can be disabled/enabled.
+
 ### v0.1.3
 
 - fixed `checkDependencies` being requred. It's optional

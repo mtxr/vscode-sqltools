@@ -8,6 +8,13 @@ export const GetConnectionsRequest = new RequestType<
   Error,
   void
 >('connection/GetConnectionsRequest');
+
+export const ForceListRefresh = new RequestType<
+  void,
+  void,
+  Error,
+  void
+>('connection/ForceListRefresh');
 export const GetConnectionPasswordRequest = new RequestType<
   { conn: IConnection },
   string,
@@ -21,7 +28,7 @@ export const RunCommandRequest = new RequestType<
   void
 >('connection/RunCommandRequest');
 export const ConnectRequest = new RequestType<
-  { conn: IConnection; password?: string },
+  { conn: IConnection; password?: string, [id: string]: any },
   IConnection,
   Error,
   void

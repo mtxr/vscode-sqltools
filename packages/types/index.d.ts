@@ -561,6 +561,13 @@ export interface ISettings {
    */
   codelensLanguages?: CodelensLanguages;
   /**
+   * Languages with SQL CodeLens enabled.
+   * @type {boolean}
+   * @default true
+   * @memberof ISettings
+   */
+   highlightQuery?: boolean;
+  /**
    * Format document/selection options
    * @type {IFormatOptions}
    * @memberof ISettings
@@ -784,7 +791,7 @@ export type LSContextMap =  Omit<Map<string, any>, 'clear' | 'delete'> & { drive
 export interface ILanguageServer {
   listen(): void;
   getContext(): LSContextMap;
-  registerPlugin(plugin: ILanguageServerPlugin): this;
+  registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]): Promise<void>;
   sendNotification: LSIConnection['sendNotification'];
   onRequest: LSIConnection['onRequest'];
   onNotification: LSIConnection['onNotification'];
