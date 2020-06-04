@@ -60,3 +60,9 @@ body.vscode-dark .syntax {
     background: rgba(255, 255, 255, 0.02);
   }
 }
+
+td, th {
+  .syntax {
+    height: auto !important;
+  }
+}

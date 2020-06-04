@@ -145,7 +145,7 @@
 
 .MuiTableCell-body, .MuiTableCell-root {
   color: inherit;
-  border: 1px solid var(--vscode-editor-lineHighlightBorder);
+  border: 1px solid var(--vscode-input-border);
   .syntax {
     font-family: var(--vscode-editor-font-family, var(--font-family));
     height: 300px;

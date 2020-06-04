@@ -2,6 +2,7 @@ import React from 'react';
 import { TableSelection } from '@devexpress/dx-react-grid-material-ui';
 import MTableRow from '@material-ui/core/TableRow';
 import { withStyles, createStyles, WithStyles } from '@material-ui/core/styles';
+import styled from 'styled-components';
 
 const styles = () => createStyles({
   selected: {
@@ -9,6 +10,12 @@ const styles = () => createStyles({
     color: 'var(--vscode-editor-selectionForeground)',
   },
 });
+
+const CustomTableRow = styled(MTableRow)`
+&.selected-row .td-syntax {
+  white-space: pre;
+}
+`;
 
 type SelectedRowProps = TableSelection.RowProps & WithStyles<typeof styles>;
 
@@ -21,8 +28,8 @@ const Selected = withStyles(styles, { name: 'TableSelectRow' })(({
   tableRow,
   ...restProps
  }: SelectedRowProps & TableSelection.RowProps) => (
-  <MTableRow
-    className={highlighted ? classes.selected : undefined}
+  <CustomTableRow
+    className={highlighted ? `${classes.selected} selected-row` : undefined}
     onClick={(e) => {
       if (!selectByRowClick) return;
       e.stopPropagation();
@@ -31,7 +38,7 @@ const Selected = withStyles(styles, { name: 'TableSelectRow' })(({
     {...restProps}
   >
     {children}
-  </MTableRow>
+  </CustomTableRow>
 ));
 const TableRow = {
   Selected,

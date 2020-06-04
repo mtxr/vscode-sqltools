@@ -1,18 +1,15 @@
 import React from 'react';
 export const ValueRender = ({ value }) => {
-  {
-    if (value === null)
-      return <small>NULL</small>;
-    if (value === true)
-      return <span>TRUE</span>;
-    if (value === false)
-      return <span>FALSE</span>;
-    if (typeof value === 'object' || Array.isArray(value)) {
-      const objString = JSON.stringify(value, null, 2);
-      return (<pre className="syntax json" data-value={value === null ? 'null' : objString}>{objString}</pre>);
-    }
-    value = String(value);
-    return <span>{value}</span>;
+  if (value === null)
+    return <small className='cell-value value-null'>NULL</small>;
+  if (typeof value === 'number')
+    return <span className='cell-value value-number'>{value}</span>;
+  if (value === true || value === false)
+    return <span className={`cell-value value-bool ${value.toString()}`}>{value.toString().toUpperCase()}</span>;
+  if (typeof value === 'object' || Array.isArray(value)) {
+    return (<>{JSON.stringify(value, null, 2)}</>);
+  }
+  return <>{String(value)}</>;
     // DISABLE! Performance issues here
     // return <span>
     //   {
@@ -30,7 +27,6 @@ export const ValueRender = ({ value }) => {
     //     })
     //   }
     // </span>
-  }
 };
 
 export default ValueRender;
