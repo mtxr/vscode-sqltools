@@ -1,5 +1,4 @@
-import isEmpty from 'lodash/isEmpty'
-import escapeRegExp from 'lodash/escapeRegExp';
+import escapeRegExp from '../core/escapeRegExp';
 import { TokenTypes, Token, TokenizerConfig } from './types';
 
 export default class Tokenizer {
@@ -118,8 +117,8 @@ export default class Tokenizer {
     }
   }
 
-  createPlaceholderRegex(types, pattern) {
-    if (isEmpty(types)) {
+  createPlaceholderRegex(types: string[], pattern) {
+    if (!types || types.length === 0) {
       return null;
     }
     const typesRegex = types.map(escapeRegExp).join('|');
@@ -150,8 +149,8 @@ export default class Tokenizer {
       input = input.substring(token.value.length);
 
       tokens.push(token);
-      // console.log(tokens)
     }
+    // console.log(tokens)
     return tokens;
   }
 

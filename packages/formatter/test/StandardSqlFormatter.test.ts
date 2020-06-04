@@ -615,5 +615,5 @@ where id = $1`);
       expect(format(i))
         .toEqual(i);
     }
-  })
+  });
 });

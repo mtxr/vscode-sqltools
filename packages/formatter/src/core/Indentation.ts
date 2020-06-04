@@ -1,5 +1,4 @@
-import repeat from 'lodash/repeat';
-import last from 'lodash/last';
+import last from './last';
 
 const INDENT_TYPE_TOP_LEVEL = 'top-level';
 const INDENT_TYPE_BLOCK_LEVEL = 'block-level';
@@ -26,7 +25,7 @@ export default class Indentation {
    * @return {string}
    */
   getIndent() {
-    return repeat(this.indent, this.indentTypes.length);
+    return new Array(this.indentTypes.length).fill(this.indent).join('');
   }
 
   /**
