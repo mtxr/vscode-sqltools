@@ -616,4 +616,30 @@ where id = $1`);
         .toEqual(i);
     }
   });
+
+  it(`format grant stataments with keyword identation`, () => {
+    let input = `GRANT ALTER, CREATE, DELETE, EXECUTE, INSERT, SELECT, REFERENCES, TRIGGER, UPDATE ON *.* TO 'user' @'%';`;
+
+    expect(format(input)).toEqual(dedent(`
+    GRANT ALTER,
+      CREATE,
+      DELETE,
+      EXECUTE,
+      INSERT,
+      SELECT,
+      REFERENCES,
+      TRIGGER,
+      UPDATE ON *.* TO 'user' @'%';
+    `))
+
+    input = `GRANT INSERT, SELECT, REFERENCES, TRIGGER,   UPDATE ON *    TO    'user' @'%';`;
+
+    expect(format(input)).toEqual(dedent(`
+    GRANT INSERT,
+      SELECT,
+      REFERENCES,
+      TRIGGER,
+      UPDATE ON * TO 'user' @'%';
+    `))
+  });
 });

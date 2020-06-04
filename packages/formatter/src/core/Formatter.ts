@@ -9,6 +9,7 @@ const trimSpacesEnd = str => str.replace(/[ \t]+$/u, '');
 export default class Formatter {
   private tokens: Token[] = [];
   private previousReservedWord: Token = { type: null, value: null };
+  private previousNonWhiteSpace: Token = { type: null, value: null };
   private indentation: Indentation;
   private inlineBlock: InlineBlock;
   private params: Params;
@@ -79,8 +80,8 @@ export default class Formatter {
         formattedQuery = this.formatWithSpaces(token, formattedQuery);
       }
 
-      if (this.previousToken().type === TokenTypes.RESERVED_TOP_LEVEL) {
-        this.indentation.increaseTopLevel();
+      if (token.type !== TokenTypes.WHITESPACE) {
+        this.previousNonWhiteSpace = token;
       }
     });
     return formattedQuery;
@@ -143,11 +144,15 @@ export default class Formatter {
   }
 
   formatTopLevelReservedWord(token: Token, query: string) {
-    this.indentation.decreaseTopLevel();
-
-    query = this.addNewline(query);
-
-    return query + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
+    const shouldChangeTopLevel = (this.previousNonWhiteSpace.value !== ',' && `${this.previousNonWhiteSpace.value}`.toUpperCase() !== 'GRANT');
+    if (shouldChangeTopLevel) {
+      this.indentation.decreaseTopLevel();
+      query = this.addNewline(query);
+    }
+    query = query + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
+    if (shouldChangeTopLevel)
+      this.indentation.increaseTopLevel();
+    return query;
   }
 
   formatNewlineReservedWord(token: Token, query: string) {
