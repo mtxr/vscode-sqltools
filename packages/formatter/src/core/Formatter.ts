@@ -63,6 +63,8 @@ export default class Formatter {
         formattedQuery = this.formatOpeningParentheses(token, formattedQuery);
       } else if (token.type === TokenTypes.CLOSE_PAREN) {
         formattedQuery = this.formatClosingParentheses(token, formattedQuery);
+      } else if (token.type === TokenTypes.NO_SPACE_OPERATOR) {
+        formattedQuery = this.formatWithoutSpaces(token, formattedQuery);
       } else if (token.type === TokenTypes.PLACEHOLDER || token.type === TokenTypes.SERVERVARIABLE) {
         formattedQuery = this.formatPlaceholder(token, formattedQuery);
       } else if (token.value === ',') {

@@ -10,6 +10,7 @@ export enum TokenTypes {
   RESERVED_TOP_LEVEL_NO_INDENT = 'reserved-top-level-no-indent',
   RESERVED_NEWLINE = 'reserved-newline',
   OPERATOR = 'operator',
+  NO_SPACE_OPERATOR = 'no-space-operator',
   OPEN_PAREN = 'open-paren',
   CLOSE_PAREN = 'close-paren',
   LINE_COMMENT = 'line-comment',

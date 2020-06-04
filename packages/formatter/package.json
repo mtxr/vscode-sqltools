@@ -30,7 +30,8 @@
     "check": "yarn run test",
     "precompile": "yarn run check && yarn run clean",
     "compile": "./node_modules/.bin/tsc -p tsconfig.json",
-    "build": "yarn run compile"
+    "build": "yarn run compile",
+    "prepack": "yarn run build"
   },
   "repository": {
     "type": "git",

@@ -581,4 +581,39 @@ where id = $1`);
       and symbol = 'sh600008';
     `))
   })
+
+  it('format json operators correctly', () => {
+    const input = dedent(`
+    SELECT json_col FROM (SELECT '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]' :: jsonb json_col) AS tbl
+    WHERE json_col @> '[{"c":"baz"}]';`);
+
+    expect(format(input)).toEqual(dedent(`
+    SELECT json_col
+    FROM (
+        SELECT '[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::jsonb json_col
+      ) AS tbl
+    WHERE json_col @> '[{"c":"baz"}]';`));
+
+    let inputs = [
+      `'{"a":1, "b":2}'::jsonb @> '{"b":2}'::jsonb`,
+      `'{"b":2}'::jsonb <@ '{"a":1, "b":2}'::jsonb`,
+      `'{"a":1, "b":2}'::jsonb ? 'b'`,
+      `'{"a":1, "b":2, "c":3}'::jsonb ?| array ['b', 'c']`,
+      `'["a", "b"]'::jsonb ?& array ['a', 'b']`,
+      `'["a", "b"]'::jsonb || '["c", "d"]'::jsonb`,
+      `'{"a": "b"}'::jsonb - 'a''{"a": "b"}'::jsonb - 'a''{"a": "b"}'::jsonb - 'a'`,
+      `'["a", "b"]'::jsonb - 1`,
+      `'["a", {"b":1}]'::jsonb #- '{1,b}'`,
+      `'[{"a":"foo"},{"b":"bar"},{"c":"baz"}]'::json->2`,
+      `'{"a": {"b":"foo"}}'::json->'a'`,
+      `'[1,2,3]'::json->>2`,
+      `'{"a":1,"b":2}'::json->>'b'`,
+      `'{"a": {"b":{"c": "foo"}}}'::json#>'{a,b}'`,
+      `'{"a":[1,2,3],"b":[4,5,6]}'::json#>>'{a,2}'`,
+    ];
+    for (let i of inputs) {
+      expect(format(i))
+        .toEqual(i);
+    }
+  })
 });

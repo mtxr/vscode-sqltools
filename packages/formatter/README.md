@@ -6,3 +6,9 @@
 > Forked from [zeroturnaround/sql-formatter](https://zeroturnaround.github.io/sql-formatter/)
 
 This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltools) extension.
+
+
+## Changelog
+
+#### v(next)
+  - Fixes JSON operators not inserting spaces. Issue [#605](https://github.com/mtxr/vscode-sqltools/issues/605)

@@ -5,7 +5,9 @@ import { TokenTypes, Token, TokenizerConfig } from './types';
 export default class Tokenizer {
   public WHITESPACE_REGEX: RegExp;
   public NUMBER_REGEX: RegExp;
+  public AMBIGUOS_OPERATOR_REGEX: RegExp;
   public OPERATOR_REGEX: RegExp;
+  public NO_SPACE_OPERATOR_REGEX: RegExp;
   public BLOCK_COMMENT_REGEX: RegExp;
   public LINE_COMMENT_REGEX: RegExp;
   public RESERVED_TOP_LEVEL_REGEX: RegExp;
@@ -37,7 +39,9 @@ export default class Tokenizer {
   constructor(cfg: TokenizerConfig) {
     this.WHITESPACE_REGEX = /^(\s+)/u;
     this.NUMBER_REGEX = /^((-\s*)?[0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+|([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}))\b/u;
-    this.OPERATOR_REGEX = /^(!=|<>|>>|<<|==|<=|>=|!<|!>|\|\|\/|\|\/|\|\||::|->>|->|~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|@|.)/u;
+    this.AMBIGUOS_OPERATOR_REGEX = /^(\?\||\?&)/u;
+    this.OPERATOR_REGEX = /^(!=|<>|>>|<<|==|<=|>=|!<|!>|\|\|\/|\|\/|\|\||~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|@>|<@|#-|@|.)/u;
+    this.NO_SPACE_OPERATOR_REGEX = /^(::|->>|->|#>>|#>)/u;
 
     this.BLOCK_COMMENT_REGEX = /^(\/\*[^]*?(?:\*\/|$))/u;
     this.LINE_COMMENT_REGEX = this.createLineCommentRegex(cfg.lineCommentTypes);
@@ -61,7 +65,7 @@ export default class Tokenizer {
   }
 
   createLineCommentRegex(lineCommentTypes) {
-    return new RegExp(`^((?:${lineCommentTypes.map(c => escapeRegExp(c)).join('|')}).*?(?:\r\n|\r|\n|$))`, 'u');
+    return new RegExp(`^((?:${lineCommentTypes.map(c => escapeRegExp(c)).join('|')})[^>]*?(?:\r\n|\r|\n|$))`, 'u');
   }
 
   createReservedWordRegex(reservedWords) {
@@ -146,6 +150,7 @@ export default class Tokenizer {
       input = input.substring(token.value.length);
 
       tokens.push(token);
+      // console.log(tokens)
     }
     return tokens;
   }
@@ -157,6 +162,8 @@ export default class Tokenizer {
       this.getStringToken(input) ||
       this.getOpenParenToken(input) ||
       this.getCloseParenToken(input) ||
+      this.getAmbiguosOperatorToken(input) ||
+      this.getNoSpaceOperatorToken(input) ||
       this.getServerVariableToken(input) ||
       this.getPlaceholderToken(input) ||
       this.getNumberToken(input) ||
@@ -285,6 +292,22 @@ export default class Tokenizer {
       input,
       type: TokenTypes.OPERATOR,
       regex: this.OPERATOR_REGEX,
+    });
+  }
+
+  getAmbiguosOperatorToken(input: string): Token {
+    return this.getTokenOnFirstMatch({
+      input,
+      type: TokenTypes.OPERATOR,
+      regex: this.AMBIGUOS_OPERATOR_REGEX,
+    });
+  }
+
+  getNoSpaceOperatorToken(input: string): Token {
+    return this.getTokenOnFirstMatch({
+      input,
+      type: TokenTypes.NO_SPACE_OPERATOR,
+      regex: this.NO_SPACE_OPERATOR_REGEX,
     });
   }
 
