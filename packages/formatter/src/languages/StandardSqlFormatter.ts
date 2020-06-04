@@ -300,6 +300,7 @@ const reservedTopLevelWords = [
   'ALTER COLUMN',
   'ALTER TABLE',
   'CREATE OR REPLACE',
+  'DECLARE',
   'DELETE FROM',
   'EXCEPT',
   'FETCH FIRST',

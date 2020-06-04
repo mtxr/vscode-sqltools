@@ -22,7 +22,7 @@ export enum TokenTypes {
 export interface Config {
   indent?: string;
   params?: Object;
-  reservedWordCase?: string;
+  reservedWordCase?: 'upper' | 'lower';
   language?: 'sql' | 'db2' | 'n1ql' | 'pl/sql';
   linesBetweenQueries?: number | 'preserve';
 }

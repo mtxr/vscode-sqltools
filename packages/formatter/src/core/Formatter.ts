@@ -144,7 +144,7 @@ export default class Formatter {
   }
 
   formatTopLevelReservedWord(token: Token, query: string) {
-    const shouldChangeTopLevel = (this.previousNonWhiteSpace.value !== ',' && `${this.previousNonWhiteSpace.value}`.toUpperCase() !== 'GRANT');
+    const shouldChangeTopLevel = (this.previousNonWhiteSpace.value !== ',' && !['GRANT'].includes(`${this.previousNonWhiteSpace.value}`.toUpperCase()));
     if (shouldChangeTopLevel) {
       this.indentation.decreaseTopLevel();
       query = this.addNewline(query);

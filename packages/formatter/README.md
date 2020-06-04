@@ -10,5 +10,9 @@ This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltool
 
 ## Changelog
 
-#### v(next)
+#### v1.2.1
   - Fixes JSON operators not inserting spaces. Issue [#605](https://github.com/mtxr/vscode-sqltools/issues/605)
+  - Fixes Grant type queries. Issue [#460](https://github.com/mtxr/vscode-sqltools/issues/460)
+
+#### v1.2.1
+  - (Almost) first public version
