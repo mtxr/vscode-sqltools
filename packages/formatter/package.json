@@ -32,7 +32,8 @@
     "compile": "./node_modules/.bin/tsc -p tsconfig.json",
     "build": "yarn run compile",
     "prepare": "yarn run build",
-    "prepack": "yarn run build"
+    "prepack": "yarn run build",
+    "release": "npm pack && npm publish *.tgz --latest"
   },
   "repository": {
     "type": "git",
