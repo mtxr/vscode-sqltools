@@ -64,11 +64,13 @@
     } catch (error) {log(error);}
   }
 
+  var timerRender = 0;
   function renderAd() {
     clearTag('#' + adTagId)
     prevHref = location.href
     if (w['__adprovider'] === CARBON) return renderCarbon()
     renderCodefund()
+    timerRender = 0;
   }
 
   var locationTimeout
@@ -79,7 +81,7 @@
     clearTimeout(locationTimeout)
     setTimeout(renderAd, 250)
   }
-  
+
   var prevOnLoad = w.onload
   w.addEventListener('codefund', function(evt) {
     log('codefund', evt['detail'])
@@ -103,6 +105,10 @@
     setProvider(Math.random() <= 0.7 ? CODEFUND : CARBON)
     w.addEventListener('pagechanged', pageChanged)
     pageChanged(w)
+    setInterval(function() {
+      if (timerRender < 18) return ++timerRender;
+      renderAd();
+    }, 10000);
     prevOnLoad && prevOnLoad.apply(w, arguments)
     setTimeout(function() {
       if (!location.hash) return

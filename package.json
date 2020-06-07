@@ -44,6 +44,7 @@
     "minimist": "^1.2.3",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
-    "typescript": "^3.7.3"
+    "typescript": "^3.7.3",
+    "vsce": "1.76.0"
   }
 }

@@ -67,3 +67,7 @@
   margin-top: -25px;
   margin-left: 100px;
 }
+
+#root [class*=Sidebar__Menus-] > div:last-child {
+  margin-bottom: 50px;
+}

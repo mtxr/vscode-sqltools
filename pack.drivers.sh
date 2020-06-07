@@ -4,8 +4,12 @@ set -e
 set -x
 
 # temporary script
-export DISPLAY_NAME=\"SQLTools\"
+export DISPLAY_NAME=SQLTools
 export NODE_ENV=production
+
+VSCE=$(yarn bin)/vsce
+
+$VSCE --version
 
 rm -rf *.vsix || 'echo nothing to remove';
 rm -rf dist || 'echo nothing to remove';
@@ -21,11 +25,11 @@ checkAndPackDriver() {
     cd packages/$1/ &&
     test -f "$PWD/out/extension.js" &&
     test -f "$PWD/out/ls/plugin.js" &&
-    vsce package --yarn -o ../../.
+    $VSCE package --yarn -o ../../.
   )
 }
 
-(cd dist && vsce package --yarn -o ../.)
+(cd dist && $VSCE package --yarn -o ../.)
 checkAndPackDriver driver.mssql
 checkAndPackDriver driver.mysql
 checkAndPackDriver driver.pg

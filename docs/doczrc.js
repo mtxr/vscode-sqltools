@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as theme from './src/theme/config';
+import { css } from 'docz-plugin-css'
 
 const PUBLIC = path.resolve(__dirname, 'assets');
 const SRC = path.resolve(__dirname, 'src')
@@ -23,6 +24,14 @@ export default {
     { name: 'Changelog', order: 100  }
   ],
   plugins: [
+    css({
+      preprocessor: 'sass',
+      cssmodules: true
+    }),
+    css({
+      preprocessor: 'postcss',
+      cssmodules: true
+    })
   ],
   public: './public',
   dest: 'dist',
@@ -56,7 +65,15 @@ export default {
       .set('@fonts', `${PUBLIC}/fonts`)
       .set('@images', `${PUBLIC}/images`)
       .set('@components', `${SRC}/theme/components`)
-      .set('@styles', `${SRC}/theme/styles`)
+      .set('@styles', `${SRC}/theme/styles`);
+    config.module.rules.get('ts').include
+      .add(__dirname + '/node_modules')
+      .add(__dirname + '/../node_modules')
+      .add(__dirname + '/../packages')
+      .add(__dirname + '/..');
+    config.module.rules.get('ts').exclude.clear();
+
+    config.resolve.extensions.add('.css');
 
     return config
   },

@@ -2,13 +2,61 @@
 
 [![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools)](https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE)
 
-
-> Forked from [zeroturnaround/sql-formatter](https://zeroturnaround.github.io/sql-formatter/)
+> Forked from [zeroturnaround/sql-formatter](https://zeroturnaround.github.io/sql-formatter/) but with improvements and ported Typescript.
 
 This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltools) extension.
 
+&rarr; Try it online using our **[playground](https://vscode-sqltools.mteixeira.dev/playground/formatter)**.
+
+## Install
+
+Get the latest version from NPM/Yarn:
+
+```shell
+npm install @sqltools/formatter
+#
+yarn add @sqltools/formatter
+```
+
+## Usage
+
+```ts
+import sqlFormatter from 'sql-formatter';
+
+console.log(sqlFormatter.format('SELECT * FROM table1'));
+```
+
+Will output:
+
+```
+SELECT *
+FROM table1
+```
+
+You can also pass in configuration options:
+
+```js
+sqlFormatter.format("SELECT *", {
+    language: "sql",
+    indent: '\t'   // Defaults to two spaces
+});
+```
+
+## Options
+
+| option | description | type | default |
+|--------|-------------|------|---------|
+| language | Query language, default is Standard SQL | `sql, n1ql, db2, pl/sql` | `sql` |
+| indent | Characters used for indentation | `string` | ` ` (2 spaces)|
+| reservedWordCase | Reserverd words case change. | `upper`, `lower`, `null` | `null` (no change) |
+| linesBetweenQueries | How many line breaks between queries | `number` or `'preserve'` | `1` |
+| params | Collection of params for placeholder replacement | `object` for name params, `array` for indexed placeholders | |
 
 ## Changelog
+
+#### v1.2.2
+ - Add playground link and options to README.md
+ - Emitting declarations files for usage with Typescript.
 
 #### v1.2.1
   - Fixes JSON operators not inserting spaces. Issue [#605](https://github.com/mtxr/vscode-sqltools/issues/605)

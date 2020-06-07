@@ -1,9 +1,10 @@
 {
   "name": "@sqltools/formatter",
-  "version": "1.2.1",
+  "version": "1.2.2",
   "description": "Formats SQL queries. Part of SQLTools",
   "license": "MIT",
-  "main": "lib/sqlFormatter.js",
+  "main": "./lib/sqlFormatter.js",
+  "types": "./lib/index.d.ts",
   "private": false,
   "publishConfig": {
     "access": "public",
@@ -21,10 +22,10 @@
     "Matheus Teixeira <matheus@mteixeira.dev>"
   ],
   "files": [
-    "lib"
+    "lib/**/*"
   ],
   "scripts": {
-    "clean": "rimraf lib dist",
+    "clean": "rimraf lib dist *.tgz",
     "test": "jest --config jest.config.js",
     "test:watch": "yarn run test -- --watch",
     "check": "yarn run test",
