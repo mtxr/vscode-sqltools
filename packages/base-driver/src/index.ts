@@ -71,29 +71,28 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
 
   public async checkDependencies() {
-    if (parseInt(process.env.IS_NODE_RUNTIME || '0') !== 1) {
+    if (!this.deps || this.deps.length === 0) return;
+    if (Number(process.env.IS_NODE_RUNTIME || '0') !== 1) {
       throw new ElectronNotSupportedError();
     }
-    if (this.deps && this.deps.length > 0) {
-      this.deps.forEach(dep => {
-        let mustUpgrade = false;
-        switch (dep.type) {
-          case AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE:
-            try {
-              delete sqltoolsRequire.cache[sqltoolsRequire.resolve(dep.name + '/package.json')];
-              const { version } = sqltoolsRequire(dep.name + '/package.json');
-              if (dep.version && version !== dep.version) {
-                mustUpgrade = true;
-                throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
-              }
-              sqltoolsRequire(dep.name);
-            } catch(e) {
-              throw new MissingModuleError(this.deps, this.credentials, mustUpgrade);
+    this.deps.forEach(dep => {
+      let mustUpgrade = false;
+      switch (dep.type) {
+        case AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE:
+          try {
+            delete sqltoolsRequire.cache[sqltoolsRequire.resolve(dep.name + '/package.json')];
+            const { version } = sqltoolsRequire(dep.name + '/package.json');
+            if (dep.version && version !== dep.version) {
+              mustUpgrade = true;
+              throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
             }
-            break;
-        }
-      });
-    }
+            sqltoolsRequire(dep.name);
+          } catch(e) {
+            throw new MissingModuleError(this.deps, this.credentials, mustUpgrade);
+          }
+          break;
+      }
+    });
   }
 
   public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {
