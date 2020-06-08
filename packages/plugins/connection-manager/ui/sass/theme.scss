@@ -169,3 +169,12 @@
     cursor: pointer;
   }
 }
+
+[class*=FilterSelector-selectMenu] {
+  .MuiListItem-root {
+    flex-direction: row;
+    .MuiListItemIcon-root[class*=FilterSelector-iconItem] {
+      display: inline-block;
+    }
+  }
+}

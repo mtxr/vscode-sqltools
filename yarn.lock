@@ -851,7 +851,7 @@
   resolved "https://registry.yarnpkg.com/@devexpress/dx-grid-core/-/dx-grid-core-2.6.3.tgz#e453136d655ba17f866c1b39e1a5f30edfe25bf3"
   integrity sha512-hYgBM/vv70gjIpuHzS80CagzDenoT20ddIcFOLJQinsAk3mdFJr/fkJAMB819wop225S0Rtb+Z157EGNgMCAXA==
 
-"@devexpress/dx-react-core@^2.5.1":
+"@devexpress/dx-react-core@^2.6.3":
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/@devexpress/dx-react-core/-/dx-react-core-2.6.3.tgz#536fb946c59d0932408e829974666296208f1268"
   integrity sha512-lKmmhHCfOBfkEFaa/SOt7DjdMLvkHqgwIiWBXaZEqK6kJk4u0Y5+yWJLUo0O9RNszaKQzAoDMQUupi47fbCPWg==
@@ -859,7 +859,7 @@
     "@devexpress/dx-core" "2.6.3"
     prop-types "^15.7.2"
 
-"@devexpress/dx-react-grid-material-ui@^2.5.1":
+"@devexpress/dx-react-grid-material-ui@^2.6.3":
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/@devexpress/dx-react-grid-material-ui/-/dx-react-grid-material-ui-2.6.3.tgz#780f17bb702006bcebd3c5b24a239de586d4e6be"
   integrity sha512-7tVQVrbGQNrkbOOF/xd8mTk7vAsDwQ8URRvRJGILthcnewPCJZqzmjsMV4GRQ1bEAQKAiCnRDbPunvR4vW0GEw==
@@ -867,7 +867,7 @@
     clsx "^1.0.4"
     prop-types "^15.7.2"
 
-"@devexpress/dx-react-grid@^2.5.1":
+"@devexpress/dx-react-grid@^2.6.3":
   version "2.6.3"
   resolved "https://registry.yarnpkg.com/@devexpress/dx-react-grid/-/dx-react-grid-2.6.3.tgz#c568c6681bd18f639832b9882f78113f65ae8ae1"
   integrity sha512-s2RMhn6Ctbe/Tp066sWgscC2eZVTTQfKs2VOR/p9gD1vMIQFPGUkSS/XyDwMPb5MD7DRvFYJ2U8oQryobB2yoQ==
@@ -1049,7 +1049,7 @@
     "@types/istanbul-reports" "^1.1.1"
     "@types/yargs" "^13.0.0"
 
-"@material-ui/core@^4.9.7":
+"@material-ui/core@^4.10.1":
   version "4.10.1"
   resolved "https://registry.yarnpkg.com/@material-ui/core/-/core-4.10.1.tgz#e3db4ca55d2af6cc23a1159ef5c32ad97c43c39c"
   integrity sha512-bJb/07JFTht0oSjoWMu0j7r1mx4EbJ2ZHx+OKiY+i6IYW/4JPZ1J6rZuFS2b9jT+slSONPZaZq/kHitbE5lcig==
@@ -1141,7 +1141,7 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@rjsf/core@^2.0.1":
+"@rjsf/core@^2.0.2":
   version "2.0.2"
   resolved "https://registry.yarnpkg.com/@rjsf/core/-/core-2.0.2.tgz#b6fdbcd730711ee0f985c7940f5b4f61ac4da77c"
   integrity sha512-2QpWwhc9epc37G8K0jsFfjgjooPSq7zjqvtoixuHhYBTc3ixYcmSWmzNbt/MtTvMvt1hZHXZTVQeXYcGjqXgIQ==
@@ -2346,7 +2346,7 @@ combined-stream@^1.0.6, combined-stream@~1.0.6:
   dependencies:
     delayed-stream "~1.0.0"
 
-command-exists@1.2.9:
+command-exists@1.2.9, command-exists@^1.2.9:
   version "1.2.9"
   resolved "https://registry.yarnpkg.com/command-exists/-/command-exists-1.2.9.tgz#c50725af3808c8ab0260fd60b01fbfa25b954f69"
   integrity sha512-LTQ/SGc+s0Xc0Fu5WaKnR0YiygZkm9eKFvyS+fRsU7/ZWFF8ykFM6Pc9aCVf1+xasOOZpO3BAVgVrKvsqKHV7w==

@@ -10,6 +10,7 @@ import {
   CustomPaging,
   PagingStateProps,
   SelectionState,
+  TableColumnResizingProps,
 } from '@devexpress/dx-react-grid';
 
 import {
@@ -38,6 +39,7 @@ import { initialState, TableState } from './state';
 import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
 import { UIAction } from '../../../../../actions';
+import { filterPredicate } from '../../utils/filterPredicate';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -118,8 +120,11 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
     }
   };
 
-  updateWidths = (columnExtensions) => {
-    this.setState({ columnExtensions });
+  updateWidths: TableColumnResizingProps["onColumnWidthsChange"] = (columnExtensions) => {
+    this.setState({ columnExtensions: columnExtensions.map(c => ({
+      ...c,
+      predicate: (c as any).predicate || filterPredicate,
+    })) });
   }
 
   tableContextOptions = (row: any, column: MTable.DataCellProps['column']): any[] => {
