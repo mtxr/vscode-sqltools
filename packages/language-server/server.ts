@@ -11,6 +11,7 @@ import LSContext from './context';
 import { ExitCalledNotification } from '../extension/api/contracts';
 import { resolve as pathResolve } from 'path';
 import logger from '@sqltools/util/log';
+import { spawnSync } from 'child_process';
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -136,10 +137,18 @@ class SQLToolsLanguageServer implements ILanguageServer {
   }
 
   public listen() {
+    const isNode = parseInt(process.env.IS_NODE_RUNTIME || '0') === 1;
+    let version = '';
+    try {
+      if (isNode) {
+        const { output } = spawnSync(process.execPath, ['-v']);
+        version = output.join('');
+      }
+    } catch (error) { }
     log.extend('info')(`${DISPLAY_NAME} Server started!
 ===============================
-Using node runtime?: ${parseInt(process.env.IS_NODE_RUNTIME || '0') === 1}
-ExecPath: ${process.execPath}
+Using node runtime?: ${isNode ? 'yes' : 'no'}
+ExecPath: ${process.execPath} ${version.replace(/[\r\n]/g, '').trim()}
 ===============================`)
     this._server.listen();
     return this;
@@ -162,7 +171,7 @@ ExecPath: ${process.execPath}
     if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
       log.extend('debug')('REQUEST => %s', req._method || req.toString());
-      process.env.NODE_ENV === 'development' && log.extend('debug')('REQUEST => %s %O', req._method || req.toString(), args);
+      process.env.NODE_ENV === 'development' && log.extend('debug')('REQUEST => %s %o', req._method || req.toString(), args);
       process.env.NODE_ENV !== 'development' && log.extend('debug')('REQUEST => %s', req._method || req.toString());
       return Promise.resolve(handler(...args));
     });

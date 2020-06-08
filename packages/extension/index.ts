@@ -268,7 +268,7 @@ export class SQLToolsExtension implements IExtension {
   private decorateAndRegisterCommand = (command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') => {
     Context.subscriptions.push(
       commands[type](`${EXT_NAMESPACE}.${command}`, async (...args) => {
-        process.env.NODE_ENV === 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command} %O`, args);
+        process.env.NODE_ENV === 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command} %o`, args);
         process.env.NODE_ENV !== 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command}`);
 
         this.onWillRunCommandEmitter.fire({ command, args });
