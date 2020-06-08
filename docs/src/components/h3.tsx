@@ -23,21 +23,33 @@ const Heading: any = styled.h3`
 
   ${(props: any) => props.theme.docz.styles.h3};
 
+  > a {
+    text-decoration: none;
+    color: inherit;
+    &:hover {
+      text-decoration: underline;
+    }
+  }
   svg {
     top: 5px;
   }
 `
+const versionRegEx = /^\s*(v(\d+\.\d+\.\d+|[^\s]+)).*/gi;
 
-const H3: SFC<React.HTMLAttributes<any>> = ({ children, ...props }) => {
+const H3: SFC<React.HTMLAttributes<any>> = ({ children, id: calculatedId, ...props }) => {
   const pathname = typeof window !== 'undefined' ? location.pathname : '/'
   const { linkComponent: Link } = useConfig()
-  if (!Link) return null
+  let id = calculatedId;
+  if (typeof children === 'string' && versionRegEx.test(children)) {
+    id = children.replace(versionRegEx, '$1').replace(/[^\w]/g, '-');
+  }
+  if (!Link) return null;
   return (
-    <Heading {...props}>
-      <Link aria-hidden to={`${pathname}#${props.id}`}>
+    <Heading {...props} id={id}>
+      <Link aria-hidden to={`${pathname}#${id}`}>
         <Icon className="heading--Icon" height={20} />
+        {children}
       </Link>
-      {children}
     </Heading>
   )
 }

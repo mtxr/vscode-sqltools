@@ -30,7 +30,7 @@ namespace Utils {
     const localConfig = {
       current: <ILocalRunInfo>{
         numericVersion: numericVersion(VERSION),
-        releaseNotes: `${DOCS_ROOT_URL}/changelog#v-${VERSION.replace(/\./g, '-')}`,
+        releaseNotes: `${DOCS_ROOT_URL}/changelog#v-${VERSION.replace(/^\s*(v(\d+\.\d+\.\d+|[^\s]+)).*/gi, '$1').replace(/[^\w]/g, '-')}`,
         run: new Date().getTime(),
         updated: false,
         version: VERSION,
