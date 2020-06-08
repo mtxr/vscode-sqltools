@@ -154,7 +154,11 @@
             {
                 "title": "Bookmark Selected Query",
                 "command": "sqltools.bookmarkSelection",
-                "category": "SQLTools Bookmarks"
+                "category": "SQLTools Bookmarks",
+                "icon": {
+                    "light": "icons/add-light.svg",
+                    "dark": "icons/add-dark.svg"
+                }
             },
             {
                 "title": "Clear",
@@ -398,7 +402,7 @@
                 "command": "sqltools.bookmarkSelection",
                 "key": "ctrl+e ctrl+q",
                 "mac": "cmd+e q",
-                "when": "editorTextFocus && !editorReadonly"
+                "when": "editorTextFocus"
             }
         ],
         "configuration": {
@@ -973,6 +977,11 @@
                 },
                 {
                     "command": "sqltools.clearBookmarks",
+                    "when": "view == sqltoolsViewBookmarksExplorer",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "sqltools.bookmarkSelection",
                     "when": "view == sqltoolsViewBookmarksExplorer",
                     "group": "navigation@1"
                 },

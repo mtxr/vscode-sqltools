@@ -88,7 +88,12 @@ export default class BookmarksManagerPlugin implements IExtensionPlugin {
 
     this.explorer = new BookmarksExplorer();
 
-    Context.subscriptions.push(window.registerTreeDataProvider(`${EXT_NAMESPACE}ViewBookmarksExplorer`, this.explorer));
+    Context.subscriptions.push(
+      window.createTreeView(
+        `${EXT_NAMESPACE}ViewBookmarksExplorer`,
+        { treeDataProvider: this.explorer, showCollapseAll: true, canSelectMany: false }
+      )
+    );
 
     this.errorHandler = extension.errorHandler;
 
