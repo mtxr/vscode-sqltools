@@ -47,13 +47,16 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 
   public constructor() {}
   public preserveFocus = true;
-  public wereToShow = ViewColumn.One;
+  public whereToShow = ViewColumn.One;
   public show() {
     if (!this.panel) {
       this.panel = window.createWebviewPanel(
         this.serializationId,
         this.title,
-        this.wereToShow,
+        {
+          viewColumn: this.whereToShow,
+          preserveFocus: true,
+        },
         {
           enableScripts: true,
           retainContextWhenHidden: true, // @OPTIMIZE remove and migrate to state restore
@@ -70,11 +73,12 @@ export default abstract class WebviewProvider<State = any> implements Disposable
       }, null, this.disposables);
       this.panel.onDidDispose(this.dispose, null, this.disposables);
       this.panel.webview.html = this.html || this.baseHtml;
+    } else {
+      this.panel.reveal(undefined, this.preserveFocus);
     }
 
     this.updatePanelName();
 
-    this.panel.reveal(this.wereToShow, this.preserveFocus);
     this.setPreviewActiveContext(true);
   }
 

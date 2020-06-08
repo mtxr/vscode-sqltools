@@ -35,8 +35,10 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       this.syncConsoleMessages(['Not focused to results view']);
       return;
     };
-    const state = await this.getState();
-    this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
+    try {
+      const state = await this.getState();
+      this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
+    } catch(e) {}
   }
 
   public get cssVariables() {
@@ -47,26 +49,29 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
   }
 
   show() {
-    this.wereToShow = null;
-    switch (Config.results.location) {
-      case 'active': // fallback older version
-      case 'current':
-        this.wereToShow = vscode.ViewColumn.Active;
-        break;
-      case 'end':
-        this.wereToShow = vscode.ViewColumn.Three;
-        break;
-      case 'beside': // fallback
-      default:
-        if (!vscode.window.activeTextEditor) {
-          this.wereToShow = vscode.ViewColumn.One;
-        } else if (Config.results && typeof Config.results.location === 'number' && Config.results.location >= -1 && Config.results.location <= 9 && Config.results.location !== 0) {
-          this.wereToShow = Config.results.location;
-        } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
-            this.wereToShow = vscode.ViewColumn.Two;
-        } else {
-            this.wereToShow = vscode.ViewColumn.Three;
-        }
+    if (!this.isOpen) {
+      this.whereToShow = null;
+      switch (Config.results.location) {
+        case 'active': // fallback older version
+        case 'current':
+          this.whereToShow = vscode.ViewColumn.Active;
+          break;
+        case 'end':
+          this.whereToShow = vscode.ViewColumn.Three;
+          break;
+        case 'beside': // fallback
+        default:
+          if (!vscode.window.activeTextEditor) {
+            this.whereToShow = vscode.ViewColumn.One;
+          } else if (Config.results && typeof Config.results.location === 'number' && Config.results.location >= -1 && Config.results.location <= 9 && Config.results.location !== 0) {
+            this.whereToShow = Config.results.location;
+          } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
+              this.whereToShow = vscode.ViewColumn.Two;
+          } else {
+              this.whereToShow = vscode.ViewColumn.Three;
+          }
+          break;
+      }
     }
 
     super.show();
@@ -85,6 +90,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       }, 500);
     });
   }
+
   updateResults = (payload: NSDatabase.IResult[]) => {
     this.title = `${DISPLAY_NAME} Console`;
     try {
@@ -103,7 +109,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
     this.sendMessage(UIAction.RESPONSE_QUERY_RESULTS, payload);
   }
 
-  wereToShow = vscode.ViewColumn.Active;
+  whereToShow = vscode.ViewColumn.Active;
 }
 
 export default class ResultsWebviewManager {
