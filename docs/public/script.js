@@ -68,8 +68,11 @@
   function renderAd() {
     clearTag('#' + adTagId)
     prevHref = location.href
-    if (w['__adprovider'] === CARBON) return renderCarbon()
-    renderCodefund()
+    if (w['__adprovider'] === CARBON) { 
+      renderCarbon()
+    } else {
+      renderCodefund()
+    }
     timerRender = 0;
   }
 
