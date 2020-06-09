@@ -50,6 +50,8 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 **Community Drivers:**
 
+> Community driver are available for now on version v0.21.x. For v0.22 and newer we are still migrating those drivers. Please use v0.21 for now. More info [here](https://github.com/mtxr/vscode-sqltools/issues/586)
+
 |Driver||Main Maintainer(s)|
 |-|-|-|
 |![Cassandra](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/packages/drivers/icons/cassandra/default.png)|Cassandra|[@EpicEric](https://github.com/EpicEric)|
