@@ -68,7 +68,7 @@
   function renderAd() {
     clearTag('#' + adTagId)
     prevHref = location.href
-    if (w['__adprovider'] === CARBON) { 
+    if (w['__adprovider'] === CARBON) {
       renderCarbon()
     } else {
       renderCodefund()
@@ -105,7 +105,7 @@
   });
   w.onload = function() {
     log('window loaded')
-    setProvider(Math.random() <= 0.7 ? CODEFUND : CARBON)
+    setProvider(Math.random() <= 0.55 ? CODEFUND : CARBON)
     w.addEventListener('pagechanged', pageChanged)
     pageChanged(w)
     setInterval(function() {
