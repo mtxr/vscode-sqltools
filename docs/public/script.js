@@ -109,7 +109,7 @@
     w.addEventListener('pagechanged', pageChanged)
     pageChanged(w)
     setInterval(function() {
-      if (timerRender < 30) return ++timerRender;
+      if (timerRender < 48) return ++timerRender;
       renderAd();
     }, 10000);
     prevOnLoad && prevOnLoad.apply(w, arguments)
