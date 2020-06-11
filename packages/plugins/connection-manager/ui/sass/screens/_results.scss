@@ -79,6 +79,14 @@ pre {
       background: var(--vscode-button-hoverBackground);
     }
   }
+  .paginator.no-buttons > div > div {
+    > button {
+      display: none;
+    }
+    > span {
+      padding-right: 1em;
+    }
+  }
 }
 
 .query-results-container .queryError .buttons button {

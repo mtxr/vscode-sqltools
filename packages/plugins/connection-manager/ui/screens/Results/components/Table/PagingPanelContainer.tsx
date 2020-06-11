@@ -5,11 +5,9 @@ const PagingPanelContainer = (buttons: React.ReactNode, showPagination: boolean)
 ) => (
   <div className="resultsPagination">
     {buttons}
-    {showPagination && (
-      <div className="paginator">
-        <PagingPanel.Container {...props} />
-      </div>
-    )}
+    <div className={`paginator ${!showPagination ? 'no-buttons' : ''}`}>
+      <PagingPanel.Container {...props} />
+    </div>
   </div>
 );
 
