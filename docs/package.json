@@ -10,8 +10,7 @@
   "license": "MIT",
   "scripts": {
     "docz:dev": "docz dev --port=1234",
-    "docz:build": "docz build",
-    "postdocz:build": "cp _redirects dist/.; cp -R public/* dist/public/.; ls -hal ./dist/*"
+    "start": "yarn run docz:dev"
   },
   "dependencies": {
     "@mdx-js/runtime": "^1.5.1",

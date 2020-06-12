@@ -1,13 +1,10 @@
-<center>
-<p align="center">
+<p style='text-align: center;'>
   <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.svg?sanitize=true" />
 </p>
-</center>
 
 <hr />
 
-<p align="center">
-  <center>
+<p style='text-align: center;'>
 
 [![Docs](https://img.shields.io/badge/docs-here-blueviolet?style=for-the-badge)](https://vscode-sqltools.mteixeira.dev)
 [![VSCode.pro](https://img.shields.io/badge/Supported%20by-VSCode%20Power%20User%20Course%20%E2%86%92-gray.svg?colorA=655BE1&colorB=4F44D6&style=for-the-badge)](https://a.paddle.com/v2/click/16413/111711?link=1227)
@@ -15,7 +12,6 @@
 [![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
 [![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge)](https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md)
 
-  </center>
 </p>
 
 Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
