@@ -482,7 +482,7 @@
                             "description": "Reserverd word case"
                         },
                         "language": {
-                            "type": "enum",
+                            "type": "string",
                             "enum": [
                                 "sql",
                                 "db2",
@@ -586,19 +586,7 @@
                             },
                             "driver": {
                                 "type": "string",
-                                "enum": [
-                                    "AWS Redshift",
-                                    "DB2",
-                                    "Cassandra",
-                                    "MariaDB",
-                                    "MSSQL",
-                                    "MySQL",
-                                    "OracleDB",
-                                    "PostgreSQL",
-                                    "SAPHana",
-                                    "SQLite"
-                                ],
-                                "description": "Connection Driver"
+                                "markdownDescription": "Connection driver used in this connection."
                             },
                             "dialect": {
                                 "type": "string",

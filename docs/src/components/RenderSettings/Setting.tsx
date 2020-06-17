@@ -19,7 +19,7 @@ const Setting = ({ description, markdownDescription, name, ...props }: Partial<S
   return (<Details open>
     <summary>
       <Chevron />
-      <span id={`#${name}`}>{name}<Type tag='small' type={props.type} items={props.items} /></span>
+      <span id={`${name}`}>{name}<Type tag='small' type={props.type} items={props.items} /></span>
       <div><MDX>{markdownDescription || description}</MDX></div>
     </summary>
     <TypeInfo {...props} />

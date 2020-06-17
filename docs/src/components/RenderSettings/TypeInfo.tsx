@@ -75,6 +75,13 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                         <td><MDX>{properties[k].markdownDescription || properties[k].description}</MDX></td>
                         <td>
                           <Type type={properties[k].type} items={properties[k].items} wrap={components.inlineCode} sep=', ' lastSep={' or '} />
+                          {properties[k].enum && (
+                            <ul>
+                              {properties[k].enum.map((v: any, i: number) => (
+                                <li>{v}{properties[k].enumDescriptions && properties[k].enumDescriptions[i] ? ': ' + properties[k].enumDescriptions[i] : ''}</li>
+                              ))}
+                            </ul>
+                          )}
                         </td>
                       </tr>
                     ))}
