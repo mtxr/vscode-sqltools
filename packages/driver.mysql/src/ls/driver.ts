@@ -5,6 +5,7 @@ import MySQLDefault from './default';
 // import compareVersions from 'compare-versions';
 import { IConnectionDriver, IConnection, NSDatabase, Arg0, MConnectionExplorer, ContextValue } from '@sqltools/types';
 import generateId from '@sqltools/util/internal-id';
+import keywordsCompletion from './keywords';
 
 const toBool = (v: any) => v && (v.toString() === '1' || v.toString().toLowerCase() === 'true' || v.toString().toLowerCase() === 'yes');
 
@@ -84,9 +85,16 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
-        return this.queryResults(this.queries.searchTables({ search }));
+        return this.queryResults(this.queries.searchTables({ search })).then(r => r.map(t => {
+          t.isView = toBool(t.isView);
+          return t;
+        }));
       case ContextValue.COLUMN:
-        return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
+        return this.queryResults(this.queries.searchColumns({ search, ...extraParams })).then(r => r.map(c => {
+          c.isFk = toBool(c.isFk);
+          c.isFk = toBool(c.isFk);
+          return c;
+        }));
     }
   }
 
@@ -145,31 +153,36 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   private completionsCache: { [w: string]: NSDatabase.IStaticCompletion } = null;
   public getStaticCompletions = async () => {
     if (this.completionsCache) return this.completionsCache;
-    this.completionsCache = {};
-    const items = await this.queryResults(/* sql */`
-    SELECT UPPER(word) AS label,
-      (
-        CASE
-          WHEN reserved = 1 THEN 'RESERVED KEYWORD'
-          ELSE 'KEYWORD'
-        END
-      ) AS "desc"
-    FROM INFORMATION_SCHEMA.KEYWORDS
-    ORDER BY word ASC
-    `);
+    try {
+      this.completionsCache = {};
+      const items = await this.queryResults(/* sql */`
+      SELECT UPPER(word) AS label,
+        (
+          CASE
+            WHEN reserved = 1 THEN 'RESERVED KEYWORD'
+            ELSE 'KEYWORD'
+          END
+        ) AS "desc"
+      FROM INFORMATION_SCHEMA.KEYWORDS
+      ORDER BY word ASC
+      `);
 
-    items.forEach((item: any) => {
-      this.completionsCache[item.label] = {
-        label: item.label,
-        detail: item.label,
-        filterText: item.label,
-        sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(item.label) ? '2:' : '') + item.label,
-        documentation: {
-          value: `\`\`\`yaml\nWORD: ${item.label}\nTYPE: ${item.desc}\n\`\`\``,
-          kind: 'markdown'
+      items.forEach((item: any) => {
+        this.completionsCache[item.label] = {
+          label: item.label,
+          detail: item.label,
+          filterText: item.label,
+          sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(item.label) ? '2:' : '') + item.label,
+          documentation: {
+            value: `\`\`\`yaml\nWORD: ${item.label}\nTYPE: ${item.desc}\n\`\`\``,
+            kind: 'markdown'
+          }
         }
-      }
-    });
+      });
+    } catch (error) {
+      // use default reserved words
+      this.completionsCache = keywordsCompletion;
+    }
 
     return this.completionsCache;
   }
