@@ -1,0 +1,70 @@
+{
+  "name": "sqltools-driver-oracledb",
+  "displayName": "SQLTools OracleDB",
+  "description": "SQLTools OracleDB",
+  "version": "0.0.1",
+  "engines": {
+    "vscode": "^1.42.0"
+  },
+  "publisher": "mtxr",
+  "license": "MIT",
+  "repository": {},
+  "bugs": {},
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./"
+  },
+  "keywords": [
+    "sqltools-driver-oracledb",
+    "sqltools-driver",
+    "oracledb"
+  ],
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Formatters",
+    "Other"
+  ],
+  "extensionDependencies": [
+    "mtxr.sqltools"
+  ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onCommand:sqltools.*"
+  ],
+  "main": "./out/extension.js",
+  "dependencies": {
+    "@sqltools/base-driver": "latest",
+    "@sqltools/types": "latest",
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.5.5",
+    "@types/node": "^14.0.9",
+    "@types/vscode": "^1.42.0",
+    "@types/webpack-env": "^1.15.2",
+    "typescript": "^3.7.3"
+  },
+  "build": [
+    {
+      "entries": {
+        "plugin": {
+          "file": "src/ls/plugin.ts",
+          "outDir": "out/ls"
+        }
+      },
+      "type": "node"
+    },
+    {
+      "entries": {
+        "extension": {
+          "file": "src/extension.ts",
+          "outDir": "out"
+        }
+      },
+      "type": "extension"
+    }
+  ]
+}

@@ -5,6 +5,7 @@
     { "path": "./packages/driver.mysql" },
     { "path": "./packages/driver.pg" },
     { "path": "./packages/driver.sqlite" },
+    { "path": "./packages/driver.oracledb" },
     { "path": "./packages/drivers" },
     { "path": "./packages/extension" },
     { "path": "./packages/formatter" },
