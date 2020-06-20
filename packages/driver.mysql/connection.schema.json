@@ -32,7 +32,7 @@
       "default": "Server and Port"
     },
     "mysqlOptions": {
-      "title": "Driver Options",
+      "title": "MySQL driver specific options",
       "type": "object",
       "properties": {
         "authProtocol": {
