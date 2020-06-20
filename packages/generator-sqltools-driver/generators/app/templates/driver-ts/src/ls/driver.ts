@@ -1,6 +1,5 @@
 import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
-// import sqltoolsRequire from '@sqltools/base-driver/dist/lib/require';
 import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
 import { v4 as generateId } from 'uuid';
 
@@ -65,7 +64,7 @@ export default class YourDriverClass extends AbstractDriver<DriverLib, DriverOpt
    * to be installed on a cache folder
    **/
   // private get lib() {
-  //   return sqltoolsRequire('node-packge-name') as DriverLib;
+  //   return this.requireDep('node-packge-name') as DriverLib;
   // }
 
   public async open() {
