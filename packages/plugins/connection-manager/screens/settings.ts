@@ -65,13 +65,13 @@ export default class SettingsWebview extends WebviewProvider {
     return commands.executeCommand(`${EXT_NAMESPACE}.testConnection`, connInfo)
     .then((res: any) => {
       if (res && res.notification) {
-        const message = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
-        return this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_WARNING, { message });
+        const externalMessage = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
+        return this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_WARNING, { externalMessage });
       }
       this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_SUCCESS, { connInfo });
     }, (payload = {}) => {
       payload = {
-        message: (payload.message || payload || '').toString(),
+        externalMessage: (payload.message || payload || '').toString(),
       }
       this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_ERROR, payload);
     });
