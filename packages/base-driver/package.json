@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "SQLTools Base Driver",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -27,6 +27,7 @@
   },
   "devDependencies": {
     "@types/node": "^14.0.9",
+    "@types/resolve": "^1.17.1",
     "@types/webpack-env": "^1.15.2",
     "rimraf": "^3.0.0",
     "typescript": "^3.7.3"
@@ -36,6 +37,7 @@
     "debug": "^4.1.1",
     "env-paths": "^2.2.0",
     "make-dir": "^3.1.0",
+    "resolve": "^1.17.0",
     "vscode-languageserver": "6.1.1"
   }
 }

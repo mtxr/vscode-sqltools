@@ -12,6 +12,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.1.8
+
+- Using [resolve](https://www.npmjs.com/package/resolve) lib as resolver and exposed custom require and resolve functions.
+
 ### v0.1.7
 
 - Fixes node require not working for dependencies.

@@ -12,9 +12,10 @@ import {
 } from '@sqltools/types';
 import ElectronNotSupportedError from './lib/exception/electron-not-supported';
 import MissingModuleError from './lib/exception/missing-module';
-import sqltoolsRequire from './lib/require';
+import sqltoolsRequire, { sqltoolsResolve } from './lib/require';
 import log from './lib/log';
 import path from 'path';
+import fs from 'fs';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: typeof log;
@@ -80,19 +81,26 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       switch (dep.type) {
         case AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE:
           try {
-            delete sqltoolsRequire.cache[sqltoolsRequire.resolve(dep.name + '/package.json')];
-            const { version } = sqltoolsRequire(dep.name + '/package.json');
+            const { version } = JSON.parse(fs.readFileSync(this.resolveDep(dep.name + '/package.json')).toString());
             if (dep.version && version !== dep.version) {
               mustUpgrade = true;
               throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
             }
-            sqltoolsRequire(dep.name);
+            this.requireDep(dep.name);
           } catch(e) {
             throw new MissingModuleError(this.deps, this.credentials, mustUpgrade);
           }
           break;
       }
     });
+  }
+
+  public requireDep = (name: string) => {
+    return sqltoolsRequire(name);
+  }
+
+  public resolveDep = (name: string) => {
+    return sqltoolsResolve(name);
   }
 
   public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {
