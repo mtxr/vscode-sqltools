@@ -7,7 +7,7 @@ Package with types and interfaces to develop SQLTools Plugins.
 
 Please refer to @TBD
 
-This package is part of [vscode-sqltools](https://github.com/mtxr/vscode-sqltools) extension.
+This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?umd_source=repository&utm_medium=readme&utm_campaign=types) extension.
 
 
 # Changelog

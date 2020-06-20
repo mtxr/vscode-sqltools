@@ -4,9 +4,9 @@
 
 > Forked from [zeroturnaround/sql-formatter](https://zeroturnaround.github.io/sql-formatter/) but with improvements and ported Typescript.
 
-This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/) extension.
+This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/?umd_source=repository&utm_medium=readme&utm_campaign=formatter) extension.
 
-&rarr; Try it online using our **[playground](https://vscode-sqltools.mteixeira.dev/playground/formatter)**.
+&rarr; Try it online using our **[playground](https://vscode-sqltools.mteixeira.dev/playground/formatter?umd_source=repository&utm_medium=readme&utm_campaign=formatter)**.
 
 ## Install
 
