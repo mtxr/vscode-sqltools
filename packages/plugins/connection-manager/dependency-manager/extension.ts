@@ -58,7 +58,7 @@ Go ahead and connect!`,
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/driver/${conn.driver ? conn.driver.toLowerCase() : ''}`);
+          openExternal(`${DOCS_ROOT_URL}/driver/${conn.driver ? conn.driver.toLowerCase() : ''}?umd_source=vscode&utm_medium=driver&utm_campaign=dependencies`);
           break;
       }
     } catch (error) {
