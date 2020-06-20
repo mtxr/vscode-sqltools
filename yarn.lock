@@ -2188,9 +2188,9 @@
     vscode-languageserver "6.1.1"
 
 "@sqltools/types@latest":
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.1.3.tgz#eb0273d73051672a93338cced287ce95e58310fc"
-  integrity sha512-CkEDziM1DfuU1h2i2KOV+NaaxKO0FrJT2/kYU2Ear8S5JrwMILI1dvkzYztPCmOgeBtrsDuUWIINMWzQcG8Zgw==
+  version "0.1.5"
+  resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.1.5.tgz#e70d075f59fd9f17b7cfb8834923a012e046feb2"
+  integrity sha512-PecPqgWDpt1MI4e/L6uVJqHoun1qd5D5kcNZoe6ohVsDl3v1ZYoA4b8a/G7ZkNYjIP61e84ttcWjztsQPWDnnQ==
 
 "@types/babel__core@^7.1.0":
   version "7.1.9"

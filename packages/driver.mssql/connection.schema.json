@@ -12,10 +12,11 @@
       "type": "string",
       "minLength": 1
     },
-    "askForPassword": {
-      "title": "Ask for password?",
-      "type": "boolean",
-      "default": false
+    "usePassword": {
+      "title": "Use password",
+      "type": "string",
+      "enum": ["Ask on connect", "Use empty password","Save password"],
+      "default": "Ask on connect"
     },
     "password": {
       "title": "Password",
@@ -35,6 +36,34 @@
       "title": "Connection Timeout",
       "type": "integer",
       "minimum": 0
+    },
+    "mssqlOptions": {
+      "type": "object",
+      "title": "MSSQL Tedious driver specific options",
+      "properties": {
+        "abortTransactionOnError": {
+          "type": "boolean"
+        },
+        "appName": {
+          "type": "string",
+          "default": "SQLTools"
+        },
+        "instanceName": {
+          "type": "string"
+        },
+        "useUTC": {
+          "type": "boolean",
+          "default": true
+        },
+        "encrypt": {
+          "type": "boolean",
+          "default": true
+        },
+        "tdsVersion": {
+          "type": "string",
+          "enum": ["7_1", "7_2", "7_3_A", "7_3_B", "7_4"]
+        }
+      }
     }
   },
   "dependencies": {
@@ -54,12 +83,12 @@
             "port": {
               "title": "Port",
               "minimum": 1,
-              "default": 5432,
+              "default": 1433,
               "type": "integer"
             },
             "database": { "$ref": "#/definitions/database" },
             "username": { "$ref": "#/definitions/username" },
-            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+            "usePassword": { "$ref": "#/definitions/usePassword" }
           },
           "required": ["server", "port", "database", "username"]
         },
@@ -75,9 +104,9 @@
             },
             "database": { "$ref": "#/definitions/database" },
             "username": { "$ref": "#/definitions/username" },
-            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+            "usePassword": { "$ref": "#/definitions/usePassword" }
           },
-          "required": ["socketPath", "database", "username", "askForPassword"]
+          "required": ["socketPath", "database", "username"]
         },
         {
           "properties": {
@@ -94,12 +123,22 @@
         }
       ]
     },
-    "askForPassword": {
+    "usePassword": {
       "oneOf": [
-        { "properties": { "askForPassword": { "enum": [true] } } },
         {
           "properties": {
-            "askForPassword": { "enum": [false] },
+            "usePassword": { "enum": ["Ask on connect"] },
+            "askForPassword": { "type": "boolean", "default": true }
+            }
+        },
+        {
+          "properties": {
+            "usePassword": { "enum": ["Use empty password"] }
+          }
+        },
+        {
+          "properties": {
+            "usePassword": { "enum": ["Save password"] },
             "password": { "$ref": "#/definitions/password" }
           },
           "required": ["password"]

@@ -44,11 +44,17 @@ MSSQL driver specific options can be passed using `mssqlOptions` settings.
   }
 ```
 
-| Option key  | Default Value | Allowed Values |
-| ------------- | ------------- | ------------- |
-| encrypt  | `true`  | See https://github.com/tediousjs/node-mssql/tree/v4.3.1#tedious |
+| Option key              | Default Value | Description |
+| -------------           | ------------- | -------------  |
+| abortTransactionOnError |               | A boolean determining whether to rollback a transaction automatically if any error is encountered during the given transaction's execution. This sets the value for XACT_ABORT during the initial SQL phase of a connection.
+| appName                 |               | Application name used for SQL server logging.
+| instanceName            |               | The instance name to connect to. The SQL Server Browser service must be running on the database server, and UDP port 1434 on the database server must be reachable.
+| useUTC                  | `true`        | A boolean determining whether or not use UTC time for values without time zone offset (default: true).
+| encrypt                 | `true`        | A boolean determining whether or not the connection will be encrypted.
+| tdsVersion              | `7_4`         | The version of TDS to use (default: 7_4, available: 7_1, 7_2, 7_3_A, 7_3_B, 7_4).
 
-You can use any setting defined in https://www.npmjs.com/package/mssql#configuration-1 also extra options defined in Tedious specific options https://www.npmjs.com/package/mssql#tedious
+
+You can use any setting defined in See https://github.com/tediousjs/node-mssql/#tedious also extra options defined in Tedious specific options
 
 ## Breaking changes
 

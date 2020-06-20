@@ -1,5 +1,26 @@
 {
-  "ui:order": ["connectionMethod", "server", "port", "socketPath", "connectString", "database", "username", "askForPassword","password"],
+  "ui:order": ["connectionMethod", "server", "port", "socketPath", "connectString", "database", "username", "usePassword","password", "mssqlOptions"],
   "password": { "ui:widget": "password" },
-  "socketPath": { "ui:widget": "file" }
+  "askForPassword": { "ui:widget": "hidden" },
+  "socketPath": { "ui:widget": "file" },
+  "mssqlOptions": {
+    "abortTransactionOnError": {
+      "ui:help": "A boolean determining whether to rollback a transaction automatically if any error is encountered during the given transaction's execution. This sets the value for XACT_ABORT during the initial SQL phase of a connection."
+    },
+    "appName": {
+      "ui:help": "Application name used for SQL server logging."
+    },
+    "instanceName": {
+      "ui:help": "The instance name to connect to. The SQL Server Browser service must be running on the database server, and UDP port 1434 on the database server must be reachable"
+    },
+    "useUTC": {
+      "ui:help": "A boolean determining whether or not use UTC time for values without time zone offset"
+    },
+    "encrypt": {
+      "ui:help": "A boolean determining whether or not the connection will be encrypted."
+    },
+    "tdsVersion": {
+      "ui:help": "The version of TDS to use (default: 7_4, available: 7_1, 7_2, 7_3_A, 7_3_B, 7_4)"
+    }
+  }
 }
