@@ -207,6 +207,7 @@ export interface IConnection<DriverOptions = any> {
    * @memberof IConnection
    */
   isActive: boolean;
+  [id: string]: any;
 }
 
 export interface IQueryOptions {

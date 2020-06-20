@@ -12,6 +12,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 # Changelog
 
+### v0.1.5
+
+- Allow IConnection to have any properties.
+
 ### v0.1.4
 
 - Add boolean option `highlightQuery` to extension configuration so query highlight can be disabled/enabled.
