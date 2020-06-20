@@ -21,7 +21,7 @@ import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { isEmpty } from '@sqltools/util/validation';
-import { getExtension } from './exntension-util';
+import { getExtension } from './extension-util';
 import DependencyManager from './dependency-manager/extension';
 const log = logger.extend('conn-man');
 
@@ -186,18 +186,18 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_selectConnection = async (connIdOrNode?: SidebarConnection | string, trySessionFile = true) => {
-    const dependencies: string[] = (Context.globalState.get<any>('extPlugins') || {}).drivers || [];
-
-    await Promise.all(dependencies.map(getExtension));
-
-    if (connIdOrNode) {
-      let conn = await this.getConnFromIdOrNode(connIdOrNode);
-
-      conn = await this._setConnection(conn as IConnection).catch(e => this.errorHandler('Error opening connection', e));
-      if (trySessionFile) await this.openConnectionFile(conn);
-      return conn;
-    }
     try {
+      const dependencies: string[] = (Context.globalState.get<any>('extPlugins') || {}).drivers || [];
+
+      await Promise.all(dependencies.map(getExtension));
+
+      if (connIdOrNode) {
+        let conn = await this.getConnFromIdOrNode(connIdOrNode);
+
+        conn = await this._setConnection(conn as IConnection).catch(e => this.errorHandler('Error opening connection', e));
+        if (trySessionFile) await this.openConnectionFile(conn);
+        return conn;
+      }
       const conn = await this._connect(true);
       if (trySessionFile) await this.openConnectionFile(conn);
       return conn;

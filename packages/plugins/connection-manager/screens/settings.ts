@@ -5,7 +5,7 @@ import { commands } from 'vscode';
 import { IConnection } from '@sqltools/types';
 import { UIAction } from '../actions';
 import { SettingsScreenState } from '../ui/screens/Settings/interfaces';
-import { driverPluginExtension, getInstalledDrivers, getDriverSchemas } from '../exntension-util';
+import { driverPluginExtension, getInstalledDrivers, getDriverSchemas } from '../extension-util';
 
 export default class SettingsWebview extends WebviewProvider {
   protected id: string = 'Settings';

@@ -5,7 +5,8 @@ import { IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './ui/lib/prepare-schema';
 import { SettingsScreenState } from './ui/screens/Settings/interfaces';
-
+import logger from '@sqltools/util/log';
+const log = logger.extend('ext-util');
 export const getDriverSchemas = ({ driver }: { driver: string; } = { driver: null }) => {
   let schema = {};
   let uiSchema = {};
@@ -24,8 +25,10 @@ export const getDriverSchemas = ({ driver }: { driver: string; } = { driver: nul
 };
 
 export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenState['installedDrivers']> => {
-  if (retry > 20)
+  if (retry > 20) {
+    log.extend('debug')('stop trying to find installed drivers.');
     return;
+  }
   const driverExtensions: string[] = (Context.globalState.get<{ driver: string[]; }>('extPlugins') || { driver: [] }).driver || [];
   const installedDrivers: SettingsScreenState['installedDrivers'] = [];
   await Promise.all(driverExtensions.map(async (id) => {
@@ -47,6 +50,7 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
   }));
 
   if (installedDrivers.length === 0 && driverExtensions.length > 0) {
+    log.extend('debug')(`no installed drivers found. retrying.... ${retry +1}.`);
     return new Promise(res => setTimeout(() => res(getInstalledDrivers(retry++)), 250));
   }
 

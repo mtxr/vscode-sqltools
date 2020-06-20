@@ -62,8 +62,8 @@ class SQLToolsLanguageServer implements ILanguageServer {
     try {
       let plugin = (__non_webpack_require__ || require)(pathResolve(pluginPath));
       plugin = plugin.default || plugin;
-      log.extend('debug')('plugin object: "%O"', plugin);
       await this.registerPlugin(plugin);
+      log.extend('debug')('plugin %s loaded', pluginPath);
     } catch (error) {
       log.extend('error')('Error registering plugin: %O', error);
       return Promise.reject(error);
