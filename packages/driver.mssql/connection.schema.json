@@ -1,0 +1,113 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "definitions": {
+    "database": {
+      "title": "Database",
+      "type": "string",
+      "minLength": 1
+    },
+    "username": {
+      "title": "Username",
+      "type": "string",
+      "minLength": 1
+    },
+    "askForPassword": {
+      "title": "Ask for password?",
+      "type": "boolean",
+      "default": false
+    },
+    "password": {
+      "title": "Password",
+      "type": "string",
+      "minLength": 1
+    }
+  },
+  "properties": {
+    "connectionMethod": {
+      "title": "Connect using",
+      "type": "string",
+      "minLength": 1,
+      "enum": ["Server and Port", "Socket File", "Connection String"],
+      "default": "Server and Port"
+    },
+    "connectionTimeout": {
+      "title": "Connection Timeout",
+      "type": "integer",
+      "minimum": 0
+    }
+  },
+  "dependencies": {
+    "connectionMethod": {
+      "oneOf": [
+        {
+          "properties": {
+            "connectionMethod": {
+              "enum": ["Server and Port"]
+            },
+            "server": {
+              "title": "Server Address",
+              "type": "string",
+              "minLength": 1,
+              "default": "localhost"
+            },
+            "port": {
+              "title": "Port",
+              "minimum": 1,
+              "default": 5432,
+              "type": "integer"
+            },
+            "database": { "$ref": "#/definitions/database" },
+            "username": { "$ref": "#/definitions/username" },
+            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+          },
+          "required": ["server", "port", "database", "username"]
+        },
+        {
+          "properties": {
+            "connectionMethod": {
+              "enum": ["Socket File"]
+            },
+            "socketPath": {
+              "title": "Socket file path",
+              "type": "string",
+              "minLength": 1
+            },
+            "database": { "$ref": "#/definitions/database" },
+            "username": { "$ref": "#/definitions/username" },
+            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+          },
+          "required": ["socketPath", "database", "username", "askForPassword"]
+        },
+        {
+          "properties": {
+            "connectionMethod": {
+              "enum": ["Connection String"]
+            },
+            "connectString": {
+              "title": "Connection String",
+              "type": "string",
+              "minLength": 1
+            }
+          },
+          "required": ["connectString"]
+        }
+      ]
+    },
+    "askForPassword": {
+      "oneOf": [
+        { "properties": { "askForPassword": { "enum": [true] } } },
+        {
+          "properties": {
+            "askForPassword": { "enum": [false] },
+            "password": { "$ref": "#/definitions/password" }
+          },
+          "required": ["password"]
+        }
+      ]
+    }
+  },
+  "required": [
+    "connectionMethod"
+  ]
+}

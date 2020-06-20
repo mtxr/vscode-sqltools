@@ -43,35 +43,55 @@
     "onCommand:sqltools.*"
   ],
   "main": "./out/extension.js",
+  "ls": "./out/ls/plugin.js",
+  "targets": {
+    "main": {
+      "context": "node",
+      "includeNodeModules": {
+        "vscode": false
+      },
+      "outputFormat": "commonjs"
+     },
+    "ls": {
+      "context": "node",
+      "includeNodeModules": true,
+      "outputFormat": "commonjs",
+      "engines": {
+        "node": ">=10.x"
+      }
+     }
+  },
+  "scripts": {
+    "clean": "rimraf -rf out dist *.vsix",
+    "predev": "yarn run clean",
+    "dev": "concurrently -k \"npm:watch:*\"",
+    "prebuild": "yarn run clean && yarn run ts",
+    "build": "NODE_ENV=production concurrently -k \"npm:build:*\"",
+    "package": "vsce package --yarn -o .",
+    "build:ext": "NODE_PATH=../../ parcel build ./src/extension.ts --target main --dist-dir out --no-cache",
+    "build:ls": "NODE_PATH=../../ parcel build ./src/ls/plugin.ts --target ls --dist-dir out",
+    "watch:tsc": "yarn run ts -w --noEmit --preserveWatchOutput",
+    "watch:ext": "NODE_PATH=../../ parcel watch ./src/extension.ts --target main --dist-dir out --no-hmr --no-cache",
+    "watch:ls": "NODE_PATH=../../ parcel watch ./src/ls/plugin.ts --target ls --dist-dir out --no-hmr",
+    "ts": "tsc -p ."
+  },
   "devDependencies": {
     "@babel/preset-env": "^7.5.5",
+    "@babel/preset-typescript": "^7.10.1",
+    "@babel/plugin-proposal-class-properties": "^7.10.1",
+    "@babel/plugin-proposal-object-rest-spread": "^7.10.3",
     "@sqltools/base-driver": "latest",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",
+    "concurrently": "^5.2.0",
     "lodash": "^4.17.13",
     "mssql": "^5.0.5",
-    "typescript": "^3.7.3"
-  },
-  "build": [
-    {
-      "entries": {
-        "plugin": {
-          "file": "src/ls/plugin.ts",
-          "outDir": "out/ls"
-        }
-      },
-      "type": "node"
-    },
-    {
-      "entries": {
-        "extension": {
-          "file": "src/extension.ts",
-          "outDir": "out"
-        }
-      },
-      "type": "extension"
-    }
-  ]
+    "parcel": "2.0.0-beta.1",
+    "parcel-plugin-externals": "^0.5.0",
+    "rimraf": "^3.0.2",
+    "typescript": "^3.7.3",
+    "vsce": "1.77.0"
+  }
 }

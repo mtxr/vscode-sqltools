@@ -9,8 +9,9 @@
 			"name": "Run SQLite Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"runtimeExecutable": "${execPath}",
 			"args": [
-        "${workspaceFolder}/../../test/project.code-workspace",
+				"${workspaceFolder}/../../test/project.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}/../../dist",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 			],
@@ -18,7 +19,7 @@
 				"${workspaceFolder}/../../dist/*.js",
 				"${workspaceFolder}/out/**/*.js",
 			],
-			// "preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 	]
 }

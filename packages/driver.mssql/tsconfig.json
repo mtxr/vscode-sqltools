@@ -7,12 +7,11 @@
     "experimentalDecorators": true,
     "lib": ["es6"],
     "module": "commonjs",
-    "noEmit": false,
+    "noEmit": true,
     "removeComments": true,
     "resolveJsonModule": true,
-    "sourceMap": false,
     "declaration": false,
-    "target": "es2017",
+    "target": "esnext",
 		"outDir": "out"
   },
   "include": [

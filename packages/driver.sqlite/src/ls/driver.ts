@@ -1,7 +1,6 @@
 import SQLiteLib from 'sqlite3';
 import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
-import sqltoolsRequire from '@sqltools/base-driver/dist/lib/require';
 import * as mkdir from 'make-dir';
 import { dirname } from 'path';
 import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
@@ -23,7 +22,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
   queries = queries;
 
   private get lib() {
-    return sqltoolsRequire('sqlite3') as SQLiteLib.sqlite3;
+    return this.requireDep('sqlite3') as SQLiteLib.sqlite3;
   }
 
   createDirIfNotExists = async () => {

@@ -4,9 +4,14 @@ module.exports = {
       require.resolve('@babel/preset-env'),
       {
         targets: {
-          node: '8',
+          electron: '6',
         },
       },
     ],
+    require.resolve('@babel/preset-typescript'),
   ],
+  plugins: [
+    require.resolve('@babel/plugin-proposal-class-properties'),
+    require.resolve('@babel/plugin-proposal-object-rest-spread')
+  ]
 };

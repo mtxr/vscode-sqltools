@@ -7,3 +7,7 @@ src/**
 **/.eslintrc.json
 **/*.map
 **/*.ts
+tsconfig.js
+*.js
+*.log
+.babel*
