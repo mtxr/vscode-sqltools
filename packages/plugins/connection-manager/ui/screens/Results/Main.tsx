@@ -179,7 +179,7 @@ const Screen: React.SFC<Props> = () => {
   const columns = cols.map(title => ({ name: title, title }));
 
   return (
-    <ViewContainer>
+    <ViewContainer className={results.length > 0 ? 'has-tabs' : ''}>
       <Tabs active={activeTab} items={results.map(r => r.label || r.query)} onChange={toggleTab}/>
       {activeResult && <Table
         columns={columns}

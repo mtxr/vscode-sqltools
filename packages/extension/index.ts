@@ -55,7 +55,7 @@ export class SQLToolsExtension implements IExtension {
 
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
     this.registerCommand('openDocs', (path?: string) => {
-      return openExternal(`https://vscode-sqltools.mteixeira.dev/${path || ''}`);
+      return openExternal(`https://vscode-sqltools.mteixeira.dev/${path || ''}?umd_source=vscode&utm_medium=command&utm_campaign=open-docs`);
     });
 
     if (logger.outputChannel) {
@@ -174,7 +174,7 @@ export class SQLToolsExtension implements IExtension {
       telemetry.registerMessage('info', message, res);
       switch (res) {
         case moreInfo:
-          openExternal('https://vscode-sqltools.mteixeira.dev/#donate-and-support');
+          openExternal('https://vscode-sqltools.mteixeira.dev/#donate-and-support?umd_source=vscode&utm_medium=notification&utm_campaign=donate');
           break;
         case releaseNotes:
           openExternal(current.releaseNotes);

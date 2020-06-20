@@ -40,6 +40,7 @@ import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
 import { UIAction } from '../../../../../actions';
 import { filterPredicate } from '../../utils/filterPredicate';
+import Message from '../../../../components/Message';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -228,11 +229,20 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
       };
     }
     return (
-      <Paper square elevation={0} style={{ height: '100%' }} className="result">
+      <Paper square elevation={0} className="result">
         {error ? (
           this.renderError(footerButtons)
         ) : (
           <>
+            {(total || rows.length) === 0 ? (
+              <div style={{
+                textAlign: 'center',
+                flex: 1,
+                justifyContent: 'space-around',
+                display: 'flex',
+                flexDirection: 'column',
+              }}><Message fontSize='1.3rem' type='success'>Query returned 0 rows</Message></div>
+            ) : (
             <Grid rows={rows} columns={columns} rootComponent={GridRoot}>
               <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
               <SortingState />
@@ -242,10 +252,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
               <PagingState pageSize={pageSize} {...pagingProps} />
               <CustomPaging totalCount={total || rows.length} />
               <SelectionState selection={selection} onSelectionChange={this.setSelection} />
-              <VirtualTable
-                height="100%"
-                cellComponent={TableCell(this.openContextMenu)}
-              />
+              <VirtualTable cellComponent={TableCell(this.openContextMenu)} />
               <TableColumnResizing columnWidths={columnExtensions} onColumnWidthsChange={this.updateWidths} />
               <TableHeaderRow showSortingControls />
               <TableSelection
@@ -262,6 +269,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
               />
               {<PagingPanel containerComponent={PagingPanelContainer(footerButtons, showPagination)} />}
             </Grid>
+            )}
             <Menu
               anchorEl={contextMenu.anchorEl}
               width={300}

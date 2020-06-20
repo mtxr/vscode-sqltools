@@ -17,7 +17,11 @@ pre {
 
 .result {
   flex-grow: 1;
-  height: 0;
+  height: 100%;
+  display: flex;
+}
+.has-tabs .result {
+  max-height: calc(100vh - 36px);
 }
 
 .resultsPagination {

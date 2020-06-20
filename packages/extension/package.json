@@ -10,7 +10,7 @@
         "url": "https://github.com/mtxr/vscode-sqltools.git",
         "type": "git"
     },
-    "homepage": "https://vscode-sqltools.mteixeira.dev/",
+    "homepage": "https://vscode-sqltools.mteixeira.dev/?umd_source=marketplace&utm_medium=readme&utm_campaign=ext",
     "bugs": {
         "url": "https://github.com/mtxr/vscode-sqltools/issues"
     },
@@ -61,7 +61,7 @@
         {
             "description": "Docs",
             "url": "https://img.shields.io/badge/docs-here-blueviolet?style=for-the-badge",
-            "href": "https://vscode-sqltools.mteixeira.dev"
+            "href": "https://vscode-sqltools.mteixeira.dev?umd_source=marketplace&utm_medium=readme&utm_campaign=ext"
         },
         {
             "description": "VSCode.pro",

@@ -7,6 +7,8 @@ import generateId from '@sqltools/util/internal-id';
 import LSContext from './context';
 import { IConnection as LSIconnection } from 'vscode-languageserver';
 import DriverNotInstalledError from './exception/driver-not-installed';
+import logger from '@sqltools/util/log';
+const log = logger.extend('conn');
 
 export default class Connection {
   private connected: boolean = false;
@@ -88,6 +90,7 @@ export default class Connection {
     return this.conn.query(query, opt)
       .catch(this.decorateException)
       .catch((e) => {
+        log.extend('error')(e);
         if (opt.throwIfError) throw e;
         telemetry.registerException(e, { driver: this.conn.credentials.driver });
         let message = '';
