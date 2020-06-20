@@ -80,7 +80,9 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       case UIAction.RESPONSE_TEST_CONNECTION_ERROR:
         return this.setState({
           loading: false,
+          externalMessageType: 'error',
           ...payload,
+          externalMessage: payload.externalMessage || payload.message || 'Connection failed.',
         });
       case UIAction.REQUEST_RESET:
         return this.reset();

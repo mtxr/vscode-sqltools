@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.22.8",
+  "version": "0.22.9",
   "publisher": "mtxr",
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
