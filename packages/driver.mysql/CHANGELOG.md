@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.0.x --- UPCOMING RELEASe
+
+- Assitant naming convetions
+- Removed preview flag from extension
+
 ## 0.0.6
 
 - Fixes completions and adapt to work with MySQL <= 5.6 or older. [#622](https://github.com/mtxr/vscode-sqltools/issues/622)
