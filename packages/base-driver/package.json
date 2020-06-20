@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "SQLTools Base Driver",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
@@ -9,6 +9,7 @@
   ],
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
+  "homepage": "https://vscode-sqltools.mteixeira.dev/?umd_source=npm&utm_medium=pkgjson&utm_campaign=base-driver",
   "repository": {
     "type": "git",
     "url": "https://github.com/mtxr/vscode-sqltools.git",

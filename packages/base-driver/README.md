@@ -1,5 +1,6 @@
 # SQLTools Base Driver
 
+This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/?umd_source=repository&utm_medium=readme&utm_campaign=base-driver) extension.
 
 ## Creating icon
 
@@ -10,6 +11,10 @@ Active icon: Opacity 100%, no margins and paddings, green (#00FF00) circle 24x24
 Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
+
+### v0.1.7
+
+- Fixes node require not working for dependencies.
 
 ### v0.1.6
 

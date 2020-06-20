@@ -41,5 +41,8 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
   config.output = config.output || {};
   config.output.path = config.output.path || outdir;
   config.stats = 'minimal';
+  config.node = {
+    global: false,
+  };
   return config;
 }
