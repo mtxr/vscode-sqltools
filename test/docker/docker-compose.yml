@@ -5,6 +5,10 @@ services:
       extends:
         file: ./mssql/docker-compose.yml
         service: db
+    mssql2017:
+      extends:
+        file: ./mssql/docker-compose.yml
+        service: db2017
     mysql:
       extends:
         file: ./mysql/docker-compose.yml

@@ -233,6 +233,21 @@
         "server": "localhost",
         "username": "cassandra",
         // "group": "CQL"
+      },
+      {
+        "database": "test_db",
+        "driver": "MSSQL",
+        "mssqlOptions": {
+          "appName": "SQLTools",
+          "encrypt": true,
+          "useUTC": true
+        },
+        "name": "MSSQL2017",
+        "password": "root(!)Password",
+        "port": 1434,
+        "previewLimit": 50,
+        "server": "localhost",
+        "username": "sa"
       }
     ],
     "sqltools.languageServerEnv": {

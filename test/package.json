@@ -5,6 +5,7 @@
     "up": "docker-compose -f docker/docker-compose.yml up --build -d",
     "up:mysql": "yarn run up mysql",
     "up:mssql": "yarn run up mssql",
+    "up:mssql2017": "yarn run up mssql2017",
     "up:mysqlv5": "yarn run up mysqlv5",
     "up:mysql_xprotocol": "yarn run up mysql_xprotocol",
     "up:oracle": "echo 'Oracle docker image currently not working'",
