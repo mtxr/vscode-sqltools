@@ -42,7 +42,6 @@
       "**/dist": true
     },
     "typescript.tsdk": "root/node_modules/typescript/lib",
-    "peacock.color": "#007fff",
   },
   "tasks": {
     "version": "2.0.0",

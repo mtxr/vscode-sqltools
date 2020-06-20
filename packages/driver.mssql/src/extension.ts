@@ -1,11 +1,10 @@
-import * as vscode from 'vscode';
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
-import { ExtensionContext } from 'vscode';
+import { ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
-import { publisher, name } from '../package.json';
+const { publisher, name } = require('../package.json');
 const driverName = 'SQL Server/Azure';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
-  const sqltools = vscode.extensions.getExtension<IExtension>('mtxr.sqltools');
+  const sqltools = extensions.getExtension<IExtension>('mtxr.sqltools');
   if (!sqltools) {
     throw new Error('SQLTools not installed');
   }

@@ -22,6 +22,7 @@ test/docker/**/local*
 .docz
 public
 .cache
+.parcel-cache
 add-new.diff
 *.tar.gz
 *.tgz

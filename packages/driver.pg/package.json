@@ -8,7 +8,6 @@
   },
   "publisher": "mtxr",
   "license": "MIT",
-  "preview": true,
   "private": true,
   "repository": {
     "type": "git",
