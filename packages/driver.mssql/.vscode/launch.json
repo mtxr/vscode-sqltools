@@ -12,7 +12,6 @@
 			"runtimeExecutable": "${execPath}",
 			"args": [
 				"${workspaceFolder}/../../test/project.code-workspace",
-				"--extensionDevelopmentPath=${workspaceFolder}/../../dist",
 				"--extensionDevelopmentPath=${workspaceFolder}",
 			],
 			"outFiles": [

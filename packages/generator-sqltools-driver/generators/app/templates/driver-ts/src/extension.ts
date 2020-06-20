@@ -43,7 +43,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
     driverName,
     parseBeforeSaveConnection: ({ connInfo }) => {
       /**
-       * This hook is called before saving the connecton using the assistant
+       * This hook is called before saving the connection using the assistant
        * so you can do any transformations before saving it to disk.active
        * EG: relative file path transformation, string manipulation etc
        * Below is the exmaple for SQLite, where we save the DB path relative to workspace
@@ -60,7 +60,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
     },
     parseBeforeEditConnection: ({ connInfo }) => {
       /**
-       * This hook is called before editing the connecton using the assistant
+       * This hook is called before editing the connection using the assistant
        * so you can do any transformations before editing it.
        * EG: absolute file path transformation, string manipulation etc
        * Below is the exmaple for SQLite, where we use relative path to save,

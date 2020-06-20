@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-const Message = styled.span<{ fontSize: string; type?: 'error' | 'success' | 'warning' }>`
+const Message = styled.span<{ fontSize?: string; type?: 'error' | 'success' | 'warning' }>`
   border-radius: 4px;
   padding: 4px;
   display: inline-block;
