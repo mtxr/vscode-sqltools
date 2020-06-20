@@ -61,12 +61,16 @@
       }
      }
   },
+  "optimizers": {
+    "*.js": ["@parcel/optimizer-terser"]
+  },
   "scripts": {
     "clean": "rimraf -rf out dist *.vsix",
     "predev": "yarn run clean",
     "dev": "concurrently -k \"npm:watch:*\"",
     "prebuild": "yarn run clean && yarn run ts",
-    "build": "NODE_ENV=production concurrently -k \"npm:build:*\"",
+    "build": "NODE_ENV=production concurrently \"npm:build:*\"",
+    "prepackage": "yarn run build",
     "package": "vsce package --yarn -o .",
     "build:ext": "NODE_PATH=../../ parcel build ./src/extension.ts --target main --dist-dir out --no-cache",
     "build:ls": "NODE_PATH=../../ parcel build ./src/ls/plugin.ts --target ls --dist-dir out",
@@ -80,6 +84,7 @@
     "@babel/preset-typescript": "^7.10.1",
     "@babel/plugin-proposal-class-properties": "^7.10.1",
     "@babel/plugin-proposal-object-rest-spread": "^7.10.3",
+    "@parcel/optimizer-terser": "^2.0.0-alpha.3",
     "@sqltools/base-driver": "latest",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
@@ -89,7 +94,6 @@
     "lodash": "^4.17.13",
     "mssql": "^5.0.5",
     "parcel": "2.0.0-beta.1",
-    "parcel-plugin-externals": "^0.5.0",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.3",
     "vsce": "1.77.0"
