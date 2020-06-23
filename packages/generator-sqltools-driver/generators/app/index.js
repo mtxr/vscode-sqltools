@@ -42,6 +42,7 @@ module.exports = class extends Generator {
     this.fs.copy(this.templatePath('driver-ts/icons'), this.destinationPath(this.props.name + '/icons'));
     this.fs.copy(this.templatePath('driver-ts/babelrc.js'), this.destinationPath(this.props.name + '/.babelrc.js'));
     this.fs.copy(this.templatePath('driver-ts/vscodeignore'), this.destinationPath(this.props.name + '/.vscodeignore'));
+    this.fs.copy(this.templatePath('driver-ts/gitignore'), this.destinationPath(this.props.name + '/.gitignore'));
     this.fs.copy(this.templatePath('driver-ts/connection.schema.json'), this.destinationPath(this.props.name + '/connection.schema.json'));
     this.fs.copy(this.templatePath('driver-ts/ui.schema.json'), this.destinationPath(this.props.name + '/ui.schema.json'));
     this.fs.copy(this.templatePath('driver-ts/tsconfig.json'), this.destinationPath(this.props.name + '/tsconfig.json'));
