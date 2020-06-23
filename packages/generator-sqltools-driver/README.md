@@ -3,7 +3,7 @@
 
 ## Installation
 
-First, install [Yeoman](http://yeoman.io) and generator-sqltools-driver using [npm](https://www.npmjs.com/) (we assume you have pre-installed [node.js](https://nodejs.org/)).
+First, install [Yeoman](http://yeoman.io) and `generator-sqltools-driver` using `npm` or `yarn`.
 
 ```bash
 npm install -g yo
@@ -16,12 +16,12 @@ Then generate your new project:
 yo sqltools-driver
 ```
 
-## Getting To Know Yeoman
+## CHANGELOG
 
- * Yeoman has a heart of gold.
- * Yeoman is a person with feelings and opinions, but is very easy to work with.
- * Yeoman can be too opinionated at times but is easily convinced not to be.
- * Feel free to [learn more about Yeoman](http://yeoman.io/).
+### v0.1.4
+
+- Added missed .gitignore. Thanks to [@daimor](https://github.com/daimor)
+
 
 ## License
 
