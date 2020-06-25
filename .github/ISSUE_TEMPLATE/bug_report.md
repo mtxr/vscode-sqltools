@@ -10,6 +10,8 @@ assignees: ''
 **Describe the bug**
 A clear and concise description of what the bug is.
 
+<!-- Try to get more info on taking a look on the results window to see what's going on using the command Developer: Open webview develper tools and also trying on SQLTools: Show output channel logs. -->
+
 **To Reproduce**
 Steps to reproduce the behavior:
 1. Go to '...'
@@ -26,8 +28,14 @@ If applicable, add screenshots to help explain your problem.
 **Desktop (please complete the following information):**
  - SQLTools Version [e.g. v0.17.x]
  - VSCode Version: [e.g 1.x.y]
- - Driver Used/Version: [e.g PostgreSQL 9, Oracle CE, SQLite, MySQL 6, Redshift..]
  - OS: [e.g. Windows, Linux, Mac]
+ - Driver: 
+   - [ ] PostgreSQL/Redshift
+   - [ ] MySQL/MariaDB
+   - [ ] MSSQL/Azure
+   - [ ] SQLite
+   - [ ] Other? Which...
+ - Database version: [e.g. MySQL v5.6, PostgreSQL vX...]
 
 **Additional context**
 Add any other context about the problem here.
