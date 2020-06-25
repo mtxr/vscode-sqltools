@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.6
+## 0.0.7
 
 - Upgrade node package to `pg@8.x`.
 - Added options for SSL connecitons.

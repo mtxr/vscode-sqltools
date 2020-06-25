@@ -45,12 +45,15 @@
   "ls": "./out/ls/plugin.js",
   "targets": {
     "main": {
-      "context": "node",
+      "context": "electron-renderer",
       "includeNodeModules": {
         "vscode": false
       },
+      "engines": {
+        "electron": ">=6.x"
+      },
       "outputFormat": "commonjs"
-     },
+    },
     "ls": {
       "context": "node",
       "includeNodeModules": true,
@@ -58,7 +61,7 @@
       "engines": {
         "node": ">=10.x"
       }
-     }
+    }
   },
   "optimizers": {
     "*.js": ["@parcel/optimizer-terser"]

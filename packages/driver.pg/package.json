@@ -2,7 +2,7 @@
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Redshift Driver",
   "description": "SQLTools PostgreSQL/Redshift Driver",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -48,9 +48,12 @@
   "ls": "./out/ls/plugin.js",
   "targets": {
     "main": {
-      "context": "node",
+      "context": "electron-renderer",
       "includeNodeModules": {
         "vscode": false
+      },
+      "engines": {
+        "electron": ">=6.x"
       },
       "outputFormat": "commonjs"
     },
