@@ -11,12 +11,14 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
+				"${workspaceFolder}/../../test/project.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/../../dist/*.js",
+				"${workspaceFolder}/out/**/*.js",
 			],
-			// "preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "npm: dev"
 		},
 	]
 }
