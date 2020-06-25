@@ -1,6 +1,6 @@
 # Changelog
 
-## 0.0.x --- UPCOMING RELEASe
+## 0.0.x --- UPCOMING RELEASE
 
 - Assitant naming convetions
 - Removed preview flag from extension

@@ -12,10 +12,15 @@
       "type": "string",
       "minLength": 1
     },
-    "askForPassword": {
-      "title": "Ask for password?",
-      "type": "boolean",
-      "default": false
+    "usePassword": {
+      "title": "Use password",
+      "type": "string",
+      "enum": [
+        "Ask on connect",
+        "Use empty password",
+        "Save password"
+      ],
+      "default": "Ask on connect"
     },
     "password": {
       "title": "Password",
@@ -28,13 +33,66 @@
       "title": "Connect using",
       "type": "string",
       "minLength": 1,
-      "enum": ["Server and Port", "Socket File", "Connection String"],
+      "enum": [
+        "Server and Port",
+        "Socket File",
+        "Connection String"
+      ],
       "default": "Server and Port"
     },
     "connectionTimeout": {
       "title": "Connection Timeout",
       "type": "integer",
       "minimum": 0
+    },
+    "pgOptions": {
+      "type": "object",
+      "title": "node-pg driver specific options",
+      "description": "You can get more info here: https://node-postgres.com/api/pool",
+      "properties": {
+        "statement_timeout": {
+          "type": "number"
+        },
+        "query_timeout": {
+          "type": "number"
+        },
+        "connectionTimeoutMillis": {
+          "type": "number"
+        },
+        "idleTimeoutMillis": {
+          "type": "number"
+        },
+        "max": {
+          "type": "number"
+        },
+        "ssl": {
+          "type": "object",
+          "description": "Passed directly to node.TLSSocket. Check more here: https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options",
+          "properties": {
+            "rejectUnauthorized": {
+              "type": "boolean"
+            },
+            "requestCert": {
+              "type": "boolean"
+            },
+            "ca": {
+              "type": "string"
+            },
+            "key": {
+              "type": "string"
+            },
+            "cert": {
+              "type": "string"
+            },
+            "pfx": {
+              "type": "string"
+            },
+            "passphrase": {
+              "type": "string"
+            }
+          }
+        }
+      }
     }
   },
   "dependencies": {
@@ -43,7 +101,9 @@
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Server and Port"]
+              "enum": [
+                "Server and Port"
+              ]
             },
             "server": {
               "title": "Server Address",
@@ -57,32 +117,57 @@
               "default": 5432,
               "type": "integer"
             },
-            "database": { "$ref": "#/definitions/database" },
-            "username": { "$ref": "#/definitions/username" },
-            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+            "database": {
+              "$ref": "#/definitions/database"
+            },
+            "username": {
+              "$ref": "#/definitions/username"
+            },
+            "usePassword": {
+              "$ref": "#/definitions/usePassword"
+            }
           },
-          "required": ["server", "port", "database", "username"]
+          "required": [
+            "server",
+            "port",
+            "database",
+            "username"
+          ]
         },
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Socket File"]
+              "enum": [
+                "Socket File"
+              ]
             },
             "socketPath": {
               "title": "Socket file path",
               "type": "string",
               "minLength": 1
             },
-            "database": { "$ref": "#/definitions/database" },
-            "username": { "$ref": "#/definitions/username" },
-            "askForPassword": { "$ref": "#/definitions/askForPassword" }
+            "database": {
+              "$ref": "#/definitions/database"
+            },
+            "username": {
+              "$ref": "#/definitions/username"
+            },
+            "usePassword": {
+              "$ref": "#/definitions/usePassword"
+            }
           },
-          "required": ["socketPath", "database", "username", "askForPassword"]
+          "required": [
+            "socketPath",
+            "database",
+            "username"
+          ]
         },
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Connection String"]
+              "enum": [
+                "Connection String"
+              ]
             },
             "connectString": {
               "title": "Connection String",
@@ -90,19 +175,50 @@
               "minLength": 1
             }
           },
-          "required": ["connectString"]
+          "required": [
+            "connectString"
+          ]
         }
       ]
     },
-    "askForPassword": {
+    "usePassword": {
       "oneOf": [
-        { "properties": { "askForPassword": { "enum": [true] } } },
         {
           "properties": {
-            "askForPassword": { "enum": [false] },
-            "password": { "$ref": "#/definitions/password" }
+            "usePassword": {
+              "enum": [
+                "Ask on connect"
+              ]
+            },
+            "askForPassword": {
+              "type": "boolean",
+              "default": true
+            }
+          }
+        },
+        {
+          "properties": {
+            "usePassword": {
+              "enum": [
+                "Use empty password"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "usePassword": {
+              "enum": [
+                "Save password"
+              ]
+            },
+            "password": {
+              "$ref": "#/definitions/password"
+            }
           },
-          "required": ["password"]
+          "required": [
+            "password"
+          ]
         }
       ]
     }

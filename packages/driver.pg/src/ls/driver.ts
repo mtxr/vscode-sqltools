@@ -9,55 +9,56 @@ import generateId from '@sqltools/util/internal-id';
 
 const rawValue = (v: string) => v;
 
-types.setTypeParser(types.builtins.TIMESTAMP, rawValue);
-types.setTypeParser(types.builtins.TIMESTAMPTZ, rawValue);
-types.setTypeParser(types.builtins.DATE, rawValue);
+types.setTypeParser((types as any).builtins.TIMESTAMP || 1114, rawValue);
+types.setTypeParser((types as any).builtins.TIMESTAMPTZ || 1184, rawValue);
+types.setTypeParser((types as any).builtins.DATE || 1082, rawValue);
 
 export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> implements IConnectionDriver {
   queries = Queries;
-  public open() {
+  public async open() {
     if (this.connection) {
       return this.connection;
     }
+    try {
+      const pgOptions: PoolConfig = this.credentials.pgOptions || {};
 
-    const pgOptions: PoolConfig = this.credentials.pgOptions || {};
-
-    let poolConfig: PoolConfig = {
-      // statement_timeout: parseInt(`${this.credentials.connectionTimeout || 0}`, 10) * 1000,
-      ...pgOptions,
-    };
-
-    if (this.credentials.connectString) {
-      poolConfig = {
-        connectionString: this.credentials.connectString,
-        ...poolConfig,
-      }
-    } else {
-      poolConfig = {
-        database: this.credentials.database,
-        host: this.credentials.server,
-        password: this.credentials.password,
-        port: this.credentials.port,
-        user: this.credentials.username,
-        ...poolConfig,
+      let poolConfig: PoolConfig = {
+        connectionTimeoutMillis: Number(`${this.credentials.connectionTimeout || 0}`) * 1000,
+        ...pgOptions,
       };
-    }
 
-    if (poolConfig.ssl && typeof poolConfig.ssl === 'object') {
-      Object.keys(poolConfig.ssl).forEach(key => {
-        if (typeof poolConfig.ssl[key] === 'string' && poolConfig.ssl[key].startsWith('file://')) return;
-        this.log.extend('info')(`Reading file ${poolConfig.ssl[key].replace('file://', '')}`)
-        poolConfig.ssl[key] = fs.readFileSync(poolConfig.ssl[key].replace('file://', '')).toString();
-      });
-    }
+      if (this.credentials.connectString) {
+        poolConfig = {
+          connectionString: this.credentials.connectString,
+          ...poolConfig,
+        }
+      } else {
+        poolConfig = {
+          database: this.credentials.database,
+          host: this.credentials.server,
+          password: this.credentials.password,
+          port: this.credentials.port,
+          user: this.credentials.username,
+          ...poolConfig,
+        };
+      }
 
-    const pool = new Pool(poolConfig);
-    return pool.connect()
-      .then(cli => {
-        cli.release();
-        this.connection = Promise.resolve(pool);
-        return this.connection;
-      });
+      if (poolConfig.ssl && typeof poolConfig.ssl === 'object') {
+        ['ca', 'key', 'cert', 'pfx'].forEach(key => {
+          if (!poolConfig.ssl[key]) return;
+          this.log.extend('info')(`Reading file ${poolConfig.ssl[key].replace(/^file:\/\//, '')}`)
+          poolConfig.ssl[key] = fs.readFileSync(poolConfig.ssl[key].replace(/^file:\/\//, '')).toString();
+        });
+      }
+
+      const pool = new Pool(poolConfig);
+      const cli = await pool.connect();
+      cli.release();
+      this.connection = Promise.resolve(pool);
+      return this.connection;
+    } catch (error) {
+      return Promise.reject(error);
+    }
   }
 
   public async close() {
