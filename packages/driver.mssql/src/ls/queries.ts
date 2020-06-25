@@ -1,5 +1,14 @@
 import queryFactory from '@sqltools/base-driver/dist/lib/factory';
-import { IBaseQueries, ContextValue } from '@sqltools/types';
+import { IBaseQueries, ContextValue, NSDatabase } from '@sqltools/types';
+
+function escapeTableName(table: Partial<NSDatabase.ITable> | string) {
+  let items: string[] = [];
+  let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
+  tableObj.database && items.push(`[${tableObj.database}]`);
+  tableObj.schema && items.push(`[${tableObj.schema}]`);
+  items.push(`[${tableObj.label}]`);
+  return items.join('.');
+}
 
 export const describeTable: IBaseQueries['describeTable'] = queryFactory`
 SP_COLUMNS @table_name = [${p => p.label}],
@@ -52,7 +61,7 @@ ORDER BY
 
 export const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM [${p => p.table.label || p.table}]
+FROM ${p => escapeTableName(p.table)}
 ORDER BY ${p => p.orderCol} ASC
 OFFSET ${p => p.offset || 0} ROWS
 FETCH NEXT ${p => p.limit || 50} ROWS ONLY;
@@ -60,7 +69,7 @@ FETCH NEXT ${p => p.limit || 50} ROWS ONLY;
 
 export const countRecords: IBaseQueries['countRecords'] = queryFactory`
 SELECT COUNT(1) AS total
-FROM ${p => p.table.database ? `[${p.table.database}].` : ''}${p => p.table.schema ? `[${p.table.schema}].` : ''}[${p => p.table.label || p.table}]
+FROM ${p => escapeTableName(p.table)}
 `;
 
 const fetchTablesAndViews = (type: ContextValue, tableType = 'BASE TABLE'): IBaseQueries['fetchTables'] => queryFactory`

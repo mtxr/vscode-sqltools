@@ -1,5 +1,5 @@
 import queryFactory from '@sqltools/base-driver/dist/lib/factory';
-import prefixedTableName from '@sqltools/util/query/prefixed-tablenames';
+import escapeTableName from '../escape-table';
 import { IBaseQueries, ContextValue } from '@sqltools/types';
 
 const describeTable: IBaseQueries['describeTable'] = queryFactory`
@@ -48,13 +48,13 @@ ORDER BY
 
 const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM ${p => prefixedTableName(p.table, { driver: 'PostgreSQL' })}
+FROM ${p => escapeTableName(p.table)}
 LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
 const countRecords: IBaseQueries['countRecords'] = queryFactory`
 SELECT count(1) AS total
-FROM ${p => prefixedTableName(p.table, { driver: 'PostgreSQL' })};
+FROM ${p => escapeTableName(p.table)};
 `;
 
 const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`

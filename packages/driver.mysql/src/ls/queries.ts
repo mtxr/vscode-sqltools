@@ -1,8 +1,16 @@
 import queryFactory from '@sqltools/base-driver/dist/lib/factory';
-import { IBaseQueries, ContextValue } from '@sqltools/types';
+import { IBaseQueries, ContextValue, NSDatabase } from '@sqltools/types';
+
+function escapeTableName(table: Partial<NSDatabase.ITable> | string) {
+  let items: string[] = [];
+  let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
+  tableObj.schema && items.push(`\`${tableObj.schema}\``);
+  items.push(`\`${tableObj.label}\``);
+  return items.join('.');
+}
 
 export const describeTable: IBaseQueries['describeTable'] = queryFactory`
-  DESCRIBE ${p => p.label}
+  DESCRIBE ${p => escapeTableName(p)}
 `;
 
 export const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory/*sql*/`
@@ -57,14 +65,14 @@ ORDER BY
 
 export const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM ${p => p.table.label || p.table.toString()}
+FROM ${p => escapeTableName(p.table)}
 LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
 
 export const countRecords: IBaseQueries['countRecords'] = queryFactory`
 SELECT count(1) AS total
-FROM ${p => p.table.label || p.table.toString()}
+FROM ${p => escapeTableName(p.table)}
 `;
 
 export const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`

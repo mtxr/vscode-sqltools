@@ -1,5 +1,9 @@
-import { IBaseQueries, ContextValue } from '@sqltools/types';
+import { IBaseQueries, ContextValue, NSDatabase } from '@sqltools/types';
 import queryFactory from '@sqltools/base-driver/dist/lib/factory';
+
+function escapeTableName(table: Partial<NSDatabase.ITable>) {
+  return `"${table.label || table.toString()}"`;
+}
 
 const describeTable: IBaseQueries['describeTable'] = queryFactory`
   SELECT C.*
@@ -20,14 +24,14 @@ ORDER BY cid ASC
 
 const fetchRecords: IBaseQueries['fetchRecords'] = queryFactory`
 SELECT *
-FROM ${p => (p.table.label || p.table)}
+FROM ${p => escapeTableName(p.table)}
 LIMIT ${p => p.limit || 50}
 OFFSET ${p => p.offset || 0};
 `;
 
 const countRecords: IBaseQueries['countRecords'] = queryFactory`
 SELECT count(1) AS total
-FROM ${p => (p.table.label || p.table)};
+FROM ${p => escapeTableName(p.table)};
 `;
 
 const fetchTablesAndViews = (type: ContextValue, tableType = 'table'): IBaseQueries['fetchTables'] => queryFactory`

@@ -5,7 +5,6 @@
     { "path": "./packages/driver.mysql" },
     { "path": "./packages/driver.pg" },
     { "path": "./packages/driver.sqlite" },
-    { "path": "./packages/drivers" },
     { "path": "./packages/extension" },
     { "path": "./packages/formatter" },
     { "path": "./packages/language-server" },
@@ -26,6 +25,7 @@
       "**/CVS": true,
       "**/.DS_Store": true,
       "**/.vscode-test": true,
+      "**/.parcel-cache": true,
       "**/dist": false
     },
     "files.watcherExclude": {
@@ -33,12 +33,14 @@
       "**/.git/subtree-cache/**": true,
       "**/node_modules/**": true,
       "**/.vscode-test": true,
+      "**/.parcel-cache": true,
       "**/dist/**": true
     },
     "search.exclude": {
       "**/node_modules": true,
       "**/bower_components": true,
       "**/.vscode-test": true,
+      "**/.parcel-cache": true,
       "**/dist": true
     },
     "typescript.tsdk": "root/node_modules/typescript/lib",
