@@ -2,7 +2,7 @@
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Redshift Driver",
   "description": "SQLTools PostgreSQL/Redshift Driver",
-  "version": "0.0.7",
+  "version": "0.1.0",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -78,14 +78,14 @@
     "clean": "rimraf -rf out dist *.vsix",
     "predev": "yarn run clean",
     "dev": "concurrently -k \"npm:watch:*\"",
-    "prebuild": "yarn run clean && yarn run ts",
+    "prebuild": "yarn run clean && yarn run ts --noEmit",
     "build": "NODE_ENV=production concurrently \"npm:build:*\"",
     "prepackage": "yarn run build",
     "package": "vsce package --yarn -o .",
     "build:ext": "NODE_PATH=../../ parcel build ./src/extension.ts --target main --dist-dir out --no-cache",
-    "build:ls": "NODE_PATH=../../ parcel build ./src/ls/plugin.ts --target ls --dist-dir out",
+    "build:ls": "NODE_PATH=../../ parcel build ./src/ls/plugin.ts --target ls --dist-dir out --no-cache",
     "watch:tsc": "yarn run ts -w --noEmit --preserveWatchOutput",
-    "watch:ext": "NODE_PATH=../../ parcel watch ./src/extension.ts --target main --dist-dir out --no-hmr --no-cache",
+    "watch:ext": "NODE_PATH=../../ parcel watch ./src/extension.ts --target main --dist-dir out --no-hmr",
     "watch:ls": "NODE_PATH=../../ parcel watch ./src/ls/plugin.ts --target ls --dist-dir out --no-hmr",
     "ts": "tsc -p ."
   },

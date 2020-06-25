@@ -1,5 +1,9 @@
 # Changelog
 
+# 0.1.0
+
+- Sync official driver versions and technology
+
 ## 0.0.7
 
 - Upgrade node package to `pg@8.x`.
