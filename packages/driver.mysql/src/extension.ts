@@ -43,13 +43,23 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
   return {
     driverName,
     parseBeforeSaveConnection: ({ connInfo }) => {
-
-      ['connectionMethod', 'id'].forEach(p => delete connInfo[p]);
+      const propsToRemove = ['connectionMethod', 'id', 'usePassword'];
+      if (connInfo.usePassword) {
+        if (connInfo.usePassword.toString().toLowerCase().includes('ask')) {
+          propsToRemove.push('password');
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
+          connInfo.password = '';
+          propsToRemove.push('askForPassword');
+        } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
+          propsToRemove.push('askForPassword');
+        }
+      }
+      propsToRemove.forEach(p => delete connInfo[p]);
 
       return connInfo;
     },
     parseBeforeEditConnection: ({ connInfo }) => {
-      const formData = {
+      const formData: typeof connInfo = {
         ...connInfo,
         connectionMethod: 'Server and Port',
       };
@@ -57,6 +67,14 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         formData.connectionMethod = 'Socket File';
       } else if (connInfo.connectString) {
         formData.connectionMethod = 'Connection String';
+      }
+
+      if (connInfo.askForPassword) {
+        formData.usePassword = 'Ask on connect';
+        delete formData.password;
+      } else if (typeof connInfo.password === 'string') {
+        delete formData.askForPassword;
+        formData.usePassword = connInfo.password ? 'Save password' : 'Use empty password';
       }
       return formData;
     },
