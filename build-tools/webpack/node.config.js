@@ -37,9 +37,6 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
     },
     resolve: {
       extensions: ['.ts', '.js', '.json'],
-      alias: {
-        'pg-native': path.join(packagePath, '../../', 'node_modules/pg/lib/native/index.js'),
-      },
       modules: ['node_modules', path.join(packagePath, '..', '..', 'node_modules')],
     },
     output: {

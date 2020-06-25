@@ -33,7 +33,8 @@
     "test:older": "cross-env CODE_VERSION=1.41.0 yarn test",
     "test:watch": "cross-env WATCH=1 yarn run test",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_EXTENSIONS_PATH=./dist CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
-    "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch"
+    "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch",
+    "pack:all": "./pack.all.sh"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

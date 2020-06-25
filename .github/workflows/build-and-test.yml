@@ -38,6 +38,7 @@ jobs:
         yarn run build
         yarn test:older --no-coverage
         yarn test
+        yarn run pack:all
 
     - uses: codecov/codecov-action@v1.0.2
       if: github.event_name == 'push'

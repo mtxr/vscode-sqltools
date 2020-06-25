@@ -9,15 +9,16 @@
 			"name": "Run MySQL Extension",
 			"type": "extensionHost",
 			"request": "launch",
+			"runtimeExecutable": "${execPath}",
 			"args": [
-        "${workspaceFolder}/../../test/project.code-workspace",
-				"--extensionDevelopmentPath=${workspaceFolder}",
+				"${workspaceFolder}/../../test/project.code-workspace",
+				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
 				"${workspaceFolder}/../../dist/*.js",
 				"${workspaceFolder}/out/**/*.js",
 			],
-			// "preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "npm: dev"
 		},
 	]
 }
