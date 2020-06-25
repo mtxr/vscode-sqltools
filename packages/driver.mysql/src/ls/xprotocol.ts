@@ -12,32 +12,37 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
       return this.connection;
     }
 
-    const mysqlOptions = this.credentials.mysqlOptions || <IConnection['mysqlOptions']>{};
-    const client = MySQLXLib.getClient(
-      this.credentials.connectString ||
-      {
-        host: this.credentials.server,
-        password: this.credentials.password,
-        port: this.credentials.port,
-        user: this.credentials.username,
-        schema: this.credentials.database,
-        connectTimeout: this.credentials.connectionTimeout * 1000,
-        socket: this.credentials.socketPath,
-        ...mysqlOptions
-      },
-      {
-        pooling: {
-          enabled: true,
-          maxIdleTime: this.credentials.connectionTimeout * 1000,
-          maxSize: 15,
-          queueTimeout: 30000
+    try {
+      const mysqlOptions = this.credentials.mysqlOptions || <IConnection['mysqlOptions']>{};
+      const client = MySQLXLib.getClient(
+        this.credentials.connectString ||
+        {
+          host: this.credentials.server,
+          password: this.credentials.password,
+          port: this.credentials.port,
+          user: this.credentials.username,
+          schema: this.credentials.database,
+          connectTimeout: this.credentials.connectionTimeout * 1000,
+          socket: this.credentials.socketPath,
+          ...mysqlOptions
+        },
+        {
+          pooling: {
+            enabled: true,
+            maxIdleTime: this.credentials.connectionTimeout * 1000,
+            maxSize: 15,
+            queueTimeout: 30000
+          }
         }
-      }
-    );
+      );
 
-    await client.getSession();
-    this.connection = Promise.resolve(client);
-    return this.connection;
+      await client.getSession();
+      this.connection = Promise.resolve(client);
+      return this.connection;
+    } catch (error) {
+      this.connection = null;
+      return Promise.reject(error);
+    }
   }
 
   public async close() {
@@ -49,56 +54,64 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
   }
 
   private async runSingleQuery(query: string, session: any, opt: any = {}): Promise<NSDatabase.IResult> {
-    const results: any[] = [];
-    const messages: string[] = [];
-    const cols: string[] = [];
-    const props = {};
-    const { requestId } = opt;
+    try {
+      const results: any[] = [];
+      const messages: string[] = [];
+      const cols: string[] = [];
+      const props = {};
+      const { requestId } = opt;
 
-    function toMappedRow(row = []) {
-      const mapped = {};
-      Object.defineProperty(mapped, '______row', {
-        enumerable: false,
-        writable: false,
-        value: row,
+      function toMappedRow(row = []) {
+        const mapped = {};
+        Object.defineProperty(mapped, '______row', {
+          enumerable: false,
+          writable: false,
+          value: row,
+        });
+        Object.defineProperties(mapped, props);
+        return JSON.parse(JSON.stringify(mapped, cols));
+      }
+
+      await session.sql(query).execute(_result => results.push(toMappedRow(_result)), _meta => {
+        _meta.forEach(({ name }, i) => {
+          cols.push(name);
+          props[name] = {
+            enumerable: true,
+            get: function() {
+              return this.______row[i];
+            },
+          }
+        });
       });
-      Object.defineProperties(mapped, props);
-      return JSON.parse(JSON.stringify(mapped, cols));
-    }
 
-    await session.sql(query).execute(_result => results.push(toMappedRow(_result)), _meta => {
-      _meta.forEach(({ name }, i) => {
-        cols.push(name);
-        props[name] = {
-          enumerable: true,
-          get: function() {
-            return this.______row[i];
-          },
-        }
-      });
-    });
-
-    return {
-      requestId,
-      resultId: generateId(),
-      connId: this.getId(),
-      cols,
-      messages,
-      query,
-      results,
+      return {
+        requestId,
+        resultId: generateId(),
+        connId: this.getId(),
+        cols,
+        messages,
+        query,
+        results,
+      }
+    } catch (error) {
+      return Promise.reject(error);
     }
   }
 
   public query: (typeof AbstractDriver)['prototype']['query'] = async (query, opt = {}) => {
-    const session = await this.open().then(client => client.getSession());
-    const queries = queryParse(query.toString());
-    const results = [];
-    for(let q of queries) {
-      const res = await this.runSingleQuery(q, session, opt);
-      res && results.push(res);
+    try {
+      const session = await this.open().then(client => client.getSession());
+      const queries = queryParse(query.toString());
+      const results = [];
+      for(let q of queries) {
+        const res = await this.runSingleQuery(q, session, opt);
+        res && results.push(res);
+      }
+      await session.close();
+      return results;
+    } catch (error) {
+      return Promise.reject(error);
     }
-    await session.close();
-    return results;
   }
 
   public getTables(): Promise<NSDatabase.ITable[]> {

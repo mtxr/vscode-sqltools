@@ -65,45 +65,49 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
   }
 
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
-    const { requestId } = opt;
     return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
+      const { requestId } = opt;
       return new Promise((resolve, reject) => {
         conn.query({ sql: query.toString(), nestTables: true }, (error, results, fields) => {
           if (error) return reject(error);
-          const queries = queryParse(query.toString());
-          if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
-            results = [results];
+          try {
+            const queries = queryParse(query.toString());
+            if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
+              results = [results];
+            }
+            return resolve(queries.map((q, i): NSDatabase.IResult => {
+              const r = results[i] || [];
+              const messages = [];
+              if (r.affectedRows) {
+                messages.push(`${r.affectedRows} rows were affected.`);
+              }
+              if (r.changedRows) {
+                messages.push(`${r.changedRows} rows were changed.`);
+              }
+              return {
+                connId: this.getId(),
+                requestId,
+                resultId: generateId(),
+                cols: fields && Array.isArray(fields) ? this.getColumnNames(fields) : [],
+                messages,
+                query: q,
+                results: Array.isArray(r) ? this.mapRows(r, fields) : [],
+              };
+            }));
+          } catch (err) {
+            return reject(err);
           }
-          return resolve(queries.map((q, i): NSDatabase.IResult => {
-            const r = results[i] || [];
-            const messages = [];
-            if (r.affectedRows) {
-              messages.push(`${r.affectedRows} rows were affected.`);
-            }
-            if (r.changedRows) {
-              messages.push(`${r.changedRows} rows were changed.`);
-            }
-            return {
-              connId: this.getId(),
-              requestId,
-              resultId: generateId(),
-              cols: Array.isArray(fields) ? this.getColumnNames(fields) : [],
-              messages,
-              query: q,
-              results: Array.isArray(r) ? this.mapRows(r, fields) : [],
-            };
-          }));
         });
       });
     });
   }
 
-  private getColumnNames(fields: MySQLLib.FieldInfo[]): string[] {
+  private getColumnNames(fields: MySQLLib.FieldInfo[] = []): string[] {
     const count = countBy(fields, ({name}) => name);
     return fields.map(({table, name}) => count[name] > 1 ? `${table}.${name}` : name);
   }
 
-  private mapRows(rows: any[], fields: MySQLLib.FieldInfo[]): any[] {
+  private mapRows(rows: any[] = [], fields: MySQLLib.FieldInfo[] = []): any[] {
     const names = this.getColumnNames(fields);
     return rows.map((row) => fields.reduce((r, {table, name}, i) => ({...r, [names[i]]: row[table][name]}), {}));
   }
