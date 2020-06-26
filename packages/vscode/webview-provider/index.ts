@@ -27,14 +27,14 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   <style>
   :root {${cssVariables}}
   </style>
-  <link rel="stylesheet" type="text/css" href="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/commons.css`)))}">
+  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./ui/commons.css`))}">
 </head>
 <body>
-  <link rel="stylesheet" type="text/css" href="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/theme.css`)))}">
+  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./ui/theme.css`))}">
   <div id="app-root"></div>
-  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/vendor.js`)))}" type="text/javascript" charset="UTF-8"></script>
-  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/commons.js`)))}" type="text/javascript" charset="UTF-8"></script>
-  <script src="${this.panel.webview.asWebviewUri(Uri.file(Context.asAbsolutePath(`./ui/${this.id}.js`)))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/vendor.js`))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/commons.js`))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/${this.id}.js`))}" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
   }
@@ -61,7 +61,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
           enableScripts: true,
           retainContextWhenHidden: true, // @OPTIMIZE remove and migrate to state restore
           enableCommandUris: true,
-          localResourceRoots: [Uri.file(path.resolve(Context.extensionPath, '..')).with({ scheme: 'vscode-resource' })],
+          localResourceRoots: [Uri.file(Context.extensionPath), Uri.file(path.resolve(Context.extensionPath, '..'))],
           // enableFindWidget: true,
         },
       );
@@ -103,8 +103,10 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     return this.panel && this.panel.active;
   }
 
-  public get asWebviewUri() {
-    return this.panel ? this.panel.webview.asWebviewUri : (() => '');
+  public prepareUrl(localResource: Uri | string) {
+    return this.panel && this.panel.webview
+      ? this.panel.webview.asWebviewUri(Uri.parse(localResource.toString()))
+      : null;
   }
   public hide = () => {
     if (this.panel === undefined) return;
