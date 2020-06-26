@@ -41,6 +41,7 @@ import TableRow from './TableRow';
 import { UIAction } from '../../../../../actions';
 import { filterPredicate } from '../../utils/filterPredicate';
 import Message from '../../../../components/Message';
+import SortLabel from './SortLabel';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -254,7 +255,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
               <SelectionState selection={selection} onSelectionChange={this.setSelection} />
               <VirtualTable cellComponent={TableCell(this.openContextMenu)} />
               <TableColumnResizing columnWidths={columnExtensions} onColumnWidthsChange={this.updateWidths} />
-              <TableHeaderRow showSortingControls />
+              <TableHeaderRow showSortingControls sortLabelComponent={SortLabel}/>
               <TableSelection
                 selectByRowClick
                 highlightRow
