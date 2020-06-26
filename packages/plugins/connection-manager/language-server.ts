@@ -105,7 +105,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     return null;
   };
 
-  private serializarConnectionState = async (conn: IConnection) => {
+  private connectionStateSerializer = async (conn: IConnection) => {
     const instance = await this.getConnectionInstance(conn);
     const lastUsedId = await connectionStateCache.get(LAST_USED_ID_KEY);
     if (instance) {
@@ -126,15 +126,19 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       return undefined;
     }
     let progressBase: any;
+    const creds = req.conn;
+
+    creds.id = getConnectionId(creds);
+
     let c: Connection;
     try {
-      let c = await this.getConnectionInstance(req.conn);
+      let c = await this.getConnectionInstance(creds);
       if (c) {
         log.extend('debug')('Connection instance already exists for %s.', c.getName());
         await Handlers.Connect(c);
-        return this.serializarConnectionState(req.conn);
+        return this.connectionStateSerializer(creds);
       }
-      c = new Connection(req.conn, () => this.server.server.workspace.getWorkspaceFolders());
+      c = new Connection(creds, () => this.server.server.workspace.getWorkspaceFolders());
       log.extend('debug')('Connection instance created for %s.', c.getName());
 
       // @OPTIMIZE
@@ -150,15 +154,15 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       await c.connect();
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
-      return this.serializarConnectionState(req.conn);
+      return this.connectionStateSerializer(creds);
     } catch (e) {
       if (req.internalRequest) return Promise.reject(e);
       log.extend('Connecting error: %O', e);
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
-      e = decorateLSException(e, { conn: req.conn });
+      e = decorateLSException(e, { conn: creds });
       if (e.data && e.data.notification) {
-        if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
+        if (creds.driver && DependencyManager.runningJobs.includes(creds.driver)) {
           return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
         }
         return void this.server.sendNotification(e.data.notification, e.data.args);
@@ -263,7 +267,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       connectionStateCache.get(LAST_USED_ID_KEY),
     ])
     if (lastUsedId && activeConnections[lastUsedId]) {
-      defaultConnections.push(await this.serializarConnectionState(activeConnections[lastUsedId].serialize()));
+      defaultConnections.push(await this.connectionStateSerializer(activeConnections[lastUsedId].serialize()));
     }
     if (
       typeof ConfigRO.autoConnectTo === 'string'

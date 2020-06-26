@@ -505,10 +505,13 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private async _setConnection(c?: IConnection): Promise<IConnection> {
     let password = null;
 
+    if (c) {
+      c.id = getConnectionId(c);
+    }
+
     if (c && getConnectionId(c) !== (await this.explorer.getActiveId())) {
       if (c.askForPassword) password = await this._askForPassword(c);
       if (c.askForPassword && password === null) return;
-      c.id = getConnectionId(c);
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     this.explorer.refresh();
