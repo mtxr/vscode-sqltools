@@ -10,7 +10,7 @@ import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/pl
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
 import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest, ForceListRefresh } from './contracts';
+import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
 import path from 'path';
 import CodeLensPlugin from '../codelens/extension';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
@@ -61,6 +61,13 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_getChildrenForTreeItem: RequestHandler<typeof GetChildrenForTreeItemRequest> = async (params) => {
     return this.client.sendRequest(
       GetChildrenForTreeItemRequest,
+      params,
+    );
+  }
+
+  private ext_getInsertQuery: RequestHandler<typeof GetInsertQueryRequest> = async (params) => {
+    return this.client.sendRequest(
+      GetInsertQueryRequest,
       params,
     );
   }
@@ -695,7 +702,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
-      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem);
+      .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)
+      .registerCommand(`getInsertQuery`, this.ext_getInsertQuery);
 
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer();

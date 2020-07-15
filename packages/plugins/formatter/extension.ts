@@ -1,7 +1,7 @@
 import logger from '@sqltools/util/log';
 import { TextEditor, TextEditorEdit, commands, SnippetString, env, workspace } from 'vscode';
 import Config from '@sqltools/util/config-manager';
-import { generateInsert, format as queryFormat } from '@sqltools/util/query';
+import { formatInsertQuery, format as queryFormat } from '@sqltools/util/query';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
 import { NSDatabase, IExtension } from '@sqltools/types';
 import { SidebarItem } from '../connection-manager/explorer';
@@ -60,7 +60,12 @@ async function generateInsertQueryHandler(item: SidebarItem) {
     conn: item.conn,
     item: item.metadata,
   });
-  return insertText(new SnippetString(generateInsert(item.label || item.toString(), columns, Config.format)));
+  const insertQuery: string = await commands.executeCommand(`${EXT_NAMESPACE}.getInsertQuery`, {
+    conn: item.conn,
+    item: item.metadata,
+    columns
+  })
+  return insertText(new SnippetString(formatInsertQuery(insertQuery, Config.format)));
 }
 
 function newSqlFileHandler() {

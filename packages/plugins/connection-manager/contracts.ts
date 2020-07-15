@@ -68,6 +68,13 @@ export const GetChildrenForTreeItemRequest = new RequestType<
   void
 >('connection/GetChildrenForTreeItemRequest');
 
+export const GetInsertQueryRequest = new RequestType<
+  { conn: IConnection, item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn>},
+  string,
+  Error,
+  void
+>('connection/GetInsertQueryRequest');
+
 
 // @OPTIMIZE: later this will be replace by the native library when available
 export interface ProgressNotificationStartParams {
