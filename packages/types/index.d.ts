@@ -270,6 +270,10 @@ export module MConnectionExplorer {
      * for resource_groups
      */
     childType?: ContextValue;
+    /**
+     * SnippetString used to insert as text
+     */
+    snippet?: string;
   }
 }
 

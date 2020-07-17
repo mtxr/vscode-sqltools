@@ -33,6 +33,7 @@ export default class SidebarItem<T extends MConnectionExplorer.IChildItem = MCon
   constructor(public metadata: T, public parent: SidebarItem | SidebarConnection) {
     super(metadata.label, TreeItemCollapsibleState.Collapsed);
     this.value = this.label;
+    metadata.snippet && (this.snippet = metadata.snippet);
     if (metadata.type) {
       this.contextValue = metadata.type;
       if (metadata.type && metadata.iconId) {
