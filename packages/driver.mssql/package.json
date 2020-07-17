@@ -90,7 +90,7 @@
     "@types/vscode": "^1.42.0",
     "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
-    "lodash": "^4.17.13",
+    "lodash": "^4.17.19",
     "mssql": "^5.0.5",
     "parcel": "2.0.0-beta.1",
     "rimraf": "^3.0.2",
