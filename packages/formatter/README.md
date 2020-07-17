@@ -48,7 +48,7 @@ sqlFormatter.format("SELECT *", {
 |--------|-------------|------|---------|
 | language | Query language, default is Standard SQL | `sql, n1ql, db2, pl/sql` | `sql` |
 | indent | Characters used for indentation | `string` | ` ` (2 spaces)|
-| reservedWordCase | Reserverd words case change. | `upper`, `lower`, `null` | `null` (no change) |
+| reservedWordCase | How to change the case of reserved words | `upper`, `lower`, `null` | `null` (no change) |
 | linesBetweenQueries | How many line breaks between queries | `number` or `'preserve'` | `1` |
 | params | Collection of params for placeholder replacement | `object` for name params, `array` for indexed placeholders | |
 
