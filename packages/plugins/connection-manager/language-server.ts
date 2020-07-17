@@ -5,7 +5,7 @@ import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connec
 import csvStringify from 'csv-stringify/lib/sync';
 import { writeFile as writeFileWithCb } from 'fs';
 import { promisify } from 'util';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
 import Handlers from './cache/handlers';
 import DependencyManager from './dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from './dependency-manager/contracts';
@@ -242,6 +242,16 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     return c.getChildrenForItem(params);
   };
 
+  private GetInsertQueryHandler: RequestHandler<typeof GetInsertQueryRequest> = async (req) => {
+    if (!req || !req.conn) {
+      return "";
+    }
+    const { conn, ...params } = req;
+    let c = await this.getConnectionInstance(conn);
+    if (!c) return "";
+    return c.getInsertQuery(params);
+  };
+
   public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
     server.registerPlugin(new DependencyManager);
     this.server = this.server || server;
@@ -255,6 +265,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server.onRequest(TestConnectionRequest, this.testConnectionHandler);
     this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler);
     this.server.onRequest(GetChildrenForTreeItemRequest, this.GetChildrenForTreeItemHandler);
+    this.server.onRequest(GetInsertQueryRequest, this.GetInsertQueryHandler);
     this.server.addOnDidChangeConfigurationHooks(this._autoConnectIfActive);
   }
 

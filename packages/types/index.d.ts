@@ -231,6 +231,7 @@ export interface IConnectionDriver {
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
+  getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
 }
 
 export declare enum ContextValue {

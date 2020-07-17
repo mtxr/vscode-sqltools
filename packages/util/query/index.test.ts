@@ -1,5 +1,4 @@
-import { cleanUp, parse, generateInsert } from './index';
-import { ContextValue } from '@sqltools/types/index.js';
+import { cleanUp, parse } from './index';
 
 describe('query cleanUp', () => {
   it('returns empty string for empty inputs', () => {
@@ -71,21 +70,4 @@ ${query}
 GO`
     expect(parse(mssqlQuery, 'mssql')).toEqual([query, query]);
   });
-});
-
-describe('generateInsert query', () => {
-  const generated = generateInsert('tablename', [
-    {
-      type: ContextValue.COLUMN,
-      table: 'tablename',
-      label: 'col1',
-      isNullable: false,
-      dataType: 'integer',
-      database: 'database',
-      schema: 'schema'
-    },
-  ]);
-  const expected = `INSERT INTO tablename (col1)
-VALUES (\${1:col1:integer});$0`;
-  expect(generated).toBe(expected);
 });
