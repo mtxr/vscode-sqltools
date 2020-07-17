@@ -1163,7 +1163,7 @@
         "cross-env": "^7.0.2",
         "jest": "^24.5.0",
         "jest-cli": "^24.5.0",
-        "lodash": "^4.17.13",
+        "lodash": "^4.17.19",
         "ts-jest": "^24.0.2",
         "typescript": "^3.7.3",
         "vscode-test": "^1.2.3"
