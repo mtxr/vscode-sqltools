@@ -478,6 +478,11 @@
                                 "string",
                                 "null"
                             ],
+                            "enum": [
+                                "upper",
+                                "lower",
+                                "null"
+                            ],
                             "default": null,
                             "description": "Reserverd word case"
                         },
