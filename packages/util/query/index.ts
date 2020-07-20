@@ -1,4 +1,4 @@
-import { ISettings, NSDatabase } from '@sqltools/types';
+import { ISettings } from '@sqltools/types';
 import formatter from '@sqltools/formatter/src/sqlFormatter';
 import multipleQueriesParse from './parse';
 
@@ -35,23 +35,17 @@ export function cleanUp(query: string = '') {
 }
 
 /**
- * Generates insert queries based on table columns
+ * Formats generated insert queries 
  *
  * @export
- * @param {string} table
- * @param {Array<NSDatabase.IColumn>} cols
+ * @param {string} insertQuery
  * @param {ISettings['format']} [formatOptions]
  * @returns {string}
  */
-export function generateInsert(
-  table: string,
-  cols: Array<NSDatabase.IColumn>,
+export function formatInsertQuery(
+  insertQuery: string,
   formatOptions?: ISettings['format'],
 ): string {
-  let insertQuery = `INSERT INTO ${table} (${cols.map((col) => col.label).join(', ')}) VALUES (`;
-  cols.forEach((col, index) => {
-    insertQuery = insertQuery.concat(`'\${${index + 1}:${col.label}:${col.dataType}}', `);
-  });
   return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, formatOptions)
   .replace(/'\${(\d+):([\w\s]+):((int|bool|num|real)[\w\s]*)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
   .concat('$0');

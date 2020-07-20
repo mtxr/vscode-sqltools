@@ -158,6 +158,18 @@ export default class Connection {
     return this.conn.getChildrenForItem(params);
   }
 
+  public getInsertQuery(params: { item: NSDatabase.ITable; columns: Array<NSDatabase.IColumn> }) {
+    if (this.conn.getInsertQuery && typeof this.conn.getInsertQuery === 'function') {
+      return this.conn.getInsertQuery(params);
+    }
+    const { item, columns } = params;
+    let insertQuery = `INSERT INTO ${item.label} (${columns.map((col) => col.label).join(', ')}) VALUES (`;
+    columns.forEach((col, index) => {
+      insertQuery = insertQuery.concat(`'\${${index + 1}:${col.label}:${col.dataType}}', `);
+    });
+    return insertQuery;
+  }
+
   public searchItems(itemType: ContextValue, search: string = '', extraParams = {}) {
     return this.conn.searchItems(itemType, search, extraParams);
   }

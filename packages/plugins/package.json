@@ -20,7 +20,7 @@
     "@sqltools/vscode": "*",
     "command-exists": "^1.2.9",
     "csv-stringify": "^5.3.2",
-    "lodash": "^4.17.13",
+    "lodash": "^4.17.19",
     "node-sql-parser": "^1.7.7",
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
