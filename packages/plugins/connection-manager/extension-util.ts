@@ -32,7 +32,9 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
   const driverExtensions: string[] = (Context.globalState.get<{ driver: string[]; }>('extPlugins') || { driver: [] }).driver || [];
   const installedDrivers: SettingsScreenState['installedDrivers'] = [];
   await Promise.all(driverExtensions.map(async (id) => {
+    log.extend('debug')(`loading extension %s information.`, id);
     const ext = await getExtension(id);
+    log.extend('debug')(`loaded extension %s for driver %s.`, id, ext.driverName);
     if (ext && ext.driverAliases) {
       ext.driverAliases.map(({ displayName, value }) => {
         const iconsPath = PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: value, resource: 'icons' }));
@@ -57,18 +59,24 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
   return installedDrivers.sort((a, b) => a.displayName.localeCompare(b.displayName));
 };
 
-export const getExtension = async (id?: string): Promise<IDriverExtensionApi | null> => {
-  const ext = extensions.getExtension<IDriverExtensionApi>(id);
-  if (ext) {
-    if (!ext.isActive) {
-      await ext.activate();
+export const getExtension = async (id: string): Promise<IDriverExtensionApi | null> => {
+  try {
+    const ext = extensions.getExtension<IDriverExtensionApi>(id);
+    if (ext) {
+      if (!ext.isActive) {
+        await ext.activate();
+      }
+      return ext.exports;
     }
-    return ext.exports;
+  } catch (error) {
+    log.extend('debug')(`failed to get installed extension %s. %O`, id, error);
   }
   return null;
 };
 
 export const driverPluginExtension = async (driverName: string) => {
   const pluginExtenxionId = PluginResourcesMap.get(buildResouceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
+  log.extend('debug')(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
+  if (!pluginExtenxionId) return null;
   return getExtension(pluginExtenxionId);
 };

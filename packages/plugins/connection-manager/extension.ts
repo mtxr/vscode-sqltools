@@ -353,9 +353,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     try {
       conn = await this.getConnFromIdOrNode(connIdOrNode);
       if (!conn) return;
-      return this.settingsWebview.editConnection({ conn });
+      return await this.settingsWebview.editConnection({ conn });
     } catch (error) {
-      return this.errorHandler(`Error while trying to edit ${(conn && conn.name) || 'connection'}`, error);
+      return this.errorHandler(`Error while trying to edit ${(conn && conn.name) || 'connection'}:`, error);
     }
   }
 
