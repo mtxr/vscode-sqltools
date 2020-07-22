@@ -626,6 +626,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   } = {};
   private handler_progressStart = (params: ProgressNotificationStartParams) => {
+    if (this.notifications[params.id]) return;
     const tokenSource = new CancellationTokenSource();
     window.withProgress({
       location: ProgressLocation.Notification,

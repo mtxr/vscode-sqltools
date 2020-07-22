@@ -14,6 +14,7 @@ import logger from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
+import { DriverNotInstalledNotification } from '@sqltools/language-server/notifications';
 
 const writeFile = promisify(writeFileWithCb);
 
@@ -150,13 +151,17 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       if (req.password) c.setPassword(req.password);
 
       this.server.sendNotification(ProgressNotificationStart, { ...progressBase, message: 'Connecting....' });
-      await Handlers.Connect(c);
 
       await c.connect();
+      await Handlers.Connect(c);
+
       this.server.sendNotification(ProgressNotificationComplete, { ...progressBase, message: 'Connected!' });
       return this.connectionStateSerializer(creds);
     } catch (e) {
-      if (req.internalRequest) return Promise.reject(e);
+      if (req.internalRequest) {
+        e.callback = () => progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
+        return Promise.reject(e);
+      }
       log.extend('Connecting error: %O', e);
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
@@ -266,12 +271,13 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler);
     this.server.onRequest(GetChildrenForTreeItemRequest, this.GetChildrenForTreeItemHandler);
     this.server.onRequest(GetInsertQueryRequest, this.GetInsertQueryHandler);
-    this.server.addOnDidChangeConfigurationHooks(this._autoConnectIfActive);
+    this.server.addOnDidChangeConfigurationHooks(() => this._autoConnectIfActive());
   }
 
   // internal utils
   public _autoConnectIfActive = async (retryCount = 0) => {
     if (retryCount >= RETRY_LIMIT) return;
+    retryCount++;
     const defaultConnections: IConnection[] = [];
     const [ activeConnections, lastUsedId ] = await Promise.all([
       connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}),
@@ -289,7 +295,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       const autoConnectTo = Array.isArray(ConfigRO.autoConnectTo)
       ? ConfigRO.autoConnectTo
       : [ConfigRO.autoConnectTo];
-      log.extend('info')(`Configuration set to auto connect to: %s. retry count: %d`, autoConnectTo.join(', '), retryCount);
+      log.extend('info')(`Configuration set to auto connect to: %s. connection attempt count: %d`, autoConnectTo.join(', '), retryCount);
 
       const existingConnections = ConfigRO.connections;
       autoConnectTo.forEach(connName => {
@@ -302,7 +308,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (defaultConnections.length === 0) {
       return;
     }
-    log.extend('debug')(`Found connections: %s. retry count: %d`, defaultConnections.map(c => c.name).join(', '), retryCount);
+    log.extend('debug')(`Found connections: %s. connection attempt count: %d`, defaultConnections.map(c => c.name).join(', '), retryCount);
     try {
       await Promise.all(defaultConnections.slice(1).map(conn => {
         log.extend('info')(`Auto connect to %s`, conn.name);
@@ -318,17 +324,21 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       await this.openConnectionHandler({ conn: defaultConnections[0], internalRequest: true });
       this.server.sendRequest(ForceListRefresh, undefined);
     } catch (error) {
-      if (retryCount < RETRY_LIMIT) {
-        log.extend('info')('auto connect will retry: attempts %d', retryCount + 1);
+      if (retryCount < RETRY_LIMIT && (error && error.data && error.data.notification === DriverNotInstalledNotification)) {
+        log.extend('info')('auto connect will retry: attempts %d', retryCount );
         return new Promise((res) => {
-          setTimeout(res, 1000);
-        }).then(() => this._autoConnectIfActive(retryCount++));
+          setTimeout(res, 2000);
+        }).then(() => this._autoConnectIfActive(retryCount));
       }
+      if (error && typeof error.callback === 'function') {
+        error.callback();
+      }
+      delete error.callback;
       log.extend('error')('auto connect error >> %O', error);
       if (error.data && error.data.notification) {
         return void this.server.sendNotification(error.data.notification, error.data.args);
       }
-      this.server.notifyError('Auto connect failed', error);
+      this.server.notifyError('Auto connect failed:', error);
     }
   }
 }
