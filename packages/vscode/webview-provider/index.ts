@@ -105,7 +105,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 
   public prepareUrl(localResource: Uri | string) {
     return this.panel && this.panel.webview
-      ? this.panel.webview.asWebviewUri(Uri.parse(localResource.toString()))
+      ? this.panel.webview.asWebviewUri(Uri.file(localResource.toString()))
       : null;
   }
   public hide = () => {
