@@ -175,7 +175,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
       telemetry.registerException(e);
 
-      throw Promise.resolve(e);
+      return Promise.reject(e);
     }
   };
 
