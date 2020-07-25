@@ -1,5 +1,5 @@
 {
-    "name": "@sqltools/extension",
+    "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
     "version": "1.0.0",
@@ -14,7 +14,7 @@
     "bugs": {
         "url": "https://github.com/mtxr/vscode-sqltools/issues"
     },
-    "main": "./extension.js",
+    "main": "./dist/extension.js",
     "author": "Matheus Teixeira <me@mteixeira.dev>",
     "private": true,
     "engines": {
@@ -1173,21 +1173,5 @@
         "@sqltools/util": "*",
         "command-exists": "1.2.9",
         "vscode-languageclient": "6.1.3"
-    },
-    "build": [
-        {
-            "entries": {
-                "icons": "icons",
-                "language": "language",
-                "package.json": "file:build/bundle-pkgJson.js"
-            },
-            "type": "copy"
-        },
-        {
-            "entries": {
-                "extension": "index.ts"
-            },
-            "type": "extension"
-        }
-    ]
+    }
 }

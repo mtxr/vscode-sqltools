@@ -44,15 +44,5 @@
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.7.3"
-  },
-  "build": [
-    {
-      "entries": {
-        "Settings": "connection-manager/ui/screens/Settings/index.tsx",
-        "Results": "connection-manager/ui/screens/Results/index.tsx",
-        "theme": "connection-manager/ui/sass/theme.scss"
-      },
-      "type": "webview"
-    }
-  ]
+  }
 }

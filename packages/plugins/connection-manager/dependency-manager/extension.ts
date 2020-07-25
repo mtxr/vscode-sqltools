@@ -6,7 +6,7 @@ import { getConnectionId } from '@sqltools/util/connection';
 import Config from '@sqltools/util/config-manager';
 import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDependency, DatabaseDriver } from '@sqltools/types';
 import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
-import { DriverNotInstalledNotification } from '@sqltools/language-server/notifications';
+import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 
 export default class DependencyManager implements IExtensionPlugin {
   public readonly name = 'Dependency Manager Plugin';

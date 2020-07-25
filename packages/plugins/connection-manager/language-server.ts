@@ -1,4 +1,4 @@
-import Connection from '@sqltools/language-server/connection';
+import Connection from '@sqltools/language-server/src/connection';
 import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
@@ -14,7 +14,7 @@ import logger from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
-import { DriverNotInstalledNotification } from '@sqltools/language-server/notifications';
+import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 
 const writeFile = promisify(writeFileWithCb);
 

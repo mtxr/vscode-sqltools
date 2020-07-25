@@ -24,13 +24,5 @@
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",
     "typescript": "^3.7.3"
-  },
-  "build": [
-    {
-      "entries": {
-        "languageserver": "index.ts"
-      },
-      "type": "node"
-    }
-  ]
+  }
 }
