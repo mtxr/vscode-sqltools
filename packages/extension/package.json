@@ -1007,7 +1007,7 @@
                 },
                 {
                     "command": "sqltools.openSettings",
-                    "when": "view == sqltoolsViewConnectionExplorer && viewItem == connection",
+                    "when": "view == sqltoolsViewConnectionExplorer && viewItem =~ /^(connection|connectedConnection)$/",
                     "group": "sqltools.dbExplorer.edit@0"
                 },
                 {
