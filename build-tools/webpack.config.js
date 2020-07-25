@@ -34,14 +34,14 @@ module.exports = function(env = {}) {
     }
     const pkgPath = `${packagesDir}/${pkg}`;
     if (!fs.lstatSync(pkgPath).isDirectory()) return;
-    if (!fs.existsSync(`${pkgPath}/package.json`)) return;
+    if (!fs.existsSync(`${pkgPath}/build.json`)) return;
 
     console.log(`Reading package @sqltools/${pkg} config`);
-    const pkgJson = require(`${pkgPath}/package.json`);
+    const buildJson = require(`${pkgPath}/build.json`);
 
-    if (pkgJson.build) {
-      console.log(`\t>> Found ${pkgJson.build.length} build entries`)
-      pkgJson.build.forEach(({
+    if (buildJson.build) {
+      console.log(`\t>> Found ${buildJson.build.length} build entries`)
+      buildJson.build.forEach(({
         entries,
         type,
         externals = {},

@@ -3,7 +3,7 @@ import { ILanguageServerPlugin, ILanguageServer, ContextValue, Arg0, NSDatabase 
 import { getDocumentCurrentQuery } from './query';
 import connectionStateCache, { LAST_USED_ID_KEY, ACTIVE_CONNECTIONS_KEY } from '../connection-manager/cache/connections-state.model';
 import { Parser, Select } from 'node-sql-parser';
-import Connection from '@sqltools/language-server/connection';
+import Connection from '@sqltools/language-server/src/connection';
 import { TableCompletionItem, TableColumnCompletionItem } from './models';
 import logger from '@sqltools/util/log';
 import { tablePrevWords, columnPrevWords } from './constants';

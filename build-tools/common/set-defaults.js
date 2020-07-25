@@ -1,4 +1,5 @@
 const webpack = require('webpack');
+const path = require('path');
 const TerserJSPlugin = require('terser-webpack-plugin');
 const OptimizeCSSAssetsPlugin = require('optimize-css-assets-webpack-plugin');
 
@@ -40,6 +41,7 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
   config.mode = IS_PRODUCTION ? 'production' : 'development';
   config.output = config.output || {};
   config.output.path = config.output.path || outdir;
+  config.output.devtoolModuleFilenameTemplate = (info) => 'webpack:///'+path.relative(path.resolve(config.output.path || outdir, '..'), info.absoluteResourcePath),
   config.stats = 'minimal';
   config.node = {
     global: false,

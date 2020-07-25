@@ -13,7 +13,7 @@
     "sourceMap": true,
     "skipLibCheck": true,
     "declaration": false,
-    "target": "es2017",
+    "target": "esnext",
 		"outDir": "out"
   },
   "include": [

@@ -345,7 +345,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private ext_openAddConnectionScreen = () => {
-    return this.settingsWebview.show();
+    this.settingsWebview.show();
+    return this.settingsWebview.reset();
   }
 
   private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {

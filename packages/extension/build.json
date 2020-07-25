@@ -1,0 +1,24 @@
+{
+  "build": [
+    {
+      "entries": {
+        "extension": "src/index.ts"
+      },
+      "type": "extension"
+    },
+    {
+      "entries": {
+        "languageserver": "../language-server/src/index.ts"
+      },
+      "type": "node"
+    },
+    {
+      "entries": {
+        "Settings": "../plugins/connection-manager/ui/screens/Settings/index.tsx",
+        "Results": "../plugins/connection-manager/ui/screens/Results/index.tsx",
+        "theme": "../plugins/connection-manager/ui/sass/theme.scss"
+      },
+      "type": "webview"
+    }
+  ]
+}

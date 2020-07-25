@@ -2,7 +2,7 @@ import logger from '@sqltools/util/log';
 import path from 'path';
 import fs from 'fs';
 import Config from '@sqltools/util/config-manager';
-import { DISPLAY_NAME, EXT_NAMESPACE, EXT_CONFIG_NAMESPACE, ServerErrorNotification } from '@sqltools/util/constants';
+import { DISPLAY_NAME, EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { sync as commandExists } from 'command-exists';
 import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget, workspace } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
@@ -12,7 +12,7 @@ import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 import uniq from 'lodash/uniq';
 import { ElectronNotSupportedNotification } from '@sqltools/base-driver/dist/lib/notification';
-import { ExitCalledNotification } from '../api/contracts';
+import { ExitCalledNotification, ServerErrorNotification } from '@sqltools/language-server/src/notifications';
 
 const log = logger.extend('lc');
 
@@ -85,7 +85,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   }
 
   private getServerOptions(): ServerOptions {
-    const serverModule = Context.asAbsolutePath('languageserver.js');
+    const serverModule = Context.asAbsolutePath('dist/languageserver.js');
     let runtime: string = undefined;
     const useNodeRuntime = Config.useNodeRuntime;
     if (useNodeRuntime) {

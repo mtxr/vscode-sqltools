@@ -123,6 +123,10 @@ export default class SettingsWebview extends WebviewProvider {
     this.sendMessage(UIAction.REQUEST_EDIT_CONNECTION, partialState);
   }
 
+  public reset() {
+    return this.sendMessage(UIAction.REQUEST_RESET);
+  }
+
   public sendMessage = (action: (typeof UIAction)[keyof typeof UIAction], payload?: any) => {
     return super.sendMessage(action, payload);
   }
