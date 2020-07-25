@@ -10,10 +10,19 @@ route: /contributing/building
 
 ## Prerequisites
 
-Make sure you have node, npm and yarn installed.
+Make sure you have `node v10+ (preferably)` and `yarn` installed.
 
 ## Building
 
-Open VSCode and run the `watch:compile`. Leave it running during the development.
+1. In your terminal, go to the project root.
+```shell
+cd vscode-sqltools
+yarn # will install all dependencies and run some scripts
+yarn run start # or yarn run dev:watch
+```
 
-Run `Launch Extension` debug setup.
+2. Open the project workspace (`project.code-workspace`) on VSCode.
+
+3. Go to the Debug panel and run `Launch Extension and LS` to start debugging both extension and language server.
+
+4. Add your breakpoints and start hacking!
