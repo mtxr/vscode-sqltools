@@ -2,7 +2,7 @@
 	"version": "0.2.0",
 	"configurations": [
 		{
-			"name": "Run driver extension",
+			"name": "Run Driver Extension",
 			"type": "extensionHost",
 			"request": "launch",
 			"args": [
@@ -11,7 +11,35 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
-			"preLaunchTask": "${defaultBuildTask}"
+			"preLaunchTask": "${defaultBuildTask}",
+			"env": {
+				"SQLTOOLS_DEBUG_PORT_LS": "6099"
+			}
+		},
+		{
+			"type": "node",
+			"request": "attach",
+			"name": "Attach SQLTools LS",
+			"port": 6099,
+			"restart": true,
+			"sourceMaps": true,
+			"protocol": "inspector",
+			"timeout": 100000,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+		}
+	],
+	"compounds": [
+		{
+			"name": "Run Driver Ext and Attach LS",
+			"configurations": [
+				"Run Driver Extension",
+				"Attach SQLTools LS"
+			]
 		}
 	]
 }
