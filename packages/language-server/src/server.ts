@@ -116,7 +116,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
     if (changes.settings.telemetry && changes.settings.telemetry.enableTelemetry) telemetry.enable();
     else telemetry.disable();
     if (changes.settings['sqltools.debug'] && changes.settings['sqltools.debug'].namespaces) {
-      (<any>logger)._debug.enable(changes.settings['sqltools.debug'].namespaces || '*,-babel*');
+      (<any>logger)._debug.enable(changes.settings['sqltools.debug'].namespaces || 'sql:*');
     }
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
@@ -145,11 +145,13 @@ class SQLToolsLanguageServer implements ILanguageServer {
         version = output.join('');
       }
     } catch (error) { }
-    log.extend('info')(`${DISPLAY_NAME} Server started!
-===============================
-Using node runtime?: ${isNode ? 'yes' : 'no'}
-ExecPath: ${process.execPath} ${version.replace(/[\r\n]/g, '').trim()}
-===============================`)
+    log.extend('info')([
+      `${DISPLAY_NAME} Server started!`,
+      '===============================',
+      `Using node runtime?: ${isNode ? 'yes' : 'no'}`,
+      `ExecPath: ${process.execPath} ${version.replace(/[\r\n]/g, '').trim()}`,
+      '==============================='
+    ].filter(Boolean).join('\n'));
     this._server.listen();
     return this;
   }

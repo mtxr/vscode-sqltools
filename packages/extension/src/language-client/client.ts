@@ -105,24 +105,24 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         log.extend('info')(message)
       }
     }
-
+    const lsCustomEnv = (Config.languageServerEnv || {});
     const runOptions: NodeModule = {
       module: serverModule,
       transport: TransportKind.ipc,
       runtime,
       options: {
         env: {
-          ...(Config.languageServerEnv || {}),
+          ...lsCustomEnv,
           IS_NODE_RUNTIME: useNodeRuntime ? 1 : 0,
         },
-      }
+      },
     };
     const debugOptions = runOptions;
 
-    if (process.env.NODE_ENV !== 'production') {
+    if (lsCustomEnv.SQLTOOLS_DEBUG_PORT_LS || process.env.SQLTOOLS_DEBUG_PORT_LS) {
       debugOptions.options = {
         ...runOptions.options,
-        execArgv: ['--nolazy', '--inspect=6010']
+        execArgv: ['--nolazy', `--inspect=${lsCustomEnv.SQLTOOLS_DEBUG_PORT_LS || process.env.SQLTOOLS_DEBUG_PORT_LS || 6011}`]
       }
     }
 
