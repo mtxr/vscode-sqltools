@@ -15,10 +15,37 @@
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
-				"${workspaceFolder}/../../dist/*.js",
 				"${workspaceFolder}/out/**/*.js",
 			],
-			"preLaunchTask": "npm: dev"
+			"preLaunchTask": "npm: dev",
+			"env": {
+				"SQLTOOLS_DEBUG_PORT_LS": "6099"
+			}
 		},
+		{
+			"type": "node",
+			"request": "attach",
+			"name": "Attach SQLTools LS",
+			"port": 6099,
+			"restart": true,
+			"sourceMaps": true,
+			"protocol": "inspector",
+			"timeout": 100000,
+			"outFiles": [
+				"${workspaceFolder}/out/**/*.js"
+			],
+			"skipFiles": [
+				"<node_internals>/**"
+			],
+		}
+	],
+	"compounds": [
+		{
+			"name": "Run MSSQL Driver Ext and Attach LS",
+			"configurations": [
+				"Attach SQLTools LS",
+				"Run MSSQL Extension"
+			]
+		}
 	]
 }
