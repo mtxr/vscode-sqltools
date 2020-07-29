@@ -109,7 +109,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
 
   private mapRows(rows: any[] = [], fields: MySQLLib.FieldInfo[] = []): any[] {
     const names = this.getColumnNames(fields);
-    return rows.map((row) => fields.reduce((r, {table, name}, i) => ({...r, [names[i]]: row[table][name]}), {}));
+    return rows.map((row) => fields.reduce((r, {table, name}, i) => ({...r, [names[i]]: castResultsIfNeeded(row[table][name])}), {}));
   }
 
   public getTables(): Promise<NSDatabase.ITable[]> {
@@ -119,4 +119,9 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
   public getColumns(): Promise<NSDatabase.IColumn[]> {
     throw new Error('Never called! Must use parent classe');
   }
+}
+
+const castResultsIfNeeded = (data: any) => {
+  if (!Buffer.isBuffer(data)) return data;
+  return Buffer.from(data).toString('hex');
 }
