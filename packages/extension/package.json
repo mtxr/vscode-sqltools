@@ -339,6 +339,15 @@
                 }
             },
             {
+                "title": "Open Results",
+                "command": "sqltools.openResults",
+                "category": "SQLTools Results",
+                "icon": {
+                    "light": "icons/view-light.svg",
+                    "dark": "icons/view-dark.svg"
+                }
+            },
+            {
                 "title": "Attach Connection To This File",
                 "command": "sqltools.attachFileToConnection",
                 "category": "SQLTools Internal"
@@ -940,6 +949,10 @@
                     "when": "sqltools.Results.active"
                 },
                 {
+                    "command": "sqltools.openResults",
+                    "when": "sqltools.Results.active"
+                },
+                {
                     "command": "sqltools.formatSql",
                     "when": "editorHasSelection"
                 },
@@ -1114,6 +1127,11 @@
             "editor/title": [
                 {
                     "command": "sqltools.saveResults",
+                    "group": "navigation",
+                    "when": "sqltools.Results.active"
+                },
+                {
+                    "command": "sqltools.openResults",
                     "group": "navigation",
                     "when": "sqltools.Results.active"
                 }
