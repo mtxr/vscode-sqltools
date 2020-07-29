@@ -27,14 +27,14 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   <style>
   :root {${cssVariables}}
   </style>
-  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./ui/commons.css`))}">
+  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./dist/ui/commons.css`))}">
 </head>
 <body>
-  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./ui/theme.css`))}">
+  <link rel="stylesheet" type="text/css" href="${this.prepareUrl(Context.asAbsolutePath(`./dist/ui/theme.css`))}">
   <div id="app-root"></div>
-  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/vendor.js`))}" type="text/javascript" charset="UTF-8"></script>
-  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/commons.js`))}" type="text/javascript" charset="UTF-8"></script>
-  <script src="${this.prepareUrl(Context.asAbsolutePath(`./ui/${this.id}.js`))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./dist/ui/vendor.js`))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./dist/ui/commons.js`))}" type="text/javascript" charset="UTF-8"></script>
+  <script src="${this.prepareUrl(Context.asAbsolutePath(`./dist/ui/${this.id}.js`))}" type="text/javascript" charset="UTF-8"></script>
 </body>
 </html>`;
   }
@@ -105,7 +105,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
 
   public prepareUrl(localResource: Uri | string) {
     return this.panel && this.panel.webview
-      ? this.panel.webview.asWebviewUri(Uri.parse(localResource.toString()))
+      ? this.panel.webview.asWebviewUri(Uri.file(localResource.toString()))
       : null;
   }
   public hide = () => {

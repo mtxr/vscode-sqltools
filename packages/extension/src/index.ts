@@ -191,6 +191,7 @@ export class SQLToolsExtension implements IExtension {
     this.pluginsQueue = [];
     this.loaded = this.loaded || true;
     for (let plugin of pluginsQueue) {
+      log.extend('info')(`registering plugin %s. type %s`, plugin.name, plugin.type);
       try {
         Promise.resolve(plugin.register(this)).then(() => {
           if (plugin.extensionId) {
@@ -198,6 +199,7 @@ export class SQLToolsExtension implements IExtension {
             if (!this.extPlugins[plugin.type || 'general'].includes(plugin.extensionId)) {
               this.extPlugins[plugin.type || 'general'].push(plugin.extensionId);
             }
+            this.updateExtPluginsInfo();
           }
         }).catch(err => {
           this.errorHandler(`Error loading plugin ${plugin.name}`, err);

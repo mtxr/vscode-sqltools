@@ -3,8 +3,8 @@ const path = require('path');
 const { author, version } = require('../package.json');
 
 exports.rootdir = path.resolve(__dirname, '..');
-exports.outdir = path.resolve(exports.rootdir, 'dist');
 exports.packagesDir = path.resolve(exports.rootdir, 'packages');
+exports.outdir = path.resolve(exports.packagesDir, 'extension/dist');
 
 exports.DISPLAY_NAME = process.env.DISPLAY_NAME || 'SQLTools';
 exports.EXT_NAMESPACE = 'sqltools';

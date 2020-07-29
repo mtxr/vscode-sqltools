@@ -1,4 +1,4 @@
-import Connection from '@sqltools/language-server/connection';
+import Connection from '@sqltools/language-server/src/connection';
 import { NSDatabase } from '@sqltools/types';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './connections-state.model';
 import queryResultsCache from './query-results.model';

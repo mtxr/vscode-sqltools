@@ -378,7 +378,8 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   };
 
   private ext_openAddConnectionScreen = () => {
-    return this.settingsWebview.show();
+    this.settingsWebview.show();
+    return this.settingsWebview.reset();
   }
 
   private ext_openEditConnectionScreen = async (connIdOrNode?: string | SidebarConnection) => {
@@ -386,9 +387,9 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     try {
       conn = await this.getConnFromIdOrNode(connIdOrNode);
       if (!conn) return;
-      return this.settingsWebview.editConnection({ conn });
+      return await this.settingsWebview.editConnection({ conn });
     } catch (error) {
-      return this.errorHandler(`Error while trying to edit ${(conn && conn.name) || 'connection'}`, error);
+      return this.errorHandler(`Error while trying to edit ${(conn && conn.name) || 'connection'}:`, error);
     }
   }
 
@@ -659,6 +660,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   } = {};
   private handler_progressStart = (params: ProgressNotificationStartParams) => {
+    if (this.notifications[params.id]) return;
     const tokenSource = new CancellationTokenSource();
     window.withProgress({
       location: ProgressLocation.Notification,

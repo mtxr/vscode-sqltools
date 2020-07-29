@@ -2,9 +2,9 @@ process.env.DEBUG_HIDE_DATE = '1';
 
 import debug, { Debugger, Debug } from 'debug';
 
-debug.enable(process.env.NODE_ENV === 'development' ? '*,-babel*' : '*,-babel*,-*:debug,-*:*:debug,-*:*:*:debug,-*:*:*:*:debug,-*:*:*:*:*:debug');
+debug.enable(process.env.NODE_ENV === 'development' ? 'sql:*' : 'sql:*,-sql:*:debug,-sql:*:*:debug,-sql:*:*:*:debug,-sql:*:*:*:*:debug,-sql:*:*:*:*:*:debug');
 
-const productLogger: Debugger & { _debug?: Debug } = debug(process.env.PRODUCT);
+const productLogger: Debugger & { _debug?: Debug } = debug('sql').extend(process.env.PRODUCT);
 
 if (process.env.PRODUCT !== 'ui') {
   (debug as any).formatArgs = function(args: any) {

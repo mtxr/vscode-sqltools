@@ -105,22 +105,26 @@ export default class SettingsWebview extends WebviewProvider {
 
   public editConnection = async ({ conn }: { conn: IConnection; }) => {
     this.show();
-    const [ installedDrivers, { schema, uiSchema } ] = await Promise.all([
-      getInstalledDrivers(),
-      getDriverSchemas({ driver: conn.driver }),
-    ]);
 
+    const installedDrivers = await getInstalledDrivers();
+    const { schema, uiSchema } = getDriverSchemas({ driver: conn.driver });
     const formData = await this.parseBeforeEdit({ connInfo: conn });
-
+    const driver = installedDrivers.find(d => d.value === conn.driver);
+    if (!driver) {
+      throw new Error(`Driver ${conn.driver} not loaded or not installed yet. Try agian in a few seconds.`);
+    }
     const partialState: Partial<SettingsScreenState> = {
       installedDrivers,
-      driver: installedDrivers.find(d => d.value === conn.driver ) || { displayName: conn.driver, value: conn.driver, icon: null },
+      driver: driver || { displayName: conn.driver, value: conn.driver, icon: null },
       schema,
       uiSchema,
       formData,
-      loading: false
     };
     this.sendMessage(UIAction.REQUEST_EDIT_CONNECTION, partialState);
+  }
+
+  public reset() {
+    return this.sendMessage(UIAction.REQUEST_RESET);
   }
 
   public sendMessage = (action: (typeof UIAction)[keyof typeof UIAction], payload?: any) => {

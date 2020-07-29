@@ -2,7 +2,7 @@
   "name": "sqltools",
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-  "version": "0.22.10",
+  "version": "0.22.11",
   "publisher": "mtxr",
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",
@@ -34,7 +34,8 @@
     "test:watch": "cross-env WATCH=1 yarn run test",
     "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_EXTENSIONS_PATH=./dist CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
     "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch",
-    "pack:all": "./pack.all.sh"
+    "pack:all": "./pack.all.sh",
+    "start": "yarn run dev:watch"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

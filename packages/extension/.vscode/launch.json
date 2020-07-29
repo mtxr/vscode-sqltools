@@ -1,7 +1,4 @@
 {
-  // Use IntelliSense to learn about possible attributes.
-  // Hover to view descriptions of existing attributes.
-  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
     {
@@ -10,15 +7,15 @@
       "request": "launch",
       "runtimeExecutable": "${execPath}",
       "args": [
-        "${workspaceFolder}/../test/project.code-workspace",
-        "--extensionDevelopmentPath=${workspaceFolder}/../dist",
+        "${workspaceFolder}/../../test/project.code-workspace",
+        "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "sourceMaps": true,
       "skipFiles": [
         "<node_internals>/**/*.js"
       ],
       "outFiles": [
-        "${workspaceFolder}/../dist/*.js"
+        "${workspaceFolder}/dist/**/*.js"
       ],
       "env": {
         "NODE_ENV": "development"
@@ -33,18 +30,18 @@
       "sourceMaps": true,
       "protocol": "inspector",
       "timeout": 100000,
-      "skipFiles": [
-        "<node_internals>/**/*.js"
-      ],
       "outFiles": [
-        "${workspaceFolder}/../dist/*.js"
+        "${workspaceFolder}/dist/**/*.js"
+      ],
+      "skipFiles": [
+        "<node_internals>/**"
       ],
     }
   ],
   "compounds": [
     {
-      "name": "Launch SQLTools and Attach LS",
+      "name": "Launch Extension and LS",
       "configurations": ["Launch SQLTools", "Attach SQLTools LS"]
     }
-  ],
+  ]
 }
