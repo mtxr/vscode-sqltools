@@ -1,19 +1,19 @@
-import React, { useEffect } from 'react';
-import getVscode from '../../lib/vscode';
-import { IWebviewMessage } from '../../interfaces';
-import logger from '@sqltools/util/log';
-import { NSDatabase, IQueryOptions } from '@sqltools/types';
-import ViewContainer from './components/ViewContainer';
-import Tabs from './components/QueryTabs';
-import Table from './components/Table';
-import Loading from '../../components/Loading';
-import useReducer from './utils/useReducer.base';
 import { Button } from '@material-ui/core';
 import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
-import sendMessage, { messageLog } from '../../lib/messages';
-import { QueryResultsState } from './interfaces';
-import { MenuActions } from './constants';
+import { IQueryOptions, NSDatabase } from '@sqltools/types';
+import logger from '@sqltools/util/log';
+import React, { useEffect } from 'react';
 import { UIAction } from '../../../actions';
+import Loading from '../../components/Loading';
+import { IWebviewMessage } from '../../interfaces';
+import sendMessage, { messageLog } from '../../lib/messages';
+import getVscode from '../../lib/vscode';
+import Tabs from './components/QueryTabs';
+import Table from './components/Table';
+import ViewContainer from './components/ViewContainer';
+import { MenuActions } from './constants';
+import { QueryResultsState } from './interfaces';
+import useReducer from './utils/useReducer.base';
 
 
 const log = logger.extend('results');
@@ -81,6 +81,17 @@ const Screen: React.SFC<Props> = () => {
     if (!activeResult) return;
     sendMessage(UIAction.CALL, {
       command: `${process.env.EXT_NAMESPACE}.saveResults`,
+      args: [{
+        ...getCurrentQueryOptions(activeResult),
+        fileType: Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined,
+      }],
+    });
+  };
+  const openResults = (choice?: MenuActions.SaveCSVOption | MenuActions.SaveJSONOption | any) => {
+    const activeResult = getCurrentResult(stateRef.current);
+    if (!activeResult) return;
+    sendMessage(UIAction.CALL, {
+      command: `${process.env.EXT_NAMESPACE}.openResults`,
       args: [{
         ...getCurrentQueryOptions(activeResult),
         fileType: Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined,
@@ -205,6 +216,7 @@ const Screen: React.SFC<Props> = () => {
             <Button onClick={focusMessages} className='action-button'>Console</Button>
             <Button onClick={reRunQuery} className='action-button'>Re-Run Query</Button>
             <Button onClick={exportResults} className='action-button'>Export</Button>
+            <Button onClick={openResults} className='action-button'>Open</Button>
           </div>
         }
       />}

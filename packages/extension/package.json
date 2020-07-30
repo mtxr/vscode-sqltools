@@ -775,6 +775,16 @@
                     "default": "prompt",
                     "description": "Default export results mode."
                 },
+                "sqltools.defaultOpenType": {
+                    "type": "string",
+                    "enum": [
+                        "prompt",
+                        "csv",
+                        "json"
+                    ],
+                    "default": "prompt",
+                    "description": "Default open results mode."
+                },
                 "sqltools.useNodeRuntime": {
                     "type": [
                         "null",
