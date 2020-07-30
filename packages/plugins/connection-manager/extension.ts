@@ -372,7 +372,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
     if (!opt || !opt.requestId) throw 'Can\'t find active results view';
 
-    fileType = fileType || Config.defaultExportType;
+    fileType = fileType || Config.defaultOpenType;
     if (fileType === 'prompt') {
       fileType = await quickPick<'csv' | 'json' | undefined>([
         { label: 'Open results as CSV', value: 'csv' },

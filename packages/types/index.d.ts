@@ -1,6 +1,6 @@
-import { RequestType, RequestType0 } from 'vscode-languageserver-protocol';
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
 import { IConnection as LSIConnection, TextDocuments } from 'vscode-languageserver';
+import { RequestType, RequestType0 } from 'vscode-languageserver-protocol';
 
 export declare namespace NodeJS {
   interface ProcessEnv {
@@ -610,6 +610,16 @@ export interface ISettings {
    * @memberof ISettings
    */
   defaultExportType?: 'prompt' | 'csv' | 'json';
+
+
+  /**
+   * Default open results mode
+   * @default "prompt"
+   * @type {string}
+   * @memberof ISettings
+   */
+  defaultOpenType?: 'prompt' | 'csv' | 'json';
+
   /**
    * Enable node runtime usage.
    * @default false
