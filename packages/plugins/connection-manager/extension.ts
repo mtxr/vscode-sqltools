@@ -1,28 +1,30 @@
-import logger from '@sqltools/util/log';
-import Config from '@sqltools/util/config-manager';
-import { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, IExtensionPlugin, ILanguageClient, IExtension, RequestHandler, NSDatabase, ContextValue, IQueryOptions } from '@sqltools/types';
-import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
-import { getConnectionDescription, getConnectionId, migrateConnectionSettings, getSessionBasename } from '@sqltools/util/connection';
-import { getSelectedText, readInput, getOrCreateEditor } from '@sqltools/vscode/utils';
-import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
-import { SidebarConnection, SidebarItem, ConnectionExplorer } from '@sqltools/plugins/connection-manager/explorer';
+import { ConnectionExplorer, SidebarConnection, SidebarItem } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
-import { commands, QuickPickItem, window, workspace, ConfigurationTarget, Uri, TextEditor, TextDocument, ProgressLocation, Progress, CancellationTokenSource } from 'vscode';
-import { ConnectRequest, DisconnectRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, ProgressNotificationStart, ProgressNotificationComplete, ProgressNotificationStartParams, ProgressNotificationCompleteParams, TestConnectionRequest, GetChildrenForTreeItemRequest, SearchConnectionItemsRequest, SaveResultsRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
-import path from 'path';
-import CodeLensPlugin from '../codelens/extension';
-import { extractConnName, getQueryParameters } from '@sqltools/util/query';
-import statusBar from './status-bar';
-import telemetry from '@sqltools/util/telemetry';
+import { ContextValue, IConnection, IExtension, IExtensionPlugin, ILanguageClient, IQueryOptions, NSDatabase, RequestHandler } from '@sqltools/types';
+import Config from '@sqltools/util/config-manager';
+import { getConnectionDescription, getConnectionId, getSessionBasename, migrateConnectionSettings } from '@sqltools/util/connection';
+import { EXT_CONFIG_NAMESPACE, EXT_NAMESPACE } from '@sqltools/util/constants';
 import generateId from '@sqltools/util/internal-id';
+import logger from '@sqltools/util/log';
+import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
+import { extractConnName, getQueryParameters } from '@sqltools/util/query';
+import telemetry from '@sqltools/util/telemetry';
+import { isEmpty } from '@sqltools/util/validation';
 import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
+import { getOrCreateEditor, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
-import { isEmpty } from '@sqltools/util/validation';
-import { getExtension } from './extension-util';
+import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
+import path from 'path';
+import { file } from 'tempy';
+import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
+import CodeLensPlugin from '../codelens/extension';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, RunCommandRequest, SaveResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
+import { getExtension } from './extension-util';
+import statusBar from './status-bar';
+
 const log = logger.extend('conn-man');
 
 export default class ConnectionManagerPlugin implements IExtensionPlugin {
@@ -296,7 +298,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_showOutputChannel = async () => logger.show();
 
   private ext_saveResults = async (arg: (IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
-    let fileType = null;
+    let fileType: string | null = null;
     let opt: IQueryOptions = {};
     if (arg instanceof Uri) {
       // if clicked on editor title actions
@@ -342,6 +344,54 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     const filename = file.fsPath;
     await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
     return commands.executeCommand('vscode.open', file);
+  }
+
+  private ext_openResults = async (arg: (IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
+    let fileType: string | null = null;
+    let opt: IQueryOptions = {};
+    if (arg instanceof Uri) {
+      // if clicked on editor title actions
+      const view = this.resultsWebview.getActiveView();
+      if (!view) {
+        throw 'Can\'t find active results view';
+      }
+      const state = await view.getState();
+      const activeResult = state.resultTabs[state.activeTab];
+      opt = {
+        requestId: activeResult.requestId,
+        resultId: activeResult.resultId,
+        baseQuery: activeResult.baseQuery,
+        connId: activeResult.connId,
+      }
+    } else if (arg.requestId) {
+      // used context menu inside of a view
+      const { fileType: optFileType, ...rest } = arg;
+      fileType = optFileType;
+      opt = rest;
+    }
+
+    if (!opt || !opt.requestId) throw 'Can\'t find active results view';
+
+    fileType = fileType || Config.defaultOpenType;
+    if (fileType === 'prompt') {
+      fileType = await quickPick<'csv' | 'json' | undefined>([
+        { label: 'Open results as CSV', value: 'csv' },
+        { label: 'Open results as JSON', value: 'json' },
+      ], 'value', {
+        title: 'Select a file type',
+      });
+    }
+
+    if (!fileType || fileType === 'prompt') return;
+
+    var filename = file({
+      extension: fileType,
+    });
+
+    var fileUri = Uri.file(filename);
+
+    await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
+    return vscodeEnv.openExternal(fileUri);
   }
 
   private ext_openAddConnectionScreen = () => {
@@ -696,6 +746,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`executeQueryFromFile`, this.ext_executeQueryFromFile)
       .registerCommand(`refreshTree`, this.ext_refreshTree)
       .registerCommand(`saveResults`, this.ext_saveResults)
+      .registerCommand(`openResults`, this.ext_openResults)
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
       .registerCommand(`showRecords`, this.ext_showRecords)

@@ -339,6 +339,15 @@
                 }
             },
             {
+                "title": "Open Results",
+                "command": "sqltools.openResults",
+                "category": "SQLTools Results",
+                "icon": {
+                    "light": "icons/view-light.svg",
+                    "dark": "icons/view-dark.svg"
+                }
+            },
+            {
                 "title": "Attach Connection To This File",
                 "command": "sqltools.attachFileToConnection",
                 "category": "SQLTools Internal"
@@ -766,6 +775,16 @@
                     "default": "prompt",
                     "description": "Default export results mode."
                 },
+                "sqltools.defaultOpenType": {
+                    "type": "string",
+                    "enum": [
+                        "prompt",
+                        "csv",
+                        "json"
+                    ],
+                    "default": "prompt",
+                    "description": "Default open results mode."
+                },
                 "sqltools.useNodeRuntime": {
                     "type": [
                         "null",
@@ -937,6 +956,10 @@
                 },
                 {
                     "command": "sqltools.saveResults",
+                    "when": "sqltools.Results.active"
+                },
+                {
+                    "command": "sqltools.openResults",
                     "when": "sqltools.Results.active"
                 },
                 {
@@ -1114,6 +1137,11 @@
             "editor/title": [
                 {
                     "command": "sqltools.saveResults",
+                    "group": "navigation",
+                    "when": "sqltools.Results.active"
+                },
+                {
+                    "command": "sqltools.openResults",
                     "group": "navigation",
                     "when": "sqltools.Results.active"
                 }
