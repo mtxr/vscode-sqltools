@@ -1,35 +1,10 @@
 import React from 'react';
 import Container from '@material-ui/core/Container';
-import Grid, { GridTypeMap } from '@material-ui/core/Grid';
-import styled from 'styled-components';
-import { OverridableComponent } from '@material-ui/core/OverridableComponent';
+import Grid from '@material-ui/core/Grid';
 import Message from '../../../components/Message';
 import { SettingsScreenState } from '../interfaces';
 import { CircularProgress } from '@material-ui/core';
-
-const DBDriverItem = styled<OverridableComponent<GridTypeMap<{ selected?: boolean }, 'div'>>>(Grid)`
-  max-width: 250px;
-  > div {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    min-height: 130px;
-    cursor: pointer;
-    justify-content: center;
-    background: ${p => p.selected ? 'var(--vscode-menu-selectionBackground)' : null};
-    color: ${p => p.selected ? 'var(--vscode-menu-selectionForeground)' : null};
-
-    div, img {
-      font-weight: bold;
-      text-align: center;
-    }
-
-    &:hover {
-      background: var(--vscode-menu-selectionBackground);
-      color: var(--vscode-menu-selectionForeground);
-    }
-  }
-`;
+import { DriverItem } from '../../../components/DriverItem';
 
 const DriverSelector = ({
   onSelect,
@@ -48,12 +23,12 @@ const DriverSelector = ({
     <Container maxWidth='sm'>
       {drivers.length > 0 && <Grid container spacing={2} autoCapitalize='center'>
         {drivers.map(driver => (
-          <DBDriverItem item key={driver.value} xs={3} selected={selected && selected.value === driver.value}>
-            <div onClick={() => onSelect(driver)}>
-              <img src={driver.icon} />
-              <div>{driver.displayName}</div>
-            </div>
-          </DBDriverItem>
+          <DriverItem
+            key={driver.value}
+            selected={selected && selected.value === driver.value}
+            driver={driver}
+            onSelect={() => onSelect(driver)}
+          />
         ))}
       </Grid>}
       {!loading && drivers.length === 0 && <Grid style={{ textAlign: 'center', height: '400px', justifyContent: 'space-evenly', flexDirection: 'column', display: 'flex', boxSizing: 'content-box' }}>
@@ -74,13 +49,13 @@ const DriverSelector = ({
           </p>
         </div>
       </Grid>}
-      {!loading && drivers.length > 0 && <div>
+      {!loading && drivers.length > 0 && <Grid style={{ textAlign: 'center', height: '120px', justifyContent: 'space-evenly', flexDirection: 'column', display: 'flex', boxSizing: 'content-box' }}>
         <p>
           <a href={`command:workbench.extensions.search?${encodeURIComponent('"@tag:sqltools-driver"')}`}>
             Get more drivers
           </a>
         </p>
-      </div>}
+      </Grid>}
     </Container>
   </>
 );

@@ -196,7 +196,6 @@ export default class YourDriverClass extends AbstractDriver<DriverLib, DriverOpt
    * It gets the child based on child types
    */
   private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
-    console.log({ item, parent });
     switch (item.childType) {
       case ContextValue.TABLE:
       case ContextValue.VIEW:

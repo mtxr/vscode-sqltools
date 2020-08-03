@@ -25,7 +25,6 @@
     "react": "^16.8.1",
     "react-dom": "^16.8.1",
     "rimraf": "^3.0.2",
-    "styled-components": "5.1.1",
     "tempy": "^0.6.0"
   },
   "scripts": {
@@ -39,7 +38,6 @@
     "@types/react": "^16.9.1",
     "@types/react-dom": "^16.8.5",
     "@types/rimraf": "^3.0.0",
-    "@types/styled-components": "^5.0.0",
     "cross-env": "^7.0.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",

@@ -2,7 +2,7 @@ import React from 'react';
 import { TableSelection } from '@devexpress/dx-react-grid-material-ui';
 import MTableRow from '@material-ui/core/TableRow';
 import { withStyles, createStyles, WithStyles } from '@material-ui/core/styles';
-import styled from 'styled-components';
+import style from './style.m.scss';
 
 const styles = () => createStyles({
   selected: {
@@ -11,16 +11,9 @@ const styles = () => createStyles({
   },
 });
 
-const CustomTableRow = styled(MTableRow)`
-&.selected-row .td-syntax {
-  white-space: pre;
-}
-`;
-
 type SelectedRowProps = TableSelection.RowProps & WithStyles<typeof styles>;
 
 const Selected = withStyles(styles, { name: 'TableSelectRow' })(({
-  children,
   classes,
   onToggle,
   selectByRowClick,
@@ -28,17 +21,15 @@ const Selected = withStyles(styles, { name: 'TableSelectRow' })(({
   tableRow,
   ...restProps
  }: SelectedRowProps & TableSelection.RowProps) => (
-  <CustomTableRow
-    className={highlighted ? `${classes.selected} selected-row` : undefined}
+  <MTableRow
+    className={highlighted ? `${classes.selected} ${style.selectedRow}` : undefined}
     onClick={(e) => {
       if (!selectByRowClick) return;
       e.stopPropagation();
       onToggle();
     }}
     {...restProps}
-  >
-    {children}
-  </CustomTableRow>
+  />
 ));
 const TableRow = {
   Selected,

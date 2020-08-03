@@ -1,8 +1,11 @@
+// @TODO css -modules
+
 .rjsf {
-  fieldset {
+  fieldset, #root {
     border: none;
     margin: 0;
     padding: 0;
+    background: none !important;
 
     .form-group {
       display: flex;
@@ -19,8 +22,9 @@
       }
       fieldset {
         flex-grow: 1;
-        padding-left: 1rem;
+        padding: 1rem;
         border: 1px solid var(--vscode-input-border, currentColor);
+        background: rgba(255,255,255,0.01);
       }
       > p.field-description, > p.help-block  {
         flex-grow: 1;
@@ -113,4 +117,8 @@
       margin-right: 0;
     }
   }
+}
+
+.vscode-light .rjsf fieldset .form-group fieldset {
+  background: rgba(0,0,0,0.01);
 }

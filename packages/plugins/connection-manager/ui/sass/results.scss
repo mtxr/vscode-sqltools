@@ -1,1 +1,99 @@
-@import './screens/results';
+@import './lib/mixins';
+
+// @TODO
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
+.query-results-container {
+  @include full-screen();
+  display: flex;
+  flex-direction: column;
+}
+.query-results-container, .query-results-container * {
+  font-size: var(--sqltools-font-size, var(--sqltools-fontSize));
+  font-family: var(--sqltools-font-family, var(--sqltools-fontFamily));
+}
+
+.result {
+  flex-grow: 1;
+  height: 100%;
+  display: flex;
+}
+.has-tabs .result {
+  max-height: calc(100vh - 36px);
+}
+
+.resultsPagination {
+  border-top: 1px solid var(--vscode-input-border);
+  padding: 2px 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .buttons {
+    button:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
+  .paginator > div {
+    padding: 0 !important;
+  }
+
+  .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    color: inherit;
+    border-radius: 0;
+    border: 1px solid transparent;
+    padding: 2px 6px;
+
+    &:hover {
+      border: 1px solid var(--vscode-button-hoverBackground);
+      background: var(--vscode-button-hoverBackground);
+    }
+  }
+  .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .paginator {
+    .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+      width: 2rem;
+      height: 2rem;
+      line-height: 1;
+
+      &:hover {
+        border: 1px solid var(--vscode-button-hoverBackground);
+        background: var(--vscode-button-hoverBackground);
+      }
+    }
+  }
+
+  button[class*="Pagination-activeButton"], .MuiButton-root.active, .MuiIconButton-root.active {
+    color: var(--vscode-input-foreground);
+    background: var(--vscode-inputOption-activeBackground);
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+  }
+
+}
+.queryError, .resultsPagination {
+  .action-button {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    &:hover {
+      background: var(--vscode-button-hoverBackground);
+    }
+  }
+  .paginator.no-buttons > div > div {
+    > button {
+      display: none;
+    }
+    > span {
+      padding-right: 1em;
+    }
+  }
+}
+
+.query-results-container .queryError .buttons button {
+  margin: 0 0.5rem;
+}

@@ -32,7 +32,7 @@ const ConnectionCreated = ({
           <Syntax code={connSettings} language="json" width='calc(100% - 100px)' />
         </details>
         <div style={{ paddingTop: '50px' }}>
-          <Button.a
+          <Button a
             onClick={reset}
             bg="var(--vscode-list-highlightForeground)"
             href={encodeURI(
@@ -40,8 +40,8 @@ const ConnectionCreated = ({
             )}
           >
             Connect now
-          </Button.a>
-          <Button.a
+          </Button>
+          <Button a
             onClick={reset}
             bg="var(--vscode-editorError-foreground)"
             float="right"
@@ -50,7 +50,7 @@ const ConnectionCreated = ({
             )}
           >
             Delete {formData.name}
-          </Button.a>
+          </Button>
           <Button onClick={reset} float="right">
             Create another
           </Button>

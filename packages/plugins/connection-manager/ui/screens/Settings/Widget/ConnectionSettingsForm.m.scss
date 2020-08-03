@@ -1,0 +1,18 @@
+.formContainer {
+  > img {
+    float: right;
+  }
+}
+
+.footer {
+  padding-top: 12px;
+  padding-bottom: 18px;
+  line-height: 1.7;
+
+  > a {
+    float: right;
+    margin-right: 2em;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+}

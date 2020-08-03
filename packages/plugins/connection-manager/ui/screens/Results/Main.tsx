@@ -1,5 +1,4 @@
 import { Button } from '@material-ui/core';
-import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 import { IQueryOptions, NSDatabase } from '@sqltools/types';
 import logger from '@sqltools/util/log';
 import React, { useEffect } from 'react';
@@ -14,6 +13,7 @@ import ViewContainer from './components/ViewContainer';
 import { MenuActions } from './constants';
 import { QueryResultsState } from './interfaces';
 import useReducer from './utils/useReducer.base';
+import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 
 
 const log = logger.extend('results');
@@ -220,7 +220,7 @@ const Screen: React.SFC<Props> = () => {
           </div>
         }
       />}
-      {loading && <Loading active />}
+      {loading && <Loading />}
     </ViewContainer>
   );
 };

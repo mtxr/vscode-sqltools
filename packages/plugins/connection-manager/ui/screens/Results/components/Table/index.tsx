@@ -28,7 +28,7 @@ import { TableProps } from '../../interfaces';
 import { availableFilterOperations, MenuActions } from '../../constants';
 import { clipboardInsert } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import Menu from '../../../../components/Menu';
-import ErrorIcon from '../../../../components/ErrorIcon';
+import ErrorIcon from '../../../../components/Icons/ErrorIcon';
 import TableFilterRowCell from './TableFilterRowCell';
 import PagingPanelContainer from './PagingPanelContainer';
 import FilterIcon from './FilterIcon';
@@ -42,6 +42,7 @@ import { UIAction } from '../../../../../actions';
 import { filterPredicate } from '../../utils/filterPredicate';
 import Message from '../../../../components/Message';
 import SortLabel from './SortLabel';
+import style from '../../../../sass/generic.m.scss';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {
   state = initialState;
@@ -206,7 +207,7 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
       }}
     >
       <div>
-        <ErrorIcon />
+        <ErrorIcon className={style.colorError}/>
       </div>
       <div style={{ margin: '30px' }}>Query with errors. Please, check the error below.</div>
       <div>{footerButtons}</div>
@@ -242,7 +243,8 @@ export default class Table extends React.PureComponent<TableProps, TableState> {
                 justifyContent: 'space-around',
                 display: 'flex',
                 flexDirection: 'column',
-              }}><Message fontSize='1.3rem' type='success'>Query returned 0 rows</Message></div>
+                fontSize: '1.3rem',
+              }}><Message type='success'>Query returned 0 rows</Message></div>
             ) : (
             <Grid rows={rows} columns={columns} rootComponent={GridRoot}>
               <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
