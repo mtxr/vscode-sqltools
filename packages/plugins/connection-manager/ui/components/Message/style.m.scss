@@ -1,0 +1,21 @@
+.message {
+  border-radius: 4px;
+  padding: 4px;
+  display: inline-block;
+  font-size: inherit;
+}
+
+.success {
+  composes: message;
+  background: rgba(0, 255, 0, 0.4);
+}
+
+.error {
+  composes: message;
+  background: rgba(255, 0, 0, 0.4);
+}
+
+.warning {
+  composes: message;
+  background: rgba(255, 255, 0, 0.4);
+}

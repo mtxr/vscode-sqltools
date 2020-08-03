@@ -1,7 +1,6 @@
 import React from 'react';
 import DriverIcon from '../../../components/DriverIcon';
 import Button from '../../../components/Button';
-import A from '../../../components/A';
 import { SettingsScreenState } from '../interfaces';
 import Form, { FormProps } from '@rjsf/core';
 import { IConnection } from '@sqltools/types';
@@ -9,6 +8,7 @@ import Syntax from '../../../components/Syntax';
 import FileWidget from './FileWidget';
 import { UIAction } from '../../../../actions';
 import Message from '../../../components/Message';
+import style from './ConnectionSettingsForm.m.scss';
 
 const ConnectionSettingsForm = ({
   onSubmit,
@@ -41,7 +41,7 @@ const ConnectionSettingsForm = ({
   };
 }) => {
   return (
-    <>
+    <div className={style.formContainer}>
       <h5>Connection Settings</h5>
       <hr />
       <DriverIcon driver={driver} />
@@ -69,12 +69,12 @@ const ConnectionSettingsForm = ({
           <Syntax code={formData} language='json' />
         </div>
       }
-    </>
+    </div>
   );
 };
 
 ConnectionSettingsForm.Footer = ({ testConnection, action, openConnectionFile }) => (
-  <footer style={{ paddingTop: '12px', paddingBottom: '18px', lineHeight: 1.7 }}>
+  <footer className={style.footer}>
     <Button bg="var(--vscode-list-highlightForeground)" type="submit">
       Save Connection
     </Button>
@@ -82,9 +82,9 @@ ConnectionSettingsForm.Footer = ({ testConnection, action, openConnectionFile })
       Test Connection
     </Button>
     {!`${action || UIAction.REQUEST_CREATE_CONNECTION}`.toLowerCase().includes('create') && (
-      <A onClick={openConnectionFile} float="right" style={{ marginRight: '2em' }}>
+      <a onClick={openConnectionFile}>
         Open settings
-      </A>
+      </a>
     )}
   </footer>
 );

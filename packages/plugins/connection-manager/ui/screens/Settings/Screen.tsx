@@ -6,7 +6,6 @@ import { Step } from './lib/steps';
 import ConnectionSettingsForm from './Widget/ConnectionSettingsForm';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import logger from '@sqltools/util/log';
-import '@sqltools/plugins/connection-manager/ui/sass/app.scss';
 import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 import sendMessage from '../../lib/messages';
 import { SettingsScreenState } from './interfaces';
@@ -14,11 +13,12 @@ import { IConnection } from '@sqltools/types';
 import { UIAction } from '../../../actions';
 import Header from './Header';
 import { ISubmitEvent, IChangeEvent } from '@rjsf/core';
+import styles from '../../sass/generic.m.scss';
 
 const log = logger.extend('settings');
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
-  checkDriversInterval: number;
+  checkDriversInterval: NodeJS.Timeout;
   messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
     log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
@@ -176,8 +176,8 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
     } = this.state;
     return (
       <>
-        <Container maxWidth='md' className={`blur ${loading ? 'blur-active' : ''}`}>
-          <Header step={step} driver={driver} saved={saved} />
+        <Container maxWidth='md' className={loading ? styles.blurActive : styles.blur}>
+          <Header step={step} driver={driver} saved={saved} goTo={this.goTo}/>
           {step === Step.CONNECTION_TYPE && (
             <DriverSelector
               loading={loading}
@@ -213,7 +213,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
             />
           )}
         </Container>
-        <Loading active={loading} />
+        {loading && <Loading />}
       </>
     );
   }

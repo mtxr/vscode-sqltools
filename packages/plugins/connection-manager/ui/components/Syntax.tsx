@@ -1,5 +1,7 @@
 import React from 'react';
 import { clipboardInsert } from '../lib/utils';
+import '../sass/syntax.scss'; // @TODO CSS modules
+
 
 interface SyntaxProps {
   language?: string;
@@ -52,7 +54,7 @@ export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
           className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}
           dangerouslySetInnerHTML={{ __html: this.renderCode(this.props.code) }}
         ></div>
-        {this.props.allowCopy && <button className='btn copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>}
+        {this.props.allowCopy && <button className='copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>}
       </div>
     );
   }

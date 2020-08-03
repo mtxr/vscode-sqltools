@@ -1,6 +1,6 @@
 .syntax {
   background: var(--vscode-editor-background, #eaeaea);
-  border-radius: $radius;
+  border-radius: var(--sqltools-radius);
   padding: 4px;
   &, * {
     line-height: 1.2;
@@ -39,30 +39,28 @@
 }
 
 .syntax.strong-bg {
-  background: rgba(0, 0, 0, 0.02);
+  background: var(--sqltools-BWColor1);
 }
 
-.btn.copy-code {
+button.copy-code {
   position: absolute;
   top: 0;
   right: 0;
-  border-top-right-radius: $radius;
-  border-bottom-left-radius: $radius;
-  background: $darkThemeWhite4;
+  border-top-right-radius: var(--sqltools-radius);
+  border-bottom-left-radius: var(--sqltools-radius);
+  background: var(--sqltools-BWColor4);
   font-size: 0.6em;
   padding: 2px 4px;
   cursor: copy;
 }
 
-body.vscode-dark .syntax {
-  background: var(--vscode-editor-background, #222);
-  &.strong-bg {
-    background: rgba(255, 255, 255, 0.02);
-  }
-}
 
 td, th {
   .syntax {
     height: auto !important;
   }
+}
+
+.relative {
+  position: relative !important;
 }

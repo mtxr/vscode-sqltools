@@ -4,7 +4,7 @@ const setDefaults = require('./../common/set-defaults');
 const webpack = require('webpack');
 const parseEntries = require('./../common/parse-entries');
 
-const { rootdir, IS_PRODUCTION } = require('../constants');
+const { rootdir } = require('../constants');
 
 /**
  *
@@ -12,6 +12,7 @@ const { rootdir, IS_PRODUCTION } = require('../constants');
  * @param {string} packagePath
  * @returns {webpack.Configuration['plugins']}
  */
+
 module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
   const { entry, outDir, babelOptions } = parseEntries(entries, packagePath);
 
@@ -27,34 +28,48 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
             { loader: 'babel-loader', options: babelOptions },
             { loader: 'ts-loader', options: { transpileOnly: true } },
           ],
-          // exclude: /[\\/]node_modules[\\/]/,
         },
         {
           test: /\.css/,
           use: [
+            minCssExtract,
             {
-              loader: MiniCssExtractPlugin.loader,
+              loader: 'css-loader',
               options: {
-                hmr: !IS_PRODUCTION,
-              },
+                importLoaders: 3,
+              }
             },
-            'css-loader'
           ],
-          // exclude: /[\\/]node_modules[\\/]/,
         },
         {
           test: /\.scss$/,
+          exclude: /\.m\.scss$/,
           use: [
+            minCssExtract,
             {
-              loader: MiniCssExtractPlugin.loader,
+              loader: 'css-loader',
               options: {
-                hmr: !IS_PRODUCTION,
-              },
+                importLoaders: 3,
+              }
             },
-            'css-loader',
+            'resolve-url-loader',
             'sass-loader'
           ],
-          // exclude: /[\\/]node_modules[\\/]/,
+        },
+        {
+          test: /\.(m|module)\.scss$/,
+          use: [
+            minCssExtract,
+            {
+              loader: 'css-loader',
+              options: {
+                importLoaders: 3,
+                modules: true,
+              }
+            },
+            'resolve-url-loader',
+            'sass-loader'
+          ],
         },
         {
           test: /\.(png|svg|jpg|gif)$/,
@@ -112,4 +127,11 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
   };
 
   return setDefaults(config);
+};
+
+const minCssExtract = {
+  loader: MiniCssExtractPlugin.loader,
+  options: {
+    hmr: false
+  },
 };
