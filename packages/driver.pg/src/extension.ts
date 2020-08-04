@@ -55,6 +55,18 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         }
       }
       propsToRemove.forEach(p => delete connInfo[p]);
+      connInfo.pgOptions = connInfo.pgOptions || {};
+      if (connInfo.pgOptions.enableSsl === 'Enabled') {
+        if (typeof connInfo.pgOptions.ssl === 'object' && Object.keys(connInfo.pgOptions.ssl).length === 0) {
+          connInfo.pgOptions.ssl = true;
+        }
+      } else if (connInfo.pgOptions.enableSsl === 'Disabled') {
+        delete connInfo.pgOptions.ssl
+      }
+      delete connInfo.pgOptions.enableSsl;
+      if (Object.keys(connInfo.pgOptions).length === 0) {
+        delete connInfo.pgOptions;
+      }
 
       return connInfo;
     },
@@ -76,6 +88,17 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         delete formData.askForPassword;
         formData.usePassword = connInfo.password ? 'Save password' : 'Use empty password';
       }
+
+      formData.pgOptions = formData.pgOptions || {};
+      if (formData.pgOptions.ssl) {
+        formData.pgOptions.enableSsl = 'Enabled';
+        if (typeof formData.pgOptions.ssl === 'boolean') {
+          formData.pgOptions.ssl = {};
+        }
+      } else {
+        formData.pgOptions.enableSsl = 'Disabled';
+      }
+
       return formData;
     },
     driverAliases: DRIVER_ALIASES,

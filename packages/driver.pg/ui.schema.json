@@ -4,6 +4,11 @@
   "askForPassword": { "ui:widget": "hidden" },
   "socketPath": { "ui:widget": "file" },
   "pgOptions": {
+    "ui:order": [
+      "enableSsl",
+      "ssl",
+      "*"
+    ],
     "statement_timeout": {
       "ui:help": "Number of milliseconds before a statement in query will time out. Default is no timeout"
     },
@@ -18,6 +23,9 @@
     },
     "max": {
       "ui:help": "Maximum number of clients the pool should contain. By default this is set to 10."
+    },
+    "enabledSsl": {
+      "ui:help": "Enabled SSL for this connection"
     },
     "ssl": {
       "rejectUnauthorized": {

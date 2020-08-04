@@ -65,32 +65,59 @@
         "max": {
           "type": "number"
         },
-        "ssl": {
-          "type": "object",
-          "description": "Passed directly to node.TLSSocket. Check more here: https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options",
-          "properties": {
-            "rejectUnauthorized": {
-              "type": "boolean"
+        "enableSsl": {
+          "type": "string",
+          "title": "SSL",
+          "enum": ["Enabled", "Disabled"],
+          "default": "Disabled"
+        }
+      },
+      "dependencies": {
+        "enableSsl": {
+          "oneOf": [
+            {
+              "properties": {
+                "enableSsl": {
+                  "enum": ["Disabled"]
+                }
+              }
             },
-            "requestCert": {
-              "type": "boolean"
-            },
-            "ca": {
-              "type": "string"
-            },
-            "key": {
-              "type": "string"
-            },
-            "cert": {
-              "type": "string"
-            },
-            "pfx": {
-              "type": "string"
-            },
-            "passphrase": {
-              "type": "string"
+            {
+              "properties": {
+                "enableSsl": {
+                  "enum": ["Enabled"]
+                },
+                "ssl": {
+                  "type": "object",
+                  "title": "SSL Options (node.TLSSocket)",
+                  "description": "Passed directly to node.TLSSocket. Check more here: https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options",
+                  "properties": {
+                    "rejectUnauthorized": {
+                      "type": "boolean"
+                    },
+                    "requestCert": {
+                      "type": "boolean"
+                    },
+                    "ca": {
+                      "type": "string"
+                    },
+                    "key": {
+                      "type": "string"
+                    },
+                    "cert": {
+                      "type": "string"
+                    },
+                    "pfx": {
+                      "type": "string"
+                    },
+                    "passphrase": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
             }
-          }
+          ]
         }
       }
     }

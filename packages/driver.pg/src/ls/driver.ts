@@ -20,7 +20,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       return this.connection;
     }
     try {
-      const pgOptions: PoolConfig = this.credentials.pgOptions || {};
+      const { ssl, ...pgOptions }: PoolConfig = this.credentials.pgOptions || {};
 
       let poolConfig: PoolConfig = {
         connectionTimeoutMillis: Number(`${this.credentials.connectionTimeout || 0}`) * 1000,
@@ -42,13 +42,25 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           ...poolConfig,
         };
       }
-
-      if (poolConfig.ssl && typeof poolConfig.ssl === 'object') {
-        ['ca', 'key', 'cert', 'pfx'].forEach(key => {
-          if (!poolConfig.ssl[key]) return;
-          this.log.extend('info')(`Reading file ${poolConfig.ssl[key].replace(/^file:\/\//, '')}`)
-          poolConfig.ssl[key] = fs.readFileSync(poolConfig.ssl[key].replace(/^file:\/\//, '')).toString();
-        });
+      if (ssl) {
+        if (typeof ssl === 'object') {
+          const useSsl = {
+            ...ssl,
+          };
+          ['ca', 'key', 'cert', 'pfx'].forEach(key => {
+            if (!useSsl[key]) {
+              delete useSsl[key];
+              return;
+            };
+            this.log.info(`Reading file ${useSsl[key].replace(/^file:\/\//, '')}`)
+            useSsl[key] = fs.readFileSync(useSsl[key].replace(/^file:\/\//, '')).toString();
+          });
+          if (Object.keys(useSsl).length > 0) {
+            poolConfig.ssl = useSsl;
+          }
+        } else {
+          poolConfig.ssl =  ssl || false;
+        }
       }
 
       const pool = new Pool(poolConfig);
