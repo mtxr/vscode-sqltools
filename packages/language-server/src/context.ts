@@ -1,15 +1,15 @@
 import { InvalidActionError } from '@sqltools/util/exception';
 import { IConnectionDriverConstructor, LSContextMap } from '@sqltools/types';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 
-const log = logger.extend('ls-context');
+const log = createLogger('ls-context');
 
 const Context: Omit<LSContextMap, 'drivers'> = new Map();
 class DriverMap<V = IConnectionDriverConstructor> extends Map<string, V> {
   set (key: string, value: V): this {
     if (typeof key !== 'string') throw 'invalid driver name!';
     key = key.toLowerCase();
-    log.extend('register-driver')(`Driver ${key} registered!`);
+    log.info({ place: 'driver-map' }, 'Driver %s registered!', key);
     return super.set(key, value);
   }
   get(key: string) { return super.get(key.toLowerCase()); }

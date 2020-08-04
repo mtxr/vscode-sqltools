@@ -1,7 +1,7 @@
 import { ENV, VERSION } from '@sqltools/util/constants';
 import { runIfPropIsDefined } from '@sqltools/util/decorators';
 import { numericVersion } from '@sqltools/util/text';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import * as Sentry from '@sentry/node';
 import { ITelemetryArgs, ATelemetry, ITimer } from '@sqltools/types';
 
@@ -39,7 +39,7 @@ const IGNORE_ERRORS_REGEX = new RegExp(`(${[
 ].join('|')})`, 'g');
 
 const product = process.env.PRODUCT;
-let log = logger.extend('telemetry');
+let log = createLogger('telemetry');
 
 Sentry.init({
   maxBreadcrumbs: 5,
@@ -97,14 +97,14 @@ class Telemetry implements ATelemetry {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
     this.createClient();
-    log.extend('debug')('Telemetry enabled!');
+    log.info('Telemetry enabled!');
   }
 
   public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     Sentry.getCurrentHub().getClient().getOptions().enabled = false;
-    log.extend('debug')('Telemetry disabled!');
+    log.info('Telemetry disabled!');
   }
 
   @runIfPropIsDefined('client')
@@ -114,7 +114,7 @@ class Telemetry implements ATelemetry {
     if (IGNORE_ERRORS_REGEX.test(errStr)) return;
 
     const properties = { ...((<any>error).data || {}), ...data };
-    log.extend('error')(`Exception:%O\n\tData: %j`, error, properties);
+    log.error(`Exception:%O\n\tData: %j`, error, properties);
     Sentry.configureScope(scope => {
       scope.setExtras({
         exception: error,
@@ -130,7 +130,7 @@ class Telemetry implements ATelemetry {
     message: string,
     value: string = 'Dismissed'
   ): void {
-    log.extend(severity.substr(0, 5).toLowerCase())(`Message: %s, value: %s`, message, value);
+    log.debug({ severity }, 'Message: %s, value: %s', message, value);
     let sev: Sentry.Severity;
     switch (severity) {
       case 'debug':
@@ -159,7 +159,7 @@ class Telemetry implements ATelemetry {
     name: string,
     properties?: { [key: string]: any }
   ): void {
-    log.extend('debug')(`Event: %s\n%j`, name,  properties || '');
+    log.debug(`Event: %s\n%j`, name,  properties || '');
     Sentry.captureEvent({
       event_id: this.prefixed(name),
       message: name,
@@ -171,7 +171,7 @@ class Telemetry implements ATelemetry {
   @runIfPropIsDefined('client')
   public registerTime(timeKey: string, timer: ITimer) {
     const elapsed = timer.elapsed();
-    log.extend('debug')('Time: %s %d ms', timeKey, elapsed);
+    log.info('Time: %s %d ms', timeKey, elapsed);
     this.registerEvent(this.prefixed(`time:${timeKey}`), {
       value: elapsed,
     });

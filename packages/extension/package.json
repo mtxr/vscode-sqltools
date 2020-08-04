@@ -870,17 +870,6 @@
                     "type": "boolean",
                     "description": "Group connection in two groups, 'Connected' and 'Not Connected'",
                     "default": false
-                },
-                "sqltools.debug": {
-                    "type": "object",
-                    "description": "SQLTools debug settings",
-                    "default": {},
-                    "properties": {
-                        "namespaces": {
-                            "type": "string",
-                            "markdownDescription": "Log debug namespaces. Eg: `ext:*,-*:debug`. Thist will print only extension logs and will ignore debug messages. See: https://github.com/visionmedia/debug/blob/4.1.1/README.md"
-                        }
-                    }
                 }
             }
         },
@@ -1199,6 +1188,7 @@
     "dependencies": {
         "@sqltools/plugins": "*",
         "@sqltools/util": "*",
+        "@sqltools/log": "*",
         "command-exists": "1.2.9",
         "vscode-languageclient": "6.1.3"
     }

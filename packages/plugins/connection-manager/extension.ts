@@ -6,7 +6,7 @@ import Config from '@sqltools/util/config-manager';
 import { getConnectionDescription, getConnectionId, getSessionBasename, migrateConnectionSettings } from '@sqltools/util/connection';
 import { EXT_CONFIG_NAMESPACE, EXT_NAMESPACE } from '@sqltools/util/constants';
 import generateId from '@sqltools/util/internal-id';
-import logger from '@sqltools/util/log';
+import { default as logger, createLogger } from '@sqltools/log/src';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
 import telemetry from '@sqltools/util/telemetry';
@@ -24,17 +24,17 @@ import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTree
 import DependencyManager from './dependency-manager/extension';
 import { getExtension } from './extension-util';
 import statusBar from './status-bar';
+import { removeAttachedConnection, attachConnection, getAttachedConnection } from './attached-files';
 
-const log = logger.extend('conn-man');
+const log = createLogger('conn-man');
 
-export default class ConnectionManagerPlugin implements IExtensionPlugin {
-  public readonly name = 'Connection Manager Plugin';
+export class ConnectionManagerPlugin implements IExtensionPlugin {
+  public readonly name = plugin.name;
   public client: ILanguageClient;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
   private errorHandler: IExtension['errorHandler'];
   private explorer: ConnectionExplorer;
-  private attachedFilesMap: { [fileUri: string]: string } = {};
   private codeLensPlugin: CodeLensPlugin;
 
   // extension commands
@@ -140,17 +140,12 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private async updateAttachedConnectionsMap(fileUri: Uri, connId?: string) {
     if (!connId) {
-      delete this.attachedFilesMap[fileUri.toString()];
+      await removeAttachedConnection(fileUri);
     } else {
-      this.attachedFilesMap[fileUri.toString()] = connId;
+      await attachConnection(fileUri, connId);
     }
-    await Context.workspaceState.update('attachedFilesMap', this.attachedFilesMap);
     this.codeLensPlugin.reset();
     this.changeTextEditorHandler(window.activeTextEditor);
-  }
-
-  public getAttachedConnection(fileUri: Uri) {
-    return this.attachedFilesMap[fileUri.toString()];
   }
 
   private async openConnectionFile(conn: IConnection) {
@@ -255,7 +250,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       }
 
       if (!connNameOrId && window.activeTextEditor) { // check if has attached connection
-        connNameOrId = this.getAttachedConnection(window.activeTextEditor.document.uri);
+        connNameOrId = getAttachedConnection(window.activeTextEditor.document.uri);
       }
 
       if (connNameOrId && connNameOrId.trim()) {
@@ -453,7 +448,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_addConnection = (connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      log.extend('warn')('Nothing to do. No parameter received');
+      log.warn('Nothing to do. No parameter received');
       return;
     }
 
@@ -464,7 +459,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_updateConnection = (oldId: string, connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {
     if (!connInfo) {
-      log.extend('warn')('Nothing to do. No parameter received');
+      log.warn('Nothing to do. No parameter received');
       return;
     }
 
@@ -645,7 +640,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
-    const connId = this.getAttachedConnection(editor.document.uri);
+    const connId = getAttachedConnection(editor.document.uri);
     if (!connId) {
       return commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, false);
     }
@@ -671,7 +666,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     [id: string]: {
       progress: Progress<any>,
       tokenSource: CancellationTokenSource,
-      interval: number,
+      interval: NodeJS.Timeout,
       resolve: Function,
       reject: Function,
     }
@@ -726,6 +721,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
   public register(extension: IExtension) {
     if (this.client) return; // do not register twice
 
+    extension.registerPlugin(this.codeLensPlugin);
     extension.registerPlugin(new DependencyManager);
 
     this.client = extension.client;
@@ -786,9 +782,24 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
     }, 2000);
   }
 
-  constructor(extension: IExtension) {
-    this.attachedFilesMap = Context.workspaceState.get('attachedFilesMap', {});
+  private constructor() {
     this.codeLensPlugin = new CodeLensPlugin;
-    extension.registerPlugin(this.codeLensPlugin);
+  }
+  private static _instance: ConnectionManagerPlugin;
+
+  public static instance = () => {
+    if (!ConnectionManagerPlugin._instance) {
+      ConnectionManagerPlugin._instance = new ConnectionManagerPlugin();
+    }
+    return ConnectionManagerPlugin._instance;
   }
 }
+
+const plugin: IExtensionPlugin = {
+  name: 'Connection Manager Plugin',
+  register(extension: IExtension) {
+    return ConnectionManagerPlugin.instance().register(extension);
+  }
+}
+
+export default plugin;

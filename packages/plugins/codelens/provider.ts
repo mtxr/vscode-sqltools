@@ -3,6 +3,7 @@ import * as Constants from '@sqltools/util/constants';
 import { getNameFromId } from '@sqltools/util/connection';
 import { extractConnName } from '@sqltools/util/query';
 import Context from '@sqltools/vscode/context';
+import { getAttachedConnection } from '../connection-manager/attached-files';
 
 export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   private _onDidChangeCodeLenses = new EventEmitter<void>();
@@ -16,7 +17,7 @@ export default class SQLToolsCodeLensProvider implements CodeLensProvider {
   async provideCodeLenses(document: TextDocument): Promise<CodeLens[]> {
     const lenses: CodeLens[] = [];
     const defaultConn = extractConnName(document.getText(new Range(0, 0, 1, 0)));
-    const attachedId = Context.workspaceState.get('attachedFilesMap', {})[document.uri.toString()];
+    const attachedId = getAttachedConnection(document.uri);
     if (attachedId) {
       // attached to a connection
       const connName = getNameFromId(attachedId);

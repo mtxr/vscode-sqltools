@@ -6,11 +6,11 @@ import SidebarItem from "@sqltools/plugins/connection-manager/explorer/SidebarIt
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
 import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
 import sortBy from 'lodash/sortBy';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import Context from '@sqltools/vscode/context';
 import Config from '@sqltools/util/config-manager';
 
-const log = logger.extend('conn-man:explorer');
+const log = createLogger('conn-man:explorer');
 
 class ConnectionGroup extends TreeItem {
   items: (ConnectionGroup | SidebarTreeItem)[] =  [];
@@ -72,7 +72,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
-    log.extend('debug')(`Connection explorer changed. Will be updated. ${item ? `Changed item: ${item.label}` : ''}`.trim());
+    log.info(`Connection explorer changed. Will be updated. ${item ? `Changed item: ${item.label}` : ''}`.trim());
   }
 
   public async getConnectionById(id: string): Promise<IConnection> {

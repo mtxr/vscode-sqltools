@@ -19,7 +19,7 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
   }
   config.node = {
     __dirname: false,
-    __filename: false,
+    __filename: true,
     fs: 'empty',
     net: 'empty',
     child_process: 'empty',

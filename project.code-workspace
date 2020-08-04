@@ -6,6 +6,7 @@
     { "path": "./packages/driver.pg" },
     { "path": "./packages/driver.sqlite" },
     { "path": "./packages/extension" },
+    { "path": "./packages/log" },
     { "path": "./packages/formatter" },
     { "path": "./packages/language-server" },
     { "path": "./packages/plugins" },
