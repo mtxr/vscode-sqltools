@@ -46,14 +46,6 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
         path: outDir
       } : {}),
     },
-    externals: {
-      // @TODO move to driver package
-      // ibm_db: 'commonjs ibm_db',
-      // oracledb: 'commonjs oracledb',
-      // 'original-fs': 'fs',
-      // '@sap/hana-client': 'commonjs @sap/hana-client',
-      ...externals,
-    },
   };
 
   return setDefaults(config);

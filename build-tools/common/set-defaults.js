@@ -46,5 +46,9 @@ module.exports = function setDefaults(config, includeDefaultPlugins = true) {
   config.node = {
     global: false,
   };
+  config.externals = {
+    vscode: 'commonjs vscode',
+    ...(config.externals || {})
+  }
   return config;
 }

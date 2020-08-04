@@ -34,10 +34,6 @@ module.exports = function getExtensionConfig({ entries, packagePath, externals =
         path: outDir
       } : {}),
     },
-    externals: {
-      ...externals,
-      vscode: 'commonjs vscode',
-    },
   };
 
   return setDefaults(config);
