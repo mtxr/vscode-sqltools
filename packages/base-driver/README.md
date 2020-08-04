@@ -12,6 +12,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.1.9
+
+- Update log utility to use `@sqltools/log`.
+
 ### v0.1.8
 
 - Using [resolve](https://www.npmjs.com/package/resolve) lib as resolver and exposed custom require and resolve functions.

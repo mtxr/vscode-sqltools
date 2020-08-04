@@ -9,14 +9,13 @@
     "@sentry/node": "5.12.4",
     "@sqltools/types": "*",
     "@sqltools/vscode": "*",
-    "debug": "https://github.com/mtxr/debug.git",
+    "@sqltools/log": "*",
     "env-paths": "^2.2.0",
     "lru-cache": "5.1.1",
     "make-dir": "^3.1.0",
     "uuid": "^8.1.0"
   },
   "devDependencies": {
-    "@types/debug": "^4.1.5",
     "@types/vscode": "^1.42.0",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",

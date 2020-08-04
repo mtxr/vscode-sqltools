@@ -34,7 +34,8 @@
     "build": "yarn run compile",
     "prepare": "yarn run build",
     "prepack": "yarn run build",
-    "release": "npm pack && npm publish *.tgz --latest"
+    "release": "npm pack && npm publish *.tgz --tag latest --access public",
+    "beta": "npm pack && npm publish *.tgz --tag beta --access public"
   },
   "repository": {
     "type": "git",
