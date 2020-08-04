@@ -13,12 +13,12 @@ import {
 import ElectronNotSupportedError from './lib/exception/electron-not-supported';
 import MissingModuleError from './lib/exception/missing-module';
 import sqltoolsRequire, { sqltoolsResolve } from './lib/require';
-import log from './lib/log';
+import { createLogger } from '@sqltools/log';
 import path from 'path';
 import fs from 'fs';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
-  public log: typeof log;
+  public log: ReturnType<typeof createLogger>;
   public readonly deps: NodeDependency[] = [];
 
   public getId() {
@@ -27,7 +27,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;
   constructor(public credentials: IConnection<DriverOptions>, protected getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders']) {
-    this.log = log.extend(credentials.driver.toLowerCase());
+    this.log = createLogger(credentials.driver.toLowerCase());
   }
 
   abstract open(): Promise<ConnectionType>;
@@ -104,11 +104,11 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
 
   public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {
-    this.log.extend('error')(`###### Attention ######\getChildrenForItem not implemented for ${this.credentials.driver}\n####################`);
+    this.log.error(`###### Attention ######\getChildrenForItem not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
   public searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]> {
-    this.log.extend('error')(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
+    this.log.error(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
     return Promise.resolve([]);
   }
 

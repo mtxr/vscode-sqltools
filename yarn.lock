@@ -2246,6 +2246,14 @@
     resolve "^1.17.0"
     vscode-languageserver "6.1.1"
 
+"@sqltools/log@latest":
+  version "1.0.0"
+  resolved "https://registry.yarnpkg.com/@sqltools/log/-/log-1.0.0.tgz#d2274eb6043e7b8c6ff9483a5832442c0532da18"
+  integrity sha512-X7NESHrBtpjCZ1iSOhhzr6oebZBBUoWqM7WNg3Qt/z2hbK4o553DXGXJN6KEBQfQ4h3cbkKmREfRss7Wg4x2hg==
+  dependencies:
+    pino "^6.5.0"
+    pino-pretty "^4.1.0"
+
 "@sqltools/types@latest":
   version "0.1.5"
   resolved "https://registry.yarnpkg.com/@sqltools/types/-/types-0.1.5.tgz#e70d075f59fd9f17b7cfb8834923a012e046feb2"
@@ -2293,11 +2301,6 @@
   version "1.2.0"
   resolved "https://registry.yarnpkg.com/@types/command-exists/-/command-exists-1.2.0.tgz#d97e0ed10097090e4ab0367ed425b0312fad86f3"
   integrity sha512-ugsxEJfsCuqMLSuCD4PIJkp5Uk2z6TCMRCgYVuhRo5cYQY3+1xXTQkSlPtkpGHuvWMjS2KTeVQXxkXRACMbM6A==
-
-"@types/debug@^4.1.5":
-  version "4.1.5"
-  resolved "https://registry.yarnpkg.com/@types/debug/-/debug-4.1.5.tgz#b14efa8852b7768d898906613c23f688713e02cd"
-  integrity sha512-Q1y515GcOdTHgagaVFhHnIFQ38ygs/kmxdNpvpou+raI9UO3YZcHDngBSYKQklcKlvA7iuQlmIKbzvmxcOE9CQ==
 
 "@types/glob@*", "@types/glob@^7.1.1":
   version "7.1.2"
@@ -4081,10 +4084,6 @@ debug@^3.1.0, debug@^3.2.6:
   integrity sha512-mel+jf7nrtEl5Pn1Qx46zARXKDpBbvzezse7p7LqINmdoIk8PYP5SySaxEmYv6TZ0JyEKA1hsCId6DIhgITtWQ==
   dependencies:
     ms "^2.1.1"
-
-"debug@https://github.com/mtxr/debug.git":
-  version "4.1.0"
-  resolved "https://github.com/mtxr/debug.git#92d860871820b4bd67d9d1d28d560775bda077e0"
 
 decamelize@^1.2.0:
   version "1.2.0"

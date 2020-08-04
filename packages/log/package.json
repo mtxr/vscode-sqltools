@@ -22,7 +22,8 @@
     "build": "tsc -p tsconfig.json",
     "prepack": "yarn run build",
     "prepare": "yarn run build",
-    "release": "npm pack && npm publish *.tgz --latest"
+    "release": "npm pack && npm publish *.tgz --tag latest --access public",
+    "beta": "npm pack && npm publish *.tgz --tag beta --access public"
   },
   "dependencies": {
     "pino": "^6.5.0",
