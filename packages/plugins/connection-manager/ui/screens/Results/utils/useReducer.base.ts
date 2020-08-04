@@ -1,7 +1,7 @@
 import React, { useRef, useReducer as useReducerDefault, useEffect } from 'react';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 
-const log = logger.extend('reducer');
+const log = createLogger();
 
 type ReducerHook = <R extends React.Reducer<any, any>>(
   reducer: R,
@@ -13,13 +13,13 @@ const useReducer: ReducerHook = (reducer, initialState) => {
   const [state, dispatchOriginal] = useReducerDefault(reducer, initialState);
 
   const dispatch: typeof dispatchOriginal = (action) => {
-    log('action => %s %O', action.type, action);
+    log.info('action => %s %O', action.type, action);
     return dispatchOriginal(action);
   }
 
   useEffect(() => {
-    log('prev state => %O', stateRef.current);
-    log('curr state => %O', state);
+    log.info('prev state => %O', stateRef.current);
+    log.info('curr state => %O', state);
     stateRef.current = state;
   }, [state]);
 

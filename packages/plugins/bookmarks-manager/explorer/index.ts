@@ -1,11 +1,11 @@
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import { EventEmitter, TreeDataProvider } from 'vscode';
 import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
 import { window } from 'vscode';
 import { getDataPath } from '@sqltools/util/path';
 import fs from 'fs';
 import Context from '@sqltools/vscode/context';
-const log = logger.extend('book-man:explorer');
+const log = createLogger('book-man:explorer');
 
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
 
@@ -80,7 +80,7 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
       })
 
     } catch(e) {
-      log.extend('error')('Error reading bookmarks:', e);
+      log.error('Error reading bookmarks:', e);
     }
   }
 

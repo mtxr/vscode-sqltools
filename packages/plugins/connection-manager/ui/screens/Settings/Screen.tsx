@@ -5,7 +5,7 @@ import DriverSelector from './Widget/DriverSelector';
 import { Step } from './lib/steps';
 import ConnectionSettingsForm from './Widget/ConnectionSettingsForm';
 import ConnectionCreated from './Widget/ConnectionCreated';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 import sendMessage from '../../lib/messages';
 import { SettingsScreenState } from './interfaces';
@@ -15,13 +15,13 @@ import Header from './Header';
 import { ISubmitEvent, IChangeEvent } from '@rjsf/core';
 import styles from '../../sass/generic.m.scss';
 
-const log = logger.extend('settings');
+const log = createLogger('settings');
 
 export default class SettingsScreen extends React.Component<any, SettingsScreenState> {
   checkDriversInterval: NodeJS.Timeout;
   messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
-    log(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
+    log.info(`Message received: %s %O`, action, payload || 'NO_PAYLOAD');
     switch(action) {
       case UIAction.REQUEST_EDIT_CONNECTION:
         return this.setState({
@@ -87,7 +87,7 @@ export default class SettingsScreen extends React.Component<any, SettingsScreenS
       case UIAction.REQUEST_RESET:
         return this.reset();
       default:
-        log.extend('warn')(`No handler set for %s`, action);
+        log.warn(`No handler set for %s`, action);
         break;
     }
   }

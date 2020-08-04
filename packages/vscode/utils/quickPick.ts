@@ -1,8 +1,8 @@
 import { window, QuickPickItem, QuickPickOptions, QuickPick } from 'vscode';
 import { DismissedError } from '@sqltools/util/exception';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 
-const log = logger.extend('quickpick');
+const log = createLogger('quickpick');
 export type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<
   QuickPickOptions & {
     title: QuickPick<T>['title'];
@@ -78,7 +78,7 @@ export async function quickPickSearch<T = any>(
           qPick.items = [];
           qPick.busy = false;
           qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
-          log.extend('error')('search error: %O', error);
+          log.error('search error: %O', error);
           return Promise.reject(error);
         };
         const thenFn = (options: any[]) => {

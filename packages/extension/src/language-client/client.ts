@@ -1,4 +1,4 @@
-import logger from '@sqltools/util/log';
+import { default as logger, createLogger } from '@sqltools/log/src';
 import path from 'path';
 import fs from 'fs';
 import Config from '@sqltools/util/config-manager';
@@ -14,7 +14,7 @@ import uniq from 'lodash/uniq';
 import { ElectronNotSupportedNotification } from '@sqltools/base-driver/dist/lib/notification';
 import { ExitCalledNotification, ServerErrorNotification } from '@sqltools/language-server/src/notifications';
 
-const log = logger.extend('lc');
+const log = createLogger('lc');
 
 export class SQLToolsLanguageClient implements ILanguageClient {
   public client: LanguageClient;
@@ -102,7 +102,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       if (!runtime) {
         const message = 'Node runtime not found. Using default as a fallback.';
         window.showInformationMessage(message);
-        log.extend('info')(message)
+        log.info(message)
       }
     }
     const lsCustomEnv = (Config.languageServerEnv || {});
@@ -161,7 +161,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       return agg;
     }, [{ scheme: EXT_NAMESPACE, language: undefined }]);
 
-    log.extend('debug')('registered for languages %O', selector);
+    log.info('Registering client for languages %O', selector);
     return {
       documentSelector: selector,
       initializationOptions: {
@@ -170,7 +170,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         userEnvVars: Config.languageServerEnv
       },
       progressOnInitialization: true,
-      outputChannel: logger.outputChannel,
+      outputChannel: logger.outputChannel as any,
       synchronize: {
         configurationSection: [EXT_CONFIG_NAMESPACE, 'telemetry'],
         fileEvents: Wspc.createFileSystemWatcher(`**/.${EXT_NAMESPACE}rc`),
@@ -208,7 +208,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
 
     telemetry.registerMessage('info', 'LanguageClient ready');
-    log.extend('info')('LanguageClient ready');
+    log.info('LanguageClient ready');
   }
 
   private electronNotSupported = async () => {

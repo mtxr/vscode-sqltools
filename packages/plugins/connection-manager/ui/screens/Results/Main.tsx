@@ -1,6 +1,6 @@
 import { Button } from '@material-ui/core';
 import { IQueryOptions, NSDatabase } from '@sqltools/types';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import React, { useEffect } from 'react';
 import { UIAction } from '../../../actions';
 import Loading from '../../components/Loading';
@@ -16,7 +16,7 @@ import useReducer from './utils/useReducer.base';
 import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
 
 
-const log = logger.extend('results');
+const log = createLogger('results');
 
 interface Props {};
 
@@ -131,7 +131,7 @@ const Screen: React.SFC<Props> = () => {
 
   const messagesHandler = ({ action, payload }: IWebviewMessage<any>) => {
     if (!action) return;
-    messageLog('received => %s %O', action, payload || 'NO_PAYLOAD');
+    messageLog.info('received => %s %O', action, payload || 'NO_PAYLOAD');
     switch (action) {
       case UIAction.RESPONSE_QUERY_RESULTS:
         const changes: Partial<QueryResultsState> = {
@@ -148,7 +148,7 @@ const Screen: React.SFC<Props> = () => {
       case UIAction.REQUEST_STATE:
         return sendMessage(UIAction.RESPONSE_STATE, stateRef.current);
       default:
-        return log.extend('warn')(`No handler set for %s`, action);
+        return log.warn(`No handler set for %s`, action);
     }
   };
 

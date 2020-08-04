@@ -2,7 +2,6 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { createConnection, IConnection, InitializedParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { InvalidActionError } from '@sqltools/util/exception';
-import log from '@sqltools/util/log';
 import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContextMap } from '@sqltools/types';
 import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
@@ -10,8 +9,10 @@ import { RegisterPlugin } from './contracts';
 import LSContext from './context';
 import { ExitCalledNotification, ServerErrorNotification } from './notifications';
 import { resolve as pathResolve } from 'path';
-import logger from '@sqltools/util/log';
 import { spawnSync } from 'child_process';
+import { createLogger } from '@sqltools/log/src';
+
+const log = createLogger();
 
 class SQLToolsLanguageServer implements ILanguageServer {
   private _server: IConnection;
@@ -58,14 +59,14 @@ class SQLToolsLanguageServer implements ILanguageServer {
   }
 
   private onRegisterPlugin: RequestHandler<typeof RegisterPlugin> = async ({ path: pluginPath } = { path: '' }) => {
-    log.extend('info')('request to register plugin: "%s"', pluginPath);
+    log.info('request to register plugin: "%s"', pluginPath);
     try {
       let plugin = (__non_webpack_require__ || require)(pathResolve(pluginPath));
       plugin = plugin.default || plugin;
       await this.registerPlugin(plugin);
-      log.extend('debug')('plugin %s loaded', pluginPath);
+      log.debug('plugin %s loaded', pluginPath);
     } catch (error) {
-      log.extend('error')('Error registering plugin: %O', error);
+      log.error('Error registering plugin: %O', error);
       return Promise.reject(error);
     }
   }
@@ -87,7 +88,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
       });
     }
     if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
-      log.extend('debug')(`User defined env vars\n===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
+      log.info(`User defined env vars\n===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
     }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
@@ -115,9 +116,6 @@ class SQLToolsLanguageServer implements ILanguageServer {
     ConfigRO.replaceAll(changes.settings[EXT_CONFIG_NAMESPACE]);
     if (changes.settings.telemetry && changes.settings.telemetry.enableTelemetry) telemetry.enable();
     else telemetry.disable();
-    if (changes.settings['sqltools.debug'] && changes.settings['sqltools.debug'].namespaces) {
-      (<any>logger)._debug.enable(changes.settings['sqltools.debug'].namespaces || 'sql:*');
-    }
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -145,7 +143,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
         version = output.join('');
       }
     } catch (error) { }
-    log.extend('info')([
+    log.info([
       `${DISPLAY_NAME} Server started!`,
       '===============================',
       `Using node runtime?: ${isNode ? 'yes' : 'no'}`,
@@ -172,9 +170,8 @@ class SQLToolsLanguageServer implements ILanguageServer {
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
     if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
-      log.extend('debug')('REQUEST => %s', req._method || req.toString());
-      process.env.NODE_ENV === 'development' && log.extend('debug')('REQUEST => %s %o', req._method || req.toString(), args);
-      process.env.NODE_ENV !== 'development' && log.extend('debug')('REQUEST => %s', req._method || req.toString());
+      process.env.NODE_ENV === 'development' && log.info('REQUEST RECEIVED => %s %o', req._method || req.toString(), args);
+      process.env.NODE_ENV !== 'development' && log.info('REQUEST RECEIVED => %s', req._method || req.toString());
       return Promise.resolve(handler(...args));
     });
   }

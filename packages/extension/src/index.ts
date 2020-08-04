@@ -1,4 +1,5 @@
-import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter } from 'vscode';
+process.env['PROD' + 'UCT'] = 'ext';
+import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter, OutputChannel } from 'vscode';
 import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
 import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
 import { migrateFilesToNewPaths } from '@sqltools/util/path';
@@ -8,13 +9,14 @@ import Context from '@sqltools/vscode/context';
 import debounce from '@sqltools/util/debounce';
 import ErrorHandler from './api/error-handler';
 import https from 'https';
-import logger from '@sqltools/util/log';
+import { default as logger, createLogger } from '@sqltools/log/src';
 import PluginResourcesMap from '@sqltools/util/plugin-resources';
 import SQLToolsLanguageClient from './language-client';
 import Timer from '@sqltools/util/telemetry/timer';
 import Utils from './api/utils';
 
-const log = logger.extend('main');
+const log = createLogger();
+
 // plugins
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
@@ -34,6 +36,7 @@ export class SQLToolsExtension implements IExtension {
 
   public activate = async (): Promise<IExtension> => {
     const activationTimer = new Timer();
+    log.info('SQLTools is starting');
     const { installedExtPlugins = {} } = Utils.getlastRunInfo();
     Context.globalState.update('extPlugins', installedExtPlugins || {});
     telemetry.updateOpts({
@@ -43,6 +46,7 @@ export class SQLToolsExtension implements IExtension {
         version: VSCodeVersion,
       },
     });
+    log.info('initializing language client...');
     this.client = new SQLToolsLanguageClient();
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
@@ -59,12 +63,14 @@ export class SQLToolsExtension implements IExtension {
     });
 
     if (logger.outputChannel) {
-      Context.subscriptions.push(logger.outputChannel);
+      Context.subscriptions.push(logger.outputChannel as OutputChannel);
     }
+    log.info('loading plugins...');
     this.loadPlugins();
     activationTimer.end();
     telemetry.registerTime('activation', activationTimer);
     this.displayReleaseNotesMessage();
+    log.info('SQLTools activation completed. %d ms', activationTimer.elapsed());
     return {
       client: this.client,
       addAfterCommandSuccessHook: this.addAfterCommandSuccessHook,
@@ -191,7 +197,7 @@ export class SQLToolsExtension implements IExtension {
     this.pluginsQueue = [];
     this.loaded = this.loaded || true;
     for (let plugin of pluginsQueue) {
-      log.extend('info')(`registering plugin %s. type %s`, plugin.name, plugin.type);
+      log.info({ plugin }, `registering %s%s.`, plugin.name, plugin.type ? ` (${plugin.type})` : '');
       try {
         Promise.resolve(plugin.register(this)).then(() => {
           if (plugin.extensionId) {
@@ -201,6 +207,8 @@ export class SQLToolsExtension implements IExtension {
             }
             this.updateExtPluginsInfo();
           }
+          log.info(`%s%s registered!`, plugin.name, plugin.type ? ` (${plugin.type})` : '');
+          this.requestRefreshTree();
         }).catch(err => {
           this.errorHandler(`Error loading plugin ${plugin.name}`, err);
         });
@@ -209,25 +217,30 @@ export class SQLToolsExtension implements IExtension {
       }
     }
     this.updateExtPluginsInfo();
+    this.requestRefreshTree();
   }
+
+  private requestRefreshTree = debounce(() => {
+    return commands.executeCommand(`${EXT_NAMESPACE}.refreshTree`);
+  }, 1000);
 
   private updateExtPluginsInfo = debounce(async () => {
     Utils.updateLastRunInfo({ installedExtPlugins: this.extPlugins });
     await Context.globalState.update('extPlugins', this.extPlugins);
-  });
+  }, 200);
 
   private onWillRunCommandHandler = (evt: ICommandEvent): void => {
     if (!evt.command) return;
     if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
 
-    log.extend('debug')(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
+    log.debug(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
   }
   private onDidRunCommandSuccessfullyHandler = (evt: ICommandSuccessEvent): void => {
     if (!evt.command) return;
     if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
 
-    log.extend('debug')(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
+    log.debug(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
   }
 
@@ -270,8 +283,8 @@ export class SQLToolsExtension implements IExtension {
   private decorateAndRegisterCommand = (command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') => {
     Context.subscriptions.push(
       commands[type](`${EXT_NAMESPACE}.${command}`, async (...args) => {
-        process.env.NODE_ENV === 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command} %o`, args);
-        process.env.NODE_ENV !== 'development' && log.extend('info')(`EXECUTING => ${EXT_NAMESPACE}.${command}`);
+        process.env.NODE_ENV === 'development' && log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command} %o`, args);
+        process.env.NODE_ENV !== 'development' && log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command}`);
 
         this.onWillRunCommandEmitter.fire({ command, args });
 
@@ -291,21 +304,20 @@ export class SQLToolsExtension implements IExtension {
 let instance: SQLToolsExtension;
 export function activate(ctx: ExtensionContext) {
   try {
-
     Context.set(ctx);
     if (instance) return;
     migrateFilesToNewPaths();
     instance = new SQLToolsExtension();
     instance.registerPlugin([
       FormatterPlugin,
-      new ConnectionManagerPlugin(instance),
+      ConnectionManagerPlugin,
       new HistoryManagerPlugin,
       new BookmarksManagerPlugin,
     ])
     return instance.activate();
 
   } catch (err) {
-    logger.extend('fatal')('failed to activate: %O', err);
+    log.fatal('failed to activate: %O', err);
   }
 }
 

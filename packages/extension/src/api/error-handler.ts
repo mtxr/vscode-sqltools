@@ -3,8 +3,9 @@ import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL } from '@sqltools/util/constants';
 import telemetry from '@sqltools/util/telemetry';
 import { ResponseError } from 'vscode-languageclient';
-import logger from '@sqltools/util/log';
-const log = logger.extend('error-handler');
+import { createLogger } from '@sqltools/log/src';
+
+const log = createLogger('error-handler');
 
 namespace ErrorHandler {
   export function create(message: string): (reason: any) => void {
@@ -19,8 +20,7 @@ namespace ErrorHandler {
   }
 
   async function output(message: string, error: ResponseError<any>) {
-    log('%s', message);
-    log.extend('verbose')('%O', error);
+    log.error('ERROR: %s, %O', message, error);
     const options = ['View Logs'];
     if (error.data && error.data.driver) {
       options.push('Help!');

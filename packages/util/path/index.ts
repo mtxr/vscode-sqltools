@@ -1,29 +1,29 @@
 import envPaths from 'env-paths';
 import path from 'path';
 import fs from 'fs';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import mkdir from './mkdir';
 
-const log = logger.extend('persistence');
+const log = createLogger('persistence');
 const SQLTOOLS_PATHS = envPaths(`vscode-${process.env.EXT_NAMESPACE || 'sqltools'}`, { suffix: null });
 let home: string;
 
 if (!fs.existsSync(SQLTOOLS_PATHS.config)) {
   mkdir.sync(SQLTOOLS_PATHS.config);
-  log.extend('debug')(`Created config path ${SQLTOOLS_PATHS.config}`);
+  log.debug(`Created config path ${SQLTOOLS_PATHS.config}`);
 }
 if (!fs.existsSync(SQLTOOLS_PATHS.data)) {
   mkdir.sync(SQLTOOLS_PATHS.data);
-  log.extend('debug')(`Created data path ${SQLTOOLS_PATHS.data}`);
+  log.debug(`Created data path ${SQLTOOLS_PATHS.data}`);
 }
 if (!fs.existsSync(SQLTOOLS_PATHS.cache)) {
   mkdir.sync(SQLTOOLS_PATHS.cache);
-  log.extend('debug')(`Created cache path ${SQLTOOLS_PATHS.cache}`);
+  log.debug(`Created cache path ${SQLTOOLS_PATHS.cache}`);
 }
 
 if (!fs.existsSync(getDataPath('node_modules'))) {
   mkdir.sync(getDataPath('node_modules'));
-  log.extend('debug')(`Created node_modules path ${getDataPath('node_modules')}`);
+  log.debug(`Created node_modules path ${getDataPath('node_modules')}`);
 }
 
 /**
@@ -56,7 +56,7 @@ export function getCachePath(...args: string[]) {
 }
 
 export function migrateFilesToNewPaths() {
-  log.extend('debug')(`Checking file paths migration needed`);
+  log.debug(`Checking file paths migration needed`);
   const toMigrate = [
     {
       from: getHome('.sqltools-setup'),
@@ -71,18 +71,18 @@ export function migrateFilesToNewPaths() {
   toMigrate.map((task) => {
     const { from, to } = task;
     if(fs.existsSync(to)) {
-      log.extend('debug')(`Destination file ${to} already exists. Skipping...`);
+      log.debug(`Destination file ${to} already exists. Skipping...`);
       return task;
     };
     if(!fs.existsSync(from)) {
-      log.extend('debug')(`Origin file ${from} doesnt exists. Skipping...`);
+      log.debug(`Origin file ${from} doesnt exists. Skipping...`);
       return task;
     };
 
     fs.renameSync(from, to);
     task.migrated = true;
 
-    log.extend('info')(`Migrated file from ${from} to ${to}`);
+    log.info(`Migrated file from ${from} to ${to}`);
 
     return task;
   });

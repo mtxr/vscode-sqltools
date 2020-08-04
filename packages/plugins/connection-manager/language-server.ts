@@ -10,7 +10,7 @@ import Handlers from './cache/handlers';
 import DependencyManager from './dependency-manager/language-server';
 import { DependeciesAreBeingInstalledNotification } from './dependency-manager/contracts';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import queryResultsCache from './cache/query-results.model';
@@ -18,7 +18,7 @@ import { DriverNotInstalledNotification } from '@sqltools/language-server/src/no
 
 const writeFile = promisify(writeFileWithCb);
 
-const log = logger.extend('conn-manager');
+const log = createLogger('conn-manager');
 
 export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   private server: ILanguageServer;
@@ -135,12 +135,12 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     try {
       let c = await this.getConnectionInstance(creds);
       if (c) {
-        log.extend('debug')('Connection instance already exists for %s.', c.getName());
+        log.info('Connection instance already exists for %s.', c.getName());
         await Handlers.Connect(c);
         return this.connectionStateSerializer(creds);
       }
       c = new Connection(creds, () => this.server.server.workspace.getWorkspaceFolders());
-      log.extend('debug')('Connection instance created for %s.', c.getName());
+      log.info('Connection instance created for %s.', c.getName());
 
       // @OPTIMIZE
       progressBase = {
@@ -162,7 +162,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         e.callback = () => progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
         return Promise.reject(e);
       }
-      log.extend('Connecting error: %O', e);
+      log.error('Connecting error: %O', e);
       await Handlers.Disconnect(c);
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: creds });
@@ -295,7 +295,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       const autoConnectTo = Array.isArray(ConfigRO.autoConnectTo)
       ? ConfigRO.autoConnectTo
       : [ConfigRO.autoConnectTo];
-      log.extend('info')(`Configuration set to auto connect to: %s. connection attempt count: %d`, autoConnectTo.join(', '), retryCount);
+      log.info(`Configuration set to auto connect to: %s. connection attempt count: %d`, autoConnectTo.join(', '), retryCount);
 
       const existingConnections = ConfigRO.connections;
       autoConnectTo.forEach(connName => {
@@ -308,10 +308,10 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (defaultConnections.length === 0) {
       return;
     }
-    log.extend('debug')(`Found connections: %s. connection attempt count: %d`, defaultConnections.map(c => c.name).join(', '), retryCount);
+    log.debug(`Found connections: %s. connection attempt count: %d`, defaultConnections.map(c => c.name).join(', '), retryCount);
     try {
       await Promise.all(defaultConnections.slice(1).map(conn => {
-        log.extend('info')(`Auto connect to %s`, conn.name);
+        log.info(`Auto connect to %s`, conn.name);
         return Promise.resolve(this.openConnectionHandler({ conn, internalRequest: true }))
           .catch(e => {
             if (retryCount < RETRY_LIMIT) return Promise.reject(e);
@@ -319,13 +319,13 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
             return Promise.resolve();
           });
       }));
-      log.extend('debug')('Will mark %s as active', defaultConnections[0].name);
+      log.debug('Will mark %s as active', defaultConnections[0].name);
       // leave the last one active
       await this.openConnectionHandler({ conn: defaultConnections[0], internalRequest: true });
       this.server.sendRequest(ForceListRefresh, undefined);
     } catch (error) {
       if (retryCount < RETRY_LIMIT && (error && error.data && error.data.notification === DriverNotInstalledNotification)) {
-        log.extend('info')('auto connect will retry: attempts %d', retryCount );
+        log.info('auto connect will retry: attempts %d', retryCount );
         return new Promise((res) => {
           setTimeout(res, 2000);
         }).then(() => this._autoConnectIfActive(retryCount));
@@ -334,7 +334,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         error.callback();
       }
       delete error.callback;
-      log.extend('error')('auto connect error >> %O', error);
+      log.error('auto connect error >> %O', error);
       if (error.data && error.data.notification) {
         return void this.server.sendNotification(error.data.notification, error.data.args);
       }

@@ -5,8 +5,9 @@ import { IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './ui/lib/prepare-schema';
 import { SettingsScreenState } from './ui/screens/Settings/interfaces';
-import logger from '@sqltools/util/log';
-const log = logger.extend('ext-util');
+import { createLogger } from '@sqltools/log/src';
+
+const log = createLogger('ext-util');
 export const getDriverSchemas = ({ driver }: { driver: string; } = { driver: null }) => {
   let schema = {};
   let uiSchema = {};
@@ -26,15 +27,15 @@ export const getDriverSchemas = ({ driver }: { driver: string; } = { driver: nul
 
 export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenState['installedDrivers']> => {
   if (retry > 20) {
-    log.extend('debug')('stop trying to find installed drivers.');
+    log.info('stoped trying to find installed drivers.');
     return;
   }
   const driverExtensions: string[] = (Context.globalState.get<{ driver: string[]; }>('extPlugins') || { driver: [] }).driver || [];
   const installedDrivers: SettingsScreenState['installedDrivers'] = [];
   await Promise.all(driverExtensions.map(async (id) => {
-    log.extend('debug')(`loading extension %s information.`, id);
+    log.info(`getting extension %s information.`, id);
     const ext = await getExtension(id);
-    log.extend('debug')(`loaded extension %s for driver %s.`, id, ext.driverName);
+    log.info(`loaded extension information %s for driver %s.`, id, ext.driverName);
     if (ext && ext.driverAliases) {
       ext.driverAliases.map(({ displayName, value }) => {
         const iconsPath = PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: value, resource: 'icons' }));
@@ -52,7 +53,7 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
   }));
 
   if (installedDrivers.length === 0 && driverExtensions.length > 0) {
-    log.extend('debug')(`no installed drivers found. retrying.... ${retry +1}.`);
+    log.info(`no installed drivers found. retrying.... ${retry +1}.`);
     return new Promise(res => setTimeout(() => res(getInstalledDrivers(retry++)), 250));
   }
 
@@ -69,14 +70,14 @@ export const getExtension = async (id: string): Promise<IDriverExtensionApi | nu
       return ext.exports;
     }
   } catch (error) {
-    log.extend('debug')(`failed to get installed extension %s. %O`, id, error);
+    log.info(`failed to get installed extension %s. %O`, id, error);
   }
   return null;
 };
 
 export const driverPluginExtension = async (driverName: string) => {
   const pluginExtenxionId = PluginResourcesMap.get(buildResouceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
-  log.extend('debug')(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
+  log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
   if (!pluginExtenxionId) return null;
   return getExtension(pluginExtenxionId);
 };

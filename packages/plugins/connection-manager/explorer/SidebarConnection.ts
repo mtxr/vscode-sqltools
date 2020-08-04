@@ -5,10 +5,10 @@ import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarItem from "./SidebarItem";
 import get from 'lodash/get';
-import logger from '@sqltools/util/log';
+import { createLogger } from '@sqltools/log/src';
 import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
 
-const log = logger.extend('conn-explorer');
+const log = createLogger('conn-explorer');
 
 export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> {
   parent = null;
@@ -77,7 +77,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       }
       return this.getIcon('disconnected');
     } catch (error) {
-      log.extend('error')(error);
+      log.error(error);
     }
   }
   getId() {
