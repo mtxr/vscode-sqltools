@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mysql",
   "displayName": "SQLTools MySQL/MariaDB",
   "description": "SQLTools MySQL/MariaDB",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -56,7 +56,9 @@
     },
     "ls": {
       "context": "node",
-      "includeNodeModules": true,
+      "includeNodeModules": {
+        "vscode": false
+      },
       "outputFormat": "commonjs",
       "engines": {
         "node": ">=10.x"

@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mssql",
   "displayName": "SQLTools Microsoft SQL Server/Azure",
   "description": "SQLTools Microsoft SQL Server/Azure",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -57,7 +57,9 @@
     },
     "ls": {
       "context": "node",
-      "includeNodeModules": true,
+      "includeNodeModules": {
+        "vscode": false
+      },
       "outputFormat": "commonjs",
       "engines": {
         "node": ">=10.x"

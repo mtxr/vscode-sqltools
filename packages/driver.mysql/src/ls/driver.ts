@@ -33,7 +33,6 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     return this.driver.query(query, opt)
     .catch(err => {
-      this.log.extend('error')('%s\n%O', err.message || err.toString(), err);
       return [<NSDatabase.IResult>{
         connId: this.getId(),
         requestId: opt.requestId,
