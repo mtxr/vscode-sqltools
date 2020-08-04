@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "lib": ["es6"],
+    "module": "commonjs",
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "sourceMap": false,
+    "target": "es3",
+    "declaration": true,
+    "outDir": "dist"
+  },
+  "include": ["./src"]
+}
