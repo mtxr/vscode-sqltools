@@ -9,7 +9,17 @@ import factory from './lib/factory';
  * logs on webviews: webview devtools
   */
 let logger: ReturnType<typeof factory>;
-if (process.env.PRODUCT === 'ext') {
+
+const isVSCodeContext = () => {
+  try {
+    require.resolve('vscode');
+    return true;
+  } catch (error) {
+    return false;
+  }
+}
+
+if (process.env.PRODUCT === 'ext' && isVSCodeContext()) {
   logger = require('./lib/vscode').default;
 } else {
   logger = require('./lib/general').default;

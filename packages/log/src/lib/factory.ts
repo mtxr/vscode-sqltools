@@ -4,7 +4,7 @@ function factory(opts: LoggerOptions = {}, stream?: DestinationStream) {
   const logger = pino({
     name: process.env.PRODUCT || 'UNINDENTIFIED',
     base: {},
-    level: process.env.NODE_ENV === 'development' ? 'debug' : undefined,
+    level: process.env.NODE_ENV === 'development' ? 'debug' : 'info',
     formatters: {
       level(level) { return { level }; },
     },
