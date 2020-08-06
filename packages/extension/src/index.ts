@@ -1,4 +1,3 @@
-process.env['PROD' + 'UCT'] = 'ext';
 import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter, OutputChannel } from 'vscode';
 import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
 import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
