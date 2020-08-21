@@ -43,58 +43,37 @@
     "onCommand:sqltools.*"
   ],
   "main": "./out/extension.js",
-  "ls": "./out/ls/plugin.js",
-  "targets": {
-    "main": {
-      "context": "electron-renderer",
-      "includeNodeModules": {
-        "vscode": false
-      },
-      "engines": {
-        "electron": ">=6.x"
-      },
-      "outputFormat": "commonjs"
-    },
-    "ls": {
-      "context": "node",
-      "includeNodeModules": {
-        "vscode": false
-      },
-      "outputFormat": "commonjs",
-      "engines": {
-        "node": ">=10.x"
-      }
-    }
-  },
-  "optimizers": {
-    "*.js": ["@parcel/optimizer-terser"]
-  },
   "scripts": {
     "clean": "rimraf -rf out dist *.vsix",
     "predev": "yarn run clean",
-    "dev": "concurrently -k \"npm:watch:*\"",
-    "prebuild": "yarn run clean && yarn run ts --noEmit",
+    "dev": "concurrently -k \"npm:dev:*\"",
+    "prebuild": "yarn run clean && yarn run tsc-check",
     "build": "NODE_ENV=production concurrently \"npm:build:*\"",
+    "build:ext": "yarn run compile:ext --define:process.env.NODE_ENV=\"'production'\" --minify",
+    "build:ls": "yarn run compile:ls --define:process.env.NODE_ENV=\"'production'\" --minify",
+    "esbuild": "esbuild --platform=node --tsconfig=./tsconfig.json --external:vscode --log-level=error --color=true --format=cjs",
     "prepackage": "yarn run build",
     "package": "vsce package --yarn -o .",
-    "build:ext": "NODE_PATH=../../ parcel build ./src/extension.ts --target main --dist-dir out --no-cache",
-    "build:ls": "NODE_PATH=../../ parcel build ./src/ls/plugin.ts --target ls --dist-dir out --no-cache",
-    "watch:tsc": "yarn run ts -w --noEmit --preserveWatchOutput",
-    "watch:ext": "NODE_PATH=../../ parcel watch ./src/extension.ts --target main --dist-dir out --no-hmr",
-    "watch:ls": "NODE_PATH=../../ parcel watch ./src/ls/plugin.ts --target ls --dist-dir out --no-hmr",
+    "compile:ext": "yarn run esbuild --bundle ./src/extension.ts --outfile=./out/extension.js --target=es2017 --define:process.env.PRODUCT=\"'ext'\"",
+    "compile:ls": "yarn run esbuild --bundle ./src/ls/plugin.ts --outfile=./out/ls/plugin.js --target=es2015 --define:process.env.PRODUCT=\"'ls'\"",
+    "tsc-check": "yarn run ts --noEmit --preserveWatchOutput",
+    "watch": "concurrently \"npm:watch:*\"",
+    "watch:ext": "yarn run compile:ext --define:process.env.NODE_ENV=\"'development'\" --sourcemap",
+    "watch:ls": "yarn run compile:ls --define:process.env.NODE_ENV=\"'development'\" --sourcemap",
+    "dev:tsc": "yarn run tsc-check -w",
+    "dev:fw": "chokidar \"src/**/*\" \"*.json\" --initial --silent -c \"yarn run watch\"",
     "ts": "tsc -p ."
   },
   "devDependencies": {
-    "@parcel/optimizer-terser": "^2.0.0-alpha.3",
     "@sqltools/base-driver": "latest",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
     "@types/vscode": "^1.42.0",
-    "@types/webpack-env": "^1.15.2",
     "concurrently": "^5.2.0",
+    "chokidar-cli": "^2.1.0",
+    "esbuild": "0.6.26",
     "lodash": "^4.17.19",
     "mssql": "^5.0.5",
-    "parcel": "2.0.0-beta.1",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.3",
     "vsce": "1.77.0"

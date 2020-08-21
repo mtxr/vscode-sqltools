@@ -142,10 +142,12 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     return [];
   }
 
-  public async showRecords(table, opt) {
-    const col = await this.searchItems(ContextValue.COLUMN, '', { tables: [table], limit: 1 });
-    opt.orderCol = col[0].label;
-    return super.showRecords(table, opt);
+  public showRecords(table, opt) {
+    return this.searchItems(ContextValue.COLUMN, '', { tables: [table], limit: 1 })
+    .then(col => {
+      opt.orderCol = col[0].label;
+      return super.showRecords(table, opt);
+    });
   }
   private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.childType) {
