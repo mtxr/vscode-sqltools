@@ -50,6 +50,7 @@ jest.config.js
 **/jest.config.js
 # exceptions
 !static/icon.png
+!icons/**
+!language/**
 !README.md
 !LICENSE.md
-!CHANGELOG.md

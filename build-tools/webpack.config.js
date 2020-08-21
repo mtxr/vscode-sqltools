@@ -8,8 +8,7 @@ require('dotenv').config({
 const constants = require('./constants');
 const { author, version, packagesDir, outdir } = constants;
 
-const copyEntries = require("./copyEntries");
-
+// const copyEntries = [];
 module.exports = function(env = {}) {
   env.pkg = env.pkg || [];
   if (typeof env.pkg === 'string') {
@@ -46,39 +45,16 @@ module.exports = function(env = {}) {
         type,
         externals = {},
       }) => {
-        if (type === 'copy') {
-          Object.keys(entries).forEach((name) => {
-            const destnation = entries[name];
-            let copyEntry = {
-              from: path.resolve(pkgPath, name),
-              to: path.resolve(outdir, destnation),
-            };
-            if (destnation.indexOf('file:') === 0) {
-              const customData = require(path.resolve(pkgPath, destnation.replace(/^file:/, '')))(constants);
-              copyEntry = {
-                ...copyEntry,
-                ...customData,
-              }
-            }
-
-            copyEntries.push(copyEntry);
-          });
-        } else {
-          webpackConfigs.push(require(`./webpack/${type}.config.js`)({
-            entries,
-            packagePath: pkgPath,
-            externals,
-          }));
-        }
+        webpackConfigs.push(require(`./webpack/${type}.config.js`)({
+          entries,
+          packagePath: pkgPath,
+          externals,
+        }));
       })
     } else {
       console.log(`\t>> no build entries`)
     }
   });
-
-  if (copyEntries.length > 0) {
-    webpackConfigs.push(require(`./webpack/copy.config.js`)(copyEntries));
-  }
 
   return webpackConfigs;
 }

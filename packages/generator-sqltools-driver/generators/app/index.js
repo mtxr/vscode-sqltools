@@ -48,7 +48,6 @@ module.exports = class extends Generator {
     this.fs.copy(this.templatePath('driver-ts/tsconfig.json'), this.destinationPath(this.props.name + '/tsconfig.json'));
 
     this.fs.copyTpl(this.templatePath('driver-ts/package.json.sample'), this.destinationPath(this.props.name + '/package.json'), this.props);
-    this.fs.copyTpl(this.templatePath('driver-ts/CHANGELOG.md'), this.destinationPath(this.props.name + '/CHANGELOG.md'), this.props);
     this.fs.copyTpl(this.templatePath('driver-ts/README.md'), this.destinationPath(this.props.name + '/README.md'), this.props);
 
     this.fs.copyTpl(this.templatePath('driver-ts/src/extension.ts'), this.destinationPath(this.props.name + '/src/extension.ts'), this.props);
