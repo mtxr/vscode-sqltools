@@ -18,6 +18,10 @@
 				"${workspaceFolder}/../../dist/*.js",
 				"${workspaceFolder}/out/**/*.js",
 			],
+			"sourceMapPathOverrides": {
+				"src/*": "${workspaceRoot}/src/*",
+			},
+			"sourceMaps": true,
 			"preLaunchTask": "npm: dev",
 			"env": {
 				"SQLTOOLS_DEBUG_PORT_LS": "6099"
@@ -29,6 +33,9 @@
 			"name": "Attach SQLTools LS",
 			"port": 6099,
 			"restart": true,
+			"sourceMapPathOverrides": {
+				"src/*": "${workspaceRoot}/src/*",
+			},
 			"sourceMaps": true,
 			"protocol": "inspector",
 			"timeout": 100000,

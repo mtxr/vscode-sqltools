@@ -66,7 +66,6 @@ class SQLToolsLanguageServer implements ILanguageServer {
       await this.registerPlugin(plugin);
       log.debug('plugin %s loaded', pluginPath);
     } catch (error) {
-      console.error({ error })
       log.error({ error }, 'Error registering plugin: %O', error);
       return Promise.reject(error);
     }
