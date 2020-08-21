@@ -1,8 +1,4 @@
-<p style='text-align: center;'>
-  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.svg?sanitize=true" />
-</p>
-
-<hr />
+# SQLTools for Visual Studio Code
 
 <p style='text-align: center;'>
 
@@ -66,7 +62,6 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 #### Know Driver Issues
 
 - Unable to connect with "Drivers XXXX is not installed"? Check [this issue](https://github.com/mtxr/vscode-sqltools/issues/590).
-
 
 ## Contributing
 
