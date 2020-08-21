@@ -2,7 +2,7 @@ import { Button } from '@material-ui/core';
 import { IQueryOptions, NSDatabase } from '@sqltools/types';
 import { createLogger } from '@sqltools/log/src';
 import React, { useEffect } from 'react';
-import { UIAction } from '../../../actions';
+import { UIAction } from '../../../../actions';
 import Loading from '../../components/Loading';
 import { IWebviewMessage } from '../../interfaces';
 import sendMessage, { messageLog } from '../../lib/messages';
@@ -13,7 +13,7 @@ import ViewContainer from './components/ViewContainer';
 import { MenuActions } from './constants';
 import { QueryResultsState } from './interfaces';
 import useReducer from './utils/useReducer.base';
-import '@sqltools/plugins/connection-manager/ui/sass/results.scss';
+import '../../sass/results.scss';
 
 
 const log = createLogger('results');

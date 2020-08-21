@@ -14,9 +14,9 @@
     },
     {
       "entries": {
-        "Settings": "../plugins/connection-manager/ui/screens/Settings/index.tsx",
-        "Results": "../plugins/connection-manager/ui/screens/Results/index.tsx",
-        "theme": "../plugins/connection-manager/ui/sass/theme.scss"
+        "Settings": "../plugins/connection-manager/webview/ui/containers/Settings/index.tsx",
+        "Results": "../plugins/connection-manager/webview/ui/containers/Results/index.tsx",
+        "theme": "../plugins/connection-manager/webview/ui/sass/theme.scss"
       },
       "type": "webview"
     }

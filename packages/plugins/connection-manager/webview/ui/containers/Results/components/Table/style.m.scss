@@ -1,0 +1,32 @@
+.sortLabel {
+  font-size: 0.9rem;
+}
+
+.centered {
+  text-align: center !important;
+}
+
+.tableCellSyntax {
+  position: relative;
+  padding: 0 !important;
+  font-family: var(--vscode-editor-font-family, monospace);
+  white-space: nowrap;
+}
+
+.selectedRow {
+  :local(.tableCellSyntax) {
+    white-space: pre !important;
+  }
+}
+
+.filterCell {
+  padding: 0;
+  background: var(--vscode-input-background);
+  background: red;
+}
+.filterCellActive {
+  composes: filterCell;
+  opacity: 1;
+  color: var(--vscode-input-placeholderForeground);
+  background: var(--vscode-inputOption-activeBackground);
+}

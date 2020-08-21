@@ -1,18 +1,18 @@
 import React from 'react';
-import Loading from '@sqltools/plugins/connection-manager/ui/components/Loading';
 import { Container } from '@material-ui/core';
 import DriverSelector from './Widget/DriverSelector';
 import { Step } from './lib/steps';
 import ConnectionSettingsForm from './Widget/ConnectionSettingsForm';
 import ConnectionCreated from './Widget/ConnectionCreated';
 import { createLogger } from '@sqltools/log/src';
-import { IWebviewMessage } from '@sqltools/plugins/connection-manager/ui/interfaces';
 import sendMessage from '../../lib/messages';
 import { SettingsScreenState } from './interfaces';
 import { IConnection } from '@sqltools/types';
-import { UIAction } from '../../../actions';
+import { UIAction } from '../../../../actions';
 import Header from './Header';
 import { ISubmitEvent, IChangeEvent } from '@rjsf/core';
+import { IWebviewMessage } from '../../interfaces';
+import Loading from '../../components/Loading';
 import styles from '../../sass/generic.m.scss';
 
 const log = createLogger('settings');

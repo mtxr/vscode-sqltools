@@ -114,3 +114,7 @@ button {
     cursor: not-allowed;
   }
 }
+
+code, pre {
+  font-family: var(--vscode-editor-font-family, var(--font-family));
+}

@@ -1,7 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { clipboardInsert } from '../lib/utils';
-import '../sass/syntax.scss'; // @TODO CSS modules
-
+import { clipboardInsert } from '../../lib/utils';
+import styles from './style.m.scss';
 interface SyntaxProps {
   language?: string;
   width?: string;
@@ -35,18 +34,18 @@ const Syntax = ({ code, language, width, style, strong, allowCopy }: SyntaxProps
   }, [setMessage, code]);
 
   return (
-    <div className="relative syntax-container" style={{ width: width, ...style }}>
-      <div
+    <main className={styles.syntaxContainer} style={{ width: width, ...style }}>
+      <section
         id={id}
-        className={`syntax ${language} ${strong ? 'strong-bg' : ''}`}
+        className={`${strong ? styles.syntaxStrongBg : styles.syntax} ${language ? 'syntax-' + language : ''}`}
         dangerouslySetInnerHTML={{ __html: transformedCode }}
-      ></div>
+      ></section>
       {allowCopy && (
-        <button className="copy-code" type="button" onClick={copyCode}>
+        <button className={styles.copyCodeButton} type="button" onClick={copyCode}>
           {copyMsg}
         </button>
       )}
-    </div>
+    </main>
   );
 };
 

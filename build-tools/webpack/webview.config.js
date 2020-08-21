@@ -64,7 +64,10 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
               loader: 'css-loader',
               options: {
                 importLoaders: 3,
-                modules: true,
+                modules: {
+                  // localIdentName: '[local]',
+                  exportLocalsConvention: 'camelCaseOnly',
+                },
               }
             },
             'resolve-url-loader',

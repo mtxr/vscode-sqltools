@@ -3,7 +3,7 @@ import Syntax from '../../../components/Syntax';
 import Button from '../../../components/Button';
 import DriverIcon  from '../../../components/DriverIcon';
 import { SettingsScreenState } from '../interfaces';
-import { UIAction } from '../../../../actions';
+import { UIAction } from '../../../../../actions';
 
 const ConnectionCreated = ({
   formData,

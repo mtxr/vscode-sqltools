@@ -6,7 +6,7 @@ import Form, { FormProps } from '@rjsf/core';
 import { IConnection } from '@sqltools/types';
 import Syntax from '../../../components/Syntax';
 import FileWidget from './FileWidget';
-import { UIAction } from '../../../../actions';
+import { UIAction } from '../../../../../actions';
 import Message from '../../../components/Message';
 import style from './ConnectionSettingsForm.m.scss';
 

@@ -11,9 +11,11 @@ pre {
   display: flex;
   flex-direction: column;
 }
-.query-results-container, .query-results-container * {
+.query-results-container {
   font-size: var(--sqltools-font-size, var(--sqltools-fontSize));
-  font-family: var(--sqltools-font-family, var(--sqltools-fontFamily));
+  :not(code):not(pre) {
+    font-family: var(--sqltools-font-family, var(--sqltools-fontFamily));
+  }
 }
 
 .result {

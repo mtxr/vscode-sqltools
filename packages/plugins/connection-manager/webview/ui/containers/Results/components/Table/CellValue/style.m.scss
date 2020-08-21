@@ -1,0 +1,18 @@
+.cell-value {
+  padding: 2px !important;
+  display: inline-block;
+}
+
+.bool {
+  composes: cell-value;
+  border-radius: 2px;
+}
+
+.true {
+  composes: bool;
+  background: var(--vscode-editorGutter-addedBackground);
+}
+.false {
+  composes: bool;
+  background: var(--vscode-editorGutter-deletedBackground);
+}

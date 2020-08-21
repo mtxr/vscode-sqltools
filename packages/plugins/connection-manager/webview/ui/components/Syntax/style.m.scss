@@ -1,25 +1,25 @@
+.syntax-container {
+  position: relative !important;
+  button {
+    display: none;
+  }
+  &:hover {
+    button {
+      display: initial;
+    }
+  }
+}
+
 .syntax {
+  font-family: var(--vscode-editor-font-family, var(--font-family));
   background: var(--vscode-editor-background, #eaeaea);
   border-radius: var(--sqltools-radius);
   padding: 4px;
-  &, * {
+  &,
+  * {
     line-height: 1.2;
     white-space: pre-wrap;
     font-family: monospace;
-  }
-  &.json {
-    .key {
-      color: #00bcd4;
-    }
-    .number {
-      color: #cddc39;
-    }
-    .string {
-      color: #ffc107;
-    }
-    .bool, .null {
-      color: #2196f3;
-    }
   }
 
   pre {
@@ -27,22 +27,13 @@
     overflow: hidden;
   }
 }
-.syntax-container {
-  .btn {
-    display: none;
-  }
-  &:hover {
-    .btn {
-      display: initial;
-    }
-  }
-}
 
-.syntax.strong-bg {
+.syntax-strong-bg {
+  composes: syntax;
   background: var(--sqltools-BWColor1);
 }
 
-button.copy-code {
+.copy-code-button {
   position: absolute;
   top: 0;
   right: 0;
@@ -54,13 +45,20 @@ button.copy-code {
   cursor: copy;
 }
 
-
-td, th {
-  .syntax {
-    height: auto !important;
+:global {
+  .syntax-json {
+    .key {
+      color: #00bcd4;
+    }
+    .number {
+      color: #cddc39;
+    }
+    .string {
+      color: #ffc107;
+    }
+    .bool,
+    .null {
+      color: #2196f3;
+    }
   }
-}
-
-.relative {
-  position: relative !important;
 }

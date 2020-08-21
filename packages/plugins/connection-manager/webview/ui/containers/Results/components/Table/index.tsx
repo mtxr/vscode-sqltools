@@ -23,25 +23,24 @@ import {
   PagingPanel,
   TableSelection,
 } from '@devexpress/dx-react-grid-material-ui';
-import { toRegEx } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import { TableProps } from '../../interfaces';
 import { availableFilterOperations, MenuActions } from '../../constants';
-import { clipboardInsert } from '@sqltools/plugins/connection-manager/ui/lib/utils';
 import Menu from '../../../../components/Menu';
 import ErrorIcon from '../../../../components/Icons/ErrorIcon';
 import TableFilterRowCell from './TableFilterRowCell';
 import PagingPanelContainer from './PagingPanelContainer';
 import FilterIcon from './FilterIcon';
 import TableCell from './TableCell';
-import GridRoot from './GridRoot';
 import generateColumnExtensions from './generateColumnExtensions';
 import { initialState, TableState } from './state';
 import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
-import { UIAction } from '../../../../../actions';
+import { UIAction } from '../../../../../../actions';
 import { filterPredicate } from '../../utils/filterPredicate';
 import Message from '../../../../components/Message';
 import SortLabel from './SortLabel';
+import { toRegEx, clipboardInsert } from '../../../../lib/utils';
+import GridRoot from './GridRoot';
 import style from '../../../../sass/generic.m.scss';
 
 export default class Table extends React.PureComponent<TableProps, TableState> {

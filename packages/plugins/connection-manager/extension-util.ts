@@ -3,8 +3,8 @@ import Context from '@sqltools/vscode/context';
 import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
 import { IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
-import prepareSchema from './ui/lib/prepare-schema';
-import { SettingsScreenState } from './ui/screens/Settings/interfaces';
+import prepareSchema from './webview/lib/prepare-schema';
+import { SettingsScreenState } from './webview/ui/containers/Settings/interfaces';
 import { createLogger } from '@sqltools/log/src';
 
 const log = createLogger('ext-util');
