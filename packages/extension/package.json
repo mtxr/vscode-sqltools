@@ -1189,9 +1189,9 @@
         "vscode-test": "^1.2.3"
     },
     "dependencies": {
+        "@sqltools/log": "*",
         "@sqltools/plugins": "*",
         "@sqltools/util": "*",
-        "@sqltools/log": "*",
         "command-exists": "1.2.9",
         "vscode-languageclient": "6.1.3"
     }
