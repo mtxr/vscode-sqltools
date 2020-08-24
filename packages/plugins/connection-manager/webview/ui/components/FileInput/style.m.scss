@@ -1,0 +1,22 @@
+.file-field {
+  display: flex;
+  > input {
+    flex-grow: 1;
+  }
+  > button {
+    overflow: hidden;
+    flex-grow: 0;
+    position: relative;
+    > input[type=file] {
+      cursor: pointer;
+      z-index: 2;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      right: 0;
+      left: 0;
+      opacity: 0;
+      width: 100%;
+    }
+  }
+}

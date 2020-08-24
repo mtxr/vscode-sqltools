@@ -10,7 +10,14 @@ interface SyntaxProps {
   style?: React.CSSProperties;
 }
 
-const Syntax = ({ code, language, width, style, strong, allowCopy }: SyntaxProps) => {
+const Syntax = ({
+  code,
+  language,
+  width,
+  style,
+  strong,
+  allowCopy,
+}: SyntaxProps) => {
   const [id] = useState(`syntax-${(Math.random() * 1000).toFixed(0)}`);
   const [copyMsg, setMessage] = useState('Copy');
 
@@ -26,7 +33,10 @@ const Syntax = ({ code, language, width, style, strong, allowCopy }: SyntaxProps
     };
   }, [copyMsg]);
 
-  const transformedCode = useMemo(() => transformCode(code, language), [code, language]);
+  const transformedCode = useMemo(() => transformCode(code, language), [
+    code,
+    language,
+  ]);
 
   const copyCode = useCallback(() => {
     clipboardInsert(JSON.stringify(code, null, 2));
@@ -37,11 +47,17 @@ const Syntax = ({ code, language, width, style, strong, allowCopy }: SyntaxProps
     <main className={styles.syntaxContainer} style={{ width: width, ...style }}>
       <section
         id={id}
-        className={`${strong ? styles.syntaxStrongBg : styles.syntax} ${language ? 'syntax-' + language : ''}`}
+        className={`${strong ? styles.syntaxStrongBg : styles.syntax} ${
+          language ? 'syntax-' + language : ''
+        }`}
         dangerouslySetInnerHTML={{ __html: transformedCode }}
       ></section>
       {allowCopy && (
-        <button className={styles.copyCodeButton} type="button" onClick={copyCode}>
+        <button
+          className={styles.copyCodeButton}
+          type='button'
+          onClick={copyCode}
+        >
           {copyMsg}
         </button>
       )}

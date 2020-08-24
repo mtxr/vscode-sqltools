@@ -4,7 +4,7 @@ import WebviewProvider from '@sqltools/vscode/webview-provider';
 import { commands } from 'vscode';
 import { IConnection } from '@sqltools/types';
 import { UIAction } from '../actions';
-import { SettingsScreenState } from './ui/containers/Settings/interfaces';
+import { SettingsScreenState } from './ui/screens/Settings/interfaces';
 import { driverPluginExtension, getInstalledDrivers, getDriverSchemas } from '../extension-util';
 
 export default class SettingsWebview extends WebviewProvider {
@@ -17,7 +17,6 @@ export default class SettingsWebview extends WebviewProvider {
     return commands.executeCommand(`${EXT_NAMESPACE}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       const partialState: Partial<SettingsScreenState> = {
-        action: UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS,
         formData: { ...connInfo, id: getConnectionId(connInfo) },
         externalMessage: `${connInfo.name} updated!`,
         externalMessageType: 'success',
@@ -39,9 +38,8 @@ export default class SettingsWebview extends WebviewProvider {
     return commands.executeCommand(`${EXT_NAMESPACE}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
     .then(() => {
       const partialState: Partial<SettingsScreenState> = {
-        action: UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS,
         formData: { ...connInfo, id: getConnectionId(connInfo) },
-        externalMessage: `${connInfo.name} created!`,
+        externalMessage: `${connInfo.name} was added to your settings!`,
         externalMessageType: 'success',
         // globalSetting,
       }

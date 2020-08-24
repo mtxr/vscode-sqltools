@@ -4,7 +4,7 @@ import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resou
 import { IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './webview/lib/prepare-schema';
-import { SettingsScreenState } from './webview/ui/containers/Settings/interfaces';
+import { SettingsScreenState } from './webview/ui/screens/Settings/interfaces';
 import { createLogger } from '@sqltools/log/src';
 
 const log = createLogger('ext-util');

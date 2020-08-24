@@ -1,6 +1,6 @@
 import { NSDatabase, InternalID } from '@sqltools/types';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
-import { QueryResultsState } from '../ui/screens/Results/interfaces';
+import { QueryResultsState } from './ui/screens/Results/interfaces';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';

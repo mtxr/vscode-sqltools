@@ -14,8 +14,8 @@
     },
     {
       "entries": {
-        "Settings": "../plugins/connection-manager/webview/ui/containers/Settings/index.tsx",
-        "Results": "../plugins/connection-manager/webview/ui/containers/Results/index.tsx",
+        "Settings": "../plugins/connection-manager/webview/ui/screens/Settings/index.tsx",
+        "Results": "../plugins/connection-manager/webview/ui/screens/Results/index.tsx",
         "theme": "../plugins/connection-manager/webview/ui/sass/theme.scss"
       },
       "type": "webview"

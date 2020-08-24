@@ -5,9 +5,6 @@
       "name": "root"
     },
     {
-      "path": "docker/db2"
-    },
-    {
       "path": "docker/pgsql"
     },
     {
@@ -19,12 +16,6 @@
     {
       "path": "docker/mssql"
     },
-    {
-      "path": "docker/oracle"
-    },
-    {
-      "path": "docker/cql"
-    }
   ],
   "settings": {
     "sqltools.useNodeRuntime": true,
@@ -127,23 +118,6 @@
       },
       {
         "askForPassword": false,
-        "connectionTimeout": 15,
-        "database": "test_db",
-        "driver": "OracleDB",
-        "name": "OracleDB",
-        "password": "root",
-        "port": 1521,
-        "username": "root",
-        "server": "localhost",
-        "oracleOptions": {
-          "poolMax": 1,
-          "poolMin": 1,
-          "poolIncrement": 0
-        },
-        // "group": "ORACLE"
-      },
-      {
-        "askForPassword": false,
         "connectionTimeout": 30,
         "database": "test_db",
         "driver": "MySQL",
@@ -168,18 +142,6 @@
         // "group": "MYSQL"
       },
       {
-        "askForPassword": false,
-        "connectionTimeout": 30,
-        "database": "98D27766B06E45F9A78EA36D5D6C3A5B",
-        "driver": "SAPHana",
-        "name": "Hana",
-        "password": "Tg6cdRmULar3.yQcw4kVh.SeFNaF._iPaWLFdDvB94_C2jNnVB25reG63nSUkMs.DPFllAJHKwsRCRz1qtgGQrc4t81H8eLpGq3pUsMi9IUrwWZoabdLUHM3FHyhEOee",
-        "port": 30041,
-        "server": "127.0.0.1",
-        "username": "SBSS_51921077446042462816087486121804932303752819285673181439206685123",
-        // "group": "SAP"
-      },
-      {
         "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
         "driver": "MSSQL",
         "name": "MSSQL ConnectionString",
@@ -190,49 +152,6 @@
         "driver": "MSSQL",
         "name": "MSSQL ConnectionString schema",
         // "group": "MSSQL"
-      },
-      {
-        "database": "mydb",
-        "driver": "DB2",
-        "name": "DB2 - localhost",
-        "password": "password",
-        "port": 50000,
-        "username": "db2inst1",
-        "server": "localhost",
-        // "group": "IBM DB2"
-      },
-      {
-        "askForPassword": false,
-        "connectionTimeout": 15,
-        "driver": "Cassandra",
-        "name": "CQL Cassandra",
-        "password": "cassandra",
-        "port": 9043,
-        "server": "localhost",
-        "username": "cassandra",
-        // "group": "CQL"
-      },
-      {
-        "askForPassword": false,
-        "connectionTimeout": 15,
-        "driver": "Cassandra",
-        "name": "CQL Scylla",
-        "password": "cassandra",
-        "port": 9044,
-        "server": "localhost",
-        "username": "cassandra",
-        // "group": "CQL"
-      },
-      {
-        "askForPassword": false,
-        "connectionTimeout": 15,
-        "driver": "Cassandra",
-        "name": "CQL Cassandra Legacy",
-        "password": "cassandra",
-        "port": 9045,
-        "server": "localhost",
-        "username": "cassandra",
-        // "group": "CQL"
       },
       {
         "database": "test_db",
