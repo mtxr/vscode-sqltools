@@ -10,7 +10,7 @@ import useDriver from '../../hooks/useDriver';
 import { IDriver } from '../../interfaces';
 import useContextAction from '../../hooks/useContextAction';
 import sendMessage from '../../../../lib/messages';
-import { UIAction } from '../../../../../../actions';
+import { UIAction } from '../../actions';
 import useLoading from '../../hooks/useLoading';
 
 const DriverSelectorStepWidget = () => {

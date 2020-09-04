@@ -4,7 +4,7 @@ const setDefaults = require('./../common/set-defaults');
 const webpack = require('webpack');
 const parseEntries = require('./../common/parse-entries');
 
-const { rootdir } = require('../constants');
+const { rootdir, IS_PRODUCTION } = require('../constants');
 
 /**
  *
@@ -65,7 +65,7 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
               options: {
                 importLoaders: 3,
                 modules: {
-                  // localIdentName: '[local]',
+                  localIdentName: IS_PRODUCTION ? '[hash:base64]' : '[path][name]__[local]-[hash:base64]',
                   exportLocalsConvention: 'camelCaseOnly',
                 },
               }

@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { createLogger } from '@sqltools/log/src';
-import { UIAction } from '../../../../../actions';
-import { SettingsScreenState, ReducerAction } from '../interfaces';
+import { UIAction } from '../actions';
+import { SettingsScreenState, SettingsReducerAction } from '../interfaces';
 import { Step } from '../lib/steps';
 import sendMessage from '../../../lib/messages';
+import getVscode from '../../../lib/vscode';
 
 const log = createLogger('settings:reducer');
 
@@ -20,7 +21,7 @@ const initialState: SettingsScreenState = {
   formData: {},
 };
 
-const reducer: React.Reducer<SettingsScreenState, ReducerAction> = (
+const reducer: React.Reducer<SettingsScreenState, SettingsReducerAction> = (
   state,
   action
 ) => {
@@ -160,6 +161,10 @@ export const useSettingsReducer = () => {
     if (state !== stateRef.current) {
       log.info('STATE => Prev %O Curr %O', stateRef.current, state);
       stateRef.current = state;
+    }
+    getVscode().setState(state);
+    return () => {
+      getVscode().setState(null);
     }
   }, [state]);
 

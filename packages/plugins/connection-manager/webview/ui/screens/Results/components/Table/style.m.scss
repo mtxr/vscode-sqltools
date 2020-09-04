@@ -6,6 +6,13 @@
   text-align: center !important;
 }
 
+.tableCell {
+  user-select: none;
+  > code, > span, > small {
+    pointer-events: none;
+  }
+}
+
 .tableCellSyntax {
   position: relative;
   padding: 0 !important;

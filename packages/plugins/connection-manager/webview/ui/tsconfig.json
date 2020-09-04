@@ -12,6 +12,6 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "esnext",
+    "target": "es2018",
   }
 }

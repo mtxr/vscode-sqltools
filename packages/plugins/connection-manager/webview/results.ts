@@ -1,13 +1,13 @@
 import { NSDatabase, InternalID } from '@sqltools/types';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
-import { QueryResultsState } from './ui/screens/Results/interfaces';
+import { ResultsScreenState } from './ui/screens/Results/interfaces';
 import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';
 import { DISPLAY_NAME } from '@sqltools/util/constants';
-import { UIAction } from '../actions';
+import { UIAction } from './ui/screens/Results/actions';
 
-class ResultsWebview extends WebviewProvider<QueryResultsState> {
+class ResultsWebview extends WebviewProvider<ResultsScreenState> {
   protected id: string = 'Results';
   protected title: string = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
@@ -107,7 +107,7 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       this.title = `${prefix}: ${suffix}`;
     } catch (error) {}
     this.updatePanelName();
-    this.sendMessage(UIAction.RESPONSE_QUERY_RESULTS, payload);
+    this.sendMessage(UIAction.RESPONSE_RESULTS, { resultTabs: payload, hasError: payload.some(p => !!p.error) });
   }
 
   whereToShow = vscode.ViewColumn.Active;

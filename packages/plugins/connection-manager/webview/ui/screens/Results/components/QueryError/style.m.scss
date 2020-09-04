@@ -1,0 +1,23 @@
+.container {
+  flex-grow: 1;
+  text-align: center;
+  align-items: center;
+  flex-direction: column;
+  display: flex;
+  justify-content: center;
+  height: 100%;
+
+  svg {
+    color: var(--vscode-errorForeground, #f97583);
+  }
+
+  > main {
+    margin: 3em auto;
+
+    pre {
+      margin-top: 3em;
+      padding: 1em;
+      background: var(--sqltools-BWColor1);
+    }
+  }
+}

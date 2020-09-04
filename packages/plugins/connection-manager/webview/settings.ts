@@ -3,7 +3,7 @@ import { getConnectionId } from '@sqltools/util/connection';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
 import { commands } from 'vscode';
 import { IConnection } from '@sqltools/types';
-import { UIAction } from '../actions';
+import { UIAction } from './ui/screens/Settings/actions';
 import { SettingsScreenState } from './ui/screens/Settings/interfaces';
 import { driverPluginExtension, getInstalledDrivers, getDriverSchemas } from '../extension-util';
 

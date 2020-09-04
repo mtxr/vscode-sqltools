@@ -1,31 +1,16 @@
-import { Column } from '@devexpress/dx-react-grid';
-import { NSDatabase, IQueryOptions } from '@sqltools/types';
-import { ReactNode } from 'react';
-import { MenuActions } from './constants';
+import { NSDatabase } from '@sqltools/types';
+import { UIAction } from './actions';
+import { ReducerAction } from '../../interfaces';
 
-export interface TableProps {
-  error: boolean;
-  columns: Column[];
-  columnNames: string[];
-  rows: {
-    [key: string]: any;
-  }[];
-  query: string;
-  queryType?: NSDatabase.IResult['queryType']; // for pagination
-  queryParams?: { [k: string]: any };
-  queryOptions: IQueryOptions;
-  pageSize: number;
-  page?: number;
-  total?: number;
-  footerButtons: ReactNode;
-  showPagination: boolean;
-  changePage?: (page: number) => void;
-  menuActions?: Partial<{ [k in MenuActions]: (...args: any[]) => void }>
-}
+type ActionKeys = keyof typeof UIAction;
 
-export interface QueryResultsState {
+export type ResultsReducerAction<
+  K extends ActionKeys = ActionKeys
+> = ReducerAction<typeof UIAction[K], ResultsScreenState>;
+
+export interface ResultsScreenState {
   loading: boolean;
-  error: any;
+  hasError: boolean;
   resultTabs: NSDatabase.IResult[];
   activeTab: number;
 }

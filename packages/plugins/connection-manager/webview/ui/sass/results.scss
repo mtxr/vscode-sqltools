@@ -1,30 +1,12 @@
-@import './lib/mixins';
-
 // @TODO
 pre {
   margin: 0;
   padding: 4px;
 }
 
-.query-results-container {
-  @include full-screen();
-  display: flex;
-  flex-direction: column;
-}
-.query-results-container {
-  font-size: var(--sqltools-font-size, var(--sqltools-fontSize));
-  :not(code):not(pre) {
-    font-family: var(--sqltools-font-family, var(--sqltools-fontFamily));
-  }
-}
-
 .result {
-  flex-grow: 1;
-  height: 100%;
+  flex: 1;
   display: flex;
-}
-.has-tabs .result {
-  max-height: calc(100vh - 36px);
 }
 
 .resultsPagination {
@@ -78,14 +60,7 @@ pre {
   }
 
 }
-.queryError, .resultsPagination {
-  .action-button {
-    background: var(--vscode-button-background);
-    color: var(--vscode-button-foreground);
-    &:hover {
-      background: var(--vscode-button-hoverBackground);
-    }
-  }
+.resultsPagination {
   .paginator.no-buttons > div > div {
     > button {
       display: none;
@@ -94,8 +69,4 @@ pre {
       padding-right: 1em;
     }
   }
-}
-
-.query-results-container .queryError .buttons button {
-  margin: 0 0.5rem;
 }

@@ -15,7 +15,7 @@ import useFormSchemas from '../../hooks/useFormSchemas';
 import useContextAction from '../../hooks/useContextAction';
 import { IConnection } from '@sqltools/types';
 import sendMessage from '../../../../lib/messages';
-import { UIAction } from '../../../../../../actions';
+import { UIAction } from '../../actions';
 
 const SettingsFormStepWidget = () => {
   const { step } = useStep();

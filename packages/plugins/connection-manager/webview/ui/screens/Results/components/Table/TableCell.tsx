@@ -3,14 +3,32 @@ import { Table as MTable } from '@devexpress/dx-react-grid-material-ui';
 import { CellValue } from './CellValue';
 import style from './style.m.scss';
 
-const TableCell = (openContextMenu: ((...args: any[]) => void)) => (props: MTable.DataCellProps) => (
-  <MTable.Cell
-    {...props}
-    className={`${typeof props.value === 'object' || Array.isArray(props.value) ? style.tableCellSyntax : ''} ${props.value === true || props.value === false || props.value === null ? style.centered : ''} ${(props as any).className || ''}`}
-    onContextMenu={e => openContextMenu(e, props.row, props.column, props.tableRow.rowId)}
-    title={(typeof props.value === 'object' || Array.isArray(props.value) ? JSON.stringify(props.value, null, 2) : `${props.value}`)}
-  >
-    <CellValue value={props.value} />
-  </MTable.Cell>
-);
+const boolOrNull = (v: any) => v === true || v === false || v === null;
+const isObjOrArray = (v: any) => typeof v === 'object' || Array.isArray(v);
+
+const TableCell = (props: MTable.DataCellProps & { className?: string }) => {
+  const displayAsCode = isObjOrArray(props.value);
+
+  const classes = [style.tableCell];
+
+  let value = props.value;
+
+  if (displayAsCode) {
+    classes.push(style.tableCellSyntax);
+    value = JSON.stringify(props.value, null, 2);
+  }
+  if (boolOrNull(props.value)) classes.push(style.centered);
+  if (props.className) classes.push((props as any).className);
+
+  return (
+    <MTable.Cell
+      {...props}
+      data-rowindex={props.tableRow.rowId}
+      data-colname={props.column.name}
+      className={classes.join(' ')}
+    >
+      <CellValue value={props.value} isCode={displayAsCode} />
+    </MTable.Cell>
+  );
+};
 export default TableCell;

@@ -22,11 +22,18 @@ export default class ErrorBoundary extends React.Component {
         <div>
           <h2>Something went wrong.</h2>
           <details style={{ whiteSpace: 'pre-wrap' }} open>
-            <summary><code>{this.state.error && this.state.error.toString()}</code></summary>
+            <summary>
+              <code>{this.state.error && this.state.error.toString()}</code>
+            </summary>
             <pre>
               {this.state.errorInfo && this.state.errorInfo.componentStack}
             </pre>
           </details>
+          <div style={{  marginTop: 30 }}>
+            <a href='command:workbench.action.webview.openDeveloperTools'>
+              Open VSCode DevTools
+            </a>
+          </div>
         </div>
       );
     }

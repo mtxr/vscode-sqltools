@@ -1,4 +1,4 @@
-import { filterPredicate } from '../../utils/filterPredicate';
+import { filterPredicate } from '../../lib/filterPredicate';
 import get from 'lodash/get';
 const generateColumnExtensions = (colNames, rows) => colNames.map(columnName => ({
   columnName,

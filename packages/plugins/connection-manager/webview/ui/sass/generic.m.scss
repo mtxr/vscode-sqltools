@@ -1,5 +1,4 @@
 @import './variables';
-@import './lib/mixins';
 
 .blur {
   transition: var(--sqltools-transition);
@@ -9,13 +8,7 @@
   filter: blur(5px);
 }
 .fullscreenContainer {
-  @include full-screen();
-}
-
-.colorError {
-  color: var(--vscode-errorForeground, #f97583);
-}
-
-.cWarning {
-  color: var(--vscode-watningForeground, #cca700);
+  display: flex;
+  width: 100vw;
+  height: 100vh;
 }

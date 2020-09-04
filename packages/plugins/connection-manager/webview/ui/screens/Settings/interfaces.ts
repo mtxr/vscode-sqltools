@@ -1,17 +1,14 @@
 import { IDriverAlias, IConnection } from '@sqltools/types';
 import { Step } from './lib/steps';
 import { FormProps } from '@rjsf/core';
-import { UIAction } from '../../../../actions';
+import { UIAction } from './actions';
+import { ReducerAction } from '../../interfaces';
 
 type ActionKeys = keyof typeof UIAction;
-export interface ReducerAction<K extends ActionKeys = ActionKeys> {
-  type: typeof UIAction[K];
-  payload?: Partial<SettingsScreenState> & { [k: string]: any };
-  callback?: () => any;
-}
+export type SettingsReducerAction<K extends ActionKeys = ActionKeys> = ReducerAction<typeof UIAction[K], SettingsScreenState>;
 
 export interface SettingsScreenState {
-  lastDispatchedAction?: ReducerAction;
+  lastDispatchedAction?: SettingsReducerAction;
   loading?: boolean;
   step: Step;
   defaultMethod?: string;

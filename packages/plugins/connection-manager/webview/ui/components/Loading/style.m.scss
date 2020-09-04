@@ -1,7 +1,5 @@
-@import '../../sass/lib/mixins';
-
 .loading {
-  @include full-screen();
+  composes: fullscreenContainer from './../../sass/generic.m.scss';
   position: absolute;
   top: 0;
   bottom: 0;

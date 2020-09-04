@@ -10,30 +10,33 @@ const theme = createMuiTheme({
   palette: {
     background: {
       default: defaultColors.backgroundColor,
-      paper: defaultColors.backgroundColor
+      paper: defaultColors.backgroundColor,
     },
   },
   overrides: {
     MuiPaper: {
       root: {
         borderCollapse: 'collapse',
-        ...defaultColors
+        ...defaultColors,
+      },
+      elevation0: {
+        zIndex: 0,
       },
       rounded: {
-        borderRadius: '1px'
-      }
+        borderRadius: '1px',
+      },
     },
     MuiTable: {
       root: {
         borderCollapse: 'collapse !important' as any,
         ...defaultColors,
-      }
+      },
     },
     MuiMenu: {
       paper: {
         backgroundColor: 'var(--vscode-menu-background)',
         color: 'var(--vscode-menu-foreground)',
-      }
+      },
     },
     MuiMenuItem: {
       root: {
@@ -44,13 +47,13 @@ const theme = createMuiTheme({
         '&:hover': {
           background: 'var(--vscode-menu-selectionBackground)',
           color: 'var(--vscode-menu-selectionForeground)',
-        }
+        },
       },
     },
     MuiList: {
       padding: {
         padding: '4px 0px',
-      }
+      },
     },
     MuiListItem: {
       root: {
@@ -63,26 +66,26 @@ const theme = createMuiTheme({
         '&:hover': {
           background: 'var(--vscode-menu-selectionBackground)',
           color: 'var(--vscode-menu-selectionForeground)',
-        }
-      }
+        },
+      },
     },
     MuiDivider: {
       root: {
         backgroundColor: 'var(--vscode-menu-separatorBackground)',
         margin: '4px 0',
         opacity: '0.4',
-      }
+      },
     },
 
     MuiListItemIcon: {
       root: {
         color: 'inherit',
-      }
+      },
     },
     MuiListItemText: {
       root: {
         margin: 0,
-      }
+      },
     },
     MuiTab: {
       root: {
@@ -94,7 +97,7 @@ const theme = createMuiTheme({
         '&$selected': {
           color: 'var(--vscode-tab-activeForeground)',
           background: 'var(--vscode-tab-activeBackground)',
-        }
+        },
       },
     },
     MuiTabs: {
@@ -103,14 +106,14 @@ const theme = createMuiTheme({
         background: 'var(--vscode-tab-inactiveBackground)',
       },
       indicator: {
-        backgroundColor: 'var(--vscode-tab-activeModifiedBorder)'
-      }
+        backgroundColor: 'var(--vscode-tab-activeModifiedBorder)',
+      },
     },
     MuiTableCell: {
       root: {
         padding: 'var(--sqltool-table-cell-padding, 2px 4px) !important',
         fontWeight: 'normal',
-        fontSize: 'inherit'
+        fontSize: 'inherit',
       },
       body: {
         color: 'inherit',
@@ -119,7 +122,7 @@ const theme = createMuiTheme({
           fontFamily: 'var(--vscode-editor-font-family, var(--font-family))',
           height: '300px',
           overflow: 'auto',
-        }
+        },
       },
       head: {
         fontWeight: 'bold',
@@ -127,11 +130,11 @@ const theme = createMuiTheme({
         border: '1px solid var(--vscode-input-border)',
         background: 'var(--vscode-panelSectionHeader-background)',
         borderBottom: 'none',
-      }
+      },
     },
     MuiInput: {
       root: {
-        margin: '0 !important'
+        margin: '0 !important',
       },
       underline: {
         '&:before': {
@@ -139,8 +142,8 @@ const theme = createMuiTheme({
         },
         '&:after': {
           display: 'none',
-        }
-      }
+        },
+      },
     },
     MuiIconButton: {
       root: {
@@ -148,25 +151,25 @@ const theme = createMuiTheme({
         padding: '0 4px',
       },
       label: {
-        color: 'inherit'
-      }
+        color: 'inherit',
+      },
     },
     MuiInputBase: {
       input: {
         color: 'var(--vscode-input-foreground)',
         height: '1em',
         padding: '4px',
-      }
+      },
     },
     MuiTableSortLabel: {
       root: {
         color: 'inherit !important',
       },
       icon: {
-        color: 'inherit !important'
-      }
-    }
-  }
+        color: 'inherit !important',
+      },
+    },
+  },
 });
 
 

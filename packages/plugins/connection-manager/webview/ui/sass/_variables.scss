@@ -49,9 +49,9 @@
     --sqltools-WBColor14: rgba(0, 0, 0, 0.70);
     --sqltools-WBColor16: rgba(0, 0, 0, 0.80);
   }
-}
 
-:root {
+
+  // user customizations
   --sqltools-transition: all .3s ease 0s;
   --sqltools-backgroundColor: var(--vscode-editor-background, var(--background-color));
   --sqltools-color: var(--vscode-editor-foreground, var(--color));
