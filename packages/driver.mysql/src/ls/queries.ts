@@ -108,6 +108,8 @@ SELECT
   'database' as "detail"
 FROM information_schema.schemata
 WHERE schema_name NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
+ORDER BY
+  schema_name
 `;
 
 export const searchTables: IBaseQueries['searchTables'] = queryFactory`
