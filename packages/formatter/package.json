@@ -4,7 +4,7 @@
   "description": "Formats SQL queries. Part of SQLTools",
   "license": "MIT",
   "main": "./lib/sqlFormatter.js",
-  "types": "./lib/index.d.ts",
+  "types": "./lib/sqlFormatter.d.ts",
   "private": false,
   "publishConfig": {
     "access": "public",
