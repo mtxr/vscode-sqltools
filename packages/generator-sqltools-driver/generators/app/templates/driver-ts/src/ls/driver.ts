@@ -84,7 +84,7 @@ export default class YourDriverClass extends AbstractDriver<DriverLib, DriverOpt
   public async close() {
     if (!this.connection) return Promise.resolve();
     /**
-     * cose you connection here!!
+     * close you connection here!!
      */
     await fakeDbLib.close();
     this.connection = null;
