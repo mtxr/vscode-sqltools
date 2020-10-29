@@ -13,25 +13,25 @@
     "start": "yarn run docz:dev"
   },
   "dependencies": {
-    "@mdx-js/runtime": "^1.5.1",
+    "@mdx-js/runtime": "^1.6.19",
     "@sqltools/formatter": "*",
-    "docz": "^1.2.0",
+    "docz": "^1.3.2",
     "docz-core": "^1.2.0",
     "docz-theme-default": "^1.2.0",
     "gatsby-plugin-offline": "^2.2.7",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.20",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
-    "react-feather": "^2.0.3",
+    "react-feather": "^2.0.8",
     "react-simple-code-editor": "^0.11.0",
     "scheduler": "^0.15.0",
     "styled-components": "^4.4.0"
   },
   "devDependencies": {
-    "@types/lodash": "^4.14.123",
-    "@types/prismjs": "^1.16.1",
-    "@types/react": "^16.8.13",
-    "@types/react-dom": "^16.8.4",
+    "@types/lodash": "^4.14.163",
+    "@types/prismjs": "^1.16.2",
+    "@types/react": "^16.9.55",
+    "@types/react-dom": "^16.9.9",
     "@types/styled-components": "^4.1.20",
     "docz-plugin-css": "^0.11.0"
   }
