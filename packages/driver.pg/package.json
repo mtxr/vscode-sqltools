@@ -23,7 +23,9 @@
     "postgres",
     "postgresql",
     "redshift",
-    "aws redshift"
+    "aws redshift",
+    "cockroach",
+    "cockroachdb"
   ],
   "galleryBanner": {
     "theme": "dark",
