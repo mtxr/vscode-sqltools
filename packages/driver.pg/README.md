@@ -6,7 +6,7 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ### 0.2.0
 
-- Fixess ssl issue. [#640](https://github.com/mtxr/vscode-sqltools/issues/640) [#675](https://github.com/mtxr/vscode-sqltools/issues/675)
+- Fixes ssl issue. [#640](https://github.com/mtxr/vscode-sqltools/issues/640) [#675](https://github.com/mtxr/vscode-sqltools/issues/675)
 - Update `base-driver` package.
 
 ### 0.1.0
