@@ -24,4 +24,5 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 - Fixes drivers not showing data type on explorer. [#595](https://github.com/mtxr/vscode-sqltools/issues/595)
 
 ### 0.0.3
+
 - First working version
