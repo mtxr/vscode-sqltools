@@ -70,16 +70,16 @@
   },
   "devDependencies": {
     "@sqltools/base-driver": "latest",
-    "@types/lodash": "^4.14.123",
-    "@types/pg": "^7.14.3",
+    "@types/lodash": "^4.14.164",
+    "@types/pg": "^7.14.5",
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
-    "concurrently": "^5.2.0",
+    "concurrently": "^5.3.0",
     "esbuild": "0.6.26",
-    "lodash": "^4.17.19",
-    "pg": "^8.2.1",
+    "lodash": "^4.17.20",
+    "pg": "^8.4.2",
     "rimraf": "^3.0.2",
     "typescript": "^3.7.3",
-    "vsce": "1.77.0"
+    "vsce": "1.81.1"
   }
 }
