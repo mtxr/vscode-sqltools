@@ -28,6 +28,7 @@
     ],
     "keywords": [
         "cassandra",
+        "cockroach",
         "cql",
         "database",
         "db",

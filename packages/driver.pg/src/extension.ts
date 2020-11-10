@@ -31,6 +31,12 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         default: extContext.asAbsolutePath('icons/redshift/default.png'),
         inactive: extContext.asAbsolutePath('icons/redshift/inactive.png'),
       });
+      // cockroach
+      extension.resourcesMap().set(`driver/${DRIVER_ALIASES[2].value}/icons`, {
+        active: extContext.asAbsolutePath('icons/cockroach/active.png'),
+        default: extContext.asAbsolutePath('icons/cockroach/default.png'),
+        inactive: extContext.asAbsolutePath('icons/cockroach/inactive.png'),
+      });
       DRIVER_ALIASES.forEach(({ value }) => {
         extension.resourcesMap().set(`driver/${value}/extension-id`, extensionId);
         extension.resourcesMap().set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
