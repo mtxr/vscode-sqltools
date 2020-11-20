@@ -92,19 +92,6 @@ You can also fund specific issues via Issuehunt. That can boost the development 
 
 [![Issuehunt](https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/issuehunt-button.png)](https://issuehunt.io/r/mtxr/vscode-sqltools)
 
-### Want to contribute without spending money? Yeah, free contribution!
-
-Personally I use Brave Browser because it's chromium based and has a builtin Ad-Block. Also its shipped with a lot of cross-site tracker blocker and other tools to take care of my privacy.
-Brave also has its own Crypto wallet and coin, and this coin helps to fund projects and publishers around the web, want to see more? Check BAT tokens and BAT project [here](https://brave.com/mtx234).
-
-That said, if you use Brave Browser and download using this link [https://brave.com/mtx234](https://brave.com/mtx234), you will be contributing (with ~$7) to the project without spending any money. Pretty cool, huh?
-
-[Download Brave](https://brave.com/mtx234)
-
-If you don't want to contribute, but still want to try Brave, I do encourage you to try, you can search anywhere and use any link you want.
-
-
-
 ## Changelog
 
 See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
