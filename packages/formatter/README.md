@@ -21,7 +21,7 @@ yarn add @sqltools/formatter
 ## Usage
 
 ```ts
-import sqlFormatter from 'sql-formatter';
+import sqlFormatter from '@sqltools/formatter';
 
 console.log(sqlFormatter.format('SELECT * FROM table1'));
 ```
