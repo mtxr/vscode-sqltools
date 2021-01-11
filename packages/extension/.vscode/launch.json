@@ -18,7 +18,8 @@
         "${workspaceFolder}/dist/**/*.js"
       ],
       "env": {
-        "NODE_ENV": "development"
+        "NODE_ENV": "development",
+        "SQLTOOLS_DEBUG_PORT_LS": "6010"
       }
     },
     {
