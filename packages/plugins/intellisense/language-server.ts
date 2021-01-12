@@ -60,8 +60,8 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     const suffix = suggestDatabases.appendDot ? "." : "";
 
     const dbs = await conn.searchItems(ContextValue.DATABASE, currentWord) as [NSDatabase.IDatabase];
-    log.info('got %d db completions', dbs.length);
-    if (dbs.length > 0) {
+    log.info('got %d db completions', dbs && dbs.length);
+    if (dbs && dbs.length > 0) {
       return dbs
         .map(d => ({
           ...DatabaseCompletionItem(d, 0),
@@ -127,7 +127,6 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
 
       const hueAst = sqlAutocompleteParser.parseSql(text.substring(0, currentOffset), text.substring(currentOffset));
 
-      // TODO use keyword weight
       completionsMap.query = (hueAst.suggestKeywords || []).filter(kw => kw.value.startsWith(currentWord)).map(kw => <CompletionItem>{
         label: kw.value,
         detail: kw.value,
