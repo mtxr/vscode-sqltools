@@ -98,7 +98,8 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
       let suffix = 'query results';
       if (payload && payload.length > 0) {
         if (payload.length === 1) {
-          suffix = payload[0].label ? payload[0].label : payload[0].query.replace(/(\r?\n\s*)/gim, ' ');
+          let truncatedQuery = payload[0].query.length > 16 ? `${payload[0].query.substring(0, 16)}...` : payload[0].query;
+          suffix = payload[0].label ? payload[0].label : truncatedQuery.replace(/(\r?\n\s*)/gim, ' ');
         } else {
           suffix = 'multiple query results';
         }
