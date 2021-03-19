@@ -4,6 +4,21 @@ import {
 } from 'vscode-languageserver';
 import { NSDatabase, DatabaseDriver } from '@sqltools/types';
 
+export function DatabaseCompletionItem(database: NSDatabase.IDatabase, priority: number = 1 ): CompletionItem {
+  let yml = `Database: ${database.label}\n`;
+  return {
+    detail: "Database",
+    documentation: {
+      value: `\`\`\`yaml\n${yml}\n\`\`\``,
+      kind: 'markdown',
+    },
+    kind: CompletionItemKind.Folder,
+    label: database.label,
+    filterText: database.label,
+    sortText: typeof priority === 'number' ? `${priority}:${database.label}` : database.label,
+  };
+}
+
 export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = `${tableOrView}: ${table.label}\n`;
