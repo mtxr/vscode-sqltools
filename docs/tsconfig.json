@@ -23,20 +23,40 @@
     "listEmittedFiles": false,
     "listFiles": false,
     "pretty": true,
-    "lib": ["es2017", "dom"],
+    "lib": [
+      "es2017",
+      "dom"
+    ],
     "declaration": false,
     "baseUrl": "./",
     "rootDir": "./",
     "outDir": "dist",
-    "typeRoots": ["node_modules/@types", "src/types"],
+    "typeRoots": [
+      "node_modules/@types",
+      "src/types"
+    ],
     "resolveJsonModule": true,
     "paths": {
-      "@fonts/*": ["public/fonts/*"],
-      "@images/*": ["public/images/*"],
-      "@components/*": ["src/theme/components/*"],
-      "@styles/*": ["src/theme/styles/*"]
+      "@fonts/*": [
+        "public/fonts/*"
+      ],
+      "@images/*": [
+        "public/images/*"
+      ],
+      "@components/*": [
+        "src/theme/components/*"
+      ],
+      "@styles/*": [
+        "src/theme/styles/*"
+      ]
     }
   },
-  "include": ["public/*", "src/**/*"],
-  "exclude": ["node_modules/**"]
+  "include": [
+    "public/*",
+    "src/**/*",
+    "../packages/extension/package.json"
+  ],
+  "exclude": [
+    "node_modules/**"
+  ]
 }

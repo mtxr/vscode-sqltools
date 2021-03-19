@@ -1,6 +1,7 @@
+// @ts-ignore
+import pkgJson from '../../../../packages/extension/package.json';
 import React from 'react';
 import get from 'lodash/get';
-import pkgJson from '../../../../packages/extension/package.json';
 import Setting from './Setting';
 import styled from 'styled-components';
 import components from '../../components';
