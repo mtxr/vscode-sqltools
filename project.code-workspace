@@ -44,7 +44,7 @@
       "**/.parcel-cache": true,
       "**/dist": true
     },
-    "typescript.tsdk": "root/node_modules/typescript/lib",
+    "typescript.tsdk": "driver.mysql/node_modules/typescript/lib",
   },
   "tasks": {
     "version": "2.0.0",

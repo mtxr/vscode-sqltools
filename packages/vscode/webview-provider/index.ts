@@ -14,7 +14,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     return this.disposeEvent.event;
   }
   public get visible() { return this.panel === undefined ? false : this.panel.visible; }
-  protected cssVariables: { [name: string]: string };
+  protected abstract cssVariables: { [name: string]: string };
   private get baseHtml(): string {
     const cssVariables = Object.keys(this.cssVariables || {}).map(k => `--sqltools-${k}: ${this.cssVariables[k]}`).join(';');
 

@@ -43,9 +43,9 @@ class ResultsWebview extends WebviewProvider<QueryResultsState> {
 
   public get cssVariables() {
     if (!Config.results.customization) {
-      return super.cssVariables;
+      return {};
     }
-    return <any>Config.results.customization;
+    return Config.results.customization;
   }
 
   show() {
