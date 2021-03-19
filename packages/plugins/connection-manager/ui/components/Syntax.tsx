@@ -1,7 +1,6 @@
-import React from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { clipboardInsert } from '../lib/utils';
 import '../sass/syntax.scss'; // @TODO CSS modules
-
 
 interface SyntaxProps {
   language?: string;
@@ -12,50 +11,58 @@ interface SyntaxProps {
   style?: React.CSSProperties;
 }
 
-interface SyntaxState {
-  copyMsg: string;
-}
-export default class Syntax extends React.Component<SyntaxProps, SyntaxState> {
-  private id = `syntax-${(Math.random() * 1000).toFixed(0)}`;
+const Syntax = ({ code, language, width, style, strong, allowCopy }: SyntaxProps) => {
+  const [id] = useState(`syntax-${(Math.random() * 1000).toFixed(0)}`);
+  const [copyMsg, setMessage] = useState('Copy');
 
-  constructor(props) {
-    super(props);
-    this.state = {
-      copyMsg: 'Copy',
+  useEffect(() => {
+    let mounted = true;
+    setTimeout(() => {
+      if (mounted) {
+        setMessage('Copy');
+      }
+    }, 1000);
+    return () => {
+      mounted = false;
     };
-  }
-  copyCode = () => {
-    clipboardInsert(JSON.stringify(this.props.code, null, 2));
-    this.setState({ copyMsg: 'Copied!' }, () => {
-      setTimeout(() => {
-        this.setState({ copyMsg: 'Copy' });
-      }, 1000);
-    });
+  }, [copyMsg]);
+
+  const transformedCode = useMemo(() => transformCode(code, language), [code, language]);
+
+  const copyCode = useCallback(() => {
+    clipboardInsert(JSON.stringify(code, null, 2));
+    setMessage('Copied!');
+  }, [setMessage, code]);
+
+  return (
+    <div className="relative syntax-container" style={{ width: width, ...style }}>
+      <div
+        id={id}
+        className={`syntax ${language} ${strong ? 'strong-bg' : ''}`}
+        dangerouslySetInnerHTML={{ __html: transformedCode }}
+      ></div>
+      {allowCopy && (
+        <button className="copy-code" type="button" onClick={copyCode}>
+          {copyMsg}
+        </button>
+      )}
+    </div>
+  );
+};
+
+export default Syntax;
+
+const transformCode = (code: string, language: string) => {
+  if (typeof code === 'string') {
+    return code;
   }
 
-  renderCode = (code) => {
-    if (this.props.language === 'json' && typeof code === 'object') {
-      return JSON.stringify(code, null, 2 )
+  if (language === 'json' && typeof code === 'object') {
+    return JSON.stringify(code, null, 2)
       .replace(/( *)(".+") *:/g, '$1<span class="key">$2</span>:')
       .replace(/: *(".+")/g, ': <span class="string">$1</span>')
       .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
       .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
-    }
-    if (typeof code === 'string') {
-      return code;
-    }
-    return JSON.stringify(code);
   }
-  public render() {
-    return (
-      <div className='relative syntax-container' style={{ width: this.props.width, ...this.props.style }}>
-        <div
-          id={this.id}
-          className={`syntax ${this.props.language} ${this.props.strong ? 'strong-bg' : ''}`}
-          dangerouslySetInnerHTML={{ __html: this.renderCode(this.props.code) }}
-        ></div>
-        {this.props.allowCopy && <button className='copy-code' type='button' onClick={this.copyCode}>{this.state.copyMsg}</button>}
-      </div>
-    );
-  }
-}
+  return JSON.stringify(code);
+};
