@@ -73,6 +73,11 @@
             "href": "https://a.paddle.com/v2/click/16413/111711?link=1227"
         },
         {
+            "description": "Ko-Fi",
+            "url": "https://ko-fi.com/img/githubbutton_sm.svg",
+            "href": "https://ko-fi.com/Y8Y487W9"
+        },
+        {
             "description": "Patreon Support",
             "url": "https://img.shields.io/badge/patreon-support-blue.svg?logo=patreon?style=for-the-badge",
             "href": "https://www.patreon.com/mteixeira"
