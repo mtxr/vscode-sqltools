@@ -1,9 +1,0 @@
-{
-  "generator-node": {
-    "promptValues": {
-      "authorName": "Matheus Teixeira",
-      "authorEmail": "github@mteixeira.dev",
-      "authorUrl": "https://mteixeira.dev"
-    }
-  }
-}

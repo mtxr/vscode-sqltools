@@ -1,4 +1,0 @@
-{
-  "ui:order": ["database"],
-  "database": { "ui:widget": "file" }
-}
