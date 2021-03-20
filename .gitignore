@@ -26,3 +26,4 @@ public
 add-new.diff
 *.tar.gz
 *.tgz
+.todo
