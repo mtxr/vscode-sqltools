@@ -4,7 +4,7 @@
   "files.exclude": {
     "**/dist": false,
     "docs": true,
-    "packages": true,
+    "packages": false,
   },
   "files.watcherExclude": {
     "**/dist": true,
