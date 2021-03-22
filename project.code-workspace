@@ -12,10 +12,10 @@
     { "path": "./packages/plugins" },
     { "path": "./packages/types" },
     { "path": "./packages/util" },
-    { "path": "./packages/vscode"},
-    { "path": "./packages/generator-sqltools-driver" },
+    { "path": "./packages/vscode" },
     { "path": "./build-tools" },
     { "path": "./docs" },
+    { "path": "./" }
   ],
   "extensions": {},
   "settings": {
@@ -45,6 +45,12 @@
       "**/dist": true
     },
     "typescript.tsdk": "extension/root/node_modules/typescript/lib",
+    "[typescript]": {
+      "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
+    "[typescriptreact]": {
+      "editor.defaultFormatter": "vscode.typescript-language-features"
+    },
   },
   "tasks": {
     "version": "2.0.0",

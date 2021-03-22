@@ -7,8 +7,6 @@ import { writeFile as writeFileWithCb } from 'fs';
 import { promisify } from 'util';
 import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
 import Handlers from './cache/handlers';
-import DependencyManager from './dependency-manager/language-server';
-import { DependeciesAreBeingInstalledNotification } from './dependency-manager/contracts';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
 import telemetry from '@sqltools/util/telemetry';
@@ -23,7 +21,7 @@ const log = createLogger('conn-manager');
 export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   private server: ILanguageServer;
   private getConnectionsList = async () => {
-    const [ activeConnections = {}, lastUsedId ] = await Promise.all([
+    const [activeConnections = {}, lastUsedId] = await Promise.all([
       connectionStateCache.get(ACTIVE_CONNECTIONS_KEY,),
       connectionStateCache.get(LAST_USED_ID_KEY),
     ]);
@@ -55,7 +53,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ fileType, filename, ...opts}) => {
+  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ fileType, filename, ...opts }) => {
     const { results, cols } = await queryResultsCache.get(queryResultsCache.buildKey(opts));
     if (fileType === 'json') {
       return writeFile(filename, JSON.stringify(results, null, 2));
@@ -167,9 +165,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: creds });
       if (e.data && e.data.notification) {
-        if (creds.driver && DependencyManager.runningJobs.includes(creds.driver)) {
-          return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
-        }
         return void this.server.sendNotification(e.data.notification, e.data.args);
       }
 
@@ -203,9 +198,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
-        if (req.conn.driver && DependencyManager.runningJobs.includes(req.conn.driver)) {
-          return void this.server.sendNotification(DependeciesAreBeingInstalledNotification, e.data.args);
-        }
         delete e.data.args.conn;
         this.server.sendNotification(e.data.notification, e.data.args);
         return e.data;
@@ -223,16 +215,16 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
     switch (sort) {
       case 'name':
-      return connList
-        .sort((a, b) => a.name.localeCompare(b.name));
+        return connList
+          .sort((a, b) => a.name.localeCompare(b.name));
       case 'connectedFirst':
       default:
         return connList
-        .sort((a, b) => {
-          if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
-          if (a.isConnected && !b.isConnected) return -1;
-          if (!a.isConnected && b.isConnected) return 1;
-        });
+          .sort((a, b) => {
+            if (a.isConnected === b.isConnected) return a.name.localeCompare(b.name);
+            if (a.isConnected && !b.isConnected) return -1;
+            if (!a.isConnected && b.isConnected) return 1;
+          });
 
     }
   }
@@ -258,7 +250,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
   };
 
   public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
-    server.registerPlugin(new DependencyManager);
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
@@ -279,7 +270,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     if (retryCount >= RETRY_LIMIT) return;
     retryCount++;
     const defaultConnections: IConnection[] = [];
-    const [ activeConnections, lastUsedId ] = await Promise.all([
+    const [activeConnections, lastUsedId] = await Promise.all([
       connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}),
       connectionStateCache.get(LAST_USED_ID_KEY),
     ])
@@ -293,8 +284,8 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       )
     ) {
       const autoConnectTo = Array.isArray(ConfigRO.autoConnectTo)
-      ? ConfigRO.autoConnectTo
-      : [ConfigRO.autoConnectTo];
+        ? ConfigRO.autoConnectTo
+        : [ConfigRO.autoConnectTo];
       log.info(`Configuration set to auto connect to: %s. connection attempt count: %d`, autoConnectTo.join(', '), retryCount);
 
       const existingConnections = ConfigRO.connections;
@@ -325,7 +316,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       this.server.sendRequest(ForceListRefresh, undefined);
     } catch (error) {
       if (retryCount < RETRY_LIMIT && (error && error.data && error.data.notification === DriverNotInstalledNotification)) {
-        log.info('auto connect will retry: attempts %d', retryCount );
+        log.info('auto connect will retry: attempts %d', retryCount);
         return new Promise((res) => {
           setTimeout(res, 2000);
         }).then(() => this._autoConnectIfActive(retryCount));

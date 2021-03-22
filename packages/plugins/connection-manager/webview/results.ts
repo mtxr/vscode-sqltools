@@ -38,7 +38,7 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
     try {
       const state = await this.getState();
       this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
-    } catch(e) {}
+    } catch (e) { }
   }
 
   public get cssVariables() {
@@ -66,9 +66,9 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
           } else if (Config.results && typeof Config.results.location === 'number' && Config.results.location >= -1 && Config.results.location <= 9 && Config.results.location !== 0) {
             this.whereToShow = Config.results.location;
           } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
-              this.whereToShow = vscode.ViewColumn.Two;
+            this.whereToShow = vscode.ViewColumn.Two;
           } else {
-              this.whereToShow = vscode.ViewColumn.Three;
+            this.whereToShow = vscode.ViewColumn.Three;
           }
           break;
       }
@@ -76,7 +76,7 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
 
     super.show();
 
-    return new Promise((resolve, reject) => {
+    return new Promise<void>((resolve, reject) => {
       let count = 0;
       let interval = setInterval(() => {
         if (this.isOpen) {
@@ -105,7 +105,7 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
         }
       }
       this.title = `${prefix}: ${suffix}`;
-    } catch (error) {}
+    } catch (error) { }
     this.updatePanelName();
     this.sendMessage(UIAction.RESPONSE_RESULTS, { resultTabs: payload, hasError: payload.some(p => !!p.error) });
   }

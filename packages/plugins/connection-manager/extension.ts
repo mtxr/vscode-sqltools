@@ -215,7 +215,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
     const params = getQueryParameters(query, Config['queryParams.regex']);
     if (params.length > 0) {
-      await new Promise((resolve, reject) => {
+      await new Promise<void>((resolve, reject) => {
         const ib = window.createInputBox();
         ib.step = 1;
         ib.totalSteps = params.length;
