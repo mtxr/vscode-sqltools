@@ -1,0 +1,12 @@
+.footer {
+  button {
+    background: var(--vscode-button-background);
+    color: var(--vscode-button-foreground);
+    &:hover {
+      background: var(--vscode-button-hoverBackground);
+    }
+    &:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
+}

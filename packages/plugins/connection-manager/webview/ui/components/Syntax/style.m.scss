@@ -1,0 +1,64 @@
+.syntax-container {
+  position: relative !important;
+  button {
+    display: none;
+  }
+  &:hover {
+    button {
+      display: initial;
+    }
+  }
+}
+
+.syntax {
+  font-family: var(--vscode-editor-font-family, var(--font-family));
+  background: var(--vscode-editor-background, #eaeaea);
+  border-radius: var(--sqltools-radius);
+  padding: 4px;
+  &,
+  * {
+    line-height: 1.2;
+    white-space: pre-wrap;
+    font-family: monospace;
+  }
+
+  pre {
+    text-overflow: ellipsis;
+    overflow: hidden;
+  }
+}
+
+.syntax-strong-bg {
+  composes: syntax;
+  background: var(--sqltools-BWColor1);
+}
+
+.copy-code-button {
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-top-right-radius: var(--sqltools-radius);
+  border-bottom-left-radius: var(--sqltools-radius);
+  background: var(--sqltools-BWColor4);
+  font-size: 0.6em;
+  padding: 2px 4px;
+  cursor: copy;
+}
+
+:global {
+  .syntax-json {
+    .key {
+      color: #00bcd4;
+    }
+    .number {
+      color: #cddc39;
+    }
+    .string {
+      color: #ffc107;
+    }
+    .bool,
+    .null {
+      color: #2196f3;
+    }
+  }
+}

@@ -17,23 +17,7 @@ services:
       extends:
         file: ./mysql/docker-compose.yml
         service: dbv5
-    # oracle:
-    #   extends:
-    #     file: ./oracle/docker-compose.yml
-    #     service: db
     pgsql:
       extends:
         file: ./pgsql/docker-compose.yml
         service: db
-    cql_cassandra:
-      extends:
-        file: ./cql/docker-compose.yml
-        service: db_cassandra
-    cql_scylla:
-      extends:
-        file: ./cql/docker-compose.yml
-        service: db_scylla
-    cql_cassandra_legacy:
-      extends:
-        file: ./cql/docker-compose.yml
-        service: db_cassandra_legacy

@@ -1,0 +1,27 @@
+.loading {
+  composes: fullscreenContainer from './../../sass/generic.m.scss';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: block;
+
+  > div {
+    display: flex;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: var(--sqltools-backdrop-bg);
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
+    align-content: center;
+    > * {
+      margin: auto;
+    }
+    :global(.MuiCircularProgress-colorPrimary) {
+      color: var(--sqltools-loading-fg);
+    }
+  }
+}

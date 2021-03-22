@@ -1,0 +1,72 @@
+// @TODO
+pre {
+  margin: 0;
+  padding: 4px;
+}
+
+.result {
+  flex: 1;
+  display: flex;
+}
+
+.resultsPagination {
+  border-top: 1px solid var(--vscode-input-border);
+  padding: 2px 6px !important;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  .buttons {
+    button:not(:last-child) {
+      margin-right: 1rem;
+    }
+  }
+  .paginator > div {
+    padding: 0 !important;
+  }
+
+  .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    color: inherit;
+    border-radius: 0;
+    border: 1px solid transparent;
+    padding: 2px 6px;
+
+    &:hover {
+      border: 1px solid var(--vscode-button-hoverBackground);
+      background: var(--vscode-button-hoverBackground);
+    }
+  }
+  .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+
+  .paginator {
+    .MuiButton-root, .MuiIconButton-root, .MuiButton-root.Mui-disabled, .MuiIconButton-root.Mui-disabled {
+      width: 2rem;
+      height: 2rem;
+      line-height: 1;
+
+      &:hover {
+        border: 1px solid var(--vscode-button-hoverBackground);
+        background: var(--vscode-button-hoverBackground);
+      }
+    }
+  }
+
+  button[class*="Pagination-activeButton"], .MuiButton-root.active, .MuiIconButton-root.active {
+    color: var(--vscode-input-foreground);
+    background: var(--vscode-inputOption-activeBackground);
+    border: 1px solid var(--vscode-inputOption-activeBorder);
+  }
+
+}
+.resultsPagination {
+  .paginator.no-buttons > div > div {
+    > button {
+      display: none;
+    }
+    > span {
+      padding-right: 1em;
+    }
+  }
+}

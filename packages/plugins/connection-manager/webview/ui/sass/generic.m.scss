@@ -1,0 +1,14 @@
+@import './variables';
+
+.blur {
+  transition: var(--sqltools-transition);
+}
+.blurActive {
+  composes: blur;
+  filter: blur(5px);
+}
+.fullscreenContainer {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+}
