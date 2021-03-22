@@ -6,12 +6,12 @@
   "license": "MIT",
   "private": true,
   "dependencies": {
-    "@devexpress/dx-react-core": "^2.6.3",
-    "@devexpress/dx-react-grid": "^2.6.3",
-    "@devexpress/dx-react-grid-material-ui": "^2.6.3",
-    "@material-ui/core": "^4.10.1",
+    "@devexpress/dx-react-core": "^2.7.0",
+    "@devexpress/dx-react-grid": "^2.7.0",
+    "@devexpress/dx-react-grid-material-ui": "^2.7.0",
+    "@material-ui/core": "^4.11.0",
     "@material-ui/icons": "^4.9.1",
-    "@rjsf/core": "^2.0.2",
+    "@rjsf/core": "^2.3.0",
     "@sqltools/base-driver": "*",
     "@sqltools/formatter": "*",
     "@sqltools/language-server": "*",
@@ -23,8 +23,8 @@
     "gethue": "^4.8.3",
     "lodash": "^4.17.19",
     "node-sql-parser": "^1.7.7",
-    "react": "^16.8.1",
-    "react-dom": "^16.8.1",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
     "rimraf": "^3.0.2",
     "tempy": "^0.6.0"
   },
@@ -36,13 +36,13 @@
     "@types/command-exists": "^1.2.0",
     "@types/jest": "^24.0.11",
     "@types/lodash": "^4.14.123",
-    "@types/react": "^16.9.1",
-    "@types/react-dom": "^16.8.5",
+    "@types/react": "^16.9.46",
+    "@types/react-dom": "^16.9.8",
     "@types/rimraf": "^3.0.0",
     "cross-env": "^7.0.2",
     "jest": "^24.5.0",
     "jest-cli": "^24.5.0",
     "ts-jest": "^24.0.2",
-    "typescript": "^3.7.3"
+    "typescript": "~4.0.2"
   }
 }

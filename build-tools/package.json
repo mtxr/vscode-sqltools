@@ -21,7 +21,7 @@
     "babel-loader": "^8.0.5",
     "copy-webpack-plugin": "^5.0.0",
     "cross-env": "^5.2.0",
-    "css-loader": "^3.2.0",
+    "css-loader": "^4.2.1",
     "dotenv": "^8.2.0",
     "file-loader": "^4.2.0",
     "mini-css-extract-plugin": "^0.8.0",

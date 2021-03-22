@@ -1,6 +1,6 @@
 import { ConnectionExplorer, SidebarConnection, SidebarItem } from '@sqltools/plugins/connection-manager/explorer';
-import ResultsWebviewManager from '@sqltools/plugins/connection-manager/screens/results';
-import SettingsWebview from '@sqltools/plugins/connection-manager/screens/settings';
+import ResultsWebviewManager from '@sqltools/plugins/connection-manager/webview/results';
+import SettingsWebview from '@sqltools/plugins/connection-manager/webview/settings';
 import { ContextValue, IConnection, IExtension, IExtensionPlugin, ILanguageClient, IQueryOptions, NSDatabase, RequestHandler } from '@sqltools/types';
 import Config from '@sqltools/util/config-manager';
 import { getConnectionDescription, getConnectionId, getSessionBasename, migrateConnectionSettings } from '@sqltools/util/connection';

@@ -1,0 +1,9 @@
+.container {
+  composes: fullscreenContainer from './../../../../sass/generic.m.scss';
+  display: flex;
+  flex-direction: column;
+  font-size: var(--sqltools-font-size, var(--sqltools-fontSize));
+  :not(code):not(pre) {
+    font-family: var(--sqltools-font-family, var(--sqltools-fontFamily));
+  }
+}
