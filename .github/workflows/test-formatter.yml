@@ -1,7 +1,10 @@
-# https://code.visualstudio.com/api/working-with-extensions/continuous-integration
-
 name: Formatter Test & Build
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
 
 jobs:
   build:
