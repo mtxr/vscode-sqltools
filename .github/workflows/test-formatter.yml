@@ -37,9 +37,6 @@ jobs:
       run: |
         cd packages/formatter
         yarn
-        yarn run check
-        echo ">>> Compiled vscode-test"
-        echo ">>> Run sample integration test"
         yarn pack
 
     - name: 'Upload tgz'
