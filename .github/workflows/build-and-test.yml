@@ -57,14 +57,11 @@ jobs:
         name: VSIX packages
         path: ./*.vsix
 
-    - name: 'Tar files'
-      run: tar -cvf coverage.tar ./coverage
-
     - name: 'Upload coverage'
       uses: actions/upload-artifact@v2
       with:
         name: coverage.tar
-        path: coverage.tar
+        path: ./coverage
         retention-days: 2
 
     - uses: codecov/codecov-action@v1.0.2
