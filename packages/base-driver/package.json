@@ -24,7 +24,8 @@
     "prepack": "yarn run build",
     "prepare": "yarn run build",
     "release": "npm pack && npm publish *.tgz --tag latest --access public",
-    "beta": "npm pack && npm publish *.tgz --tag beta --access public"
+    "beta": "npm pack && npm publish *.tgz --tag beta --access public",
+    "tag": "git tag  base-drver/$(node -e 'console.log(require(\"./package.json\").version)')"
   },
   "devDependencies": {
     "@types/node": "^14.0.9",

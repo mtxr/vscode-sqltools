@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/formatter",
-  "version": "1.2.2",
+  "version": "1.2.3",
   "description": "Formats SQL queries. Part of SQLTools",
   "license": "MIT",
   "main": "./lib/sqlFormatter.js",
@@ -35,7 +35,8 @@
     "prepare": "yarn run build",
     "prepack": "yarn run build",
     "release": "npm pack && npm publish *.tgz --tag latest --access public",
-    "beta": "npm pack && npm publish *.tgz --tag beta --access public"
+    "beta": "npm pack && npm publish *.tgz --tag beta --access public",
+    "tag": "git tag  formatter/$(node -e 'console.log(require(\"./package.json\").version)')"
   },
   "repository": {
     "type": "git",

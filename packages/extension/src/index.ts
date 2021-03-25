@@ -91,7 +91,7 @@ export class SQLToolsExtension implements IExtension {
   }
 
   private getIssueTemplate = (name: string) => {
-    const url = `https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/.github/ISSUE_TEMPLATE/${name}`;
+    const url = `https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/.github/ISSUE_TEMPLATE/${name}`;
     return new Promise<string>((resolve) => {
       https.get(url, (resp) => {
         let data = '';

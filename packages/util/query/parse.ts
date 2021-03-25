@@ -1,12 +1,12 @@
 /**
- * copied from https://github.com/TeamSQL/SQL-Statement-Parser/blob/master/src/index.ts
+ * copied from https://github.com/TeamSQL/SQL-Statement-Parser/blob/dev/src/index.ts
  * minor improvements
  */
 
 class QueryParser {
   static parse(query: string, driver: 'pg' | 'mysql' | 'mssql' | 'cql' = 'mysql'): Array<string> {
     if (driver === 'mssql') {
-      query = query.replace(/^[ \t]*GO;?[ \t]*$/gmi, '');
+      query = query.replace(/^[ \t]*GO;?[ \t]*$/gim, '');
     }
     const delimiter: string = ';';
     const queries: Array<string> = [];
@@ -74,7 +74,7 @@ class QueryParser {
       if (
         isInComment == true &&
         (((commentChar == '#' || commentChar == '-') && char == '\n') ||
-          (commentChar == '/' && (char == '*' && nextChar == '/')))
+          (commentChar == '/' && char == '*' && nextChar == '/'))
       ) {
         isInComment = false;
         commentChar = null;
@@ -119,13 +119,11 @@ class QueryParser {
         }
       }
       if (
-        driver === 'mssql'
-        && char.toLowerCase() === 'g'
-        && `${charArray[index + 1] || ''}`.toLowerCase() === 'o'
-        && (
-          typeof charArray[index + 2] !== 'undefined'
-          && /go\b/gi.test(`${char}${charArray[index + 1]}${charArray[index + 2]}`)
-        )
+        driver === 'mssql' &&
+        char.toLowerCase() === 'g' &&
+        `${charArray[index + 1] || ''}`.toLowerCase() === 'o' &&
+        typeof charArray[index + 2] !== 'undefined' &&
+        /go\b/gi.test(`${char}${charArray[index + 1]}${charArray[index + 2]}`)
       ) {
         char = `${char}${charArray[index + 1]}`;
       }
@@ -257,6 +255,5 @@ class QueryParser {
     return clearedText;
   }
 }
-
 
 export default QueryParser.parse;

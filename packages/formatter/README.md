@@ -1,6 +1,6 @@
 # SQLTools Formatter
 
-[![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools)](https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE)
+[![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools)](https://github.com/mtxr/vscode-sqltools/blob/dev/LICENSE)
 
 > Forked from [zeroturnaround/sql-formatter](https://zeroturnaround.github.io/sql-formatter/) but with improvements and ported Typescript.
 
@@ -36,31 +36,39 @@ FROM table1
 You can also pass in configuration options:
 
 ```js
-sqlFormatter.format("SELECT *", {
-    language: "sql",
-    indent: '\t'   // Defaults to two spaces
+sqlFormatter.format('SELECT *', {
+  language: 'sql',
+  indent: '\t', // Defaults to two spaces
 });
 ```
 
 ## Options
 
-| option | description | type | default |
-|--------|-------------|------|---------|
-| language | Query language, default is Standard SQL | `sql, n1ql, db2, pl/sql` | `sql` |
-| indent | Characters used for indentation | `string` | ` ` (2 spaces)|
-| reservedWordCase | How to change the case of reserved words | `upper`, `lower`, `null` | `null` (no change) |
-| linesBetweenQueries | How many line breaks between queries | `number` or `'preserve'` | `1` |
-| params | Collection of params for placeholder replacement | `object` for name params, `array` for indexed placeholders | |
+| option              | description                                      | type                                                       | default            |
+| ------------------- | ------------------------------------------------ | ---------------------------------------------------------- | ------------------ |
+| language            | Query language, default is Standard SQL          | `sql, n1ql, db2, pl/sql`                                   | `sql`              |
+| indent              | Characters used for indentation                  | `string`                                                   | ` ` (2 spaces)     |
+| reservedWordCase    | How to change the case of reserved words         | `upper`, `lower`, `null`                                   | `null` (no change) |
+| linesBetweenQueries | How many line breaks between queries             | `number` or `'preserve'`                                   | `1`                |
+| params              | Collection of params for placeholder replacement | `object` for name params, `array` for indexed placeholders |                    |
 
 ## Changelog
 
+#### v1.2.3
+
+- Update types path. Thanks to [@sgtpep](https://github.com/sgtpep)
+- Update README.md. Thanks to [@hacker0limbo](https://github.com/hacker0limbo)
+
 #### v1.2.2
- - Add playground link and options to README.md
- - Emitting declarations files for usage with Typescript.
+
+- Add playground link and options to README.md
+- Emitting declarations files for usage with Typescript.
 
 #### v1.2.1
-  - Fixes JSON operators not inserting spaces. Issue [#605](https://github.com/mtxr/vscode-sqltools/issues/605)
-  - Fixes Grant type queries. Issue [#460](https://github.com/mtxr/vscode-sqltools/issues/460)
+
+- Fixes JSON operators not inserting spaces. Issue [#605](https://github.com/mtxr/vscode-sqltools/issues/605)
+- Fixes Grant type queries. Issue [#460](https://github.com/mtxr/vscode-sqltools/issues/460)
 
 #### v1.2.1
-  - (Almost) first public version
+
+- (Almost) first public version

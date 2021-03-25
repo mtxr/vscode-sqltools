@@ -74,7 +74,7 @@
         },
         {
             "description": "Ko-Fi",
-            "url": "https://cdn.ko-fi.com/cdn/kofi1.png?v=2",
+            "url": "https://user-images.githubusercontent.com/707561/112481485-d0d09800-8d55-11eb-8bfd-bb70c9984617.png",
             "href": "https://ko-fi.com/Y8Y487W9"
         },
         {
@@ -90,7 +90,7 @@
         {
             "description": "LICENSE",
             "url": "https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge",
-            "href": "https://github.com/mtxr/vscode-sqltools/blob/master/LICENSE.md"
+            "href": "https://github.com/mtxr/vscode-sqltools/blob/dev/LICENSE.md"
         }
     ],
     "activationEvents": [
