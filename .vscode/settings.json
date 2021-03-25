@@ -4,16 +4,16 @@
   "files.exclude": {
     "**/dist": false,
     "docs": true,
-    "packages": true,
+    "packages": false,
   },
   "files.watcherExclude": {
     "**/dist": true,
     "docs": true,
-    "packages": true,
+    "packages": false,
   },
   "search.exclude": {
     "**/dist": true,
     "docs": true,
-    "packages": true,
+    "packages": false,
   }
 }

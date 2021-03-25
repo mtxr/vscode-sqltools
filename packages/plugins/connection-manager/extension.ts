@@ -379,11 +379,11 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
     if (!fileType || fileType === 'prompt') return;
 
-    var filename = file({
+    const filename = file({
       extension: fileType,
     });
 
-    var fileUri = Uri.file(filename);
+    const fileUri = Uri.file(filename);
 
     await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
     return vscodeEnv.openExternal(fileUri);

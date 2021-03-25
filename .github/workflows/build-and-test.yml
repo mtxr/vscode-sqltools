@@ -2,7 +2,11 @@
 
 name: Node CI
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
 
 jobs:
   build:
@@ -17,6 +21,17 @@ jobs:
     - uses: actions/checkout@v1
       with:
         ref: ${{ github.ref }}
+
+    - uses: actions/cache@v2
+      id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
+      with:
+        path: |
+          ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          '!**/.vscode-test'
+        key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+        restore-keys: |
+          ${{ runner.os }}-yarn-
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -34,11 +49,24 @@ jobs:
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
+        JEST_CI: "true"
       run: |
-        yarn run build
-        yarn test:older --no-coverage
         yarn test
+        yarn test:insiders --no-coverage
+        yarn run build
         yarn run pack:all
+
+    - uses: actions/upload-artifact@v2
+      with:
+        name: VSIX packages
+        path: ./*.vsix
+
+    - name: 'Upload coverage'
+      uses: actions/upload-artifact@v2
+      with:
+        name: coverage.tar
+        path: ./coverage
+        retention-days: 2
 
     - uses: codecov/codecov-action@v1.0.2
       if: github.event_name == 'push'

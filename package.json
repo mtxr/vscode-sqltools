@@ -28,12 +28,12 @@
     "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch",
     "build:pack": "yarn --cwd ./build-tools run build:pack",
     "postinstall": "yarn workspace @sqltools/base-driver run prepare && yarn workspace @sqltools/formatter install && yarn --cwd ./build-tools && yarn --cwd ./docs",
-    "pretest": "rimraf -rf ./coverage",
+    "pretest": "rimraf -rf ./coverage ./.test-results",
     "pack:release": "cross-env NODE_ENV=production yarn run build:pack",
     "test:docker": "yarn --cwd ./test run",
-    "test:older": "cross-env CODE_VERSION=1.41.0 yarn test",
+    "test:insiders": "cross-env CODE_VERSION=insiders yarn test",
     "test:watch": "cross-env WATCH=1 yarn run test",
-    "test": "cross-env CODE_DISABLE_EXTENSIONS=1 CODE_EXTENSIONS_PATH=./dist CODE_TESTS_WORKSPACE=./test/docker node ./test/run-tests.js",
+    "test": "cross-env CODE_EXTENSIONS_PATH=./packages/extension/dist CODE_TESTS_WORKSPACE=./test/docker node ./test/runVscodeTests.js",
     "start": "yarn run dev:watch",
     "prepack:all": "rimraf -rf *.vsix dist",
     "pack:all": "cross-env DISPLAY_NAME=SQLTools NODE_ENV=production concurrently --kill-others-on-fail \"npm:build:pack\" \"npm:driver:pack\"",
@@ -46,13 +46,16 @@
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
     "cross-env": "^7.0.2",
-    "jest": "^24.5.0",
-    "jest-cli": "^24.5.0",
+    "fs-extra": "9.1.0",
+    "jest": "^26.6.3",
+    "jest-cli": "^26.6.3",
+    "ts-jest": "^26.5.4",
     "jest-environment-node": "^24.5.0",
     "minimist": "^1.2.3",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
     "typescript": "^3.7.3",
-    "vsce": "1.76.0"
+    "vsce": "1.77.0",
+    "ts-node": "^9.1.1"
   }
 }

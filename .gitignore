@@ -27,3 +27,4 @@ add-new.diff
 *.tar.gz
 *.tgz
 .todo
+.test-results/

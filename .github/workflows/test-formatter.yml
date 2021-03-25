@@ -1,7 +1,10 @@
-# https://code.visualstudio.com/api/working-with-extensions/continuous-integration
-
 name: Formatter Test & Build
-on: [push, pull_request]
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
 
 jobs:
   build:
@@ -10,12 +13,18 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x, 12.x]
+        node-version: [10.x]
 
     steps:
     - uses: actions/checkout@v1
       with:
         ref: ${{ github.ref }}
+
+    - uses: actions/cache@v2
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
@@ -31,10 +40,13 @@ jobs:
       run: |
         cd packages/formatter
         yarn
-        yarn run check
-        echo ">>> Compiled vscode-test"
-        echo ">>> Run sample integration test"
-        yarn run build
+        yarn pack
+
+    - name: 'Upload tgz'
+      uses: actions/upload-artifact@v2
+      with:
+        name: package
+        path: ./packages/formatter/*.tgz
 
     - uses: codecov/codecov-action@v1.0.2
       with:
