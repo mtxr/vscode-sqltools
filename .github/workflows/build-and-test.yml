@@ -34,10 +34,11 @@ jobs:
         CXX: "g++-4.9"
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
+        JEST_CI: "true"
       run: |
         yarn run build
-        yarn test:older --no-coverage
         yarn test
+        yarn test:insiders --no-coverage
         yarn run pack:all
 
     - uses: codecov/codecov-action@v1.0.2

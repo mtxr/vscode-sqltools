@@ -8,11 +8,11 @@ import components from '../../components';
 
 function getQueryParams() {
   const queryString = window.location.search;
-  var query: any = {};
-  var pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
-  for (var i = 0; i < pairs.length; i++) {
-      var pair = pairs[i].split('=');
-      query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
+  const query: any = {};
+  const pairs = (queryString[0] === '?' ? queryString.substr(1) : queryString).split('&');
+  for (let i = 0; i < pairs.length; i++) {
+    const pair = pairs[i].split('=');
+    query[decodeURIComponent(pair[0])] = decodeURIComponent(pair[1] || '');
   }
   return query;
 }
@@ -77,7 +77,7 @@ class RenderSettings extends React.Component<Props> {
   renderSearchContainer = () => this.props.disableSearch ? null : (
     <SearchContainer onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
       <SearchIcon />
-      <Search placeholder="Type to search..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef}/>
+      <Search placeholder="Type to search..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef} />
     </SearchContainer>
   );
 
