@@ -17,6 +17,12 @@ jobs:
     - uses: actions/checkout@v1
       with:
         ref: ${{ github.ref }}
+
+    - uses: actions/cache@v2
+      with:
+        path: '**/node_modules'
+        key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+
     - name: Use Node.js ${{ matrix.node-version }}
       uses: actions/setup-node@v1
       with:
