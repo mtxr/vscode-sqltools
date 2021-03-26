@@ -54,7 +54,7 @@ const getResultHeader = (result, rootPath) => {
       TITLE_BULLET +
       'Console\n\n' +
       getConsoleOutput(
-        projectRootPath,
+        rootPath,
         false,
         result.console
       );

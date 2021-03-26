@@ -29,11 +29,13 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       });
       DRIVER_ALIASES.forEach(({ value }) => {
         extension.resourcesMap().set(`driver/${value}/extension-id`, extensionId);
-        extension.resourcesMap().set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
+        extension
+          .resourcesMap()
+          .set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
         extension.resourcesMap().set(`driver/${value}/ui-schema`, extContext.asAbsolutePath('ui.schema.json'));
       });
-      await extension.client.sendRequest('ls/RegisterPlugin', { path: extContext.asAbsolutePath('out/ls/plugin.js') });
-    }
+      await extension.client.sendRequest('ls/RegisterPlugin', { path: extContext.asAbsolutePath('dist/ls/plugin.js') });
+    },
   };
   api.registerPlugin(plugin);
   return {
@@ -49,7 +51,10 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         const databaseUri = Uri.file(connInfo.database);
         const dbWorkspace = workspace.getWorkspaceFolder(databaseUri);
         if (dbWorkspace) {
-          formData.database = `\$\{workspaceFolder:${dbWorkspace.name}\}/${workspace.asRelativePath(connInfo.database, false)}`;
+          formData.database = `\$\{workspaceFolder:${dbWorkspace.name}\}/${workspace.asRelativePath(
+            connInfo.database,
+            false
+          )}`;
         }
       }
       propsToRemove.forEach(p => delete formData[p]);
@@ -67,12 +72,15 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         const workspaceName = connInfo.database.match(/\$\{workspaceFolder:(.+)}/)[1];
         const dbWorkspace = workspace.workspaceFolders.find(w => w.name === workspaceName);
         if (dbWorkspace)
-          formData.database = path.resolve(dbWorkspace.uri.fsPath, connInfo.database.replace(/\$\{workspaceFolder:(.+)}/g, './'));
+          formData.database = path.resolve(
+            dbWorkspace.uri.fsPath,
+            connInfo.database.replace(/\$\{workspaceFolder:(.+)}/g, './')
+          );
       }
       return formData;
     },
     driverAliases: DRIVER_ALIASES,
-  }
+  };
 }
 
 export function deactivate() {}

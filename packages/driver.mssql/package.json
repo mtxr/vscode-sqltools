@@ -42,9 +42,9 @@
     "onLanguage:sql",
     "onCommand:sqltools.*"
   ],
-  "main": "./out/extension.js",
+  "main": "./dist/extension.js",
   "scripts": {
-    "clean": "rimraf -rf out dist *.vsix",
+    "clean": "rimraf -rf dist *.vsix",
     "predev": "yarn run clean",
     "dev": "concurrently -k \"npm:dev:*\"",
     "prebuild": "yarn run clean && yarn run tsc-check",
@@ -54,8 +54,8 @@
     "esbuild": "esbuild --platform=node --tsconfig=./tsconfig.json --external:vscode --log-level=error --color=true --format=cjs",
     "prepackage": "yarn run build",
     "package": "vsce package --yarn -o .",
-    "compile:ext": "yarn run esbuild --bundle ./src/extension.ts --outfile=./out/extension.js --target=es2017 --define:process.env.PRODUCT=\"'ext'\"",
-    "compile:ls": "yarn run esbuild --bundle ./src/ls/plugin.ts --outfile=./out/ls/plugin.js --target=es2015 --define:process.env.PRODUCT=\"'ls'\"",
+    "compile:ext": "yarn run esbuild --bundle ./src/extension.ts --outfile=./dist/extension.js --target=es2017 --define:process.env.PRODUCT=\"'ext'\"",
+    "compile:ls": "yarn run esbuild --bundle ./src/ls/plugin.ts --outfile=./dist/ls/plugin.js --target=es2015 --define:process.env.PRODUCT=\"'ls'\"",
     "tsc-check": "yarn run ts --noEmit --preserveWatchOutput",
     "watch": "concurrently \"npm:watch:*\"",
     "watch:ext": "yarn run compile:ext --define:process.env.NODE_ENV=\"'development'\" --sourcemap",

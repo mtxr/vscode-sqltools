@@ -25,6 +25,8 @@
     "docs:build": "yarn --cwd ./docs run docz:build",
     "docs:dev": "yarn --cwd ./docs run docz:dev",
     "dev:jest": "jest --config jest.config.js --passWithNoTests",
+    "dev:lint": "yarn eslint --ext .js,.jsx,.ts,.tsx -c .eslintrc",
+    "dev:lint:all": "yarn run dev:lint .",
     "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch",
     "build:pack": "yarn --cwd ./build-tools run build:pack",
     "postinstall": "yarn workspace @sqltools/base-driver run prepare && yarn workspace @sqltools/formatter install && yarn --cwd ./build-tools && yarn --cwd ./docs",
@@ -36,6 +38,7 @@
     "test": "cross-env CODE_EXTENSIONS_PATH=./packages/extension/dist CODE_TESTS_WORKSPACE=./test/docker node ./test/runVscodeTests.js",
     "start": "yarn run dev:watch",
     "prepack:all": "rimraf -rf *.vsix dist",
+    "prebuild": "yarn run dev:lint",
     "pack:all": "cross-env DISPLAY_NAME=SQLTools NODE_ENV=production concurrently --kill-others-on-fail \"npm:build:pack\" \"npm:driver:pack\"",
     "driver:pack": "concurrently --kill-others-on-fail \"npm:driver:pack:*\"",
     "driver:pack:pg": "(cd packages/driver.pg/ && yarn run package && mv *.vsix '../../.')",
@@ -45,17 +48,23 @@
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
+    "@typescript-eslint/eslint-plugin": "^4.19.0",
+    "@typescript-eslint/parser": "^4.19.0",
     "cross-env": "^7.0.2",
+    "eslint": "^7.22.0",
+    "eslint-config-prettier": "^8.1.0",
+    "eslint-plugin-prettier": "^3.3.1",
     "fs-extra": "9.1.0",
     "jest": "^26.6.3",
     "jest-cli": "^26.6.3",
-    "ts-jest": "^26.5.4",
     "jest-environment-node": "^24.5.0",
     "minimist": "^1.2.3",
+    "prettier": "^2.2.1",
     "rimraf": "^3.0.0",
     "source-map-support": "^0.5.11",
+    "ts-jest": "^26.5.4",
+    "ts-node": "^9.1.1",
     "typescript": "^3.7.3",
-    "vsce": "1.77.0",
-    "ts-node": "^9.1.1"
+    "vsce": "1.77.0"
   }
 }
