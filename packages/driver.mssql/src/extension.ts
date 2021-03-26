@@ -1,6 +1,7 @@
-import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
+import { IDriverExtensionApi, IExtension, IExtensionPlugin } from '@sqltools/types';
 import { ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { publisher, name } = require('../package.json');
 const driverName = 'SQL Server/Azure';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
@@ -77,4 +78,6 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
   };
 }
 
-export function deactivate() {}
+export function deactivate() {
+  /** @TODO */
+}

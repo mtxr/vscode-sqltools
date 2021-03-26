@@ -2,8 +2,8 @@ import queryFactory from '@sqltools/base-driver/dist/lib/factory';
 import { IBaseQueries, ContextValue, NSDatabase } from '@sqltools/types';
 
 function escapeTableName(table: Partial<NSDatabase.ITable> | string) {
-  let items: string[] = [];
-  let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
+  const items: string[] = [];
+  const tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
   tableObj.database && items.push(`[${tableObj.database}]`);
   tableObj.schema && items.push(`[${tableObj.schema}]`);
   items.push(`[${tableObj.label}]`);
@@ -125,11 +125,14 @@ FROM INFORMATION_SCHEMA.TABLES AS T
 WHERE
   LOWER(T.TABLE_SCHEMA) NOT IN ('information_schema', 'sys', 'guest')
   AND LOWER(T.TABLE_SCHEMA) NOT LIKE 'db\\_%' ESCAPE '\\'
-  ${p => p.search ? `AND (
+  ${p =>
+    p.search
+      ? `AND (
     LOWER(T.TABLE_CATALOG + '.' + T.TABLE_SCHEMA + '.' + T.TABLE_NAME) LIKE '%${p.search.toLowerCase()}%'
     OR LOWER('[' + T.TABLE_CATALOG + '].[' + T.TABLE_SCHEMA + '].[' + T.TABLE_NAME + ']') LIKE '%${p.search.toLowerCase()}%'
     OR LOWER(T.TABLE_NAME) LIKE '%${p.search}%'
-  )` : ''}
+  )`
+      : ''}
 ORDER BY
   T.TABLE_NAME
 OFFSET 0 ROWS
@@ -168,23 +171,25 @@ FROM
   AND C.TABLE_CATALOG = T.TABLE_CATALOG
 WHERE LOWER(C.TABLE_SCHEMA) NOT IN ('information_schema', 'sys', 'guest')
   AND LOWER(C.TABLE_SCHEMA) NOT LIKE 'db\\_%' ESCAPE '\\'
-  ${p => p.tables.filter(t => !!t.label).length
-    ? `AND LOWER(C.TABLE_NAME) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
-    : ''
-  }
-  ${p => p.search
-    ? `AND (
+  ${p =>
+    p.tables.filter(t => !!t.label).length
+      ? `AND LOWER(C.TABLE_NAME) IN (${p.tables
+          .filter(t => !!t.label)
+          .map(t => `'${t.label}'`.toLowerCase())
+          .join(', ')})`
+      : ''}
+  ${p =>
+    p.search
+      ? `AND (
       (C.TABLE_NAME + '.' + C.COLUMN_NAME) LIKE '%${p.search}%'
       OR C.COLUMN_NAME LIKE '%${p.search}%'
     )`
-    : ''
-  }
+      : ''}
 ORDER BY C.TABLE_NAME,
   C.ORDINAL_POSITION
 OFFSET 0 ROWS
 FETCH NEXT ${p => p.limit || 100} ROWS ONLY
 `;
-
 
 // export default {
 //   fetchFunctions: `

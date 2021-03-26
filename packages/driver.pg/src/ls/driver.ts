@@ -31,7 +31,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         poolConfig = {
           connectionString: this.credentials.connectString,
           ...poolConfig,
-        }
+        };
       } else {
         poolConfig = {
           database: this.credentials.database,
@@ -51,15 +51,15 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
             if (!useSsl[key]) {
               delete useSsl[key];
               return;
-            };
-            this.log.info(`Reading file ${useSsl[key].replace(/^file:\/\//, '')}`)
+            }
+            this.log.info(`Reading file ${useSsl[key].replace(/^file:\/\//, '')}`);
             useSsl[key] = fs.readFileSync(useSsl[key].replace(/^file:\/\//, '')).toString();
           });
           if (Object.keys(useSsl).length > 0) {
             poolConfig.ssl = useSsl;
           }
         } else {
-          poolConfig.ssl =  ssl || false;
+          poolConfig.ssl = ssl || false;
         }
       }
 
@@ -80,14 +80,16 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     pool.end();
   }
 
-  public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
+  public query: typeof AbstractDriver['prototype']['query'] = (query, opt = {}) => {
     const messages = [];
-    let cli : PoolClient;
+    let cli: PoolClient;
     const { requestId } = opt;
     return this.open()
-      .then(async (pool) => {
+      .then(async pool => {
         cli = await pool.connect();
-        cli.on('notice', notice => messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`)));
+        cli.on('notice', notice =>
+          messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`))
+        );
         const results = await cli.query({ text: query.toString(), rowMode: 'array' });
         cli.release();
         return results;
@@ -98,67 +100,79 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           results = [results];
         }
 
-        return results.map((r, i): NSDatabase.IResult => {
-          const cols = this.getColumnNames(r.fields || []);
-          return {
-            requestId,
-            resultId: generateId(),
-            connId: this.getId(),
-            cols,
-            messages: messages.concat([
-              this.prepareMessage(`${r.command} successfully executed.${
-                r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number' ? ` ${r.rowCount} rows were affected.` : ''
-              }`)
-            ]),
-            query: queries[i],
-            results: this.mapRows(r.rows, cols),
-          };
-        });
+        return results.map(
+          (r, i): NSDatabase.IResult => {
+            const cols = this.getColumnNames(r.fields || []);
+            return {
+              requestId,
+              resultId: generateId(),
+              connId: this.getId(),
+              cols,
+              messages: messages.concat([
+                this.prepareMessage(
+                  `${r.command} successfully executed.${
+                    r.command.toLowerCase() !== 'select' && typeof r.rowCount === 'number'
+                      ? ` ${r.rowCount} rows were affected.`
+                      : ''
+                  }`
+                ),
+              ]),
+              query: queries[i],
+              results: this.mapRows(r.rows, cols),
+            };
+          }
+        );
       })
       .catch(err => {
         cli && cli.release();
-        return [<NSDatabase.IResult>{
-          connId: this.getId(),
-          requestId,
-          resultId: generateId(),
-          cols: [],
-          messages: messages.concat([
-            this.prepareMessage ([
-              (err && err.message || err),
-              err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined
-            ].filter(Boolean).join(' '))
-          ]),
-          error: true,
-          rawError: err,
-          query,
-          results: [],
-        }];
+        return [
+          <NSDatabase.IResult>{
+            connId: this.getId(),
+            requestId,
+            resultId: generateId(),
+            cols: [],
+            messages: messages.concat([
+              this.prepareMessage(
+                [
+                  (err && err.message) || err,
+                  err && err.routine === 'scanner_yyerror' && err.position ? `at character ${err.position}` : undefined,
+                ]
+                  .filter(Boolean)
+                  .join(' ')
+              ),
+            ]),
+            error: true,
+            rawError: err,
+            query,
+            results: [],
+          },
+        ];
       });
-  }
+  };
 
   private getColumnNames(fields: FieldDef[]): string[] {
     return fields.reduce((names, { name }) => {
-      const count = names.filter((n) => n === name).length;
+      const count = names.filter(n => n === name).length;
       return names.concat(count > 0 ? `${name} (${count})` : name);
     }, []);
   }
 
   private mapRows(rows: any[], columns: string[]): any[] {
-    return rows.map((r) => zipObject(columns, r));
+    return rows.map(r => zipObject(columns, r));
   }
 
   private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
     const results = await this.queryResults(this.queries.fetchColumns(parent));
     return results.map(col => ({
       ...col,
-      iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null),
+      iconName: col.isPk ? 'pk' : col.isFk ? 'fk' : null,
       childType: ContextValue.NO_CHILD,
-      table: parent
+      table: parent,
     }));
   }
 
   public async testConnection() {
-    const pool = await this.open()
+    const pool = await this.open();
     const cli = await pool.connect();
     await cli.query('SELECT 1');
     cli.release();
@@ -183,7 +197,12 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         return <MConnectionExplorer.IChildItem[]>[
           { label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TABLE },
           { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
-          { label: 'Materialized Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.MATERIALIZED_VIEW },
+          {
+            label: 'Materialized Views',
+            type: ContextValue.RESOURCE_GROUP,
+            iconId: 'folder',
+            childType: ContextValue.MATERIALIZED_VIEW,
+          },
           { label: 'Functions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.FUNCTION },
         ];
     }
@@ -205,7 +224,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
     return [];
   }
 
-  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
+  public searchItems(
+    itemType: ContextValue,
+    search: string,
+    extraParams: any = {}
+  ): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
         return this.queryResults(this.queries.searchTables({ search }));
@@ -218,7 +241,9 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   public getStaticCompletions = async () => {
     if (this.completionsCache) return this.completionsCache;
     this.completionsCache = {};
-    const items = await this.queryResults('SELECT UPPER(word) AS label, UPPER(catdesc) AS desc FROM pg_get_keywords();');
+    const items = await this.queryResults(
+      'SELECT UPPER(word) AS label, UPPER(catdesc) AS desc FROM pg_get_keywords();'
+    );
 
     items.forEach((item: any) => {
       this.completionsCache[item.label] = {
@@ -228,11 +253,11 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(item.label) ? '2:' : '') + item.label,
         documentation: {
           value: `\`\`\`yaml\nWORD: ${item.label}\nTYPE: ${item.desc}\n\`\`\``,
-          kind: 'markdown'
-        }
-      }
+          kind: 'markdown',
+        },
+      };
     });
 
     return this.completionsCache;
-  }
+  };
 }

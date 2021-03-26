@@ -11,13 +11,13 @@ import keywordsCompletion from './keywords';
 const SQLite3Version = '4.2.0';
 
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
-
-  public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
-    name: 'sqlite3',
-    version: SQLite3Version,
-  }];
-
+  public readonly deps: typeof AbstractDriver.prototype['deps'] = [
+    {
+      type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
+      name: 'sqlite3',
+      version: SQLite3Version,
+    },
+  ];
 
   queries = queries;
 
@@ -30,7 +30,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
 
     const baseDir = dirname(await this.getDatabase());
     mkdir.sync(baseDir);
-  }
+  };
   private getDatabase = () => this.toAbsolutePath(this.credentials.database);
 
   public async open() {
@@ -41,7 +41,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     await this.createDirIfNotExists();
     const db = await new Promise<SQLiteLib.Database>(async (resolve, reject) => {
       try {
-        const instance = new (this.lib).Database(await this.getDatabase(), (err) => {
+        const instance = new this.lib.Database(await this.getDatabase(), err => {
           if (err) return reject(err);
           return resolve(instance);
         });
@@ -56,28 +56,28 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
 
   public async close() {
     if (!this.connection) return Promise.resolve();
-    const db = await this.connection
+    const db = await this.connection;
     await new Promise((resolve, reject) => {
-      db.close(err => err ? reject(err) : resolve());
+      db.close(err => (err ? reject(err) : resolve()));
     });
     this.connection = null;
   }
 
   private runSingleQuery(db: SQLiteLib.Database, query: string) {
     return new Promise<any[]>((resolve, reject) => {
-      db.all(query,(err, rows) => {
+      db.all(query, (err, rows) => {
         if (err) return reject(err);
         return resolve(rows);
-      })
+      });
     });
   }
 
-  public query: (typeof AbstractDriver)['prototype']['query'] = async (query, opt = {}) => {
+  public query: typeof AbstractDriver['prototype']['query'] = async (query, opt = {}) => {
     const db = await this.open();
     const { requestId } = opt;
     const queries = queryParse(query.toString()).filter(Boolean);
-    let resultsAgg: NSDatabase.IResult[] = [];
-    for (let q of queries) {
+    const resultsAgg: NSDatabase.IResult[] = [];
+    for (const q of queries) {
       const results: any[][] = (await this.runSingleQuery(db, q)) || [];
       const messages = [];
       if (results.length === 0 && q.toLowerCase() !== 'select') {
@@ -94,10 +94,10 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
       });
     }
     return resultsAgg;
-  }
+  };
 
   public async testConnection() {
-    await this.open()
+    await this.open();
     await this.query('SELECT 1', {});
   }
 
@@ -128,7 +128,11 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     return [];
   }
 
-  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
+  public searchItems(
+    itemType: ContextValue,
+    search: string,
+    extraParams: any = {}
+  ): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
         return this.queryResults(this.queries.searchTables({ search }));
@@ -138,5 +142,5 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
   }
   public getStaticCompletions = async () => {
     return keywordsCompletion;
-  }
+  };
 }

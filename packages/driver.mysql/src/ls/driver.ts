@@ -7,7 +7,8 @@ import { IConnectionDriver, IConnection, NSDatabase, Arg0, MConnectionExplorer, 
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
 
-const toBool = (v: any) => v && (v.toString() === '1' || v.toString().toLowerCase() === 'true' || v.toString().toLowerCase() === 'yes');
+const toBool = (v: any) =>
+  v && (v.toString() === '1' || v.toString().toLowerCase() === 'true' || v.toString().toLowerCase() === 'yes');
 
 export default class MySQL<O = any> extends AbstractDriver<any, O> implements IConnectionDriver {
   queries = Queries;
@@ -30,26 +31,23 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     return this.driver.close();
   }
 
-  public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
-    return this.driver.query(query, opt)
-    .catch(err => {
-      return [<NSDatabase.IResult>{
-        connId: this.getId(),
-        requestId: opt.requestId,
-        resultId: generateId(),
-        cols: [],
-        messages: [
-          this.prepareMessage ([
-            (err && err.message || err.toString()),
-          ].filter(Boolean).join(' '))
-        ],
-        error: true,
-        rawError: err,
-        query,
-        results: [],
-      }];
+  public query: typeof AbstractDriver['prototype']['query'] = (query, opt = {}) => {
+    return this.driver.query(query, opt).catch(err => {
+      return [
+        <NSDatabase.IResult>{
+          connId: this.getId(),
+          requestId: opt.requestId,
+          resultId: generateId(),
+          cols: [],
+          messages: [this.prepareMessage([(err && err.message) || err.toString()].filter(Boolean).join(' '))],
+          error: true,
+          rawError: err,
+          query,
+          results: [],
+        },
+      ];
     });
-  }
+  };
 
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.type) {
@@ -73,43 +71,55 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.childType) {
       case ContextValue.TABLE:
-        return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema)).then(res => res.map(t => ({ ...t, isView: toBool(t.isView) })));
+        return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema)).then(res =>
+          res.map(t => ({ ...t, isView: toBool(t.isView) }))
+        );
       case ContextValue.VIEW:
-        return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema)).then(res => res.map(t => ({ ...t, isView: toBool(t.isView) })));
+        return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema)).then(res =>
+          res.map(t => ({ ...t, isView: toBool(t.isView) }))
+        );
       case ContextValue.FUNCTION:
         return this.queryResults(this.queries.fetchFunctions(parent as NSDatabase.ISchema));
     }
     return [];
   }
 
-  public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
+  public searchItems(
+    itemType: ContextValue,
+    search: string,
+    extraParams: any = {}
+  ): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
-        return this.queryResults(this.queries.searchTables({ search })).then(r => r.map(t => {
-          t.isView = toBool(t.isView);
-          return t;
-        }));
+        return this.queryResults(this.queries.searchTables({ search })).then(r =>
+          r.map(t => {
+            t.isView = toBool(t.isView);
+            return t;
+          })
+        );
       case ContextValue.COLUMN:
-        return this.queryResults(this.queries.searchColumns({ search, ...extraParams })).then(r => r.map(c => {
-          c.isFk = toBool(c.isFk);
-          c.isFk = toBool(c.isFk);
-          return c;
-        }));
+        return this.queryResults(this.queries.searchColumns({ search, ...extraParams })).then(r =>
+          r.map(c => {
+            c.isFk = toBool(c.isFk);
+            c.isFk = toBool(c.isFk);
+            return c;
+          })
+        );
     }
   }
 
   private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
     const results = await this.queryResults(this.queries.fetchColumns(parent));
-    return results.map((obj) => {
+    return results.map(obj => {
       obj.isPk = toBool(obj.isPk);
       obj.isFk = toBool(obj.isFk);
 
       return <NSDatabase.IColumn>{
         ...obj,
         isNullable: toBool(obj.isNullable),
-        iconName: obj.isPk ? 'pk' : (obj.isFk ? 'fk' : null),
+        iconName: obj.isPk ? 'pk' : obj.isFk ? 'fk' : null,
         childType: ContextValue.NO_CHILD,
-        table: parent
+        table: parent,
       };
     });
   }
@@ -155,7 +165,7 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     if (this.completionsCache) return this.completionsCache;
     try {
       this.completionsCache = {};
-      const items = await this.queryResults(/* sql */`
+      const items = await this.queryResults(/* sql */ `
       SELECT UPPER(word) AS label,
         (
           CASE
@@ -175,9 +185,9 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
           sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(item.label) ? '2:' : '') + item.label,
           documentation: {
             value: `\`\`\`yaml\nWORD: ${item.label}\nTYPE: ${item.desc}\n\`\`\``,
-            kind: 'markdown'
-          }
-        }
+            kind: 'markdown',
+          },
+        };
       });
     } catch (error) {
       // use default reserved words
@@ -185,5 +195,5 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     }
 
     return this.completionsCache;
-  }
+  };
 }

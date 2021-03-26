@@ -7,7 +7,7 @@ const MySQLDriverPlugin: ILanguageServerPlugin = {
     DRIVER_ALIASES.forEach(({ value }) => {
       server.getContext().drivers.set(value, MySQL);
     });
-  }
-}
+  },
+};
 
 export default MySQLDriverPlugin;

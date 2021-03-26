@@ -1,8 +1,9 @@
-import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
-import { ExtensionContext, extensions, workspace, Uri } from 'vscode';
-import { DRIVER_ALIASES } from './constants';
-const { publisher, name } = require('../package.json');
+import { IDriverExtensionApi, IExtension, IExtensionPlugin } from '@sqltools/types';
 import path from 'path';
+import { ExtensionContext, extensions, Uri, workspace } from 'vscode';
+import { DRIVER_ALIASES } from './constants';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const { publisher, name } = require('../package.json');
 
 const driverName = 'SQLite';
 
@@ -51,7 +52,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         const databaseUri = Uri.file(connInfo.database);
         const dbWorkspace = workspace.getWorkspaceFolder(databaseUri);
         if (dbWorkspace) {
-          formData.database = `\$\{workspaceFolder:${dbWorkspace.name}\}/${workspace.asRelativePath(
+          formData.database = `$\{workspaceFolder:${dbWorkspace.name}}/${workspace.asRelativePath(
             connInfo.database,
             false
           )}`;
@@ -83,4 +84,6 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
   };
 }
 
-export function deactivate() {}
+export function deactivate() {
+  /** @TODO */
+}

@@ -20,7 +20,8 @@
   "rules": {
     "no-console": "warn",
     "prettier/prettier": "error",
-    "@typescript-eslint/explicit-module-boundary-types": "off"
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "no-async-promise-executor": "off"
   },
   "overrides": [
     {
