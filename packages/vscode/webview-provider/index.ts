@@ -1,11 +1,11 @@
-import { Uri, commands, Disposable, EventEmitter, ViewColumn, WebviewPanel, window } from 'vscode';
-import { getIconPaths } from '@sqltools/vscode/icons';
-import Context from '@sqltools/vscode/context';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
+import Context from '@sqltools/vscode/context';
+import { getIconPaths } from '@sqltools/vscode/icons';
 import path from 'path';
+import { commands, Disposable, EventEmitter, Uri, ViewColumn, WebviewPanel, window } from 'vscode';
 import { DefaultUIAction } from './action';
 
-export default abstract class WebviewProvider<State = any> implements Disposable {
+export default abstract class WebviewProvider<State = Record<string, unknown>> implements Disposable {
   get serializationId() {
     return this.id;
   }
@@ -53,9 +53,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
   protected abstract title: string;
   private panel: WebviewPanel;
   private disposables: Disposable[] = [];
-  protected messagesHandler: (...args: any) => void;
-
-  public constructor() {}
+  protected messagesHandler: (message: { action: string; payload: unknown }) => void | Promise<void>;
   public preserveFocus = true;
   public whereToShow = ViewColumn.One;
   public show() {
@@ -96,7 +94,7 @@ export default abstract class WebviewProvider<State = any> implements Disposable
     this.setPreviewActiveContext(true);
   }
 
-  public onViewActive?: (active: boolean) => any;
+  public onViewActive?: (active: boolean) => void | Promise<void>;
   private onDidReceiveMessage = ({ action, payload, ...rest }) => {
     switch (action) {
       case DefaultUIAction.RESPONSE_STATE:

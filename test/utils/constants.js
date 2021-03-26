@@ -9,7 +9,7 @@ const extensionTestsPath = path.resolve(__dirname, '..', 'vscodeTestRunner');
 try {
   require('fs').mkdirSync(path.resolve(projectRootPath, '.test-results'));
 } catch (error) {
-  /** */
+  /* */
 }
 
 module.exports = {

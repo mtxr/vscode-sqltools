@@ -1,19 +1,20 @@
-if (process.env.PRODUCT !== 'ext') { throw 'Cant use context module outside of VSCode context'; }
+if (process.env.PRODUCT !== 'ext') {
+  throw 'Cant use context module outside of VSCode context';
+}
 
-import { ExtensionContext } from 'vscode';
 import { InvalidActionError } from '@sqltools/util/exception';
+import { ExtensionContext } from 'vscode';
 
-let currentContext: ExtensionContext & { set: typeof setCurrentContext; onRegister: typeof onRegister } = {} as any;
+let currentContext = {} as ExtensionContext & { set: typeof setCurrentContext; onRegister: typeof onRegister };
 
 const queue = [];
 
 const onRegister = (cb: () => void) => queue.push(cb);
 
 export const setCurrentContext = (ctx: ExtensionContext) => {
-  currentContext = ctx as (typeof currentContext);
+  currentContext = ctx as typeof currentContext;
   queue.forEach(cb => cb());
 };
-
 
 const handler = {
   get(_: never, prop: string) {
@@ -27,6 +28,5 @@ const handler = {
 };
 
 const Context = new Proxy<typeof currentContext>(currentContext, handler);
-
 
 export default Context;
