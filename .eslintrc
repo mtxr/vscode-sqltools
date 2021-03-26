@@ -19,6 +19,15 @@
   ],
   "rules": {
     "no-console": "warn",
-    "prettier/prettier": "error"
-  }
+    "prettier/prettier": "error",
+    "@typescript-eslint/explicit-module-boundary-types": "off"
+  },
+  "overrides": [
+    {
+      "files": ["*.js", "*.jsx"],
+      "rules": {
+        "@typescript-eslint/no-var-requires": "off"
+      }
+    }
+  ]
 }

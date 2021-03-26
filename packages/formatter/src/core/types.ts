@@ -19,9 +19,12 @@ export enum TokenTypes {
   PLACEHOLDER = 'placeholder',
   SERVERVARIABLE = 'servervariable',
 }
+
+export type ParamsMapType = { [k: string]: number | string | boolean | null };
+
 export interface Config {
   indent?: string;
-  params?: Object;
+  params?: ParamsMapType;
   reservedWordCase?: 'upper' | 'lower';
   language?: 'sql' | 'db2' | 'n1ql' | 'pl/sql';
   linesBetweenQueries?: number | 'preserve';

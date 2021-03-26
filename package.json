@@ -30,7 +30,7 @@
     "dev:watch": "cross-env NODE_ENV=development yarn --cwd ./build-tools run dev:watch",
     "build:pack": "yarn --cwd ./build-tools run build:pack",
     "postinstall": "yarn workspace @sqltools/base-driver run prepare && yarn workspace @sqltools/formatter install && yarn --cwd ./build-tools && yarn --cwd ./docs",
-    "pretest": "rimraf -rf ./coverage ./.test-results",
+    "pretest": "rimraf -rf ./coverage ./.test-results && yarn run dev:lint",
     "pack:release": "cross-env NODE_ENV=production yarn run build:pack",
     "test:docker": "yarn --cwd ./test run",
     "test:insiders": "cross-env CODE_VERSION=insiders yarn test",

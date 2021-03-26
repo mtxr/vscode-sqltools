@@ -46,9 +46,7 @@ export default class Tokenizer {
     this.LINE_COMMENT_REGEX = this.createLineCommentRegex(cfg.lineCommentTypes);
 
     this.RESERVED_TOP_LEVEL_REGEX = this.createReservedWordRegex(cfg.reservedTopLevelWords);
-    this.RESERVED_TOP_LEVEL_NO_INDENT_REGEX = this.createReservedWordRegex(
-      cfg.reservedTopLevelWordsNoIndent
-    );
+    this.RESERVED_TOP_LEVEL_NO_INDENT_REGEX = this.createReservedWordRegex(cfg.reservedTopLevelWordsNoIndent);
     this.RESERVED_NEWLINE_REGEX = this.createReservedWordRegex(cfg.reservedNewlineWords);
     this.RESERVED_PLAIN_REGEX = this.createReservedWordRegex(cfg.reservedWords);
 
@@ -60,7 +58,10 @@ export default class Tokenizer {
 
     this.INDEXED_PLACEHOLDER_REGEX = this.createPlaceholderRegex(cfg.indexedPlaceholderTypes, '[0-9]*');
     this.IDENT_NAMED_PLACEHOLDER_REGEX = this.createPlaceholderRegex(cfg.namedPlaceholderTypes, '[a-zA-Z0-9._$]+');
-    this.STRING_NAMED_PLACEHOLDER_REGEX = this.createPlaceholderRegex(cfg.namedPlaceholderTypes, this.createStringPattern(cfg.stringTypes));
+    this.STRING_NAMED_PLACEHOLDER_REGEX = this.createPlaceholderRegex(
+      cfg.namedPlaceholderTypes,
+      this.createStringPattern(cfg.stringTypes)
+    );
   }
 
   createLineCommentRegex(lineCommentTypes) {
@@ -352,7 +353,7 @@ export default class Tokenizer {
     return this.getTokenOnFirstMatch({
       input,
       type: TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT,
-      regex: this.RESERVED_TOP_LEVEL_NO_INDENT_REGEX
+      regex: this.RESERVED_TOP_LEVEL_NO_INDENT_REGEX,
     });
   }
 

@@ -1,7 +1,7 @@
 import AbstractFormatter from './utils/abstract';
 import { TokenizerConfig } from '../core/types';
 
-export default class Db2Formatter extends AbstractFormatter{
+export default class Db2Formatter extends AbstractFormatter {
   getTokenizerConfig() {
     return <TokenizerConfig>{
       reservedWords,
@@ -14,11 +14,10 @@ export default class Db2Formatter extends AbstractFormatter{
       indexedPlaceholderTypes: ['?'],
       namedPlaceholderTypes: [':'],
       lineCommentTypes: ['--'],
-      specialWordChars: ['#', '@']
+      specialWordChars: ['#', '@'],
     };
   }
 }
-
 
 const reservedWords = [
   'ABS',
@@ -522,7 +521,7 @@ const reservedWords = [
   'XMLEXISTS',
   'XMLNAMESPACES',
   'YEAR',
-  'YEARS'
+  'YEARS',
 ];
 
 const reservedTopLevelWords = [
@@ -547,7 +546,7 @@ const reservedTopLevelWords = [
   'SET',
   'UPDATE',
   'VALUES',
-  'WHERE'
+  'WHERE',
 ];
 
 const reservedTopLevelWordsNoIndent = ['INTERSECT', 'INTERSECT ALL', 'MINUS', 'UNION', 'UNION ALL'];
@@ -562,5 +561,5 @@ const reservedNewlineWords = [
   'OR',
   'OUTER JOIN',
   'RIGHT JOIN',
-  'RIGHT OUTER JOIN'
+  'RIGHT OUTER JOIN',
 ];

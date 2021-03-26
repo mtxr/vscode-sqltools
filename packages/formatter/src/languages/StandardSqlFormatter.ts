@@ -14,7 +14,7 @@ export default class StandardSqlFormatter extends AbstractFormatter {
       indexedPlaceholderTypes: ['?'],
       namedPlaceholderTypes: ['@', ':', '%', '$'],
       lineCommentTypes: ['#', '--'],
-      specialWordChars: []
+      specialWordChars: [],
     };
   }
 }
@@ -332,8 +332,8 @@ const reservedNewlineWords = [
   'CROSS JOIN',
   'ELSE',
   'INNER JOIN',
-  "FULL JOIN",
-  "FULL OUTER JOIN",
+  'FULL JOIN',
+  'FULL OUTER JOIN',
   'LEFT JOIN',
   'LEFT OUTER JOIN',
   'NATURAL JOIN',

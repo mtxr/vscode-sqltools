@@ -188,7 +188,7 @@ const reservedWords = [
   'WITH',
   'WITHIN',
   'WORK',
-  'XOR'
+  'XOR',
 ];
 
 const reservedTopLevelWords = [
@@ -218,7 +218,7 @@ const reservedTopLevelWords = [
   'UPSERT',
   'USE KEYS',
   'VALUES',
-  'WHERE'
+  'WHERE',
 ];
 
 const reservedTopLevelWordsNoIndent = ['INTERSECT', 'INTERSECT ALL', 'MINUS', 'UNION', 'UNION ALL'];
@@ -233,5 +233,5 @@ const reservedNewlineWords = [
   'OUTER JOIN',
   'RIGHT JOIN',
   'RIGHT OUTER JOIN',
-  'XOR'
+  'XOR',
 ];

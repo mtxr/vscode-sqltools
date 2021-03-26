@@ -38,6 +38,7 @@ jobs:
       env:
         HUSKY_SKIP_INSTALL: "true"
       run: |
+        yarn run dev:lint ./packages/formatter
         cd packages/formatter
         yarn
         yarn pack

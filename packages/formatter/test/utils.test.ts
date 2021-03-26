@@ -4,8 +4,8 @@ import last from '../src/core/last';
 const stubString = () => '';
 
 describe('escapeRegExp', () => {
-  var escaped = '\\^\\$\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|\\\\',
-      unescaped = '^$.*+?()[]{}|\\';
+  const escaped = '\\^\\$\\.\\*\\+\\?\\(\\)\\[\\]\\{\\}\\|\\\\',
+    unescaped = '^$.*+?()[]{}|\\';
 
   it('should escape values', () => {
     expect(escapeRegExp(unescaped + unescaped)).toEqual(escaped + escaped);
@@ -16,12 +16,10 @@ describe('escapeRegExp', () => {
   });
 
   it('should return an empty string for empty values', () => {
-    var values = [, null, undefined, ''],
-        expected = values.map(stubString);
+    const values = [undefined, null, undefined, ''],
+      expected = values.map(stubString);
 
-    var actual = values.map((value, index) => {
-      return index ? escapeRegExp(value) : escapeRegExp();
-    });
+    const actual = values.map(value => escapeRegExp(value));
 
     expect(actual).toEqual(expected);
   });

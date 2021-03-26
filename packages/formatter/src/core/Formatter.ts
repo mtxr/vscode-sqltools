@@ -20,7 +20,11 @@ export default class Formatter {
    *   @param {Object} cfg.params
    * @param {Tokenizer} tokenizer
    */
-  constructor(public cfg: Config, public tokenizer: Tokenizer, private tokenOverride?: (token: Token, previousToken?: Token) => Token) {
+  constructor(
+    public cfg: Config,
+    public tokenizer: Tokenizer,
+    private tokenOverride?: (token: Token, previousToken?: Token) => Token
+  ) {
     this.indentation = new Indentation(this.cfg.indent);
     this.inlineBlock = new InlineBlock();
     this.params = new Params(this.cfg.params);
@@ -54,10 +58,10 @@ export default class Formatter {
       } else if (token.type === TokenTypes.BLOCK_COMMENT) {
         formattedQuery = this.formatBlockComment(token, formattedQuery);
       } else if (
-        token.type === TokenTypes.RESERVED_TOP_LEVEL
-        || token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT
-        || token.type === TokenTypes.RESERVED_NEWLINE
-        || token.type === TokenTypes.RESERVED
+        token.type === TokenTypes.RESERVED_TOP_LEVEL ||
+        token.type === TokenTypes.RESERVED_TOP_LEVEL_NO_INDENT ||
+        token.type === TokenTypes.RESERVED_NEWLINE ||
+        token.type === TokenTypes.RESERVED
       ) {
         formattedQuery = this.formatReserved(token, formattedQuery);
       } else if (token.type === TokenTypes.OPEN_PAREN) {
@@ -89,22 +93,22 @@ export default class Formatter {
 
   formatWhitespace(token: Token, query: string) {
     if (
-      this.cfg.linesBetweenQueries === 'preserve'
-      && /((\r\n|\n)(\r\n|\n)+)/u.test(token.value)
-      && this.previousToken().value === ';'
+      this.cfg.linesBetweenQueries === 'preserve' &&
+      /((\r\n|\n)(\r\n|\n)+)/u.test(token.value) &&
+      this.previousToken().value === ';'
     ) {
       return query.replace(/(\n|\r\n)$/m, '') + token.value;
     }
-    return query
+    return query;
   }
 
   formatReserved(token: Token, query: string) {
     // reserved words combination check
     if (
-      token.type === TokenTypes.RESERVED_NEWLINE
-      && this.previousReservedWord
-      && this.previousReservedWord.value
-      && token.value.toUpperCase() === 'AND' &&
+      token.type === TokenTypes.RESERVED_NEWLINE &&
+      this.previousReservedWord &&
+      this.previousReservedWord.value &&
+      token.value.toUpperCase() === 'AND' &&
       this.previousReservedWord.value.toUpperCase() === 'BETWEEN'
     ) {
       token.type = TokenTypes.RESERVED;
@@ -144,21 +148,20 @@ export default class Formatter {
   }
 
   formatTopLevelReservedWord(token: Token, query: string) {
-    const shouldChangeTopLevel = (this.previousNonWhiteSpace.value !== ',' && !['GRANT'].includes(`${this.previousNonWhiteSpace.value}`.toUpperCase()));
+    const shouldChangeTopLevel =
+      this.previousNonWhiteSpace.value !== ',' &&
+      !['GRANT'].includes(`${this.previousNonWhiteSpace.value}`.toUpperCase());
     if (shouldChangeTopLevel) {
       this.indentation.decreaseTopLevel();
       query = this.addNewline(query);
     }
     query = query + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
-    if (shouldChangeTopLevel)
-      this.indentation.increaseTopLevel();
+    if (shouldChangeTopLevel) this.indentation.increaseTopLevel();
     return query;
   }
 
   formatNewlineReservedWord(token: Token, query: string) {
-    return (
-      this.addNewline(query) + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' '
-    );
+    return this.addNewline(query) + this.equalizeWhitespace(this.formatReservedWord(token.value)) + ' ';
   }
 
   // Replace any sequence of whitespace characters with single space
@@ -174,9 +177,9 @@ export default class Formatter {
     // or another opening parens or line comment
     const previousTokenType = this.previousToken().type;
     if (
-      previousTokenType !== TokenTypes.WHITESPACE
-      && previousTokenType !== TokenTypes.OPEN_PAREN
-      && previousTokenType !== TokenTypes.LINE_COMMENT
+      previousTokenType !== TokenTypes.WHITESPACE &&
+      previousTokenType !== TokenTypes.OPEN_PAREN &&
+      previousTokenType !== TokenTypes.LINE_COMMENT
     ) {
       query = trimSpacesEnd(query);
     }

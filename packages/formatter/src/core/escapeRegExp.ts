@@ -1,5 +1,5 @@
-const reRegExpChar = /[\\^$.*+?()[\]{}|]/g
-const reHasRegExpChar = RegExp(reRegExpChar.source)
+const reRegExpChar = /[\\^$.*+?()[\]{}|]/g;
+const reHasRegExpChar = RegExp(reRegExpChar.source);
 
 /**
  * Escapes the `RegExp` special characters "^", "$", "\", ".", "*", "+",
@@ -11,9 +11,7 @@ const reHasRegExpChar = RegExp(reRegExpChar.source)
  * @returns {string} Returns the escaped string.
  */
 function escapeRegExp(str?: string) {
-  return (str && reHasRegExpChar.test(str))
-    ? str.replace(reRegExpChar, '\\$&')
-    : (str || '')
+  return str && reHasRegExpChar.test(str) ? str.replace(reRegExpChar, '\\$&') : str || '';
 }
 
-export default escapeRegExp
+export default escapeRegExp;
