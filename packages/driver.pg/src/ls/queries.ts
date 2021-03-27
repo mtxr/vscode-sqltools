@@ -215,13 +215,14 @@ SELECT
   schema_name AS schema,
   '${ContextValue.SCHEMA}' as "type",
   'group-by-ref-type' as "iconId",
-  catalog_name as database
-FROM information_schema.schemata
-WHERE
-  schema_name !~ '^pg_'
-  AND schema_name <> 'information_schema'
-  AND catalog_name = '${p => p.database}'
-`;
+  '${p => p.database}' as database
+FROM (
+  SELECT DISTINCT(schemaname) AS schema_name
+  FROM pg_tables
+  WHERE
+    schemaname !~ '^pg_'
+    AND schemaname <> 'information_schema'
+)`;
 
 export default {
   describeTable,
