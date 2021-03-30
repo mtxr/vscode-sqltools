@@ -1,15 +1,13 @@
-const path = require('path');
-const webpack = require('webpack');
 const setDefaults = require('./../common/set-defaults');
 const parseEntries = require('./../common/parse-entries');
 /**
  *
  * @param {object} entries
  * @param {string} packagePath
- * @returns {webpack.Configuration['plugins']}
+ * @returns {import('webpack').Configuration['plugins']}
  */
 module.exports = function getExtensionConfig({ entries, packagePath, externals = {} }) {
-  /** @type webpack.Configuration */
+  /** @type import('webpack').Configuration */
   const { entry, outDir } = parseEntries(entries, packagePath);
   let config = {
     name: 'ext',
@@ -30,11 +28,17 @@ module.exports = function getExtensionConfig({ entries, packagePath, externals =
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
-      ...(outDir ? {
-        path: outDir
-      } : {}),
+      ...(outDir
+        ? {
+            path: outDir,
+          }
+        : {}),
     },
   };
 
+  config.externals = {
+    ...externals,
+  };
+
   return setDefaults(config);
-}
+};

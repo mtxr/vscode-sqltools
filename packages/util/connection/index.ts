@@ -4,18 +4,14 @@ export const idSep = '|';
 
 export function getConnectionId(c: IConnection): string | null {
   c = migrateConnectionSetting(c);
-  if (!c)
-    return null;
+  if (!c) return null;
   if (c.id) return c.id;
 
   const parts = [c.name, c.driver];
   if (c.connectString) {
     parts.push(c.connectString);
   } else {
-    parts.push(
-      c.server,
-      c.database
-    );
+    parts.push(c.server, c.database);
   }
   return parts.join(idSep).replace(/\./g, ':').replace(/\//g, '\\');
 }
@@ -24,7 +20,6 @@ export function getNameFromId(id: string) {
   if (!id) return null;
   return id.split(idSep)[0];
 }
-
 
 export function migrateConnectionSetting(c: IConnection) {
   c.driver = c.driver || (<any>c).dialect;
@@ -60,5 +55,7 @@ export function getConnectionDescription(c: IConnection): string | null {
     c.port,
     '/',
     c.database,
-  ].filter(Boolean).join('');
+  ]
+    .filter(Boolean)
+    .join('');
 }

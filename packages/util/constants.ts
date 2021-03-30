@@ -8,5 +8,5 @@ export const DOCS_ROOT_URL = 'https://vscode-sqltools.mteixeira.dev';
 export const TREE_SEP = '/-##-/';
 
 // query parsing
-export const DELIMITER_START_REGEX = /(?:[\r\n]+)(\s*-{2,}\s*@block.*)$/guim;
-export const DELIMITER_START_REPLACE_REGEX = /^(\s*-{2,}\s*@block.*)$/guim;
+export const DELIMITER_START_REGEX = /(?:[\r\n]+)(\s*-{2,}\s*@block.*)$/gimu;
+export const DELIMITER_START_REPLACE_REGEX = /^(\s*-{2,}\s*@block.*)$/gimu;

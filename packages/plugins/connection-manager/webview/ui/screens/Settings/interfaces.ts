@@ -5,7 +5,9 @@ import { UIAction } from './actions';
 import { ReducerAction } from '../../interfaces';
 
 type ActionKeys = keyof typeof UIAction;
-export type SettingsReducerAction<K extends ActionKeys = ActionKeys> = ReducerAction<typeof UIAction[K], SettingsScreenState>;
+export type SettingsReducerAction<
+  K extends ActionKeys = ActionKeys
+> = ReducerAction<typeof UIAction[K], SettingsScreenState>;
 
 export interface SettingsScreenState {
   lastDispatchedAction?: SettingsReducerAction;

@@ -1,4 +1,11 @@
-import { languages, Disposable, window, workspace, TextEditor, Selection } from 'vscode';
+import {
+  languages,
+  Disposable,
+  window,
+  workspace,
+  TextEditor,
+  Selection,
+} from 'vscode';
 import SQLToolsCodeLensProvider from './provider';
 import { sortText } from '@sqltools/util/text';
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
@@ -24,36 +31,55 @@ export default class CodeLensPlugin implements IExtensionPlugin {
   async createCodelens() {
     const oldLang = this.registeredLanguages.sort(sortText);
     const newLang = Config.codelensLanguages.sort(sortText);
-    const shouldRegister = newLang.length > 0 && (oldLang.join() !== newLang.join());
+    const shouldRegister =
+      newLang.length > 0 && oldLang.join() !== newLang.join();
 
     if (!shouldRegister) return;
 
-    if(this.codelensDisposable) {
+    if (this.codelensDisposable) {
       await this.dispose();
     }
     this.provider = new SQLToolsCodeLensProvider();
     this.codelensDisposable = languages.registerCodeLensProvider(
       Config.codelensLanguages.map(language => ({ language })),
-      this.provider,
+      this.provider
     );
     this.registeredLanguages = Config.codelensLanguages;
   }
 
   createDecorations() {
-    window.onDidChangeActiveTextEditor(editor => {
-      this.updateDecorations(editor);
-    }, null, Context.subscriptions);
+    window.onDidChangeActiveTextEditor(
+      editor => {
+        this.updateDecorations(editor);
+      },
+      null,
+      Context.subscriptions
+    );
 
-    workspace.onDidChangeTextDocument(event => {
-      if (window.activeTextEditor && event.document === window.activeTextEditor.document) {
-        this.updateDecorations(window.activeTextEditor);
-      }
-    }, null, Context.subscriptions);
-    window.onDidChangeTextEditorSelection(event => {
-      if (event.textEditor && event.textEditor.document === window.activeTextEditor.document) {
-        this.updateDecorations(window.activeTextEditor);
-      }
-    }, null, Context.subscriptions);
+    workspace.onDidChangeTextDocument(
+      event => {
+        if (
+          window.activeTextEditor &&
+          event.document === window.activeTextEditor.document
+        ) {
+          this.updateDecorations(window.activeTextEditor);
+        }
+      },
+      null,
+      Context.subscriptions
+    );
+    window.onDidChangeTextEditorSelection(
+      event => {
+        if (
+          event.textEditor &&
+          event.textEditor.document === window.activeTextEditor.document
+        ) {
+          this.updateDecorations(window.activeTextEditor);
+        }
+      },
+      null,
+      Context.subscriptions
+    );
     this.updateDecorations(window.activeTextEditor);
   }
 
@@ -62,13 +88,15 @@ export default class CodeLensPlugin implements IExtensionPlugin {
       return;
     }
 
-    window.activeTextEditor.selections = (Array.isArray(arg) ? arg : [arg]).filter(Boolean);
-  }
+    window.activeTextEditor.selections = (Array.isArray(arg)
+      ? arg
+      : [arg]
+    ).filter(Boolean);
+  };
 
   register(extension: IExtension) {
     Context.subscriptions.push(this);
-    extension
-      .registerCommand('setSelection', this.ext_setSelection)
+    extension.registerCommand('setSelection', this.ext_setSelection);
     this.createCodelens();
     this.createDecorations();
     Config.addOnUpdateHook(({ event }) => {
@@ -86,7 +114,12 @@ export default class CodeLensPlugin implements IExtensionPlugin {
   }
   updateDecorations = (editor: TextEditor) => {
     if (!Config.highlightQuery) return;
-    if (!editor || !editor.document || editor.document.uri.scheme === 'output' || !this.registeredLanguages.includes(editor.document.languageId)) {
+    if (
+      !editor ||
+      !editor.document ||
+      editor.document.uri.scheme === 'output' ||
+      !this.registeredLanguages.includes(editor.document.languageId)
+    ) {
       return;
     }
     try {
@@ -95,7 +128,7 @@ export default class CodeLensPlugin implements IExtensionPlugin {
     } catch (error) {
       log.error('update decorations failed: %O', error);
     }
-  }
+  };
 }
 
 const currentQueryDecoration = window.createTextEditorDecorationType({

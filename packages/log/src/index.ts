@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import factory from './lib/factory';
 /**
  * Export logger based on environment.
@@ -7,7 +8,7 @@ import factory from './lib/factory';
  *
  * logs when in LS: language server output channel
  * logs on webviews: webview devtools
-  */
+ */
 let logger: ReturnType<typeof factory>;
 
 const isVSCodeContext = () => {
@@ -17,7 +18,7 @@ const isVSCodeContext = () => {
   } catch (error) {
     return false;
   }
-}
+};
 
 if (process.env.PRODUCT === 'ext' && isVSCodeContext()) {
   logger = require('./lib/vscode').default;

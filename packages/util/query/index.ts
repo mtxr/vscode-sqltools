@@ -22,11 +22,13 @@ export function parse(query: string, driver: 'pg' | 'mysql' | 'mssql' | 'cql' = 
  * @param {string} [query='']
  * @returns
  */
-export function cleanUp(query: string = '') {
+export function cleanUp(query = '') {
   if (!query) return '';
 
-  return query.toString().replace('\t', '  ')
-    .replace(/(--.*)|(((\/\*)+?[\w\W]+?(\*\/)+))/gmi, '')
+  return query
+    .toString()
+    .replace('\t', '  ')
+    .replace(/(--.*)|(((\/\*)+?[\w\W]+?(\*\/)+))/gim, '')
     .split(/\r\n|\n/gi)
     .map(v => v.trim())
     .filter(Boolean)
@@ -35,20 +37,20 @@ export function cleanUp(query: string = '') {
 }
 
 /**
- * Formats generated insert queries 
+ * Formats generated insert queries
  *
  * @export
  * @param {string} insertQuery
  * @param {ISettings['format']} [formatOptions]
  * @returns {string}
  */
-export function formatInsertQuery(
-  insertQuery: string,
-  formatOptions?: ISettings['format'],
-): string {
+export function formatInsertQuery(insertQuery: string, formatOptions?: ISettings['format']): string {
   return format(`${insertQuery.substr(0, Math.max(0, insertQuery.length - 2))});`, formatOptions)
-  .replace(/'\${(\d+):([\w\s]+):((int|bool|num|real)[\w\s]*)}'/gi, (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`)
-  .concat('$0');
+    .replace(
+      /'\${(\d+):([\w\s]+):((int|bool|num|real)[\w\s]*)}'/gi,
+      (_, pos, colName, type) => `\${${pos}:${colName.trim()}:${type.trim()}}`
+    )
+    .concat('$0');
 }
 
 export function extractConnName(query: string) {
@@ -60,11 +62,15 @@ export function getQueryParameters(query: string, regexStr: string) {
 
   const regex = new RegExp(regexStr, 'g');
 
-  const paramsMap: { [k: string]: { param: string; string: string; }} = {};
+  const paramsMap: { [k: string]: { param: string; string: string } } = {};
 
   let match;
   while ((match = regex.exec(query)) !== null) {
-    const queryPart = query.substring(Math.max(0, regex.lastIndex - 15), Math.min(query.length, regex.lastIndex + 15)).replace(/[\r\n]/g, '').replace(/\s+/g, ' ').trim();
+    const queryPart = query
+      .substring(Math.max(0, regex.lastIndex - 15), Math.min(query.length, regex.lastIndex + 15))
+      .replace(/[\r\n]/g, '')
+      .replace(/\s+/g, ' ')
+      .trim();
     if (!paramsMap[match[0]]) {
       paramsMap[match[0]] = {
         param: match[0],
@@ -74,7 +80,6 @@ export function getQueryParameters(query: string, regexStr: string) {
   }
   return Object.values(paramsMap);
 }
-
 
 const dollarRegex = /\$([^\s]+)/gi;
 /**
@@ -88,15 +93,21 @@ function fixParameters(query: string, originalQuery: string) {
 
   return matches.reduce((text, match) => {
     const matchEscaped = match.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    return text.replace(new RegExp('\\\$' + ' +' + matchEscaped.substr(2), 'g'), match.replace(/\$/g, '$$$$'));
+    return text.replace(new RegExp('\\$' + ' +' + matchEscaped.substr(2), 'g'), match.replace(/\$/g, '$$$$'));
   }, query);
 }
 
-export function format(query: string, formatOptions: Partial<{ insertSpaces: boolean, tabSize: number, reservedWordCase: 'upper' | 'lower' }> = {}) {
+export function format(
+  query: string,
+  formatOptions: Partial<{ insertSpaces: boolean; tabSize: number; reservedWordCase: 'upper' | 'lower' }> = {}
+) {
   const { reservedWordCase = null, insertSpaces = true, tabSize = 2, ...opts } = formatOptions;
-  return fixParameters(formatter.format(query, {
-    ...opts,
-    indent: insertSpaces ? ' '.repeat(tabSize) : '\t',
-    reservedWordCase,
-  }), query);
+  return fixParameters(
+    formatter.format(query, {
+      ...opts,
+      indent: insertSpaces ? ' '.repeat(tabSize) : '\t',
+      reservedWordCase,
+    }),
+    query
+  );
 }

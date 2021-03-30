@@ -6,7 +6,7 @@ describe('query cleanUp', () => {
     expect(cleanUp()).toEqual('');
     expect(cleanUp(null)).toEqual('');
     expect(cleanUp(<any>false)).toEqual('');
-  })
+  });
 
   it('removes line breaks from simple select query', () => {
     const query = `
@@ -15,7 +15,7 @@ select
 from
   table
     `;
-    expect(cleanUp(query)).toEqual('select * from table')
+    expect(cleanUp(query)).toEqual('select * from table');
   });
 
   it('removes comments from queries', () => {
@@ -28,7 +28,7 @@ select
 from
   table
     `;
-    expect(cleanUp(query)).toEqual('select * from table')
+    expect(cleanUp(query)).toEqual('select * from table');
   });
 
   it('don`t change inline queries', () => {
@@ -39,7 +39,7 @@ from
 
 describe('query parse', () => {
   it('parses single query string to array', () => {
-    let query = `select
+    const query = `select
   * -- here is a comment
   /**
    * multiline comment
@@ -50,12 +50,12 @@ from
     expect(parse(query, 'mysql')).toEqual([query]);
     expect(parse(query, 'pg')).toEqual([query]);
     const mssqlQuery = `${query};
-GO`
+GO`;
     expect(parse(mssqlQuery, 'mssql')).toEqual([`${query};`]);
   });
 
   it('parses muliple query string to array of queries', () => {
-    let query = `select
+    const query = `select
   *
 from
   table;`;
@@ -67,7 +67,7 @@ from
 GO
 
 ${query}
-GO`
+GO`;
     expect(parse(mssqlQuery, 'mssql')).toEqual([query, query]);
   });
 });

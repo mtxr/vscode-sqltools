@@ -1,10 +1,8 @@
-function debounce(func: Function, wait: number = 100) {
-  let timeout: number;
-  return function(...args: any[]) {
+function debounce(callback: () => unknown, wait = 100) {
+  let timeout: NodeJS.Timeout;
+  return function () {
     clearTimeout(timeout);
-    timeout = setTimeout(() => {
-      func.apply(this, args);
-    }, wait);
+    timeout = setTimeout(callback, wait);
   };
 }
 export default debounce;

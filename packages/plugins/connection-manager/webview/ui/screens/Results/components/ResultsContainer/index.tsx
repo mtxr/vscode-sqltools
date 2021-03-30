@@ -11,7 +11,7 @@ const ResultsContainer = () => {
   return (
     <ViewContainer>
       <QueryTabs />
-      <Table setContextState={setState}  />
+      <Table setContextState={setState} />
       {loading && <Loading />}
     </ViewContainer>
   );

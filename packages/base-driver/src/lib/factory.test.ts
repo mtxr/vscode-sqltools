@@ -17,5 +17,5 @@ describe(`query generator`, () => {
 
     const expected = `SELECT * FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'table' AND TABLE_CATALOG = 'catalog' AND TABLE_SCHEMA = 'schema' AND something = 'smtg'`;
     expect(result).toBe(expected);
-  })
+  });
 });

@@ -4,13 +4,20 @@ class ResourcesMap extends Map<string, any> {
     key = key.toLowerCase();
     return super.set(key, value);
   }
-  get<V = any>(key: string) { return super.get(key.toLowerCase()) as V; }
-  has(key: string) { return super.has(key.toLowerCase()); }
-  delete(key: string) { return super.delete(key.toLowerCase()); }
+  get<V = any>(key: string) {
+    return super.get(key.toLowerCase()) as V;
+  }
+  has(key: string) {
+    return super.has(key.toLowerCase());
+  }
+  delete(key: string) {
+    return super.delete(key.toLowerCase());
+  }
 }
 
 const PluginResourcesMap = new ResourcesMap();
 
-export const buildResouceKey = ({ type, name, resource }: { type: string, name: string, resource: string }) => [type, name, resource].join('/');
+export const buildResouceKey = ({ type, name, resource }: { type: string; name: string; resource: string }) =>
+  [type, name, resource].join('/');
 
 export default PluginResourcesMap;

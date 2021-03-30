@@ -3,15 +3,11 @@ export function sortText(a: string, b: string) {
 }
 
 export function numericVersion(v: string) {
-  const n: number[] = v.replace(/^v/, '').split('.')
-    .map((a) => parseInt(a.replace(/\D+/, ''), 10));
+  const n: number[] = v
+    .replace(/^v/, '')
+    .split('.')
+    .map(a => parseInt(a.replace(/\D+/, ''), 10));
   if (n.length >= 3) return n[0] * 10000 + n[1] * 100 + n[2];
   if (n.length === 2) return n[0] * 10000 + n[1] * 100;
   return n[0] * 10000;
-}
-
-export function replacer(source: string, toReplace: object) {
-  return Object.keys(toReplace).reduce((destination, replaceParam) => {
-    return destination.replace(new RegExp(`:${replaceParam}`, 'g'), toReplace[replaceParam]);
-  }, source);
 }

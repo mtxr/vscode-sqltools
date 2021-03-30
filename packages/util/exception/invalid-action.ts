@@ -1,7 +1,7 @@
 import GenericError from './generic';
 
 export class InvalidActionError extends GenericError {
-  constructor(message: string = 'Invalid Action!') {
+  constructor(message = 'Invalid Action!') {
     super(message);
   }
 }

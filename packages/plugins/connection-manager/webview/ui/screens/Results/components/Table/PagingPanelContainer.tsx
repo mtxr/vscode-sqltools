@@ -4,7 +4,7 @@ import FooterActions from '../FooterActions';
 const PagingPanelContainer = (showPagination: boolean) => (
   props: PagingPanel.ContainerProps
 ) => (
-  <div className="resultsPagination">
+  <div className='resultsPagination'>
     <FooterActions />
     <div className={`paginator ${!showPagination ? 'no-buttons' : ''}`}>
       <PagingPanel.Container {...props} />

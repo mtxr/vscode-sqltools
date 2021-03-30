@@ -27,11 +27,11 @@ if (!fs.existsSync(getDataPath('node_modules'))) {
 }
 
 /**
-   * Get user home path
-   *
-   * @throws {EnvironmentException} Can't find user path from wnv
-   * @returns {string} Returns user path as string
-   */
+ * Get user home path
+ *
+ * @throws {EnvironmentException} Can't find user path from wnv
+ * @returns {string} Returns user path as string
+ */
 export function getHome(...args: string[]): string {
   if (!home) {
     if (process && process.env && (process.env.HOME || process.env.USERPROFILE)) {
@@ -65,19 +65,19 @@ export function migrateFilesToNewPaths() {
     },
     {
       from: getHome('.SQLTools'),
-      to: getDataPath(SESSION_FILES_DIRNAME)
-    }
+      to: getDataPath(SESSION_FILES_DIRNAME),
+    },
   ];
-  toMigrate.map((task) => {
+  toMigrate.map(task => {
     const { from, to } = task;
-    if(fs.existsSync(to)) {
+    if (fs.existsSync(to)) {
       log.debug(`Destination file ${to} already exists. Skipping...`);
       return task;
-    };
-    if(!fs.existsSync(from)) {
+    }
+    if (!fs.existsSync(from)) {
       log.debug(`Origin file ${from} doesnt exists. Skipping...`);
       return task;
-    };
+    }
 
     fs.renameSync(from, to);
     task.migrated = true;

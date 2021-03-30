@@ -1,4 +1,12 @@
-import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue, InternalID, IQueryOptions } from '@sqltools/types';
+import {
+  NSDatabase,
+  IConnectionDriver,
+  IConnection,
+  MConnectionExplorer,
+  ContextValue,
+  InternalID,
+  IQueryOptions,
+} from '@sqltools/types';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
@@ -12,9 +20,12 @@ import { createLogger } from '@sqltools/log/src';
 const log = createLogger('conn');
 
 export default class Connection {
-  private connected: boolean = false;
+  private connected = false;
   private conn: IConnectionDriver;
-  constructor(private credentials: IConnection, getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']) {
+  constructor(
+    private credentials: IConnection,
+    getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']
+  ) {
     if (!LSContext.drivers.has(credentials.driver)) {
       throw new DriverNotInstalledError(credentials.driver);
     }
@@ -27,7 +38,7 @@ export default class Connection {
   private decorateException = (e: Error) => {
     e = decorateLSException(e, { conn: this.credentials });
     return Promise.reject(e);
-  }
+  };
 
   public needsPassword() {
     return this.conn.credentials.askForPassword;
@@ -38,10 +49,8 @@ export default class Connection {
       await this.conn.checkDependencies();
     }
 
-    if (typeof this.conn.testConnection === 'function')
-      await this.conn.testConnection().catch(this.decorateException);
-    else
-      await this.query('SELECT 1;', { throwIfError: true });
+    if (typeof this.conn.testConnection === 'function') await this.conn.testConnection().catch(this.decorateException);
+    else await this.query('SELECT 1;', { throwIfError: true });
     this.connected = true;
   }
 
@@ -70,7 +79,7 @@ export default class Connection {
     }
     return info;
   }
-  public async showRecords(table: NSDatabase.ITable, opt: {requestId: InternalID; page: number; pageSize?: number }) {
+  public async showRecords(table: NSDatabase.ITable, opt: { requestId: InternalID; page: number; pageSize?: number }) {
     const { pageSize, page, requestId } = opt;
     const limit = pageSize || this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
 
@@ -81,16 +90,17 @@ export default class Connection {
         Math.max(records.total || 0, records.results.length, 0),
         'records on',
         `'${table.label}'`,
-        'table'
+        'table',
       ].join(' ');
     }
     return [records];
   }
 
   public query(query: string, opt: IQueryOptions & { throwIfError?: boolean } = {}): Promise<NSDatabase.IResult[]> {
-    return this.conn.query(query, opt)
+    return this.conn
+      .query(query, opt)
       .catch(this.decorateException)
-      .catch((e) => {
+      .catch(e => {
         log.error('%O', e);
         if (opt.throwIfError) throw e;
         telemetry.registerException(e, { driver: this.conn.credentials.driver });
@@ -102,16 +112,18 @@ export default class Connection {
         } else {
           message = JSON.stringify(e);
         }
-        return [{
-          requestId: opt.requestId,
-          resultId: generateId(),
-          connId: this.getId(),
-          cols: [],
-          error: true,
-          messages: [ { message, date: new Date() } ],
-          query,
-          results: [],
-        } ];
+        return [
+          {
+            requestId: opt.requestId,
+            resultId: generateId(),
+            connId: this.getId(),
+            cols: [],
+            error: true,
+            messages: [{ message, date: new Date() }],
+            query,
+            results: [],
+          },
+        ];
       });
   }
   public getName() {
@@ -148,7 +160,10 @@ export default class Connection {
     };
   }
 
-  public static async testConnection(credentials: IConnection, getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']) {
+  public static async testConnection(
+    credentials: IConnection,
+    getWorkspaceFolders: LSIconnection['workspace']['getWorkspaceFolders']
+  ) {
     const testConn = new Connection(credentials, getWorkspaceFolders);
     await testConn.connect();
     await testConn.close();
@@ -164,19 +179,19 @@ export default class Connection {
       return this.conn.getInsertQuery(params);
     }
     const { item, columns } = params;
-    let insertQuery = `INSERT INTO ${item.label} (${columns.map((col) => col.label).join(', ')}) VALUES (`;
+    let insertQuery = `INSERT INTO ${item.label} (${columns.map(col => col.label).join(', ')}) VALUES (`;
     columns.forEach((col, index) => {
       insertQuery = insertQuery.concat(`'\${${index + 1}:${col.label}:${col.dataType}}', `);
     });
     return insertQuery;
   }
 
-  public searchItems(itemType: ContextValue, search: string = '', extraParams = {}) {
+  public searchItems(itemType: ContextValue, search = '', extraParams = {}) {
     return this.conn.searchItems(itemType, search, extraParams);
   }
 
   public getStaticCompletions: IConnectionDriver['getStaticCompletions'] = () => {
     if (typeof this.conn.getStaticCompletions !== 'function') return Promise.resolve({} as any);
     return this.conn.getStaticCompletions();
-  }
+  };
 }

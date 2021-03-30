@@ -1,9 +1,9 @@
 import React from 'react';
 import styles from './style.m.scss';
 
-export const CellValue = ({ value }) => {
+export const CellValue = ({ value, isCode }) => {
   if (value === null) return <code className={styles.cellValue}>NULL</code>;
-  if (typeof value === 'number')
+  if (typeof value === 'number' || isCode)
     return <code className={styles.cellValue}>{value}</code>;
   if (value === true || value === false)
     return (

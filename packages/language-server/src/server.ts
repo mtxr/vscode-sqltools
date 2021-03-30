@@ -1,16 +1,31 @@
+import { createLogger } from '@sqltools/log/src';
+import {
+  Arg0,
+  GenericCallback,
+  ILanguageServer,
+  ILanguageServerPlugin,
+  LSContextMap,
+  RequestHandler,
+} from '@sqltools/types';
 import ConfigRO from '@sqltools/util/config-manager';
-import { createConnection, IConnection, InitializedParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver';
-import { TextDocument } from 'vscode-languageserver-textdocument';
+import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { InvalidActionError } from '@sqltools/util/exception';
 import telemetry from '@sqltools/util/telemetry';
-import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContextMap } from '@sqltools/types';
-import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
-import { RegisterPlugin } from './contracts';
-import LSContext from './context';
-import { ExitCalledNotification, ServerErrorNotification } from './notifications';
-import { resolve as pathResolve } from 'path';
 import { spawnSync } from 'child_process';
-import { createLogger } from '@sqltools/log/src';
+import { resolve as pathResolve } from 'path';
+import {
+  createConnection,
+  IConnection,
+  InitializedParams,
+  InitializeResult,
+  ProposedFeatures,
+  TextDocuments,
+  TextDocumentSyncKind,
+} from 'vscode-languageserver';
+import { TextDocument } from 'vscode-languageserver-textdocument';
+import LSContext from './context';
+import { RegisterPlugin } from './contracts';
+import { ExitCalledNotification, ServerErrorNotification } from './notifications';
 
 const log = createLogger();
 
@@ -19,7 +34,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
   private _docManager = new TextDocuments(TextDocument);
   private onInitializeHooks: Arg0<IConnection['onInitialize']>[] = [];
   private onInitializedHooks: Arg0<IConnection['onInitialized']>[] = [];
-  private onDidChangeConfigurationHooks: Function[] = [];
+  private onDidChangeConfigurationHooks: GenericCallback[] = [];
 
   constructor() {
     this._server = createConnection(ProposedFeatures.all);
@@ -41,7 +56,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
     process.on('uncaughtException', (error: any) => {
       let message: string;
       if (error) {
-        telemetry.registerException(error, { type: 'uncaughtException' })
+        telemetry.registerException(error, { type: 'uncaughtException' });
         if (typeof error.stack === 'string') {
           message = error.stack;
         } else if (typeof error.message === 'string') {
@@ -49,7 +64,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
         } else if (typeof error === 'string') {
           message = error;
         } else {
-          message = (error || '').toString()
+          message = (error || '').toString();
         }
       }
       if (message) {
@@ -69,11 +84,11 @@ class SQLToolsLanguageServer implements ILanguageServer {
       log.error({ error }, 'Error registering plugin: %O', error);
       return Promise.reject(error);
     }
-  }
+  };
 
   public getContext = (): LSContextMap => {
     return LSContext;
-  }
+  };
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
     telemetry.registerMessage('info', `Initialized with node version:${process.version}`);
@@ -87,8 +102,14 @@ class SQLToolsLanguageServer implements ILanguageServer {
         ...params.initializationOptions.telemetry,
       });
     }
-    if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
-      log.info(`User defined env vars\n===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
+    if (
+      params.initializationOptions.userEnvVars &&
+      Object.keys(params.initializationOptions.userEnvVars || {}).length > 0
+    ) {
+      log.info(
+        `User defined env vars\n===============================\n%O\n===============================:`,
+        params.initializationOptions.userEnvVars
+      );
     }
 
     return this.onInitializeHooks.reduce<InitializeResult>(
@@ -104,9 +125,9 @@ class SQLToolsLanguageServer implements ILanguageServer {
           workspace: {
             workspaceFolders: {
               supported: true,
-              changeNotifications: true
+              changeNotifications: true,
             },
-          }
+          },
         },
       }
     );
@@ -142,23 +163,26 @@ class SQLToolsLanguageServer implements ILanguageServer {
         const { output } = spawnSync(process.execPath, ['-v']);
         version = output.join('');
       }
-    } catch (error) { }
-    log.info([
-      `${DISPLAY_NAME} Server started!`,
-      '===============================',
-      `Using node runtime?: ${isNode ? 'yes' : 'no'}`,
-      `ExecPath: ${process.execPath} ${version.replace(/[\r\n]/g, '').trim()}`,
-      '==============================='
-    ].filter(Boolean).join('\n'));
+    } catch (error) {
+      /* */
+    }
+    log.info(
+      [
+        `${DISPLAY_NAME} Server started!`,
+        '===============================',
+        `Using node runtime?: ${isNode ? 'yes' : 'no'}`,
+        `ExecPath: ${process.execPath} ${version.replace(/[\r\n]/g, '').trim()}`,
+        '===============================',
+      ]
+        .filter(Boolean)
+        .join('\n')
+    );
     this._server.listen();
     return this;
   }
 
   public async registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]) {
-    await Promise.all(
-      (Array.isArray(plugin) ? plugin : [plugin].filter(Boolean))
-      .map(p => p.register(this))
-    );
+    await Promise.all((Array.isArray(plugin) ? plugin : [plugin].filter(Boolean)).map(p => p.register(this)));
   }
 
   public get sendNotification(): IConnection['sendNotification'] {
@@ -170,11 +194,12 @@ class SQLToolsLanguageServer implements ILanguageServer {
   public onRequest: IConnection['onRequest'] = (req, handler?: any) => {
     if (!handler) throw new InvalidActionError('Disabled registration for * handlers');
     return this._server.onRequest(req, async (...args) => {
-      process.env.NODE_ENV === 'development' && log.info('REQUEST RECEIVED => %s %o', req._method || req.toString(), args);
+      process.env.NODE_ENV === 'development' &&
+        log.info('REQUEST RECEIVED => %s %o', req._method || req.toString(), args);
       process.env.NODE_ENV !== 'development' && log.info('REQUEST RECEIVED => %s', req._method || req.toString());
       return Promise.resolve(handler(...args));
     });
-  }
+  };
 
   public get sendRequest(): IConnection['sendRequest'] {
     return this._server.sendRequest;
@@ -209,7 +234,11 @@ class SQLToolsLanguageServer implements ILanguageServer {
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
       telemetry.registerException(err, { message, languageServer: true });
-      this._server.sendNotification(ServerErrorNotification, { err, message, errMessage: (err.message || err).toString() });
+      this._server.sendNotification(ServerErrorNotification, {
+        err,
+        message,
+        errMessage: (err.message || err).toString(),
+      });
     };
     if (typeof error !== 'undefined') return cb(error);
     return cb;

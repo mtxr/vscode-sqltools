@@ -3,14 +3,17 @@ interface QueryConstructor<P> {
   raw?: string;
 }
 
-const queryFactory = <P>(pieces: TemplateStringsArray, ...placeholders: (string | number | ((fnArgs: Partial<P>) => any))[]) => {
+const queryFactory = <P>(
+  pieces: TemplateStringsArray,
+  ...placeholders: (string | number | ((fnArgs: Partial<P>) => any))[]
+) => {
   function queryConstructor(params: Partial<P> = {}) {
     return pieces
       .reduce((q, piece, index) => {
         const ph = placeholders[index];
         q += piece.replace(/\r?\n\s+/g, ' ');
         if (typeof ph !== 'undefined') {
-          q += (typeof ph !== 'function' ? ph : ph(params));
+          q += typeof ph !== 'function' ? ph : ph(params);
         }
         return q;
       }, '')

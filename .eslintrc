@@ -21,7 +21,11 @@
     "no-console": "warn",
     "prettier/prettier": "error",
     "@typescript-eslint/explicit-module-boundary-types": "off",
-    "no-async-promise-executor": "off"
+    "no-async-promise-executor": "off",
+    "@typescript-eslint/no-unused-vars": ["error", { "argsIgnorePattern": "^_" }],
+    "no-prototype-builtins": "warn",
+    "prefer-spread": "warn",
+    "prefer-rest-params": "warn"
   },
   "overrides": [
     {

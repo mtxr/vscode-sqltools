@@ -1,18 +1,17 @@
 const path = require('path');
 const setDefaults = require('./../common/set-defaults');
 const parseEntries = require('./../common/parse-entries');
-const webpack = require('webpack');
 
 /**
  *
  * @param {object} entries
  * @param {string} packagePath
- * @returns {webpack.Configuration['plugins']}
+ * @returns {import('webpack').Configuration['plugins']}
  */
 module.exports = function getNodeConfig({ entries, packagePath, externals = {} }) {
   const { entry, outDir, babelOptions } = parseEntries(entries, packagePath);
 
-  /** @type webpack.Configuration */
+  /** @type import('webpack').Configuration */
   let config = {
     name: 'ls',
     target: 'node',
@@ -31,8 +30,7 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
           test: /\.js$/,
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
-
-        }
+        },
       ].filter(Boolean),
     },
     resolve: {
@@ -42,10 +40,16 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
-      ...(outDir ? {
-        path: outDir
-      } : {}),
+      ...(outDir
+        ? {
+            path: outDir,
+          }
+        : {}),
     },
+  };
+
+  config.externals = {
+    ...externals,
   };
 
   return setDefaults(config);

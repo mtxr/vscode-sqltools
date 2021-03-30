@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { createLogger } from '@sqltools/log/src';
-import { UIAction } from '../actions';
-import { SettingsScreenState, SettingsReducerAction } from '../interfaces';
-import { Step } from '../lib/steps';
+import { useCallback, useEffect, useReducer, useRef } from 'react';
 import sendMessage from '../../../lib/messages';
 import getVscode from '../../../lib/vscode';
+import { UIAction } from '../actions';
+import { SettingsReducerAction, SettingsScreenState } from '../interfaces';
+import { Step } from '../lib/steps';
 
 const log = createLogger('settings:reducer');
 
@@ -66,17 +66,15 @@ const reducer: React.Reducer<SettingsScreenState, SettingsReducerAction> = (
         externalMessageType: 'warning',
       });
     case UIAction.RESPONSE_INSTALLED_DRIVERS:
-      const installedDrivers = payload as SettingsScreenState['installedDrivers'];
       return mutate({
         loading: false,
-        installedDrivers,
+        installedDrivers: payload as SettingsScreenState['installedDrivers'],
       });
     case UIAction.RESPONSE_DRIVER_SCHEMAS:
-      const { schema = {}, uiSchema = {} } = payload;
       return mutate({
         loading: false,
-        schema,
-        uiSchema,
+        schema: payload.schema || {},
+        uiSchema: payload.uiSchema || {},
         step: Step.CONNECTION_FORM,
       });
     case UIAction.RESPONSE_UPDATE_CONNECTION_ERROR:
@@ -92,7 +90,10 @@ const reducer: React.Reducer<SettingsScreenState, SettingsReducerAction> = (
     case UIAction.SET_STATE:
       return mutate({ ...payload });
     case UIAction.REQUEST_RESET:
-      return mutate({ ...initialState, installedDrivers: state.installedDrivers });
+      return mutate({
+        ...initialState,
+        installedDrivers: state.installedDrivers,
+      });
     default:
       log.warn(`No handler set for %s`, action);
   }
@@ -165,7 +166,7 @@ export const useSettingsReducer = () => {
     getVscode().setState(state);
     return () => {
       getVscode().setState(null);
-    }
+    };
   }, [state]);
 
   return { state, dispatch, setState };

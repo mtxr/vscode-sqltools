@@ -8,8 +8,8 @@ export class DriverNotInstalledError extends NotifyResponseError {
       notification: DriverNotInstalledNotification,
       dontNotify: true,
       args: {
-        driverName
-      }
+        driverName,
+      },
     });
   }
 }

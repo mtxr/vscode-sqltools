@@ -1,5 +1,5 @@
-import React from 'react';
 import { Table as MTable } from '@devexpress/dx-react-grid-material-ui';
+import React from 'react';
 import { CellValue } from './CellValue';
 import style from './style.m.scss';
 
@@ -27,7 +27,7 @@ const TableCell = (props: MTable.DataCellProps & { className?: string }) => {
       data-colname={props.column.name}
       className={classes.join(' ')}
     >
-      <CellValue value={props.value} isCode={displayAsCode} />
+      <CellValue value={value} isCode={displayAsCode} />
     </MTable.Cell>
   );
 };
