@@ -42,6 +42,6 @@ export default function prepareSchema(
 
   return {
     schema: combinedSchema,
-    uiSchema: uiCombinedSchema
-  }
+    uiSchema: uiCombinedSchema,
+  };
 }

@@ -26,25 +26,24 @@ export interface IExpectedResult<T = any> extends String {
   resultsIn?: T;
 }
 
-
 export interface QueryBuilder<P, R> {
   (params?: P & { [k: string]: any }): IExpectedResult<R>;
   raw?: string;
 }
 
 export interface IBaseQueries {
-  fetchRecords: QueryBuilder<{ limit: number; offset: number; table: NSDatabase.ITable; }, any>;
-  countRecords: QueryBuilder<{ table: NSDatabase.ITable; }, { total: number; }>;
+  fetchRecords: QueryBuilder<{ limit: number; offset: number; table: NSDatabase.ITable }, any>;
+  countRecords: QueryBuilder<{ table: NSDatabase.ITable }, { total: number }>;
   fetchSchemas?: QueryBuilder<NSDatabase.IDatabase, NSDatabase.ISchema>;
   fetchDatabases?: QueryBuilder<never, NSDatabase.IDatabase>;
   fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
-  searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
-  searchColumns: QueryBuilder<{ search: string, tables: NSDatabase.ITable[], limit?: number }, NSDatabase.IColumn>;
+  searchTables: QueryBuilder<{ search: string; limit?: number }, NSDatabase.ITable>;
+  searchColumns: QueryBuilder<{ search: string; tables: NSDatabase.ITable[]; limit?: number }, NSDatabase.IColumn>;
   // old api
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
   fetchFunctions?: QueryBuilder<NSDatabase.ISchema, NSDatabase.IFunction>;
-  [id: string]: string | ((params: any) => (string | IExpectedResult));
+  [id: string]: string | ((params: any) => string | IExpectedResult);
 }
 
 export interface IConnection<DriverOptions = any> {
@@ -59,7 +58,7 @@ export interface IConnection<DriverOptions = any> {
    * @type {string}
    * @memberof IConnection
    */
-   group?: string;
+  group?: string;
   /**
    * Server address
    * @type {string}
@@ -90,7 +89,7 @@ export interface IConnection<DriverOptions = any> {
    * @type {string}
    * @memberof IConnection
    */
-  username: string;
+  username?: string;
   /**
    * Connection password. You can use option askForPassword to prompt password before connect
    * @type {string}
@@ -192,10 +191,8 @@ export interface IConnection<DriverOptions = any> {
     disconnected?: string;
   };
 
-
-
-   // WONT BE INCLUDED IN SETTINGS
-   /**
+  // WONT BE INCLUDED IN SETTINGS
+  /**
    * Connection flag. This is not a settings. It's generated in runtime
    * @type {boolean}
    * @memberof IConnection
@@ -216,7 +213,10 @@ export interface IQueryOptions {
   [k: string]: any;
 }
 export interface IConnectionDriverConstructor {
-  new (credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
+  new (
+    credentials: IConnection<any>,
+    getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']
+  ): IConnectionDriver;
 }
 export interface IConnectionDriver {
   connection: any;
@@ -225,13 +225,19 @@ export interface IConnectionDriver {
   close(): Promise<any>;
   checkDependencies?(): Promise<void>;
   describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
-  showRecords(tableName: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }): Promise<NSDatabase.IResult[]>;
+  showRecords(
+    tableName: NSDatabase.ITable,
+    opt: IQueryOptions & { limit: number; page?: number }
+  ): Promise<NSDatabase.IResult[]>;
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
-  getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
+  getChildrenForItem?(params: {
+    item: NSDatabase.SearchableItem;
+    parent?: NSDatabase.SearchableItem;
+  }): Promise<MConnectionExplorer.IChildItem[]>;
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
-  getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
+  getInsertQuery?(params: { item: NSDatabase.ITable; columns: Array<NSDatabase.IColumn> }): Promise<string>;
 }
 
 export declare enum ContextValue {
@@ -249,7 +255,7 @@ export declare enum ContextValue {
   KEYWORDS = 'KEYWORDS',
 }
 
-export module MConnectionExplorer {
+export namespace MConnectionExplorer {
   export interface IChildItem {
     type: ContextValue;
     label: string;
@@ -262,12 +268,12 @@ export module MConnectionExplorer {
     /**
      * Icon id from https://microsoft.github.io/vscode-codicons/dist/codicon.html
      */
-     iconId?: string;
-     /**
-      * sqltools icons
-      */
-     iconName?: string;
-     /**
+    iconId?: string;
+    /**
+     * sqltools icons
+     */
+    iconName?: string;
+    /**
      * for resource_groups
      */
     childType?: ContextValue;
@@ -305,7 +311,7 @@ export namespace NSDatabase {
     isPk?: boolean;
     isFk?: boolean;
     columnKey?: string;
-    extra?: { [k: string]: any; };
+    extra?: { [k: string]: any };
     table: ITable | string;
   }
 
@@ -326,14 +332,14 @@ export namespace NSDatabase {
     source?: string;
   }
 
-  export interface IProcedure extends IFunction {}
+  export type IProcedure = IFunction;
 
   export interface IStaticCompletion {
     label: string;
     filterText?: string;
     sortText?: string;
     detail: string;
-    documentation: { kind: 'markdown', value: string};
+    documentation: { kind: 'markdown'; value: string };
   }
 
   export interface IResult<T extends { [key: string]: any } = any> {
@@ -366,11 +372,20 @@ export namespace NSDatabase {
     queryType?: 'showRecords' | 'describeTable';
     queryParams?: { [k: string]: any };
   }
-  export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
+  export type SearchableItem =
+    | IDatabase
+    | ISchema
+    | ITable
+    | IColumn
+    | IFunction
+    | IProcedure
+    | MConnectionExplorer.IChildItem;
 }
 
 export interface INotifyErrorData {
-  notification: string; dontNotify?: boolean; args?: any
+  notification: string;
+  dontNotify?: boolean;
+  args?: any;
 }
 
 export interface ITelemetryArgs {
@@ -383,7 +398,7 @@ export interface ITelemetryArgs {
 }
 
 export abstract class ATelemetry {
-  public static enabled: Boolean;
+  public static enabled: boolean;
 
   public static extraInfo: ITelemetryArgs['extraInfo'];
 
@@ -398,13 +413,10 @@ export abstract class ATelemetry {
   abstract registerMessage(
     severity: 'info' | 'warn' | 'debug' | 'error' | 'critical' | 'fatal',
     message: string,
-    value?: string,
+    value?: string
   ): void;
 
-  abstract registerEvent(
-    name: string,
-    properties?: { [key: string]: any }
-  ): void;
+  abstract registerEvent(name: string, properties?: { [key: string]: any }): void;
 
   abstract registerTime(timeKey: string, timer: ITimer): void;
 }
@@ -420,7 +432,9 @@ export type ArgsType<T> = T extends (...args: infer U) => any ? U : never;
 
 export type RequestHandler<T> = T extends RequestType<infer P, infer R, any, any>
   ? (params: P) => R | Promise<R>
-  : (T extends RequestType0<infer R, any, any> ? () => R | Promise<R> : never);
+  : T extends RequestType0<infer R, any, any>
+  ? () => R | Promise<R>
+  : never;
 
 export type CompletionLanguages = string[];
 export type FormatLanguages = string[];
@@ -510,7 +524,7 @@ export interface IResultsOptions {
     'font-family'?: string;
     'font-size'?: string;
     'table-cell-padding'?: string;
-   };
+  };
 }
 
 export interface ISettings {
@@ -541,7 +555,7 @@ export interface ISettings {
    * @default 100
    * @memberof ISettings
    */
-   historySize?: number;
+  historySize?: number;
   /**
    * Languages with SQL completion enabled.
    * @type {CompletionLanguages}
@@ -572,7 +586,7 @@ export interface ISettings {
    * @default true
    * @memberof ISettings
    */
-   highlightQuery?: boolean;
+  highlightQuery?: boolean;
   /**
    * Format document/selection options
    * @type {IFormatOptions}
@@ -610,7 +624,6 @@ export interface ISettings {
    * @memberof ISettings
    */
   defaultExportType?: 'prompt' | 'csv' | 'json';
-
 
   /**
    * Default open results mode
@@ -700,14 +713,17 @@ export interface ISettings {
 
 export interface IConfig extends ISettings {
   get: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: K, defaultValue?: V | any) => V;
-  update: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(configKey: KeysOfSettings, value: V) => Promise<void>;
+  update: <K extends KeysOfSettings = KeysOfSettings, V = IConfig[K]>(
+    configKey: KeysOfSettings,
+    value: V
+  ) => Promise<void>;
   addOnUpdateHook: (handler: OnUpdateConfigHandler) => void;
   replaceAll: (newSettings: IConfig) => void;
 }
 
 export type OnUpdateConfigHandler = (data: { event?: ConfigChangeEvent; settings?: ISettings }) => any;
 
-export type KeysOfSettings = (keyof ISettings);
+export type KeysOfSettings = keyof ISettings;
 
 export interface ConfigChangeEvent {
   affectsConfig(section: KeysOfSettings, resource?: any): boolean;
@@ -727,7 +743,7 @@ export interface NodeDependency {
   name: string;
   version?: string;
   env?: { [id: string]: string };
-  args?: string[], // extra arguments to be passaged to packag managers
+  args?: string[]; // extra arguments to be passaged to packag managers
 }
 
 export interface ICommandEvent {
@@ -747,12 +763,11 @@ export interface IExtension {
   registerPlugin(plugin: IExtensionPlugin | IExtensionPlugin[]): this;
   addBeforeCommandHook(command: string, handler: CommandEventHandler<ICommandEvent>): this;
   addAfterCommandSuccessHook(command: string, handler: CommandEventHandler<ICommandSuccessEvent>): this;
-  registerCommand(command: string, handler: Function): this;
-  registerTextEditorCommand(command: string, handler: Function): this;
+  registerCommand(command: string, handler: GenericCallback): this;
+  registerTextEditorCommand(command: string, handler: GenericCallback): this;
   errorHandler(message: string, error: any): any;
   resourcesMap(): Map<string, any>;
 }
-
 
 export interface IDriverExtensionApi {
   /**
@@ -802,7 +817,9 @@ export interface ILanguageClient {
   onNotification: LanguageClient['onNotification'];
 }
 
-export type LSContextMap =  Omit<Map<string, any>, 'clear' | 'delete'> & { drivers: Map<string, IConnectionDriverConstructor> };
+export type LSContextMap = Omit<Map<string, any>, 'clear' | 'delete'> & {
+  drivers: Map<string, IConnectionDriverConstructor>;
+};
 
 export interface ILanguageServer {
   listen(): void;
@@ -830,3 +847,5 @@ export interface ILanguageServerPlugin<T = ILanguageServer> {
 }
 
 export { LSIConnection };
+
+export type GenericCallback = (...args: unknown[]) => Promise<unknown> | unknown;

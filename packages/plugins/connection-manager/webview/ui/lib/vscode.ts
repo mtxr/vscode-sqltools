@@ -2,7 +2,7 @@ import { IVSCodeWebviewAPI } from '../interfaces';
 
 let vscode: IVSCodeWebviewAPI;
 
-declare var acquireVsCodeApi: () => IVSCodeWebviewAPI;
+declare let acquireVsCodeApi: () => IVSCodeWebviewAPI;
 
 export default function getVscode() {
   vscode = vscode || acquireVsCodeApi();

@@ -1,23 +1,24 @@
+import { createLogger } from '@sqltools/log';
 import {
-  IConnectionDriver,
+  ContextValue,
   IBaseQueries,
   IConnection,
+  IConnectionDriver,
   IExpectedResult,
-  NodeDependency,
-  ContextValue,
-  MConnectionExplorer,
   IQueryOptions,
-  NSDatabase,
   LSIConnection,
+  MConnectionExplorer,
+  NodeDependency,
+  NSDatabase,
 } from '@sqltools/types';
+import fs from 'fs';
+import path from 'path';
 import ElectronNotSupportedError from './lib/exception/electron-not-supported';
 import MissingModuleError from './lib/exception/missing-module';
 import sqltoolsRequire, { sqltoolsResolve } from './lib/require';
-import { createLogger } from '@sqltools/log';
-import path from 'path';
-import fs from 'fs';
 
-export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
+export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any>
+  implements IConnectionDriver {
   public log: ReturnType<typeof createLogger>;
   public readonly deps: NodeDependency[] = [];
 
@@ -26,24 +27,30 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
   }
   public connection: Promise<ConnectionType>;
   abstract queries: IBaseQueries;
-  constructor(public credentials: IConnection<DriverOptions>, protected getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders']) {
+  constructor(
+    public credentials: IConnection<DriverOptions>,
+    protected getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders']
+  ) {
     this.log = createLogger(credentials.driver.toLowerCase());
   }
 
   abstract open(): Promise<ConnectionType>;
   abstract close(): Promise<void>;
 
-  abstract query<R = any, Q = any>(queryOrQueries: Q | string | String, opt: IQueryOptions): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
+  abstract query<R = any, Q = any>(
+    queryOrQueries: Q | string | string,
+    opt: IQueryOptions
+  ): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
 
-  public singleQuery<R = any, Q = any>(query: Q | string | String, opt: IQueryOptions) {
-    return this.query<R, Q>(query, opt).then(([ res ]) => res);
+  public singleQuery<R = any, Q = any>(query: Q | string | string, opt: IQueryOptions) {
+    return this.query<R, Q>(query, opt).then(([res]) => res);
   }
 
-  protected queryResults = async <R = any, Q = any>(query: Q | string | String, opt?: IQueryOptions) => {
+  protected queryResults = async <R = any, Q = any>(query: Q | string | string, opt?: IQueryOptions) => {
     const result = await this.singleQuery<R, Q>(query, opt);
     if (result.error) throw result.rawError;
     return result.results;
-  }
+  };
 
   public async describeTable(metadata: NSDatabase.ITable, opt: IQueryOptions) {
     const result = await this.singleQuery(this.queries.describeTable(metadata), opt);
@@ -51,14 +58,14 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return [result];
   }
 
-  public async showRecords(table: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }) {
+  public async showRecords(table: NSDatabase.ITable, opt: IQueryOptions & { limit: number; page?: number }) {
     const { limit, page = 0 } = opt;
     const params = { ...opt, limit, table, offset: page * limit };
     if (typeof this.queries.fetchRecords === 'function' && typeof this.queries.countRecords === 'function') {
-      const [ records, totalResult ] = await (Promise.all([
+      const [records, totalResult] = await Promise.all([
         this.singleQuery(this.queries.fetchRecords(params), opt),
         this.singleQuery(this.queries.countRecords(params), opt),
-      ]));
+      ]);
       records.baseQuery = this.queries.fetchRecords.raw;
       records.pageSize = limit;
       records.page = page;
@@ -87,7 +94,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
               throw new Error(`Version not matching. We need to upgrade ${dep.name}`);
             }
             this.requireDep(dep.name);
-          } catch(e) {
+          } catch (e) {
             throw new MissingModuleError(this.deps, this.credentials, mustUpgrade);
           }
           break;
@@ -97,18 +104,29 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
 
   public requireDep = (name: string) => {
     return sqltoolsRequire(name);
-  }
+  };
 
   public resolveDep = (name: string) => {
     return sqltoolsResolve(name);
-  }
+  };
 
-  public getChildrenForItem(_params: { item: NSDatabase.SearchableItem; parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]> {
-    this.log.error(`###### Attention ######\getChildrenForItem not implemented for ${this.credentials.driver}\n####################`);
+  public getChildrenForItem(_params: {
+    item: NSDatabase.SearchableItem;
+    parent?: NSDatabase.SearchableItem;
+  }): Promise<MConnectionExplorer.IChildItem[]> {
+    this.log.error(
+      `###### Attention ######\ngetChildrenForItem not implemented for ${this.credentials.driver}\n####################`
+    );
     return Promise.resolve([]);
   }
-  public searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]> {
-    this.log.error(`###### Attention ######\searchItems not implemented for ${this.credentials.driver}\n####################`);
+  public searchItems(
+    _itemType: ContextValue,
+    _search: string,
+    _extraParams?: unknown
+  ): Promise<NSDatabase.SearchableItem[]> {
+    this.log.error(
+      `###### Attention ######\nsearchItems not implemented for ${this.credentials.driver}\n####################`
+    );
     return Promise.resolve([]);
   }
 
@@ -118,18 +136,21 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       if (workspaceName) {
         const workspaceFolders = await this.getWorkspaceFolders();
         const dbWorkspace = workspaceFolders.find(w => w.name === workspaceName);
-        fsPath = path.resolve(dbWorkspace.uri.replace(/^(\w+):\/\//, ''), fsPath.replace(/\$\{workspaceFolder:(.+)}/g, './'));
+        fsPath = path.resolve(
+          dbWorkspace.uri.replace(/^(\w+):\/\//, ''),
+          fsPath.replace(/\$\{workspaceFolder:(.+)}/g, './')
+        );
       }
     }
     return fsPath;
   }
 
-  protected prepareMessage(message: any): NSDatabase.IResult['messages'][number] {
-    return { message: message.toString(), date: new Date() };
+  protected prepareMessage(message: unknown): NSDatabase.IResult['messages'][number] {
+    return { message: `${message}`, date: new Date() };
   }
 
   static readonly CONSTANTS = {
     DEPENDENCY_PACKAGE: 'package' as NodeDependency['type'],
     DEPENDENCY_NPM_SCRIPT: 'npmscript' as NodeDependency['type'],
-  }
+  };
 }

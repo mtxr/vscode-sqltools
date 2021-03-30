@@ -604,8 +604,8 @@ const keywordsCompletion: { [w: string]: NSDatabase.IStaticCompletion } = keywor
     sortText: (['SELECT', 'CREATE', 'UPDATE', 'DELETE'].includes(word) ? '2:' : '') + word,
     documentation: {
       value: `\`\`\`yaml\nWORD: ${word}\n\`\`\``,
-      kind: 'markdown'
-    }
+      kind: 'markdown',
+    },
   };
   return agg;
 }, {});

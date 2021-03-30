@@ -1,3 +1,3 @@
 import { SQLToolsLanguageClient } from './client';
 
-export default SQLToolsLanguageClient
+export default SQLToolsLanguageClient;

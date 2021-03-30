@@ -4,7 +4,7 @@ import styles from './style.m.scss';
 interface StyledProps {
   fg?: string;
   bg?: string;
-  float?: 'right' | 'left',
+  float?: 'right' | 'left';
   a?: boolean;
 }
 
@@ -16,7 +16,9 @@ const Button = ({
   bg,
   a: useAnchor,
   ...props
-}: StyledProps & React.AnchorHTMLAttributes<HTMLButtonElement | HTMLAnchorElement> & React.ButtonHTMLAttributes<HTMLButtonElement | HTMLAnchorElement>) => {
+}: StyledProps &
+  React.AnchorHTMLAttributes<HTMLButtonElement | HTMLAnchorElement> &
+  React.ButtonHTMLAttributes<HTMLButtonElement | HTMLAnchorElement>) => {
   const composedProps = {
     className: `${styles.button} ${className}`,
     style: {
@@ -25,7 +27,7 @@ const Button = ({
       float,
       ...style,
     },
-    ...props
+    ...props,
   };
   if (useAnchor) {
     return <a {...composedProps} />;

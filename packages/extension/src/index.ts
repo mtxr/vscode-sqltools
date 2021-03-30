@@ -1,37 +1,61 @@
-import { commands, env as VSCodeEnv, ExtensionContext, version as VSCodeVersion, window, EventEmitter, OutputChannel } from 'vscode';
-import { EXT_NAMESPACE, VERSION, AUTHOR, DISPLAY_NAME } from '@sqltools/util/constants';
-import { IExtension, IExtensionPlugin, ICommandEvent, ICommandSuccessEvent, CommandEventHandler } from '@sqltools/types';
-import { migrateFilesToNewPaths } from '@sqltools/util/path';
-import { openExternal } from '@sqltools/vscode/utils';
-import Config from '@sqltools/util/config-manager';
-import Context from '@sqltools/vscode/context';
-import debounce from '@sqltools/util/debounce';
-import ErrorHandler from './api/error-handler';
-import https from 'https';
-import { default as logger, createLogger } from '@sqltools/log/src';
-import PluginResourcesMap from '@sqltools/util/plugin-resources';
-import SQLToolsLanguageClient from './language-client';
-import Timer from '@sqltools/util/telemetry/timer';
-import Utils from './api/utils';
-
-const log = createLogger();
-
+import { createLogger, default as logger } from '@sqltools/log/src';
+import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 // plugins
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
-import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
-import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
+import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
+import {
+  CommandEventHandler,
+  GenericCallback,
+  ICommandEvent,
+  ICommandSuccessEvent,
+  IExtension,
+  IExtensionPlugin,
+} from '@sqltools/types';
+import Config from '@sqltools/util/config-manager';
+import {
+  AUTHOR,
+  DISPLAY_NAME,
+  EXT_NAMESPACE,
+  VERSION,
+} from '@sqltools/util/constants';
+import debounce from '@sqltools/util/debounce';
+import { migrateFilesToNewPaths } from '@sqltools/util/path';
+import PluginResourcesMap from '@sqltools/util/plugin-resources';
 import telemetry from '@sqltools/util/telemetry';
+import Timer from '@sqltools/util/telemetry/timer';
+import { isPromise } from '@sqltools/util/typeGuards';
+import Context from '@sqltools/vscode/context';
+import { openExternal } from '@sqltools/vscode/utils';
+import https from 'https';
+import {
+  commands,
+  env as VSCodeEnv,
+  EventEmitter,
+  ExtensionContext,
+  OutputChannel,
+  version as VSCodeVersion,
+  window,
+} from 'vscode';
+import ErrorHandler from './api/error-handler';
+import Utils from './api/utils';
+import SQLToolsLanguageClient from './language-client';
+
+const log = createLogger();
 
 export class SQLToolsExtension implements IExtension {
   private pluginsQueue: IExtensionPlugin<this>[] = [];
   private extPlugins: { [type: string]: string[] } = {};
   private onWillRunCommandEmitter: EventEmitter<ICommandEvent>;
   private onDidRunCommandSuccessfullyEmitter: EventEmitter<ICommandSuccessEvent>;
-  private willRunCommandHooks: { [commands: string]: Array<(evt: ICommandEvent) => void> } = {};
-  private didRunCommandSuccessfullyHooks: { [commands: string]: Array<(evt: ICommandSuccessEvent) => void> } = {};
+  private willRunCommandHooks: {
+    [commands: string]: Array<(evt: ICommandEvent) => void>;
+  } = {};
+  private didRunCommandSuccessfullyHooks: {
+    [commands: string]: Array<(evt: ICommandSuccessEvent) => void>;
+  } = {};
   public client: SQLToolsLanguageClient;
-  private loaded: boolean = false;
+  private loaded = false;
 
   public activate = async (): Promise<IExtension> => {
     const activationTimer = new Timer();
@@ -53,12 +77,18 @@ export class SQLToolsExtension implements IExtension {
     Context.subscriptions.push(
       this.client.start(),
       this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
-      this.onDidRunCommandSuccessfullyEmitter.event(this.onDidRunCommandSuccessfullyHandler),
+      this.onDidRunCommandSuccessfullyEmitter.event(
+        this.onDidRunCommandSuccessfullyHandler
+      )
     );
 
     this.registerCommand('aboutVersion', this.aboutVersionHandler);
     this.registerCommand('openDocs', (path?: string) => {
-      return openExternal(`https://vscode-sqltools.mteixeira.dev/${path || ''}?umd_source=vscode&utm_medium=command&utm_campaign=open-docs`);
+      return openExternal(
+        `https://vscode-sqltools.mteixeira.dev/${
+          path || ''
+        }?umd_source=vscode&utm_medium=command&utm_campaign=open-docs`
+      );
     });
 
     if (logger.outputChannel) {
@@ -80,26 +110,28 @@ export class SQLToolsExtension implements IExtension {
       errorHandler: this.errorHandler,
       resourcesMap: this.resourcesMap,
     };
-  }
+  };
 
   public deactivate = (): void => {
-    return Context.subscriptions.forEach((sub) => void sub.dispose());
-  }
+    return Context.subscriptions.forEach(sub => void sub.dispose());
+  };
 
   public resourcesMap = (): typeof PluginResourcesMap => {
     return PluginResourcesMap;
-  }
+  };
 
   private getIssueTemplate = (name: string) => {
     const url = `https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/.github/ISSUE_TEMPLATE/${name}`;
-    return new Promise<string>((resolve) => {
-      https.get(url, (resp) => {
-        let data = '';
-        resp.on('data', chunk => data += chunk.toString());
-        resp.on('end', () => resolve(data));
-      }).on('error', () => resolve(null));
+    return new Promise<string>(resolve => {
+      https
+        .get(url, resp => {
+          let data = '';
+          resp.on('data', chunk => (data += chunk.toString()));
+          resp.on('end', () => resolve(data));
+        })
+        .on('error', () => resolve(null));
     });
-  }
+  };
 
   private aboutVersionHandler = async () => {
     const FoundABug = 'Found a bug?';
@@ -110,9 +142,14 @@ export class SQLToolsExtension implements IExtension {
       `Platform: ${process.platform}, ${process.arch}`,
       `Using Node Runtime: ${Config.useNodeRuntime ? 'yes' : 'no'}`,
       '',
-      `by @mtxr ${AUTHOR}`
+      `by @mtxr ${AUTHOR}`,
     ];
-    const res = await window.showInformationMessage(message.join('\n'), { modal: true }, FeatureRequest, FoundABug);
+    const res = await window.showInformationMessage(
+      message.join('\n'),
+      { modal: true },
+      FeatureRequest,
+      FoundABug
+    );
     if (!res) return;
     const newIssueUrl = 'https://github.com/mtxr/vscode-sqltools/issues/new';
 
@@ -132,24 +169,27 @@ export class SQLToolsExtension implements IExtension {
       if (body) {
         body = encodeURIComponent(
           body
-          .replace(/---([^\-]+---\n\n)/gim, '')
-          .replace(/(- OS).+/gi, `$1: ${process.platform}, ${process.arch}`)
-          .replace(/(- Version).+/gi, `$1: v${VERSION}`));
+            .replace(/---([^-]+---\n\n)/gim, '')
+            .replace(/(- OS).+/gi, `$1: ${process.platform}, ${process.arch}`)
+            .replace(/(- Version).+/gi, `$1: v${VERSION}`)
+        );
       }
 
       if (!template && !body) {
         return openExternal(`${newIssueUrl}/choose`);
       }
-      let issueUrl = `${newIssueUrl}?assignees=&labels=feature+request&template=${template}&body=${body}`;
+      const issueUrl = `${newIssueUrl}?assignees=&labels=feature+request&template=${template}&body=${body}`;
       openExternal(issueUrl);
     } catch (e) {
-      const res = await window.showInformationMessage('Could not open a issue. Please go to GitHub to open.', 'Open Github');
+      const res = await window.showInformationMessage(
+        'Could not open a issue. Please go to GitHub to open.',
+        'Open Github'
+      );
       if (res) {
         openExternal(`${newIssueUrl}/choose`);
       }
     }
-
-  }
+  };
 
   /**
    * Management functions
@@ -158,15 +198,21 @@ export class SQLToolsExtension implements IExtension {
     try {
       const current = Utils.getlastRunInfo();
       const { lastNotificationDate = 0, updated } = current;
-      const lastNDate = parseInt(new Date(lastNotificationDate).toISOString().substr(0, 10).replace(/\D/g, ''), 10);
-      const today = parseInt(new Date().toISOString().substr(0, 10).replace(/\D/g, ''), 10);
-      const updatedRecently = (today - lastNDate) < 2;
+      const lastNDate = parseInt(
+        new Date(lastNotificationDate)
+          .toISOString()
+          .substr(0, 10)
+          .replace(/\D/g, ''),
+        10
+      );
+      const today = parseInt(
+        new Date().toISOString().substr(0, 10).replace(/\D/g, ''),
+        10
+      );
+      const updatedRecently = today - lastNDate < 2;
 
-      if (
-        Config.disableReleaseNotifications
-        || !updated
-        || updatedRecently
-      ) return;
+      if (Config.disableReleaseNotifications || !updated || updatedRecently)
+        return;
 
       Utils.updateLastRunInfo({ lastNotificationDate: +new Date() });
 
@@ -174,12 +220,17 @@ export class SQLToolsExtension implements IExtension {
       const supportProject = 'Support This Project';
       const releaseNotes = 'Release Notes';
       const message = `${DISPLAY_NAME} updated! Check out the release notes for more information.`;
-      const options = [ moreInfo, supportProject, releaseNotes ];
-      const res: string = await window.showInformationMessage(message, ...options);
+      const options = [moreInfo, supportProject, releaseNotes];
+      const res: string = await window.showInformationMessage(
+        message,
+        ...options
+      );
       telemetry.registerMessage('info', message, res);
       switch (res) {
         case moreInfo:
-          openExternal('https://vscode-sqltools.mteixeira.dev/#donate-and-support?umd_source=vscode&utm_medium=notification&utm_campaign=donate');
+          openExternal(
+            'https://vscode-sqltools.mteixeira.dev/#donate-and-support?umd_source=vscode&utm_medium=notification&utm_campaign=donate'
+          );
           break;
         case releaseNotes:
           openExternal(current.releaseNotes);
@@ -188,36 +239,56 @@ export class SQLToolsExtension implements IExtension {
           openExternal('https://www.patreon.com/mteixeira');
           break;
       }
-    } catch (e) { /***/ }
-  }
+    } catch (e) {
+      /***/
+    }
+  };
 
   private loadPlugins = () => {
     const pluginsQueue = this.pluginsQueue;
     this.pluginsQueue = [];
     this.loaded = this.loaded || true;
-    for (let plugin of pluginsQueue) {
-      log.info({ plugin }, `registering %s%s.`, plugin.name, plugin.type ? ` (${plugin.type})` : '');
+    for (const plugin of pluginsQueue) {
+      log.info(
+        { plugin },
+        `registering %s%s.`,
+        plugin.name,
+        plugin.type ? ` (${plugin.type})` : ''
+      );
       try {
-        Promise.resolve(plugin.register(this)).then(() => {
-          if (plugin.extensionId) {
-            this.extPlugins[plugin.type || 'general'] = this.extPlugins[plugin.type || 'general'] || [];
-            if (!this.extPlugins[plugin.type || 'general'].includes(plugin.extensionId)) {
-              this.extPlugins[plugin.type || 'general'].push(plugin.extensionId);
+        Promise.resolve(plugin.register(this))
+          .then(() => {
+            if (plugin.extensionId) {
+              this.extPlugins[plugin.type || 'general'] =
+                this.extPlugins[plugin.type || 'general'] || [];
+              if (
+                !this.extPlugins[plugin.type || 'general'].includes(
+                  plugin.extensionId
+                )
+              ) {
+                this.extPlugins[plugin.type || 'general'].push(
+                  plugin.extensionId
+                );
+              }
+              this.updateExtPluginsInfo();
             }
-            this.updateExtPluginsInfo();
-          }
-          log.info(`%s%s registered!`, plugin.name, plugin.type ? ` (${plugin.type})` : '');
-          this.requestRefreshTree();
-        }).catch(err => {
-          this.errorHandler(`Error loading plugin ${plugin.name}`, err);
-        });
+            log.info(
+              `%s%s registered!`,
+              plugin.name,
+              plugin.type ? ` (${plugin.type})` : ''
+            );
+            this.requestRefreshTree();
+          })
+          .catch(err => {
+            this.errorHandler(`Error loading plugin ${plugin.name}`, err);
+          });
       } catch (error) {
         this.errorHandler(`Error loading plugin ${plugin.name}`, error);
       }
     }
     this.updateExtPluginsInfo();
     this.requestRefreshTree();
-  }
+  };
 
   private requestRefreshTree = debounce(() => {
     return commands.executeCommand(`${EXT_NAMESPACE}.refreshTree`);
@@ -230,34 +301,62 @@ export class SQLToolsExtension implements IExtension {
 
   private onWillRunCommandHandler = (evt: ICommandEvent): void => {
     if (!evt.command) return;
-    if (!this.willRunCommandHooks[evt.command] || this.willRunCommandHooks[evt.command].length === 0) return;
+    if (
+      !this.willRunCommandHooks[evt.command] ||
+      this.willRunCommandHooks[evt.command].length === 0
+    )
+      return;
 
-    log.debug(`Will run ${this.willRunCommandHooks[evt.command].length} attached handler for 'beforeCommandHooks'`)
+    log.debug(
+      `Will run ${
+        this.willRunCommandHooks[evt.command].length
+      } attached handler for 'beforeCommandHooks'`
+    );
     this.willRunCommandHooks[evt.command].forEach(hook => hook(evt));
-  }
-  private onDidRunCommandSuccessfullyHandler = (evt: ICommandSuccessEvent): void => {
+  };
+  private onDidRunCommandSuccessfullyHandler = (
+    evt: ICommandSuccessEvent
+  ): void => {
     if (!evt.command) return;
-    if (!this.didRunCommandSuccessfullyHooks[evt.command] || this.didRunCommandSuccessfullyHooks[evt.command].length === 0) return;
+    if (
+      !this.didRunCommandSuccessfullyHooks[evt.command] ||
+      this.didRunCommandSuccessfullyHooks[evt.command].length === 0
+    )
+      return;
 
-    log.debug(`Will run ${this.didRunCommandSuccessfullyHooks[evt.command].length} attached handler for 'afterCommandSuccessfullyHooks'`)
+    log.debug(
+      `Will run ${
+        this.didRunCommandSuccessfullyHooks[evt.command].length
+      } attached handler for 'afterCommandSuccessfullyHooks'`
+    );
     this.didRunCommandSuccessfullyHooks[evt.command].forEach(hook => hook(evt));
-  }
+  };
 
-  private addHook = (prop: 'willRunCommandHooks' | 'didRunCommandSuccessfullyHooks', command: string, handler: any) => {
+  private addHook = (
+    prop: 'willRunCommandHooks' | 'didRunCommandSuccessfullyHooks',
+    command: string,
+    handler: any
+  ) => {
     if (!this[prop][command]) {
       this[prop][command] = [];
     }
     this[prop][command].push(handler);
     return this;
-  }
+  };
 
-  public addBeforeCommandHook = (command: string, handler: CommandEventHandler<ICommandEvent>) => {
+  public addBeforeCommandHook = (
+    command: string,
+    handler: CommandEventHandler<ICommandEvent>
+  ) => {
     return this.addHook('willRunCommandHooks', command, handler);
-  }
+  };
 
-  public addAfterCommandSuccessHook = (command: string, handler: CommandEventHandler<ICommandSuccessEvent>) => {
+  public addAfterCommandSuccessHook = (
+    command: string,
+    handler: CommandEventHandler<ICommandSuccessEvent>
+  ) => {
     return this.addHook('didRunCommandSuccessfullyHooks', command, handler);
-  }
+  };
 
   public registerPlugin = (plugins: IExtensionPlugin | IExtensionPlugin[]) => {
     this.pluginsQueue.push(...(Array.isArray(plugins) ? plugins : [plugins]));
@@ -265,30 +364,43 @@ export class SQLToolsExtension implements IExtension {
       this.loadPlugins();
     }
     return this;
-  }
+  };
 
-  public registerCommand = (command: string, handler: Function) => {
+  public registerCommand = (command: string, handler: GenericCallback) => {
     return this.decorateAndRegisterCommand(command, handler);
-  }
+  };
 
-  public registerTextEditorCommand = (command: string, handler: Function) => {
-    return this.decorateAndRegisterCommand(command, handler, 'registerTextEditorCommand');
-  }
+  public registerTextEditorCommand = (
+    command: string,
+    handler: GenericCallback
+  ) => {
+    return this.decorateAndRegisterCommand(
+      command,
+      handler,
+      'registerTextEditorCommand'
+    );
+  };
 
   public errorHandler = (message: string, error: any) => {
     return ErrorHandler.create(message)(error);
-  }
+  };
 
-  private decorateAndRegisterCommand = (command: string, handler: Function, type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand') => {
+  private decorateAndRegisterCommand = (
+    command: string,
+    handler: GenericCallback,
+    type: 'registerCommand' | 'registerTextEditorCommand' = 'registerCommand'
+  ) => {
     Context.subscriptions.push(
       commands[type](`${EXT_NAMESPACE}.${command}`, async (...args) => {
-        process.env.NODE_ENV === 'development' && log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command} %o`, args);
-        process.env.NODE_ENV !== 'development' && log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command}`);
+        process.env.NODE_ENV === 'development' &&
+          log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command} %o`, args);
+        process.env.NODE_ENV !== 'development' &&
+          log.info(`EXECUTING COMMAND => ${EXT_NAMESPACE}.${command}`);
 
         this.onWillRunCommandEmitter.fire({ command, args });
 
         let result = handler(...args);
-        if (typeof result !== 'undefined' && (typeof result.then === 'function' || typeof result.catch === 'function')) {
+        if (typeof result !== 'undefined' && isPromise(result)) {
           result = await result;
           // @FEATURE: add on fail hook
         }
@@ -297,7 +409,7 @@ export class SQLToolsExtension implements IExtension {
       })
     );
     return this;
-  }
+  };
 }
 
 let instance: SQLToolsExtension;
@@ -310,11 +422,10 @@ export function activate(ctx: ExtensionContext) {
     instance.registerPlugin([
       FormatterPlugin,
       ConnectionManagerPlugin,
-      new HistoryManagerPlugin,
-      new BookmarksManagerPlugin,
-    ])
+      new HistoryManagerPlugin(),
+      new BookmarksManagerPlugin(),
+    ]);
     return instance.activate();
-
   } catch (err) {
     log.fatal('failed to activate: %O', err);
   }

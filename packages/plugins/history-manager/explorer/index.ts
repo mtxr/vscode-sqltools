@@ -1,4 +1,4 @@
-import { EventEmitter, TreeDataProvider,TreeView } from 'vscode';
+import { EventEmitter, TreeDataProvider, TreeView } from 'vscode';
 import { HistoryTreeItem, HistoryTreeGroup } from './tree-items';
 import { window } from 'vscode';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
@@ -8,7 +8,9 @@ type HistoryExplorerItem = HistoryTreeItem | HistoryTreeGroup;
 
 export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   private treeView: TreeView<HistoryExplorerItem>;
-  private _onDidChangeTreeData: EventEmitter<HistoryExplorerItem | undefined> = new EventEmitter();
+  private _onDidChangeTreeData: EventEmitter<
+    HistoryExplorerItem | undefined
+  > = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   private tree: { [group: string]: HistoryTreeGroup } = {};
   private treeGroupOrder: string[] = [];
@@ -31,14 +33,16 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   }
   public refresh = (item?: HistoryExplorerItem) => {
     this._onDidChangeTreeData.fire(item);
-  }
+  };
 
   public addItem(group: string, value: string) {
     if (!this.tree[group]) {
       this.tree[group] = new HistoryTreeGroup(group, this.refresh);
     }
 
-    this.treeGroupOrder = [group].concat(this.treeGroupOrder.filter(g => g !== group));
+    this.treeGroupOrder = [group].concat(
+      this.treeGroupOrder.filter(g => g !== group)
+    );
     this.tree[group].addItem(value);
     this.refresh();
   }
@@ -50,7 +54,10 @@ export class HistoryExplorer implements TreeDataProvider<HistoryExplorerItem> {
   }
 
   constructor() {
-    this.treeView = window.createTreeView<HistoryExplorerItem>(`${EXT_NAMESPACE}ViewHistoryExplorer`, { treeDataProvider: this, showCollapseAll: true });
+    this.treeView = window.createTreeView<HistoryExplorerItem>(
+      `${EXT_NAMESPACE}ViewHistoryExplorer`,
+      { treeDataProvider: this, showCollapseAll: true }
+    );
     Context.subscriptions.push(this.treeView);
   }
 }

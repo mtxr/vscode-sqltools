@@ -6,8 +6,7 @@ export default abstract class AbstractFormatter {
   /**
    * @param {Object} cfg Different set of configurations
    */
-  constructor(public cfg: Config) { }
-
+  constructor(public cfg: Config) {}
 
   abstract getTokenizerConfig(): TokenizerConfig;
 

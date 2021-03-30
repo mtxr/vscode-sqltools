@@ -1,79 +1,121 @@
-import { EXT_NAMESPACE, DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
+import {
+  EXT_NAMESPACE,
+  DISPLAY_NAME,
+  EXT_CONFIG_NAMESPACE,
+} from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
 import WebviewProvider from '@sqltools/vscode/webview-provider';
 import { commands } from 'vscode';
 import { IConnection } from '@sqltools/types';
 import { UIAction } from './ui/screens/Settings/actions';
 import { SettingsScreenState } from './ui/screens/Settings/interfaces';
-import { driverPluginExtension, getInstalledDrivers, getDriverSchemas } from '../extension-util';
+import {
+  driverPluginExtension,
+  getInstalledDrivers,
+  getDriverSchemas,
+} from '../extension-util';
 
 export default class SettingsWebview extends WebviewProvider {
-  protected id: string = 'Settings';
-  protected title: string = `${DISPLAY_NAME} Settings`;
+  protected id = 'Settings';
+  protected title = `${DISPLAY_NAME} Settings`;
 
   private updateConnection = async ({ connInfo, globalSetting, editId }) => {
     connInfo = await this.parseBeforeSave({ connInfo });
 
-    return commands.executeCommand(`${EXT_NAMESPACE}.updateConnection`, editId, connInfo, globalSetting ? 'Global' : undefined)
-    .then(() => {
-      const partialState: Partial<SettingsScreenState> = {
-        formData: { ...connInfo, id: getConnectionId(connInfo) },
-        externalMessage: `${connInfo.name} updated!`,
-        externalMessageType: 'success',
-        // globalSetting,
-      }
-      return this.sendMessage(UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS, partialState);
-    }, (error = {}) => {
-      const partialState: Partial<SettingsScreenState> = {
-        externalMessage: (error.message || error || '').toString(),
-        externalMessageType: 'error',
-        // globalSetting,
-      }
-      return this.sendMessage(UIAction.RESPONSE_UPDATE_CONNECTION_ERROR, partialState);
-    });
-  }
+    return commands
+      .executeCommand(
+        `${EXT_NAMESPACE}.updateConnection`,
+        editId,
+        connInfo,
+        globalSetting ? 'Global' : undefined
+      )
+      .then(
+        () => {
+          const partialState: Partial<SettingsScreenState> = {
+            formData: { ...connInfo, id: getConnectionId(connInfo) },
+            externalMessage: `${connInfo.name} updated!`,
+            externalMessageType: 'success',
+            // globalSetting,
+          };
+          return this.sendMessage(
+            UIAction.RESPONSE_UPDATE_CONNECTION_SUCCESS,
+            partialState
+          );
+        },
+        (error = {}) => {
+          const partialState: Partial<SettingsScreenState> = {
+            externalMessage: (error.message || error || '').toString(),
+            externalMessageType: 'error',
+            // globalSetting,
+          };
+          return this.sendMessage(
+            UIAction.RESPONSE_UPDATE_CONNECTION_ERROR,
+            partialState
+          );
+        }
+      );
+  };
 
   private createConnection = async ({ connInfo, globalSetting }) => {
     connInfo = await this.parseBeforeSave({ connInfo });
-    return commands.executeCommand(`${EXT_NAMESPACE}.addConnection`, connInfo, globalSetting ? 'Global' : undefined)
-    .then(() => {
-      const partialState: Partial<SettingsScreenState> = {
-        formData: { ...connInfo, id: getConnectionId(connInfo) },
-        externalMessage: `${connInfo.name} was added to your settings!`,
-        externalMessageType: 'success',
-        // globalSetting,
-      }
-      return this.sendMessage(
-        UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS,
-        partialState
+    return commands
+      .executeCommand(
+        `${EXT_NAMESPACE}.addConnection`,
+        connInfo,
+        globalSetting ? 'Global' : undefined
+      )
+      .then(
+        () => {
+          const partialState: Partial<SettingsScreenState> = {
+            formData: { ...connInfo, id: getConnectionId(connInfo) },
+            externalMessage: `${connInfo.name} was added to your settings!`,
+            externalMessageType: 'success',
+            // globalSetting,
+          };
+          return this.sendMessage(
+            UIAction.RESPONSE_CREATE_CONNECTION_SUCCESS,
+            partialState
+          );
+        },
+        (error = {}) => {
+          const partialState: Partial<SettingsScreenState> = {
+            externalMessage: (error.message || error || '').toString(),
+            externalMessageType: 'error',
+            // globalSetting,
+          };
+          return this.sendMessage(
+            UIAction.RESPONSE_CREATE_CONNECTION_ERROR,
+            partialState
+          );
+        }
       );
-    }, (error = {}) => {
-      const partialState: Partial<SettingsScreenState> = {
-        externalMessage: (error.message || error || '').toString(),
-        externalMessageType: 'error',
-        // globalSetting,
-      }
-      return this.sendMessage(UIAction.RESPONSE_CREATE_CONNECTION_ERROR, partialState);
-    });
-  }
+  };
 
   private testConnection = async ({ connInfo }) => {
     connInfo = await this.parseBeforeSave({ connInfo });
 
-    return commands.executeCommand(`${EXT_NAMESPACE}.testConnection`, connInfo)
-    .then((res: any) => {
-      if (res && res.notification) {
-        const externalMessage = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`
-        return this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_WARNING, { externalMessage });
-      }
-      this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_SUCCESS, { connInfo });
-    }, (payload = {}) => {
-      payload = {
-        externalMessage: (payload.message || payload || '').toString(),
-      }
-      this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_ERROR, payload);
-    });
-  }
+    return commands
+      .executeCommand(`${EXT_NAMESPACE}.testConnection`, connInfo)
+      .then(
+        (res: any) => {
+          if (res && res.notification) {
+            const externalMessage = `You need to fix some issues in your machine first. Check the notifications on bottom-right before moving forward.`;
+            return this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_WARNING, {
+              externalMessage,
+            });
+          }
+          this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_SUCCESS, {
+            connInfo,
+          });
+        },
+        (payload = {}) => {
+          payload = {
+            externalMessage: (payload.message || payload || '').toString(),
+          };
+          this.sendMessage(UIAction.RESPONSE_TEST_CONNECTION_ERROR, payload);
+        }
+      );
+  };
 
   private parseBeforeSave = async ({ connInfo }) => {
     const pluginExt = await driverPluginExtension(connInfo.driver);
@@ -82,7 +124,7 @@ export default class SettingsWebview extends WebviewProvider {
     }
     ['id', 'isConnected', 'isActive'].forEach(p => delete connInfo[p]);
     return connInfo;
-  }
+  };
 
   private parseBeforeEdit = async ({ connInfo }) => {
     const pluginExt = await driverPluginExtension(connInfo.driver);
@@ -91,17 +133,25 @@ export default class SettingsWebview extends WebviewProvider {
     }
     ['isConnected', 'isActive'].forEach(p => delete connInfo[p]);
     return connInfo;
-  }
+  };
 
   private getAndSendInstalledDrivers = async () => {
-    return this.sendMessage(UIAction.RESPONSE_INSTALLED_DRIVERS, await getInstalledDrivers());
-  }
+    return this.sendMessage(
+      UIAction.RESPONSE_INSTALLED_DRIVERS,
+      await getInstalledDrivers()
+    );
+  };
 
-  private getAndSendDriverSchemas = ({ driver }: { driver: string } = { driver: null }) => {
-    return this.sendMessage(UIAction.RESPONSE_DRIVER_SCHEMAS, getDriverSchemas({ driver }));
-  }
+  private getAndSendDriverSchemas = (
+    { driver }: { driver: string } = { driver: null }
+  ) => {
+    return this.sendMessage(
+      UIAction.RESPONSE_DRIVER_SCHEMAS,
+      getDriverSchemas({ driver })
+    );
+  };
 
-  public editConnection = async ({ conn }: { conn: IConnection; }) => {
+  public editConnection = async ({ conn }: { conn: IConnection }) => {
     this.show();
 
     const installedDrivers = await getInstalledDrivers();
@@ -109,29 +159,41 @@ export default class SettingsWebview extends WebviewProvider {
     const formData = await this.parseBeforeEdit({ connInfo: conn });
     const driver = installedDrivers.find(d => d.value === conn.driver);
     if (!driver) {
-      throw new Error(`Driver ${conn.driver} not loaded or not installed yet. Try agian in a few seconds.`);
+      throw new Error(
+        `Driver ${conn.driver} not loaded or not installed yet. Try agian in a few seconds.`
+      );
     }
     const partialState: Partial<SettingsScreenState> = {
       installedDrivers,
-      driver: driver || { displayName: conn.driver, value: conn.driver, icon: null },
+      driver: driver || {
+        displayName: conn.driver,
+        value: conn.driver,
+        icon: null,
+      },
       schema,
       uiSchema,
       formData,
     };
     this.sendMessage(UIAction.REQUEST_EDIT_CONNECTION, partialState);
-  }
+  };
 
   public reset() {
     return this.sendMessage(UIAction.REQUEST_RESET);
   }
 
-  public sendMessage = (action: (typeof UIAction)[keyof typeof UIAction], payload?: any) => {
+  public sendMessage = (
+    action: typeof UIAction[keyof typeof UIAction],
+    payload?: any
+  ) => {
     return super.sendMessage(action, payload);
-  }
+  };
 
   private openConnectionFile = async () => {
-    return commands.executeCommand('workbench.action.openSettings', `${EXT_CONFIG_NAMESPACE}.connections`);
-  }
+    return commands.executeCommand(
+      'workbench.action.openSettings',
+      `${EXT_CONFIG_NAMESPACE}.connections`
+    );
+  };
 
   protected messagesHandler = ({ action, payload }) => {
     switch (action) {
@@ -148,5 +210,5 @@ export default class SettingsWebview extends WebviewProvider {
       case UIAction.REQUEST_DRIVER_SCHEMAS:
         return this.getAndSendDriverSchemas(payload);
     }
-  }
+  };
 }

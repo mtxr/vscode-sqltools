@@ -1,6 +1,6 @@
-import { window, QuickPickItem, QuickPickOptions, QuickPick } from 'vscode';
-import { DismissedError } from '@sqltools/util/exception';
 import { createLogger } from '@sqltools/log/src';
+import { DismissedError } from '@sqltools/util/exception';
+import { QuickPick, QuickPickItem, QuickPickOptions, window } from 'vscode';
 
 const log = createLogger('quickpick');
 export type ExtendedQuickPickOptions<T extends QuickPickItem = QuickPickItem | any> = Partial<
@@ -56,13 +56,13 @@ export async function quickPick<T = QuickPickItem | any>(
 }
 
 export async function quickPickSearch<T = any>(
-  loadOptions: (search: string) => PromiseLike<(({ label: string; value?: T }))[]>,
-  quickPickOptions: ExtendedQuickPickOptions = {},
+  loadOptions: (search: string) => PromiseLike<{ label: string; value?: T }[]>,
+  quickPickOptions: ExtendedQuickPickOptions = {}
 ): Promise<T> {
   const qPick = window.createQuickPick();
   qPick.placeholder = qPick.placeholder || 'Type something to search...';
   const sel = await new Promise<any[]>(resolve => {
-    const { placeHolderDisabled, debounceTime = 150, ignoreIfEmpty = false, ...qPickOptions } = quickPickOptions;
+    const { debounceTime = 150, ignoreIfEmpty = false, ...qPickOptions } = quickPickOptions;
     let searchTimeout = null;
     const onChangeValue = (search = '') => {
       qPick.busy = true;
@@ -83,12 +83,14 @@ export async function quickPickSearch<T = any>(
         };
         const thenFn = (options: any[]) => {
           qPick.busy = false;
-          qPick.items = options.length > 0 && typeof options[0] === 'object'
-            ? <QuickPickItem[]>options.map(o => ({ ...o, value: o, label: o.value || o.label }))
-            : options.map<QuickPickItem>(value => ({ value, label: value.toString() }));
+          qPick.items =
+            options.length > 0 && typeof options[0] === 'object'
+              ? <QuickPickItem[]>options.map(o => ({ ...o, value: o, label: o.value || o.label }))
+              : options.map<QuickPickItem>(value => ({ value, label: value.toString() }));
         };
         qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
-        if (getOptsPromise instanceof Promise || typeof getOptsPromise['catch'] === 'function') (<Promise<any>>getOptsPromise).then(thenFn).catch(catchFn);
+        if (getOptsPromise instanceof Promise || typeof getOptsPromise['catch'] === 'function')
+          (<Promise<any>>getOptsPromise).then(thenFn).catch(catchFn);
         else getOptsPromise.then(thenFn, catchFn);
       }, debounceTime);
     };
@@ -100,8 +102,7 @@ export async function quickPickSearch<T = any>(
       qPick.dispose();
     });
     qPick.onDidTriggerButton((btn: any) => {
-      if (btn.cb)
-        btn.cb();
+      if (btn.cb) btn.cb();
       qPick.hide();
     });
     Object.keys(qPickOptions).forEach(k => {
@@ -114,7 +115,7 @@ export async function quickPickSearch<T = any>(
 
   if (!sel || (quickPickOptions.canPickMany && sel.length === 0)) throw new DismissedError();
 
-  if (quickPickOptions.canPickMany) return sel as any as T;
+  if (quickPickOptions.canPickMany) return (sel as any) as T;
 
   return sel.pop() as T;
 }

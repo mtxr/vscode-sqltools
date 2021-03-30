@@ -46,11 +46,25 @@
     },
     "typescript.tsdk": "extension/root/node_modules/typescript/lib",
     "[typescript]": {
-      "editor.defaultFormatter": "vscode.typescript-language-features"
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
     "[typescriptreact]": {
-      "editor.defaultFormatter": "vscode.typescript-language-features"
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
     },
+    "[javascript]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "[javascriptreact]": {
+      "editor.defaultFormatter": "esbenp.prettier-vscode"
+    },
+    "editor.codeActionsOnSave": {
+      "source.fixAll": true,
+      "source.fixAll.eslint": true,
+      "source.organizeImports": true
+    },
+    "editor.formatOnSave": true,
+    "javascript.format.enable": true,
+    "typescript.format.enable": true
   },
   "tasks": {
     "version": "2.0.0",

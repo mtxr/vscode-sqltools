@@ -2,8 +2,8 @@ import queryFactory from '@sqltools/base-driver/dist/lib/factory';
 import { IBaseQueries, ContextValue, NSDatabase } from '@sqltools/types';
 
 function escapeTableName(table: Partial<NSDatabase.ITable> | string) {
-  let items: string[] = [];
-  let tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
+  const items: string[] = [];
+  const tableObj = typeof table === 'string' ? <NSDatabase.ITable>{ label: table } : table;
   tableObj.schema && items.push(`\`${tableObj.schema}\``);
   items.push(`\`${tableObj.label}\``);
   return items.join('.');
@@ -13,7 +13,7 @@ export const describeTable: IBaseQueries['describeTable'] = queryFactory`
   DESCRIBE ${p => escapeTableName(p)}
 `;
 
-export const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory/*sql*/`
+export const fetchColumns: IBaseQueries['fetchColumns'] = queryFactory/*sql*/ `
 SELECT
   C.COLUMN_NAME AS label,
   '${ContextValue.COLUMN}' as "type",
@@ -48,16 +48,16 @@ FROM
   LEFT JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU ON (
     C.TABLE_NAME = KCU.TABLE_NAME
     AND C.TABLE_SCHEMA = KCU.TABLE_SCHEMA
-    ${p => p.catalog ? 'AND C.TABLE_CATALOG = KCU.TABLE_CATALOG' : ''}
+    ${p => (p.catalog ? 'AND C.TABLE_CATALOG = KCU.TABLE_CATALOG' : '')}
     AND C.COLUMN_NAME = KCU.COLUMN_NAME
   )
   JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
   AND C.TABLE_SCHEMA = T.TABLE_SCHEMA
-  ${p => p.catalog ? 'AND C.TABLE_CATALOG = T.TABLE_CATALOG' : ''}
+  ${p => (p.catalog ? 'AND C.TABLE_CATALOG = T.TABLE_CATALOG' : '')}
 WHERE
   C.TABLE_SCHEMA = '${p => p.schema}'
   AND C.TABLE_NAME = '${p => p.label}'
-  ${p => p.catalog ? `AND C.TABLE_CATALOG = '${p.catalog}'` : ''}
+  ${p => (p.catalog ? `AND C.TABLE_CATALOG = '${p.catalog}'` : '')}
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION
@@ -90,7 +90,7 @@ FROM
   INFORMATION_SCHEMA.TABLES AS T
 WHERE
   T.TABLE_SCHEMA = '${p => p.database}'
-  ${p => p.catalog ? `AND T.TABLE_CATALOG = '${p.catalog}'` : ''}
+  ${p => (p.catalog ? `AND T.TABLE_CATALOG = '${p.catalog}'` : '')}
   AND UPPER(T.TABLE_TYPE) = '${tableType.toUpperCase()}'
 ORDER BY
   T.TABLE_NAME
@@ -126,11 +126,14 @@ FROM
   INFORMATION_SCHEMA.TABLES AS T
 WHERE
   T.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
-  ${p => p.search ? `AND (
+  ${p =>
+    p.search
+      ? `AND (
     (T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p.search}%'
     OR ('"' T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p.search}%'
     OR T.TABLE_NAME ILIKE '%${p.search}%'
-  )` : ''}
+  )`
+      : ''}
 ORDER BY
   T.TABLE_NAME
 LIMIT ${p => p.limit || 100};
@@ -163,17 +166,20 @@ FROM
   AND (C.TABLE_CATALOG IS NULL OR C.TABLE_CATALOG = T.TABLE_CATALOG)
 WHERE
   C.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
-  ${p => p.tables.filter(t => !!t.label).length
-    ? `AND LOWER(C.TABLE_NAME) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
-    : ''
-  }
-  ${p => p.search
-    ? `AND (
+  ${p =>
+    p.tables.filter(t => !!t.label).length
+      ? `AND LOWER(C.TABLE_NAME) IN (${p.tables
+          .filter(t => !!t.label)
+          .map(t => `'${t.label}'`.toLowerCase())
+          .join(', ')})`
+      : ''}
+  ${p =>
+    p.search
+      ? `AND (
       (C.TABLE_NAME || '.' || C.COLUMN_NAME) ILIKE '%${p.search}%'
       OR C.COLUMN_NAME ILIKE '%${p.search}%'
     )`
-    : ''
-  }
+      : ''}
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION

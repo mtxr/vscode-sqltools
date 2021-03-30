@@ -8,7 +8,7 @@ class QueryParser {
     if (driver === 'mssql') {
       query = query.replace(/^[ \t]*GO;?[ \t]*$/gim, '');
     }
-    const delimiter: string = ';';
+    const delimiter = ';';
     const queries: Array<string> = [];
     const flag = true;
     let restOfQuery;
@@ -34,9 +34,9 @@ class QueryParser {
 
   static getStatements(query: string, driver: string, delimiter: string): Array<string> {
     let previousChar: string = null;
-    let isInComment: boolean = false;
-    let isInString: boolean = false;
-    let isInTag: boolean = false;
+    let isInComment = false;
+    let isInString = false;
+    let isInTag = false;
     let nextChar: string = null;
     let commentChar: string = null;
     let stringChar: string = null;
@@ -155,7 +155,7 @@ class QueryParser {
     return resultQueries;
   }
 
-  static getQueryParts(query: string, splittingIndex: number, numChars: number = 1): Array<string> {
+  static getQueryParts(query: string, splittingIndex: number, numChars = 1): Array<string> {
     let statement: string = query.substring(0, splittingIndex);
     const restOfQuery: string = query.substring(splittingIndex + numChars);
     const result: Array<string> = [];

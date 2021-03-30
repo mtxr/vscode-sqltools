@@ -8,7 +8,11 @@ export class BookmarkTreeItem extends TreeItem {
     return this.query;
   }
 
-  constructor(public name: string, public query: string, public parent: BookmarkTreeGroup) {
+  constructor(
+    public name: string,
+    public query: string,
+    public parent: BookmarkTreeGroup
+  ) {
     super(name, TreeItemCollapsibleState.None);
     this.description = query;
     this.command = {
@@ -53,7 +57,10 @@ export class BookmarkTreeGroup extends TreeItem {
   }
 
   public toJSON() {
-    const items = Object.values(this.items).reduce(( groupped, item) => ({ ...groupped, ...item.toJSON() }), {});
+    const items = Object.values(this.items).reduce(
+      (groupped, item) => ({ ...groupped, ...item.toJSON() }),
+      {}
+    );
     return { [this.name]: items };
   }
 

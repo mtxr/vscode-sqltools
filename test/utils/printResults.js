@@ -14,4 +14,4 @@ function printResults(results) {
     }
   });
 }
-module.exports = printResults
+module.exports = printResults;

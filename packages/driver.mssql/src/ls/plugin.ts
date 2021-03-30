@@ -7,7 +7,7 @@ const MSSQLDriverPlugin: ILanguageServerPlugin = {
     DRIVER_ALIASES.forEach(({ value }) => {
       server.getContext().drivers.set(value, MSSQL);
     });
-  }
-}
+  },
+};
 
 export default MSSQLDriverPlugin;

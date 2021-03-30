@@ -5,12 +5,15 @@ export interface IWebviewMessage<T = any> {
 }
 
 export interface IVSCodeWebviewAPI {
-  getState<State>(): State,
-  setState<State>(newState: State): State,
+  getState<State>(): State;
+  setState<State>(newState: State): State;
   postMessage<T>(message: IWebviewMessage<T>): void;
 }
 
-export interface ReducerAction<A extends string = string, S extends object = any> {
+export interface ReducerAction<
+  A extends string = string,
+  S extends Record<string, unknown> = any
+> {
   type: A;
   payload?: Partial<S> & { [k: string]: any };
   callback?: () => any;

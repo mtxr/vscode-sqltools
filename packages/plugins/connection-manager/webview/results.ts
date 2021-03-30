@@ -1,18 +1,23 @@
-import { NSDatabase, InternalID } from '@sqltools/types';
-import WebviewProvider from '@sqltools/vscode/webview-provider';
-import { ResultsScreenState } from './ui/screens/Results/interfaces';
-import vscode from 'vscode';
+import { InternalID, NSDatabase } from '@sqltools/types';
 import Config from '@sqltools/util/config-manager';
 import { getNameFromId } from '@sqltools/util/connection';
 import { DISPLAY_NAME } from '@sqltools/util/constants';
+import WebviewProvider from '@sqltools/vscode/webview-provider';
+import vscode from 'vscode';
 import { UIAction } from './ui/screens/Results/actions';
+import { ResultsScreenState } from './ui/screens/Results/interfaces';
 
 class ResultsWebview extends WebviewProvider<ResultsScreenState> {
-  protected id: string = 'Results';
-  protected title: string = `${DISPLAY_NAME} Results`;
+  protected id = 'Results';
+  protected title = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
 
-  constructor(public requestId: string, private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
+  constructor(
+    public requestId: string,
+    private syncConsoleMessages: (
+      messages: NSDatabase.IResult['messages']
+    ) => void
+  ) {
     super();
 
     this.onDidDispose(() => {
@@ -34,12 +39,14 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
     if (!active) {
       this.syncConsoleMessages(['Not focused to results view']);
       return;
-    };
+    }
     try {
       const state = await this.getState();
       this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
-    } catch (e) { }
-  }
+    } catch (e) {
+      /* */
+    }
+  };
 
   public get cssVariables() {
     if (!Config.results.customization) {
@@ -63,9 +70,17 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
         default:
           if (!vscode.window.activeTextEditor) {
             this.whereToShow = vscode.ViewColumn.One;
-          } else if (Config.results && typeof Config.results.location === 'number' && Config.results.location >= -1 && Config.results.location <= 9 && Config.results.location !== 0) {
+          } else if (
+            Config.results &&
+            typeof Config.results.location === 'number' &&
+            Config.results.location >= -1 &&
+            Config.results.location <= 9 &&
+            Config.results.location !== 0
+          ) {
             this.whereToShow = Config.results.location;
-          } else if (vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One) {
+          } else if (
+            vscode.window.activeTextEditor.viewColumn === vscode.ViewColumn.One
+          ) {
             this.whereToShow = vscode.ViewColumn.Two;
           } else {
             this.whereToShow = vscode.ViewColumn.Three;
@@ -77,15 +92,15 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
     super.show();
 
     return new Promise<void>((resolve, reject) => {
-      let count = 0;
-      let interval = setInterval(() => {
+      const count = 0;
+      const interval = setInterval(() => {
         if (this.isOpen) {
           clearInterval(interval);
           return resolve();
         }
         if (count >= 5) {
           clearInterval(interval);
-          return reject(new Error('Can\'t open results screen'));
+          return reject(new Error("Can't open results screen"));
         }
       }, 500);
     });
@@ -98,44 +113,68 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
       let suffix = 'query results';
       if (payload && payload.length > 0) {
         if (payload.length === 1) {
-          let truncatedQuery = payload[0].query.length > 16 ? `${payload[0].query.substring(0, 16)}...` : payload[0].query;
-          suffix = payload[0].label ? payload[0].label : truncatedQuery.replace(/(\r?\n\s*)/gim, ' ');
+          const truncatedQuery =
+            payload[0].query.length > 16
+              ? `${payload[0].query.substring(0, 16)}...`
+              : payload[0].query;
+          suffix = payload[0].label
+            ? payload[0].label
+            : truncatedQuery.replace(/(\r?\n\s*)/gim, ' ');
         } else {
           suffix = 'multiple query results';
         }
       }
       this.title = `${prefix}: ${suffix}`;
-    } catch (error) { }
+    } catch (error) {
+      /* */
+    }
     this.updatePanelName();
-    this.sendMessage(UIAction.RESPONSE_RESULTS, { resultTabs: payload, hasError: payload.some(p => !!p.error) });
-  }
+    this.sendMessage(UIAction.RESPONSE_RESULTS, {
+      resultTabs: payload,
+      hasError: payload.some(p => !!p.error),
+    });
+  };
 
   whereToShow = vscode.ViewColumn.Active;
 }
 
 export default class ResultsWebviewManager {
   private viewsMap: { [id: string]: ResultsWebview } = {};
-  constructor(private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) { }
+  constructor(
+    private syncConsoleMessages: (
+      messages: NSDatabase.IResult['messages']
+    ) => void
+  ) {}
 
   dispose = () => {
-    return Promise.all(Object.keys(this.viewsMap).map(id => this.viewsMap[id].dispose()));
-  }
+    return Promise.all(
+      Object.keys(this.viewsMap).map(id => this.viewsMap[id].dispose())
+    );
+  };
 
   private createForId = (requestId: InternalID) => {
-    this.viewsMap[requestId] = new ResultsWebview(requestId, this.syncConsoleMessages);
+    this.viewsMap[requestId] = new ResultsWebview(
+      requestId,
+      this.syncConsoleMessages
+    );
     this.viewsMap[requestId].onDidDispose(() => {
       delete this.viewsMap[requestId];
     });
     return this.viewsMap[requestId];
-  }
+  };
 
   get = (requestId: InternalID) => {
-    if (!requestId) throw new Error('Missing request id to create results view');
+    if (!requestId)
+      throw new Error('Missing request id to create results view');
 
     return this.viewsMap[requestId] || this.createForId(requestId);
-  }
+  };
 
   public getActiveView = () => {
-    return this.viewsMap[Object.keys(this.viewsMap).find(k => this.viewsMap[k] && this.viewsMap[k].isActive)];
-  }
+    return this.viewsMap[
+      Object.keys(this.viewsMap).find(
+        k => this.viewsMap[k] && this.viewsMap[k].isActive
+      )
+    ];
+  };
 }

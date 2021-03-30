@@ -2,7 +2,7 @@
 
 const fs: any = jest.genMockFromModule('fs');
 
-let mockFiles: any = {};
+const mockFiles: any = {};
 function readFileSync(directoryPath) {
   if (!mockFiles.hasOwnProperty(directoryPath)) {
     throw new Error('File not found!');
@@ -29,5 +29,6 @@ function writeFileSync(directoryPath, content) {
 fs.readFileSync = readFileSync;
 fs.writeFileSync = writeFileSync;
 fs.unlinkSync = unlinkSync;
+fs.existsSync = existsSync;
 
 module.exports = fs;

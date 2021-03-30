@@ -1,7 +1,7 @@
 # exclusions
 .vscode/**
 .vscode-test/**
-out/test/**
+dist/test/**
 test/**
 **/test/**
 src/**

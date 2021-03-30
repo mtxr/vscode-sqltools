@@ -1,0 +1,10 @@
+node_modules/
+static/
+.github/
+.test-results/
+.vscode/
+.vscode-test/
+docs/
+coverage/
+**/dist/**/*.js
+**/formatter/lib/

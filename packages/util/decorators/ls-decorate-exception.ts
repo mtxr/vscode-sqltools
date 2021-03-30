@@ -9,16 +9,21 @@ class DecoratedException<A> extends ResponseError<A> {
   }
 }
 
-export default function decorateLSException(e: Error & { code?: number; data?: { [key: string]: any } }, { conn }: { conn?: IConnection } = {}) {
-  let data: { [key: string]: any } = {};
+export default function decorateLSException(
+  e: Error & { code?: number; data?: any },
+  { conn }: { conn?: IConnection } = {}
+) {
+  const data: IConnection = {
+    ...conn,
+  };
   if (conn && conn.driver) {
     data.driver = conn.driver;
-    data.driverOptions = {
-      mssqlOptions: conn.mssqlOptions,
-      mysqlOptions: conn.mysqlOptions,
-      pgOptions: conn.pgOptions,
-      oracleOptions: conn.oracleOptions,
+    data.driverOptions = conn.driverOptions || {
+      mssqlOptions: (conn as any).mssqlOptions,
+      mysqlOptions: (conn as any).mysqlOptions,
+      pgOptions: (conn as any).pgOptions,
+      oracleOptions: (conn as any).oracleOptions,
     };
   }
-  return new DecoratedException<typeof e.data>(e, data);
+  return new DecoratedException<IConnection>(e, data);
 }

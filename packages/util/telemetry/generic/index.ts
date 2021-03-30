@@ -5,41 +5,44 @@ import { createLogger } from '@sqltools/log/src';
 import * as Sentry from '@sentry/node';
 import { ITelemetryArgs, ATelemetry, ITimer } from '@sqltools/types';
 
-const IGNORE_ERRORS_REGEX = new RegExp(`(${[
-  'aggregate function',
-  'already exists',
-  'authentication failed',
-  'cannot drop',
-  'cross-database references',
-  'does not exist',
-  'econnrefused',
-  'econnreset',
-  'enotfound',
-  'enotfound',
-  'er_access_denied_error',
-  'er_bad_db_error',
-  'er_bad_field_error',
-  'er_cannot_load_from_table_v2',
-  'er_dup_fieldname',
-  'er_no_referenced_row_2',
-  'er_no_such_table',
-  'er_not_supported_auth_mode',
-  'er_parse_error',
-  'etimedout',
-  'failed to connect',
-  'is ambiguous',
-  'key constraint',
-  'login failed',
-  'no such table',
-  'ora-[0-9]+',
-  'sqlite_cantopen',
-  'syntax error',
-  'unknown_code_please_report',
-  'violates',
-].join('|')})`, 'g');
+const IGNORE_ERRORS_REGEX = new RegExp(
+  `(${[
+    'aggregate function',
+    'already exists',
+    'authentication failed',
+    'cannot drop',
+    'cross-database references',
+    'does not exist',
+    'econnrefused',
+    'econnreset',
+    'enotfound',
+    'enotfound',
+    'er_access_denied_error',
+    'er_bad_db_error',
+    'er_bad_field_error',
+    'er_cannot_load_from_table_v2',
+    'er_dup_fieldname',
+    'er_no_referenced_row_2',
+    'er_no_such_table',
+    'er_not_supported_auth_mode',
+    'er_parse_error',
+    'etimedout',
+    'failed to connect',
+    'is ambiguous',
+    'key constraint',
+    'login failed',
+    'no such table',
+    'ora-[0-9]+',
+    'sqlite_cantopen',
+    'syntax error',
+    'unknown_code_please_report',
+    'violates',
+  ].join('|')})`,
+  'g'
+);
 
 const product = process.env.PRODUCT;
-let log = createLogger('telemetry');
+const log = createLogger('telemetry');
 
 Sentry.init({
   maxBreadcrumbs: 5,
@@ -54,11 +57,11 @@ Sentry.init({
       return null;
     }
     return event;
-  }
+  },
 });
 
 class Telemetry implements ATelemetry {
-  public static enabled: Boolean;
+  public static enabled: boolean;
   public static extraInfo: ITelemetryArgs['extraInfo'];
   private prefixed(key: string) {
     return `${product}:${key}`;
@@ -82,7 +85,7 @@ class Telemetry implements ATelemetry {
         sessionId: Telemetry.extraInfo.sessId,
       });
     }
-  }
+  };
   constructor(opts: ITelemetryArgs) {
     this.updateOpts(opts);
   }
@@ -91,21 +94,21 @@ class Telemetry implements ATelemetry {
     Telemetry.extraInfo = opts.extraInfo || Telemetry.extraInfo || {};
     if (opts.enableTelemetry) this.enable();
     else this.disable();
-  }
+  };
 
   public enable = (): void => {
     if (Telemetry.enabled) return;
     Telemetry.enabled = true;
     this.createClient();
     log.info('Telemetry enabled!');
-  }
+  };
 
   public disable = (): void => {
     if (!Telemetry.enabled) return;
     Telemetry.enabled = false;
     Sentry.getCurrentHub().getClient().getOptions().enabled = false;
     log.info('Telemetry disabled!');
-  }
+  };
 
   @runIfPropIsDefined('client')
   public registerException(error: Error, data: { [key: string]: any } = {}) {
@@ -118,17 +121,17 @@ class Telemetry implements ATelemetry {
     Sentry.configureScope(scope => {
       scope.setExtras({
         exception: error,
-        properties
+        properties,
       });
       Sentry.captureException(error);
-    })
+    });
   }
 
   @runIfPropIsDefined('client')
   public registerMessage(
     severity: 'info' | 'warn' | 'debug' | 'error' | 'critical' | 'fatal',
     message: string,
-    value: string = 'Dismissed'
+    value = 'Dismissed'
   ): void {
     log.debug({ severity }, 'Message: %s, value: %s', message, value);
     let sev: Sentry.Severity;
@@ -155,11 +158,8 @@ class Telemetry implements ATelemetry {
   }
 
   @runIfPropIsDefined('client')
-  public registerEvent(
-    name: string,
-    properties?: { [key: string]: any }
-  ): void {
-    log.debug(`Event: %s\n%j`, name,  properties || '');
+  public registerEvent(name: string, properties?: { [key: string]: any }): void {
+    log.debug(`Event: %s\n%j`, name, properties || '');
     Sentry.captureEvent({
       event_id: this.prefixed(name),
       message: name,

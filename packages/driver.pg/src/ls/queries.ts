@@ -109,11 +109,14 @@ FROM INFORMATION_SCHEMA.TABLES AS T
 WHERE
   T.TABLE_SCHEMA !~ '^pg_'
   AND T.TABLE_SCHEMA <> 'information_schema'
-  ${p => p.search ? `AND (
+  ${p =>
+    p.search
+      ? `AND (
     (T.TABLE_CATALOG || '.' || T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p.search}%'
     OR ('"' || T.TABLE_CATALOG || '"."' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p.search}%'
     OR T.TABLE_NAME ILIKE '%${p.search}%'
-  )` : ''}
+  )`
+      : ''}
 ORDER BY
   T.TABLE_NAME
 LIMIT ${p => p.limit || 100};
@@ -146,17 +149,20 @@ JOIN INFORMATION_SCHEMA.TABLES AS T ON C.TABLE_NAME = T.TABLE_NAME
 WHERE
   C.TABLE_SCHEMA !~ '^pg_'
   AND C.TABLE_SCHEMA <> 'information_schema'
-  ${p => p.tables.filter(t => !!t.label).length
-    ? `AND LOWER(C.TABLE_NAME) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
-    : ''
-  }
-  ${p => p.search
-    ? `AND (
+  ${p =>
+    p.tables.filter(t => !!t.label).length
+      ? `AND LOWER(C.TABLE_NAME) IN (${p.tables
+          .filter(t => !!t.label)
+          .map(t => `'${t.label}'`.toLowerCase())
+          .join(', ')})`
+      : ''}
+  ${p =>
+    p.search
+      ? `AND (
       (C.TABLE_NAME || '.' || C.COLUMN_NAME) ILIKE '%${p.search}%'
       OR C.COLUMN_NAME ILIKE '%${p.search}%'
     )`
-    : ''
-  }
+      : ''}
 ORDER BY
   C.TABLE_NAME,
   C.ORDINAL_POSITION

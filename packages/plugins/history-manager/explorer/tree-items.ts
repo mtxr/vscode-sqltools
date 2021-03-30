@@ -1,7 +1,8 @@
-import { TreeItem, TreeItemCollapsibleState } from 'vscode';
+import { GenericCallback } from '@sqltools/types';
 import Config from '@sqltools/util/config-manager';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { cleanUp } from '@sqltools/util/query';
+import { TreeItem, TreeItemCollapsibleState } from 'vscode';
 
 export class HistoryTreeItem extends TreeItem {
   public contextValue = 'history.item';
@@ -30,10 +31,13 @@ export class HistoryTreeGroup extends TreeItem {
   }
 
   public addItem(query: string) {
-    if (!query || (query.trim().length === 0)) {
+    if (!query || query.trim().length === 0) {
       return;
     }
-    if (this.items.length > 0 && this.items[0].query.trim() === query.toString().trim()) {
+    if (
+      this.items.length > 0 &&
+      this.items[0].query.trim() === query.toString().trim()
+    ) {
       this.items[0].description = new Date().toLocaleString();
       return this.items[0];
     }
@@ -49,14 +53,16 @@ export class HistoryTreeGroup extends TreeItem {
       this.items.length = this.getMaxSize();
       this.refresh(this);
     }
-  }
+  };
   private getMaxSize() {
     return Config.get('historySize', 100);
   }
 
-  constructor(public name: string, private refresh: Function) {
+  constructor(public name: string, private refresh: GenericCallback) {
     super(name, TreeItemCollapsibleState.Expanded);
 
-    Config.addOnUpdateHook(({ event }) => event.affectsConfig('historySize') && this.sizeKeeper);
+    Config.addOnUpdateHook(
+      ({ event }) => event.affectsConfig('historySize') && this.sizeKeeper
+    );
   }
 }

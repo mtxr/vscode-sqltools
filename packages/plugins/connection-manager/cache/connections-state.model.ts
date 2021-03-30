@@ -1,7 +1,7 @@
 import Cache from '@sqltools/util/cache';
 
 const connectionStateCache = new Cache('manager', {
-  maxAge: 2*60*60*1000,
+  maxAge: 2 * 60 * 60 * 1000,
   maxEntries: 50,
 });
 

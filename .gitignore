@@ -1,5 +1,4 @@
-out/
-dist/
+**/dist/
 node_modules/
 .vscode-test/
 coverage/

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-var-requires */
 import { ATelemetry } from '@sqltools/types';
 
 let telemetry: ATelemetry;

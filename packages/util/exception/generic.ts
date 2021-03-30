@@ -1,2 +1,1 @@
-export default class GenericError extends Error {
-}
+export default class GenericError extends Error {}

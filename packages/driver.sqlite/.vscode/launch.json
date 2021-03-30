@@ -16,7 +16,7 @@
 			],
 			"outFiles": [
 				"${workspaceFolder}/../../dist/*.js",
-				"${workspaceFolder}/out/**/*.js",
+				"${workspaceFolder}/dist/**/*.js",
 			],
 			"sourceMapPathOverrides": {
 				"src/*": "${workspaceRoot}/src/*",
@@ -40,7 +40,7 @@
 			"protocol": "inspector",
 			"timeout": 100000,
 			"outFiles": [
-				"${workspaceFolder}/out/**/*.js"
+				"${workspaceFolder}/dist/**/*.js"
 			],
 			"skipFiles": [
 				"<node_internals>/**"

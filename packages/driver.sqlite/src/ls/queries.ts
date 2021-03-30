@@ -44,13 +44,13 @@ ORDER BY name
 `;
 
 const fetchTables: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.TABLE);
-const fetchViews: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.VIEW , 'view');
+const fetchViews: IBaseQueries['fetchTables'] = fetchTablesAndViews(ContextValue.VIEW, 'view');
 
 const searchTables: IBaseQueries['searchTables'] = queryFactory`
 SELECT name AS label,
   type
 FROM sqlite_master
-${p => p.search ? `WHERE LOWER(name) LIKE '%${p.search.toLowerCase()}%'` : ''}
+${p => (p.search ? `WHERE LOWER(name) LIKE '%${p.search.toLowerCase()}%'` : '')}
 ORDER BY name
 `;
 const searchColumns: IBaseQueries['searchColumns'] = queryFactory`
@@ -63,17 +63,20 @@ SELECT C.name AS label,
 FROM sqlite_master AS T
 LEFT OUTER JOIN pragma_table_info((T.name)) AS C ON 1 = 1
 WHERE 1 = 1
-${p => p.tables.filter(t => !!t.label).length
-  ? `AND LOWER(T.name) IN (${p.tables.filter(t => !!t.label).map(t => `'${t.label}'`.toLowerCase()).join(', ')})`
-  : ''
-}
-${p => p.search
-  ? `AND (
+${p =>
+  p.tables.filter(t => !!t.label).length
+    ? `AND LOWER(T.name) IN (${p.tables
+        .filter(t => !!t.label)
+        .map(t => `'${t.label}'`.toLowerCase())
+        .join(', ')})`
+    : ''}
+${p =>
+  p.search
+    ? `AND (
     LOWER(T.name || '.' || C.name) LIKE '%${p.search.toLowerCase()}%'
     OR LOWER(C.name) LIKE '%${p.search.toLowerCase()}%'
   )`
-  : ''
-}
+    : ''}
 ORDER BY C.name ASC,
   C.cid ASC
 LIMIT ${p => p.limit || 100}
@@ -87,8 +90,8 @@ export default {
   fetchTables,
   fetchViews,
   searchTables,
-  searchColumns
-}
+  searchColumns,
+};
 // export default {
 //   listFks: `PRAGMA foreign_key_list(\':table\');`
 // } as IBaseQueries;

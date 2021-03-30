@@ -26,9 +26,7 @@ describe('N1qlFormatter', () => {
   });
 
   it('formats INSERT with {} object literal', () => {
-    const result = format(
-      "INSERT INTO heroes (KEY, VALUE) VALUES ('123', {'id':1,'type':'Tarzan'});"
-    );
+    const result = format("INSERT INTO heroes (KEY, VALUE) VALUES ('123', {'id':1,'type':'Tarzan'});");
     expect(result).toBe(dedent/* sql */ `
       INSERT INTO heroes (KEY, VALUE)
       VALUES ('123', {'id': 1, 'type': 'Tarzan'});
@@ -92,9 +90,7 @@ describe('N1qlFormatter', () => {
   });
 
   it('formats UPDATE query with USE KEYS and RETURNING', () => {
-    const result = format(
-      "UPDATE tutorial USE KEYS 'baldwin' SET type = 'actor' RETURNING tutorial.type"
-    );
+    const result = format("UPDATE tutorial USE KEYS 'baldwin' SET type = 'actor' RETURNING tutorial.type");
     expect(result).toBe(dedent/* sql */ `
       UPDATE tutorial
       USE KEYS 'baldwin'
@@ -116,8 +112,8 @@ describe('N1qlFormatter', () => {
     const result = format('SELECT $variable, $\'var name\', $"var name", $`var name`;', {
       params: {
         variable: '"variable value"',
-        'var name': "'var value'"
-      }
+        'var name': "'var value'",
+      },
     });
     expect(result).toBe(dedent/* sql */ `
       SELECT "variable value",
@@ -132,8 +128,8 @@ describe('N1qlFormatter', () => {
       params: {
         0: 'first',
         1: 'second',
-        2: 'third'
-      }
+        2: 'third',
+      },
     });
     expect(result).toBe(dedent/* sql */ `
       SELECT second,

@@ -2,21 +2,21 @@ const chalk = require('chalk');
 const { specialChars } = require('jest-util');
 const { ICONS } = specialChars;
 
-const getTestResults = (testResults) => {
+const getTestResults = testResults => {
   const testSuites = groupTestsBySuites(testResults);
 
   return getLogSuite(testSuites, 0);
 };
 
-const groupTestsBySuites = (testResults) => {
+const groupTestsBySuites = testResults => {
   const output = { suites: [], tests: [], title: '' };
-  testResults.forEach((testResult) => {
+  testResults.forEach(testResult => {
     let targetSuite = output;
 
     // Find the target suite for this test,
     // creating nested suites as necessary.
     for (const title of testResult.ancestorTitles) {
-      let matchingSuite = targetSuite.suites.find((s) => s.title === title);
+      let matchingSuite = targetSuite.suites.find(s => s.title === title);
       if (!matchingSuite) {
         matchingSuite = { suites: [], tests: [], title };
         targetSuite.suites.push(matchingSuite);
@@ -39,9 +39,7 @@ const getLogSuite = (suite, indentLevel) => {
 
   output += logTests(suite.tests, indentLevel + 1);
 
-  suite.suites.forEach(
-    (suite) => (output += getLogSuite(suite, indentLevel + 1))
-  );
+  suite.suites.forEach(suite => (output += getLogSuite(suite, indentLevel + 1)));
 
   return output;
 };
@@ -54,7 +52,7 @@ const getLine = (str, indentLevel) => {
 
 const logTests = (tests, indentLevel) => {
   let output = '';
-  tests.forEach((test) => (output += logTest(test, indentLevel)));
+  tests.forEach(test => (output += logTest(test, indentLevel)));
 
   return output;
 };
@@ -67,7 +65,7 @@ const logTest = (test, indentLevel) => {
   return getLine(testStatus, indentLevel);
 };
 
-const getIcon = (status) => {
+const getIcon = status => {
   switch (status) {
     case 'failed':
       return chalk.red(ICONS.failed);

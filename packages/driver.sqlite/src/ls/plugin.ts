@@ -7,7 +7,7 @@ const SQLiteDriverPlugin: ILanguageServerPlugin = {
     DRIVER_ALIASES.forEach(({ value }) => {
       server.getContext().drivers.set(value, SQLite as any);
     });
-  }
-}
+  },
+};
 
 export default SQLiteDriverPlugin;

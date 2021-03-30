@@ -1,5 +1,6 @@
-import LRUCache from 'lru-cache';
 import { createLogger } from '@sqltools/log/src';
+import LRUCache from 'lru-cache';
+import { isFunction } from '../typeGuards';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
 
@@ -10,15 +11,12 @@ interface CacheOptions {
   maxEntries?: number;
   maxAge?: number;
   persist?: boolean;
-};
+}
 
 class Cache<K = Key, V = Value> {
   private instance: LRUCache<K, V>;
   private log: ReturnType<typeof createLogger>;
-  constructor(private namespace: string, {
-    maxEntries = 50,
-    maxAge = ONE_DAY_MS,
-  }: CacheOptions) {
+  constructor(private namespace: string, { maxEntries = 50, maxAge = ONE_DAY_MS }: CacheOptions) {
     this.instance = new LRUCache<K, V>({
       max: maxEntries,
       maxAge,
@@ -31,7 +29,7 @@ class Cache<K = Key, V = Value> {
   set = async (key: K, value: V, maxAge?: number): Promise<boolean> => {
     this.log.debug('SET %s', key);
     return Promise.resolve(this.instance.set(key, value, maxAge));
-  }
+  };
 
   peek = async (key: K) => Promise.resolve(this.instance.peek(key));
 
@@ -44,19 +42,19 @@ class Cache<K = Key, V = Value> {
 
     this.log.debug('MISS for %s', key);
     if (typeof getUpdatedValue === 'undefined') return undefined;
-    const result = await Promise.resolve(typeof getUpdatedValue !== 'function' ? getUpdatedValue : (<Function>getUpdatedValue)());
+    const result = await Promise.resolve(isFunction(getUpdatedValue) ? getUpdatedValue() : getUpdatedValue);
     await this.set(key, result);
     return result;
-  }
+  };
 
   del = async (keysOrKeys: K | K[]): Promise<boolean> => {
-    const keys = Array.isArray(keysOrKeys) ? keysOrKeys : (keysOrKeys ? [keysOrKeys] : []);
-    for(const key of keys) {
+    const keys = Array.isArray(keysOrKeys) ? keysOrKeys : keysOrKeys ? [keysOrKeys] : [];
+    for (const key of keys) {
       this.log.debug('DELETE  %s', key);
       this.instance.del(key);
     }
     return true;
-  }
+  };
 
   keys = () => this.instance.keys() as string[];
 
@@ -74,24 +72,23 @@ class Cache<K = Key, V = Value> {
     }
     this.log.debug('DELETE keys starting with %s completed!', startStr);
     return true;
-  }
+  };
 
   clear = async () => {
     this.log.debug('CLEAR all');
     return Promise.resolve(this.instance.reset());
-  }
+  };
 
   forceClearOld = async () => {
     this.log.debug('PRUNE old');
     return Promise.resolve(this.instance.prune());
-  }
+  };
 
   buildKey = (opts: any) => JSON.stringify(opts);
 
   private onDeleted = async (key: K, _value?: V) => {
     this.log.debug('DELETED %s', key);
-  }
+  };
 }
-
 
 export default Cache;

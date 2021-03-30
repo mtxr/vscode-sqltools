@@ -1,6 +1,13 @@
-import { IConnection, MConnectionExplorer, ContextValue } from '@sqltools/types';
+import {
+  IConnection,
+  MConnectionExplorer,
+  ContextValue,
+} from '@sqltools/types';
 import { TreeItem, SnippetString } from 'vscode';
-interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T> {
+interface SidebarItemIterface<
+  T extends SidebarItemIterface<any> | never,
+  A = T
+> {
   parent: SidebarItemIterface<T, A>;
   value: string;
   snippet?: SnippetString;
@@ -8,18 +15,24 @@ interface SidebarItemIterface<T extends SidebarItemIterface<any> | never, A = T>
   getChildren(): Promise<T[]>;
   metadata: MConnectionExplorer.IChildItem;
 }
-export default abstract class SidebarAbstractItem<T extends SidebarItemIterface<SidebarAbstractItem> = any, A = T> extends TreeItem implements SidebarItemIterface<T, A> {
+export default abstract class SidebarAbstractItem<
+    T extends SidebarItemIterface<SidebarAbstractItem> = any,
+    A = T
+  >
+  extends TreeItem
+  implements SidebarItemIterface<T, A> {
   protected _snippet: SnippetString;
   get snippet() {
     if (!this._snippet) {
       this._snippet = new SnippetString(this.label);
     }
     return this._snippet;
-  };
+  }
 
   set snippet(value: any) {
-    this._snippet = value instanceof SnippetString ? value : new SnippetString(`${value}`);
-  };
+    this._snippet =
+      value instanceof SnippetString ? value : new SnippetString(`${value}`);
+  }
   conn: IConnection;
   parent: SidebarAbstractItem = null;
   abstract value: string;

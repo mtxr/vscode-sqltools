@@ -1,38 +1,43 @@
-import { IConfig, OnUpdateConfigHandler, ConfigChangeEvent } from '@sqltools/types';
+import { ConfigChangeEvent, IConfig, OnUpdateConfigHandler } from '@sqltools/types';
 import { InvalidActionError } from '@sqltools/util/exception';
 
 let settings: IConfig = {} as IConfig;
 
 const onUpdateHooks: OnUpdateConfigHandler[] = [];
 
-const get: IConfig['get'] = (configKey, defaultValue = null) =>  {
-  if ((settings as any).hasOwnProperty(configKey)) {
+const get: IConfig['get'] = (configKey, defaultValue = null) => {
+  if (configKey in settings) {
     return settings[configKey];
   }
-  const keys: string [] = configKey.split('.');
+  const keys: string[] = configKey.split('.');
 
-  let setting = settings as any;
+  let setting = settings;
   for (const key of keys) {
-    if (!setting.hasOwnProperty(key) || typeof setting[key] === 'undefined') {
+    if (!(key in setting) || typeof setting[key] === 'undefined') {
       return defaultValue;
     }
     setting = setting[key];
   }
   return setting;
-}
+};
 
-const throwIfAccess = (name: string) => () => {throw `${name} is not available. Config Manager is in read-only mode.`};
+const throwIfAccess = (name: string) => () => {
+  throw `${name} is not available. Config Manager is in read-only mode.`;
+};
 
-const handlerEventAccess: ConfigChangeEvent = { affectsConfig: throwIfAccess('affectsConfig'), affectsConfiguration: throwIfAccess('affectsConfiguration') }
+const handlerEventAccess: ConfigChangeEvent = {
+  affectsConfig: throwIfAccess('affectsConfig'),
+  affectsConfiguration: throwIfAccess('affectsConfiguration'),
+};
 
 const replaceAll: IConfig['replaceAll'] = (newSettings: IConfig) => {
   settings = newSettings;
   onUpdateHooks.forEach(cb => cb({ settings: newSettings, event: handlerEventAccess }));
-}
+};
 
-const addOnUpdateHook: IConfig['addOnUpdateHook'] = (handler) => {
+const addOnUpdateHook: IConfig['addOnUpdateHook'] = handler => {
   onUpdateHooks.push(handler);
-}
+};
 
 const handler = {
   get(_: never, prop: string) {

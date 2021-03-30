@@ -12,13 +12,15 @@ function parseEntries(entries, packagePath) {
   let babelOptions = undefined;
   try {
     babelOptions = require(path.join(packagePath, '.babelrc'));
-  } catch (error) { }
+  } catch (error) {
+    /* */
+  }
 
   return {
     outDir: outDir ? path.resolve(packagePath, outDir) : undefined,
     entry,
-    babelOptions
-  }
+    babelOptions,
+  };
 }
 
 module.exports = parseEntries;

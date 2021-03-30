@@ -1,13 +1,13 @@
-import {
-  CompletionItem,
-  CompletionItemKind,
-} from 'vscode-languageserver';
+import { CompletionItem, CompletionItemKind } from 'vscode-languageserver';
 import { NSDatabase, DatabaseDriver } from '@sqltools/types';
 
-export function DatabaseCompletionItem(database: NSDatabase.IDatabase, priority: number = 1 ): CompletionItem {
-  let yml = `Database: ${database.label}\n`;
+export function DatabaseCompletionItem(
+  database: NSDatabase.IDatabase,
+  priority = 1
+): CompletionItem {
+  const yml = `Database: ${database.label}\n`;
   return {
-    detail: "Database",
+    detail: 'Database',
     documentation: {
       value: `\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
@@ -15,11 +15,17 @@ export function DatabaseCompletionItem(database: NSDatabase.IDatabase, priority:
     kind: CompletionItemKind.Folder,
     label: database.label,
     filterText: database.label,
-    sortText: typeof priority === 'number' ? `${priority}:${database.label}` : database.label,
+    sortText:
+      typeof priority === 'number'
+        ? `${priority}:${database.label}`
+        : database.label,
   };
 }
 
-export function TableCompletionItem(table: NSDatabase.ITable, priority: number = 1 ): CompletionItem {
+export function TableCompletionItem(
+  table: NSDatabase.ITable,
+  priority = 1
+): CompletionItem {
   const tableOrView = table.isView ? 'View' : 'Table';
   let yml = `${tableOrView}: ${table.label}\n`;
   if (table.schema) {
@@ -34,15 +40,21 @@ export function TableCompletionItem(table: NSDatabase.ITable, priority: number =
       value: `\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
-    kind: table.isView ? CompletionItemKind.Reference : CompletionItemKind.Constant,
+    kind: table.isView
+      ? CompletionItemKind.Reference
+      : CompletionItemKind.Constant,
     label: table.label,
     filterText: table.label,
-    sortText: typeof priority === 'number' ? `${priority}:${table.label}` : table.label,
+    sortText:
+      typeof priority === 'number' ? `${priority}:${table.label}` : table.label,
   };
 }
 
-export function TableColumnCompletionItem(col: NSDatabase.IColumn, _ignored: { driver?: DatabaseDriver; addTable?: boolean } = {}): CompletionItem {
-  const colInfo = [ col.label ];
+export function TableColumnCompletionItem(
+  col: NSDatabase.IColumn,
+  _ignored: { driver?: DatabaseDriver; addTable?: boolean } = {}
+): CompletionItem {
+  const colInfo = [col.label];
   if (typeof col.size !== 'undefined' && col.size !== null) {
     colInfo.push(`${col.type.toUpperCase()}(${col.size})`);
   } else {
@@ -71,7 +83,9 @@ export function TableColumnCompletionItem(col: NSDatabase.IColumn, _ignored: { d
   return <CompletionItem>{
     detail: `${table} Col`,
     documentation: {
-      value: `\`\`\`sql\n${colInfo.join(' ')}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
+      value: `\`\`\`sql\n${colInfo.join(
+        ' '
+      )}\n\`\`\`\n\`\`\`yaml\n${yml}\n\`\`\``,
       kind: 'markdown',
     },
     kind: CompletionItemKind.Field,

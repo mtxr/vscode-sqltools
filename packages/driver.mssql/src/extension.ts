@@ -1,6 +1,7 @@
-import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
+import { IDriverExtensionApi, IExtension, IExtensionPlugin } from '@sqltools/types';
 import { ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
+// eslint-disable-next-line @typescript-eslint/no-var-requires
 const { publisher, name } = require('../package.json');
 const driverName = 'SQL Server/Azure';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
@@ -26,11 +27,13 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       });
       DRIVER_ALIASES.forEach(({ value }) => {
         extension.resourcesMap().set(`driver/${value}/extension-id`, extensionId);
-        extension.resourcesMap().set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
+        extension
+          .resourcesMap()
+          .set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
         extension.resourcesMap().set(`driver/${value}/ui-schema`, extContext.asAbsolutePath('ui.schema.json'));
       });
-      await extension.client.sendRequest('ls/RegisterPlugin', { path: extContext.asAbsolutePath('out/ls/plugin.js') });
-    }
+      await extension.client.sendRequest('ls/RegisterPlugin', { path: extContext.asAbsolutePath('dist/ls/plugin.js') });
+    },
   };
   api.registerPlugin(plugin);
   return {
@@ -43,7 +46,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
           connInfo.password = '';
           propsToRemove.push('askForPassword');
-        } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('save')) {
           propsToRemove.push('askForPassword');
         }
       }
@@ -72,7 +75,9 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       return formData;
     },
     driverAliases: DRIVER_ALIASES,
-  }
+  };
 }
 
-export function deactivate() {}
+export function deactivate() {
+  /** @TODO */
+}

@@ -8,8 +8,7 @@ describe('PlSqlFormatter', () => {
   const format = (query, cfg = {}) => sqlFormatter.format(query, { ...cfg, language: 'pl/sql' });
 
   it('formats FETCH FIRST like LIMIT', () => {
-    expect(format('SELECT col1 FROM tbl ORDER BY col2 DESC FETCH FIRST 20 ROWS ONLY;'))
-      .toBe(dedent/* sql */ `
+    expect(format('SELECT col1 FROM tbl ORDER BY col2 DESC FETCH FIRST 20 ROWS ONLY;')).toBe(dedent/* sql */ `
         SELECT col1
         FROM tbl
         ORDER BY col2 DESC
@@ -42,9 +41,8 @@ describe('PlSqlFormatter', () => {
   });
 
   it('formats long CREATE TABLE', () => {
-    expect(
-      format('CREATE TABLE items (a INT PRIMARY KEY, b TEXT, c INT NOT NULL, d INT NOT NULL);')
-    ).toBe(dedent/* sql */ `
+    expect(format('CREATE TABLE items (a INT PRIMARY KEY, b TEXT, c INT NOT NULL, d INT NOT NULL);'))
+      .toBe(dedent/* sql */ `
       CREATE TABLE items (
         a INT PRIMARY KEY,
         b TEXT,
@@ -94,15 +92,15 @@ describe('PlSqlFormatter', () => {
       params: {
         0: 'first',
         1: 'second',
-        2: 'third'
-      }
+        2: 'third',
+      },
     });
     expect(result).toBe('SELECT second,\n  third,\n  first;');
   });
 
   it('replaces ? indexed placeholders with param values', () => {
     const result = format('SELECT ?, ?, ?;', {
-      params: ['first', 'second', 'third']
+      params: ['first', 'second', 'third'],
     });
     expect(result).toBe('SELECT first,\n  second,\n  third;');
   });
@@ -169,9 +167,7 @@ describe('PlSqlFormatter', () => {
   });
 
   it('formats CASE ... WHEN inside SELECT', () => {
-    const result = format(
-      "SELECT foo, bar, CASE baz WHEN 'one' THEN 1 WHEN 'two' THEN 2 ELSE 3 END FROM table"
-    );
+    const result = format("SELECT foo, bar, CASE baz WHEN 'one' THEN 1 WHEN 'two' THEN 2 ELSE 3 END FROM table");
 
     expect(result).toBe(dedent/* sql */ `
       SELECT foo,

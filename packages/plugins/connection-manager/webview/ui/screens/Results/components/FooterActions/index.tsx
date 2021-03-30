@@ -1,8 +1,9 @@
 import React from 'react';
 import styles from './styles.m.scss';
 import Button from '../../../../components/Button';
-import useContextAction, { openMessagesConsole } from '../../../Results/hooks/useContextAction';
-
+import useContextAction, {
+  openMessagesConsole,
+} from '../../../Results/hooks/useContextAction';
 
 const FooterActions = () => {
   const { openResults } = useContextAction();

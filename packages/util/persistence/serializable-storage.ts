@@ -1,10 +1,10 @@
 import fs from 'fs';
 import { NotFoundError } from '@sqltools/util/exception';
 
-export default class SerializableStorage<Item, Key = string | number | Symbol> {
+export default class SerializableStorage<Item, Key = string | number | symbol> {
   public encoding: BufferEncoding = 'utf8';
   public storagePath: string = null;
-  protected defaultSerializable: string = '{}';
+  protected defaultSerializable = '{}';
   protected items: any = {};
   constructor(storagePath: string, defaultSerializable: any = {}) {
     this.defaultSerializable = JSON.stringify(defaultSerializable);

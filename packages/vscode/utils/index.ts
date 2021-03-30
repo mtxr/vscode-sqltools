@@ -1,14 +1,6 @@
-import {
-  TextEditor,
-  window,
-  workspace,
-  SnippetString,
-  env,
-  commands,
-  Uri,
-} from 'vscode';
 import { DismissedError } from '@sqltools/util/exception';
 import { isEmpty } from '@sqltools/util/validation';
+import { commands, env, SnippetString, TextEditor, Uri, window, workspace } from 'vscode';
 
 export async function getOrCreateEditor(forceCreate = false): Promise<TextEditor> {
   if (forceCreate || !window.activeTextEditor || !window.activeTextEditor.viewColumn) {
@@ -46,17 +38,16 @@ export async function readInput(prompt: string, placeholder?: string, value?: st
   return data;
 }
 
-
 export function openExternal(url: string) {
   let uri = Uri.parse(url);
   if (uri.query && /http/.test(uri.scheme)) {
     uri = uri.with({ query: uri.query.replace(/\n/g, encodeURI('\n')) });
   }
-  if (env && typeof (env as any).openExternal === 'function') {
-    return (env as any).openExternal(uri);
+  if (env && typeof env.openExternal === 'function') {
+    return env.openExternal(uri);
   }
-  if (env && typeof (env as any).open === 'function') {
-    return (env as any).open(uri);
+  if (env && typeof env['open'] === 'function') {
+    return env['open'](uri);
   }
 
   return commands.executeCommand('vscode.open', uri);

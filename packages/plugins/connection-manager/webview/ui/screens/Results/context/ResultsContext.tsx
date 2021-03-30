@@ -12,10 +12,12 @@ const log = createLogger('Results:reducer');
 export interface IResultsContextActions {
   dispatch: ReturnType<typeof useResultsReducer>['dispatch'];
   setState: (data: any, cb?: () => void) => any;
-};
+}
 export type IResultsContext = IResultsContextActions & ResultsScreenState;
 
-export const ResultsContext = React.createContext<IResultsContext>({} as IResultsContext);
+export const ResultsContext = React.createContext<IResultsContext>(
+  {} as IResultsContext
+);
 
 export const ResultsProvider = ({ children }: IResultsProviderProps) => {
   const { state, dispatch, setState } = useResultsReducer();
@@ -39,7 +41,7 @@ export const ResultsProvider = ({ children }: IResultsProviderProps) => {
     getVscode().setState(state);
     return () => {
       getVscode().setState(null);
-    }
+    };
   }, [state]);
 
   useEffect(() => {
@@ -56,15 +58,22 @@ export const ResultsProvider = ({ children }: IResultsProviderProps) => {
   }, [state.hasError]);
 
   useEffect(() => {
-    sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, state.resultTabs[state.activeTab]?.messages ?? []);
+    sendMessage(
+      UIAction.REQUEST_SYNC_CONSOLE_MESSAGES,
+      state.resultTabs[state.activeTab]?.messages ?? []
+    );
   }, [state, state.activeTab]);
 
   return (
-    <ResultsContext.Provider value={{
-      ...state,
-      dispatch,
-      setState,
-    }}>{children}</ResultsContext.Provider>
+    <ResultsContext.Provider
+      value={{
+        ...state,
+        dispatch,
+        setState,
+      }}
+    >
+      {children}
+    </ResultsContext.Provider>
   );
 };
 

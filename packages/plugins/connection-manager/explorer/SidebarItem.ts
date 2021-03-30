@@ -1,19 +1,29 @@
-import { ThemeIcon, TreeItemCollapsibleState, commands, TreeItem } from 'vscode';
+import {
+  ThemeIcon,
+  TreeItemCollapsibleState,
+  commands,
+  TreeItem,
+} from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
 import { getIconPaths } from '@sqltools/vscode/icons';
 import { MConnectionExplorer, ContextValue } from '@sqltools/types';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { SidebarConnection } from '.';
 
-export default class SidebarItem<T extends MConnectionExplorer.IChildItem = MConnectionExplorer.IChildItem> extends SidebarAbstractItem<SidebarItem> {
+export default class SidebarItem<
+  T extends MConnectionExplorer.IChildItem = MConnectionExplorer.IChildItem
+> extends SidebarAbstractItem<SidebarItem> {
   public iconPath = ThemeIcon.Folder;
   public value: string;
   public async getChildren() {
-    const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
-      conn: this.conn,
-      item: this.metadata,
-      parent: this.parent && this.parent.metadata || undefined
-    });
+    const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(
+      `${EXT_NAMESPACE}.getChildrenForTreeItem`,
+      {
+        conn: this.conn,
+        item: this.metadata,
+        parent: (this.parent && this.parent.metadata) || undefined,
+      }
+    );
     if (items.length === 0) {
       return [new TreeItem('Nothing here') as SidebarItem];
     }
@@ -30,16 +40,19 @@ export default class SidebarItem<T extends MConnectionExplorer.IChildItem = MCon
     return this.parent.conn;
   }
   public contextValue = ContextValue.RESOURCE_GROUP;
-  constructor(public metadata: T, public parent: SidebarItem | SidebarConnection) {
+  constructor(
+    public metadata: T,
+    public parent: SidebarItem | SidebarConnection
+  ) {
     super(metadata.label, TreeItemCollapsibleState.Collapsed);
     this.value = this.label;
     metadata.snippet && (this.snippet = metadata.snippet);
     if (metadata.type) {
       this.contextValue = metadata.type;
       if (metadata.type && metadata.iconId) {
-        this.iconPath =  new ThemeIcon(metadata.iconId);
+        this.iconPath = new ThemeIcon(metadata.iconId);
       } else if (metadata.type && metadata.iconName) {
-        this.iconPath =  getIconPaths(metadata.iconName);
+        this.iconPath = getIconPaths(metadata.iconName);
       } else {
         this.iconPath = getIconPaths(metadata.type.replace('connection.', ''));
       }

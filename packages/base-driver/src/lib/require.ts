@@ -18,6 +18,6 @@ function getDataPath(...args: string[]) {
   return path.resolve(SQLTOOLS_PATHS.data, ...args);
 }
 
-export const sqltoolsResolve = (name: string) => sync(name, { basedir: getDataPath() })
+export const sqltoolsResolve = (name: string) => sync(name, { basedir: getDataPath() });
 const sqltoolsRequire = (name: string) => require(sqltoolsResolve(name));
 export default sqltoolsRequire;

@@ -14,7 +14,7 @@ export default class PlSqlFormatter extends AbstractFormatter {
       indexedPlaceholderTypes: ['?'],
       namedPlaceholderTypes: [':'],
       lineCommentTypes: ['--'],
-      specialWordChars: ['_', '$', '#', '.', '@']
+      specialWordChars: ['_', '$', '#', '.', '@'],
     };
   }
 
@@ -383,7 +383,7 @@ const reservedWords = [
   'WRAPPED',
   'WRITE',
   'YEAR',
-  'ZONE'
+  'ZONE',
 ];
 
 const reservedTopLevelWords = [
@@ -415,7 +415,7 @@ const reservedTopLevelWords = [
   'START WITH',
   'UPDATE',
   'VALUES',
-  'WHERE'
+  'WHERE',
 ];
 
 const reservedTopLevelWordsNoIndent = ['INTERSECT', 'INTERSECT ALL', 'MINUS', 'UNION', 'UNION ALL'];
@@ -436,5 +436,5 @@ const reservedNewlineWords = [
   'RIGHT JOIN',
   'RIGHT OUTER JOIN',
   'WHEN',
-  'XOR'
+  'XOR',
 ];

@@ -7,7 +7,7 @@ const PGDriverPlugin: ILanguageServerPlugin = {
     DRIVER_ALIASES.forEach(({ value }) => {
       server.getContext().drivers.set(value, PostgreSQL);
     });
-  }
-}
+  },
+};
 
 export default PGDriverPlugin;

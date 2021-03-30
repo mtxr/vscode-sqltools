@@ -2,9 +2,18 @@ import { EXT_NAMESPACE } from '@sqltools/util/constants';
 import { IConnection, NSDatabase } from '@sqltools/types';
 import { getConnectionId } from '@sqltools/util/connection';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
-import SidebarItem from "@sqltools/plugins/connection-manager/explorer/SidebarItem";
-import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
-import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
+import SidebarItem from '@sqltools/plugins/connection-manager/explorer/SidebarItem';
+import SidebarConnection from '@sqltools/plugins/connection-manager/explorer/SidebarConnection';
+import {
+  EventEmitter,
+  TreeDataProvider,
+  TreeItem,
+  TreeView,
+  window,
+  TreeItemCollapsibleState,
+  commands,
+  ThemeIcon,
+} from 'vscode';
 import sortBy from 'lodash/sortBy';
 import { createLogger } from '@sqltools/log/src';
 import Context from '@sqltools/vscode/context';
@@ -13,30 +22,38 @@ import Config from '@sqltools/util/config-manager';
 const log = createLogger('conn-man:explorer');
 
 class ConnectionGroup extends TreeItem {
-  items: (ConnectionGroup | SidebarTreeItem)[] =  [];
-  isGroup: boolean = true;
+  items: (ConnectionGroup | SidebarTreeItem)[] = [];
+  isGroup = true;
   getChildren() {
     return this.items;
   }
 }
 
-const connectedTreeItem: ConnectionGroup = new ConnectionGroup('Connected', TreeItemCollapsibleState.Expanded);
-connectedTreeItem.id = 'CONNECTED'
+const connectedTreeItem: ConnectionGroup = new ConnectionGroup(
+  'Connected',
+  TreeItemCollapsibleState.Expanded
+);
+connectedTreeItem.id = 'CONNECTED';
 connectedTreeItem.iconPath = ThemeIcon.Folder;
 
-const notConnectedTreeItem: ConnectionGroup = new ConnectionGroup('Not Connected', TreeItemCollapsibleState.Expanded);
+const notConnectedTreeItem: ConnectionGroup = new ConnectionGroup(
+  'Not Connected',
+  TreeItemCollapsibleState.Expanded
+);
 notConnectedTreeItem.id = 'DISCONNECTED';
 notConnectedTreeItem.iconPath = ThemeIcon.Folder;
-
 
 export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
   private messagesTreeView: TreeView<TreeItem>;
   private messagesTreeViewProvider: MessagesProvider;
-  private _onDidChangeTreeData: EventEmitter<SidebarTreeItem | undefined> = new EventEmitter();
+  private _onDidChangeTreeData: EventEmitter<
+    SidebarTreeItem | undefined
+  > = new EventEmitter();
   private _onDidChangeActiveConnection: EventEmitter<IConnection> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
-  public readonly onDidChangeActiveConnection = this._onDidChangeActiveConnection.event;
+  public readonly onDidChangeActiveConnection = this
+    ._onDidChangeActiveConnection.event;
 
   public async getActive(): Promise<IConnection | null> {
     const conns = await this.getConnections();
@@ -72,7 +89,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public refresh(item?: SidebarTreeItem) {
     this._onDidChangeTreeData.fire(item);
-    log.info(`Connection explorer changed. Will be updated. ${item ? `Changed item: ${item.label}` : ''}`.trim());
+    log.info(
+      `Connection explorer changed. Will be updated. ${
+        item ? `Changed item: ${item.label}` : ''
+      }`.trim()
+    );
   }
 
   public async getConnectionById(id: string): Promise<IConnection> {
@@ -86,19 +107,29 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAMESPACE}ViewConnectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
+    this.treeView = window.createTreeView(
+      `${EXT_NAMESPACE}ViewConnectionExplorer`,
+      { treeDataProvider: this, canSelectMany: true, showCollapseAll: true }
+    );
     Config.addOnUpdateHook(({ event }) => {
       if (
-        event.affectsConfig('flattenGroupsIfOne')
-        || event.affectsConfig('connections')
-        || event.affectsConfig('connectionExplorer.groupConnected')
-        || event.affectsConfig('sortColumns')
+        event.affectsConfig('flattenGroupsIfOne') ||
+        event.affectsConfig('connections') ||
+        event.affectsConfig('connectionExplorer.groupConnected') ||
+        event.affectsConfig('sortColumns')
       ) {
         this.refresh();
       }
     });
     this.messagesTreeViewProvider = new MessagesProvider();
-    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}ViewConsoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: true });
+    this.messagesTreeView = window.createTreeView(
+      `${EXT_NAMESPACE}ViewConsoleMessages`,
+      {
+        treeDataProvider: this.messagesTreeViewProvider,
+        canSelectMany: false,
+        showCollapseAll: true,
+      }
+    );
     Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 
@@ -107,22 +138,33 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
   private getConnectionsTreeItems = async () => {
     const connections: IConnection[] = await this.getConnections();
-    const items: SidebarConnection[] = connections.map(conn => new SidebarConnection(conn));
+    const items: SidebarConnection[] = connections.map(
+      conn => new SidebarConnection(conn)
+    );
 
     return items;
-  }
+  };
 
-  private getOrCreateConnectionGroup = (currentGroup: ConnectionGroup, groupId: string, item: SidebarConnection) => {
-    let subGroup = currentGroup.items.find((it: ConnectionGroup) => it.id === groupId) as ConnectionGroup;
+  private getOrCreateConnectionGroup = (
+    currentGroup: ConnectionGroup,
+    groupId: string,
+    item: SidebarConnection
+  ) => {
+    let subGroup = currentGroup.items.find(
+      (it: ConnectionGroup) => it.id === groupId
+    ) as ConnectionGroup;
     if (!subGroup) {
-      subGroup = new ConnectionGroup(item.conn.group, TreeItemCollapsibleState.Expanded);
+      subGroup = new ConnectionGroup(
+        item.conn.group,
+        TreeItemCollapsibleState.Expanded
+      );
       subGroup.id = groupId;
       subGroup.iconPath = ThemeIcon.Folder;
       currentGroup.items.push(subGroup);
     }
     subGroup.description = `${subGroup.items.length + 1} connections`;
     return subGroup;
-  }
+  };
 
   private async getRootItems(): Promise<TreeItem[]> {
     const groupConnected = Config['connectionExplorer.groupConnected'];
@@ -145,7 +187,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       let currentGroup: ConnectionGroup = root;
       if (item.conn && item.conn.group) {
         const groupId = `GID:${item.conn.group}`;
-        let subGroup = this.getOrCreateConnectionGroup(currentGroup, groupId, item);
+        const subGroup = this.getOrCreateConnectionGroup(
+          currentGroup,
+          groupId,
+          item
+        );
         currentGroup = subGroup;
       }
       currentGroup.items.push(item);
@@ -173,27 +219,41 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
         connectedTreeCount++;
       } else {
         currentGroup = notConnectedTreeItem;
-        notConnectedTreeCount++
+        notConnectedTreeCount++;
       }
       if (item.conn && item.conn.group) {
-        const groupId = `GID:${item.isConnected ? 'C' : 'N'}:${item.conn.group}`;
-        let subGroup = this.getOrCreateConnectionGroup(currentGroup, groupId, item);
+        const groupId = `GID:${item.isConnected ? 'C' : 'N'}:${
+          item.conn.group
+        }`;
+        const subGroup = this.getOrCreateConnectionGroup(
+          currentGroup,
+          groupId,
+          item
+        );
         currentGroup = subGroup;
       }
       currentGroup.items.push(item);
     });
     this._onDidChangeActiveConnection.fire(active);
 
-    connectedTreeItem.items = sortBy(connectedTreeItem.items, ['isGroup', 'label']);
-    notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, ['isGroup', 'label']);
+    connectedTreeItem.items = sortBy(connectedTreeItem.items, [
+      'isGroup',
+      'label',
+    ]);
+    notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, [
+      'isGroup',
+      'label',
+    ]);
 
     notConnectedTreeItem.description = `${notConnectedTreeCount} connections`;
     connectedTreeItem.description = `${connectedTreeCount} connections`;
 
-    return [connectedTreeItem, notConnectedTreeItem].filter(a => a.items.length > 0);
+    return [connectedTreeItem, notConnectedTreeItem].filter(
+      a => a.items.length > 0
+    );
   }
 
-  public get addConsoleMessages () {
+  public get addConsoleMessages() {
     return this.messagesTreeViewProvider.addMessages;
   }
 }
@@ -212,7 +272,7 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
 
   getParent = (_: TreeItem) => {
     return null;
-  }
+  };
 
   addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
     this.items = messages.map(m => {
@@ -231,12 +291,12 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
       item.command = {
         title: 'Copy message',
         command: `${EXT_NAMESPACE}.copyText`,
-        arguments: [item.label]
+        arguments: [item.label],
       };
       return item;
     });
     this._onDidChangeTreeData.fire(null);
-  }
+  };
 }
 
 export { SidebarConnection, SidebarItem, SidebarTreeItem };

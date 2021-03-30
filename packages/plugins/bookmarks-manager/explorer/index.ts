@@ -1,16 +1,18 @@
 import { createLogger } from '@sqltools/log/src';
-import { EventEmitter, TreeDataProvider } from 'vscode';
-import { BookmarkTreeItem, BookmarkTreeGroup } from './tree-items';
-import { window } from 'vscode';
 import { getDataPath } from '@sqltools/util/path';
-import fs from 'fs';
 import Context from '@sqltools/vscode/context';
+import fs from 'fs';
+import { EventEmitter, TreeDataProvider, window } from 'vscode';
+import { BookmarkTreeGroup, BookmarkTreeItem } from './tree-items';
 const log = createLogger('book-man:explorer');
 
 type BookmarkExplorerItem = BookmarkTreeItem | BookmarkTreeGroup;
 
-export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> {
-  private _onDidChangeTreeData: EventEmitter<BookmarkExplorerItem | undefined> = new EventEmitter();
+export class BookmarkExplorer
+  implements TreeDataProvider<BookmarkExplorerItem> {
+  private _onDidChangeTreeData: EventEmitter<
+    BookmarkExplorerItem | undefined
+  > = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   private tree: { [group: string]: BookmarkTreeGroup } = {};
 
@@ -32,9 +34,9 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
   public refresh = (item?: BookmarkExplorerItem) => {
     this._onDidChangeTreeData.fire(item);
-  }
+  };
 
-  public addItem(group: string, name: string, query: string, skipSave: boolean = false) {
+  public addItem(group: string, name: string, query: string, skipSave = false) {
     if (!query || (query && query.trim().length === 0)) return;
 
     if (!this.tree[group]) {
@@ -62,7 +64,9 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
     if (!fs.existsSync(this.oldFilePath)) return;
     try {
       fs.renameSync(this.oldFilePath, this.filePath);
-    } catch (e) {}
+    } catch (e) {
+      /* */
+    }
   }
 
   private readFromFile() {
@@ -77,15 +81,18 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
           const query = data[group][name];
           this.addItem(group, name, query, true);
         });
-      })
-
-    } catch(e) {
+      });
+    } catch (e) {
       log.error('Error reading bookmarks:', e);
     }
   }
 
   public async clear() {
-    const res = await window.showInformationMessage('Do you really want to delete all your bookmarks?', { modal: true }, 'Yes');
+    const res = await window.showInformationMessage(
+      'Do you really want to delete all your bookmarks?',
+      { modal: true },
+      'Yes'
+    );
     if (res === 'Yes') {
       this.tree = {};
       this.refresh();
@@ -94,7 +101,11 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   public async delete(group: string, name: string) {
-    const res = await window.showInformationMessage(`Do you really want to delete ${name} bookmark?`, { modal: true }, 'Yes');
+    const res = await window.showInformationMessage(
+      `Do you really want to delete ${name} bookmark?`,
+      { modal: true },
+      'Yes'
+    );
     if (res !== 'Yes') return;
 
     this.tree[group].delete(name);
@@ -108,10 +119,12 @@ export class BookmarkExplorer implements TreeDataProvider<BookmarkExplorerItem> 
   }
 
   private save() {
-    const data = Object.values(this.tree).reduce(( groupped, item) => ({ ...groupped, ...item.toJSON() }), {});
+    const data = Object.values(this.tree).reduce(
+      (groupped, item) => ({ ...groupped, ...item.toJSON() }),
+      {}
+    );
     return fs.writeFileSync(this.filePath, JSON.stringify(data));
   }
-
 
   constructor() {
     this.readFromFile();

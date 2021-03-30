@@ -1,12 +1,22 @@
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
-import { IConnection, MConnectionExplorer, ContextValue, IIcons } from '@sqltools/types';
-import { getConnectionDescription, getConnectionId } from '@sqltools/util/connection';
+import {
+  IConnection,
+  MConnectionExplorer,
+  ContextValue,
+  IIcons,
+} from '@sqltools/types';
+import {
+  getConnectionDescription,
+  getConnectionId,
+} from '@sqltools/util/connection';
 import { TreeItemCollapsibleState, Uri, commands } from 'vscode';
 import SidebarAbstractItem from './SidebarAbstractItem';
-import SidebarItem from "./SidebarItem";
+import SidebarItem from './SidebarItem';
 import get from 'lodash/get';
 import { createLogger } from '@sqltools/log/src';
-import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
+import PluginResourcesMap, {
+  buildResouceKey,
+} from '@sqltools/util/plugin-resources';
 
 const log = createLogger('conn-explorer');
 
@@ -14,7 +24,9 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
   parent = null;
 
   get contextValue() {
-    return this.isConnected ? ContextValue.CONNECTED_CONNECTION : ContextValue.CONNECTION;
+    return this.isConnected
+      ? ContextValue.CONNECTED_CONNECTION
+      : ContextValue.CONNECTION;
   }
 
   get description() {
@@ -34,7 +46,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
   get metadata() {
     return <MConnectionExplorer.IChildItem>{
       label: this.label,
-      type: this.contextValue
+      type: this.contextValue,
     };
   }
   get tooltip() {
@@ -47,14 +59,17 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     if (!this.isConnected) {
       await commands.executeCommand(`${EXT_NAMESPACE}.selectConnection`, this);
     }
-    const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
-      conn: this.conn,
-      item: this.metadata,
-    });
+    const items: MConnectionExplorer.IChildItem[] = await commands.executeCommand(
+      `${EXT_NAMESPACE}.getChildrenForTreeItem`,
+      {
+        conn: this.conn,
+        item: this.metadata,
+      }
+    );
     return items.map(item => new SidebarItem(item, this));
   }
 
-  public get command () {
+  public get command() {
     if (!this.isActive) {
       return {
         title: 'Connect',
@@ -65,14 +80,18 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
   }
 
   constructor(public conn: IConnection) {
-    super(conn.name, conn.isConnected ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
+    super(
+      conn.name,
+      conn.isConnected
+        ? TreeItemCollapsibleState.Collapsed
+        : TreeItemCollapsibleState.None
+    );
   }
   get iconPath() {
     try {
       if (this.isActive) {
         return this.getIcon('active');
-      }
-      else if (this.contextValue === ContextValue.CONNECTED_CONNECTION) {
+      } else if (this.contextValue === ContextValue.CONNECTED_CONNECTION) {
         return this.getIcon('connected');
       }
       return this.getIcon('disconnected');
@@ -99,6 +118,14 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       disconnected: 'inactive',
     };
 
-    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResouceKey({type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
-  }
+    return Uri.parse(
+      (PluginResourcesMap.get<IIcons>(
+        buildResouceKey({
+          type: 'driver',
+          name: this.conn.driver,
+          resource: 'icons',
+        })
+      ) || {})[(typeMap[type] as any) || 'default']
+    );
+  };
 }

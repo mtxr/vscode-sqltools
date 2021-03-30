@@ -1,15 +1,14 @@
-const path = require('path');
 const webpack = require('webpack');
 const WebpackNotifierPlugin = require('webpack-notifier');
 
-const { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE, DISPLAY_NAME, rootdir, IS_PRODUCTION, outdir, author, version } = require('../constants');
+const { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE, DISPLAY_NAME, author, version } = require('../constants');
 
 /**
  *
  * @param {string} name
  * @returns {webpack.Configuration['plugins']}
  */
-const basePlugins = (name) => [
+const basePlugins = name => [
   new webpack.ProgressPlugin(),
   new webpack.DefinePlugin({
     'process.env.PRODUCT': JSON.stringify(name),

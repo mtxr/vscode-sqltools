@@ -1,4 +1,4 @@
-import { Token } from './types';
+import { ParamsMapType, Token } from './types';
 
 /**
  * Handles placeholder replacement with given params.
@@ -6,9 +6,9 @@ import { Token } from './types';
 export default class Params {
   private index = 0;
   /**
-   * @param {Object} params
+   * @param {ParamsMapType} params
    */
-  constructor(public params: Object) {
+  constructor(public params: ParamsMapType) {
     this.params = params;
   }
 
