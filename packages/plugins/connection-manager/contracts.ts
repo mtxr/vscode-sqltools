@@ -54,12 +54,12 @@ export const SearchConnectionItemsRequest = new RequestType<
   void
 >('connection/SearchConnectionItemsRequest');
 
-export const SaveResultsRequest = new RequestType<
-  IQueryOptions & { filename: string, fileType: 'json' | 'csv' },
-  void,
+export const GetResultsRequest = new RequestType<
+  IQueryOptions & { formatType: 'json' | 'csv' },
+  string,
   Error,
   void
->('connection/SaveResultsRequest');
+>('connection/GetResultsRequest');
 
 export const GetChildrenForTreeItemRequest = new RequestType<
   { conn: IConnection, item: MConnectionExplorer.IChildItem, parent?: MConnectionExplorer.IChildItem },
