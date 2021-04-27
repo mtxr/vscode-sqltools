@@ -110,7 +110,9 @@ SELECT name AS label,
   '${ContextValue.DATABASE}' AS "type",
   'database' AS "detail"
 FROM MASTER.dbo.sysdatabases
-WHERE name NOT IN ('master', 'model', 'msdb', 'tempdb')
+WHERE
+  name NOT IN ('master', 'model', 'msdb', 'tempdb')
+  AND name = DB_NAME()
 `;
 export const searchTables: IBaseQueries['searchTables'] = queryFactory`
 SELECT
