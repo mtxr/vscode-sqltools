@@ -19,7 +19,7 @@
     "docz-core": "^1.2.0",
     "docz-theme-default": "^1.2.0",
     "gatsby-plugin-offline": "^2.2.7",
-    "lodash": "^4.17.19",
+    "lodash": "^4.17.21",
     "react": "^16.8.3",
     "react-dom": "^16.8.3",
     "react-feather": "^2.0.3",
