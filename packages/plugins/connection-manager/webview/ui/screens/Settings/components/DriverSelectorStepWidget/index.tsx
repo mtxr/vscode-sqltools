@@ -83,7 +83,7 @@ const DriverSelectorStepWidget = () => {
                 <strong>
                   Don't worry, we are still looking up for installedDrivers.
                   <br />
-                  Try to install drivers before move forward.
+                  Try to install drivers before moving forward.
                 </strong>
               </p>
             </div>
