@@ -20,7 +20,7 @@ import path from 'path';
 import { file } from 'tempy';
 import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
-import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, RunCommandRequest, SaveResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, SaveResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
 import { getExtension } from './extension-util';
 import statusBar from './status-bar';
@@ -90,7 +90,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_showRecords = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable, opt: IQueryOptions & { page?: number, pageSize?: number } = {}) => {
     try {
       const table = await this._getTable(node);
-      const view = await this._openResultsWebview(opt.requestId);
+      const conn = await this.explorer.getActive()
+      const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('showRecords', table, { ...opt, requestId: view.requestId });
       this.updateViewResults(view, payload);
     } catch (e) {
@@ -101,7 +102,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_describeTable = async (node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable) => {
     try {
       const table = await this._getTable(node);
-      const view = await this._openResultsWebview();
+      const conn = await this.explorer.getActive()
+      const view = await this._openResultsWebview(conn && conn.id, undefined);
       const payload = await this._runConnectionCommandWithArgs('describeTable', table, { requestId: view.requestId });
       this.updateViewResults(view, payload);
     } catch (e) {
@@ -265,7 +267,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       }
 
       query = await this.replaceParams(query);
-      const view = await this._openResultsWebview(opt.requestId);
+      const conn = await this.explorer.getActive()
+      const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
       this.updateViewResults(view, payload);
       return payload;
@@ -489,9 +492,12 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
 
-  private async _openResultsWebview(reUseId?: string) {
+  private async _openResultsWebview(connId: string, reUseId: string) {
     const requestId = reUseId || generateId();
     const view = this.resultsWebview.get(requestId);
+    view.onDidDispose(() => {
+      this.client.sendRequest(ReleaseResultsRequest, { connId, requestId });
+    });
     await view.show();
     return view;
   }
