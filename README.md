@@ -26,10 +26,10 @@ You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https:/
 
 ## Features
 
-Some feature provided by SQLTools:
+Some features provided by SQLTools:
 
 - Beautifier/Formatter
-- Query runner, history and bookmarks
+- Query runner, history, and bookmarks
 - Connection explorer
 - Query generators (INSERT only)
 
