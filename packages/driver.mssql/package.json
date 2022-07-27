@@ -71,7 +71,7 @@
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
     "concurrently": "^5.2.0",
-    "esbuild": "0.6.26",
+    "esbuild": "0.14.50",
     "lodash": "^4.17.19",
     "mssql": "^5.0.5",
     "rimraf": "^3.0.2",
