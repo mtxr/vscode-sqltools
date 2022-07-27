@@ -1,8 +1,3 @@
- Looking for maintainers => https://github.com/mtxr/vscode-sqltools/issues/896
-------
-
-
-
 <p style='text-align: center;'>
   <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/static/header-hero.svg?sanitize=true" />
 </p>
