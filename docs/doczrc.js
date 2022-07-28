@@ -19,7 +19,12 @@ export default {
     { name: 'Settings', menu: ['Properties']},
     {
       name: 'Contributing',
-      menu: ['How to contribute to SQLTools'],
+      menu: [
+        'How to contribute to SQLTools',
+        'Building',
+        'Testing',
+        'Support New Drivers'
+      ],
     },
     { name: 'Changelog', order: 100  }
   ],
