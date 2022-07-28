@@ -187,7 +187,12 @@
   },
   "extensions": {
     "recommendations": [
-      "ms-azuretools.vscode-docker"
+      "ms-azuretools.vscode-docker",
+      "mtxr.sqltools",
+      "mtxr.sqltools-driver-mssql",
+      "mtxr.sqltools-driver-mysql",
+      "mtxr.sqltools-driver-pg",
+      "mtxr.sqltools-driver-sqlite"
     ]
   },
 }
