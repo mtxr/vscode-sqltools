@@ -142,6 +142,29 @@
         // "group": "MYSQL"
       },
       {
+        "askForPassword": false,
+        "connectionTimeout": 15,
+        "database": "test_db",
+        "driver": "MySQL",
+        "name": "MySQLv5",
+        "password": "root",
+        "port": 3308,
+        "server": "localhost",
+        "username": "root",
+        // "group": "MYSQL"
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 30,
+        "database": "test_db",
+        "driver": "MySQL",
+        "name": "MySQLv5 Socket",
+        "password": "root",
+        "socketPath": "./docker/mysql/local-mysqldv5/mysqld.sock",
+        "username": "root",
+        // "group": "MYSQL"
+      },
+      {
         "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
         "driver": "MSSQL",
         "name": "MSSQL ConnectionString",
@@ -187,7 +210,12 @@
   },
   "extensions": {
     "recommendations": [
-      "ms-azuretools.vscode-docker"
+      "ms-azuretools.vscode-docker",
+      "mtxr.sqltools",
+      "mtxr.sqltools-driver-mssql",
+      "mtxr.sqltools-driver-mysql",
+      "mtxr.sqltools-driver-pg",
+      "mtxr.sqltools-driver-sqlite"
     ]
   },
 }
