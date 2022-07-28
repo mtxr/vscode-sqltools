@@ -185,4 +185,9 @@
     },
     // "sqltools.trace.server": "verbose"
   },
+  "extensions": {
+    "recommendations": [
+      "ms-azuretools.vscode-docker"
+    ]
+  },
 }
