@@ -2,7 +2,7 @@
   "name": "sqltools-driver-sqlite",
   "displayName": "SQLTools SQLite",
   "description": "SQLTools SQLite",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -62,9 +62,12 @@
     "dev:fw": "chokidar \"src/**/*\" \"*.json\" --initial --silent -c \"yarn run watch\"",
     "ts": "tsc -p ."
   },
+  "dependencies": {
+    "sqlite3": "^5.0.10"
+  },
   "devDependencies": {
     "@sqltools/base-driver": "latest",
-    "@types/sqlite3": "^3.1.6",
+    "@types/sqlite3": "^3.1.8",
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
     "concurrently": "^5.2.0",
