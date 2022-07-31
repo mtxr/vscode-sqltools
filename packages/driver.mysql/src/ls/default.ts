@@ -34,6 +34,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
       dateStrings: true,
       bigNumberStrings: true,
       supportBigNumbers: true,
+      charset: 'utf8mb4_general_ci',
       ...mysqlOptions
     });
 
