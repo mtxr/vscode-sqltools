@@ -32,6 +32,3 @@ services:
 
     ports:
       - 3308:3306
-      - 33080:33060
-    volumes:
-      - ./local-mysqldv5:/var/run/mysqld:Z
