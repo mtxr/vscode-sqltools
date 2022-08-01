@@ -1,3 +1,4 @@
+-- @conn SQLite
 CREATE TABLE contacts (
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,
