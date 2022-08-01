@@ -10,11 +10,12 @@ route: /contributing/building
 
 ## Prerequisites
 
-Make sure you have `node v10+ (preferably)` and `yarn` installed.
+Make sure you have [node v14](https://nodejs.org/) and [yarn](https://yarnpkg.com/) installed. If you need to switch between node versions, consider using [nvm](https://github.com/nvm-sh/nvm).
 
 ## Building
 
 1. In your terminal, go to the project root.
+
 ```shell
 cd vscode-sqltools
 yarn # will install all dependencies and run some scripts
@@ -26,3 +27,9 @@ yarn run start # or yarn run dev:watch
 3. Go to the Debug panel and run `Launch Extension and LS` to start debugging both extension and language server.
 
 4. Add your breakpoints and start hacking!
+
+### Troubleshooting
+
+#### Installing on macOS m1
+
+On the root of the project, run `CXXFLAGS="--std=c++17" yarn` if you are on node 16+ and experience errors.
