@@ -68,7 +68,7 @@
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
     "concurrently": "^5.2.0",
-    "esbuild": "0.6.26",
+    "esbuild": "0.14.50",
     "rimraf": "^3.0.2",
     "typescript": "~4.0.2",
     "vsce": "1.77.0"
