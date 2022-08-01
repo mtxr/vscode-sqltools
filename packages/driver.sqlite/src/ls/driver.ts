@@ -57,7 +57,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
   public async close() {
     if (!this.connection) return Promise.resolve();
     const db = await this.connection
-    await new Promise((resolve, reject) => {
+    await new Promise<void>((resolve, reject) => {
       db.close(err => err ? reject(err) : resolve());
     });
     this.connection = null;
