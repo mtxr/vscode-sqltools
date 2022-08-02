@@ -21,10 +21,10 @@ You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https:/
 
 ## Features
 
-Some feature provided by SQLTools:
+Some features provided by SQLTools:
 
 - Beautifier/Formatter
-- Query runner, history and bookmarks
+- Query runner, history, and bookmarks
 - Connection explorer
 - Query generators (INSERT only)
 
@@ -44,7 +44,7 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 | ![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/pg/default.png)         | PostgreSQL                 | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-pg)     | [packages/driver.pg](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.pg)         |
 | ![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.sqlite/icons/default.png)            | SQLite                     | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-sqlite) | [packages/driver.sqlite](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.sqlite) |
 
-> I'm looking for maintainers for each driver, if you are interested on maintain/test any driver, please contact me. https://mteixeira.dev
+> I'm looking for maintainers for each driver, if you are interested in maintaining/testing any driver, please contact me. https://mteixeira.dev
 
 **Community Drivers:**
 
@@ -83,7 +83,7 @@ Join all these amazing [contributors](https://github.com/mtxr/vscode-sqltools/gr
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
-SQLTools will save you (for sure) a lot of time and help you to increase your productivity so, please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools to become more awesome than ever.
+SQLTools will save you (for sure) a lot of time and help you to increase your productivity, so please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools become more awesome than ever.
 
 [![ko-fi](https://user-images.githubusercontent.com/707561/112481485-d0d09800-8d55-11eb-8bfd-bb70c9984617.png)](https://ko-fi.com/Y8Y487W9)
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
