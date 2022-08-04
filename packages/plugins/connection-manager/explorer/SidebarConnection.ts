@@ -42,7 +42,9 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
   get metadata() {
     return <MConnectionExplorer.IChildItem>{
       label: this.label,
-      type: this.contextValue
+      type: this.contextValue,
+      database: this.conn.database,
+      schema: ''
     };
   }
 

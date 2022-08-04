@@ -36,7 +36,7 @@ export interface IBaseQueries {
   fetchRecords: QueryBuilder<{ limit: number; offset: number; table: NSDatabase.ITable; }, any>;
   countRecords: QueryBuilder<{ table: NSDatabase.ITable; }, { total: number; }>;
   fetchSchemas?: QueryBuilder<NSDatabase.IDatabase, NSDatabase.ISchema>;
-  fetchDatabases?: QueryBuilder<never, NSDatabase.IDatabase>;
+  fetchDatabases?: QueryBuilder<never | MConnectionExplorer.IChildItem, NSDatabase.IDatabase>;
   fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
   searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
   searchColumns: QueryBuilder<{ search: string, tables: NSDatabase.ITable[], limit?: number }, NSDatabase.IColumn>;
