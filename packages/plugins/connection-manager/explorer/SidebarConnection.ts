@@ -13,20 +13,28 @@ const log = createLogger('conn-explorer');
 export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> {
   parent = null;
 
-  get contextValue() {
-    return this.isConnected ? ContextValue.CONNECTED_CONNECTION : ContextValue.CONNECTION;
+  constructor(public conn: IConnection) {
+    super(conn.name, conn.isConnected ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
+    this.description = getConnectionDescription(this.conn);
+    this.id = this.getId();
+  }
+  
+  getId() {
+    return getConnectionId(this.conn);
   }
 
-  get description() {
-    return getConnectionDescription(this.conn);
+  get contextValue() {
+    return this.isConnected ? ContextValue.CONNECTED_CONNECTION : ContextValue.CONNECTION;
   }
 
   get isConnected() {
     return this.conn.isConnected;
   }
-  get id() {
-    return <string>this.getId();
+
+  get isActive() {
+    return this.conn.isActive;
   }
+
   get value() {
     return this.conn.database;
   }
@@ -37,6 +45,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       type: this.contextValue
     };
   }
+
   get tooltip() {
     if (this.isActive)
       return `Active Connection - Queries will run for this connection`;
@@ -64,28 +73,18 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     }
   }
 
-  constructor(public conn: IConnection) {
-    super(conn.name, conn.isConnected ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
-  }
   get iconPath() {
     try {
       if (this.isActive) {
         return this.getIcon('active');
       }
-      else if (this.contextValue === ContextValue.CONNECTED_CONNECTION) {
+      else if (this.isConnected) {
         return this.getIcon('connected');
       }
       return this.getIcon('disconnected');
     } catch (error) {
       log.error(error);
     }
-  }
-  getId() {
-    return getConnectionId(this.conn);
-  }
-
-  get isActive() {
-    return this.conn.isActive;
   }
 
   private getIcon = (type: 'active' | 'connected' | 'disconnected') => {
