@@ -4,9 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
-### 0.2.1
+### 0.3.0
 
 - Sort databases alphabetically.
+- Sync with 0.24 release of main extension.
 
 ### 0.2.0
 
