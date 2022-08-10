@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.2.1
+
+- Fix dependency installation problem. [#757](https://github.com/mtxr/vscode-sqltools/issues/757).
+
 ### 0.2.0
 
 - Update `base-driver` package.

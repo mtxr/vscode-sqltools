@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.2.1
+
+- Sort databases alphabetically.
+
 ### 0.2.0
 
 - Update `base-driver` package.
