@@ -40,7 +40,7 @@ jobs:
         ./pack.drivers.sh
 
     - name: Upload to Release
-      uses: OmgImAlexis/upload-to-release@12da88e
+      uses: OmgImAlexis/upload-to-release@12da88e9f14252a5232be13ee9aadda64637c271
       with:
         args: "*.vsix packages/*/*.vsix"
       env:
