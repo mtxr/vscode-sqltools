@@ -21,10 +21,10 @@ You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https:/
 
 ## Features
 
-Some feature provided by SQLTools:
+Some features provided by SQLTools:
 
 - Beautifier/Formatter
-- Query runner, history and bookmarks
+- Query runner, history, and bookmarks
 - Connection explorer
 - Query generators (INSERT only)
 
@@ -36,7 +36,6 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 |                                                                                                                           | Driver                     | Marketplace                                                                             | Package                                                                                           |
 | ------------------------------------------------------------------------------------------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| ![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/redshift/default.png) | AWS Redshift               | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-pg)     | [packages/driver.pg](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.pg)         |
 | ![CockroachDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/cockroach/default.png) | CockroachDB                | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-pg)     | [packages/driver.pg](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.pg)         |
 | ![MariaDB](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.mysql/icons/mariadb/default.png)    | MariaDB                    | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-mysql)  | [packages/driver.mysql](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.mysql)   |
 | ![MSSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.mssql/icons/default.png)              | Microsoft SQL Server/Azure | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-mssql)  | [packages/driver.mssql](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.mssql)   |
@@ -44,17 +43,19 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 | ![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/pg/default.png)         | PostgreSQL                 | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-pg)     | [packages/driver.pg](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.pg)         |
 | ![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.sqlite/icons/default.png)            | SQLite                     | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-sqlite) | [packages/driver.sqlite](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.sqlite) |
 
-> I'm looking for maintainers for each driver, if you are interested on maintain/test any driver, please contact me. https://mteixeira.dev
+> I'm looking for maintainers for each driver, if you are interested in maintaining/testing any driver, please contact me. https://mteixeira.dev
 
 **Community Drivers:**
 
 |                                                                                                                                           | Driver               | Marketplace                                                                                                            | Maintainer and Repository                                                                                                                                                                              |
 | ----------------------------------------------------------------------------------------------------------------------------------------- | -------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| ![AWS Redshift](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/redshift/default.png) | AWS Redshift               | [Link](https://marketplace.visualstudio.com/items?itemName=kj.sqltools-driver-redshift)     | [@kj-9](https://github.com/kj-9)<br/> [kj-9/sqltools-redshift-driver](https://github.com/kj-9/sqltools-redshift-driver)         |
 | ![ClickHouse logo](https://raw.githubusercontent.com/ultram4rine/sqltools-clickhouse-driver/master/icons/default.png)                     | ClickHouse           | [Link](https://marketplace.visualstudio.com/items?itemName=ultram4rine.sqltools-clickhouse-driver)                     | [@ultram4rine](https://github.com/ultram4rine) <br/> [ultram4rine/sqltools-clickhouse-driver](https://github.com/ultram4rine/sqltools-clickhouse-driver)                                               |
 | ![Google Cloud Spanner](https://raw.githubusercontent.com/cloudspannerecosystem/sqltools-cloud-spanner-driver/main/icons/default.png)     | Google Cloud Spanner | [Link](https://marketplace.visualstudio.com/items?itemName=google-cloud-spanner-ecosystem.google-cloud-spanner-driver) | [@cloudspannerecosystem](https://github.com/cloudspannerecosystem) <br/> [cloudspannerecosystem/sqltools-cloud-spanner-driver](https://github.com/cloudspannerecosystem/sqltools-cloud-spanner-driver) |
 | ![InterSystems IRIS logo](https://raw.githubusercontent.com/intersystems-community/sqltools-intersystems-driver/master/icons/default.png) | InterSystems IRIS    | [Link](https://marketplace.visualstudio.com/items?itemName=intersystems-community.sqltools-intersystems-driver)        | [@daimor](https://github.com/daimor) <br/> [intersystems-community/sqltools-intersystems-driver](https://github.com/intersystems-community/sqltools-intersystems-driver)                               |
 | ![SAP HANA](https://raw.githubusercontent.com/SAP/sap-hana-driver-for-sqltools/master/icons/default.png)                                  | SAP HANA             | [Link](https://marketplace.visualstudio.com/items?itemName=SAPOSS.sap-hana-driver-for-sqltools)                        | [@SAP](https://github.com/SAP) <br/> [SAP/sap-hana-driver-for-sqltools](https://github.com/SAP/sap-hana-driver-for-sqltools)                                                                           |
 | ![Snowflake](https://raw.githubusercontent.com/koszti/sqltools-snowflake-driver/master/icons/default.png)                                 | Snowflake            | [Link](https://marketplace.visualstudio.com/items?itemName=koszti.snowflake-driver-for-sqltools)                       | [@koszti](https://github.com/koszti) <br/> [koszti/sqltools-snowflake-driver](https://github.com/koszti/sqltools-snowflake-driver)                                                                     |
+| ![Teradata](https://raw.githubusercontent.com/scriptpup/sqltools-teradata-driver/master/icons/default.png)                                | Teradata             | [Link](https://marketplace.visualstudio.com/items?itemName=scriptpup.sqltools-teradata-driver)                         | [@ScriptPup](https://github.com/ScriptPup) <br/> [ScriptPup/sqltools-teradata-driver](https://github.com/ScriptPup/sqltools-teradata-driver)                                                           |
 
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
@@ -82,7 +83,7 @@ Join all these amazing [contributors](https://github.com/mtxr/vscode-sqltools/gr
 
 SQLTools was developed with ♥ to save us time during our programming journey.
 
-SQLTools will save you (for sure) a lot of time and help you to increase your productivity so, please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools to become more awesome than ever.
+SQLTools will save you (for sure) a lot of time and help you to increase your productivity, so please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools become more awesome than ever.
 
 [![ko-fi](https://user-images.githubusercontent.com/707561/112481485-d0d09800-8d55-11eb-8bfd-bb70c9984617.png)](https://ko-fi.com/Y8Y487W9)
 [![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
