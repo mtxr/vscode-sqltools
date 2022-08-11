@@ -91,6 +91,7 @@ export default class Tokenizer {
   // 3. double quoted string using "" or \" to escape
   // 4. single quoted string using '' or \' to escape
   // 5. national character quoted string using N'' or N\' to escape
+  // 6. postgres character quoted string using E'' or e'' to escape
   createStringPattern(stringTypes) {
     const patterns = {
       '``': '((`[^`]*($|`))+)',
@@ -98,6 +99,7 @@ export default class Tokenizer {
       '""': '(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)',
       "''": "(('[^'\\\\]*(?:\\\\.[^'\\\\]*)*('|$))+)",
       "N''": "((N'[^N'\\\\]*(?:\\\\.[^N'\\\\]*)*('|$))+)",
+      "E''": "(((E|e)'[^'\\\\]*(?:\\\\.[^'\\\\]*)*('|$))+)",
     };
 
     return stringTypes.map(t => patterns[t]).join('|');
