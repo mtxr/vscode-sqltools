@@ -642,4 +642,25 @@ where id = $1`);
       UPDATE ON * TO 'user' @'%';
     `))
   });
+
+  it("formats postgres specific c-style escape sequences", function() {
+    expect(format("E'\\n'")).toBe("E'\\n'");
+    expect(format("E'\\d+'")).toBe("E'\\d+'");
+    expect(format("E'\n'")).toBe("E'\n'");
+    expect(format("E'foo\\'bar'")).toBe("E'foo\\'bar'");
+
+    // also support lower-case e
+    expect(format("e'\n'")).toBe("e'\n'");
+    // multiline escape sequence
+    expect(format(`E'\n
+    \\d+
+    '`)).toBe(`E'\n
+    \\d+
+    '`);
+
+    expect(format("e'\n' ='abc'")).toBe("e'\n' = 'abc'");
+
+    // only E or e should be treated as special escape sequence
+    expect(format("D'\n'")).toBe("D '\n'");
+  });
 });
