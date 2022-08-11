@@ -412,6 +412,7 @@ export default function behavesLikeSqlFormatter(language?: any) {
         expect(format("foo !~* 'hello'")).toBe("foo !~* 'hello'");
         expect(format("foo !~~* 'hello'")).toBe("foo !~~* 'hello'");
         expect(format("@ foo")).toBe("@ foo");
+        expect(format("tsvector @@ tsquery")).toBe("tsvector @@ tsquery");
         expect(format("foo << 2")).toBe("foo << 2");
         expect(format("foo >> 2")).toBe("foo >> 2");
         expect(format("|/ foo")).toBe("|/ foo");
