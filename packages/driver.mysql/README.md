@@ -6,7 +6,7 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ### 0.3.0
 
-- Sort databases alphabetically.
+- Sort databases alphabetically. [#706](https://github.com/mtxr/vscode-sqltools/pull/706) - thanks [@mattschlosser](https://github.com/mattschlosser).
 - Sync with 0.24 release of main extension.
 
 ### 0.2.0
