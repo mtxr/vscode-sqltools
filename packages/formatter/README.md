@@ -54,6 +54,11 @@ sqlFormatter.format('SELECT *', {
 
 ## Changelog
 
+#### v1.2.4
+
+- Support PostgreSQL c-style escape strings in formatter. [#935](https://github.com/mtxr/vscode-sqltools/pull/935) - thanks to [@sivaramasubramanian](https://github.com/sivaramasubramanian).
+- Support PostgreSQL @@ operator in formatter. [#936](https://github.com/mtxr/vscode-sqltools/pull/936) - thanks to [@remlse](https://github.com/remlse).
+
 #### v1.2.3
 
 - Update types path. Thanks to [@sgtpep](https://github.com/sgtpep)

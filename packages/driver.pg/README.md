@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.3.0
+
+- Add Cockroach as an alias. Thanks [@ultram4rine](https://github.com/ultram4rine).
+- Sync with 0.24 release of main extension.
+
 ### 0.2.0
 
 - Fixes ssl issue. [#640](https://github.com/mtxr/vscode-sqltools/issues/640) [#675](https://github.com/mtxr/vscode-sqltools/issues/675)
