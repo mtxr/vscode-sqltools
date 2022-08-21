@@ -1,4 +1,8 @@
 -- @conn SQLite
+DROP TABLE IF EXISTS contacts;
+DROP TABLE IF EXISTS contacts_metadata;
+DROP VIEW IF EXISTS contacts_view;
+
 CREATE TABLE contacts (
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,

@@ -8,7 +8,7 @@ export default class StandardSqlFormatter extends AbstractFormatter {
       reservedTopLevelWords,
       reservedNewlineWords,
       reservedTopLevelWordsNoIndent,
-      stringTypes: [`""`, "N''", "''", '``', '[]'],
+      stringTypes: [`""`, "N''", "''", '``', '[]', "E''"],
       openParens: ['(', 'CASE'],
       closeParens: [')', 'END'],
       indexedPlaceholderTypes: ['?'],
