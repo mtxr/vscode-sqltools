@@ -37,11 +37,11 @@ jobs:
         CC: "gcc-4.9"
         DISPLAY: ":99.0"
       run: |
-        ./pack.drivers.sh
+        yarn run pack:all
 
     - name: Upload to Release
       uses: OmgImAlexis/upload-to-release@12da88e9f14252a5232be13ee9aadda64637c271
       with:
-        args: "*.vsix packages/*/*.vsix"
+        args: "*.vsix"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
