@@ -10,7 +10,8 @@ jobs:
   build:
 
     runs-on: ubuntu-latest
-
+    env:
+      codecov_secret: ${{ secrets.CODECOV_TOKEN_FORMATTER }}
     strategy:
       matrix:
         node-version: [14.x]
@@ -49,7 +50,7 @@ jobs:
         path: ./packages/formatter/*.tgz
 
     - name 'codecov'
-      if: secrets.CODECOV_TOKEN_FORMATTER != '' 
+      if: env.codecov_secret != '' 
       uses: codecov/codecov-action@v1.0.2
       with:
-        token: ${{secrets.CODECOV_TOKEN_FORMATTER}} #required
+        token: ${{env.codecov_secret}} #required
