@@ -55,7 +55,7 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     switch (item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
-        return this.queryResults(this.queries.fetchDatabases());
+        return this.queryResults(this.queries.fetchDatabases(item));
       case ContextValue.TABLE:
       case ContextValue.VIEW:
         return this.getColumns(item as NSDatabase.ITable);
