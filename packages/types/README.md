@@ -10,6 +10,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 # Changelog
 
+### v0.1.6
+
+- IBaseQueries.fetchDatabases() can optionally pass an MConnectionExplorer.IChildItem in versions after 0.23.0.
+
 ### v0.1.5
 
 - Allow IConnection to have any properties.
@@ -20,7 +24,7 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 ### v0.1.3
 
-- fixed `checkDependencies` being requred. It's optional
+- fixed `checkDependencies` being required. It's optional
 
 ### v0.1.2
 
@@ -32,4 +36,4 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 ### v0.1.0
 
-- First realease
+- First release

@@ -20,18 +20,11 @@ export default class SidebarItem<T extends MConnectionExplorer.IChildItem = MCon
     return items.map(item => new SidebarItem(item, this));
   }
 
-  public get description() {
-    if (this.metadata) {
-      return this.metadata.detail || null;
-    }
-    return null;
-  }
-  public get conn() {
-    return this.parent.conn;
-  }
   public contextValue = ContextValue.RESOURCE_GROUP;
   constructor(public metadata: T, public parent: SidebarItem | SidebarConnection) {
     super(metadata.label, TreeItemCollapsibleState.Collapsed);
+    this.conn = this.parent.conn;
+    this.description = this.metadata ? this.metadata.detail || null : null;
     this.value = this.label;
     metadata.snippet && (this.snippet = metadata.snippet);
     if (metadata.type) {

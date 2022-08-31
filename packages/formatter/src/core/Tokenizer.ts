@@ -39,7 +39,7 @@ export default class Tokenizer {
     this.WHITESPACE_REGEX = /^(\s+)/u;
     this.NUMBER_REGEX = /^((-\s*)?[0-9]+(\.[0-9]+)?|0x[0-9a-fA-F]+|0b[01]+|([a-fA-F0-9]{8}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{4}-[a-fA-F0-9]{12}))\b/u;
     this.AMBIGUOS_OPERATOR_REGEX = /^(\?\||\?&)/u;
-    this.OPERATOR_REGEX = /^(!=|<>|>>|<<|==|<=|>=|!<|!>|\|\|\/|\|\/|\|\||~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|@>|<@|#-|@|.)/u;
+    this.OPERATOR_REGEX = /^(!=|<>|>>|<<|==|<=|>=|!<|!>|\|\|\/|\|\/|\|\||~~\*|~~|!~~\*|!~~|~\*|!~\*|!~|:=|&&|@>|<@|#-|@@|@|.)/u;
     this.NO_SPACE_OPERATOR_REGEX = /^(::|->>|->|#>>|#>)/u;
 
     this.BLOCK_COMMENT_REGEX = /^(\/\*[^]*?(?:\*\/|$))/u;
@@ -91,6 +91,7 @@ export default class Tokenizer {
   // 3. double quoted string using "" or \" to escape
   // 4. single quoted string using '' or \' to escape
   // 5. national character quoted string using N'' or N\' to escape
+  // 6. postgres character quoted string using E'' or e'' to escape
   createStringPattern(stringTypes) {
     const patterns = {
       '``': '((`[^`]*($|`))+)',
@@ -98,6 +99,7 @@ export default class Tokenizer {
       '""': '(("[^"\\\\]*(?:\\\\.[^"\\\\]*)*("|$))+)',
       "''": "(('[^'\\\\]*(?:\\\\.[^'\\\\]*)*('|$))+)",
       "N''": "((N'[^N'\\\\]*(?:\\\\.[^N'\\\\]*)*('|$))+)",
+      "E''": "(((E|e)'[^'\\\\]*(?:\\\\.[^'\\\\]*)*('|$))+)",
     };
 
     return stringTypes.map(t => patterns[t]).join('|');
