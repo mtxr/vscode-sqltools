@@ -108,7 +108,9 @@ SELECT
   'database' as "detail"
 FROM information_schema.schemata
 WHERE schema_name NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
+    OR schema_name = '${p => p.database}'
 ORDER BY
+  schema_name <> '${p => p.database}', 
   schema_name
 `;
 

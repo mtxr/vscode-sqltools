@@ -3,14 +3,11 @@ import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
 export class BookmarkTreeItem extends TreeItem {
   public contextValue = 'bookmark.item';
-  public description: string;
-  public get tooltip() {
-    return this.query;
-  }
 
   constructor(public name: string, public query: string, public parent: BookmarkTreeGroup) {
     super(name, TreeItemCollapsibleState.None);
     this.description = query;
+    this.tooltip = query;
     this.command = {
       title: 'Edit',
       command: `${EXT_NAMESPACE}.editBookmark`,
@@ -27,9 +24,6 @@ export class BookmarkTreeGroup extends TreeItem {
   public parent = null;
   public contextValue = 'bookmark.group';
   public items: { [id: string]: BookmarkTreeItem } = {};
-  public get tooltip() {
-    return this.name;
-  }
 
   public addItem(name: string, query: string) {
     if (!query || (query && query.trim().length === 0)) {
@@ -59,5 +53,6 @@ export class BookmarkTreeGroup extends TreeItem {
 
   constructor(public name: string) {
     super(name, TreeItemCollapsibleState.Expanded);
+    this.tooltip = name;
   }
 }
