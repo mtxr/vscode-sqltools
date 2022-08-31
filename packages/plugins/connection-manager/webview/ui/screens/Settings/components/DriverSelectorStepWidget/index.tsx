@@ -65,7 +65,7 @@ const DriverSelectorStepWidget = () => {
           >
             <div>
               <Message>
-                Couldn't find any drivers installed yet.
+                Couldn't find any installed drivers.
                 <p>
                   <a
                     href={`command:workbench.extensions.search?${encodeURIComponent(
@@ -81,9 +81,9 @@ const DriverSelectorStepWidget = () => {
               <CircularProgress size='20px' />
               <p>
                 <strong>
-                  Don't worry, we are still looking up for installedDrivers.
+                  Don't worry, we are still looking for installed drivers.
                   <br />
-                  Try to install drivers before move forward.
+                  Try installing drivers before proceeding.
                 </strong>
               </p>
             </div>

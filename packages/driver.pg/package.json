@@ -2,7 +2,7 @@
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Cockroach/Redshift Driver",
   "description": "SQLTools PostgreSQL/Cockroach/Redshift Driver",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -75,7 +75,7 @@
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
     "concurrently": "^5.2.0",
-    "esbuild": "0.6.26",
+    "esbuild": "0.14.50",
     "lodash": "^4.17.19",
     "pg": "^8.2.1",
     "rimraf": "^3.0.2",
