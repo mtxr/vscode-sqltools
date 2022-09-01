@@ -3,13 +3,13 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, ReleaseResultsRequest } from './contracts';
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
-import queryResultsCache from './cache/query-results.model';
+import { getRetainedResults, releaseConnectionResults, releaseResults } from './cache/query-results.model';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 
 const log = createLogger('conn-manager');
@@ -49,9 +49,17 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
-  private getResultsHandler: RequestHandler<typeof GetResultsRequest> = async ({ formatType, ...opts }) => {
-    const { results, cols } = await queryResultsCache.get(queryResultsCache.buildKey(opts));
+  private releaseResultsHandler: RequestHandler<typeof ReleaseResultsRequest> = async ({ connId, requestId }) => {
+    releaseResults(connId, requestId);
+  };
 
+  private getResultsHandler: RequestHandler<typeof GetResultsRequest> = async ({ formatType, ...opts }) => {
+    const retainedResult = getRetainedResults(opts.connId, opts.requestId);
+    if (!retainedResult) {
+      return;
+    }
+
+    const { results, cols } = retainedResult;
     return formatType === 'json'
       ? JSON.stringify(results, null, 2)
       : csvStringify(results, {
@@ -244,6 +252,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
+    this.server.onRequest(ReleaseResultsRequest, this.releaseResultsHandler);
     this.server.onRequest(GetResultsRequest, this.getResultsHandler);
     this.server.onRequest(SearchConnectionItemsRequest, this.searchItemsHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);

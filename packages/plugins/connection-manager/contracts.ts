@@ -27,6 +27,12 @@ export const RunCommandRequest = new RequestType<
   Error,
   void
 >('connection/RunCommandRequest');
+export const ReleaseResultsRequest = new RequestType<
+  { connId: string, requestId: string },
+  void,
+  Error,
+  void
+>('connection/ReleaseResultsRequest');
 export const ConnectRequest = new RequestType<
   { conn: IConnection; password?: string, [id: string]: any },
   IConnection,
@@ -90,4 +96,3 @@ export interface ProgressNotificationCompleteParams {
   id: string;
 };
 export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>(`${EXT_NAMESPACE}/window/progress/complete`);
-
