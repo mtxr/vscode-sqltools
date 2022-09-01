@@ -5,13 +5,13 @@ import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connec
 import csvStringify from 'csv-stringify/lib/sync';
 import { writeFile as writeFileWithCb } from 'fs';
 import { promisify } from 'util';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, ReleaseResultsRequest } from './contracts';
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
-import queryResultsCache from './cache/query-results.model';
+import { getRetainedResults, releaseConnectionResults, releaseResults } from './cache/query-results.model';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 
 const writeFile = promisify(writeFileWithCb);
@@ -53,8 +53,17 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     }
   };
 
+  private releaseResultsHandler: RequestHandler<typeof ReleaseResultsRequest> = async ({ connId, requestId }) => {
+    releaseResults(connId, requestId);
+  };
+
   private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ fileType, filename, ...opts }) => {
-    const { results, cols } = await queryResultsCache.get(queryResultsCache.buildKey(opts));
+    const retainedResult = getRetainedResults(opts.connId, opts.requestId);
+    if (!retainedResult) {
+      return;
+    }
+
+    const { results, cols } = retainedResult;
     if (fileType === 'json') {
       return writeFile(filename, JSON.stringify(results, null, 2));
     }
@@ -253,6 +262,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server = this.server || server;
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
+    this.server.onRequest(ReleaseResultsRequest, this.releaseResultsHandler);
     this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
     this.server.onRequest(SearchConnectionItemsRequest, this.searchItemsHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
