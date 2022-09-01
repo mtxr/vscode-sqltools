@@ -64,8 +64,8 @@ export default class Tokenizer {
   }
 
   createLineCommentRegex(lineCommentTypes) {
-    const unMatchJSONOpeartors = '((?<!#)>|(?:[^>]))'; // Don't match if lineComment is # and immediately followed with >
-    return new RegExp(`^((?:${lineCommentTypes.map(c => escapeRegExp(c)).join('|')})${unMatchJSONOpeartors}.*?(?:\r\n|\r|\n|$))`, 'u');
+    const unMatchJSONOperators = '((?<!#)>|(?:[^>]))'; // Don't match if lineComment is # and immediately followed with >
+    return new RegExp(`^((?:${lineCommentTypes.map(c => escapeRegExp(c)).join('|')})${unMatchJSONOperators}.*?(?:\r\n|\r|\n|$))`, 'u');
   }
 
   createReservedWordRegex(reservedWords) {
