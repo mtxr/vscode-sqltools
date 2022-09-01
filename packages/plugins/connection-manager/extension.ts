@@ -439,7 +439,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       workspaceFolderValue = [],
       workspaceValue = [],
       globalValue = [],
-    } = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect('connections');
+    } = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect<any[]>('connections');
 
     const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === conn.id);
 
