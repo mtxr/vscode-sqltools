@@ -17,10 +17,11 @@ import { getOrCreateEditor, getSelectedText, readInput } from '@sqltools/vscode/
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
 import path from 'path';
+import { promises as fs } from 'fs';
 import { file } from 'tempy';
 import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
-import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, SaveResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
 import { getExtension } from './extension-util';
 import statusBar from './status-bar';
@@ -295,8 +296,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_showOutputChannel = async () => logger.show();
 
-  private ext_saveResults = async (arg: (IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
-    let fileType: string | null = null;
+  private ext_saveResults = async (arg: (IQueryOptions & { formatType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
+    let formatType: string | null = null;
     let opt: IQueryOptions = {};
     if (arg instanceof Uri) {
       // if clicked on editor title actions
@@ -314,38 +315,49 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       }
     } else if (arg.requestId) {
       // used context menu inside of a view
-      const { fileType: optFileType, ...rest } = arg;
-      fileType = optFileType;
+      const { formatType: optFileType, ...rest } = arg;
+      formatType = optFileType;
       opt = rest;
     }
 
     if (!opt || !opt.requestId) throw 'Can\'t find active results view';
 
-    fileType = fileType || Config.defaultExportType;
-    if (fileType === 'prompt') {
-      fileType = await quickPick<'csv' | 'json' | undefined>([
-        { label: 'Save results as CSV', value: 'csv' },
-        { label: 'Save results as JSON', value: 'json' },
+    let showSaveDialog = true;
+    formatType = formatType || Config.defaultExportType;
+    if (formatType === 'prompt') {
+      ({ formatType, showSaveDialog } = (await quickPick<{ formatType: 'csv' | 'json'; showSaveDialog: boolean }>([
+        { label: 'Save results as CSV', value: { formatType: 'csv', showSaveDialog: true } },
+        { label: 'Save results as JSON', value: { formatType: 'json', showSaveDialog: true } },
+        { label: 'Copy results as CSV to clipboard', value: { formatType: 'csv', showSaveDialog: false } },
+        { label: 'Copy results as JSON to clipboard', value: { formatType: 'json', showSaveDialog: false } },
       ], 'value', {
         title: 'Select a file type to export',
-      });
+      }) || {}));
     }
 
-    if (!fileType || fileType === 'prompt') return;
+    if (!formatType || formatType === 'prompt') return;
 
-    const filters = fileType === 'csv' ? { 'CSV File': ['csv', 'txt'] } : { 'JSON File': ['json'] };
-    const file = await window.showSaveDialog({
-      filters,
-      saveLabel: 'Export'
-    });
-    if (!file) return;
-    const filename = file.fsPath;
-    await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
-    return commands.executeCommand('vscode.open', file);
+    if (showSaveDialog) { // When saving to file
+      const filters = formatType === 'csv' ? { 'CSV File': ['csv', 'txt'] } : { 'JSON File': ['json'] };
+      const file = await window.showSaveDialog({
+        filters,
+        saveLabel: 'Export'
+      });
+      if (!file) return;
+      const filename = file.fsPath;
+  
+      const results = await this.client.sendRequest(GetResultsRequest, { ...opt, formatType });
+  
+      await fs.writeFile(filename, results);
+      return commands.executeCommand('vscode.open', file);
+    } else { // When saving to clipboard
+      const results = await this.client.sendRequest(GetResultsRequest, { ...opt, formatType });
+      return vscodeEnv.clipboard.writeText(results);
+    }
   }
 
-  private ext_openResults = async (arg: (IQueryOptions & { fileType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
-    let fileType: string | null = null;
+  private ext_openResults = async (arg: (IQueryOptions & { formatType?: 'csv' | 'json' | 'prompt' }) | Uri = {}) => {
+    let formatType: string | null = null;
     let opt: IQueryOptions = {};
     if (arg instanceof Uri) {
       // if clicked on editor title actions
@@ -363,16 +375,16 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       }
     } else if (arg.requestId) {
       // used context menu inside of a view
-      const { fileType: optFileType, ...rest } = arg;
-      fileType = optFileType;
+      const { formatType: optFileType, ...rest } = arg;
+      formatType = optFileType;
       opt = rest;
     }
 
     if (!opt || !opt.requestId) throw 'Can\'t find active results view';
 
-    fileType = fileType || Config.defaultOpenType;
-    if (fileType === 'prompt') {
-      fileType = await quickPick<'csv' | 'json' | undefined>([
+    formatType = formatType || Config.defaultOpenType;
+    if (formatType === 'prompt') {
+      formatType = await quickPick<'csv' | 'json' | undefined>([
         { label: 'Open results as CSV', value: 'csv' },
         { label: 'Open results as JSON', value: 'json' },
       ], 'value', {
@@ -380,15 +392,16 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       });
     }
 
-    if (!fileType || fileType === 'prompt') return;
+    if (!formatType || formatType === 'prompt') return;
 
     const filename = file({
-      extension: fileType,
+      extension: formatType,
     });
 
     const fileUri = Uri.file(filename);
+    const results = await this.client.sendRequest(GetResultsRequest, { ...opt, formatType });
+    await fs.writeFile(filename, results);
 
-    await this.client.sendRequest(SaveResultsRequest, { ...opt, filename, fileType });
     return vscodeEnv.openExternal(fileUri);
   }
 
@@ -426,7 +439,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       workspaceFolderValue = [],
       workspaceValue = [],
       globalValue = [],
-    } = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect('connections');
+    } = workspace.getConfiguration(EXT_CONFIG_NAMESPACE).inspect<any[]>('connections');
 
     const findIndex = (arr = []) => arr.findIndex(c => getConnectionId(c) === conn.id);
 

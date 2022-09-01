@@ -3,9 +3,7 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
-import { writeFile as writeFileWithCb } from 'fs';
-import { promisify } from 'util';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, SaveResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, ReleaseResultsRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, ReleaseResultsRequest } from './contracts';
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
@@ -13,8 +11,6 @@ import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import { getRetainedResults, releaseConnectionResults, releaseResults } from './cache/query-results.model';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
-
-const writeFile = promisify(writeFileWithCb);
 
 const log = createLogger('conn-manager');
 
@@ -57,27 +53,21 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     releaseResults(connId, requestId);
   };
 
-  private saveResultsHandler: RequestHandler<typeof SaveResultsRequest> = async ({ fileType, filename, ...opts }) => {
+  private getResultsHandler: RequestHandler<typeof GetResultsRequest> = async ({ formatType, ...opts }) => {
     const retainedResult = getRetainedResults(opts.connId, opts.requestId);
     if (!retainedResult) {
       return;
     }
 
     const { results, cols } = retainedResult;
-    if (fileType === 'json') {
-      return writeFile(filename, JSON.stringify(results, null, 2));
-    }
-    if (fileType === 'csv') {
-      return writeFile(
-        filename,
-        csvStringify(results, {
+    return formatType === 'json'
+      ? JSON.stringify(results, null, 2)
+      : csvStringify(results, {
           columns: cols,
           header: true,
           quoted_string: true,
           quoted_empty: true,
-        }),
-      );
-    }
+        });
   };
 
   private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search, extraParams = {} }) => {
@@ -263,7 +253,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
 
     this.server.onRequest(RunCommandRequest, this.runCommandHandler);
     this.server.onRequest(ReleaseResultsRequest, this.releaseResultsHandler);
-    this.server.onRequest(SaveResultsRequest, this.saveResultsHandler);
+    this.server.onRequest(GetResultsRequest, this.getResultsHandler);
     this.server.onRequest(SearchConnectionItemsRequest, this.searchItemsHandler);
     this.server.onRequest(DisconnectRequest, this.closeConnectionHandler);
     this.server.onRequest(GetConnectionPasswordRequest, this.GetConnectionPasswordRequestHandler);
