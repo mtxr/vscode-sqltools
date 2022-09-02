@@ -102,6 +102,8 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
           }
         });
       });
+    }).catch((reason) => {
+      throw new Error(reason.message);
     });
   }
 
