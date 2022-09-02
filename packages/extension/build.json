@@ -20,5 +20,15 @@
       },
       "type": "webview"
     }
+  ],
+  "patch": [
+    {
+      "type": "contentReplace",
+      "entries": {
+        "README.md": "../../README.md"
+      },
+      "regexStr": "<!-- HEADER START -->[\\s\\S]+<!-- HEADER END -->",
+      "replacement": "# SQLTools for Visual Studio Code"
+    }
   ]
 }

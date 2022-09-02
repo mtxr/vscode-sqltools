@@ -45,8 +45,7 @@
         "username": "root",
         "askForPassword": false,
         "password": "root",
-        "connectionTimeout": 15,
-        // "group": "PG"
+        "connectionTimeout": 15
       },
       {
         "name": "PGSQL",
@@ -57,15 +56,13 @@
         "username": "root",
         "askForPassword": false,
         "password": "root",
-        "connectionTimeout": 15,
-        // "group": "PG"
+        "connectionTimeout": 15
       },
       {
         "name": "PGSQL URI",
         "driver": "PostgreSQL",
         "connectString": "postgres://root:root@localhost:5433/test_db",
-        "connectionTimeout": 15,
-        // "group": "PG"
+        "connectionTimeout": 15
       },
       {
         "name": "MSSQL",
@@ -79,15 +76,13 @@
         "connectionTimeout": 15,
         "mssqlOptions": {
           "encrypt": false
-        },
-        // "group": "MSSQL"
+        }
       },
       {
         "name": "SQLite",
         "driver": "SQLite",
         "database": "./docker/sqlite/test_db.db",
-        "connectionTimeout": 15,
-        // "group": "SQLITE"
+        "connectionTimeout": 15
       },
       {
         "askForPassword": false,
@@ -98,8 +93,7 @@
         "password": "root",
         "port": 3307,
         "server": "localhost",
-        "username": "root",
-        // "group": "MYSQL"
+        "username": "root"
       },
       {
         "askForPassword": false,
@@ -113,8 +107,7 @@
         "username": "root",
         "mysqlOptions": {
           "authProtocol": "xprotocol"
-        },
-        // "group": "MYSQL"
+        }
       },
       {
         "askForPassword": false,
@@ -124,8 +117,20 @@
         "name": "MySQL Socket",
         "password": "root",
         "socketPath": "./docker/mysql/local-mysqld/mysqld.sock",
+        "username": "root"
+      },
+      {
+        "mysqlOptions": {
+          "authProtocol": "default"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3307,
+        "driver": "MySQL",
+        "name": "MySQL information_schema",
+        "database": "information_schema",
         "username": "root",
-        // "group": "MYSQL"
+        "password": "root"
       },
       {
         "askForPassword": false,
@@ -138,20 +143,38 @@
         "username": "root",
         "mysqlOptions": {
           "authProtocol": "xprotocol"
-        },
-        // "group": "MYSQL"
+        }
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 15,
+        "database": "test_db",
+        "driver": "MySQL",
+        "name": "MySQLv5",
+        "password": "root",
+        "port": 3308,
+        "server": "localhost",
+        "username": "root"
+      },
+      {
+        "askForPassword": false,
+        "connectionTimeout": 30,
+        "database": "test_db",
+        "driver": "MySQL",
+        "name": "MySQLv5 Socket",
+        "password": "root",
+        "socketPath": "./docker/mysql/local-mysqldv5/mysqld.sock",
+        "username": "root"
       },
       {
         "connectString": "Server={localhost,1433};Database={test_db};Pwd={root(!)Password};User Id={sa}",
         "driver": "MSSQL",
-        "name": "MSSQL ConnectionString",
-        // "group": "MSSQL"
+        "name": "MSSQL ConnectionString"
       },
       {
         "connectString": "mssql://sa:root(!)Password@localhost:1433/test_db",
         "driver": "MSSQL",
-        "name": "MSSQL ConnectionString schema",
-        // "group": "MSSQL"
+        "name": "MSSQL ConnectionString schema"
       },
       {
         "database": "test_db",
@@ -184,5 +207,15 @@
       "namespaces": "*"
     },
     // "sqltools.trace.server": "verbose"
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-azuretools.vscode-docker",
+      "mtxr.sqltools",
+      "mtxr.sqltools-driver-mssql",
+      "mtxr.sqltools-driver-mysql",
+      "mtxr.sqltools-driver-pg",
+      "mtxr.sqltools-driver-sqlite"
+    ]
   },
 }

@@ -15,7 +15,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [10.x]
+        node-version: [14.x]
 
     steps:
     - uses: actions/checkout@v1
@@ -68,7 +68,7 @@ jobs:
         path: ./coverage
         retention-days: 2
 
-    - uses: codecov/codecov-action@v1.0.2
-      if: github.event_name == 'push'
+    - uses: codecov/codecov-action@v3
+      if: github.repository == 'mtxr/vscode-sqltools'
       with:
-        token: ${{secrets.CODECOV_TOKEN}} #required
+        flags: "extension"

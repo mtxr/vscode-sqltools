@@ -8,7 +8,7 @@ import { IQueryOptions } from '@sqltools/types';
 
 const getCommand = (cmd: string) => `${process.env.EXT_NAMESPACE}.${cmd}`;
 
-const getFileType = (choice: MenuActions) => Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined;
+const getFormatType = (choice: MenuActions) => Object.values(MenuActions).includes(choice) ? (choice === MenuActions.SaveJSONOption ? 'json' : 'csv') : undefined;
 
 export const openMessagesConsole = () => sendMessage(UIAction.CALL, { command: `${process.env.EXT_NAMESPACE}ViewConsoleMessages.focus` });
 
@@ -22,7 +22,7 @@ export default function useContextAction() {
       command: getCommand('openResults'),
       args: [{
         ...options,
-        fileType: getFileType(choice),
+        formatType: getFormatType(choice),
       }],
     });
   }, [result]);
@@ -33,7 +33,7 @@ export default function useContextAction() {
       command: getCommand('saveResults'),
       args: [{
         ...options,
-        fileType: getFileType(choice),
+        formatType: getFormatType(choice),
       }],
     });
   }, [result]);
