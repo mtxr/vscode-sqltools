@@ -8,22 +8,9 @@ import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
 
-const SQLite3Version = '5.0.10';
-
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 
-  public readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
-    name: 'sqlite3',
-    version: SQLite3Version,
-  }];
-
-
   queries = queries;
-
-  private get lib() {
-    return this.requireDep('sqlite3') as SQLiteLib.sqlite3;
-  }
 
   createDirIfNotExists = async () => {
     if (this.credentials.database.toLowerCase() === ':memory:') return;
@@ -41,7 +28,7 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     await this.createDirIfNotExists();
     const db = await new Promise<SQLiteLib.Database>(async (resolve, reject) => {
       try {
-        const instance = new (this.lib).Database(await this.getDatabase(), (err) => {
+        const instance = new SQLiteLib.Database(await this.getDatabase(), (err) => {
           if (err) return reject(err);
           return resolve(instance);
         });
