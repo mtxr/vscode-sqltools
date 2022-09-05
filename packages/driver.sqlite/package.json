@@ -63,7 +63,7 @@
     "ts": "tsc -p ."
   },
   "dependencies": {
-    "sqlite3": "^5.0.10"
+    "sqlite3": "^5.0.11"
   },
   "devDependencies": {
     "@sqltools/base-driver": "latest",
