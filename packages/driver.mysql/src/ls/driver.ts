@@ -33,6 +33,9 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     return this.driver.query(query, opt)
     .catch(err => {
+      if (opt.throwIfError) {
+        throw new Error(err.message);
+      }
       return [<NSDatabase.IResult>{
         connId: this.getId(),
         requestId: opt.requestId,
@@ -55,7 +58,7 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     switch (item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
-        return this.queryResults(this.queries.fetchDatabases());
+        return this.queryResults(this.queries.fetchDatabases(item));
       case ContextValue.TABLE:
       case ContextValue.VIEW:
         return this.getColumns(item as NSDatabase.ITable);

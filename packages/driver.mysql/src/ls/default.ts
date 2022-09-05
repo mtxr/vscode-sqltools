@@ -84,6 +84,9 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
               if (r.changedRows) {
                 messages.push(`${r.changedRows} rows were changed.`);
               }
+              if (fields) {
+                fields = fields.filter(field => typeof field !== 'undefined');
+              }
               return {
                 connId: this.getId(),
                 requestId,
@@ -99,6 +102,8 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
           }
         });
       });
+    }).catch((reason) => {
+      throw new Error(reason.message);
     });
   }
 

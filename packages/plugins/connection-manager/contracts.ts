@@ -27,6 +27,12 @@ export const RunCommandRequest = new RequestType<
   Error,
   void
 >('connection/RunCommandRequest');
+export const ReleaseResultsRequest = new RequestType<
+  { connId: string, requestId: string },
+  void,
+  Error,
+  void
+>('connection/ReleaseResultsRequest');
 export const ConnectRequest = new RequestType<
   { conn: IConnection; password?: string, [id: string]: any },
   IConnection,
@@ -54,12 +60,12 @@ export const SearchConnectionItemsRequest = new RequestType<
   void
 >('connection/SearchConnectionItemsRequest');
 
-export const SaveResultsRequest = new RequestType<
-  IQueryOptions & { filename: string, fileType: 'json' | 'csv' },
-  void,
+export const GetResultsRequest = new RequestType<
+  IQueryOptions & { formatType: 'json' | 'csv' },
+  string,
   Error,
   void
->('connection/SaveResultsRequest');
+>('connection/GetResultsRequest');
 
 export const GetChildrenForTreeItemRequest = new RequestType<
   { conn: IConnection, item: MConnectionExplorer.IChildItem, parent?: MConnectionExplorer.IChildItem },
@@ -90,4 +96,3 @@ export interface ProgressNotificationCompleteParams {
   id: string;
 };
 export const ProgressNotificationComplete = new NotificationType<ProgressNotificationCompleteParams, void>(`${EXT_NAMESPACE}/window/progress/complete`);
-

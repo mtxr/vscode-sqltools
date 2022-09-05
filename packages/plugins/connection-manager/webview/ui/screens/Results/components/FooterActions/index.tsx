@@ -5,12 +5,12 @@ import useContextAction, { openMessagesConsole } from '../../../Results/hooks/us
 
 
 const FooterActions = () => {
-  const { openResults } = useContextAction();
+  const { openResults, reRunQuery, exportResults } = useContextAction();
   return (
     <footer className={styles.footer}>
       <Button onClick={openMessagesConsole}>Console</Button>
-      <Button onClick={undefined /* reRunQuery */}>Re-Run Query</Button>
-      <Button onClick={undefined /* exportResults */}>Export</Button>
+      <Button onClick={reRunQuery}>Re-Run Query</Button>
+      <Button onClick={exportResults}>Export</Button>
       <Button onClick={openResults}>Open</Button>
     </footer>
   );

@@ -48,6 +48,7 @@ jobs:
         name: package
         path: ./packages/formatter/*.tgz
 
-    # - uses: codecov/codecov-action@v1.0.2
-    #   with:
-    #     token: ${{secrets.CODECOV_TOKEN_FORMATTER}} #required
+    - uses: codecov/codecov-action@v3
+      if: github.repository == 'mtxr/vscode-sqltools'
+      with:
+        flags: "formatter"
