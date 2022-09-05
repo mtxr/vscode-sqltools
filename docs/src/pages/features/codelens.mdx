@@ -36,6 +36,26 @@ This will be transformed into:
 
 Everything inside a block will run together.
 
-If you add `@conn ConnectionName` to your query block, your queries will be executed on the defined connection.
+If you add `-- @conn ConnectionName` to your query block, your queries will be executed on the defined connection.
 
 You can even have multiple blocks of different connections on same file.
+
+Each statement in a block can optionally be preceded by a comment line of the form `-- @label Some Text` to make the result tab label become `Some Text` instead of the first 16 characters of the statement.
+
+Additionally, if the first statement of a multi-statement block is preceded by two `-- @label ...` comments then the first will set the label of the block's tab and the second the label of the statement sub-tab. For example:
+```sql
+-- @block create company table
+-- @conn PGSQL
+-- @label Set up COMPANY table
+-- @label Create
+CREATE TABLE IF NOT EXISTS COMPANY(
+    ID INT PRIMARY KEY NOT NULL,
+    NAME TEXT NOT NULL,
+    AGE INT NOT NULL,
+    ADDRESS CHAR(50),
+    SALARY REAL
+);
+
+-- @label Insert row #1
+INSERT INTO COMPANY VALUES (1, 'Name', 12, 'address', 0.2);
+```
