@@ -6,9 +6,9 @@ route: /features/codelens
 
 # Codelens
 
-Since v0.17.15 you can run queries using VSCode Codelens.
+Since v0.17.15 you can run queries using VS Code's Codelens feature.
 
-To use codelens, first you need to define query blocks, using the `@block` comment. See the example below:
+To use a Codelens, first you need to define query blocks using the `@block` comment. See the example below:
 ```sql
 -- @block create company table
 -- @conn PGSQL
@@ -36,11 +36,11 @@ This will be transformed into:
 
 Everything inside a block will run together.
 
-If you add `-- @conn ConnectionName` to your query block, your queries will be executed on the defined connection.
+If you add `-- @conn ConnectionName` to the start of your query block, your queries will be executed on the specified connection.
 
-You can even have multiple blocks of different connections on same file.
+You can even have multiple blocks using different connections in the same file.
 
-Each statement in a block can optionally be preceded by a comment line of the form `-- @label Some Text` to make the result tab label become `Some Text` instead of the first 16 characters of the statement.
+Each statement in a block can optionally be preceded by a comment line of the form `-- @label Some Text` to make the result tab's label become `Some Text` instead of the first 16 characters of the statement.
 
 Additionally, if the first statement of a multi-statement block is preceded by two `-- @label ...` comments then the first will set the label of the block's tab and the second the label of the statement sub-tab. For example:
 ```sql
