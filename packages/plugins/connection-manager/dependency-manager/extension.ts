@@ -67,7 +67,7 @@ export default class DependencyManager implements IExtensionPlugin {
                 depNamesString.push(depStr);
                 if (dep.args) args.push(...dep.args);
               })
-              progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait till it finishes. Check the opened terminal for more info.` });
+              progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait until it finishes. Check the opened terminal for more info.` });
               const isPowerShell = env.shell.match(/[\\/]pwsh(.exe)?$/g);
               terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${isPowerShell ? '$(exit 0)' : 'exit 0'}`);
             });
@@ -76,8 +76,7 @@ export default class DependencyManager implements IExtensionPlugin {
           this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
-            `"${dependenciesName}" installed!\n
-Go ahead and connect!`,
+            `"${dependenciesName}" installed. Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
