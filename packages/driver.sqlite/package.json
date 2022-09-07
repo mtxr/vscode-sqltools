@@ -62,9 +62,6 @@
     "dev:fw": "chokidar \"src/**/*\" \"*.json\" --initial --silent -c \"yarn run watch\"",
     "ts": "tsc -p ."
   },
-  "dependencies": {
-    "sqlite3": "^5.0.11"
-  },
   "devDependencies": {
     "@sqltools/base-driver": "latest",
     "@types/sqlite3": "^3.1.8",
