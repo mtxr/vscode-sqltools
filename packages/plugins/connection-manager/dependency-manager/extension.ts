@@ -68,9 +68,7 @@ export default class DependencyManager implements IExtensionPlugin {
                 if (dep.args) args.push(...dep.args);
               })
               progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait till it finishes. Check the opened terminal for more info.` });
-              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")}`);
-              terminal.show();
-              terminal.sendText("exit 0");
+              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && exit 0`);
             });
             progress.report({ increment: 100, message: `Finished installing ${depNamesString.join(", ")}` });
           });
