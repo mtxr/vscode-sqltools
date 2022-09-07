@@ -1,4 +1,4 @@
-import { window as Win, window, ProgressLocation, commands } from 'vscode';
+import { window as Win, window, ProgressLocation, commands, env } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL, DISPLAY_NAME } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
@@ -68,7 +68,8 @@ export default class DependencyManager implements IExtensionPlugin {
                 if (dep.args) args.push(...dep.args);
               })
               progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait till it finishes. Check the opened terminal for more info.` });
-              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && exit 0`);
+              const isPowerShell = env.shell.match(/[\\/]pwsh(.exe)?$/g);
+              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${isPowerShell ? '$(exit 0)' : 'exit 0'}`);
             });
             progress.report({ increment: 100, message: `Finished installing ${depNamesString.join(", ")}` });
           });
