@@ -50,6 +50,7 @@ export class SQLToolsExtension implements IExtension {
     this.onWillRunCommandEmitter = new EventEmitter();
     this.onDidRunCommandSuccessfullyEmitter = new EventEmitter();
 
+    await this.client.init()
     Context.subscriptions.push(
       this.client.start(),
       this.onWillRunCommandEmitter.event(this.onWillRunCommandHandler),
@@ -132,9 +133,9 @@ export class SQLToolsExtension implements IExtension {
       if (body) {
         body = encodeURIComponent(
           body
-          .replace(/---([^\-]+---\n\n)/gim, '')
-          .replace(/(- OS).+/gi, `$1: ${process.platform}, ${process.arch}`)
-          .replace(/(- Version).+/gi, `$1: v${VERSION}`));
+            .replace(/---([^\-]+---\n\n)/gim, '')
+            .replace(/(- OS).+/gi, `$1: ${process.platform}, ${process.arch}`)
+            .replace(/(- Version).+/gi, `$1: v${VERSION}`));
       }
 
       if (!template && !body) {
@@ -174,7 +175,7 @@ export class SQLToolsExtension implements IExtension {
       const supportProject = 'Support This Project';
       const releaseNotes = 'Release Notes';
       const message = `${DISPLAY_NAME} updated! Check out the release notes for more information.`;
-      const options = [ moreInfo, supportProject, releaseNotes ];
+      const options = [moreInfo, supportProject, releaseNotes];
       const res: string = await window.showInformationMessage(message, ...options);
       telemetry.registerMessage('info', message, res);
       switch (res) {
