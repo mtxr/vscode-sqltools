@@ -7,6 +7,7 @@ import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDepende
 import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 import { getDataPath } from '@sqltools/util/path';
+import getShellExitCommand from '@sqltools/vscode/utils/get-shell-exit-cmd';
 
 export default class DependencyManager implements IExtensionPlugin {
   public readonly name = 'Dependency Manager Plugin';
@@ -68,8 +69,8 @@ export default class DependencyManager implements IExtensionPlugin {
                 if (dep.args) args.push(...dep.args);
               })
               progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait until it finishes. Check the opened terminal for more info.` });
-              const isPowerShell = env.shell.match(/[\\/]pwsh(.exe)?$/g);
-              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${isPowerShell ? '$(exit 0)' : 'exit 0'}`);
+
+              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${getShellExitCommand()}`);
             });
             progress.report({ increment: 100, message: `Finished installing ${depNamesString.join(", ")}` });
           });
