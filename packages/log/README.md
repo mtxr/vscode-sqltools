@@ -1,4 +1,4 @@
 # SQLTools Log Utility
 
-Logging utility for VSCode SQLTools and Drivers.
+Logging utility for VS Code SQLTools and Drivers.
 

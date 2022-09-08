@@ -29,9 +29,9 @@ export default class ErrorBoundary extends React.Component {
               {this.state.errorInfo && this.state.errorInfo.componentStack}
             </pre>
           </details>
-          <div style={{  marginTop: 30 }}>
+          <div style={{ marginTop: 30 }}>
             <a href='command:workbench.action.webview.openDeveloperTools'>
-              Open VSCode DevTools
+              Open VS Code DevTools
             </a>
           </div>
         </div>

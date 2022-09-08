@@ -1,4 +1,4 @@
-import { window as Win, window, ProgressLocation, commands } from 'vscode';
+import { window as Win, window, ProgressLocation, commands, env } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL, DISPLAY_NAME } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
@@ -7,6 +7,7 @@ import { IExtensionPlugin, ILanguageClient, IExtension, IConnection, NodeDepende
 import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
 import { getDataPath } from '@sqltools/util/path';
+import getShellExitCommand from '@sqltools/vscode/utils/get-shell-exit-cmd';
 
 export default class DependencyManager implements IExtensionPlugin {
   public readonly name = 'Dependency Manager Plugin';
@@ -67,16 +68,16 @@ export default class DependencyManager implements IExtensionPlugin {
                 depNamesString.push(depStr);
                 if (dep.args) args.push(...dep.args);
               })
-              progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait till it finishes. Check the opened terminal for more info.` });
-              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && exit 0`);
+              progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait until it finishes. Check the opened terminal for more info.` });
+
+              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${getShellExitCommand()}`);
             });
             progress.report({ increment: 100, message: `Finished installing ${depNamesString.join(", ")}` });
           });
           this.installingDrivers = this.installingDrivers.filter(v => v !== conn.driver);
           const opt = conn.name ? [`Connect to ${conn.name}`] : [];
           const rr = conn.name && autoUpdateOrInstall ? opt[0] : await Win.showInformationMessage(
-            `"${dependenciesName}" installed!\n
-Go ahead and connect!`,
+            `"${dependenciesName}" installed. Go ahead and connect!`,
             ...opt
           );
           if (rr === opt[0]) {
@@ -95,7 +96,7 @@ Go ahead and connect!`,
 
   private driverNotInstalled = async ({ driverName }: { driverName: DatabaseDriver }) => {
     if (!driverName) return;
-    const options = ['Search VSCode Marketplace'];
+    const options = ['Search VS Code Marketplace'];
     try {
       const r = await Win.showInformationMessage(
         `Driver ${driverName} is not installed.`,

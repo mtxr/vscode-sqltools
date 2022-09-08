@@ -800,7 +800,7 @@
                         "boolean",
                         "string"
                     ],
-                    "default": false,
+                    "default": true,
                     "description": "Enable node runtime usage."
                 },
                 "sqltools.languageServerEnv": {
