@@ -1,42 +1,38 @@
 import * as path from 'path';
 import * as theme from './src/theme/config';
-import { css } from 'docz-plugin-css'
+import { css } from 'docz-plugin-css';
 
 const PUBLIC = path.resolve(__dirname, 'assets');
-const SRC = path.resolve(__dirname, 'src')
+const SRC = path.resolve(__dirname, 'src');
 
 export default {
   title: 'SQLTools',
   description: 'SQLTools for VSCode',
-  wrapper:'src/docs-theme',
+  wrapper: 'src/docs-theme',
+  ignore: ['**/content', '**/README.md'],
   menu: [
     {
       name: 'Home',
-      order: 1
+      order: 1,
     },
     'Features',
-    'Drivers',
-    { name: 'Settings', menu: ['Properties']},
+    { name: 'Drivers', menu: ['Drivers Index'] },
+    { name: 'Settings', menu: ['Properties'] },
     {
       name: 'Contributing',
-      menu: [
-        'How to contribute to SQLTools',
-        'Building',
-        'Testing',
-        'Support New Drivers'
-      ],
+      menu: ['How to contribute to SQLTools', 'Building', 'Testing', 'Support New Drivers'],
     },
-    { name: 'Changelog', order: 100  }
+    { name: 'Changelog', order: 100 },
   ],
   plugins: [
     css({
       preprocessor: 'sass',
-      cssmodules: true
+      cssmodules: true,
     }),
     css({
       preprocessor: 'postcss',
-      cssmodules: true
-    })
+      cssmodules: true,
+    }),
   ],
   public: './public',
   dest: 'dist',
@@ -60,7 +56,7 @@ export default {
       grayLight: theme.colors.n300,
       grayExtraLight: theme.colors.n100,
       grayBg: '#CED4DE',
-      yellow: '#FFDF00'
+      yellow: '#FFDF00',
     },
     fontWeight: theme.fontWeight,
     transition: 'all 0.1s ease',
@@ -71,8 +67,9 @@ export default {
       .set('@images', `${PUBLIC}/images`)
       .set('@components', `${SRC}/theme/components`)
       .set('@styles', `${SRC}/theme/styles`);
-    config.module.rules.get('ts').include
-      .add(__dirname + '/node_modules')
+    config.module.rules
+      .get('ts')
+      .include.add(__dirname + '/node_modules')
       .add(__dirname + '/../node_modules')
       .add(__dirname + '/../packages')
       .add(__dirname + '/..');
@@ -80,6 +77,6 @@ export default {
 
     config.resolve.extensions.add('.css');
 
-    return config
+    return config;
   },
-}
+};
