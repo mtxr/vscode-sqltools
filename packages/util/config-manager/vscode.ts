@@ -1,4 +1,4 @@
-if (process.env.PRODUCT !== 'ext') { throw 'Cant use config-manager module outside of VSCode context'; }
+if (process.env.PRODUCT !== 'ext') { throw 'Cant use config-manager module outside of VS Code context'; }
 
 import { InvalidActionError } from '@sqltools/util/exception';
 import { workspace } from 'vscode';
@@ -27,7 +27,7 @@ const handler = {
     if (prop === 'get') return get;
     if (prop === 'update') return update;
     if (prop === 'addOnUpdateHook') return addOnUpdateHook;
-    if (prop === 'replaceAll') throw 'replaceAll is not necessary within VSCode context. You can use `get` anytime to get fresh data.';
+    if (prop === 'replaceAll') throw 'replaceAll is not necessary within VS Code context. You can use `get` anytime to get fresh data.';
     return get(prop as KeysOfSettings);
   },
   set() {
@@ -44,7 +44,7 @@ Context.onRegister(() => {
     const affectsConfiguration = event.affectsConfiguration;
     const affectsConfig = (section: KeysOfSettings, resource?: any) => {
       return affectsConfiguration(`${EXT_CONFIG_NAMESPACE}.${section}`, resource);
-  };
+    };
     onUpdateHooks.forEach(cb => cb({ event: { affectsConfig, affectsConfiguration } }));
   }));
 });

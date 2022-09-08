@@ -1,7 +1,7 @@
 {
   "name": "@sqltools/vscode",
   "version": "1.0.0",
-  "description": "SQLTools VSCode related api",
+  "description": "SQLTools VS Code related api",
   "main": "index.ts",
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",

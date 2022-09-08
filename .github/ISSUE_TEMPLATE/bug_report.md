@@ -27,9 +27,9 @@ If applicable, add screenshots to help explain your problem.
 
 **Desktop (please complete the following information):**
  - SQLTools Version [e.g. v0.17.x]
- - VSCode Version: [e.g 1.x.y]
+ - VS Code Version: [e.g 1.x.y]
  - OS: [e.g. Windows, Linux, Mac]
- - Driver: 
+ - Driver:
    - [ ] PostgreSQL/Redshift
    - [ ] MySQL/MariaDB
    - [ ] MSSQL/Azure

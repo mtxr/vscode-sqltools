@@ -96,7 +96,7 @@ export default class DependencyManager implements IExtensionPlugin {
 
   private driverNotInstalled = async ({ driverName }: { driverName: DatabaseDriver }) => {
     if (!driverName) return;
-    const options = ['Search VSCode Marketplace'];
+    const options = ['Search VS Code Marketplace'];
     try {
       const r = await Win.showInformationMessage(
         `Driver ${driverName} is not installed.`,

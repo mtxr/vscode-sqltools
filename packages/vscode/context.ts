@@ -1,4 +1,4 @@
-if (process.env.PRODUCT !== 'ext') { throw 'Cant use context module outside of VSCode context'; }
+if (process.env.PRODUCT !== 'ext') { throw 'Cant use context module outside of VS Code context'; }
 
 import { ExtensionContext } from 'vscode';
 import { InvalidActionError } from '@sqltools/util/exception';

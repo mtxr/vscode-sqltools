@@ -1,7 +1,7 @@
-if (process.env.PRODUCT !== 'ext') { throw 'Cant use outputchannels outside of VSCode context'; }
+if (process.env.PRODUCT !== 'ext') { throw 'Cant use outputchannels outside of VS Code context'; }
 
-import { Writable }  from 'stream';
-import { window }  from 'vscode';
+import { Writable } from 'stream';
+import { window } from 'vscode';
 import factory from './factory';
 
 const outputChannel = window.createOutputChannel(process.env.DISPLAY_NAME || 'SQLTools');

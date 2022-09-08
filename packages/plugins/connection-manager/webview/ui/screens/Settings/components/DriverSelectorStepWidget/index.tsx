@@ -33,7 +33,7 @@ const DriverSelectorStepWidget = () => {
     );
   }, []);
 
-  if (step !== Step.CONNECTION_DRIVER_SELECTOR)  return null;
+  if (step !== Step.CONNECTION_DRIVER_SELECTOR) return null;
 
   return (
     <>
@@ -45,7 +45,9 @@ const DriverSelectorStepWidget = () => {
             {installedDrivers.map(driver => (
               <DriverItem
                 key={driver.value}
-                selected={selectedDriver && selectedDriver.value === driver.value}
+                selected={
+                  selectedDriver && selectedDriver.value === driver.value
+                }
                 driver={driver}
                 onSelect={() => onSelectDriver(driver)}
               />
@@ -72,7 +74,7 @@ const DriverSelectorStepWidget = () => {
                       '"@tag:sqltools-driver"'
                     )}`}
                   >
-                    Search VSCode marketplace
+                    Search VS Code marketplace
                   </a>
                 </p>
               </Message>

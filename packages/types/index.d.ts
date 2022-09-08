@@ -59,7 +59,7 @@ export interface IConnection<DriverOptions = any> {
    * @type {string}
    * @memberof IConnection
    */
-   group?: string;
+  group?: string;
   /**
    * Server address
    * @type {string}
@@ -194,12 +194,12 @@ export interface IConnection<DriverOptions = any> {
 
 
 
-   // WONT BE INCLUDED IN SETTINGS
-   /**
-   * Connection flag. This is not a settings. It's generated in runtime
-   * @type {boolean}
-   * @memberof IConnection
-   */
+  // WONT BE INCLUDED IN SETTINGS
+  /**
+  * Connection flag. This is not a settings. It's generated in runtime
+  * @type {boolean}
+  * @memberof IConnection
+  */
   isConnected: boolean;
   /**
    * Connection flag. This is not a settings. It's generated in runtime
@@ -216,7 +216,7 @@ export interface IQueryOptions {
   [k: string]: any;
 }
 export interface IConnectionDriverConstructor {
-  new (credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
+  new(credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
 }
 export interface IConnectionDriver {
   connection: any;
@@ -262,14 +262,14 @@ export module MConnectionExplorer {
     /**
      * Icon id from https://microsoft.github.io/vscode-codicons/dist/codicon.html
      */
-     iconId?: string;
-     /**
-      * sqltools icons
-      */
-     iconName?: string;
-     /**
-     * for resource_groups
+    iconId?: string;
+    /**
+     * sqltools icons
      */
+    iconName?: string;
+    /**
+    * for resource_groups
+    */
     childType?: ContextValue;
     /**
      * SnippetString used to insert as text
@@ -326,14 +326,14 @@ export namespace NSDatabase {
     source?: string;
   }
 
-  export interface IProcedure extends IFunction {}
+  export interface IProcedure extends IFunction { }
 
   export interface IStaticCompletion {
     label: string;
     filterText?: string;
     sortText?: string;
     detail: string;
-    documentation: { kind: 'markdown', value: string};
+    documentation: { kind: 'markdown', value: string };
   }
 
   export interface IResult<T extends { [key: string]: any } = any> {
@@ -510,7 +510,7 @@ export interface IResultsOptions {
     'font-family'?: string;
     'font-size'?: string;
     'table-cell-padding'?: string;
-   };
+  };
 }
 
 export interface ISettings {
@@ -541,7 +541,7 @@ export interface ISettings {
    * @default 100
    * @memberof ISettings
    */
-   historySize?: number;
+  historySize?: number;
   /**
    * Languages with SQL completion enabled.
    * @type {CompletionLanguages}
@@ -572,7 +572,7 @@ export interface ISettings {
    * @default true
    * @memberof ISettings
    */
-   highlightQuery?: boolean;
+  highlightQuery?: boolean;
   /**
    * Format document/selection options
    * @type {IFormatOptions}
@@ -712,7 +712,7 @@ export type KeysOfSettings = (keyof ISettings);
 export interface ConfigChangeEvent {
   affectsConfig(section: KeysOfSettings, resource?: any): boolean;
   /**
-   * VSCode config
+   * VS Code config
    *
    * @param {string} section
    * @param {any} [resource]
@@ -802,7 +802,7 @@ export interface ILanguageClient {
   onNotification: LanguageClient['onNotification'];
 }
 
-export type LSContextMap =  Omit<Map<string, any>, 'clear' | 'delete'> & { drivers: Map<string, IConnectionDriverConstructor> };
+export type LSContextMap = Omit<Map<string, any>, 'clear' | 'delete'> & { drivers: Map<string, IConnectionDriverConstructor> };
 
 export interface ILanguageServer {
   listen(): void;

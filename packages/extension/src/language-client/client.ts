@@ -223,7 +223,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private electronNotSupported = async () => {
     const r = await window.showInformationMessage(
-      `VSCode engine is not supported. You should enable \'${EXT_CONFIG_NAMESPACE}.useNodeRuntime\' and have NodeJS installed to continue.`,
+      `VS Code engine is not supported. You should enable \'${EXT_CONFIG_NAMESPACE}.useNodeRuntime\' and have NodeJS installed to continue.`,
       'Enable now',
     );
     if (!r) return;
