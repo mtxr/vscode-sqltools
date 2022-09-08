@@ -231,7 +231,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     try { await Wspc.getConfiguration(EXT_CONFIG_NAMESPACE).update('useNodeRuntime', true, ConfigurationTarget.Workspace) } catch (e) { }
     try { await Wspc.getConfiguration(EXT_CONFIG_NAMESPACE).update('useNodeRuntime', true, ConfigurationTarget.WorkspaceFolder) } catch (e) { }
     const res = await window.showInformationMessage(
-      `\'${EXT_NAMESPACE}.useNodeRuntime\' enabled. You must reload VSCode to take effect.`, 'Reload now');
+      `\'${EXT_NAMESPACE}.useNodeRuntime\' enabled. You must reload VS Code to take effect.`, 'Reload now');
     if (!res) return;
     commands.executeCommand('workbench.action.reloadWindow');
   }
