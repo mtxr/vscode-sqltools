@@ -63,7 +63,7 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 
 Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
 
-**Drivers supported till v0.21.9:**
+<!-- **Drivers supported till v0.21.9:**
 
 | Driver    | Maintainer                                       |
 | --------- | ------------------------------------------------ |
@@ -71,7 +71,7 @@ Do you want to add a new driver? We have a tool to help you. See [support new dr
 | IBM DB2   | [@snyang](https://github.com/snyang)             |
 | OracleDB  | [@mickeypearce](https://github.com/mickeypearce) |
 
-> These drivers are being migrated to be compatible with v0.22 or newer. If you need one of them, you need to install v0.21.9.
+> These drivers are being migrated to be compatible with v0.22 or newer. If you need one of them, you need to install v0.21.9. -->
 
 #### Know Driver Issues
 
