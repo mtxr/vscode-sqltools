@@ -1,4 +1,4 @@
-import { window as Win, window, ProgressLocation, commands, env } from 'vscode';
+import { window as Win, window, ProgressLocation, commands } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL, DISPLAY_NAME } from '@sqltools/util/constants';
 import { getConnectionId } from '@sqltools/util/connection';
