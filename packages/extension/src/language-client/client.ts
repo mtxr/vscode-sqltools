@@ -90,7 +90,6 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private async getServerOptions(): Promise<ServerOptions> {
     const serverModule = Context.asAbsolutePath('dist/languageserver.js');
-    const nodePath = await detectNodePath();
     let runtime: string = undefined;
     const useNodeRuntime = Config.useNodeRuntime;
 
@@ -100,13 +99,16 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         if (fs.existsSync(runtimePath)) {
           runtime = runtimePath;
         }
-      } else if (nodePath) {
-        const message = `Node runtime auto detected.\nUsing ${nodePath}.`;
-        window.showInformationMessage(message);
-        runtime = nodePath
       } else {
-        if (commandExists('node')) {
-          runtime = 'node';
+        const nodePath = await detectNodePath();
+        if (nodePath) {
+          const message = `Node runtime auto-detected. Using ${nodePath}.`;
+          window.showInformationMessage(message);
+          runtime = nodePath
+        } else {
+          if (commandExists('node')) {
+            runtime = 'node';
+          }
         }
       }
       if (!runtime) {

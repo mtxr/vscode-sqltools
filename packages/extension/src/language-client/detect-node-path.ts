@@ -11,7 +11,7 @@ const detectNodePath = async (): Promise<string | null> => {
     const terminal = window.createTerminal({ name: "detect node runtime" });
     await new Promise<void>((resolve) => {
       window.onDidCloseTerminal((e => e.processId === terminal.processId && resolve()))
-      terminal.sendText(`node -e 'require("fs").writeFileSync("${nodeRuntimeTmpFile}", process.execPath)'; ${getShellExitCommand()}`);
+      terminal.sendText(`node -e 'require(\\"fs\\").writeFileSync(\\"${nodeRuntimeTmpFile.replace(/\\/g, "\\\\")}\\", process.execPath)' && ${getShellExitCommand()}`);
     })
     return fs.readFileSync(nodeRuntimeTmpFile).toString();
   } catch (error) {
