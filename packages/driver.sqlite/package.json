@@ -63,7 +63,7 @@
     "ts": "tsc -p ."
   },
   "devDependencies": {
-    "@sqltools/base-driver": "latest",
+    "@sqltools/base-driver": "^0.1.11",
     "@types/sqlite3": "^3.1.8",
     "@types/vscode": "^1.42.0",
     "chokidar-cli": "^2.1.0",
