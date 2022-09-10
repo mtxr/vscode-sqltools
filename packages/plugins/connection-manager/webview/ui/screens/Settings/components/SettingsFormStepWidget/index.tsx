@@ -95,7 +95,7 @@ const SettingsFormStepWidget = () => {
       {process.env.NODE_ENV !== 'production' && (
         <div>
           <blockquote> -- DEV ONLY -- </blockquote>
-          <a onClick={() => location.reload()}>Realod webview</a>
+          <a onClick={() => location.reload()}>Reload webview</a>
           <Syntax code={formData} language='json' />
         </div>
       )}
