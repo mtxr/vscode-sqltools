@@ -74,7 +74,7 @@ const DriverSelectorStepWidget = () => {
                       '"@tag:sqltools-driver"'
                     )}`}
                   >
-                    Search VS Code marketplace
+                    Search VS Code Marketplace
                   </a>
                 </p>
               </Message>

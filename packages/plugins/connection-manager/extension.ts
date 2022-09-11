@@ -553,7 +553,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       buttons: [
         {
           iconPath: getIconPaths('add-connection'),
-          tooltip: 'Add new Connection',
+          tooltip: 'Add New Connection',
           cb: () => commands.executeCommand(`${EXT_NAMESPACE}.openAddConnectionScreen`),
         } as any,
       ],

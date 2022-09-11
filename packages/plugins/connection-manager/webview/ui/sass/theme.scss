@@ -109,6 +109,10 @@ button {
   border: 1px solid var(--vscode-input-border);
   text-transform: uppercase;
   cursor: pointer;
+  &:focus {
+    outline: 1px solid var(--vscode-focusBorder);
+    outline-offset: 2px;
+  }
   &:disabled,
   &[disabled] {
     opacity: 0.3;

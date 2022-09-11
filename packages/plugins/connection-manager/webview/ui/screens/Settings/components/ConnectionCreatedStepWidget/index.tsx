@@ -44,7 +44,7 @@ const ConnectionCreatedStepWidget = () => {
               }.selectConnection?${JSON.stringify(id)}`
             )}
           >
-            Connect now
+            Connect Now
           </Button>
           <Button
             a
@@ -60,7 +60,7 @@ const ConnectionCreatedStepWidget = () => {
             Delete {connSettings.name}
           </Button>
           <Button onClick={reset} float='right'>
-            Create another
+            Create Another
           </Button>
         </div>
       </div>

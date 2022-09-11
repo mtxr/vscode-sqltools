@@ -330,7 +330,7 @@
                 }
             },
             {
-                "title": "New Sql File",
+                "title": "New SQL File",
                 "command": "sqltools.newSqlFile",
                 "category": "SQLTools",
                 "icon": {
@@ -923,7 +923,7 @@
         "viewsWelcome": [
             {
                 "view": "sqltoolsViewConnectionExplorer",
-                "contents": "No connections found.\n[Add new connection](command:sqltools.openAddConnectionScreen)"
+                "contents": "No connections found.\n[Add New Connection](command:sqltools.openAddConnectionScreen)"
             }
         ],
         "menus": {

@@ -9,9 +9,9 @@ const Header = () => {
     <h3 className={style.header}>
       Connection Assistant
       <small>
-        {prev && <a onClick={prev}>{'<'}</a>}
+        {prev && <a tabIndex={0} onClick={prev} onKeyPress={prev}>{'<'}</a>}
         Step {step}/{lastStep}
-        {next && <a onClick={next}>{'>'}</a>}
+        {next && <a tabIndex={0} onClick={next} onKeyPress={next}>{'>'}</a>}
       </small>
     </h3>
   );
