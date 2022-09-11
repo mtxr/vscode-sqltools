@@ -12,6 +12,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.1.11
+
+- Fix `toAbsolutePath` for Windows by using `vscode-uri`.
+
 ### v0.1.9
 
 - Update log utility to use `@sqltools/log`.

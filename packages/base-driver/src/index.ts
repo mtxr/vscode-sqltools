@@ -16,6 +16,7 @@ import sqltoolsRequire, { sqltoolsResolve } from './lib/require';
 import { createLogger } from '@sqltools/log';
 import path from 'path';
 import fs from 'fs';
+import {URI} from 'vscode-uri';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: ReturnType<typeof createLogger>;
@@ -118,7 +119,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
       if (workspaceName) {
         const workspaceFolders = await this.getWorkspaceFolders();
         const dbWorkspace = workspaceFolders.find(w => w.name === workspaceName);
-        fsPath = path.resolve(dbWorkspace.uri.replace(/^(\w+):\/\//, ''), fsPath.replace(/\$\{workspaceFolder:(.+)}/g, './'));
+        fsPath = path.resolve(URI.parse(dbWorkspace.uri, true).fsPath, fsPath.replace(/\$\{workspaceFolder:(.+)}/g, './'));
       }
     }
     return fsPath;
