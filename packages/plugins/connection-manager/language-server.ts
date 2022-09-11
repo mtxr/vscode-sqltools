@@ -198,12 +198,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
-
-        // To fix https://github.com/mtxr/vscode-sqltools/issues/903 we need not to delete conn from the notification.
-        // Unclear in what circumstances we *do* need to delete it, but made the minimal change to fix #903.
-        if (e.data.notification !== MissingModuleNotification) {
-          delete e.data.args.conn;
-        }
         this.server.sendNotification(e.data.notification, e.data.args);
         return e.data;
       }
