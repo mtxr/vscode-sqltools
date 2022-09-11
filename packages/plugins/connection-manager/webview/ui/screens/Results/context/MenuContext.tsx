@@ -39,6 +39,7 @@ export const MenuProvider = ({
   const { data, options, position, anchorEl } = state;
   const openMenu = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
+      e.preventDefault();
       const options =
         typeof getOptions === 'function'
           ? getOptions((e.target as any).dataset || {}, e)
