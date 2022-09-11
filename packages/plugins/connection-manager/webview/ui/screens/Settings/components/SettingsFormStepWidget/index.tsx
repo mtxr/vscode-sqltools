@@ -109,13 +109,13 @@ SettingsFormStepWidget.Footer = ({
   openConnectionFile,
 }) => (
   <footer className={style.footer}>
-    <Button bg='var(--vscode-list-highlightForeground)' type='submit'>
+    <Button bg='var(--vscode-button-background)' fg='var(--vscode-button-foreground)' type='submit'>
       Save Connection
     </Button>
-    <Button onClick={testConnection} float='right' type='button'>
+    <Button bg='var(--vscode-button-secondaryBackground)' fg='var(--vscode-button-secondaryForeground)' onClick={testConnection} float='right' type='button'>
       Test Connection
     </Button>
-    {allowOpen && <a onClick={openConnectionFile}>Open settings</a>}
+    {allowOpen && <a onClick={openConnectionFile}>Open Settings</a>}
   </footer>
 );
 
