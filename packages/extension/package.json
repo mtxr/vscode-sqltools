@@ -383,55 +383,55 @@
                 "command": "workbench.action.quickOpen",
                 "key": "ctrl+e ctrl+e",
                 "mac": "cmd+e cmd+e",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings && !(editorTextFocus || editorHasSelection)"
             },
             {
                 "command": "sqltools.formatSql",
                 "key": "ctrl+e ctrl+b",
                 "mac": "cmd+e cmd+b",
-                "when": "config.sqltools.enableOldKeybindings && editorTextFocus && !editorReadonly && editorHasSelection"
+                "when": "!config.sqltools.disableChordKeybindings && editorTextFocus && !editorReadonly && editorHasSelection"
             },
             {
                 "command": "sqltools.executeQuery",
                 "key": "ctrl+e ctrl+e",
                 "mac": "cmd+e cmd+e",
-                "when": "config.sqltools.enableOldKeybindings && editorTextFocus && editorHasSelection"
+                "when": "!config.sqltools.disableChordKeybindings && editorTextFocus && editorHasSelection"
             },
             {
                 "command": "sqltools.describeTable",
                 "key": "ctrl+e ctrl+d",
                 "mac": "cmd+e cmd+d",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings"
             },
             {
                 "command": "sqltools.runFromHistory",
                 "key": "ctrl+e ctrl+h",
                 "mac": "cmd+e cmd+h",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings"
             },
             {
                 "command": "sqltools.runFromBookmarks",
                 "key": "ctrl+e ctrl+a",
                 "mac": "cmd+e cmd+a",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings"
             },
             {
                 "command": "sqltools.showRecords",
                 "key": "ctrl+e ctrl+s",
                 "mac": "cmd+e cmd+s",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings"
             },
             {
                 "command": "sqltools.deleteBookmark",
                 "key": "ctrl+e ctrl+r",
                 "mac": "cmd+e cmd+r",
-                "when": "config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings"
             },
             {
                 "command": "sqltools.bookmarkSelection",
                 "key": "ctrl+e ctrl+q",
                 "mac": "cmd+e q",
-                "when": "editorTextFocus && editorHasSelection && config.sqltools.enableOldKeybindings"
+                "when": "!config.sqltools.disableChordKeybindings && editorTextFocus && editorHasSelection"
             }
         ],
         "configuration": {
@@ -459,10 +459,10 @@
                     "default": true,
                     "description": "Toggle statusbar visibility."
                 },
-                "sqltools.enableOldKeybindings": {
+                "sqltools.disableChordKeybindings": {
                     "type": "boolean",
                     "default": false,
-                    "markdownDescription": "Add the original built-in chord keybindings that begin with `Ctrl/Cmd+E`. They are no longer enabled by default because they mask the `Go to File...` command's standard keybinding. When this setting is enabled you can invoke that command with the chord `Ctrl/Cmd+E Ctrl/Cmd+E` instead."
+                    "markdownDescription": "SQLTools' default chord keybindings begin with `Ctrl/Cmd+E` and therefore mask the default keybinding of VS Code's `Go to File...` command. When this setting is disabled (the default) you can instead invoke that command with the chord `Ctrl/Cmd+E Ctrl/Cmd+E`. Enable this setting if you don't require SQLTools' chord keybindings."
                 },
                 "sqltools.historySize": {
                     "type": "number",
