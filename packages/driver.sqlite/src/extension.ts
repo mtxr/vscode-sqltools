@@ -43,7 +43,9 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         ...connInfo,
       };
 
-      const propsToRemove = ['connectionMethod', 'id', 'usePassword', 'askForPassword'];
+      if (!connInfo.database) {
+        throw new Error('Database is required');
+      }
 
       if (path.isAbsolute(connInfo.database)) {
         const databaseUri = Uri.file(connInfo.database);
@@ -52,6 +54,8 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
           formData.database = `\$\{workspaceFolder:${dbWorkspace.name}\}/${workspace.asRelativePath(connInfo.database, false)}`;
         }
       }
+
+      const propsToRemove = ['connectionMethod', 'id', 'usePassword', 'askForPassword'];
       propsToRemove.forEach(p => delete formData[p]);
 
       return formData;

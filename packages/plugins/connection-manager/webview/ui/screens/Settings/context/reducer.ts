@@ -60,9 +60,7 @@ const reducer: React.Reducer<SettingsScreenState, SettingsReducerAction> = (
     case UIAction.RESPONSE_TEST_CONNECTION_WARNING:
       return mutate({
         loading: false,
-        externalMessage: (
-          (payload && payload.message ? payload.message : payload) || ''
-        ).toString(),
+        externalMessage: payload.externalMessage || payload.message || 'Connection problem.',
         externalMessageType: 'warning',
       });
     case UIAction.RESPONSE_INSTALLED_DRIVERS:

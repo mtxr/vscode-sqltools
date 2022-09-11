@@ -9,8 +9,9 @@ import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception
 import { createLogger } from '@sqltools/log/src';
 import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
-import { getRetainedResults, releaseConnectionResults, releaseResults } from './cache/query-results.model';
+import { getRetainedResults, releaseResults } from './cache/query-results.model';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
+import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
 
 const log = createLogger('conn-manager');
 
@@ -197,7 +198,6 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
       progressBase && this.server.sendNotification(ProgressNotificationComplete, progressBase);
       e = decorateLSException(e, { conn: req.conn });
       if (e.data && e.data.notification) {
-        delete e.data.args.conn;
         this.server.sendNotification(e.data.notification, e.data.args);
         return e.data;
       }
