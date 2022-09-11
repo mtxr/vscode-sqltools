@@ -8,9 +8,10 @@
     cursor: pointer;
     justify-content: center;
 
-    div, img {
+    button {
       font-weight: bold;
       text-align: center;
+      text-transform: none;
     }
 
     &:hover {

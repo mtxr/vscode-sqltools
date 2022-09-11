@@ -16,7 +16,7 @@ export const DriverItem = ({
   <Grid item xs={3} className={selected ? style.itemSelected : style.item}>
     <div onClick={onSelect}>
       <DriverIcon driver={driver} />
-      <div>{driver.displayName}</div>
+      <button onClick={onSelect} tabIndex={0} autoFocus={selected}>{driver.displayName}</button>
     </div>
   </Grid>
 );
