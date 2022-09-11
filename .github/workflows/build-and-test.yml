@@ -68,7 +68,7 @@ jobs:
         path: ./coverage
         retention-days: 2
 
-    - uses: codecov/codecov-action@v3
-      if: github.repository == 'mtxr/vscode-sqltools'
-      with:
-        flags: "extension"
+    # - uses: codecov/codecov-action@v3
+    #   if: github.repository == 'mtxr/vscode-sqltools'
+    #   with:
+    #     flags: "extension"
