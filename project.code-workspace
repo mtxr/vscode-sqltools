@@ -15,6 +15,7 @@
     { "path": "./packages/vscode" },
     { "path": "./build-tools" },
     { "path": "./docs" },
+    { "path": "./docs-v2" },
     { "path": "./" }
   ],
   "extensions": {},
