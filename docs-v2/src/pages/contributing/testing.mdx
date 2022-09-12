@@ -1,0 +1,115 @@
+---
+title: Testing
+header: Contributing
+layout: ../../layouts/MainLayout.astro
+---
+
+# Testing the project
+
+> This documentation section is still under development
+
+## Prerequisites
+
+- Docker. Testing is done by running instances of the target DBMS platforms locally in containers.
+- The bash shell. The scripts that launch test containers assume this, so they won't run on Windows.
+
+## Testing
+
+1. Open the testing workspace (`test/project.code-workspace`) in VS Code. This gives you a multi-root workspace. The first folder, `root`, shows the `test/*` subtree of the repository. Additional top-level folders giving easy access to the corresponding folders of the `test/docker/` subtree.
+2. Accept extension recommendations. The SQLTools extension and the driver extensions for the testing targets will need to be installed. The `ms-azuretools.vscode-docker` extension is optional but these instructions assume you install it.
+3. Go to the NPM Scripts view (e.g. run command `Explorer: Focus on NPM Scripts View`). Its tree will show one root folder, `package.json`. In this the `up` script launches containerized services that the bundled drivers can connect to. The `up:*` scripts each launch an individual service in a container, and are useful if you only want to test one driver.
+4. Run the `up` script. Example of output is shown below.
+5. Select Docker in VS Code activity bar. In the Containers section you should see five running containers.
+6. Select SQLTools in activity bar. In the Connections section there are entries for each of the testable targets. Most connect to the port exposed by the corresponding running container. SQLite is an exception because it accesses a local .db file directly.
+7. Connect and run queries.
+
+### Connections
+
+There are more connections defined (currently 14) than there are drivers to test (currently 4). Reasons:
+
+- Drivers can have aliases. For example `mtxr.sqltools-driver-pg` is referenced by connections as `PostgreSQL` and as `AWS Redshift`, and it also has the alias `CockroachDB`.
+- Drivers can support multiple connection protocol. For example `mtxr.sqltools-driver-mysql` supports the X Protocol as well as the Client/Server Protocol.
+- Drivers may need to be tested against multiple server versions. For example one container runs MS SQL Server 2017 another the latest version.
+
+The workspace folder for each driver contains some query files:
+
+- 1.create-some-stuff.sql
+- 2.select-some-stuff.sql
+
+### Example output from `up` script
+
+(ignore incorrect coloring)
+
+```
+> up
+> yarn run preup:mysql && docker-compose -f docker/docker-compose.yml up --build -d
+
+yarn run v1.22.15
+$ bash ./docker/mysql/prepare.sh
+Done in 0.10s.
+Creating network "docker_default" with the default driver
+Pulling mssql (mcr.microsoft.com/mssql/server:latest)...
+latest: Pulling from mssql/server
+...: Pull complete
+...: Pull complete
+...: Pull complete
+Digest: sha256:...
+Status: Downloaded newer image for mcr.microsoft.com/mssql/server:latest
+Pulling mssql2017 (mcr.microsoft.com/mssql/server:2017-latest)...
+2017-latest: Pulling from mssql/server
+Digest: sha256:...
+Status: Downloaded newer image for mcr.microsoft.com/mssql/server:2017-latest
+Pulling mysql (mysql:)...
+latest: Pulling from library/mysql
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+Digest: sha256:...
+Status: Downloaded newer image for mysql:latest
+Pulling mysqlv5 (vsamov/mysql-5.1.73:)...
+latest: Pulling from vsamov/mysql-5.1.73
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+Digest: sha256:...
+Status: Downloaded newer image for vsamov/mysql-5.1.73:latest
+Pulling pgsql (postgres:)...
+latest: Pulling from library/postgres
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+...: Pull complete
+Digest: sha256:...
+Status: Downloaded newer image for postgres:latest
+Creating sqltools_mysqlv5    ... done
+Creating sqltools_mssql      ... done
+Creating sqltools_mssql-2017 ... done
+Creating sqltools_mysql      ... done
+Creating sqltools_pgsql      ... done
+ *  Terminal will be reused by tasks, press any key to close it.
+```

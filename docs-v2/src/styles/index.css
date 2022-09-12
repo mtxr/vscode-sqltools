@@ -15,7 +15,7 @@
 
 @media (min-width: 50em) {
 	:root {
-		--max-width: 46em;
+		--max-width: 66em;
 	}
 }
 
@@ -313,6 +313,7 @@ h2.heading {
 
 .heading-link {
 	font-size: 1rem;
+	opacity: 0.8;
 	padding: 0.1rem 0 0.1rem 1rem;
 	border-left: 4px solid var(--theme-divider);
 }

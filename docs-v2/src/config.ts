@@ -1,12 +1,12 @@
 export const SITE = {
-	title: 'Documentation',
-	description: 'Your website description.',
+	title: 'SQLTools',
+	description: 'VScode SQLTools.',
 	defaultLanguage: 'en_US',
 };
 
 export const OPEN_GRAPH = {
 	image: {
-		src: 'https://github.com/withastro/astro/blob/main/assets/social/banner.jpg?raw=true',
+		src: 'https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.svg?sanitize=true',
 		alt:
 			'astro logo on a starry expanse of space,' +
 			' with a purple saturn-like planet floating in the right foreground',
@@ -26,32 +26,37 @@ export type Frontmatter = {
 };
 
 export const KNOWN_LANGUAGES = {
-	English: 'en',
+	English: '',
 } as const;
 export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
 
-export const GITHUB_EDIT_URL = `https://github.com/withastro/astro/tree/main/examples/docs`;
+export const GITHUB_EDIT_URL = `https://github.com/mtxr/vscode-sqltools/blob/dev/docs`;
 
-export const COMMUNITY_INVITE_URL = `https://astro.build/chat`;
+export const COMMUNITY_INVITE_URL = ``;
 
-// See "Algolia" section of the README for more information.
+// @TODO waiting for algolia doc search approval
 export const ALGOLIA = {
-	indexName: 'XXXXXXXXXX',
-	appId: 'XXXXXXXXXX',
-	apiKey: 'XXXXXXXXXX',
+	indexName: '',
+	appId: '',
+	apiKey: '',
 };
+
+export type SidebarEntry = { text: string; link: string } | SidebarGroup;
+export type SidebarGroup = Record<string, { order: number; items: SidebarEntry[] }>
 
 export type Sidebar = Record<
 	typeof KNOWN_LANGUAGE_CODES[number],
-	Record<string, { text: string; link: string }[]>
+	SidebarGroup
 >;
+
 export const SIDEBAR: Sidebar = {
-	en: {
-		'Section Header': [
-			{ text: 'Introduction', link: 'en/introduction' },
-			{ text: 'Page 2', link: 'en/page-2' },
-			{ text: 'Page 3', link: 'en/page-3' },
-		],
-		'Another Section': [{ text: 'Page 4', link: 'en/page-4' }],
+	'': {
+		'Start Here': { items: [], order: 0 },
+		// 'Guides': { items: [], order: 1 },
+		'Features': { items: [], order: 2 },
+		'Official Drivers': { items: [], order: 3 },
+		'Community Drivers': { items: [], order: 4 },
+		// 'Configuration': { items: [], order: 1 },
+		'Contributing': { items: [], order: 7 },
 	},
 };
