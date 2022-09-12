@@ -22,13 +22,6 @@
     "sqltools.sortColumns": "ordinalnumber",
     "sqltools.autoOpenSessionFiles": true,
     "sqltools.sessionFilesFolder": "/tmp",
-    "sqltools.results": {
-      "limit": 100,
-      "location": "next",
-      "customization": {
-        "table-cell-padding": "2px 4px"
-      }
-    },
     "sqltools.format": {
       "reservedWordCase": "upper",
       "linesBetweenQueries": "preserve"
@@ -206,6 +199,7 @@
     "sqltools.debug": {
       "namespaces": "*"
     },
+    "sqltools.results.limit": 100,
     // "sqltools.trace.server": "verbose"
   },
   "extensions": {
