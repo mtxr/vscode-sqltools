@@ -1,0 +1,21 @@
+---
+import MainLayout from '../layouts/MainLayout.astro';
+---
+
+<MainLayout frontmatter={{ description: '', title: '', layout: '' }} headings={[]}>
+  <center>
+    <h1>PAGE NOT FOUND!</h1>
+    <br />
+    <br />
+    <p>Ops! You are looking for something that's not here...</p>
+    <br />
+    <p><code>SELECT content FROM pages WHERE url = '<span id="preplace"></span>';</code></p>
+    <h2>😥</h2>
+  </center>
+</MainLayout>
+
+<script is:inline>
+  (function () {
+    document.getElementById('preplace').innerHTML = window.location.pathname;
+  })();
+</script>

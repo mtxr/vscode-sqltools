@@ -18,7 +18,8 @@ export const OPEN_GRAPH = {
 export type Frontmatter = {
 	title: string;
 	description: string;
-	layout: string;
+	header?: string; // to show on the sidebar
+	layout?: string;
 	image?: { src: string; alt: string };
 	dir?: 'ltr' | 'rtl';
 	ogLocale?: string;
