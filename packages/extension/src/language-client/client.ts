@@ -23,12 +23,6 @@ export class SQLToolsLanguageClient implements ILanguageClient {
 
   private avoidRestart = false;
   constructor() {
-    this.onNotification(ExitCalledNotification, () => {
-      this.avoidRestart = true;
-    });
-
-    this.registerBaseNotifications();
-
     Config.addOnUpdateHook(async ({ event }) => {
       if (event.affectsConfig('useNodeRuntime')) {
         const res = await window.showWarningMessage('Use node runtime setting change. You must reload window to take effect.', 'Reload now');
@@ -63,8 +57,14 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         return defaultErrorHandler.closed();
       },
     };
+    
+    this.onNotification(ExitCalledNotification, () => {
+      this.avoidRestart = true;
+    });
 
+    this.registerBaseNotifications();
   }
+
   public start() {
     return this.client.start();
   }
@@ -83,6 +83,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     await this.client.onReady();
     return this.client.sendNotification.apply(this.client, arguments);
   }
+  
   public onNotification: LanguageClient['onNotification'] = async function () {
     await this.client.onReady();
     return this.client.onNotification.apply(this.client, arguments);
@@ -100,6 +101,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
           runtime = runtimePath;
         }
       } else {
+        log.info('Detecting node path (if this stalls check Terminal view for the stuck session and kill it)...');
         const nodePath = await detectNodePath();
         if (nodePath) {
           const message = `Node runtime auto-detected. Using ${nodePath}.`;
