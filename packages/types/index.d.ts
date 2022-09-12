@@ -494,12 +494,21 @@ export interface IResultsOptions {
   limit: number;
 
   /**
-   * Define where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn
+   * Defines how results tabs are or are not reused
+   * @type {string}
+   * @default 'never'
+   * @memberof IResultsOptions
+   */
+  reuseTabs?: 'never' | 'connection';
+
+  /**
+   * Defines where the results should show up. Use the defined strings or any number defined in https://code.visualstudio.com/api/references/vscode-api#ViewColumn
    * @type {string}
    * @default 'next'
    * @memberof IResultsOptions
    */
   location?: 'current' | 'next' | 'end' | number;
+
   /**
    * Customize results screen CSS
    *
