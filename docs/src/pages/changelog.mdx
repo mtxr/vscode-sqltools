@@ -5,6 +5,40 @@ route: /changelog
 
 # Changelog
 
+## v0.25
+
+### v0.25.0 - (Sep 14, 2022)
+
+- **Extension**
+  - Add `sqltools.results.reuseTabs` setting. [#968](https://github.com/mtxr/vscode-sqltools/pull/968) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Allow setting of result tab labels via `-- @label ...` comments. [#954](https://github.com/mtxr/vscode-sqltools/pull/954) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Add Clipboard option to result Export and Save functions. [#793](https://github.com/mtxr/vscode-sqltools/pull/793) - thanks to [@Jordanh1996](https://github.com/Jordanh1996).
+  - Add `sqltools.disableChordKeybindings` setting to disable Ctrl/Cmd+E chords. [#958](https://github.com/mtxr/vscode-sqltools/pull/958) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Fix Export and Save, and enable Re-Run. [#880](https://github.com/mtxr/vscode-sqltools/pull/880) - thanks to [@sdissegna-maystreet](https://github.com/sdissegna-maystreet).
+  - Improve accessibility and theme compatibility on connection definition pages. [#966](https://github.com/mtxr/vscode-sqltools/pull/966), [#965](https://github.com/mtxr/vscode-sqltools/pull/965) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Suppress default context menu on results table. [#964](https://github.com/mtxr/vscode-sqltools/pull/964) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Add Trino driver to the list of community drivers. [#945](https://github.com/mtxr/vscode-sqltools/pull/945) - thanks to [@regadas](https://github.com/regadas).
+
+- **Formatter: 1.2.5**
+  - Handle `>` in comments correctly. [#791](https://github.com/mtxr/vscode-sqltools/pull/791) - thanks to [@Jordanh1996](https://github.com/Jordanh1996).
+
+- **Driver: MSSQL 0.3.0**
+  - Version unchanged.
+
+- **Driver: MySQL 0.4.0**
+  - Add version 8 keywords. [#841](https://github.com/mtxr/vscode-sqltools/pull/841) - thanks [@mojoaxel](https://github.com/mojoaxel).
+  - Give access to MySQL meta databases such as `information_schema`, and list target database first. [#938](https://github.com/mtxr/vscode-sqltools/pull/938) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Fix `destructure property 'name' of 'undefined'` error. [#950](https://github.com/mtxr/vscode-sqltools/pull/950) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Report connection test failure. [#951](https://github.com/mtxr/vscode-sqltools/pull/951) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+
+- **Driver: PostgreSQL 0.3.0**
+  - Version unchanged.
+
+- **Driver: SQLite 0.4.0**
+  - Install dependencies and report errors during connection test. [#963](https://github.com/mtxr/vscode-sqltools/pull/963) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Handle driver's `${workspaceFolder:rootFolderName}/...` database path format correctly on Windows. [#961](https://github.com/mtxr/vscode-sqltools/pull/961) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+  - Upgrade node-sqlite3 package from 4.2.0 to 5.0.11 (bundled SQLite is now v3.39.2). [#953](https://github.com/mtxr/vscode-sqltools/pull/953) - thanks [@gjsjohnmurray](https://github.com/gjsjohnmurray).
+
 ## v0.24
 
 ### v0.24.0 - (Aug 10, 2022)

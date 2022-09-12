@@ -4,6 +4,13 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.0
+
+- Add version 8 keywords. [#841](https://github.com/mtxr/vscode-sqltools/pull/841) - thanks [@mojoaxel](https://github.com/mojoaxel).
+- Give access to MySQL meta databases such as information_schema, and list target database first. [#938](https://github.com/mtxr/vscode-sqltools/pull/938)
+- Fix destructure property 'name' of 'undefined' error. [#950](https://github.com/mtxr/vscode-sqltools/pull/950)
+- Report connection test failure. [#951](https://github.com/mtxr/vscode-sqltools/pull/951)
+
 ### 0.3.0
 
 - Sort databases alphabetically. [#706](https://github.com/mtxr/vscode-sqltools/pull/706) - thanks [@mattschlosser](https://github.com/mattschlosser).
