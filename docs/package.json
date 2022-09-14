@@ -9,6 +9,7 @@
   ],
   "license": "MIT",
   "scripts": {
+    "test:tsc": "tsc --noEmit -p ./tsconfig.json --skipLibCheck",
     "docz:dev": "docz dev --port=1234",
     "start": "yarn run docz:dev"
   },

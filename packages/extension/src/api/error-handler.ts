@@ -1,7 +1,6 @@
 import { commands, window } from 'vscode';
 import { openExternal } from '@sqltools/vscode/utils';
 import { EXT_NAMESPACE, DOCS_ROOT_URL } from '@sqltools/util/constants';
-import telemetry from '@sqltools/util/telemetry';
 import { ResponseError } from 'vscode-languageclient';
 import { createLogger } from '@sqltools/log/src';
 
@@ -12,7 +11,6 @@ namespace ErrorHandler {
     return async (error: any): Promise<void> => {
       if (error) {
         if (error.dontNotify || (error.data && error.data.dontNotify)) return;
-        telemetry.registerException(error, error.data);
         message = `${message} ${error.message ? error.message : error.toString()}`;
       }
       output(message, error);

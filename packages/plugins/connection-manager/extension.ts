@@ -9,7 +9,6 @@ import generateId from '@sqltools/util/internal-id';
 import { default as logger, createLogger } from '@sqltools/log/src';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
-import telemetry from '@sqltools/util/telemetry';
 import { isEmpty } from '@sqltools/util/validation';
 import Context from '@sqltools/vscode/context';
 import { getIconPaths } from '@sqltools/vscode/icons';
@@ -124,7 +123,6 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
     try {
       await this.client.sendRequest(DisconnectRequest, { conn })
-      telemetry.registerMessage('info', 'Connection closed!');
       await this.explorer.refresh();
     } catch (e) {
       return this.errorHandler('Error closing connection', e);
@@ -345,9 +343,9 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       });
       if (!file) return;
       const filename = file.fsPath;
-  
+
       const results = await this.client.sendRequest(GetResultsRequest, { ...opt, formatType });
-  
+
       await fs.writeFile(filename, results);
       return commands.executeCommand('vscode.open', file);
     } else { // When saving to clipboard
@@ -506,7 +504,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
 
   private async _openResultsWebview(connId: string, reUseId: string) {
-    const requestId = reUseId || Config.results.reuseTabs === 'connection' ? connId :  generateId();
+    const requestId = reUseId || Config.results.reuseTabs === 'connection' ? connId : generateId();
     const view = this.resultsWebview.get(requestId);
     view.onDidDispose(() => {
       this.client.sendRequest(ReleaseResultsRequest, { connId, requestId });

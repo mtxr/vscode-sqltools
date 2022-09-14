@@ -17,8 +17,11 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     super(conn.name, conn.isConnected ? TreeItemCollapsibleState.Collapsed : TreeItemCollapsibleState.None);
     this.description = getConnectionDescription(this.conn);
     this.id = this.getId();
+    this.tooltip = this.getTooltip();
+    this.iconPath = this.getIconPath();
+    this.command = this.getCommand();
   }
-  
+
   getId() {
     return getConnectionId(this.conn);
   }
@@ -48,7 +51,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     };
   }
 
-  get tooltip() {
+  private getTooltip() {
     if (this.isActive)
       return `Active Connection - Queries will run for this connection`;
     return undefined;
@@ -65,7 +68,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     return items.map(item => new SidebarItem(item, this));
   }
 
-  public get command () {
+  private getCommand() {
     if (!this.isActive) {
       return {
         title: 'Connect',
@@ -75,7 +78,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
     }
   }
 
-  get iconPath() {
+  private getIconPath() {
     try {
       if (this.isActive) {
         return this.getIcon('active');
@@ -100,6 +103,6 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       disconnected: 'inactive',
     };
 
-    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResouceKey({type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
+    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
   }
 }

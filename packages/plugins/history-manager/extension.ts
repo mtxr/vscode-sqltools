@@ -29,7 +29,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
       agg.concat(
         group.items.map<QuickPickItem>(item => ({
           label: item.query,
-          detail: item.description,
+          detail: typeof item.description === "string" ? item.description : "",
           description: group.label,
         }))
       ), []);

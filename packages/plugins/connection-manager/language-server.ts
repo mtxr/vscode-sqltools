@@ -7,11 +7,9 @@ import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetCon
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
-import telemetry from '@sqltools/util/telemetry';
 import connectionStateCache, { ACTIVE_CONNECTIONS_KEY, LAST_USED_ID_KEY } from './cache/connections-state.model';
 import { getRetainedResults, releaseResults } from './cache/query-results.model';
 import { DriverNotInstalledNotification } from '@sqltools/language-server/src/notifications';
-import { MissingModuleNotification } from '@sqltools/base-driver/dist/lib/notification';
 
 const log = createLogger('conn-manager');
 
@@ -64,11 +62,11 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     return formatType === 'json'
       ? JSON.stringify(results, null, 2)
       : csvStringify(results, {
-          columns: cols,
-          header: true,
-          quoted_string: true,
-          quoted_empty: true,
-        });
+        columns: cols,
+        header: true,
+        quoted_string: true,
+        quoted_empty: true,
+      });
   };
 
   private searchItemsHandler: RequestHandler<typeof SearchConnectionItemsRequest> = async ({ conn, itemType, search, extraParams = {} }) => {
@@ -168,7 +166,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         return void this.server.sendNotification(e.data.notification, e.data.args);
       }
 
-      telemetry.registerException(e);
+      log.error("Open connetion error", e);
 
       return Promise.reject(e);
     }

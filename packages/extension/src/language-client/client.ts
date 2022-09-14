@@ -4,11 +4,10 @@ import fs from 'fs';
 import Config from '@sqltools/util/config-manager';
 import { DISPLAY_NAME, EXT_NAMESPACE, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { sync as commandExists } from 'command-exists';
-import { env as VSCodeEnv, version as VSCodeVersion, workspace as Wspc, window, commands, ConfigurationTarget, workspace } from 'vscode';
+import { workspace as Wspc, window, commands, ConfigurationTarget } from 'vscode';
 import { CloseAction, ErrorAction, ErrorHandler as LanguageClientErrorHandler, LanguageClient, LanguageClientOptions, NodeModule, ServerOptions, TransportKind } from 'vscode-languageclient';
 import ErrorHandler from '../api/error-handler';
-import telemetry from '@sqltools/util/telemetry';
-import { ILanguageClient, ITelemetryArgs } from '@sqltools/types';
+import { ILanguageClient } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
 import uniq from 'lodash/uniq';
 import { ElectronNotSupportedNotification } from '@sqltools/base-driver/dist/lib/notification';
@@ -57,7 +56,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         return defaultErrorHandler.closed();
       },
     };
-    
+
     this.onNotification(ExitCalledNotification, () => {
       this.avoidRestart = true;
     });
@@ -83,7 +82,7 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     await this.client.onReady();
     return this.client.sendNotification.apply(this.client, arguments);
   }
-  
+
   public onNotification: LanguageClient['onNotification'] = async function () {
     await this.client.onReady();
     return this.client.onNotification.apply(this.client, arguments);
@@ -147,14 +146,6 @@ export class SQLToolsLanguageClient implements ILanguageClient {
   }
 
   private getClientOptions(): LanguageClientOptions {
-    const telemetryArgs: ITelemetryArgs = {
-      enableTelemetry: workspace.getConfiguration().get('telemetry.enableTelemetry') || false,
-      extraInfo: {
-        sessId: VSCodeEnv.sessionId,
-        uniqId: VSCodeEnv.machineId,
-        version: VSCodeVersion,
-      },
-    };
     let selector = [];
     if (Config.completionLanguages) {
       selector = selector.concat(Config.completionLanguages);
@@ -179,31 +170,22 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     return {
       documentSelector: selector,
       initializationOptions: {
-        telemetry: telemetryArgs,
         extensionPath: Context.extensionPath,
         userEnvVars: Config.languageServerEnv
       },
       progressOnInitialization: true,
       outputChannel: logger.outputChannel as any,
       synchronize: {
-        configurationSection: [EXT_CONFIG_NAMESPACE, 'telemetry'],
+        configurationSection: [EXT_CONFIG_NAMESPACE],
         fileEvents: Wspc.createFileSystemWatcher(`**/.${EXT_NAMESPACE}rc`),
       },
       initializationFailedHandler: error => {
-        telemetry.registerException(error, {
-          message: 'Server initialization failed.',
-        });
         this.client.error('Server initialization failed.', error);
         this.client.outputChannel.show(true);
         return false;
       },
       errorHandler: {
         error: (error, message, count): ErrorAction => {
-          telemetry.registerException(error, {
-            message: 'Language Server error.',
-            givenMessage: message,
-            count,
-          });
           return this.clientErrorHandler.error(error, message, count);
         },
         closed: (): CloseAction => {
@@ -221,7 +203,6 @@ export class SQLToolsLanguageClient implements ILanguageClient {
     this.client.onNotification(ServerErrorNotification, onError);
     this.client.onNotification(ElectronNotSupportedNotification, this.electronNotSupported);
 
-    telemetry.registerMessage('info', 'LanguageClient ready');
     log.info('LanguageClient ready');
   }
 

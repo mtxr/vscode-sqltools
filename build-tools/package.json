@@ -4,6 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "test:tsc": "tsc --noEmit -p ./tsconfig.json --skipLibCheck",
     "clean": "rimraf -rf ../packages/extension/dist ../**/*.vsix",
     "build:pack": "cd ../packages/extension && vsce package --yarn -o ../../.",
     "build:webpack": "node --max_old_space_size=8192 ./node_modules/webpack/bin/webpack.js",

@@ -10,7 +10,7 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "esnext",
+    "target": "esnext"
   },
   "include": ["./src"],
   "exclude": ["./test", "./node_modules", "./__mocks__", "./*.js"]

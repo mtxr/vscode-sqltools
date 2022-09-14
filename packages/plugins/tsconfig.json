@@ -11,6 +11,7 @@
     "removeComments": true,
     "resolveJsonModule": true,
     "sourceMap": true,
-    "target": "esnext",
-  }
+    "target": "esnext"
+  },
+  "exclude": ["./connection-manager/webview/ui/**/*"]
 }

@@ -5,14 +5,11 @@ import { cleanUp } from '@sqltools/util/query';
 
 export class HistoryTreeItem extends TreeItem {
   public contextValue = 'history.item';
-  public description: string;
-  public get tooltip() {
-    return this.query;
-  }
 
   constructor(public query: string, public parent: HistoryTreeGroup) {
     super(cleanUp(query), TreeItemCollapsibleState.None);
     this.description = new Date().toLocaleString();
+    this.tooltip = this.query;
     this.command = {
       title: 'Edit',
       command: `${EXT_NAMESPACE}.editHistory`,
@@ -25,9 +22,6 @@ export class HistoryTreeGroup extends TreeItem {
   public parent = null;
   public contextValue = 'history.group';
   public items: HistoryTreeItem[] = [];
-  public get tooltip() {
-    return this.name;
-  }
 
   public addItem(query: string) {
     if (!query || (query.trim().length === 0)) {
@@ -56,7 +50,7 @@ export class HistoryTreeGroup extends TreeItem {
 
   constructor(public name: string, private refresh: Function) {
     super(name, TreeItemCollapsibleState.Expanded);
-
+    this.tooltip = this.name;
     Config.addOnUpdateHook(({ event }) => event.affectsConfig('historySize') && this.sizeKeeper);
   }
 }
