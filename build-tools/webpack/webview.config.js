@@ -23,6 +23,12 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
     module: {
       rules: [
         {
+          test: /\.m?js$/,
+          resolve: {
+            fullySpecified: false, // disable the behaviour
+          },
+        },
+        {
           test: /\.tsx?$/,
           use: [
             { loader: 'babel-loader', options: babelOptions },
@@ -37,7 +43,7 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
               loader: 'css-loader',
               options: {
                 importLoaders: 3,
-              }
+              },
             },
           ],
         },
@@ -50,10 +56,10 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
               loader: 'css-loader',
               options: {
                 importLoaders: 3,
-              }
+              },
             },
             'resolve-url-loader',
-            'sass-loader'
+            'sass-loader',
           ],
         },
         {
@@ -68,24 +74,24 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
                   localIdentName: IS_PRODUCTION ? '[hash:base64]' : '[path][name]__[local]-[hash:base64]',
                   exportLocalsConvention: 'camelCaseOnly',
                 },
-              }
+              },
             },
             'resolve-url-loader',
-            'sass-loader'
+            'sass-loader',
           ],
         },
         {
           test: /\.(png|svg|jpg|gif)$/,
           use: [
             {
-              loader:'file-loader',
+              loader: 'file-loader',
               options: {
                 outputPath: 'ui',
                 name: '[path][name].[ext]',
               },
-            }
-          ]
-        }
+            },
+          ],
+        },
       ],
     },
     resolve: {
@@ -98,7 +104,7 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
           commons: {
             test: /(?!theme)/,
             name: 'commons',
-            chunks (chunk) {
+            chunks(chunk) {
               return chunk.name !== 'theme';
             },
             enforce: true,
@@ -116,9 +122,11 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
     output: {
       chunkFilename: 'ui/[name].js',
       filename: 'ui/[name].js',
-      ...(outDir ? {
-        path: outDir
-      } : {}),
+      ...(outDir
+        ? {
+            path: outDir,
+          }
+        : {}),
     },
     plugins: [
       new MiniCssExtractPlugin({
@@ -135,6 +143,6 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
 const minCssExtract = {
   loader: MiniCssExtractPlugin.loader,
   options: {
-    hmr: false
+    hmr: false,
   },
 };

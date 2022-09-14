@@ -20,19 +20,21 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
     module: {
       rules: [
         {
+          test: /\.m?js$/,
+          resolve: {
+            fullySpecified: false, // disable the behaviour
+          },
+        },
+        {
           test: /\.ts$/,
-          use: [
-            process.env.NODE_ENV !== 'development' && { loader: 'babel-loader', options: babelOptions },
-            { loader: 'ts-loader', options: { transpileOnly: true } },
-          ].filter(Boolean),
+          use: [{ loader: 'ts-loader', options: { transpileOnly: true } }].filter(Boolean),
           exclude: /node_modules|\.test\..+/i,
         },
         process.env.NODE_ENV !== 'development' && {
-          test: /\.js$/,
+          test: /\.m?js$/,
           use: [{ loader: 'babel-loader', options: babelOptions }],
           exclude: /\.test\..+/i,
-
-        }
+        },
       ].filter(Boolean),
     },
     resolve: {
@@ -42,9 +44,11 @@ module.exports = function getNodeConfig({ entries, packagePath, externals = {} }
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
-      ...(outDir ? {
-        path: outDir
-      } : {}),
+      ...(outDir
+        ? {
+            path: outDir,
+          }
+        : {}),
     },
   };
 

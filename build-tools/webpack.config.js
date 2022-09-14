@@ -48,13 +48,14 @@ module.exports = function (env = {}) {
     if (buildJson.build) {
       console.log(`\t>> Found ${buildJson.build.length} build entries`);
       buildJson.build.forEach(({ entries, type, externals = {} }) => {
-        webpackConfigs.push(
-          require(`./webpack/${type}.config.js`)({
+        webpackConfigs.push({
+          mode: constants.IS_PRODUCTION ? 'production' : 'development',
+          ...require(`./webpack/${type}.config.js`)({
             entries,
             packagePath: pkgPath,
             externals,
-          })
-        );
+          }),
+        });
       });
     } else {
       console.log(`\t>> no build entries`);
