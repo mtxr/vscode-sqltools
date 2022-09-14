@@ -436,7 +436,7 @@
         ],
         "configuration": {
             "type": "object",
-            "title": "SQLTools Settings",
+            "title": "SQLTools",
             "properties": {
                 "sqltools.disableReleaseNotifications": {
                     "type": "boolean",
@@ -449,7 +449,7 @@
                         "array"
                     ],
                     "default": [],
-                    "markdownDescription": "Name(s) of the connection to auto connect on start.",
+                    "markdownDescription": "Name(s) of the connection(s) to auto connect on start.",
                     "items": {
                         "type": "string"
                     }
@@ -750,66 +750,73 @@
                         }
                     }
                 },
-                "sqltools.results": {
+                "sqltools.results.limit": {
+                    "type": "number",
+                    "description": "Maximum number of records to return in results.",
+                    "default": 50
+                },
+                "sqltools.results.reuseTabs": {
+                    "type": "string",
+                    "description": "How requests reuse results tabs.",
+                    "default": "never",
+                    "enum": [
+                        "never",
+                        "connection"
+                    ],
+                    "enumDescriptions": [
+                        "Every request creates a new tab.",
+                        "There is a single tab for each connection."
+                    ]
+                },
+                "sqltools.results.location": {
+                    "type": [
+                        "string"
+                    ],
+                    "default": "next",
+                    "enum": [
+                        "next",
+                        "current",
+                        "end",
+                        "1",
+                        "2",
+                        "3",
+                        "4",
+                        "5",
+                        "6",
+                        "7",
+                        "8",
+                        "9"
+                    ],
+                    "enumDescriptions": [
+                        "New group if nothing open. Second group if currently active text editor is in first group. Otherwise third group.",
+                        "Current active group.",
+                        "The third group.",
+                        "First group.",
+                        "Second group.",
+                        "Third group.",
+                        "Fourth group.",
+                        "Fifth group.",
+                        "Sixth group.",
+                        "Seventh group.",
+                        "Eighth group.",
+                        "Ninth group."
+                    ],
+                    "markdownDescription": "Define which edit group the results tab should appear in. Empty groups are never created. For example, if setting is 4 but only one group currently exists then the first set of results will create a new group 2, the second a group 3 and the third and subsequent sets of results will appear in group 4."
+                },
+                "sqltools.results.customization": {
                     "type": "object",
+                    "description": "Properties that customize the appearance of results tables.",
                     "default": {},
                     "properties": {
-                        "limit": {
-                            "type": "number",
-                            "description": "Maximum number of records to return in results.",
-                            "default": 50
+                        "font-family": {
+                            "type": "string"
                         },
-                        "location": {
-                            "type": [
-                                "string",
-                                "number"
-                            ],
-                            "default": "next",
-                            "enum": [
-                                "next",
-                                "current",
-                                "end",
-                                1,
-                                2,
-                                3,
-                                4,
-                                5,
-                                6,
-                                7,
-                                8,
-                                9
-                            ],
-                            "enumDescriptions": [
-                                "New group if nothing open. Second group if currently active text editor is in first group. Otherwise third group.",
-                                "Current active group.",
-                                "The third group.",
-                                "First group.",
-                                "Second group.",
-                                "Third group.",
-                                "Fourth group.",
-                                "Fifth group.",
-                                "Sixth group.",
-                                "Seventh group.",
-                                "Eighth group.",
-                                "Ninth group."
-                            ],
-                            "markdownDescription": "Define which edit group the results tab should appear in. Empty groups are never created. For example, if setting is 4 but only one group currently exists then the first set of results will create a new group 2, the second a group 3 and the third and subsequent sets of results will appear in group 4."
+                        "font-size": {
+                            "type": "string"
                         },
-                        "customization": {
-                            "type": "object",
-                            "default": {},
-                            "properties": {
-                                "font-family": {
-                                    "type": "string"
-                                },
-                                "font-size": {
-                                    "type": "string"
-                                },
-                                "table-cell-padding": {
-                                    "type": "string",
-                                    "default": "2px 4px"
-                                }
-                            }
+                        "table-cell-padding": {
+                            "type": "string",
+                            "default": "2px 4px"
                         }
                     }
                 },
