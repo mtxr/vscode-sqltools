@@ -166,7 +166,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
         return void this.server.sendNotification(e.data.notification, e.data.args);
       }
 
-      log.error("Open connetion error", e);
+      log.error("Open connection error", e);
 
       return Promise.reject(e);
     }
