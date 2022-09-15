@@ -46,7 +46,8 @@ export default class DependencyManager implements IExtensionPlugin {
             const terminal = Win.createTerminal({ name: "SQLTools Dep manager terminal", cwd: getDataPath() });
 
             const depNamesString = [];
-            await new Promise<void>((resolve, reject) => {
+            await new Promise<void>(async (resolve, reject) => {
+              const exitCmdPromise = getShellExitCommand();
               const disposable = Win.onDidCloseTerminal((e) => {
                 if (e.processId !== terminal.processId) return;
                 try {
@@ -70,7 +71,7 @@ export default class DependencyManager implements IExtensionPlugin {
               })
               progress.report({ message: `Installing "${depNamesString.join(", ")}". Please wait until it finishes. Check the opened terminal for more info.` });
 
-              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${getShellExitCommand()}`);
+              terminal.sendText(`${dependencyManagerSettings.packageManager} ${args.join(" ")} && ${await exitCmdPromise}`);
             });
             progress.report({ increment: 100, message: `Finished installing ${depNamesString.join(", ")}` });
           });
