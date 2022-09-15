@@ -44,7 +44,11 @@ jobs:
         /usr/bin/Xvfb :99 -screen 0 1024x768x24 > /dev/null 2>&1 &
         yarn
 
-    - name: test & build
+    - name: type check
+      run: |
+        yarn run test:tsc
+
+    - name: test
       env:
         CXX: "g++-4.9"
         CC: "gcc-4.9"
@@ -53,6 +57,14 @@ jobs:
       run: |
         yarn test
         yarn test:insiders --no-coverage
+
+    - name: build
+      env:
+        CXX: "g++-4.9"
+        CC: "gcc-4.9"
+        DISPLAY: ":99.0"
+        JEST_CI: "true"
+      run: |
         yarn run build
         yarn run pack:all
 

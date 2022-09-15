@@ -2,13 +2,13 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { sortText } from '@sqltools/util/text';
 import { Disposable, DocumentFormattingParams, DocumentRangeFormattingParams, DocumentRangeFormattingRequest, Range, TextEdit } from 'vscode-languageserver';
 import { format } from '@sqltools/util/query';
-import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServerPlugin, ILanguageServer } from '@sqltools/types';
+import logger from "@sqltools/log/src";
 
 export default class FormatterPlugin implements ILanguageServerPlugin {
   private server: ILanguageServer;
   private formatterLanguages: string[] = [];
-  private  formatterRegistration: Thenable<Disposable> | null = null;
+  private formatterRegistration: Thenable<Disposable> | null = null;
 
   private handler = (params: DocumentRangeFormattingParams | DocumentFormattingParams | DocumentRangeFormattingParams[]): TextEdit[] => {
     try {
@@ -26,13 +26,13 @@ export default class FormatterPlugin implements ILanguageServerPlugin {
         newRange = { start: { line: 0, character: 0 }, end: { line: document.lineCount, character: 0 } };
       }
 
-      return [ TextEdit.replace(newRange || range, format(text, {
+      return [TextEdit.replace(newRange || range, format(text, {
         ...ConfigRO.format,
         tabSize,
         insertSpaces
-      })) ];
+      }))];
     } catch (e) {
-      telemetry.registerException(e);
+      logger.error("formatter error", e);
     }
   }
 

@@ -4,11 +4,12 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
+    "test:tsc": "tsc --noEmit -p ./tsconfig.json --skipLibCheck",
     "clean": "rimraf -rf ../packages/extension/dist ../**/*.vsix",
     "build:pack": "cd ../packages/extension && vsce package --yarn -o ../../.",
     "build:webpack": "node --max_old_space_size=8192 ./node_modules/webpack/bin/webpack.js",
     "build": "yarn run build:webpack",
-    "dev:watch": "yarn run webpack --watch --info-verbosity verbose",
+    "dev:watch": "yarn run webpack --watch",
     "postbuild": "rimraf -rf ../packages/extension/dist/ui/theme.js || exit 0",
     "predev:watch": "yarn run clean",
     "prebuild:pack": "yarn run build",
@@ -32,11 +33,10 @@
     "resolve-url-loader": "^3.1.1",
     "rimraf": "^3.0.0",
     "sass-loader": "^10.3.1",
-    "terser-webpack-plugin": "^2.3.6",
-    "ts-loader": "^6.0.0",
+    "terser-webpack-plugin": "^5.3.6",
+    "ts-loader": "^9.3.1",
     "vsce": "^1.77.0",
-    "webpack": "^4.35.0",
-    "webpack-cli": "^3.3.5",
-    "webpack-notifier": "^1.8.0"
+    "webpack": "^5.74.0",
+    "webpack-cli": "^4.10.0"
   }
 }

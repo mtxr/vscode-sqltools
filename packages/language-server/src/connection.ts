@@ -2,7 +2,6 @@ import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, Contex
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
-import telemetry from '@sqltools/util/telemetry';
 import generateId from '@sqltools/util/internal-id';
 import LSContext from './context';
 import { IConnection as LSIconnection } from 'vscode-languageserver';
@@ -70,7 +69,7 @@ export default class Connection {
     }
     return info;
   }
-  public async showRecords(table: NSDatabase.ITable, opt: {requestId: InternalID; page: number; pageSize?: number }) {
+  public async showRecords(table: NSDatabase.ITable, opt: { requestId: InternalID; page: number; pageSize?: number }) {
     const { pageSize, page, requestId } = opt;
     const limit = pageSize || this.conn.credentials.previewLimit || (ConfigRO.results && ConfigRO.results.limit) || 50;
 
@@ -93,7 +92,6 @@ export default class Connection {
       .catch((e) => {
         log.error('%O', e);
         if (opt.throwIfError) throw e;
-        telemetry.registerException(e, { driver: this.conn.credentials.driver });
         let message = '';
         if (typeof e === 'string') {
           message = e;
@@ -108,10 +106,10 @@ export default class Connection {
           connId: this.getId(),
           cols: [],
           error: true,
-          messages: [ { message, date: new Date() } ],
+          messages: [{ message, date: new Date() }],
           query,
           results: [],
-        } ];
+        }];
       });
   }
   public getName() {

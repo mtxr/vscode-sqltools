@@ -2,7 +2,6 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { createConnection, IConnection, InitializedParams, InitializeResult, ProposedFeatures, TextDocuments, TextDocumentSyncKind } from 'vscode-languageserver';
 import { TextDocument } from 'vscode-languageserver-textdocument';
 import { InvalidActionError } from '@sqltools/util/exception';
-import telemetry from '@sqltools/util/telemetry';
 import { ILanguageServer, ILanguageServerPlugin, Arg0, RequestHandler, LSContextMap } from '@sqltools/types';
 import { DISPLAY_NAME, EXT_CONFIG_NAMESPACE } from '@sqltools/util/constants';
 import { RegisterPlugin } from './contracts';
@@ -41,7 +40,6 @@ class SQLToolsLanguageServer implements ILanguageServer {
     process.on('uncaughtException', (error: any) => {
       let message: string;
       if (error) {
-        telemetry.registerException(error, { type: 'uncaughtException' })
         if (typeof error.stack === 'string') {
           message = error.stack;
         } else if (typeof error.message === 'string') {
@@ -53,7 +51,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
         }
       }
       if (message) {
-        telemetry.registerMessage('error', message);
+        log.error(message);
       }
     });
   }
@@ -76,17 +74,12 @@ class SQLToolsLanguageServer implements ILanguageServer {
   }
 
   private onInitialized: Arg0<IConnection['onInitialized']> = (params: InitializedParams) => {
-    telemetry.registerMessage('info', `Initialized with node version:${process.version}`);
+    log.info(`Initialized with node version:${process.version}`);
 
     this.onInitializedHooks.forEach(hook => hook(params));
   };
 
   private onInitialize: Arg0<IConnection['onInitialize']> = (params, token, workDoneProgress, resultProgress) => {
-    if (params.initializationOptions.telemetry) {
-      telemetry.updateOpts({
-        ...params.initializationOptions.telemetry,
-      });
-    }
     if (params.initializationOptions.userEnvVars && Object.keys(params.initializationOptions.userEnvVars || {}).length > 0) {
       log.info(`User defined env vars\n===============================\n%O\n===============================:`, params.initializationOptions.userEnvVars);
     }
@@ -114,8 +107,6 @@ class SQLToolsLanguageServer implements ILanguageServer {
 
   private onDidChangeConfiguration: Arg0<IConnection['onDidChangeConfiguration']> = changes => {
     ConfigRO.replaceAll(changes.settings[EXT_CONFIG_NAMESPACE]);
-    if (changes.settings.telemetry && changes.settings.telemetry.enableTelemetry) telemetry.enable();
-    else telemetry.disable();
 
     this.onDidChangeConfigurationHooks.forEach(hook => hook());
   };
@@ -157,7 +148,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
   public async registerPlugin(plugin: ILanguageServerPlugin | ILanguageServerPlugin[]) {
     await Promise.all(
       (Array.isArray(plugin) ? plugin : [plugin].filter(Boolean))
-      .map(p => p.register(this))
+        .map(p => p.register(this))
     );
   }
 
@@ -208,7 +199,7 @@ class SQLToolsLanguageServer implements ILanguageServer {
 
   public notifyError(message: string, error?: any): any {
     const cb = (err: any = '') => {
-      telemetry.registerException(err, { message, languageServer: true });
+      log.error(err, { message, languageServer: true });
       this._server.sendNotification(ServerErrorNotification, { err, message, errMessage: (err.message || err).toString() });
     };
     if (typeof error !== 'undefined') return cb(error);

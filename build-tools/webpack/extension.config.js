@@ -19,7 +19,7 @@ module.exports = function getExtensionConfig({ entries, packagePath, externals =
       rules: [
         {
           test: /\.ts?$/,
-          loaders: [{ loader: 'ts-loader', options: { transpileOnly: true } }],
+          use: [{ loader: 'ts-loader', options: { transpileOnly: true } }],
           exclude: /node_modules|\.test\..+/i,
         },
       ],
@@ -30,11 +30,13 @@ module.exports = function getExtensionConfig({ entries, packagePath, externals =
     output: {
       filename: '[name].js',
       libraryTarget: 'commonjs2',
-      ...(outDir ? {
-        path: outDir
-      } : {}),
+      ...(outDir
+        ? {
+            path: outDir,
+          }
+        : {}),
     },
   };
 
   return setDefaults(config);
-}
+};

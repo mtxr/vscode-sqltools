@@ -1,6 +1,5 @@
 const path = require('path');
 const webpack = require('webpack');
-const WebpackNotifierPlugin = require('webpack-notifier');
 
 const { EXT_NAMESPACE, EXT_CONFIG_NAMESPACE, DISPLAY_NAME, rootdir, IS_PRODUCTION, outdir, author, version } = require('../constants');
 
@@ -26,7 +25,6 @@ const basePlugins = (name) => [
   //   filename: IS_PRODUCTION ? '[file].map' : undefined,
   //   sourceRoot: path.relative(outdir, rootdir)
   // }),
-  new WebpackNotifierPlugin({ excludeWarnings: true }),
 ];
 
 module.exports = basePlugins;

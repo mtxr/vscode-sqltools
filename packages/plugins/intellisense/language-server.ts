@@ -13,11 +13,8 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
   private server: T;
 
   private getQueryData = async (params: Arg0<Arg0<ILanguageServer['onCompletion']>>) => {
-    const [activeConnections, lastUsedId] = await Promise.all<
-      { [k: string]: Connection },
-      string
-    >([
-      connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}),
+    const [activeConnections, lastUsedId] = await Promise.all([
+      connectionStateCache.get(ACTIVE_CONNECTIONS_KEY, {}) as Promise<{ [k: string]: Connection }>,
       connectionStateCache.get(LAST_USED_ID_KEY) as Promise<string>,
     ])
     const { textDocument, position } = params;

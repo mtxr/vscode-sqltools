@@ -34,6 +34,10 @@ jobs:
       run: |
         yarn
 
+    - name: type check
+      run: |
+        yarn run test:tsc
+
     - name: test & build
       env:
         HUSKY_SKIP_INSTALL: "true"

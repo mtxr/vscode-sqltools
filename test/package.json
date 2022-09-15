@@ -2,6 +2,7 @@
   "name": "@sqltools/test",
   "private": true,
   "scripts": {
+    "test:tsc": "tsc --noEmit -p ./tsconfig.json --skipLibCheck",
     "up": "yarn run preup:mysql && docker-compose -f docker/docker-compose.yml up --build -d",
     "up:mysql": "yarn run up mysql",
     "up:mssql": "yarn run up mssql",

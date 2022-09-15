@@ -1,6 +1,6 @@
 function debounce(func: Function, wait: number = 100) {
-  let timeout: number;
-  return function(...args: any[]) {
+  let timeout: ReturnType<typeof setTimeout>;
+  return function (...args: any[]) {
     clearTimeout(timeout);
     timeout = setTimeout(() => {
       func.apply(this, args);
