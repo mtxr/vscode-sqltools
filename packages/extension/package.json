@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
-    "version": "0.25.0",
+    "version": "0.25.1",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -851,7 +851,7 @@
                         "boolean",
                         "string"
                     ],
-                    "default": true,
+                    "default": false,
                     "description": "Enable node runtime usage."
                 },
                 "sqltools.languageServerEnv": {
