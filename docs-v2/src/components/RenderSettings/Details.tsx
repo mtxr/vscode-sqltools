@@ -8,7 +8,6 @@ const Details = styled.details`
   position: relative;
   border-radius: 0.25em;
   overflow: hidden;
-  transition: ${props => props.theme.docz.transition};
 
   .CodeMirror-lines {
     min-height: 5em;
@@ -20,10 +19,8 @@ const Details = styled.details`
     padding: 0.25em 2em;
   }
   summary {
-    transition: ${props => props.theme.docz.transition};
     display: inline-block;
     outline: none;
-    background: ${(props: any) => props.theme.docz.colors.blue};
     color: white;
     display: flex;
     padding: 0.25em 1em;
@@ -38,7 +35,6 @@ const Details = styled.details`
       margin-bottom: 0.25em;
     }
     div {
-      color: ${props => props.theme.docz.colors.text};
       margin: 0 -1em -0.25em;
       p:first-child {
         margin-top: 0
@@ -48,10 +44,8 @@ const Details = styled.details`
       }
     }
     svg {
-      transition: ${props => props.theme.docz.transition};
       flex-grow: 0;
       transform: rotate(-90deg);
-      stroke: ${(props: any) => props.theme.docz.colors.yellow};
       margin-left: -0.25em;
       margin-right: 0.25em;
       width: 1em;

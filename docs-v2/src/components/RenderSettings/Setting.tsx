@@ -1,5 +1,5 @@
 import React from 'react';
-import MDX from '../MDX';
+import MDX from 'react-markdown';
 import TypeInfo from './TypeInfo';
 import Chevron from './Chevron';
 import Type from './Type';

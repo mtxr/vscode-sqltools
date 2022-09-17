@@ -1,24 +1,25 @@
 ---
-menu: Drivers
-route: /driver/aws-redshift
-name: AWS Redshift
+title: CockroachDB
+header: Community Drivers
+layout: ../../../layouts/MainLayout.astro
 ---
 
-# AWS Redshift Start Guide
+# CockroachDB Start Guide
 
-> Remember: Redshift is a fork from PostgreSQL. We use the same driver to connect for both Redshift and PostgreSQL.
+> Remember: CockroachDB supports the PostgreSQL wire protocol. We use the same driver to connect for both Cockroach and PostgreSQL.
 
 ## 1. Connections
 
-import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
 
 Connection example:
+
 ```json
 {
-  "name": "Redshift",
+  "name": "Cockroach",
   "server": "localhost",
-  "driver": "AWS Redshift",
-  "port": 5433,
+  "driver": "CockroachDB",
+  "port": 26257,
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -29,14 +30,14 @@ Connection example:
 
 ### 1.1 Specific Options
 
-AWS Redshift driver specific options can be passed using `pgOptions` settings.
+CockroachDB driver specific options can be passed using `pgOptions` settings.
 
 ```json
 {
-  "name": "Redshift",
+  "name": "Cockroach",
   "server": "localhost",
-  "driver": "AWS Redshift",
-  "port": 5433,
+  "driver": "CockroachDB",
+  "port": 26257,
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -47,10 +48,10 @@ AWS Redshift driver specific options can be passed using `pgOptions` settings.
   }
 }
 ```
+
 You can use any options defined in https://node-postgres.com/features/connecting#programmatic in `pgOptions`.
 
 They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/pgsql/index.ts .
-
 
 ### 1.2 Alternative Connection Strings
 
@@ -60,13 +61,13 @@ Using connectionURI for previous example:
 
 ```json
 {
-  "name": "Redshift",
+  "name": "Cockroach",
   "server": "localhost",
-  "driver": "AWS Redshift",
-  "connectString": "AWS Redshift://root:root@localhost:5433/test_db",
+  "driver": "CockroachDB",
+  "connectString": "postgresql://root:root@localhost:26257/test_db",
   "askForPassword": false,
-  "connectionTimeout": 15,
+  "connectionTimeout": 15
 }
 ```
 
-<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath','mssqlOptions', 'icons', 'domain']} />
+<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']} />

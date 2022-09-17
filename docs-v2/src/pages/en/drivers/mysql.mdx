@@ -1,15 +1,17 @@
 ---
-name: MySQL
-menu: Drivers
-route: /driver/mysql
+title: MySQL
+header: Official Drivers
+layout: ../../../layouts/MainLayout.astro
 ---
-import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
 
 # MySQL Start Guide
 
 ## 1. Connections
 
 Connection example:
+
 ```json
 {
   "name": "MySQL",
@@ -25,6 +27,7 @@ Connection example:
 ```
 
 Using a socket file example:
+
 ```json
 {
   "name": "MySQL",
@@ -34,10 +37,9 @@ Using a socket file example:
   "askForPassword": false,
   "password": "root",
   "connectionTimeout": 15,
-  "socketPath": "/path/to/mysqld.sock",
+  "socketPath": "/path/to/mysqld.sock"
 }
 ```
-
 
 ### 1.1 Specific Options
 
@@ -60,17 +62,16 @@ MySQL driver specific options can be passed using `mysqlOptions` settings.
 }
 ```
 
-
 ### 2. mysqlOptions
 
 We have two options of connectors for MySQL. You can choose which one to use by change the setting `mysqlOptions.authProtocol`. The allowed values are `default` and `xprotocol`, we use `default` by default since is the most often used.
 
 Extra options can be used as defined in the connectors documentation.
 
-* For MySQL default protocol
-  * See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
-* For MySQL xprotocol
-  * See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
+- For MySQL default protocol
+  - See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
+- For MySQL xprotocol
+  - See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
 
 They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/mysql/index.ts .
 
@@ -80,8 +81,8 @@ They will be passed to the pool constructor directly. See https://github.com/mtx
 
 Potential solutions:
 
-* Ensure you've set `authProtocol` to `xprotocol`
-* Add a trailing `0` to the `port`. See the [MySQL Guide to Ports](https://mysqlserverteam.com/mysql-guide-to-ports/)
+- Ensure you've set `authProtocol` to `xprotocol`
+- Add a trailing `0` to the `port`. See the [MySQL Guide to Ports](https://mysqlserverteam.com/mysql-guide-to-ports/)
 
 Example configuration:
 
@@ -104,4 +105,4 @@ Example configuration:
 }
 ```
 
-<RenderConnectionOptions exclude={['oracleOptions','mssqlOptions', 'icons', 'domain', 'pgOptions']}/>
+<RenderConnectionOptions exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']} />

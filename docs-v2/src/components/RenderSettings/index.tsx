@@ -4,7 +4,6 @@ import React from 'react';
 import get from 'lodash/get';
 import Setting from './Setting';
 import styled from 'styled-components';
-import components from '../../components';
 
 function getQueryParams() {
   const queryString = window.location.search;
@@ -25,7 +24,6 @@ const SearchContainer = styled.div`
   align-items: center;
   margin-bottom: 2em;
   border-radius: .25em;
-  border: 1px solid ${(props: any) => props.theme.docz.colors.grayBg};
   max-width: 100%;
   padding-left: 1em;
   font-size: 1.3em;
@@ -33,7 +31,6 @@ const SearchContainer = styled.div`
   svg {
     width: 1.3em;
     height: 1.3em;
-    stroke: ${(props: any) => props.theme.docz.colors.gray};
   }
 `;
 const Search = styled.input`
@@ -42,7 +39,6 @@ const Search = styled.input`
   border: none;
   outline: none;
   flex-grow: 1;
-  color: ${(props: any) => props.theme.docz.colors.gray};
 
 `
 
@@ -82,7 +78,7 @@ class RenderSettings extends React.Component<Props> {
   );
 
   renderTitle = () => this.props.title ? (
-    <components.h2 id={this.props.title.toLowerCase().replace(/\s/g, '-')}>{this.props.title}</components.h2>
+    <h2 id={this.props.title.toLowerCase().replace(/\s/g, '-')}>{this.props.title}</h2>
   ) : null;
 
   componentDidMount() {

@@ -1,25 +1,25 @@
 ---
-menu: Drivers
-route: /driver/cockroachdb
-name: CockroachDB
+title: AWS Redshift
+header: Official Drivers
+layout: ../../../layouts/MainLayout.astro
 ---
 
-# CockroachDB Start Guide
+# AWS Redshift Start Guide
 
-> Remember: CockroachDB supports the PostgreSQL wire protocol. We use the same driver to connect for both Cockroach and PostgreSQL.
+> Remember: Redshift is a fork from PostgreSQL. We use the same driver to connect for both Redshift and PostgreSQL.
 
 ## 1. Connections
 
-import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx';
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
 
 Connection example:
 
 ```json
 {
-  "name": "Cockroach",
+  "name": "Redshift",
   "server": "localhost",
-  "driver": "CockroachDB",
-  "port": 26257,
+  "driver": "AWS Redshift",
+  "port": 5433,
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -30,14 +30,14 @@ Connection example:
 
 ### 1.1 Specific Options
 
-CockroachDB driver specific options can be passed using `pgOptions` settings.
+AWS Redshift driver specific options can be passed using `pgOptions` settings.
 
 ```json
 {
-  "name": "Cockroach",
+  "name": "Redshift",
   "server": "localhost",
-  "driver": "CockroachDB",
-  "port": 26257,
+  "driver": "AWS Redshift",
+  "port": 5433,
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -61,10 +61,10 @@ Using connectionURI for previous example:
 
 ```json
 {
-  "name": "Cockroach",
+  "name": "Redshift",
   "server": "localhost",
-  "driver": "CockroachDB",
-  "connectString": "postgresql://root:root@localhost:26257/test_db",
+  "driver": "AWS Redshift",
+  "connectString": "AWS Redshift://root:root@localhost:5433/test_db",
   "askForPassword": false,
   "connectionTimeout": 15
 }

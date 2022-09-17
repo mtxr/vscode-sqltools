@@ -1,10 +1,10 @@
 ---
-name: SQLite
-menu: Drivers
-route: /driver/sqlite
+title: SQLite
+header: Official Drivers
+layout: ../../../layouts/MainLayout.astro
 ---
 
-import RenderConnectionOptions from '../../components/RenderConnectionOptions.tsx'
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
 
 # SQLite Start Guide
 
@@ -16,7 +16,7 @@ import RenderConnectionOptions from '../../components/RenderConnectionOptions.ts
 ```json
 // settings.json example
 {
-    "sqltools.useNodeRuntime": true
+  "sqltools.useNodeRuntime": true
 }
 ```
 
@@ -39,4 +39,4 @@ SQLite's connections handle files so you can use the example below as reference 
 }
 ```
 
-<RenderConnectionOptions include={['name', 'dialect', 'database', 'connectionTimeout']}/>
+<RenderConnectionOptions include={['name', 'dialect', 'database', 'connectionTimeout']} />
