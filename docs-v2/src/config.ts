@@ -27,7 +27,7 @@ export type Frontmatter = {
 };
 
 export const KNOWN_LANGUAGES = {
-	English: '',
+	English: 'en',
 } as const;
 export const KNOWN_LANGUAGE_CODES = Object.values(KNOWN_LANGUAGES);
 
@@ -51,7 +51,7 @@ export type Sidebar = Record<
 >;
 
 export const SIDEBAR: Sidebar = {
-	'': {
+	'en': {
 		'Start Here': { items: [], order: 0 },
 		// 'Guides': { items: [], order: 1 },
 		'Features': { items: [], order: 2 },

@@ -8,7 +8,8 @@
     "check": "astro check && tsc",
     "build": "astro build",
     "preview": "astro preview",
-    "astro": "astro"
+    "astro": "astro",
+    "postbuild": "cp _redirects ./dist/."
   },
   "dependencies": {
     "@algolia/client-search": "^4.13.1",

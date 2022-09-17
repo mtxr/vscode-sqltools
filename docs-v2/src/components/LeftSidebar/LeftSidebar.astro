@@ -7,27 +7,31 @@ import mapValues from 'lodash/mapValues';
 import merge from 'lodash/merge';
 const pages = await Astro.glob('../../pages/**/*.{mdx,md}');
 
-const sideBarFromPages = mapValues(
-  groupBy(
-    sortBy(
-      pages.map(p => ({
+const localizedPages = groupBy(
+  sortBy(
+    pages
+      .map(p => ({
         link: p.url,
         text: p.frontmatter.name || p.frontmatter.title,
         header: p.frontmatter.header,
         order: p.frontmatter.order ?? 1,
-      })),
-      'order'
-    ),
-    'header'
+        ogLocale: p.frontmatter.ogLocale ?? 'en',
+      }))
+      .filter(p => p.text),
+    'order'
   ),
-  d => ({ items: d })
+  'ogLocale'
 );
+
+const { currentPage } = Astro.props as Props;
+const langCode = getLanguageFromURL(currentPage);
+const sideBarFromPages = mapValues(groupBy(localizedPages[langCode] || localizedPages['en'], 'header'), d => ({
+  items: d,
+}));
 type Props = {
   currentPage: string;
 };
 
-const { currentPage } = Astro.props as Props;
-const langCode = getLanguageFromURL(currentPage);
 const sidebar = merge({}, sideBarFromPages, SIDEBAR[langCode]);
 const sortedSiderbar = sortBy(Object.entries(sidebar), ([_, { order }]) => order ?? 10);
 ---
