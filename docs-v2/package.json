@@ -9,7 +9,7 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "postbuild": "cp _redirects ./dist/."
+    "postbuild": "cp netlify.toml ./dist/. && cp _redirects ./dist/."
   },
   "dependencies": {
     "@algolia/client-search": "^4.13.1",
