@@ -37,9 +37,9 @@ export const COMMUNITY_INVITE_URL = ``;
 
 // @TODO waiting for algolia doc search approval
 export const ALGOLIA = {
-	indexName: '',
-	appId: '',
-	apiKey: '',
+	indexName: 'vscode-sqltools',
+	appId: 'WSQ0K6SUHV',
+	apiKey: '43437b610c31c376dec0e0d92e1eb4cc',
 };
 
 export type SidebarEntry = { text: string; link: string } | SidebarGroup;
