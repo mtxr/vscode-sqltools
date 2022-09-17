@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@algolia/client-search": "^4.13.1",
+    "@sqltools/formatter": "*",
     "react-markdown": "^8.0.3",
     "@astrojs/mdx": "^0.11.1",
     "@astrojs/preact": "^1.1.0",
@@ -27,6 +28,7 @@
     "preact": "^10.7.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
+    "react-simple-code-editor": "^0.13.0",
     "styled-components": "^4.4.0"
   }
 }

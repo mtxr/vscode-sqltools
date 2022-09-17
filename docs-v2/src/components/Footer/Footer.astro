@@ -1,19 +1,28 @@
 ---
 import AvatarList from './AvatarList.astro';
 type Props = {
-	path: string;
+  path: string;
 };
 const { path } = Astro.props as Props;
 ---
 
 <footer>
-	<AvatarList path={path} />
+  <AvatarList path={path} />
 </footer>
 
 <style>
-	footer {
-		margin-top: auto;
-		padding: 2rem;
-		border-top: 3px solid var(--theme-divider);
-	}
+  footer {
+    margin-top: auto;
+    padding: 2rem;
+    border-top: 3px solid var(--theme-divider);
+  }
 </style>
+<script src="https://storage.ko-fi.com/cdn/scripts/overlay-widget.js"></script>
+<script>
+  kofiWidgetOverlay.draw('mteixeira', {
+    type: 'floating-chat',
+    'floating-chat.donateButton.text': 'Donate',
+    'floating-chat.donateButton.background-color': '#794bc4',
+    'floating-chat.donateButton.text-color': '#fff',
+  });
+</script>
