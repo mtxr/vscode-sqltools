@@ -53,11 +53,12 @@ export type Sidebar = Record<
 export const SIDEBAR: Sidebar = {
 	'en': {
 		'Start Here': { items: [], order: 0 },
-		// 'Guides': { items: [], order: 1 },
+		'Configuration': { items: [], order: 1 },
+		'Guides': { items: [], order: 1 },
 		'Features': { items: [], order: 2 },
 		'Official Drivers': { items: [], order: 3 },
 		'Community Drivers': { items: [], order: 4 },
-		// 'Configuration': { items: [], order: 1 },
+		'Playground': { items: [], order: 5 },
 		'Contributing': { items: [], order: 7 },
 	},
 };

@@ -17,7 +17,7 @@ const localizedPages = groupBy(
         order: p.frontmatter.order ?? 1,
         ogLocale: p.frontmatter.ogLocale ?? 'en',
       }))
-      .filter(p => p.text),
+      .filter(p => p.text && p.header),
     'order'
   ),
   'ogLocale'
@@ -33,7 +33,9 @@ type Props = {
 };
 
 const sidebar = merge({}, sideBarFromPages, SIDEBAR[langCode]);
-const sortedSiderbar = sortBy(Object.entries(sidebar), ([_, { order }]) => order ?? 10);
+const sortedSiderbar = sortBy(Object.entries(sidebar), ([_, { order }]) => order ?? 10).filter(
+  h => h?.[1]?.items?.length > 0
+);
 ---
 
 <nav aria-labelledby="grid-left">

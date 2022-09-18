@@ -1,9 +1,11 @@
 ---
-name: Dependency Manager
-menu: Settings
-route: /settings/dependency-manager
+title: Dependency Manager
+header: Configuration
+layout: ../../../layouts/MainLayout.astro
+order: 1
 ---
-import RenderSettings from '../components/RenderSettings/index.tsx'
+
+import RenderSettings from '../../../components/RenderSettings/index.tsx';
 
 # Dependency Manager
 
@@ -11,7 +13,11 @@ SQLTools can automatically install dependencies required by its drivers. We use 
 
 Below you can see configurations you can do to use your favorite package manager.
 
-<RenderSettings path="['sqltools.dependencyManager'].properties" disableSearch title="sqltools.dependencyManager options"/>
+<RenderSettings
+  path="['sqltools.dependencyManager'].properties"
+  disableSearch
+  title="sqltools.dependencyManager options"
+/>
 
 ## NPM Example
 
