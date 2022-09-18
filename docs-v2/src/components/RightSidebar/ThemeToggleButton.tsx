@@ -45,10 +45,20 @@ const ThemeToggle: FunctionalComponent = () => {
 
 	useEffect(() => {
 		const root = document.documentElement;
+		const link = document.getElementById("prism-theme") || document.createElement("link");
+		link.id = "prism-theme";
+		link.setAttribute("rel", "stylesheet");
 		if (theme === 'light') {
 			root.classList.remove('theme-dark');
+			link.setAttribute("href", "https://unpkg.com/prismjs@1.29.0/themes/prism.css")
 		} else {
 			root.classList.add('theme-dark');
+			link.setAttribute("href", "https://unpkg.com/prismjs@1.29.0/themes/prism-dark.css")
+		}
+		document.head.appendChild(link);
+		console.log("HERE")
+		return () => {
+			document.getElementById("prism-theme")?.remove();
 		}
 	}, [theme]);
 

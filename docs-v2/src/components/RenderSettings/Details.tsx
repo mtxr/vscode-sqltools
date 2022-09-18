@@ -1,4 +1,5 @@
 import styled from 'styled-components';
+
 const Details = styled.details`
   font-size: 1rem;
   margin-bottom: 2em;
