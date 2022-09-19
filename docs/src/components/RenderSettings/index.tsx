@@ -3,7 +3,6 @@ import pkgJson from '../../../../packages/extension/package.json';
 import React from 'react';
 import get from 'lodash/get';
 import Setting from './Setting';
-import styled from 'styled-components';
 
 function getQueryParams() {
   const queryString = window.location.search;
@@ -17,36 +16,6 @@ function getQueryParams() {
 }
 
 const SearchIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>;
-
-const SearchContainer = styled.div`
-  cursor: text;
-  display: flex;
-  align-items: center;
-  margin-bottom: 2em;
-  border-radius: .25em;
-  max-width: 100%;
-  padding-left: 1em;
-  font-size: 1.3em;
-  overflow: hidden;
-  background-color: var(--theme-divider);
-	border-color: var(--theme-divider);
-	color: var(--theme-text-light);
-  svg {
-    width: 1.3em;
-    height: 1.3em;
-  }
-`;
-const Search = styled.input`
-  font-size: inherit;
-  padding: .5em 1em;
-  border: none;
-  outline: none;
-  flex-grow: 1;
-  background-color: transparent;
-	border-color: transparent;
-	color: var(--theme-text-light);
-
-`
 
 interface Props {
   path?: string;
@@ -77,10 +46,10 @@ class RenderSettings extends React.Component<Props> {
   inputRef = React.createRef<HTMLInputElement>();
 
   renderSearchContainer = () => this.props.disableSearch ? null : (
-    <SearchContainer onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
+    <div className="search-container" onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
       <SearchIcon />
-      <Search placeholder="Type to search settings..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef} />
-    </SearchContainer>
+      <input placeholder="Type to search settings..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef} />
+    </div>
   );
 
   renderTitle = () => this.props.title ? (

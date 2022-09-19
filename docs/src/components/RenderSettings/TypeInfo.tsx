@@ -1,39 +1,12 @@
 import React from 'react';
 import Type from './Type';
-import styled from 'styled-components';
 import MDX from 'react-markdown';
-
-const Table = styled.table<any>`
-  border-collapse: collapse;
-  margin-top: 1em;
-  width: 100%;
-  td, th {
-    padding: 2px 4px;
-    text-align: left;
-    word-break: break-word;
-    p:first-child {
-      margin-top: 0;
-    }
-    p:last-child {
-      margin-bottom: 0;
-    }
-  }
-  td:first-child {
-    font-weight: ${(props: any) => props.header === false ? 'bold' : 'normal'};
-  }
-  td:first-child, td:last-child {
-    white-space: nowrap;
-  }
-  tr {
-    border-bottom: 1px solid var(--theme-navbar-bg);
-  }
-`;
 
 const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
   const types = Array.isArray(type) ? type : [type];
   return (
     <div>
-      <Table header={false}>
+      <table className="settings-table">
         <tbody>
           <tr>
             <td {...{ width: 150 }}>Type</td>
@@ -52,7 +25,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
             </tr>
           )}
         </tbody>
-      </Table>
+      </table>
       {types.map(t => {
         switch (t) {
           case 'array':
@@ -62,7 +35,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
             return (
               <React.Fragment key={t}>
                 <header> Object Properties</header>
-                <Table>
+                <table className="settings-table">
                   <thead>
                     <tr>
                       <th>Property</th>
@@ -88,7 +61,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                       </tr>
                     ))}
                   </tbody>
-                </Table>
+                </table>
                 {/* <pre>{JSON.stringify(props, null, 2)}</pre> */}
               </React.Fragment>
             );

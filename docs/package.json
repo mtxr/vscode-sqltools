@@ -28,7 +28,6 @@
     "preact": "^10.7.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
-    "react-simple-code-editor": "^0.13.0",
-    "styled-components": "^4.4.0"
+    "react-simple-code-editor": "^0.13.0"
   }
 }

@@ -1,53 +1,7 @@
 import React, { useEffect, useState } from 'react'
-import styled from 'styled-components';
 import formatter from '@sqltools/formatter/lib/sqlFormatter';
 import { Config } from '@sqltools/formatter/src/core/types';
 import Editor from 'react-simple-code-editor';
-
-const PlaygroundContainer = styled.div`
-  height: calc(80vh - 200px);
-  font-size: 14px;
-  font-size: 0.8rem;
-  display: flex;
-  flex-direction: ${p => p.view === "side" ? "row" : "column"};
-  > label {
-    font-weight: bold;
-    display: block;
-    width: 0;
-  }
-  > div {
-    font-size: inherit;
-    margin-top: ${p => p.view === "side" ? "1.5em" : undefined};
-    width: ${p => p.view === "side" ? "50%" : "100%"};
-    border: 1px solid gray;
-    box-sizing: content-box;
-    float: left;
-    overflow: auto;
-    height: 50%;
-    min-height: ${p => p.view === "side" ? undefined : "350px"};
-    &:first-child {
-      border-right: ${p => p.view === "side" ? "none" : undefined};
-    }
-  }
-  code[class*="language-"], pre[class*="language-"] {
-    text-shadow: none;
-  }
-`;
-const OptionsContainer = styled.div`
-margin-bottom: 1em;
-> header {
-  font-weight: bold;
-  font-size: 1.2em;
-  margin: 0;
-}
-p {
-  margin: 0;
-}
-> main {
-  display: flex;
-  flex-direction: row;
-}
-`;
 
 const Formatter = () => {
   const [state, setState] = useState({
@@ -103,7 +57,7 @@ const Formatter = () => {
     </>
   );
   const renderOptions = () => (
-    <OptionsContainer>
+    <div className="options-container">
       <header>Editor View</header>
       <main>
         <input type="radio" name="editorPosition" value="side" checked={state.editorView === "side"} id="side" onChange={e => setState(s => ({ ...s, editorView: e.target.value as any }))} />
@@ -144,16 +98,16 @@ const Formatter = () => {
           <input type="number" value={state.indentSize} min='1' onChange={e => setState(s => ({ ...s, indentSize: Number(e.target.value) }))} />
         </p>
       </main>
-    </OptionsContainer>
+    </div>
   );
 
   return (
     <>
       {renderOptions()}
-      <PlaygroundContainer view={state.editorView}>
+      <div className={["playground-container", state.editorView === "side" ? "view-side" : "view-below"].join(" ")}>
         {renderEditor()}
         {renderResults()}
-      </PlaygroundContainer>
+      </div>
     </>
   );
 }
