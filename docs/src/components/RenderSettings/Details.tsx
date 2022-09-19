@@ -1,30 +1,28 @@
 import styled from 'styled-components';
+
 const Details = styled.details`
   font-size: 1rem;
   margin-bottom: 2em;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: var(--docsearch-modal-shadow);
   width: 100%;
-  background: #eaeaea;
+  background: var(--theme-bg-hover);
   position: relative;
   border-radius: 0.25em;
   overflow: hidden;
-  transition: ${props => props.theme.docz.transition};
 
   .CodeMirror-lines {
     min-height: 5em;
   }
   summary > div,
   > div {
-    background: #eaeaea;
+    background: var(--theme-bg-hover);
     flex-basis: 100%;
     padding: 0.25em 2em;
   }
   summary {
-    transition: ${props => props.theme.docz.transition};
     display: inline-block;
     outline: none;
-    background: ${(props: any) => props.theme.docz.colors.blue};
-    color: white;
+    color: var(--theme-text);
     display: flex;
     padding: 0.25em 1em;
     align-items: center;
@@ -38,7 +36,6 @@ const Details = styled.details`
       margin-bottom: 0.25em;
     }
     div {
-      color: ${props => props.theme.docz.colors.text};
       margin: 0 -1em -0.25em;
       p:first-child {
         margin-top: 0
@@ -48,10 +45,8 @@ const Details = styled.details`
       }
     }
     svg {
-      transition: ${props => props.theme.docz.transition};
       flex-grow: 0;
       transform: rotate(-90deg);
-      stroke: ${(props: any) => props.theme.docz.colors.yellow};
       margin-left: -0.25em;
       margin-right: 0.25em;
       width: 1em;

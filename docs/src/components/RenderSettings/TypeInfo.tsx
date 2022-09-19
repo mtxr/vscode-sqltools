@@ -1,8 +1,7 @@
 import React from 'react';
-import { components } from 'docz-theme-default';
 import Type from './Type';
 import styled from 'styled-components';
-import MDX from '../MDX';
+import MDX from 'react-markdown';
 
 const Table = styled.table<any>`
   border-collapse: collapse;
@@ -10,8 +9,8 @@ const Table = styled.table<any>`
   width: 100%;
   td, th {
     padding: 2px 4px;
-    border: 1px solid ${(props: any) => props.theme.docz.colors.gray};
     text-align: left;
+    word-break: break-word;
     p:first-child {
       margin-top: 0;
     }
@@ -25,6 +24,9 @@ const Table = styled.table<any>`
   td:first-child, td:last-child {
     white-space: nowrap;
   }
+  tr {
+    border-bottom: 1px solid var(--theme-navbar-bg);
+  }
 `;
 
 const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
@@ -36,16 +38,16 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
           <tr>
             <td {...{ width: 150 }}>Type</td>
             <td>
-              <Type type={types} items={props.items} wrap={components.inlineCode} sep=', ' lastSep={' or '} />
+              <Type type={types} items={props.items} tag='code' sep=', ' lastSep={' or '} />
             </td>
           </tr>
           {typeof defaultValue !== 'undefined' && (
             <tr>
-              <td>Default Vaue</td>
+              <td>Default Value</td>
               <td>
-                <components.inlineCode>
+                {typeof defaultValue === "undefined" ? null : <code>
                   {['object', 'boolean'].includes(typeof defaultValue) ? JSON.stringify(defaultValue) : defaultValue}
-                </components.inlineCode>
+                </code>}
               </td>
             </tr>
           )}
@@ -63,7 +65,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                 <Table>
                   <thead>
                     <tr>
-                      <th {...{ width: 150 }}>Property</th>
+                      <th>Property</th>
                       <th>Description</th>
                       <th>Type</th>
                     </tr>
@@ -74,7 +76,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                         <td>{k}</td>
                         <td><MDX>{properties[k].markdownDescription || properties[k].description}</MDX></td>
                         <td>
-                          <Type type={properties[k].type} items={properties[k].items} wrap={components.inlineCode} sep=', ' lastSep={' or '} />
+                          <Type type={properties[k].type} items={properties[k].items} tag='code' sep=', ' lastSep={' or '} />
                           {properties[k].enum && (
                             <ul>
                               {properties[k].enum.map((v: any, i: number) => (
@@ -95,7 +97,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
           case 'number':
           case 'null':
           default:
-              return null;
+            return null;
         }
       })}
     </div>

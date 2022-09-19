@@ -1,5 +1,5 @@
 import React from 'react';
-import MDX from '../MDX';
+import MDX from 'react-markdown';
 import TypeInfo from './TypeInfo';
 import Chevron from './Chevron';
 import Type from './Type';
@@ -19,7 +19,7 @@ const Setting = ({ description, markdownDescription, name, ...props }: Partial<S
   return (<Details open>
     <summary>
       <Chevron />
-      <span id={`${name}`}>{name}<Type tag='small' type={props.type} items={props.items} /></span>
+      <span id={`${name}`}>{name}<Type tag='small' wrap='code' type={props.type} items={props.items} /></span>
       <div><MDX>{markdownDescription || description}</MDX></div>
     </summary>
     <TypeInfo {...props} />

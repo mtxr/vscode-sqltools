@@ -1,24 +1,36 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import styled from 'styled-components';
 import formatter from '@sqltools/formatter/lib/sqlFormatter';
 import { Config } from '@sqltools/formatter/src/core/types';
 import Editor from 'react-simple-code-editor';
 
 const PlaygroundContainer = styled.div`
-  height: calc(100vh - 300px);
+  height: calc(80vh - 200px);
   font-size: 14px;
   font-size: 0.8rem;
   display: flex;
+  flex-direction: ${p => p.view === "side" ? "row" : "column"};
+  > label {
+    font-weight: bold;
+    display: block;
+    width: 0;
+  }
   > div {
     font-size: inherit;
-    width: 50%;
+    margin-top: ${p => p.view === "side" ? "1.5em" : undefined};
+    width: ${p => p.view === "side" ? "50%" : "100%"};
     border: 1px solid gray;
     box-sizing: content-box;
     float: left;
     overflow: auto;
+    height: 50%;
+    min-height: ${p => p.view === "side" ? undefined : "350px"};
     &:first-child {
-      border-right: none;
+      border-right: ${p => p.view === "side" ? "none" : undefined};
     }
+  }
+  code[class*="language-"], pre[class*="language-"] {
+    text-shadow: none;
   }
 `;
 const OptionsContainer = styled.div`
@@ -37,58 +49,73 @@ p {
 }
 `;
 
-class Formatter extends React.Component<{}, Formatter['state']> {
-  state = {
+const Formatter = () => {
+  const [state, setState] = useState({
     code,
     indentSize: 2,
     options: {
       reservedWordCase: 'upper',
       linesBetweenQueries: 2,
     } as Config,
+    editorView: "below" as "side" | "below",
     indentType: ' ',
-  }
+  });
 
-  editor = React.createRef<HTMLTextAreaElement>();
-  componentDidMount() {
-    this.editor.current && this.editor.current.focus();
-  }
 
-  format = (code: string) => {
+  const editor = React.createRef<HTMLTextAreaElement>();
+  useEffect(() => {
+    editor.current && editor.current.focus();
+  }, []);
+
+  const format = (code: string) => {
     return formatter.format(code, {
-      ...this.state.options,
-      indent: new Array(this.state.indentSize).fill(this.state.indentType === ' ' ? ' ' : '\t').join(''),
+      ...state.options,
+      indent: new Array(state.indentSize).fill(state.indentType === ' ' ? ' ' : '\t').join(''),
     });
   }
 
   // render stuff
-  renderEditor = () => (
-    <div>
-      <Editor
-        value={this.state.code}
-        onValueChange={code => this.setState({ code })}
-        highlight={code => window.Prism.highlight(code, window.Prism.languages.sql, 'sql')}
-        {...baseEditorProps}
-      />
-    </div>
+  const renderEditor = () => (
+    <>
+      <label>EDITOR</label>
+      <div>
+        <Editor
+          value={state.code}
+          onValueChange={code => { setState(s => ({ ...s, code })); }}
+          highlight={code => window["Prism"]?.highlight?.(code, window["Prism"]?.languages?.sql, 'sql')}
+          {...baseEditorProps}
+        />
+      </div>
+    </>
   );
 
-  renderResults = () => (
-    <div>
-      <Editor
-        onValueChange={() => void 0}
-        value={this.state.code}
-        highlight={code => window.Prism.highlight(this.format(code), window.Prism.languages.sql, 'sql')}
-        {...baseEditorProps}
-      />
-    </div>
+  const renderResults = () => (
+    <>
+      <label>PREVIEW</label>
+      <div>
+        <Editor
+          onValueChange={() => void 0}
+          value={state.code}
+          highlight={code => window["Prism"]?.highlight?.(format(code), window["Prism"]?.languages?.sql, 'sql')}
+          {...baseEditorProps}
+        />
+      </div>
+    </>
   );
-  renderOptions = () => (
+  const renderOptions = () => (
     <OptionsContainer>
+      <header>Editor View</header>
+      <main>
+        <input type="radio" name="editorPosition" value="side" checked={state.editorView === "side"} id="side" onChange={e => setState(s => ({ ...s, editorView: e.target.value as any }))} />
+        <label htmlFor="side">Side by Side</label>
+        <input type="radio" name="editorPosition" value="below" checked={state.editorView === "below"} id="below" onChange={e => setState(s => ({ ...s, editorView: e.target.value as any }))} />
+        <label htmlFor="below">Below</label>
+      </main>
       <header>Options</header>
       <main>
         <p>
           <label>Reserved Words Case</label>
-          <select defaultValue={this.state.options.reservedWordCase} onChange={e => this.setState({ options: { ...this.state.options, reservedWordCase: e.target.value as any }})}>
+          <select defaultValue={state.options.reservedWordCase} onChange={e => setState(s => ({ ...s, options: { ...state.options, reservedWordCase: e.target.value as any } }))}>
             <option>Preserve</option>
             <option value="upper">Uppercase</option>
             <option value="lower">Lowercase</option>
@@ -96,7 +123,7 @@ class Formatter extends React.Component<{}, Formatter['state']> {
         </p>
         <p>
           <label>Lines Between Queries</label>
-          <select defaultValue={this.state.options.linesBetweenQueries} onChange={e => this.setState({ options: { ...this.state.options, linesBetweenQueries: e.target.value as any }})}>
+          <select defaultValue={state.options.linesBetweenQueries} onChange={e => setState(s => ({ ...s, options: { ...state.options, linesBetweenQueries: e.target.value as any } }))}>
             <option value='preserve'>Preserve</option>
             <option value="1">1 line</option>
             <option value="2">2 line</option>
@@ -107,30 +134,28 @@ class Formatter extends React.Component<{}, Formatter['state']> {
         </p>
         <p>
           <label>Identation</label>
-          <select defaultValue={this.state.indentType} onChange={e => this.setState({ indentType: e.target.value })}>
+          <select defaultValue={state.indentType} onChange={e => setState(s => ({ ...s, indentType: e.target.value }))}>
             <option value=" ">Use spaces</option>
             <option value="tab">Use Tabs</option>
           </select>
         </p>
         <p>
           <label>Indent size</label>
-          <input type="number" value={this.state.indentSize} min='1' onChange={e => this.setState({ indentSize: Number(e.target.value) })}/>
+          <input type="number" value={state.indentSize} min='1' onChange={e => setState(s => ({ ...s, indentSize: Number(e.target.value) }))} />
         </p>
       </main>
     </OptionsContainer>
   );
 
-  render() {
-    return (
-      <>
-        {this.renderOptions()}
-        <PlaygroundContainer>
-          {this.renderEditor()}
-          {this.renderResults()}
-        </PlaygroundContainer>
-      </>
-    );
-  }
+  return (
+    <>
+      {renderOptions()}
+      <PlaygroundContainer view={state.editorView}>
+        {renderEditor()}
+        {renderResults()}
+      </PlaygroundContainer>
+    </>
+  );
 }
 
 export default Formatter;
