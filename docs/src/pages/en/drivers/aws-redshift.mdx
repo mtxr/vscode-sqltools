@@ -70,4 +70,7 @@ Using connectionURI for previous example:
 }
 ```
 
-<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']} />
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']}
+/>

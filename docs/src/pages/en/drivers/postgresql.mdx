@@ -112,4 +112,7 @@ Using a connectionURI for the same configurations from the previous example:
 }
 ```
 
-<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']} />
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']}
+/>

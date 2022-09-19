@@ -63,4 +63,7 @@ You can use any setting defined in See https://github.com/tediousjs/node-mssql/#
 
 - Removed deprecated (v0.17.6) `sqltools.connections[].dialectOptions` in favor of `sqltools.connections[].mssqlOptions`.
 
-<RenderConnectionOptions exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'icons', 'pgOptions']} />
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'icons', 'pgOptions']}
+/>

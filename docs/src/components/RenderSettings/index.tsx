@@ -28,6 +28,9 @@ const SearchContainer = styled.div`
   padding-left: 1em;
   font-size: 1.3em;
   overflow: hidden;
+  background-color: var(--theme-divider);
+	border-color: var(--theme-divider);
+	color: var(--theme-text-light);
   svg {
     width: 1.3em;
     height: 1.3em;
@@ -39,6 +42,9 @@ const Search = styled.input`
   border: none;
   outline: none;
   flex-grow: 1;
+  background-color: transparent;
+	border-color: transparent;
+	color: var(--theme-text-light);
 
 `
 
@@ -73,7 +79,7 @@ class RenderSettings extends React.Component<Props> {
   renderSearchContainer = () => this.props.disableSearch ? null : (
     <SearchContainer onClick={() => this.inputRef && this.inputRef.current && this.inputRef.current.focus()}>
       <SearchIcon />
-      <Search placeholder="Type to search..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef} />
+      <Search placeholder="Type to search settings..." onChange={e => this.setState({ search: e.target.value || '' })} value={this.state.search} ref={this.inputRef} />
     </SearchContainer>
   );
 

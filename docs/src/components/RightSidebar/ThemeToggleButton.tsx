@@ -56,7 +56,6 @@ const ThemeToggle: FunctionalComponent = () => {
 			link.setAttribute("href", "https://unpkg.com/prismjs@1.29.0/themes/prism-dark.css")
 		}
 		document.head.appendChild(link);
-		console.log("HERE")
 		return () => {
 			document.getElementById("prism-theme")?.remove();
 		}

@@ -10,6 +10,7 @@ const Table = styled.table<any>`
   td, th {
     padding: 2px 4px;
     text-align: left;
+    word-break: break-word;
     p:first-child {
       margin-top: 0;
     }
@@ -22,6 +23,9 @@ const Table = styled.table<any>`
   }
   td:first-child, td:last-child {
     white-space: nowrap;
+  }
+  tr {
+    border-bottom: 1px solid var(--theme-navbar-bg);
   }
 `;
 
@@ -39,11 +43,11 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
           </tr>
           {typeof defaultValue !== 'undefined' && (
             <tr>
-              <td>Default Vaue</td>
+              <td>Default Value</td>
               <td>
-                <code>
+                {typeof defaultValue === "undefined" ? null : <code>
                   {['object', 'boolean'].includes(typeof defaultValue) ? JSON.stringify(defaultValue) : defaultValue}
-                </code>
+                </code>}
               </td>
             </tr>
           )}
@@ -61,7 +65,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                 <Table>
                   <thead>
                     <tr>
-                      <th {...{ width: 150 }}>Property</th>
+                      <th>Property</th>
                       <th>Description</th>
                       <th>Type</th>
                     </tr>

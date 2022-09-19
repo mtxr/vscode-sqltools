@@ -105,4 +105,7 @@ Example configuration:
 }
 ```
 
-<RenderConnectionOptions exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']} />
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']}
+/>
