@@ -22,8 +22,6 @@
     "postgre",
     "postgres",
     "postgresql",
-    "redshift",
-    "aws redshift",
     "cockroach",
     "cockroachdb"
   ],
