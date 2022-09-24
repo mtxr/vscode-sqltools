@@ -6,7 +6,7 @@ import SidebarAbstractItem from './SidebarAbstractItem';
 import SidebarItem from "./SidebarItem";
 import get from 'lodash/get';
 import { createLogger } from '@sqltools/log/src';
-import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
+import PluginResourcesMap, { buildResourceKey } from '@sqltools/util/plugin-resources';
 
 const log = createLogger('conn-explorer');
 
@@ -103,6 +103,7 @@ export default class SidebarConnection extends SidebarAbstractItem<SidebarItem> 
       disconnected: 'inactive',
     };
 
-    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
+    return Uri.parse((PluginResourcesMap.get<IIcons>(buildResourceKey({ type: 'driver', name: this.conn.driver, resource: 'icons' })) || {})[typeMap[type] as any || 'default']);
+
   }
 }

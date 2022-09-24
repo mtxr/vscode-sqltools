@@ -11,6 +11,6 @@ class ResourcesMap extends Map<string, any> {
 
 const PluginResourcesMap = new ResourcesMap();
 
-export const buildResouceKey = ({ type, name, resource }: { type: string, name: string, resource: string }) => [type, name, resource].join('/');
+export const buildResourceKey = ({ type, name, resource }: { type: string, name: string, resource: string }) => [type, name, resource].join('/');
 
 export default PluginResourcesMap;
