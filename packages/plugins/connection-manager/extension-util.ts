@@ -39,15 +39,17 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
     if (ext && ext.driverAliases) {
       ext.driverAliases.map(({ displayName, value }) => {
         const iconsPath = PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: value, resource: 'icons' }));
-        let icon: string;
+
+        // If alias didn't register a default icon, exclude it from the Connection Assistant because it is a legacy alias
+        // (see https://github.com/mtxr/vscode-sqltools/issues/956)
         if (iconsPath && iconsPath.default) {
-          icon = 'data:application/octet-stream;base64,' + fs.readFileSync(iconsPath.default).toString('base64');
+          const icon = 'data:application/octet-stream;base64,' + fs.readFileSync(iconsPath.default).toString('base64');
+          installedDrivers.push({
+            displayName,
+            value,
+            icon,
+          });
         }
-        installedDrivers.push({
-          displayName,
-          value,
-          icon,
-        });
       });
     }
   }));
