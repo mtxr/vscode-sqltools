@@ -14,7 +14,7 @@ const detectNodePath = async (): Promise<string | null> => {
       window.onDidCloseTerminal((e => e.processId === terminal.processId && resolve()));
       const nodeCmd = `require("fs").writeFileSync("${nodeRuntimeTmpFile}", process.execPath)`;
       const nodeCmdWindows = nodeCmd.replace(/\\/g, '\\\\').replace(/\"/g, '\\"');
-      terminal.sendText(`node -e '${process.platform === 'win32' ? nodeCmdWindows : nodeCmd}' && ${shellExitCommand}`);
+      terminal.sendText(`node -e '${process.platform === 'win32' ? nodeCmdWindows : nodeCmd}'; ${shellExitCommand}`);
     })
     return fs.readFileSync(nodeRuntimeTmpFile).toString();
   } catch (error) {
