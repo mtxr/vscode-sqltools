@@ -370,6 +370,7 @@ export default function behavesLikeSqlFormatter(language?: any) {
         expect(format("foo !> bar")).toBe("foo !> bar");
         expect(format("foo && bar")).toBe("foo && bar");
         expect(format("foo := bar")).toBe("foo := bar");
+        expect(format("foo => bar")).toBe("foo => bar"); // Snowflake, TimescaleDB
     });
 
     it("formats logical operators", function() {
