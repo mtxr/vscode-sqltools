@@ -551,11 +551,11 @@
                             ],
                             "enumDescriptions": [
                                 "Leave unchanged.",
-                                "1 line.",
-                                "2 lines.",
-                                "3 lines.",
-                                "4 lines.",
-                                "5 lines."
+                                "1 linebreak.",
+                                "2 linebreaks.",
+                                "3 linebreaks.",
+                                "4 linebreaks.",
+                                "5 linebreaks."
                             ],
                             "default": 1,
                             "description": "Adjust spacing between queries."
