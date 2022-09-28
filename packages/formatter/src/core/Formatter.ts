@@ -93,7 +93,7 @@ export default class Formatter {
       && /((\r\n|\n)(\r\n|\n)+)/u.test(token.value)
       && this.previousToken().value === ';'
     ) {
-      return query.replace(/(\n|\r\n)$/m, '') + token.value;
+      return query.replace(/(\n|\r\n)$/u, '') + token.value;
     }
     return query
   }
