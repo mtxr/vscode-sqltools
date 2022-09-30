@@ -292,7 +292,7 @@
                 "category": "SQLTools Management"
             },
             {
-                "title": "Open settings",
+                "title": "Open Settings",
                 "command": "sqltools.openSettings",
                 "category": "SQLTools Management"
             },
@@ -307,7 +307,7 @@
                 "category": "SQLTools Sidebar"
             },
             {
-                "title": "Copy value(s)",
+                "title": "Copy Value(s)",
                 "command": "sqltools.copyTextFromTreeItem",
                 "category": "SQLTools Sidebar"
             },
