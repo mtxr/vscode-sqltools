@@ -11,6 +11,7 @@
         "--extensionDevelopmentPath=${workspaceFolder}"
       ],
       "sourceMaps": true,
+      "debugWebviews": true,
       "skipFiles": [
         "<node_internals>/**/*.js"
       ],
