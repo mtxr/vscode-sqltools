@@ -129,9 +129,9 @@ FROM
 WHERE
   T.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
   ${p => p.search ? `AND (
-    (T.TABLE_SCHEMA || '.' || T.TABLE_NAME) ILIKE '%${p.search}%'
-    OR ('"' T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') ILIKE '%${p.search}%'
-    OR T.TABLE_NAME ILIKE '%${p.search}%'
+    (T.TABLE_SCHEMA || '.' || T.TABLE_NAME) LIKE '%${p.search}%'
+    OR ('"' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') LIKE '%${p.search}%'
+    OR T.TABLE_NAME LIKE '%${p.search}%'
   )` : ''}
 ORDER BY
   T.TABLE_NAME
@@ -171,8 +171,8 @@ WHERE
   }
   ${p => p.search
     ? `AND (
-      (C.TABLE_NAME || '.' || C.COLUMN_NAME) ILIKE '%${p.search}%'
-      OR C.COLUMN_NAME ILIKE '%${p.search}%'
+      (C.TABLE_NAME || '.' || C.COLUMN_NAME) LIKE '%${p.search}%'
+      OR C.COLUMN_NAME LIKE '%${p.search}%'
     )`
     : ''
   }
