@@ -123,14 +123,14 @@ SELECT
   T.TABLE_CATALOG AS "catalog",
   (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN 0 ELSE 1 END) AS "isView",
   (CASE WHEN T.TABLE_TYPE = 'BASE TABLE' THEN 'table' ELSE 'view' END) AS description,
-  ('"' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') as detail
+  CONCAT(T.TABLE_SCHEMA, '.', T.TABLE_NAME) AS detail
 FROM
   INFORMATION_SCHEMA.TABLES AS T
 WHERE
   T.TABLE_SCHEMA NOT IN ('information_schema', 'performance_schema', 'sys', 'mysql')
   ${p => p.search ? `AND (
-    (T.TABLE_SCHEMA || '.' || T.TABLE_NAME) LIKE '%${p.search}%'
-    OR ('"' || T.TABLE_SCHEMA || '"."' || T.TABLE_NAME || '"') LIKE '%${p.search}%'
+    CONCAT(T.TABLE_SCHEMA, '.', T.TABLE_NAME) LIKE '%${p.search}%'
+    OR CONCAT('"', T.TABLE_SCHEMA, '"."', T.TABLE_NAME, '"') LIKE '%${p.search}%'
     OR T.TABLE_NAME LIKE '%${p.search}%'
   )` : ''}
 ORDER BY
@@ -171,7 +171,7 @@ WHERE
   }
   ${p => p.search
     ? `AND (
-      (C.TABLE_NAME || '.' || C.COLUMN_NAME) LIKE '%${p.search}%'
+      CONCAT(C.TABLE_NAME, '.', C.COLUMN_NAME) LIKE '%${p.search}%'
       OR C.COLUMN_NAME LIKE '%${p.search}%'
     )`
     : ''
