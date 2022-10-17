@@ -86,8 +86,8 @@ export async function quickPickSearch<T = any>(
           qPick.items = options.length > 0 && typeof options[0] === 'object'
             ? <QuickPickItem[]>options.map(o => ({ ...o, value: o, label: o.value || o.label }))
             : options.map<QuickPickItem>(value => ({ value, label: value.toString() }));
+          qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
         };
-        qPick.title = `${qPickOptions.title || 'Items'} (${qPick.items.length})`;
         if (getOptsPromise instanceof Promise || typeof getOptsPromise['catch'] === 'function') (<Promise<any>>getOptsPromise).then(thenFn).catch(catchFn);
         else getOptsPromise.then(thenFn, catchFn);
       }, debounceTime);
