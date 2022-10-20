@@ -1,14 +1,12 @@
 ---
-title: MariaDB
+title: MySQL
 header: Official Drivers
 layout: ../../../layouts/MainLayout.astro
 ---
 
 import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
 
-# MariaDB Start Guide
-
-> Remember: We use the same driver extension to connect for both MariaDB and MySQL, so some of the settings and documentation refer to `mysql` or `MySQL`.
+# MySQL Start Guide
 
 ## 1. Connections
 
@@ -16,9 +14,9 @@ Connection example:
 
 ```json
 {
-  "name": "MariaDB",
+  "name": "MySQL",
   "server": "localhost",
-  "driver": "MariaDB",
+  "driver": "MySQL",
   "port": 3306,
   "database": "test_db",
   "username": "root",
@@ -32,8 +30,8 @@ Using a socket file example:
 
 ```json
 {
-  "name": "MariaDB",
-  "driver": "MariaDB",
+  "name": "MySQL",
+  "driver": "MySQL",
   "database": "test_db",
   "username": "root",
   "askForPassword": false,
@@ -45,13 +43,13 @@ Using a socket file example:
 
 ### 1.1 Specific Options
 
-MariaDB driver specific options can be passed using `mysqlOptions` settings.
+MySQL driver specific options can be passed using `mysqlOptions` settings.
 
 ```json
 {
-  "name": "MariaDB",
+  "name": "MySQL",
   "server": "localhost",
-  "driver": "MariaDB",
+  "driver": "MySQL",
   "port": 5433,
   "database": "test_db",
   "username": "root",
@@ -66,25 +64,25 @@ MariaDB driver specific options can be passed using `mysqlOptions` settings.
 
 ### 2. mysqlOptions
 
-We have two options of connectors for MariaDB. You can choose which one to use by change the setting `mysqlOptions.authProtocol`. The allowed values are `default` and `xprotocol`, we use `default` by default since is the most often used.
+We have two options of connectors for MySQL. You can choose which one to use by change the setting `mysqlOptions.authProtocol`. The allowed values are `default` and `xprotocol`, we use `default` by default since is the most often used.
 
 Extra options can be used as defined in the connectors documentation.
 
-- For default protocol
+- For MySQL default protocol
   - See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
-- For xprotocol
-  - See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/
+- For MySQL xprotocol
+  - See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/global.html#URI
 
 They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/mysql/index.ts .
 
 ## Know Errors and How to Fix
 
-### MariaDB 8 and `ER_NOT_SUPPORTED_AUTH_MODE`
+### MySQL 8 and `ER_NOT_SUPPORTED_AUTH_MODE`
 
 Potential solutions:
 
 - Ensure you've set `authProtocol` to `xprotocol`
-- Use the correct port. Typically, add a trailing `0` to the `port` used by the `default` protocol.
+- Add a trailing `0` to the `port`. See the [MySQL Guide to Ports](https://mysqlserverteam.com/mysql-guide-to-ports/)
 
 Example configuration:
 
@@ -94,7 +92,7 @@ Example configuration:
     {
       "askForPassword": true,
       "connectionTimeout": 30,
-      "driver": "MariaDB",
+      "driver": "MySQL",
       "name": "LocalHost",
       "port": 33060,
       "server": "127.0.0.1",

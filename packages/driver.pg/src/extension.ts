@@ -2,7 +2,7 @@ import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/typ
 import { ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
 const { publisher, name } = require('../package.json');
-const driverName = 'PostgreSQL/Cockroach';
+const driverName = 'PostgreSQL/Redshift';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
   const sqltools = extensions.getExtension<IExtension>('mtxr.sqltools');
   if (!sqltools) {
@@ -25,9 +25,10 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         default: extContext.asAbsolutePath('icons/pg/default.png'),
         inactive: extContext.asAbsolutePath('icons/pg/inactive.png'),
       });
-      // redshift (deprecated as an alias in favour of the standalone one, so doesn't register a default icon so as not to appear in Connection Assistant)
+      // redshift
       extension.resourcesMap().set(`driver/${DRIVER_ALIASES[1].value}/icons`, {
         active: extContext.asAbsolutePath('icons/redshift/active.png'),
+        default: extContext.asAbsolutePath('icons/redshift/default.png'),
         inactive: extContext.asAbsolutePath('icons/redshift/inactive.png'),
       });
       // cockroach

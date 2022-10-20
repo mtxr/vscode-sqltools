@@ -1,8 +1,8 @@
 {
   "name": "sqltools-driver-pg",
-  "displayName": "SQLTools PostgreSQL/Cockroach Driver",
-  "description": "SQLTools PostgreSQL/Cockroach Driver",
-  "version": "0.3.1-dev",
+  "displayName": "SQLTools PostgreSQL/Cockroach/Redshift Driver",
+  "description": "SQLTools PostgreSQL/Cockroach/Redshift Driver",
+  "version": "0.3.0",
   "engines": {
     "vscode": "^1.42.0"
   },
@@ -22,6 +22,8 @@
     "postgre",
     "postgres",
     "postgresql",
+    "redshift",
+    "aws redshift",
     "cockroach",
     "cockroachdb"
   ],

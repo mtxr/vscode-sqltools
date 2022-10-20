@@ -1,6 +1,6 @@
 import { extensions } from 'vscode';
 import Context from '@sqltools/vscode/context';
-import PluginResourcesMap, { buildResourceKey } from '@sqltools/util/plugin-resources';
+import PluginResourcesMap, { buildResouceKey } from '@sqltools/util/plugin-resources';
 import { IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './webview/lib/prepare-schema';
@@ -14,11 +14,11 @@ export const getDriverSchemas = ({ driver }: { driver: string; } = { driver: nul
   if (!driver)
     return prepareSchema(schema, uiSchema);
   try {
-    schema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResourceKey({ type: 'driver', name: driver, resource: 'connection-schema' }))).toString()) || {};
+    schema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'connection-schema' }))).toString()) || {};
   }
   catch (error) { }
   try {
-    uiSchema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResourceKey({ type: 'driver', name: driver, resource: 'ui-schema' }))).toString()) || {};
+    uiSchema = JSON.parse(fs.readFileSync(PluginResourcesMap.get<string>(buildResouceKey({ type: 'driver', name: driver, resource: 'ui-schema' }))).toString()) || {};
   }
   catch (error) { }
 
@@ -38,18 +38,16 @@ export const getInstalledDrivers = async (retry = 0): Promise<SettingsScreenStat
     log.info(`loaded extension information %s for driver %s.`, id, ext.driverName);
     if (ext && ext.driverAliases) {
       ext.driverAliases.map(({ displayName, value }) => {
-        const iconsPath = PluginResourcesMap.get<IIcons>(buildResourceKey({ type: 'driver', name: value, resource: 'icons' }));
-
-        // If alias didn't register a default icon, exclude it from the Connection Assistant because it is a legacy alias
-        // (see https://github.com/mtxr/vscode-sqltools/issues/956)
+        const iconsPath = PluginResourcesMap.get<IIcons>(buildResouceKey({ type: 'driver', name: value, resource: 'icons' }));
+        let icon: string;
         if (iconsPath && iconsPath.default) {
-          const icon = 'data:application/octet-stream;base64,' + fs.readFileSync(iconsPath.default).toString('base64');
-          installedDrivers.push({
-            displayName,
-            value,
-            icon,
-          });
+          icon = 'data:application/octet-stream;base64,' + fs.readFileSync(iconsPath.default).toString('base64');
         }
+        installedDrivers.push({
+          displayName,
+          value,
+          icon,
+        });
       });
     }
   }));
@@ -78,7 +76,7 @@ export const getExtension = async (id: string): Promise<IDriverExtensionApi | nu
 };
 
 export const driverPluginExtension = async (driverName: string) => {
-  const pluginExtenxionId = PluginResourcesMap.get(buildResourceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
+  const pluginExtenxionId = PluginResourcesMap.get(buildResouceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
   log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
   if (!pluginExtenxionId) return null;
   return getExtension(pluginExtenxionId);

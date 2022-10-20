@@ -17,18 +17,7 @@ export default async function getShellExitCommand(code = 0) {
     throw new Error('No env.shell retrieved despite retries');
   }
 
-  if (shell.match(/[\\/]pwsh(\.exe)?$/g)) {
-
-    // PowerShell 7+ supports the && pipeline chain operator but needs the exit command wrapped
-    return `&& $(exit ${code})`;
-  } else if (shell.match(/[\\]powershell.exe$/g)) {
-
-    // Bundled PowerShell of a Windows workstation where PowerShell 7+ hasn't been installed doesn't support the && pipeline chain operator,
-    // so use ; followed by a conditional command
-    return `; if ($?) { exit ${code} }`;
-  } else {
-
-    // Everything else
-    return `&& exit ${code}`;
-  }
+  const isPowerShell = shell.match(/[\\/]pwsh(\.exe)?$/g);
+  if (isPowerShell) return `$(exit ${code})`;
+  return `exit ${code}`;
 }
