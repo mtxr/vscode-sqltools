@@ -4,7 +4,14 @@ import InlineBlock from './InlineBlock';
 import Params from './Params';
 import Tokenizer from './Tokenizer';
 
-const trimSpacesEnd = str => str.replace(/[ \t]+$/u, '');
+const spaceChars = [' ', '\t'];
+const trimSpacesEnd = (str: string) => {
+  let end = str.length - 1;
+  while (end >= 0 && spaceChars.includes(str[end])) {
+    end--;
+  }
+  return str.substring(0, end + 1);
+};
 
 export default class Formatter {
   private tokens: Token[] = [];
@@ -93,7 +100,7 @@ export default class Formatter {
       && /((\r\n|\n)(\r\n|\n)+)/u.test(token.value)
       && this.previousToken().value === ';'
     ) {
-      return query.replace(/(\n|\r\n)$/m, '') + token.value;
+      return query.replace(/(\n|\r\n)$/u, '') + token.value;
     }
     return query
   }
