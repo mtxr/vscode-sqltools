@@ -77,3 +77,9 @@ See the changelog [here](https://vscode-sqltools.mteixeira.dev/changelog).
 Our aim is to build a tool that is genuinely helpful for developers. Therefore we welcome any feedback or additional feature requests – please submit them through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
 
 If you need help sooner, get in touch with the maintainers directly – we might be able to help you out.
+
+## About George James Software
+
+Known for our expertise in InterSystems technologies, George James Software has been providing innovative software solutions for over 35 years. We pride ourselves on the quality and maintainability of our code and we have built a number of tools to help developers achieve the same with their work. These are available as VS Code extensions [here](https://marketplace.visualstudio.com/publishers/georgejames).
+
+We also help other developers to build their own extensions. If there is a tool you need building please get in touch with us at [info@georgejames.com](mailto:info@georgejames.com).
