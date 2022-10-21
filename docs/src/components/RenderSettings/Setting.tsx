@@ -1,9 +1,8 @@
 import React from 'react';
-import MDX from '../MDX';
+import MDX from 'react-markdown';
 import TypeInfo from './TypeInfo';
 import Chevron from './Chevron';
 import Type from './Type';
-import Details from './Details';
 
 interface SettingProp {
   prop: any;
@@ -16,14 +15,14 @@ interface SettingProp {
 }
 
 const Setting = ({ description, markdownDescription, name, ...props }: Partial<SettingProp>) => {
-  return (<Details open>
+  return (<details className="details-info" open>
     <summary>
       <Chevron />
-      <span id={`${name}`}>{name}<Type tag='small' type={props.type} items={props.items} /></span>
+      <span id={`${name}`}>{name}<Type tag='small' wrap='code' type={props.type} items={props.items} /></span>
       <div><MDX>{markdownDescription || description}</MDX></div>
     </summary>
     <TypeInfo {...props} />
-  </Details>);
+  </details>);
 };
 
 export default Setting;

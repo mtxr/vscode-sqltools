@@ -1,0 +1,8 @@
+---
+type Props = {
+  size: number;
+};
+const { size } = Astro.props as Props;
+---
+
+<img class="logo" width={size} height={size} src="/favicon.png" />

@@ -1,0 +1,113 @@
+---
+title: MariaDB
+header: Official Drivers
+layout: ../../../layouts/MainLayout.astro
+---
+
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
+
+# MariaDB Start Guide
+
+> Remember: We use the same driver extension to connect for both MariaDB and MySQL, so some of the settings and documentation refer to `mysql` or `MySQL`.
+
+## 1. Connections
+
+Connection example:
+
+```json
+{
+  "name": "MariaDB",
+  "server": "localhost",
+  "driver": "MariaDB",
+  "port": 3306,
+  "database": "test_db",
+  "username": "root",
+  "askForPassword": false,
+  "password": "root",
+  "connectionTimeout": 15
+}
+```
+
+Using a socket file example:
+
+```json
+{
+  "name": "MariaDB",
+  "driver": "MariaDB",
+  "database": "test_db",
+  "username": "root",
+  "askForPassword": false,
+  "password": "root",
+  "connectionTimeout": 15,
+  "socketPath": "/path/to/mysqld.sock"
+}
+```
+
+### 1.1 Specific Options
+
+MariaDB driver specific options can be passed using `mysqlOptions` settings.
+
+```json
+{
+  "name": "MariaDB",
+  "server": "localhost",
+  "driver": "MariaDB",
+  "port": 5433,
+  "database": "test_db",
+  "username": "root",
+  "askForPassword": false,
+  "password": "root",
+  "connectionTimeout": 15,
+  "mysqlOptions": {
+    ... // options See section 2. mysqlOptions
+  }
+}
+```
+
+### 2. mysqlOptions
+
+We have two options of connectors for MariaDB. You can choose which one to use by change the setting `mysqlOptions.authProtocol`. The allowed values are `default` and `xprotocol`, we use `default` by default since is the most often used.
+
+Extra options can be used as defined in the connectors documentation.
+
+- For default protocol
+  - See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
+- For xprotocol
+  - See https://dev.mysql.com/doc/dev/connector-nodejs/8.0/
+
+They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/mysql/index.ts .
+
+## Know Errors and How to Fix
+
+### MariaDB 8 and `ER_NOT_SUPPORTED_AUTH_MODE`
+
+Potential solutions:
+
+- Ensure you've set `authProtocol` to `xprotocol`
+- Use the correct port. Typically, add a trailing `0` to the `port` used by the `default` protocol.
+
+Example configuration:
+
+```json
+{
+  "sqltools.connections": [
+    {
+      "askForPassword": true,
+      "connectionTimeout": 30,
+      "driver": "MariaDB",
+      "name": "LocalHost",
+      "port": 33060,
+      "server": "127.0.0.1",
+      "username": "root",
+      "mysqlOptions": {
+        "authProtocol": "xprotocol"
+      }
+    }
+  ]
+}
+```
+
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']}
+/>

@@ -1,94 +1,75 @@
-import React from 'react'
-import styled from 'styled-components';
+import React, { useEffect, useState } from 'react'
 import formatter from '@sqltools/formatter/lib/sqlFormatter';
 import { Config } from '@sqltools/formatter/src/core/types';
 import Editor from 'react-simple-code-editor';
 
-const PlaygroundContainer = styled.div`
-  height: calc(100vh - 300px);
-  font-size: 14px;
-  font-size: 0.8rem;
-  display: flex;
-  > div {
-    font-size: inherit;
-    width: 50%;
-    border: 1px solid gray;
-    box-sizing: content-box;
-    float: left;
-    overflow: auto;
-    &:first-child {
-      border-right: none;
-    }
-  }
-`;
-const OptionsContainer = styled.div`
-margin-bottom: 1em;
-> header {
-  font-weight: bold;
-  font-size: 1.2em;
-  margin: 0;
-}
-p {
-  margin: 0;
-}
-> main {
-  display: flex;
-  flex-direction: row;
-}
-`;
-
-class Formatter extends React.Component<{}, Formatter['state']> {
-  state = {
+const Formatter = () => {
+  const [state, setState] = useState({
     code,
     indentSize: 2,
     options: {
       reservedWordCase: 'upper',
       linesBetweenQueries: 2,
     } as Config,
+    editorView: "below" as "side" | "below",
     indentType: ' ',
-  }
+  });
 
-  editor = React.createRef<HTMLTextAreaElement>();
-  componentDidMount() {
-    this.editor.current && this.editor.current.focus();
-  }
 
-  format = (code: string) => {
+  const editor = React.createRef<HTMLTextAreaElement>();
+  useEffect(() => {
+    editor.current && editor.current.focus();
+  }, []);
+
+  const format = (code: string) => {
     return formatter.format(code, {
-      ...this.state.options,
-      indent: new Array(this.state.indentSize).fill(this.state.indentType === ' ' ? ' ' : '\t').join(''),
+      ...state.options,
+      indent: new Array(state.indentSize).fill(state.indentType === ' ' ? ' ' : '\t').join(''),
     });
   }
 
   // render stuff
-  renderEditor = () => (
-    <div>
-      <Editor
-        value={this.state.code}
-        onValueChange={code => this.setState({ code })}
-        highlight={code => window.Prism.highlight(code, window.Prism.languages.sql, 'sql')}
-        {...baseEditorProps}
-      />
-    </div>
+  const renderEditor = () => (
+    <>
+      <label>EDITOR</label>
+      <div>
+        <Editor
+          value={state.code}
+          onValueChange={code => { setState(s => ({ ...s, code })); }}
+          highlight={code => window["Prism"]?.highlight?.(code, window["Prism"]?.languages?.sql, 'sql')}
+          {...baseEditorProps}
+        />
+      </div>
+    </>
   );
 
-  renderResults = () => (
-    <div>
-      <Editor
-        onValueChange={() => void 0}
-        value={this.state.code}
-        highlight={code => window.Prism.highlight(this.format(code), window.Prism.languages.sql, 'sql')}
-        {...baseEditorProps}
-      />
-    </div>
+  const renderResults = () => (
+    <>
+      <label>PREVIEW</label>
+      <div>
+        <Editor
+          onValueChange={() => void 0}
+          value={state.code}
+          highlight={code => window["Prism"]?.highlight?.(format(code), window["Prism"]?.languages?.sql, 'sql')}
+          {...baseEditorProps}
+        />
+      </div>
+    </>
   );
-  renderOptions = () => (
-    <OptionsContainer>
+  const renderOptions = () => (
+    <div className="options-container">
+      <header>Editor View</header>
+      <main>
+        <input type="radio" name="editorPosition" value="side" checked={state.editorView === "side"} id="side" onChange={e => setState(s => ({ ...s, editorView: e.target.value as any }))} />
+        <label htmlFor="side">Side by Side</label>
+        <input type="radio" name="editorPosition" value="below" checked={state.editorView === "below"} id="below" onChange={e => setState(s => ({ ...s, editorView: e.target.value as any }))} />
+        <label htmlFor="below">Below</label>
+      </main>
       <header>Options</header>
       <main>
         <p>
           <label>Reserved Words Case</label>
-          <select defaultValue={this.state.options.reservedWordCase} onChange={e => this.setState({ options: { ...this.state.options, reservedWordCase: e.target.value as any }})}>
+          <select defaultValue={state.options.reservedWordCase} onChange={e => setState(s => ({ ...s, options: { ...state.options, reservedWordCase: e.target.value as any } }))}>
             <option>Preserve</option>
             <option value="upper">Uppercase</option>
             <option value="lower">Lowercase</option>
@@ -96,7 +77,7 @@ class Formatter extends React.Component<{}, Formatter['state']> {
         </p>
         <p>
           <label>Lines Between Queries</label>
-          <select defaultValue={this.state.options.linesBetweenQueries} onChange={e => this.setState({ options: { ...this.state.options, linesBetweenQueries: e.target.value as any }})}>
+          <select defaultValue={state.options.linesBetweenQueries} onChange={e => setState(s => ({ ...s, options: { ...state.options, linesBetweenQueries: e.target.value as any } }))}>
             <option value='preserve'>Preserve</option>
             <option value="1">1 line</option>
             <option value="2">2 line</option>
@@ -107,30 +88,28 @@ class Formatter extends React.Component<{}, Formatter['state']> {
         </p>
         <p>
           <label>Identation</label>
-          <select defaultValue={this.state.indentType} onChange={e => this.setState({ indentType: e.target.value })}>
+          <select defaultValue={state.indentType} onChange={e => setState(s => ({ ...s, indentType: e.target.value }))}>
             <option value=" ">Use spaces</option>
             <option value="tab">Use Tabs</option>
           </select>
         </p>
         <p>
           <label>Indent size</label>
-          <input type="number" value={this.state.indentSize} min='1' onChange={e => this.setState({ indentSize: Number(e.target.value) })}/>
+          <input type="number" value={state.indentSize} min='1' onChange={e => setState(s => ({ ...s, indentSize: Number(e.target.value) }))} />
         </p>
       </main>
-    </OptionsContainer>
+    </div>
   );
 
-  render() {
-    return (
-      <>
-        {this.renderOptions()}
-        <PlaygroundContainer>
-          {this.renderEditor()}
-          {this.renderResults()}
-        </PlaygroundContainer>
-      </>
-    );
-  }
+  return (
+    <>
+      {renderOptions()}
+      <div className={["playground-container", state.editorView === "side" ? "view-side" : "view-below"].join(" ")}>
+        {renderEditor()}
+        {renderResults()}
+      </div>
+    </>
+  );
 }
 
 export default Formatter;

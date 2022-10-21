@@ -1,0 +1,321 @@
+:root {
+  --font-fallback: -apple-system, BlinkMacSystemFont, Segoe UI, Helvetica, Arial, sans-serif, Apple Color Emoji,
+    Segoe UI Emoji;
+  --font-body: system-ui, var(--font-fallback);
+  --font-mono: 'IBM Plex Mono', Consolas, 'Andale Mono WT', 'Andale Mono', 'Lucida Console', 'Lucida Sans Typewriter',
+    'DejaVu Sans Mono', 'Bitstream Vera Sans Mono', 'Liberation Mono', 'Nimbus Mono L', Monaco, 'Courier New', Courier,
+    monospace;
+
+  /*
+   * Variables with --color-base prefix define
+   * the hue, and saturation values to be used for
+   * hsla colors.
+   *
+   * ex:
+   *
+   * --color-base-{color}: {hue}, {saturation};
+   *
+   */
+
+  --color-base-white: 0, 0%;
+  --color-base-black: 240, 100%;
+  --color-base-gray: 215, 14%;
+  --color-base-blue: 212, 100%;
+  --color-base-blue-dark: 212, 72%;
+  --color-base-green: 158, 79%;
+  --color-base-orange: 22, 100%;
+  --color-base-purple: 269, 79%;
+  --color-base-red: 351, 100%;
+  --color-base-yellow: 41, 100%;
+
+  /*
+   * Color palettes are made using --color-base
+   * variables, along with a lightness value to
+   * define different variants.
+   *
+   */
+
+  --color-gray-5: var(--color-base-gray), 5%;
+  --color-gray-10: var(--color-base-gray), 10%;
+  --color-gray-20: var(--color-base-gray), 20%;
+  --color-gray-30: var(--color-base-gray), 30%;
+  --color-gray-40: var(--color-base-gray), 40%;
+  --color-gray-50: var(--color-base-gray), 50%;
+  --color-gray-60: var(--color-base-gray), 60%;
+  --color-gray-70: var(--color-base-gray), 70%;
+  --color-gray-80: var(--color-base-gray), 80%;
+  --color-gray-90: var(--color-base-gray), 90%;
+  --color-gray-95: var(--color-base-gray), 95%;
+
+  --color-blue: var(--color-base-blue), 61%;
+  --color-blue-dark: var(--color-base-blue-dark), 39%;
+  --color-green: var(--color-base-green), 42%;
+  --color-orange: var(--color-base-orange), 50%;
+  --color-purple: var(--color-base-purple), 54%;
+  --color-red: var(--color-base-red), 54%;
+  --color-yellow: var(--color-base-yellow), 59%;
+}
+
+:root {
+  color-scheme: light;
+  --theme-accent: hsla(var(--color-blue), 1);
+  --theme-text-accent: hsla(var(--color-blue), 1);
+  --theme-accent-opacity: 0.15;
+  --theme-divider: hsla(var(--color-gray-95), 1);
+  --theme-text: hsla(var(--color-gray-10), 1);
+  --theme-text-light: hsla(var(--color-gray-40), 1);
+  /* @@@: not used anywhere */
+  --theme-text-lighter: hsla(var(--color-gray-80), 1);
+  --theme-bg: hsla(var(--color-base-white), 100%, 1);
+  --theme-bg-hover: hsla(var(--color-gray-95), 1);
+  --theme-bg-offset: hsla(var(--color-gray-90), 1);
+  --theme-bg-accent: hsla(var(--color-blue), var(--theme-accent-opacity));
+  --theme-code-inline-bg: hsla(var(--color-gray-95), 1);
+  --theme-code-inline-text: var(--theme-text);
+  --theme-code-bg: hsla(217, 19%, 27%, 1);
+  --theme-code-text: hsla(var(--color-gray-95), 1);
+  --theme-navbar-bg: hsla(var(--color-base-white), 100%, 1);
+  --theme-navbar-height: 6rem;
+  --theme-selection-color: hsla(var(--color-blue), 1);
+  --theme-selection-bg: hsla(var(--color-blue), var(--theme-accent-opacity));
+}
+
+body {
+  background: var(--theme-bg);
+  color: var(--theme-text);
+}
+
+:root.theme-dark {
+  color-scheme: dark;
+  --theme-accent-opacity: 0.15;
+  --theme-accent: hsla(var(--color-blue), 1);
+  --theme-text-accent: hsla(var(--color-blue), 1);
+  --theme-divider: hsla(var(--color-gray-10), 1);
+  --theme-text: hsla(var(--color-gray-90), 1);
+  --theme-text-light: hsla(var(--color-gray-80), 1);
+
+  /* @@@: not used anywhere */
+  --theme-text-lighter: hsla(var(--color-gray-40), 1);
+  --theme-bg: hsla(215, 28%, 17%, 1);
+  --theme-bg-hover: hsla(var(--color-gray-40), 1);
+  --theme-bg-offset: hsla(var(--color-gray-5), 1);
+  --theme-code-inline-bg: hsla(var(--color-gray-10), 1);
+  --theme-code-inline-text: hsla(var(--color-base-white), 100%, 1);
+  --theme-code-bg: hsla(var(--color-gray-5), 1);
+  --theme-code-text: hsla(var(--color-base-white), 100%, 1);
+  --theme-navbar-bg: hsla(215, 28%, 17%, 1);
+  --theme-selection-color: hsla(var(--color-base-white), 100%, 1);
+  --theme-selection-bg: hsla(var(--color-purple), var(--theme-accent-opacity));
+
+  /* DocSearch [Algolia] */
+  --docsearch-modal-background: var(--theme-bg);
+  --docsearch-searchbox-focus-background: var(--theme-divider);
+  --docsearch-footer-background: var(--theme-divider);
+  --docsearch-text-color: var(--theme-text);
+  --docsearch-hit-background: var(--theme-divider);
+  --docsearch-hit-shadow: none;
+  --docsearch-hit-color: var(--theme-text);
+  --docsearch-footer-shadow: inset 0 2px 10px #000;
+  --docsearch-modal-shadow: inset 0 0 8px #000;
+}
+
+::selection {
+  color: var(--theme-selection-color);
+  background-color: var(--theme-selection-bg);
+}
+
+.playground-container {
+  height: calc(80vh - 200px);
+  font-size: 14px;
+  font-size: 0.8rem;
+  display: flex;
+}
+
+.playground-container.view-side {
+  flex-direction: row;
+}
+.playground-container:not(.view-side) {
+  flex-direction: column;
+}
+
+.playground-container > label {
+  font-weight: bold;
+  display: block;
+  width: 0;
+}
+.playground-container > div {
+  font-size: inherit;
+  border: 1px solid gray;
+  box-sizing: content-box;
+  float: left;
+  overflow: auto;
+}
+.playground-container.view-side > div {
+  margin-top: 1.5em;
+  width: 50%;
+}
+.playground-container:not(.view-side) > div {
+  width: 100%;
+  min-height: 350px;
+}
+
+.playground-container.view-side > div:first-child {
+  border-right: none;
+}
+
+.playground-container code[class*='language-'],
+.playground-container pre[class*='language-'] {
+  text-shadow: none;
+}
+
+.options-container {
+  margin-bottom: 1em;
+}
+.options-container > header {
+  font-weight: bold;
+  font-size: 1.2em;
+  margin: 0;
+}
+.options-containerp {
+  margin: 0;
+}
+.options-container > main {
+  display: flex;
+  flex-direction: row;
+}
+
+.search-container {
+  cursor: text;
+  display: flex;
+  align-items: center;
+  margin-bottom: 2em;
+  border-radius: 0.25em;
+  max-width: 100%;
+  padding-left: 1em;
+  font-size: 1.3em;
+  overflow: hidden;
+  background-color: var(--theme-divider);
+  border-color: var(--theme-divider);
+  color: var(--theme-text-light);
+}
+.search-container svg {
+  width: 1.3em;
+  height: 1.3em;
+}
+
+.search-container input {
+  font-size: inherit;
+  padding: 0.5em 1em;
+  border: none;
+  outline: none;
+  flex-grow: 1;
+  background-color: transparent;
+  border-color: transparent;
+  color: var(--theme-text-light);
+}
+
+table.settings-table {
+  border-collapse: collapse;
+  margin-top: 1em;
+  width: 100%;
+}
+table.settings-table td,
+table.settings-table th {
+  padding: 2px 4px;
+  text-align: left;
+  word-break: break-word;
+}
+
+table.settings-table td p:first-child,
+table.settings-table th p:first-child {
+  margin-top: 0;
+}
+table.settings-table td p:last-child,
+table.settings-table th p:last-child {
+  margin-bottom: 0;
+}
+table.settings-table td:first-child {
+  font-weight: bold;
+}
+table.settings-table td:first-child,
+table.settings-table td:last-child {
+  white-space: nowrap;
+}
+table.settings-table tr {
+  border-bottom: 1px solid var(--theme-navbar-bg);
+}
+.details-info {
+  font-size: 1rem;
+  margin-bottom: 2em;
+  box-shadow: var(--docsearch-modal-shadow);
+  width: 100%;
+  background: var(--theme-bg-hover);
+  position: relative;
+  border-radius: 0.25em;
+  overflow: hidden;
+}
+.details-info .CodeMirror-lines {
+  min-height: 5em;
+}
+.details-info summary > div,
+.details-info > div {
+  background: var(--theme-bg-hover);
+  flex-basis: 100%;
+  padding: 0.25em 2em;
+}
+.details-info summary {
+  display: inline-block;
+  outline: none;
+  color: var(--theme-text);
+  display: flex;
+  padding: 0.25em 1em;
+  align-items: center;
+  cursor: pointer;
+  flex-wrap: wrap;
+}
+.details-info summary span {
+  flex: 1;
+  text-decoration: none;
+  color: inherit;
+  font-size: 1.2em;
+  margin-bottom: 0.25em;
+}
+.details-info summary div {
+  margin: 0 -1em -0.25em;
+}
+.details-info summary div p:first-child {
+  margin-top: 0;
+}
+.details-info summary div p:last-child {
+  margin-bottom: 0;
+}
+.details-info summary svg {
+  flex-grow: 0;
+  transform: rotate(-90deg);
+  margin-left: -0.25em;
+  margin-right: 0.25em;
+  width: 1em;
+  height: 1em;
+}
+.details-info summary small {
+  margin-left: 1em;
+  opacity: 0.6;
+  font-family: monospace;
+  font-size: 0.7em;
+}
+.details-info summary::-webkit-details-marker {
+  display: none;
+}
+.details-info[open] svg {
+  transform: rotate(0);
+}
+.details-info > div {
+  padding: 2em;
+  padding-top: 0;
+}
+.details-info label {
+  font-weight: bold;
+}
+.details-info label::after {
+  content: ': ';
+}

@@ -11,7 +11,7 @@
 			"request": "launch",
 			"runtimeExecutable": "${execPath}",
 			"args": [
-				"${workspaceFolder}/../../test/project.code-workspace",
+				"${workspaceFolder}/../../test/test-vscode-sqltools.code-workspace",
 				"--extensionDevelopmentPath=${workspaceFolder}"
 			],
 			"outFiles": [
@@ -48,7 +48,7 @@
 	],
 	"compounds": [
 		{
-			"name": "Run MYSQL Driver Ext and Attach LS",
+			"name": "Run MySQL Driver Ext and Attach LS",
 			"configurations": [
 				"Attach SQLTools LS",
 				"Run MySQL Extension"

@@ -1,56 +1,31 @@
 import React from 'react';
-import { components } from 'docz-theme-default';
 import Type from './Type';
-import styled from 'styled-components';
-import MDX from '../MDX';
-
-const Table = styled.table<any>`
-  border-collapse: collapse;
-  margin-top: 1em;
-  width: 100%;
-  td, th {
-    padding: 2px 4px;
-    border: 1px solid ${(props: any) => props.theme.docz.colors.gray};
-    text-align: left;
-    p:first-child {
-      margin-top: 0;
-    }
-    p:last-child {
-      margin-bottom: 0;
-    }
-  }
-  td:first-child {
-    font-weight: ${(props: any) => props.header === false ? 'bold' : 'normal'};
-  }
-  td:first-child, td:last-child {
-    white-space: nowrap;
-  }
-`;
+import MDX from 'react-markdown';
 
 const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
   const types = Array.isArray(type) ? type : [type];
   return (
     <div>
-      <Table header={false}>
+      <table className="settings-table">
         <tbody>
           <tr>
             <td {...{ width: 150 }}>Type</td>
             <td>
-              <Type type={types} items={props.items} wrap={components.inlineCode} sep=', ' lastSep={' or '} />
+              <Type type={types} items={props.items} tag='code' sep=', ' lastSep={' or '} />
             </td>
           </tr>
           {typeof defaultValue !== 'undefined' && (
             <tr>
-              <td>Default Vaue</td>
+              <td>Default Value</td>
               <td>
-                <components.inlineCode>
+                {typeof defaultValue === "undefined" ? null : <code>
                   {['object', 'boolean'].includes(typeof defaultValue) ? JSON.stringify(defaultValue) : defaultValue}
-                </components.inlineCode>
+                </code>}
               </td>
             </tr>
           )}
         </tbody>
-      </Table>
+      </table>
       {types.map(t => {
         switch (t) {
           case 'array':
@@ -60,10 +35,10 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
             return (
               <React.Fragment key={t}>
                 <header> Object Properties</header>
-                <Table>
+                <table className="settings-table">
                   <thead>
                     <tr>
-                      <th {...{ width: 150 }}>Property</th>
+                      <th>Property</th>
                       <th>Description</th>
                       <th>Type</th>
                     </tr>
@@ -74,7 +49,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                         <td>{k}</td>
                         <td><MDX>{properties[k].markdownDescription || properties[k].description}</MDX></td>
                         <td>
-                          <Type type={properties[k].type} items={properties[k].items} wrap={components.inlineCode} sep=', ' lastSep={' or '} />
+                          <Type type={properties[k].type} items={properties[k].items} tag='code' sep=', ' lastSep={' or '} />
                           {properties[k].enum && (
                             <ul>
                               {properties[k].enum.map((v: any, i: number) => (
@@ -86,7 +61,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
                       </tr>
                     ))}
                   </tbody>
-                </Table>
+                </table>
                 {/* <pre>{JSON.stringify(props, null, 2)}</pre> */}
               </React.Fragment>
             );
@@ -95,7 +70,7 @@ const TypeInfo = ({ type, default: defaultValue, ...props }: any) => {
           case 'number':
           case 'null':
           default:
-              return null;
+            return null;
         }
       })}
     </div>
