@@ -52,6 +52,9 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
           propsToRemove.push('askForPassword');
         } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
           propsToRemove.push('askForPassword');
+        } else if(connInfo.usePassword.toString().toLowerCase().includes('secure')) {
+          propsToRemove.push('password');
+          propsToRemove.push('askForPassword');
         }
       }
       propsToRemove.forEach(p => delete connInfo[p]);
@@ -74,7 +77,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         delete formData.password;
       } else if (typeof connInfo.password === 'string') {
         delete formData.askForPassword;
-        formData.usePassword = connInfo.password ? 'Save password' : 'Use empty password';
+        formData.usePassword = connInfo.password === undefined ? 'Secure password' : connInfo.password ? 'Save password' : 'Use empty password';
       }
       return formData;
     },
