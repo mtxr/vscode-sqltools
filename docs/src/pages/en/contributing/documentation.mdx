@@ -1,0 +1,36 @@
+---
+title: Documentation
+header: Contributing
+layout: ../../../layouts/MainLayout.astro
+---
+
+Here is the process for improving this documentation.
+
+## Editing
+
+1. Fork the repository.
+2. Clone your fork.
+3. Open the project workspace (`vscode-sqltools.code-workspace`) withj VS Code.
+4. Create a branch from the `dev` branch.
+5. Expand the `docs` root folder.
+6. Edit pages. For example this page is at `src/pages/en/contributing/documentation.mdx` within `docs`
+
+Notes:
+- If changing home.mdx try to keep README.md (in `vscode-sqltools` root folder of the workspace) in sync.
+
+## Previewing
+1. In the Debug view's dropdown choose `Development server (docs)` and run it.
+2. In the Terminal tab of the Panel, look for a terminal instance containing text like this:
+```
+Debugger attached.
+   astro  v1.2.1 started in 818ms
+  
+  ┃ Local    http://localhost:3000/
+  ┃ Network  use --host to expose
+```
+3. Use Ctrl/Cmd+Click to open the link in a browser.
+
+## Submitting
+1. Stage your changes.
+2. Push your branch to your fork.
+3. Create a PR on the main repository requesting that your branch gets merged.
