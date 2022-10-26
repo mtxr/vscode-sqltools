@@ -6,12 +6,11 @@ export const SITE = {
 
 export const OPEN_GRAPH = {
 	image: {
-		src: 'https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.svg?sanitize=true',
+		src: 'https://raw.githubusercontent.com/mtxr/vscode-sqltools/master/static/header-hero.png',
 		alt:
-			'astro logo on a starry expanse of space,' +
-			' with a purple saturn-like planet floating in the right foreground',
+			'SQLTools database management',
 	},
-	twitter: 'astrodotbuild',
+	twitter: 'GJSoftware',
 };
 
 // This is the type of the frontmatter you put in the docs markdown files.

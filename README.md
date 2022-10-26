@@ -1,6 +1,6 @@
 <!-- HEADER START -->
 <p style='text-align: center;'>
-  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/static/header-hero.svg?sanitize=true" />
+  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/static/header-hero.png" />
 </p>
 
 <hr />
