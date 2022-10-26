@@ -1,6 +1,6 @@
 <!-- HEADER START -->
 <p style='text-align: center;'>
-  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/static/header-hero.svg?sanitize=true" />
+  <img src="https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/static/header-hero.png" />
 </p>
 
 <hr />
@@ -8,31 +8,37 @@
 
 <p style='text-align: center;'>
 
-[![Docs](https://img.shields.io/badge/docs-here-blueviolet?style=for-the-badge)](https://vscode-sqltools.mteixeira.dev)
-[![ko-fi](https://user-images.githubusercontent.com/707561/112481485-d0d09800-8d55-11eb-8bfd-bb70c9984617.png)](https://ko-fi.com/Y8Y487W9)
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
-[![VSCode.pro](https://img.shields.io/badge/Supported%20by-VSCode%20Power%20User%20Course%20%E2%86%92-gray.svg?colorA=655BE1&colorB=4F44D6&style=for-the-badge)](https://a.paddle.com/v2/click/16413/111711?link=1227)
 [![GitHub](https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge)](https://github.com/mtxr/vscode-sqltools/blob/dev/LICENSE.md)
 
 </p>
 
-Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!
+Welcome to Database Management done right. 
+SQLTools provides connections to many of the most commonly used databases, making it easier to work with your data. With this tool, developers will save (a lot of) time, increase productivity and feel like a database hero ✌️
 
-You can read the entire docs in [https://vscode-sqltools.mteixeira.dev/](https://vscode-sqltools.mteixeira.dev/)
+SQLTools is an open-source project maintained by [Matheus Teixeira](https://mteixeira.dev/) and [George James Software](https://georgejames.com), alongside contributions from our brilliant community of users. 
+
+If you like using this tool please [leave us a review](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools&ssr=false#review-details).
 
 ## Features
 
-Some features provided by SQLTools:
+Connects to MySQL, PostgreSQL, Microsoft SQL Server and many more...
 
-- Beautifier/Formatter
-- Query runner, history, and bookmarks
+- Beautifier and formatter for SQL code
+- Query runner, history and bookmarks
 - Connection explorer
-- Query generators (INSERT only)
+- Generator for INSERT queries
+- Pluggable driver architecture
 
-Check out all the features and their documentation [here](http://vscode-sqltools.mteixeira.dev/#features).
+Find out more in the documentation [here](http://vscode-sqltools.mteixeira.dev/#features).
 
-## Supported Drivers
+## Supported Databases
+To use SQLTools you will also need to install the appropriate driver extension for your database.
+
+If the driver you want is not available, you can use our handy [new drivers guide](https://vscode-sqltools.mteixeira.dev/en/contributing/support-new-drivers/) to write it yourself (and help our community in the process) or submit feedback via  [GitHub](https://github.com/mtxr/vscode-sqltools/issues).
+
+If you need a driver sooner, get in touch with the maintainers directly – we might be able to help you out.
+
+Psst… we’re always on the lookout for maintainers for the official drivers, so let us know if this is something you’re interested in!
 
 **Official Drivers**
 
@@ -44,8 +50,6 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 | ![MySQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.mysql/icons/default.png)                 | MySQL                      | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-mysql)  | [packages/driver.mysql](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.mysql)   |
 | ![PostgreSQL](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.pg/icons/pg/default.png)            | PostgreSQL                 | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-pg)     | [packages/driver.pg](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.pg)         |
 | ![SQLite](https://raw.githubusercontent.com/mtxr/vscode-sqltools/dev/packages/driver.sqlite/icons/default.png)               | SQLite                     | [Link](https://marketplace.visualstudio.com/items?itemName=mtxr.sqltools-driver-sqlite) | [packages/driver.sqlite](https://github.com/mtxr/vscode-sqltools/tree/dev/packages/driver.sqlite) |
-
-> I'm looking for maintainers for each driver, if you are interested in maintaining/testing any driver, please contact me. https://mteixeira.dev
 
 **Community Drivers:**
 
@@ -60,42 +64,22 @@ Check out all the features and their documentation [here](http://vscode-sqltools
 | ![Teradata](https://raw.githubusercontent.com/scriptpup/sqltools-teradata-driver/master/icons/default.png)                                | Teradata             | [Link](https://marketplace.visualstudio.com/items?itemName=scriptpup.sqltools-teradata-driver)                         | [@ScriptPup](https://github.com/ScriptPup) <br/> [ScriptPup/sqltools-teradata-driver](https://github.com/ScriptPup/sqltools-teradata-driver)                                                           |
 | ![Trino](https://raw.githubusercontent.com/regadas/sqltools-trino-driver/master/icons/default.png)                                        | Trino                | [Link](https://marketplace.visualstudio.com/items?itemName=regadas.sqltools-trino-driver)                              | [@regadas](https://github.com/regadas) <br/> [regadas/sqltools-trino-driver](https://github.com/regadas/sqltools-trino-driver)                                                                         |
 
-Do you want to add a new driver? We have a tool to help you. See [support new drivers](https://vscode-sqltools.mteixeira.dev/contributing/support-new-drivers) guide.
-
-<!-- **Drivers supported till v0.21.9:**
-
-| Driver    | Maintainer                                       |
-| --------- | ------------------------------------------------ |
-| Cassandra | [@EpicEric](https://github.com/EpicEric)         |
-| IBM DB2   | [@snyang](https://github.com/snyang)             |
-| OracleDB  | [@mickeypearce](https://github.com/mickeypearce) |
-
-> These drivers are being migrated to be compatible with v0.22 or newer. If you need one of them, you need to install v0.21.9. -->
-
-#### Know Driver Issues
-
-- Unable to connect with "Drivers XXXX is not installed"? Check [this issue](https://github.com/mtxr/vscode-sqltools/issues/590).
-
 ## Contributing
 
-Please read the contributing guide [here](https://vscode-sqltools.mteixeira.dev/contributing).
-
-Join all these amazing [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors)❤️ on this journey.
-
-## Donate and Support
-
-SQLTools was developed with ♥ to save us time during our programming journey.
-
-SQLTools will save you (for sure) a lot of time and help you to increase your productivity, so please consider a [donation](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8) or become a [supporter](https://www.patreon.com/mteixeira) and help SQLTools become more awesome than ever.
-
-[![ko-fi](https://user-images.githubusercontent.com/707561/112481485-d0d09800-8d55-11eb-8bfd-bb70c9984617.png)](https://ko-fi.com/Y8Y487W9)
-[![Patreon](https://img.shields.io/badge/patreon-support-blue.svg?style=for-the-badge&logo=patreon)](https://www.patreon.com/mteixeira)
-[![Paypal Donate](https://img.shields.io/badge/paypal-donate-blue.svg?style=for-the-badge&logo=paypal)](https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=RSMB6DGK238V8)
+We are grateful to our [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors) for helping with this project ❤️ If you would like to join them you’ll find everything you need to know about contributing [here](https://vscode-sqltools.mteixeira.dev/contributing).
 
 ## Changelog
 
-See changelog [here](https://vscode-sqltools.mteixeira.dev/changelog)
+See the changelog [here](https://vscode-sqltools.mteixeira.dev/changelog).
 
 ## Feedback
 
-Please provide feedback through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
+Our aim is to build a tool that is genuinely helpful for developers. Therefore we welcome any feedback or additional feature requests – please submit them through the [GitHub Issue](https://github.com/mtxr/vscode-sqltools/issues) system.
+
+If you need help sooner, get in touch with the maintainers directly – we might be able to help you out.
+
+## About George James Software
+
+George James Software has been providing innovative software solutions for over 35 years. We pride ourselves on the quality and maintainability of our code and we have built a number of tools to help developers achieve the same with their work. These are available as VS Code extensions [here](https://marketplace.visualstudio.com/publishers/georgejames).
+
+We also help other developers to build their own extensions. If there is a tool you need building please get in touch with us at [info@georgejames.com](mailto:info@georgejames.com).
