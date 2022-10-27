@@ -15,7 +15,7 @@ This page describes how to test changes you make to the project in a local branc
 
 ## Testing
 
-1. Open the testing workspace (`test/project.code-workspace`) in VS Code. This gives you a multi-root workspace. The first folder, `root`, shows the `test/*` subtree of the repository. Additional top-level folders giving easy access to the corresponding folders of the `test/docker/` subtree.
+1. Open the testing workspace (`test/test-vscode-sqltools.code-workspace`) in VS Code. This gives you a multi-root workspace. The first folder, `root`, shows the `test/*` subtree of the repository. Additional top-level folders giving easy access to the corresponding folders of the `test/docker/` subtree.
 2. Accept extension recommendations. The SQLTools extension and the driver extensions for the testing targets will need to be installed. The `ms-azuretools.vscode-docker` extension is optional but these instructions assume you install it.
 3. Go to the NPM Scripts view (e.g. run command `Explorer: Focus on NPM Scripts View`). Its tree will show one root folder, `package.json`. In this the `up` script launches containerized services that the bundled drivers can connect to. The `up:*` scripts each launch an individual service in a container, and are useful if you only want to test one driver.
 4. Run the `up` script. Example of output is shown below.

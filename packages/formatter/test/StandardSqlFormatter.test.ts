@@ -504,6 +504,23 @@ where id = $1`);
         id INTEGER PRIMARY KEY,
         name VARCHAR(200) UNIQUE,
       );
+
+      CREATE TABLE bar (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+
+      CREATE TABLE baz (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
+    `;
+    expect(format(input, { linesBetweenQueries: 'preserve' })).toEqual(input);
+    input = dedent`
+      CREATE TABLE foo (
+        id INTEGER PRIMARY KEY,
+        name VARCHAR(200) UNIQUE,
+      );
       CREATE TABLE bar (
         id INTEGER PRIMARY KEY,
         name VARCHAR(200) UNIQUE,
