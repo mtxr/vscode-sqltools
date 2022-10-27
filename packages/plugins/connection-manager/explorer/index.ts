@@ -22,7 +22,7 @@ class ConnectionGroup extends TreeItem {
 
 const connectedTreeItem: ConnectionGroup = new ConnectionGroup('Connected', TreeItemCollapsibleState.Expanded);
 connectedTreeItem.id = 'CONNECTED'
-connectedTreeItem.iconPath = new ThemeIcon('folder-active');
+connectedTreeItem.iconPath = ThemeIcon.Folder;
 
 const notConnectedTreeItem: ConnectionGroup = new ConnectionGroup('Not Connected', TreeItemCollapsibleState.Expanded);
 notConnectedTreeItem.id = 'DISCONNECTED';
