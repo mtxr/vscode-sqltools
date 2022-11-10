@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.0
+
+- No longer promote as an official driver for Redshift. [#991](https://github.com/mtxr/vscode-sqltools/pull/991)
+- Update Cockroach icons.
+
 ### 0.3.0
 
 - Add Cockroach as an alias. Thanks [@ultram4rine](https://github.com/ultram4rine).

@@ -2,7 +2,13 @@
 
 This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/?umd_source=repository&utm_medium=readme&utm_campaign=sqlite) extension.
 
+See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lite/) for instructions, including prerequisites.
+
 ## Changelog
+
+### 0.4.1
+
+  - Link from README to Start Guide (see above).
 
 ### 0.4.0
 

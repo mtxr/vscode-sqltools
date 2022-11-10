@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.1
+
+- Fix table and column searching. [#1015](https://github.com/mtxr/vscode-sqltools/pull/1015)
+
 ### 0.4.0
 
 - Add version 8 keywords. [#841](https://github.com/mtxr/vscode-sqltools/pull/841) - thanks [@mojoaxel](https://github.com/mojoaxel).
