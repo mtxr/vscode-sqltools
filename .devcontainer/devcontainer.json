@@ -1,0 +1,32 @@
+{
+	"name": "SQLTools",
+	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+
+	// Features to add to the dev container. More info: https://containers.dev/implementors/features.
+	"features": {
+		"ghcr.io/devcontainers/features/node:1": {}
+	},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// "forwardPorts": [],
+
+	// Use 'postCreateCommand' to run commands after the container is created
+	"postCreateCommand": "./.devcontainer/postCreateCommand.sh",
+
+	// But at that point the local .gitconfig hasn't yet been copied
+	// (see https://github.com/microsoft/vscode-remote-release/issues/6810#issuecomment-1310980232).
+	// So use 'postStartCommand' for commands which write to that file.
+	"postStartCommand": "./.devcontainer/postStartCommand.sh",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"extensions.ignoreRecommendations": true
+			}
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}

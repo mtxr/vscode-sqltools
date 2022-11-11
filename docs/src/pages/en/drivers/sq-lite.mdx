@@ -10,9 +10,9 @@ import RenderConnectionOptions from '../../../components/RenderConnectionOptions
 
 ## 1. Prerequisites
 
-- Node.js 10 or newer
+- Have Node.js (version 10 or newer) and npm installed. Some instructions are available [here](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).
 - Configure the `sqltools.useNodeRuntime` setting. It can be set to `true` to perform auto-detect of your Node runtime, or to the full path of the runtime.
-  - For successful auto-detect on Windows, VS Code must be configured to use `PowerShell` as its default terminal shell. If set to `Command Prompt` or `Windows PowerShell`, auto-detect will fail.
+  - For successful auto-detect on Windows we recommend that VS Code is be configured to use `PowerShell` as its default terminal shell. If set to `Command Prompt` or `Windows PowerShell`, auto-detect may fail.
   - An example of a string value for a Windows environment is `"C:\\Program Files\\nodejs\\node.exe"`. Notice how backslashes in a JSON string have to be doubled.
 
 ```json
@@ -22,7 +22,7 @@ import RenderConnectionOptions from '../../../components/RenderConnectionOptions
 }
 ```
 
-On first use the SQLite driver extension prompts to install the [node-sqlite3](https://www.npmjs.com/package/sqlite3)@5.1.1 package. During installation this package downloads its platform-specific prebuilt binaries. See the package documentation for details.
+Upon first use the SQLite driver extension prompts for permission to install the [node-sqlite3](https://www.npmjs.com/package/sqlite3)@5.1.1 package. During installation this package downloads its platform-specific prebuilt binaries. See the package documentation for details.
 
 ## 2. Connections
 

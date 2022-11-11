@@ -1,8 +1,5 @@
 -- Extracted from w3schools
 
-CREATE SCHEMA test_schema
-AUTHORIZATION dbo;
-
 CREATE TABLE ACCOUNTABILITY (
 	ID INT PRIMARY KEY,
     REF_NAME VARCHAR (50)
