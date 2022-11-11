@@ -1,6 +1,11 @@
 #!/bin/bash
 
-echo '*** Please do not respond to any VS Code notification about opening a workspace until after this script completes ***'
+echo
+echo '*** Ignore the VS Code notification about opening a workspace until after this script completes.'
+echo
+echo '*** If setup progress bars cause linewrap, widen your terminal.'
+echo
+echo 'Setup will continue in 5 seconds...'
 sleep 5
 
 # Suppress warnings triggered by engine value package.json of a VS Code extension
