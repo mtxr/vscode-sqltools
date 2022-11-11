@@ -14,7 +14,7 @@
 	// the feature containing nvm hasn't been installed, nor has the local .gitconfig been copied
 	// (see https://github.com/microsoft/vscode-remote-release/issues/6810#issuecomment-1310980232).
 	// So use 'postStartCommand' to run commands after the container is started.
-	"postStartCommand": "nvm install 14 && git config --global --add safe.directory  ${containerWorkspaceFolder}"
+	"postStartCommand": "nvm install 14 && git config --global --add safe.directory ${containerWorkspaceFolder}"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
