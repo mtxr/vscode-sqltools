@@ -1,5 +1,5 @@
 {
-	"name": "Ubuntu",
+	"name": "SQLTools",
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
 
 	// Features to add to the dev container. More info: https://containers.dev/implementors/features.
@@ -16,10 +16,16 @@
 	// But at that point the local .gitconfig hasn't yet been copied
 	// (see https://github.com/microsoft/vscode-remote-release/issues/6810#issuecomment-1310980232).
 	// So use 'postStartCommand' for commands which write to that file.
-	"postStartCommand": "./.devcontainer/postStartCommand.sh"
+	"postStartCommand": "./.devcontainer/postStartCommand.sh",
 
 	// Configure tool-specific properties.
-	// "customizations": {},
+	"customizations": {
+		"vscode": {
+			"settings": {
+				"extensions.ignoreRecommendations": true
+			}
+		}
+	}
 
 	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
 	// "remoteUser": "root"
