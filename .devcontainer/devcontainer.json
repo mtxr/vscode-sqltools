@@ -1,18 +1,20 @@
 {
 	"name": "Ubuntu",
 	"image": "mcr.microsoft.com/devcontainers/base:jammy",
+
+	// Features to add to the dev container. More info: https://containers.dev/implementors/features.
 	"features": {
 		"ghcr.io/devcontainers/features/node:1": {}
 	},
 
-	// Features to add to the dev container. More info: https://containers.dev/implementors/features.
-	// "features": {},
-
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "nvm install 14 && git config --global --add safe.directory /workspaces/vscode-sqltools"
+	// Use 'postCreateCommand' to run commands after the container is created, but at that point
+	// the feature containing nvm hasn't been installed, nor has the local .gitconfig been copied
+	// (see https://github.com/microsoft/vscode-remote-release/issues/6810#issuecomment-1310980232).
+	// So use 'postStartCommand' to run commands after the container is started.
+	"postStartCommand": "nvm install 14 && git config --global --add safe.directory  ${containerWorkspaceFolder}"
 
 	// Configure tool-specific properties.
 	// "customizations": {},
