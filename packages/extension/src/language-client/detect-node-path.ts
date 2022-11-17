@@ -8,7 +8,7 @@ const nodeRuntimeTmpFile = getDataPath(".node-runtime");
 
 const detectNodePath = async (): Promise<string | null> => {
   const failureMessageTimer = setTimeout(() => {
-    window.showWarningMessage("Check Terminal view for an erroring 'detect node runtime' session. Capture details for investigation, then kill the terminal to continue SQLTools extension startup. Change the 'sqltools.detectNodeRuntime' setting to disable runtime detection.",
+    window.showWarningMessage("Check Terminal view for an erroring 'detect node runtime' session. Capture details for investigation, then kill the terminal to continue SQLTools extension startup. Change the 'sqltools.useNodeRuntime' setting to disable runtime detection.",
       { modal: true });
       commands.executeCommand("terminal.focus");
   }, 5000);
