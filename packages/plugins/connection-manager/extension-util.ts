@@ -1,7 +1,7 @@
 import { extensions } from 'vscode';
 import Context from '@sqltools/vscode/context';
 import PluginResourcesMap, { buildResourceKey } from '@sqltools/util/plugin-resources';
-import { IDriverExtensionApi, IIcons } from '@sqltools/types';
+import { IConnection, IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './webview/lib/prepare-schema';
 import { SettingsScreenState } from './webview/ui/screens/Settings/interfaces';
@@ -83,3 +83,11 @@ export const driverPluginExtension = async (driverName: string) => {
   if (!pluginExtenxionId) return null;
   return getExtension(pluginExtenxionId);
 };
+
+export const resolveConnection = async (connInfo: IConnection) => {
+  const pluginExt = await driverPluginExtension(connInfo.driver);
+  if (pluginExt && pluginExt.resolveConnection) {
+    connInfo = await pluginExt.resolveConnection({ connInfo });
+  }
+  return connInfo;
+}
