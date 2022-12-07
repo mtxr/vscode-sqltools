@@ -11,7 +11,7 @@ const detectNodePath = async (): Promise<string | null> => {
     window.showWarningMessage("Check Terminal view for an erroring 'detect node runtime' session. Capture details for investigation, then kill the terminal to continue SQLTools extension startup. Change the 'sqltools.useNodeRuntime' setting to disable runtime detection.",
       { modal: true });
       commands.executeCommand("terminal.focus");
-  }, 5000);
+  }, 15_000);
   try {
     const terminal = window.createTerminal({ name: "detect node runtime" });
     const shellExitCommand = await getShellExitCommand();
