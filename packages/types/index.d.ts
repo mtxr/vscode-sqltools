@@ -601,6 +601,14 @@ export interface ISettings {
    */
   useNodeRuntime?: null | boolean | string;
 
+    /**
+   * Disable node runtime detection notifications.
+   * @default false
+   * @type {boolean}
+   * @memberof ISettings
+   */
+    disableNodeDetectNotifications?: boolean;
+
   /**
    * Columns sort order
    * @default 'name'
