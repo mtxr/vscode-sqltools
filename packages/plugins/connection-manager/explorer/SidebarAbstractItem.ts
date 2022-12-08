@@ -12,7 +12,7 @@ export default abstract class SidebarAbstractItem<T extends SidebarItemIterface<
   protected _snippet: SnippetString;
   get snippet() {
     if (!this._snippet) {
-      this._snippet = new SnippetString(this.label);
+      this._snippet = new SnippetString(typeof this.label === 'string' ? this.label : this.label?.label);
     }
     return this._snippet;
   };

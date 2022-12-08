@@ -30,7 +30,7 @@ export default class ConnectionManagerPlugin implements IExtensionPlugin {
         group.items.map<QuickPickItem>(item => ({
           label: item.query,
           detail: typeof item.description === "string" ? item.description : "",
-          description: group.label,
+          description: typeof group.label === 'string' ? group.label : group.label?.label,
         }))
       ), []);
     return await quickPick(
