@@ -1,7 +1,7 @@
 import { extensions } from 'vscode';
 import Context from '@sqltools/vscode/context';
 import PluginResourcesMap, { buildResourceKey } from '@sqltools/util/plugin-resources';
-import { IDriverExtensionApi, IIcons } from '@sqltools/types';
+import { IConnection, IDriverExtensionApi, IIcons } from '@sqltools/types';
 import fs from 'fs';
 import prepareSchema from './webview/lib/prepare-schema';
 import { SettingsScreenState } from './webview/ui/screens/Settings/interfaces';
@@ -78,8 +78,16 @@ export const getExtension = async (id: string): Promise<IDriverExtensionApi | nu
 };
 
 export const driverPluginExtension = async (driverName: string) => {
-  const pluginExtenxionId = PluginResourcesMap.get(buildResourceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
-  log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
-  if (!pluginExtenxionId) return null;
-  return getExtension(pluginExtenxionId);
+  const pluginExtensionId = PluginResourcesMap.get(buildResourceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
+  log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtensionId);
+  if (!pluginExtensionId) return null;
+  return getExtension(pluginExtensionId);
 };
+
+export const resolveConnection = async (connInfo: IConnection) => {
+  const pluginExt = await driverPluginExtension(connInfo.driver);
+  if (pluginExt && pluginExt.resolveConnection) {
+    connInfo = await pluginExt.resolveConnection({ connInfo });
+  }
+  return connInfo;
+}

@@ -729,7 +729,8 @@ export interface IExtension {
 
 export interface IDriverExtensionApi {
   /**
-   * Prepare connection settings that will be saved to settings file
+   * Prepare connection settings that will be saved to settings file,
+   * and/or resolve settings before passing them to the language server (e.g. call an AuthenticationProvider to retrieve credentials)
    *
    * @param {{ connInfo: IConnection }} arg
    * @returns {(Promise<IConnection> | IConnection)}
@@ -737,6 +738,7 @@ export interface IDriverExtensionApi {
    */
   parseBeforeSaveConnection?(arg: { connInfo: IConnection }): Promise<IConnection> | IConnection;
   parseBeforeEditConnection?(arg: { connInfo: IConnection }): Promise<IConnection> | IConnection;
+  resolveConnection?(arg: { connInfo: IConnection }): Promise<IConnection> | IConnection;
   readonly driverName?: string;
   readonly driverAliases: IDriverAlias[];
 }
