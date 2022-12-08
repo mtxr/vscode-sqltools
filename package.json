@@ -13,7 +13,7 @@
     "type": "git"
   },
   "engines": {
-    "vscode": "^1.42.0",
+    "vscode": "^1.72.0",
     "node": ">=10"
   },
   "private": true,
