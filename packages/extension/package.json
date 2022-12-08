@@ -829,6 +829,11 @@
                     "default": false,
                     "description": "Enable node runtime usage."
                 },
+                "sqltools.disableNodeDetectNotifications": {
+                    "type": "boolean",
+                    "default": false,
+                    "description": "Disable node runtime detection notifications."
+                },
                 "sqltools.languageServerEnv": {
                     "type": "object",
                     "default": {},
