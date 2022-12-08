@@ -78,10 +78,10 @@ export const getExtension = async (id: string): Promise<IDriverExtensionApi | nu
 };
 
 export const driverPluginExtension = async (driverName: string) => {
-  const pluginExtenxionId = PluginResourcesMap.get(buildResourceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
-  log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtenxionId);
-  if (!pluginExtenxionId) return null;
-  return getExtension(pluginExtenxionId);
+  const pluginExtensionId = PluginResourcesMap.get(buildResourceKey({ type: 'driver', name: driverName, resource: 'extension-id' }));
+  log.debug(`Driver name %s. Plugin ext: %s`, driverName, pluginExtensionId);
+  if (!pluginExtensionId) return null;
+  return getExtension(pluginExtensionId);
 };
 
 export const resolveConnection = async (connInfo: IConnection) => {
