@@ -104,7 +104,10 @@ export class SQLToolsLanguageClient implements ILanguageClient {
         const nodePath = await detectNodePath();
         if (nodePath) {
           const message = `Node runtime auto-detected. Using ${nodePath}.`;
-          window.showInformationMessage(message);
+          if (!Config.disableNodeDetectNotifications) {
+            window.showInformationMessage(message);
+          }
+          log.info(message)
           runtime = nodePath
         } else {
           if (commandExists('node')) {
@@ -114,7 +117,9 @@ export class SQLToolsLanguageClient implements ILanguageClient {
       }
       if (!runtime) {
         const message = 'Node runtime not found. Using default as a fallback.';
-        window.showInformationMessage(message);
+        if (!Config.disableNodeDetectNotifications) {
+          window.showInformationMessage(message);
+        }
         log.info(message)
       }
     }

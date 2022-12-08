@@ -9,6 +9,7 @@ import sortBy from 'lodash/sortBy';
 import { createLogger } from '@sqltools/log/src';
 import Context from '@sqltools/vscode/context';
 import Config from '@sqltools/util/config-manager';
+import { resolveConnection } from '../extension-util';
 
 const log = createLogger('conn-man:explorer');
 
@@ -40,8 +41,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public async getActive(): Promise<IConnection | null> {
     const conns = await this.getConnections();
-    const active = conns.find(c => c.isActive);
+    let active = conns.find(c => c.isActive);
     if (!active) return null;
+
+    active = await resolveConnection(active);
 
     return {
       ...active,
@@ -78,7 +81,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public async getConnectionById(id: string): Promise<IConnection> {
     if (!id) return null;
     const items = await this.getConnections();
-    return items.find(c => getConnectionId(c) === id) || null;
+    let connection = items.find(c => getConnectionId(c) === id) || null;
+    if (connection) {
+      connection = await resolveConnection(connection);
+    }
+    return connection;
   }
 
   public getSelection() {
