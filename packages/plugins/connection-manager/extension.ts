@@ -22,7 +22,7 @@ import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEn
 import CodeLensPlugin from '../codelens/extension';
 import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
-import { getExtension } from './extension-util';
+import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
 import { removeAttachedConnection, attachConnection, getAttachedConnection } from './attached-files';
 
@@ -51,6 +51,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_testConnection = async (c: IConnection) => {
     let password = null;
+    c = await resolveConnection(c);
 
     if (c.askForPassword) password = await this._askForPassword(c);
     if (c.askForPassword && password === null) return;
@@ -576,6 +577,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     let password = null;
 
     if (c) {
+      c = await resolveConnection(c);
       c.id = getConnectionId(c);
     }
 

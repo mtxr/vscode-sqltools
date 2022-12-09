@@ -4,7 +4,7 @@
   "description": "SQLTools Microsoft SQL Server/Azure",
   "version": "0.3.0",
   "engines": {
-    "vscode": "^1.42.0"
+    "vscode": "^1.72.0"
   },
   "publisher": "mtxr",
   "license": "MIT",
@@ -68,7 +68,7 @@
     "@sqltools/base-driver": "latest",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
-    "@types/vscode": "^1.42.0",
+    "@types/vscode": "^1.72.0",
     "concurrently": "^5.2.0",
     "esbuild": "^0.15.7",
     "lodash": "^4.17.19",

@@ -9,6 +9,7 @@ import sortBy from 'lodash/sortBy';
 import { createLogger } from '@sqltools/log/src';
 import Context from '@sqltools/vscode/context';
 import Config from '@sqltools/util/config-manager';
+import { resolveConnection } from '../extension-util';
 
 const log = createLogger('conn-man:explorer');
 
@@ -40,8 +41,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
 
   public async getActive(): Promise<IConnection | null> {
     const conns = await this.getConnections();
-    const active = conns.find(c => c.isActive);
+    let active = conns.find(c => c.isActive);
     if (!active) return null;
+
+    active = await resolveConnection(active);
 
     return {
       ...active,
@@ -78,7 +81,11 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   public async getConnectionById(id: string): Promise<IConnection> {
     if (!id) return null;
     const items = await this.getConnections();
-    return items.find(c => getConnectionId(c) === id) || null;
+    let connection = items.find(c => getConnectionId(c) === id) || null;
+    if (connection) {
+      connection = await resolveConnection(connection);
+    }
+    return connection;
   }
 
   public getSelection() {
@@ -131,7 +138,8 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       return null;
     }
 
-    let active = null;
+    let connectedTreeCount = 0;
+    let active: IConnection<any>;
     if (groupConnected) {
       return this.getGroupedRootItems(items);
     }
@@ -141,6 +149,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     items.forEach(item => {
       if (item.isActive) {
         active = item.conn;
+      }
+      if (item.isConnected) {
+        connectedTreeCount++;
       }
       let currentGroup: ConnectionGroup = root;
       if (item.conn && item.conn.group) {
@@ -152,6 +163,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     });
     this._onDidChangeActiveConnection.fire(active);
 
+    if (connectedTreeCount > 0) {
+      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active'};
+    } else {
+      this.treeView.badge = undefined;
+    }
+
     root.items = sortBy(root.items, ['isGroup', 'label']);
 
     return root.items;
@@ -162,7 +179,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     notConnectedTreeItem.items = [];
     let connectedTreeCount = 0;
     let notConnectedTreeCount = 0;
-    let active = null;
+    let active: IConnection<any>;
     items.forEach(item => {
       if (item.isActive) {
         active = item.conn;
@@ -183,6 +200,12 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
       currentGroup.items.push(item);
     });
     this._onDidChangeActiveConnection.fire(active);
+
+    if (connectedTreeCount > 0) {
+      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active'};
+    } else {
+      this.treeView.badge = undefined;
+    }
 
     connectedTreeItem.items = sortBy(connectedTreeItem.items, ['isGroup', 'label']);
     notConnectedTreeItem.items = sortBy(notConnectedTreeItem.items, ['isGroup', 'label']);
