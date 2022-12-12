@@ -276,10 +276,9 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
         await this._connect();
       }
 
-      this._askForPassword
-
       const conn = await this.explorer.getActive()
       query = await this.replaceParams(query, conn);
+      
       const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
       this.updateViewResults(view, payload);
