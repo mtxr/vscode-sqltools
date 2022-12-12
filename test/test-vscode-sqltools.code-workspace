@@ -75,7 +75,10 @@
         "name": "SQLite",
         "driver": "SQLite",
         "database": "./docker/sqlite/test_db.db",
-        "connectionTimeout": 15
+        "connectionTimeout": 15,
+        "variables": {
+          "env": "dev"
+        }
       },
       {
         "askForPassword": false,

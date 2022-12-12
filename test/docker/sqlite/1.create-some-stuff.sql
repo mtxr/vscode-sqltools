@@ -17,7 +17,7 @@ CREATE TABLE contacts_metadata (
   FOREIGN KEY(contact_id) REFERENCES contact(id)
 );
 
-CREATE VIEW contacts_view
+CREATE VIEW contacts_view_$[env]
 AS
 SELECT
 *

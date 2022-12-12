@@ -212,32 +212,42 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     }
   }
 
-  private replaceParams = async (query: string) => {
+  private replaceParams = async (query: string, conn: IConnection) => {
     if (!Config['queryParams.enableReplace']) return query;
 
-    const params = getQueryParameters(query, Config['queryParams.regex']);
+    const regex = Config['queryParams.regex']
+    const params = getQueryParameters(query, regex);
     if (params.length > 0) {
-      await new Promise<void>((resolve, reject) => {
-        const ib = window.createInputBox();
-        ib.step = 1;
-        ib.totalSteps = params.length;
-        ib.ignoreFocusOut = true;
-        ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
-        ib.prompt = 'Remember to escape values if needed.'
-        ib.onDidAccept(() => {
-          const r = new RegExp(params[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
-          query = query.replace(r, ib.value);
-          ib.step++;
-          if (ib.step > ib.totalSteps) {
-            ib.hide();
-            return resolve();
-          }
-          ib.value = '';
-          ib.title = `Value for '${params[ib.step - 1].param}' in '${params[ib.step - 1].string}'`;
+      const connVariables = conn.variables || {}
+      const connParams = params.filter(p => p.varName && Object.keys(connVariables).includes(p.varName))
+      for (const connParam of connParams) {
+        const r = new RegExp(connParam.param.replace(/([\$\[\]])/g, '\\$1'), 'g');
+        query = query.replace(r, connVariables[connParam.varName]);
+      }
+      const promptParams = params.filter(p => connParams.indexOf(p) === -1)
+      if (promptParams.length > 0) {
+        await new Promise<void>((resolve, reject) => {
+          const ib = window.createInputBox();
+          ib.step = 1;
+          ib.totalSteps = promptParams.length;
+          ib.ignoreFocusOut = true;
+          ib.title = `Value for '${promptParams[ib.step - 1].param}' in '${promptParams[ib.step - 1].string}'`;
+          ib.prompt = 'Remember to escape values if needed.'
+          ib.onDidAccept(() => {
+            const r = new RegExp(promptParams[ib.step - 1].param.replace(/([\$\[\]])/g, '\\$1'), 'g');
+            query = query.replace(r, ib.value);
+            ib.step++;
+            if (ib.step > ib.totalSteps) {
+              ib.hide();
+              return resolve();
+            }
+            ib.value = '';
+            ib.title = `Value for '${promptParams[ib.step - 1].param}' in '${promptParams[ib.step - 1].string}'`;
+          });
+          ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didn\'t fill all params. Cancelling...')));
+          ib.show();
         });
-        ib.onDidHide(() => ib.step >= ib.totalSteps && ib.value.trim() ? resolve() : reject(new Error('Didn\'t fill all params. Cancelling...')));
-        ib.show();
-      });
+      }
     }
 
     return query;
@@ -266,8 +276,10 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
         await this._connect();
       }
 
-      query = await this.replaceParams(query);
+      this._askForPassword
+
       const conn = await this.explorer.getActive()
+      query = await this.replaceParams(query, conn);
       const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
       const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
       this.updateViewResults(view, payload);
