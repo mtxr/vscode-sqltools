@@ -728,7 +728,7 @@
                                     "null"
                                 ],
                                 "default": null,
-                                "description": "Connection variables in a key/value pair format, this property needs to be used with `sqltools.queryParams.enableReplace` to replace the variables without prompting.",
+                                "description": "Connection variables in a key/value pair format. Use this property with `sqltools.queryParams.enableReplace` to replace the variables without prompting.",
                                 "properties": {}
                             }
                         }
