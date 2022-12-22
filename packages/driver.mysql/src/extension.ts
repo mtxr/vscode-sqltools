@@ -1,10 +1,11 @@
+import * as vscode from 'vscode';
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
-import { ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
+const AUTHENTICATION_PROVIDER = 'sqltools-driver-credentials';
 const { publisher, name } = require('../package.json');
 const driverName = 'MySQL/MariaDB';
-export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
-  const sqltools = extensions.getExtension<IExtension>('mtxr.sqltools');
+export async function activate(extContext: vscode.ExtensionContext): Promise<IDriverExtensionApi> {
+  const sqltools = vscode.extensions.getExtension<IExtension>('mtxr.sqltools');
   if (!sqltools) {
     throw new Error('SQLTools not installed');
   }
@@ -46,6 +47,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       const propsToRemove = ['connectionMethod', 'id', 'usePassword'];
       if (connInfo.usePassword) {
         if (connInfo.usePassword.toString().toLowerCase().includes('ask')) {
+          connInfo.askForPassword = true;
           propsToRemove.push('password');
         } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
           connInfo.password = '';
@@ -77,9 +79,36 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         delete formData.password;
       } else if (typeof connInfo.password === 'string') {
         delete formData.askForPassword;
-        formData.usePassword = connInfo.password === undefined ? 'Secure password' : connInfo.password ? 'Save password' : 'Use empty password';
+        formData.usePassword = connInfo.password ? 'Save as plaintext in settings' : 'Use empty password';
+      } else {
+        formData.usePassword = 'SQLTools Driver Credentials';
       }
       return formData;
+    },
+    resolveConnection: async ({ connInfo }) => {
+      /**
+       * This hook is called after a connection definition has been fetched
+       * from settings and is about to be used to connect.
+       */
+      if (connInfo.password === undefined && !connInfo.askForPassword) {
+        const scopes = [connInfo.name, (connInfo.username || "")];
+        let session = await vscode.authentication.getSession(
+          AUTHENTICATION_PROVIDER,
+          scopes,
+          { silent: true }
+        );
+        if (!session) {
+            session = await vscode.authentication.getSession(
+              AUTHENTICATION_PROVIDER,
+              scopes,
+              { createIfNone: true }
+            );
+        }
+        if (session) {
+          connInfo.password = session.accessToken;
+          }
+      }
+      return connInfo;
     },
     driverAliases: DRIVER_ALIASES,
   }

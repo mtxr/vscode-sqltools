@@ -23,26 +23,6 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     }
   }
   public open() {
-    if (this.credentials.password === undefined) {
-      const scopes = [this.credentials.name, (this.credentials.username || "").toLowerCase()];
-      let session = await vscode.authentication.getSession(
-        AUTHENTICATION_PROVIDER,
-        scopes,
-        { silent: true },
-      );
-      if (!session) {
-        session = await vscode.authentication.getSession(
-          AUTHENTICATION_PROVIDER,
-          scopes,
-          { createIfNone: true },
-        );
-      }
-      if (session) {
-        serverSpec.username = session.scopes[1] === "unknownuser" ? "" : session.scopes[1];
-        serverSpec.password = session.accessToken;
-      }
-  
-    }
     return this.driver.open();
   }
 

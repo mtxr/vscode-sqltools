@@ -13,15 +13,15 @@
       "minLength": 1
     },
     "usePassword": {
-      "title": "Use password",
+      "title": "Password mode",
       "type": "string",
       "enum": [
+        "SQLTools Driver Credentials",
         "Ask on connect",
         "Use empty password",
-        "Save password",
-        "Secure password"
+        "Save as plaintext in settings"
       ],
-      "default": "Ask on connect"
+      "default": "SQLTools Driver Credentials"
     },
     "password": {
       "title": "Password",
@@ -153,10 +153,6 @@
               "enum": [
                 "Ask on connect"
               ]
-            },
-            "askForPassword": {
-              "type": "boolean",
-              "default": true
             }
           }
         },
@@ -173,7 +169,7 @@
           "properties": {
             "usePassword": {
               "enum": [
-                "Save password"
+                "Save as plaintext in settings"
               ]
             },
             "password": {
@@ -188,7 +184,7 @@
           "properties": {
             "usePassword": {
               "enum": [
-                "Secure password"
+                "SQLTools Driver Credentials"
               ]
             }
           }
