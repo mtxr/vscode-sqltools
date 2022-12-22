@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/util",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "SQLTools Logger",
   "author": "Matheus Teixeira <me@mteixeira.dev>",
   "license": "MIT",

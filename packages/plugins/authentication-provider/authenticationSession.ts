@@ -11,10 +11,9 @@ export class SQLToolsAuthenticationSession implements AuthenticationSession {
 		public readonly userName: string,
 		password: string,
 	) {
-		const canonicalUserName = userName.toLowerCase();
 		this.id = SQLToolsAuthenticationProvider.sessionId(serverName, userName);
 		this.accessToken = password;
-		this.account = { id: canonicalUserName, label: `${userName} on ${serverName}` };
-		this.scopes = [serverName, canonicalUserName];
+		this.account = { id: userName, label: `'${userName}' on '${serverName}'` };
+		this.scopes = [serverName, userName];
 	}
 }

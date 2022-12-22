@@ -13,9 +13,8 @@ import {
 	workspace,
 } from "vscode";
 import { SQLToolsAuthenticationSession } from "./authenticationSession";
-import { EXT_NAMESPACE, DISPLAY_NAME } from '@sqltools/util/constants';
+import { EXT_NAMESPACE, DISPLAY_NAME, AUTHENTICATION_PROVIDER } from '@sqltools/util/constants';
 
-export const AUTHENTICATION_PROVIDER = `${EXT_NAMESPACE}-driver-credentials`;
 const AUTHENTICATION_PROVIDER_LABEL = `${DISPLAY_NAME} Driver Credentials`;
 
 export class SQLToolsAuthenticationProvider implements AuthenticationProvider, Disposable {
@@ -23,8 +22,7 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 	public static label = AUTHENTICATION_PROVIDER_LABEL;
 	public static secretKeyPrefix = "credentialProvider:";
 	public static sessionId(serverName: string, userName: string): string {
-		const canonicalUserName = userName.toLowerCase();
-		return `${serverName}/${canonicalUserName}`;
+		return `${serverName}/${userName}`;
 	}
 	public static credentialKey(sessionId: string): string {
 		return `${SQLToolsAuthenticationProvider.secretKeyPrefix}${sessionId}`;
@@ -51,9 +49,9 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 		await this._ensureInitialized();
 		let sessions = this._sessions;
 
-		// Filter to return only those that match all supplied scopes, which are positional and case-insensitive.
+		// Filter to return only those that match all supplied scopes, which are positional and case-sensitive.
 		for (let index = 0; index < scopes.length; index++) {
-			sessions = sessions.filter((session) => session.scopes[index] === scopes[index].toLowerCase());
+			sessions = sessions.filter((session) => session.scopes[index] === scopes[index]);
 		}
 		return sessions;
 	}
@@ -86,7 +84,7 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 		if (!password) {
 			// Prompt for password
 			const doInputBox = async (): Promise<string | undefined> => {
-				return await new Promise<string | undefined>((resolve, reject) => {
+				return await new Promise<string | undefined>((resolve, _reject) => {
 					const inputBox = window.createInputBox();
 					inputBox.value = "";
 					inputBox.password = true;
