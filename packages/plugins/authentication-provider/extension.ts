@@ -6,14 +6,11 @@ import { SQLToolsAuthenticationProvider } from './authenticationProvider';
 export default class AuthenticationProviderPlugin implements IExtensionPlugin {
   public readonly name = 'Authentication Provider Plugin';
   private isRegistered = false;
-  private errorHandler: IExtension['errorHandler'];
 
-  public register(extension: IExtension) {
+  public register(_extension: IExtension) {
     if (this.isRegistered) {
       return; // do not register twice
     }
-
-    this.errorHandler = extension.errorHandler;
 
     // Register our authentication provider. NOTE: this will register the provider globally which means that
     // any other extension can request to use use this provider via the `vscode.authentication.getSession` API.
