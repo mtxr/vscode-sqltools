@@ -213,7 +213,7 @@ export interface IConnection<DriverOptions = any> {
   * @type {boolean}
   * @memberof IConnection
   */
-  isPasswordResolved: boolean;
+  isPasswordResolved?: boolean;
 
   [id: string]: any;
 }
