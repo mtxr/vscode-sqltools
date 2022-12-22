@@ -85,9 +85,13 @@ export const driverPluginExtension = async (driverName: string) => {
 };
 
 export const resolveConnection = async (connInfo: IConnection) => {
+  const unresolvedPassword = connInfo.password;
   const pluginExt = await driverPluginExtension(connInfo.driver);
   if (pluginExt && pluginExt.resolveConnection) {
     connInfo = await pluginExt.resolveConnection({ connInfo });
+  }
+  if (connInfo.password !== unresolvedPassword) {
+    connInfo.isPasswordResolved = true;
   }
   return connInfo;
 }

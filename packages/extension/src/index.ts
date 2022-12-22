@@ -21,6 +21,7 @@ import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extens
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
+import AuthenticationProviderPlugin from '@sqltools/plugins/authentication-provider/extension';
 
 export class SQLToolsExtension implements IExtension {
   private pluginsQueue: IExtensionPlugin<this>[] = [];
@@ -305,6 +306,7 @@ export function activate(ctx: ExtensionContext) {
       ConnectionManagerPlugin,
       new HistoryManagerPlugin,
       new BookmarksManagerPlugin,
+      new AuthenticationProviderPlugin
     ])
     return instance.activate();
 

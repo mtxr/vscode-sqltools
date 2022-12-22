@@ -202,17 +202,25 @@ export interface IConnection<DriverOptions = any> {
 
   // WONT BE INCLUDED IN SETTINGS
   /**
-  * Connection flag. This is not a settings. It's generated in runtime
+  * Connection flag. This is not a setting. It is determined at runtime
   * @type {boolean}
   * @memberof IConnection
   */
   isConnected: boolean;
   /**
-   * Connection flag. This is not a settings. It's generated in runtime
+   * Connection flag. This is not a setting. It is determined at runtime
    * @type {boolean}
    * @memberof IConnection
    */
   isActive: boolean;
+  /**
+  * This is not a setting. It is determined at runtime and indicates whether the `password` property
+  * came from the driver's resolveConnection callback (true) or not (false)
+  * @type {boolean}
+  * @memberof IConnection
+  */
+  isPasswordResolved?: boolean;
+
   [id: string]: any;
 }
 

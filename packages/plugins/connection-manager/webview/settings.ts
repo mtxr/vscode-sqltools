@@ -80,11 +80,18 @@ export default class SettingsWebview extends WebviewProvider {
     if (pluginExt && pluginExt.parseBeforeSaveConnection) {
       connInfo = await pluginExt.parseBeforeSaveConnection({ connInfo });
     }
-    ['id', 'isConnected', 'isActive'].forEach(p => delete connInfo[p]);
+    ['id', 'isConnected', 'isActive', 'isPasswordResolved'].forEach(p => delete connInfo[p]);
     return connInfo;
   }
 
   private parseBeforeEdit = async ({ connInfo }) => {
+
+    // Ensure driver doesn't inadvertently treat authprovider-sourced password as having come from settings
+    if (connInfo.isPasswordResolved) {
+      delete connInfo.password;
+    }
+    delete connInfo.isPasswordResolved;
+
     const pluginExt = await driverPluginExtension(connInfo.driver);
     if (pluginExt && pluginExt.parseBeforeEditConnection) {
       connInfo = await pluginExt.parseBeforeEditConnection({ connInfo });
