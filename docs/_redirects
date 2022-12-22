@@ -21,3 +21,4 @@
 /driver/intersystems                              /en/drivers/intersystems
 /driver/saphana                                   /en/drivers/saphana
 /driver/snowflake                                 /en/drivers/snowflake
+/driver/databricks                                /en/drivers/databricks

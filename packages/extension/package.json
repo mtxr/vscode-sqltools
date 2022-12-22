@@ -545,7 +545,7 @@
                 },
                 "sqltools.queryParams.regex": {
                     "type": "string",
-                    "default": "\\$[\\d]+|\\$\\[[\\d\\w]+\\]",
+                    "default": "\\$[\\d]+|\\$\\[([\\d\\w]+)\\]",
                     "description": "RegEx used to identify query parameters.",
                     "required": true
                 },
@@ -722,6 +722,15 @@
                                         "default": null
                                     }
                                 }
+                            },
+                            "variables": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": null,
+                                "description": "Connection variables in a key/value pair format. Use this property with `sqltools.queryParams.enableReplace` to replace the variables without prompting.",
+                                "properties": {}
                             }
                         }
                     }

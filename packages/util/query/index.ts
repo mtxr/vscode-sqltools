@@ -60,7 +60,7 @@ export function getQueryParameters(query: string, regexStr: string) {
 
   const regex = new RegExp(regexStr, 'g');
 
-  const paramsMap: { [k: string]: { param: string; string: string; }} = {};
+  const paramsMap: { [k: string]: { param: string; string: string; varName?: string }} = {};
 
   let match;
   while ((match = regex.exec(query)) !== null) {
@@ -70,6 +70,10 @@ export function getQueryParameters(query: string, regexStr: string) {
         param: match[0],
         string: `...${queryPart}...`,
       };
+
+      if (match[1]) {
+        paramsMap[match[0]].varName = match[1]
+      }
     }
   }
   return Object.values(paramsMap);

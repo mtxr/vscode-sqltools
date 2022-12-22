@@ -191,8 +191,14 @@ export interface IConnection<DriverOptions = any> {
     connected?: string;
     disconnected?: string;
   };
-
-
+  /**
+   * Connection variables. Use this property with `sqltools.queryParams.enableReplace` to replace the variables without prompting.
+   * @type {object}
+   * @memberof IConnection
+   */
+  variables?: {
+    [key: string]: string
+  }
 
   // WONT BE INCLUDED IN SETTINGS
   /**
