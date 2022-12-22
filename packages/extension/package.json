@@ -71,7 +71,8 @@
     "activationEvents": [
         "*",
         "onLanguage:sql",
-        "onCommand:sqltools.selectConnection"
+        "onCommand:sqltools.selectConnection",
+        "onAuthenticationRequest:sqltools-driver-credentials"
     ],
     "contributes": {
         "colors": [
