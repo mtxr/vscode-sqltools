@@ -10,10 +10,9 @@ import {
 	SecretStorage,
 	ThemeIcon,
 	window,
-	workspace,
 } from "vscode";
 import { SQLToolsAuthenticationSession } from "./authenticationSession";
-import { EXT_NAMESPACE, DISPLAY_NAME, AUTHENTICATION_PROVIDER } from '@sqltools/util/constants';
+import { DISPLAY_NAME, AUTHENTICATION_PROVIDER } from '@sqltools/util/constants';
 
 const AUTHENTICATION_PROVIDER_LABEL = `${DISPLAY_NAME} Driver Credentials`;
 
@@ -77,7 +76,7 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 
 		let password: string | undefined = "";
 
-		// Seek password in secret storage
+		// Seek password in this extension's secret storage
 		const credentialKey = SQLToolsAuthenticationProvider.credentialKey(sessionId);
 		password = await this._secretStorage.get(credentialKey);
 
@@ -90,7 +89,7 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 					inputBox.password = true;
 					inputBox.title = `${AUTHENTICATION_PROVIDER_LABEL}: Password for user '${userName}'`;
 					inputBox.placeholder = `Password for user '${userName}' on '${serverName}'`;
-					inputBox.prompt = "Optionally use $(key) button above to store password";
+					inputBox.prompt = "Optionally use $(key) button to store password securely until you sign out using the 'Accounts' menu.";
 					inputBox.ignoreFocusOut = true;
 					inputBox.buttons = [
 						{
@@ -159,26 +158,11 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 		const index = this._sessions.findIndex((item) => item.id === sessionId);
 		const session = this._sessions[index];
 
-		let deletePassword = false;
 		const credentialKey = SQLToolsAuthenticationProvider.credentialKey(sessionId);
 		if (await this._secretStorage.get(credentialKey)) {
-			const passwordOption = workspace.getConfiguration(`${EXT_NAMESPACE}.credentialsProvider`)
-				.get<string>("deletePasswordOnSignout", "ask");
-			deletePassword = (passwordOption === "always");
-			if (passwordOption === "ask") {
-				const choice = await window.showWarningMessage(
-					`Do you want to keep the password or delete it?`,
-					{ detail: `The ${AUTHENTICATION_PROVIDER_LABEL} account you signed out (${session.account.label}) is currently storing its password securely on your workstation.`, modal: true },
-					{ title: "Keep", isCloseAffordance: true },
-					{ title: "Delete", isCloseAffordance: false },
-				);
-				deletePassword = (choice?.title === "Delete");
-			}
-		}
-		if (deletePassword) {
-			// Delete from secret storage
+			// Always delete from secret storage when logging out so we don't have to worry about orphaned passwords
 			await this._secretStorage.delete(credentialKey);
-			console.log(`${AUTHENTICATION_PROVIDER_LABEL}: Deleted password at ${credentialKey}`);
+			console.log(`${AUTHENTICATION_PROVIDER_LABEL}: Deleted stored password at ${credentialKey}`);
 		}
 		if (index > -1) {
 			// Remove session here so we don't store it
