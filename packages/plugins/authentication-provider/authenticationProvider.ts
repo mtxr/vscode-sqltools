@@ -76,7 +76,7 @@ export class SQLToolsAuthenticationProvider implements AuthenticationProvider, D
 
 		let password: string | undefined = "";
 
-		// Seek password in secret storage
+		// Seek password in this extension's secret storage
 		const credentialKey = SQLToolsAuthenticationProvider.credentialKey(sessionId);
 		password = await this._secretStorage.get(credentialKey);
 
