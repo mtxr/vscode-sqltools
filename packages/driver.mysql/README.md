@@ -6,7 +6,7 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ### 0.5.0
 
-- Leverage new sqltools-driver-credentials authentication provider of 0.27 main extension release. [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)
+- Add "SQLTools Driver Credentials" password mode, using new authentication provider feature of 0.27 main extension release to store connection password securely. [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)
 
 ### 0.4.1
 
