@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.0
+
+- Sync with 0.27 release of main extension.
+
 ### 0.3.0
 
 - Sync with 0.24 release of main extension.

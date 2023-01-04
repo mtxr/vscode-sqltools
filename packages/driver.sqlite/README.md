@@ -6,6 +6,10 @@ See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lit
 
 ## Changelog
 
+### 0.5.0
+
+- Sync with 0.27 release of main extension.
+
 ### 0.4.1
 
   - Link from README to Start Guide (see above).

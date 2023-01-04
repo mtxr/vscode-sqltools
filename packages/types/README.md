@@ -10,6 +10,14 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 # Changelog
 
+### v0.1.7
+
+- New 0.27.0 features:
+    - `variables` property of connections. [#1064](https://github.com/mtxr/vscode-sqltools/pull/1064)
+    - `disableNodeDetectNotifications` setting. [#1060](https://github.com/mtxr/vscode-sqltools/pull/1060)
+    - IDriverExtensionApi.resolveConnection(). [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)
+    - Connection's runtime `isPasswordResolved` property. [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)
+
 ### v0.1.6
 
 - IBaseQueries.fetchDatabases() can optionally pass an MConnectionExplorer.IChildItem in versions after 0.23.0.

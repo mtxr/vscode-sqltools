@@ -2,7 +2,7 @@
   "name": "sqltools-driver-sqlite",
   "displayName": "SQLTools SQLite",
   "description": "SQLTools SQLite",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "engines": {
     "vscode": "^1.72.0"
   },
