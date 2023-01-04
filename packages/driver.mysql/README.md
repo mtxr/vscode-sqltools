@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.0
+
+- Leverage new sqltools-driver-credentials authentication provider of 0.27 main extension release. [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)
+
 ### 0.4.1
 
 - Fix table and column searching. [#1015](https://github.com/mtxr/vscode-sqltools/pull/1015)

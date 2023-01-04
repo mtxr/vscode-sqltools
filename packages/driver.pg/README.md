@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.0
+
+- Sync with 0.27 release of main extension.
+
 ### 0.4.0
 
 - No longer promote as an official driver for Redshift. [#991](https://github.com/mtxr/vscode-sqltools/pull/991)
