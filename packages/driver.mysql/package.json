@@ -66,7 +66,7 @@
   "devDependencies": {
     "@mysql/xdevapi": "^8.0.20",
     "@sqltools/base-driver": "latest",
-    "@sqltools/types": "^0.1.6",
+    "@sqltools/types": "^0.1.7",
     "@types/lodash": "^4.14.123",
     "@types/mysql": "^2.15.12",
     "@types/vscode": "^1.72.0",
