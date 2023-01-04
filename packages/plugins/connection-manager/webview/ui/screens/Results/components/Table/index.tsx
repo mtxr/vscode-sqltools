@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import Paper from '@material-ui/core/Paper';
 import {
   SortingState,
@@ -12,7 +12,6 @@ import {
   SelectionState,
   TableColumnResizingProps,
   Filter,
-  TableColumnWidthInfo,
 } from '@devexpress/dx-react-grid';
 
 import {
@@ -29,7 +28,7 @@ import TableFilterRowCell from './TableFilterRowCell';
 import PagingPanelContainer from './PagingPanelContainer';
 import FilterIcon from './FilterIcon';
 import TableCell from './TableCell';
-import generateColumnExtensions from './generateColumnExtensions';
+import computeColumnWidths from './computeColumnWidths';
 import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
 import { UIAction } from '../../../Settings/actions';
@@ -47,14 +46,15 @@ const Table = ({ setContextState }) => {
   const [selection, setSelection] = useState<Array<number | string>>([]);
   const { exportResults, reRunQuery } = useContextAction();
   const { result } = useCurrentResult();
-  const [columnExtensions, setColumnExtensions] = useState<(IntegratedFiltering.ColumnExtension & TableColumnWidthInfo)[]>(generateColumnExtensions(result?.cols ?? [], result?.results ?? []));
   const { results: rows = [], cols = [], error, messages = [], page, pageSize, total, queryType, queryParams, requestId } = result || {};
+
+  const columnExtensions = useMemo(() => cols.map(columnName => ({ columnName, predicate: filterPredicate })), [cols]);
 
   const showPagination = useMemo(() => Math.max(total ?? 0, rows.length) > pageSize, [total, rows]);
 
   const { columnObjNames, columnNames } = useMemo(() => {
     const columnNames = cols.length > 0 ? cols : [''];
-    return { columnNames, columnObjNames: cols.map(title => ({ name: title, title }))};
+    return { columnNames, columnObjNames: cols.map(title => ({ name: title, title })) };
   }, [cols]);
 
   const changePage = (page: number) => {
@@ -80,12 +80,19 @@ const Table = ({ setContextState }) => {
     setSelection(selection.includes(rowindex) ? selection : (rowindex >= 0 ? [rowindex] : []));
   }, [JSON.stringify(selection)]);
 
-  const updateWidths: TableColumnResizingProps["onColumnWidthsChange"] = useCallback((newColsInfo) => {
-    setColumnExtensions(newColsInfo.map(c => ({
-      ...c,
-      predicate: (c as any).predicate ?? filterPredicate,
-    })));
-  }, [columnExtensions]);
+  const defaultColumnWidths = useMemo(() => computeColumnWidths(cols ?? [], rows ?? []), [...cols, rows && rows.length]);
+  const [columnWidthOverrides, setColumnWidthOverrides] = useState<Record<string, string | number>>({});
+  const updateWidths: TableColumnResizingProps["onColumnWidthsChange"] = useCallback((newColsInfo) =>
+    setColumnWidthOverrides(oldOverrides => {
+      const newOverrides = { ...oldOverrides };
+      for (const { columnName, width } of newColsInfo) {
+        if (width !== defaultColumnWidths[columnName] || columnName in oldOverrides)
+          newOverrides[columnName] = width;
+      }
+      return newOverrides;
+    }), [defaultColumnWidths]);
+  const columnWidths = Object.entries({ ...defaultColumnWidths, ...columnWidthOverrides })
+    .map(([columnName, width]) => ({ columnName, width }));
 
   const menuActions = {
     [MenuActions.ReRunQueryOption]: reRunQuery,
@@ -201,10 +208,6 @@ const Table = ({ setContextState }) => {
     return options;
   }, [JSON.stringify(selection), JSON.stringify(filters), rows, rows.length]);
 
-  useEffect(() => {
-    setColumnExtensions(generateColumnExtensions(cols ?? [], rows ?? []));
-  }, [cols && cols.length, rows && rows.length]);
-
   let pagingProps: PagingStateProps = {};
   if (typeof page === 'number') {
     pagingProps = {
@@ -236,8 +239,8 @@ const Table = ({ setContextState }) => {
           <CustomPaging totalCount={total ?? rows.length} />
           <SelectionState selection={selection} onSelectionChange={setSelection} />
           <VirtualTable cellComponent={TableCell} />
-          <TableColumnResizing columnWidths={columnExtensions} onColumnWidthsChange={updateWidths} />
-          <TableHeaderRow showSortingControls sortLabelComponent={SortLabel}/>
+          <TableColumnResizing columnWidths={columnWidths} onColumnWidthsChange={updateWidths} />
+          <TableHeaderRow showSortingControls sortLabelComponent={SortLabel} />
           <TableSelection
             selectByRowClick
             highlightRow
