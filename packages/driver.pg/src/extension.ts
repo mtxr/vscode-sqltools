@@ -1,8 +1,9 @@
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
-import { ExtensionContext, extensions } from 'vscode';
+import { ExtensionContext, extensions, authentication } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
 const { publisher, name } = require('../package.json');
 const driverName = 'PostgreSQL/Cockroach';
+const AUTHENTICATION_PROVIDER = 'sqltools-driver-credentials';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
   const sqltools = extensions.getExtension<IExtension>('mtxr.sqltools');
   if (!sqltools) {
@@ -105,6 +106,31 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       }
 
       return formData;
+    },
+    resolveConnection: async ({ connInfo }) => {
+      /**
+       * This hook is called after a connection definition has been fetched
+       * from settings and is about to be used to connect.
+       */
+      if (connInfo.password === undefined && !connInfo.askForPassword) {
+        const scopes = [connInfo.name, (connInfo.username || "")];
+        let session = await authentication.getSession(
+          AUTHENTICATION_PROVIDER,
+          scopes,
+          { silent: true }
+        );
+        if (!session) {
+          session = await authentication.getSession(
+            AUTHENTICATION_PROVIDER,
+            scopes,
+            { createIfNone: true }
+          );
+        }
+        if (session) {
+          connInfo.password = session.accessToken;
+        }
+      }
+      return connInfo;
     },
     driverAliases: DRIVER_ALIASES,
   }
