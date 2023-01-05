@@ -119,7 +119,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
        * This hook is called after a connection definition has been fetched
        * from settings and is about to be used to connect.
        */
-      if (connInfo.password === undefined && !connInfo.askForPassword) {
+      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString) {
         const scopes = [connInfo.name, (connInfo.username || "")];
         let session = await authentication.getSession(
           AUTHENTICATION_PROVIDER,
