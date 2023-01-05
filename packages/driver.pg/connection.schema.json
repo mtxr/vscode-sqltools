@@ -19,7 +19,7 @@
         "SQLTools Driver Credentials",
         "Ask on connect",
         "Use empty password",
-        "Save password"
+        "Save as plaintext in settings"
       ],
       "default": "SQLTools Driver Credentials"
     },
@@ -237,7 +237,7 @@
           "properties": {
             "usePassword": {
               "enum": [
-                "Save password"
+                "Save as plaintext in settings"
               ]
             },
             "password": {

@@ -52,15 +52,20 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       const propsToRemove = ['connectionMethod', 'id', 'usePassword'];
       if (connInfo.usePassword) {
         if (connInfo.usePassword.toString().toLowerCase().includes('ask')) {
+          connInfo.askForPassword = true;
           propsToRemove.push('password');
         } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
           connInfo.password = '';
           propsToRemove.push('askForPassword');
-        } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('save')) {
+          propsToRemove.push('askForPassword');
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('secure')) {
+          propsToRemove.push('password');
           propsToRemove.push('askForPassword');
         }
       }
       propsToRemove.forEach(p => delete connInfo[p]);
+
       connInfo.pgOptions = connInfo.pgOptions || {};
       if (connInfo.pgOptions.enableSsl === 'Enabled') {
         if (typeof connInfo.pgOptions.ssl === 'object' && Object.keys(connInfo.pgOptions.ssl).length === 0) {
@@ -92,7 +97,9 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         delete formData.password;
       } else if (typeof connInfo.password === 'string') {
         delete formData.askForPassword;
-        formData.usePassword = connInfo.password ? 'Save password' : 'Use empty password';
+        formData.usePassword = connInfo.password ? 'Save as plaintext in settings' : 'Use empty password';
+      } else {
+        formData.usePassword = 'SQLTools Driver Credentials';
       }
 
       formData.pgOptions = formData.pgOptions || {};
