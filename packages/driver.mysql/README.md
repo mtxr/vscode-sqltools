@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.1
+
+- Fix unnecessary password prompt on connections that use `connectString`. [#1086](https://github.com/mtxr/vscode-sqltools/pull/1086)
+- Avoid storing redundant properties on connections that use `connectString`. [#1087](https://github.com/mtxr/vscode-sqltools/issues/1087)
+
 ### 0.5.0
 
 - Add "SQLTools Driver Credentials" password mode, using new authentication provider feature of 0.27 main extension release to store connection password securely. [#1066](https://github.com/mtxr/vscode-sqltools/pull/1066)

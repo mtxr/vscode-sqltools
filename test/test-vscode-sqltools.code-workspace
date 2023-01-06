@@ -196,6 +196,27 @@
         "driver": "MySQL",
         "name": "MySQL ConnectionString schema",
         "connectString": "mysql://root:root@localhost:3307/test_db"
+      },
+      {
+        "mysqlOptions": {
+          "authProtocol": "default"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 3307,
+        "driver": "MySQL",
+        "name": "MySQL keystore password",
+        "database": "test_db",
+        "username": "root"
+      },
+      {
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 5433,
+        "driver": "PostgreSQL",
+        "name": "PGSQL keystore password",
+        "database": "test_db",
+        "username": "root"
       }
     ],
     "sqltools.languageServerEnv": {
