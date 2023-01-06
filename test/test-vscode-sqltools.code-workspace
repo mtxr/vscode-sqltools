@@ -186,6 +186,16 @@
         "previewLimit": 50,
         "server": "localhost",
         "username": "sa"
+      },
+      {
+        "mysqlOptions": {
+          "authProtocol": "default"
+        },
+        "previewLimit": 50,
+        "server": "localhost",
+        "driver": "MySQL",
+        "name": "MySQL ConnectionString schema",
+        "connectString": "mysql://root:root@localhost:3307/test_db"
       }
     ],
     "sqltools.languageServerEnv": {

@@ -74,10 +74,10 @@ const transformCode = (code: string, language: string) => {
 
   if (language === 'json' && typeof code === 'object') {
     return JSON.stringify(code, null, 2)
-      .replace(/( *)(".+") *:/g, '$1<span class="key">$2</span>:')
-      .replace(/: *(".+")/g, ': <span class="string">$1</span>')
-      .replace(/: *([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
-      .replace(/: *(null|true|false)/g, ': <span class="bool">$1</span>');
+      .replace(/( *)(".+"):/g, '$1<span class="key">$2</span>:')
+      .replace(/: (".+")/g, ': <span class="string">$1</span>')
+      .replace(/: ([0-9]+(\.[0-9]+)?)/g, ': <span class="number">$1</span>')
+      .replace(/: (null|true|false)/g, ': <span class="bool">$1</span>');
   }
   return JSON.stringify(code);
 };
