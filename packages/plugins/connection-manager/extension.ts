@@ -479,6 +479,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     }
 
     const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined);
+    this._throwIfNotUnique(connInfo, connList);
     connList.push(connInfo);
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
@@ -491,11 +492,20 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
     const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined)
       .filter(c => getConnectionId(c) !== oldId);
+    this._throwIfNotUnique(connInfo, connList);
     connList.push(connInfo);
     return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
   }
 
   // internal utils
+
+  private _throwIfNotUnique(connInfo: IConnection, connList: IConnection[]) {
+    const connId = getConnectionId(connInfo);
+    if (connList.filter((c) => getConnectionId(c) === connId).length > 0) {
+      throw new Error(`A connection definition already exists with id '${connId}'. Change name or another id element to make it unique.`);
+    }
+  }
+
   private async _getTable(node?: SidebarItem<NSDatabase.ITable> | NSDatabase.ITable): Promise<NSDatabase.ITable> {
     if (node instanceof SidebarItem && node.conn) {
       await this._setConnection(node.conn as IConnection);
