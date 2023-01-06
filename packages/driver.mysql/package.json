@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mysql",
   "displayName": "SQLTools MySQL/MariaDB",
   "description": "SQLTools MySQL/MariaDB",
-  "version": "0.5.1-SNAPSHOT",
+  "version": "0.5.1",
   "engines": {
     "vscode": "^1.72.0"
   },
