@@ -15,7 +15,6 @@
 /driver/maria-db                                  /en/drivers/maria-db
 /driver/microsoft-sql-server-azure                /en/drivers/microsoft-sql-server-azure
 /driver/my-sql                                    /en/drivers/my-sql
-/driver/oracle                                    /en/drivers/oracle
 /driver/postgre-sql                               /en/drivers/postgre-sql
 /driver/sq-lite                                   /en/drivers/sq-lite
 /driver/clickhouse                                /en/drivers/clickhouse
@@ -23,3 +22,4 @@
 /driver/saphana                                   /en/drivers/saphana
 /driver/snowflake                                 /en/drivers/snowflake
 /driver/databricks                                /en/drivers/databricks
+/driver/oracle                                    /en/drivers/oracle
