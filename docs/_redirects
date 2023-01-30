@@ -10,16 +10,10 @@
 /features/executing-queries                       /en/features/executing-queries
 /features/sessions-and-multiple-connections       /en/features/sessions-and-multiple-connections
 
-/driver/aws-redshift                              /en/drivers/aws-redshift
+# Entries only needed for official drivers, for which we ship doc pages
 /driver/cockroach-db                              /en/drivers/cockroach-db
 /driver/maria-db                                  /en/drivers/maria-db
 /driver/microsoft-sql-server-azure                /en/drivers/microsoft-sql-server-azure
 /driver/my-sql                                    /en/drivers/my-sql
 /driver/postgre-sql                               /en/drivers/postgre-sql
 /driver/sq-lite                                   /en/drivers/sq-lite
-/driver/clickhouse                                /en/drivers/clickhouse
-/driver/intersystems                              /en/drivers/intersystems
-/driver/saphana                                   /en/drivers/saphana
-/driver/snowflake                                 /en/drivers/snowflake
-/driver/databricks                                /en/drivers/databricks
-/driver/oracle                                    /en/drivers/oracle
