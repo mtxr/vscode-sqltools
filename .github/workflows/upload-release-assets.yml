@@ -45,3 +45,15 @@ jobs:
         args: "*.vsix"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload to VSCode Marketplace and Open-VSX
+      env:
+        OVSX_TOKEN: ${{ secrets.OVSX_TOKEN }}
+        VSCE_PAT: ${{ secrets.VSCE_PAT }}
+      run: |
+        for FILE in *.vsix; do
+          echo "Publishing $FILE"
+          npx vsce publish --packagePath $FILE
+          npx ovsx publish $FILE -p $OVSX_TOKEN
+          echo "Published $FILE"
+        done
