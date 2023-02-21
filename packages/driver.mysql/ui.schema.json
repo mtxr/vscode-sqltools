@@ -3,6 +3,29 @@
   "password": { "ui:widget": "password" },
   "socketPath": { "ui:widget": "file" },
   "mysqlOptions": {
-    "authProtocol": { "ui:help": "Try to switch protocols in case you have problems." }
+    "authProtocol": { "ui:help": "Try to switch protocols in case you have problems." },
+    "ssl": {
+      "ui:help": "Enabled SSL for this connection",
+      "ca": {
+        "ui:help": "Optionally override the trusted CA certificates. Default is to trust the well-known CAs curated by Mozilla. Mozilla's CAs are completely replaced when CAs are explicitly specified using this option.",
+        "ui:widget": "file"
+      },
+      "key": {
+        "ui:help": "Private keys in PEM format. PEM allows the option of private keys being encrypted. Encrypted keys will be decrypted with options.passphrase",
+        "ui:widget": "file"
+      },
+      "cert": {
+        "ui:help": "Cert chains in PEM format. One cert chain should be provided per private key. Each cert chain should consist of the PEM formatted certificate for a provided private key, followed by the PEM formatted intermediate certificates (if any), in order, and not including the root CA (the root CA must be pre-known to the peer, see ca)",
+        "ui:widget": "file"
+      },
+      "pfx": {
+        "ui:help": "PFX or PKCS12 encoded private key and certificate chain. pfx is an alternative to providing key and cert individually. PFX is usually encrypted, if it is, passphrase will be used to decrypt it",
+        "ui:widget": "file"
+      },
+      "crl": {
+        "ui:help": "The path name of the file containing certificate revocation lists in PEM format.",
+        "ui:widget": "file"
+      }
+    }
   }
 }
