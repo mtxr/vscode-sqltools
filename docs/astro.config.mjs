@@ -14,4 +14,7 @@ export default defineConfig({
     sitemap(),
   ],
   site: `https://vscode-sqltools.mteixeira.dev`,
+  build: {
+    format: 'file'
+  }
 });
