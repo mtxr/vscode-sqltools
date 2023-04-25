@@ -4,7 +4,7 @@ import { getConnectionId } from '@sqltools/util/connection';
 import { SidebarTreeItem } from '@sqltools/plugins/connection-manager/explorer/tree-items';
 import SidebarItem from "@sqltools/plugins/connection-manager/explorer/SidebarItem";
 import SidebarConnection from "@sqltools/plugins/connection-manager/explorer/SidebarConnection";
-import { EventEmitter, TreeDataProvider, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon } from 'vscode';
+import { EventEmitter, TreeDataProvider, TreeDragAndDropController, TreeItem, TreeView, window, TreeItemCollapsibleState, commands, ThemeIcon, CancellationToken, DataTransfer, DataTransferItem } from 'vscode';
 import sortBy from 'lodash/sortBy';
 import { createLogger } from '@sqltools/log/src';
 import Context from '@sqltools/vscode/context';
@@ -14,7 +14,7 @@ import { resolveConnection } from '../extension-util';
 const log = createLogger('conn-man:explorer');
 
 class ConnectionGroup extends TreeItem {
-  items: (ConnectionGroup | SidebarTreeItem)[] =  [];
+  items: (ConnectionGroup | SidebarTreeItem)[] = [];
   isGroup: boolean = true;
   getChildren() {
     return this.items;
@@ -30,7 +30,7 @@ notConnectedTreeItem.id = 'DISCONNECTED';
 notConnectedTreeItem.iconPath = ThemeIcon.Folder;
 
 
-export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
+export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, TreeDragAndDropController<SidebarTreeItem> {
   private treeView: TreeView<TreeItem>;
   private messagesTreeView: TreeView<TreeItem>;
   private messagesTreeViewProvider: MessagesProvider;
@@ -93,7 +93,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
   }
 
   public constructor() {
-    this.treeView = window.createTreeView(`${EXT_NAMESPACE}ViewConnectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true });
+    this.treeView = window.createTreeView(`${EXT_NAMESPACE}ViewConnectionExplorer`, { treeDataProvider: this, canSelectMany: true, showCollapseAll: true, dragAndDropController: this });
     Config.addOnUpdateHook(({ event }) => {
       if (
         event.affectsConfig('flattenGroupsIfOne')
@@ -164,7 +164,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     this._onDidChangeActiveConnection.fire(active);
 
     if (connectedTreeCount > 0) {
-      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active'};
+      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active' };
     } else {
       this.treeView.badge = undefined;
     }
@@ -202,7 +202,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     this._onDidChangeActiveConnection.fire(active);
 
     if (connectedTreeCount > 0) {
-      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active'};
+      this.treeView.badge = { value: connectedTreeCount, tooltip: active ? `Connection '${active.name}' is active` : 'No connection is active' };
     } else {
       this.treeView.badge = undefined;
     }
@@ -216,9 +216,21 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem> {
     return [connectedTreeItem, notConnectedTreeItem].filter(a => a.items.length > 0);
   }
 
-  public get addConsoleMessages () {
+  public get addConsoleMessages() {
     return this.messagesTreeViewProvider.addMessages;
   }
+  //#region Drag and drop definitions
+  dropMimeTypes: readonly string[] = ['application/vnd.code.tree.sqltoolsobjectdrop', 'text/uri-list'];
+  dragMimeTypes: readonly string[] = ['application/vnd.code.tree.sqltoolsobjectdrop'];
+  handleDrag(
+    source: readonly SidebarTreeItem[]
+    , dataTransfer: DataTransfer
+    , _token: CancellationToken
+  ): void | Thenable<void> {
+    dataTransfer.set('application/vnd.code.tree.sqltoolsobjectdrop', new DataTransferItem(JSON.stringify(source)));
+    console.log(`Dragging item ${JSON.stringify(source)}`);
+  }
+  //#endregion Drag and drop definitions
 }
 
 export class MessagesProvider implements TreeDataProvider<TreeItem> {
@@ -260,6 +272,7 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
     });
     this._onDidChangeTreeData.fire(null);
   }
+
 }
 
 export { SidebarConnection, SidebarItem, SidebarTreeItem };
