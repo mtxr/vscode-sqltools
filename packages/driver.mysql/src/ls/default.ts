@@ -80,6 +80,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
             }
             
             return resolve(queries.map((q, i): NSDatabase.IResult => {
+              const r = resultAny[i] || [];
               var f = fields[i] || [];
               const messages = [];
               if (r.affectedRows) {
