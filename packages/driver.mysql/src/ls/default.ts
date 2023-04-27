@@ -65,16 +65,22 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
       const { requestId } = opt;
       return new Promise((resolve, reject) => {
-        conn.query({ sql: query.toString(), nestTables: true }, (error, results, fields) => {
+        conn.query({ sql: query.toString(), nestTables: true }, (error, results, fields: any) => {
           if (error) return reject(error);
           try {
             const queries = queryParse(query.toString());
             var resultAny = {};
+
+            // Shape of results and fields is different when querystring contains multiple queries
             if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
               resultAny = [results];
             }
+            if (fields && !Array.isArray(fields[0]) && typeof fields[0] !== 'undefined') {
+              fields = [fields];
+            }
+            
             return resolve(queries.map((q, i): NSDatabase.IResult => {
-              const r = resultAny[i] || [];
+              var f = fields[i] || [];
               const messages = [];
               if (r.affectedRows) {
                 messages.push(`${r.affectedRows} rows were affected.`);
@@ -82,17 +88,17 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
               if (r.changedRows) {
                 messages.push(`${r.changedRows} rows were changed.`);
               }
-              if (fields) {
-                fields = fields.filter(field => typeof field !== 'undefined');
+              if (f) {
+                f = f.filter(field => typeof field !== 'undefined');
               }
               return {
                 connId: this.getId(),
                 requestId,
                 resultId: generateId(),
-                cols: fields && Array.isArray(fields) ? this.getColumnNames(fields) : [],
+                cols: f && Array.isArray(f) ? this.getColumnNames(f) : [],
                 messages,
                 query: q,
-                results: Array.isArray(r) ? this.mapRows(r, fields) : [],
+                results: Array.isArray(r) ? this.mapRows(r, f) : [],
               };
             }));
           } catch (err) {

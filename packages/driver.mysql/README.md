@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.2
+
+- Handle multi-statement queries correctly. [#1140](https://github.com/mtxr/vscode-sqltools/pull/1140)
+
 ### 0.5.1
 
 - Fix unnecessary password prompt on connections that use `connectString`. [#1086](https://github.com/mtxr/vscode-sqltools/pull/1086)
