@@ -220,14 +220,14 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
     return this.messagesTreeViewProvider.addMessages;
   }
   //#region Drag and drop definitions
-  dropMimeTypes: readonly string[] = ['application/vnd.code.tree.sqltoolsobjectdrop', 'text/uri-list'];
-  dragMimeTypes: readonly string[] = ['application/vnd.code.tree.sqltoolsobjectdrop'];
+  dropMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer','text/uri-list'];
+  dragMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer'];
   handleDrag(
     source: readonly SidebarTreeItem[]
     , dataTransfer: DataTransfer
     , _token: CancellationToken
   ): void | Thenable<void> {
-    dataTransfer.set('application/vnd.code.tree.sqltoolsobjectdrop', new DataTransferItem(JSON.stringify(source)));
+    dataTransfer.set('application/vnd.code.tree.connectionExplorer', new DataTransferItem(JSON.stringify(source)));
     console.log(`Dragging item ${JSON.stringify(source)}`);
   }
   //#endregion Drag and drop definitions

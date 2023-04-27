@@ -1,7 +1,6 @@
 import { languages, DocumentSelector, CancellationToken, DataTransfer, DocumentDropEdit, DocumentDropEditProvider, Position, TextDocument } from "vscode";
 import { IExtensionPlugin, IExtension } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
-import { Print } from "@material-ui/icons";
 
 class ObjectDropProvider implements DocumentDropEditProvider {
     async provideDocumentDropEdits(
@@ -11,7 +10,7 @@ class ObjectDropProvider implements DocumentDropEditProvider {
         , _token: CancellationToken
     ): Promise<DocumentDropEdit | undefined> {
         console.log("Editor item drop detected");
-        const dataTransferItem = dataTransfer.get('application/vnd.code.tree.sqltoolsobjectdrop');
+        const dataTransferItem = await dataTransfer.get('application/vnd.code.tree.connectionExplorer');
         if (!dataTransferItem) {
             console.log("No data transfer items found, canceling");
             return undefined;
