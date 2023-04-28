@@ -69,7 +69,7 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
           if (error) return reject(error);
           try {
             const queries = queryParse(query.toString());
-            var resultAny = {};
+            var resultAny: any = results;
 
             // Shape of results and fields is different when querystring contains multiple queries
             if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
