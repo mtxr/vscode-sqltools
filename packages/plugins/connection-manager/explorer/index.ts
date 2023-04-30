@@ -228,7 +228,6 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
     , _token: CancellationToken
   ): void | Thenable<void> {
     dataTransfer.set('application/vnd.code.tree.connectionExplorer', new DataTransferItem(JSON.stringify(source)));
-    console.log(`Dragging item ${JSON.stringify(source)}`);
   }
   //#endregion Drag and drop definitions
 }
