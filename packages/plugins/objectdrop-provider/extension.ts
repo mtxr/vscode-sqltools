@@ -1,30 +1,35 @@
-import { languages, DocumentSelector, CancellationToken, DataTransfer, DocumentDropEdit, DocumentDropEditProvider, Position, TextDocument } from "vscode";
-import { IExtensionPlugin, IExtension } from '@sqltools/types';
+import { languages, CancellationToken, DataTransfer, DocumentDropEdit, DocumentDropEditProvider, Position, TextDocument } from "vscode";
+import { IExtensionPlugin, IExtension, ContextValue } from '@sqltools/types';
 import Context from '@sqltools/vscode/context';
+import { SidebarTreeItem } from "../connection-manager/explorer";
 
 class ObjectDropProvider implements DocumentDropEditProvider {
+    private ELIGIBLE_CONTEXT_TYPES: ContextValue[] = [ContextValue.DATABASE, ContextValue.SCHEMA, ContextValue.TABLE, ContextValue.VIEW, ContextValue.COLUMN, ContextValue.FUNCTION];
+
     async provideDocumentDropEdits(
         _document: TextDocument
         , _position: Position
         , dataTransfer: DataTransfer
         , _token: CancellationToken
     ): Promise<DocumentDropEdit | undefined> {
-        console.log("Editor item drop detected");
         const dataTransferItem = await dataTransfer.get('application/vnd.code.tree.connectionExplorer');
         if (!dataTransferItem) {
-            console.log("No data transfer items found, canceling");
             return undefined;
         }
-        dataTransfer.forEach((item, mimetype) => {
-            console.log("Itterate types");
-            console.log(`${mimetype} - ${JSON.stringify(item)}`);
-        });
-
-        const val = await dataTransferItem.value;
-        console.log(`Recieved data ${JSON.stringify(dataTransferItem)}, ${JSON.stringify(val)}`);
-        const snippet: DocumentDropEdit = new DocumentDropEdit(val);
-        console.log(`Dropped data ${JSON.stringify(snippet)}`);
+        const val: SidebarTreeItem[] = JSON.parse(await dataTransferItem.value);             
+        const snippet: DocumentDropEdit = new DocumentDropEdit(this.parseData(val));
         return snippet;
+    }
+
+    private parseData = (items: Array<SidebarTreeItem>): string|undefined => {
+        return items.map(item=>{
+            if (this.ELIGIBLE_CONTEXT_TYPES.indexOf(item.contextValue) === -1 ){
+                return undefined;
+            }
+            else {
+                return item.value;
+            }
+        }).join("\n");
     }
 }
 
@@ -62,3 +67,4 @@ export default class ObjectDropProviderPlugin implements IExtensionPlugin {
     };
 
 }
+
