@@ -50,8 +50,10 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
 
   show() {
     if (!this.isOpen) {
-      this.whereToShow = null;
+      this.whereToShow = undefined;
       switch (Config.results.location) {
+        case 'none': 
+          break;
         case 'active': // fallback older version
         case 'current':
           this.whereToShow = vscode.ViewColumn.Active;
