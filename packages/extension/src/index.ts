@@ -18,6 +18,7 @@ const log = createLogger();
 
 // plugins
 import ConnectionManagerPlugin from '@sqltools/plugins/connection-manager/extension';
+import ObjectDropProviderPlugin from '@sqltools/plugins/objectdrop-provider/extension';
 import HistoryManagerPlugin from '@sqltools/plugins/history-manager/extension';
 import BookmarksManagerPlugin from '@sqltools/plugins/bookmarks-manager/extension';
 import FormatterPlugin from '@sqltools/plugins/formatter/extension';
@@ -306,7 +307,8 @@ export function activate(ctx: ExtensionContext) {
       ConnectionManagerPlugin,
       new HistoryManagerPlugin,
       new BookmarksManagerPlugin,
-      new AuthenticationProviderPlugin
+      new AuthenticationProviderPlugin,
+      new ObjectDropProviderPlugin,
     ])
     return instance.activate();
 
