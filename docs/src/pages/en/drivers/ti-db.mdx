@@ -1,0 +1,112 @@
+---
+title: TiDB
+header: Official Drivers
+layout: ../../../layouts/MainLayout.astro
+---
+
+import RenderConnectionOptions from '../../../components/RenderConnectionOptions.tsx';
+
+# TiDB Start Guide
+
+> Remember: We use the same driver extension to connect for both TiDB and MySQL, so some of the settings and documentation refer to `mysql` or `MySQL`.
+
+## 1. Connections
+
+Connection example:
+
+```json
+{
+  "name": "TiDB",
+  "server": "localhost",
+  "driver": "TiDB",
+  "port": 4000,
+  "database": "test",
+  "username": "root",
+  "askForPassword": false,
+  "password": "",
+  "connectionTimeout": 15
+}
+```
+
+### 1.1 Specific Options
+
+TiDB driver specific options can be passed using `mysqlOptions` settings.
+
+```json
+{
+  "name": "TiDB",
+  "server": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+  "driver": "TiDB",
+  "port": 4000,
+  "database": "test",
+  "username": "GfKM8ds5z2m614G.root",
+  "askForPassword": false,
+  "password": "<your_password>",
+  "connectionTimeout": 15,
+  "mysqlOptions": {
+    ... // options See section 2. mysqlOptions
+  }
+}
+```
+
+### 2. mysqlOptions
+
+TiDB can **NOT** use the `xprotocol`, so please keep the `mysqlOptions.authProtocol` is `default` option.
+
+Extra options can be used as defined in the connectors documentation.
+
+See https://github.com/mysqljs/mysql#connection-options and https://github.com/mysqljs/mysql#pool-options
+
+They will be passed to the pool constructor directly. See https://github.com/mtxr/vscode-sqltools/blob/master/packages/core/driver/mysql/index.ts .
+
+## Typical Connect Scenarios
+
+### 1. TiDB Cloud Serverless Tier
+
+[TiDB Cloud](https://docs.pingcap.com/tidbcloud/tidb-cloud-intro) Serverless Tier need to point the CA certificates.
+
+```json
+{
+  "name": "TiDB",
+  "server": "gateway01.ap-southeast-1.prod.aws.tidbcloud.com",
+  "driver": "TiDB",
+  "port": 4000,
+  "database": "test",
+  "username": "GfKM8ds5z2m614G.root",
+  "askForPassword": false,
+  "password": "<your_password>",
+  "connectionTimeout": 15,
+  "mysqlOptions": {
+    "authProtocol": "default",
+    "enableSsl": "Enabled",
+    "ssl": {
+      "ca": "/etc/ssl/cert.pem"
+    }
+  }
+}
+```
+
+You can read the [TLS Connections to Serverless Tier](https://docs.pingcap.com/tidbcloud/secure-connections-to-serverless-tier-clusters#tls-connections-to-serverless-tier) document to get more information.
+
+## 2. Local Default TiUP Playground Cluster
+
+If you use the [TiUP](https://docs.pingcap.com/tidb/stable/production-deployment-using-tiup) to create a playground cluster at your local device. You can use this config to connect:
+
+```json
+{
+  "name": "TiDB",
+  "server": "localhost",
+  "driver": "TiDB",
+  "port": 4000,
+  "database": "test",
+  "username": "root",
+  "askForPassword": false,
+  "password": "",
+  "connectionTimeout": 15
+}
+```
+
+<RenderConnectionOptions
+  client:only="react"
+  exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']}
+/>

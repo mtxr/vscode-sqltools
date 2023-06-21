@@ -50,6 +50,55 @@
           "enum": ["default", "xprotocol"],
           "default": "default",
           "title": "Authentication Protocol"
+        },
+        "enableSsl": {
+          "type": "string",
+          "title": "SSL",
+          "enum": ["Enabled", "Disabled"],
+          "default": "Disabled"
+        }
+      },
+      "dependencies": {
+        "enableSsl" : {
+          "oneOf": [
+            {
+              "properties": {
+                "enableSsl": {
+                  "enum": ["Disabled"]
+                }
+              }
+            },
+            {
+              "properties": {
+                "enableSsl": {
+                  "enum": ["Enabled"]
+                },
+                "ssl": {
+                  "type": "object",
+                  "title": "SSL Options (node.TLSSocket)",
+                  "description": "Passed directly to node.TLSSocket. Check more here: https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options",
+                  "properties": {
+                    "ca": {
+                      "type": "string",
+                      "title": "Certificate Authority (CA) Certificate File"
+                    },
+                    "cert": {
+                      "type": "string",
+                      "title": "Server Public Key Certificate File"
+                    },
+                    "key": {
+                      "type": "string",
+                      "title": "Server Private Key Certificate File"
+                    },
+                    "crl": {
+                      "type": "string",
+                      "title": "Certificate Revocation Lists File"
+                    }
+                  }
+                }
+              }
+            }
+          ]
         }
       }
     },

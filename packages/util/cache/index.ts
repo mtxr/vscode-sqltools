@@ -1,4 +1,4 @@
-import LRUCache from 'lru-cache';
+import LRUCache from '../node_modules/lru-cache';
 import { createLogger } from '@sqltools/log/src';
 
 const ONE_DAY_MS = 24 * 60 * 60 * 1000;
