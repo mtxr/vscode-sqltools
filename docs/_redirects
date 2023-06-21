@@ -13,6 +13,7 @@
 # Entries only needed for official drivers, for which we ship doc pages
 /driver/cockroach-db                              /en/drivers/cockroach-db
 /driver/maria-db                                  /en/drivers/maria-db
+/driver/ti-db                                     /en/drivers/ti-db
 /driver/microsoft-sql-server-azure                /en/drivers/microsoft-sql-server-azure
 /driver/my-sql                                    /en/drivers/my-sql
 /driver/postgre-sql                               /en/drivers/postgre-sql

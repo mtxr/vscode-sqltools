@@ -1,7 +1,7 @@
 {
   "name": "sqltools-driver-mysql",
-  "displayName": "SQLTools MySQL/MariaDB",
-  "description": "SQLTools MySQL/MariaDB",
+  "displayName": "SQLTools MySQL/MariaDB/TiDB",
+  "description": "SQLTools MySQL/MariaDB/TiDB",
   "version": "0.5.2-SNAPSHOT",
   "engines": {
     "vscode": "^1.72.0"
@@ -20,7 +20,8 @@
   "keywords": [
     "sqltools-driver",
     "mysql",
-    "mariadb"
+    "mariadb",
+    "tidb"
   ],
   "galleryBanner": {
     "theme": "light",
@@ -69,12 +70,11 @@
     "@sqltools/types": "^0.1.7",
     "@types/lodash": "^4.14.123",
     "@types/mysql": "^2.15.12",
-    "@types/vscode": "^1.72.0",
     "compare-versions": "3.6.0",
     "concurrently": "^5.2.0",
     "esbuild": "^0.15.7",
     "lodash": "^4.17.19",
-    "mysql": "^2.18.1",
+    "mysql2": "~3.1.2",
     "rimraf": "^3.0.2",
     "typescript": "~4.8.3",
     "vsce": "1.77.0"

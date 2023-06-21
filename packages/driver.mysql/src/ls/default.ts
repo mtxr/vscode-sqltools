@@ -1,4 +1,4 @@
-import MySQLLib from 'mysql';
+import MySQLLib from 'mysql2';
 import AbstractDriver from '@sqltools/base-driver';
 import * as Queries from './queries';
 import fs from 'fs';
@@ -7,7 +7,7 @@ import {countBy} from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 
-export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolConfig> implements IConnectionDriver {
+export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolOptions> implements IConnectionDriver {
   queries = Queries;
   public open() {
     if (this.connection) {
@@ -40,12 +40,9 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     return new Promise<MySQLLib.Pool>((resolve, reject) => {
       pool.getConnection((err, conn) => {
         if (err) return reject(err);
-        conn.ping(error => {
-          if (error) return reject(error);
-          this.connection = Promise.resolve(pool);
-          conn.release();
-          return resolve(this.connection);
-        });
+        this.connection = Promise.resolve(pool);
+        conn.release();
+        return resolve(this.connection);
       });
     });
   }
@@ -72,17 +69,18 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
           if (error) return reject(error);
           try {
             const queries = queryParse(query.toString());
+            var resultAny: any = results;
 
             // Shape of results and fields is different when querystring contains multiple queries
             if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
-              results = [results];
+              resultAny = [results];
             }
             if (fields && !Array.isArray(fields[0]) && typeof fields[0] !== 'undefined') {
               fields = [fields];
             }
             
             return resolve(queries.map((q, i): NSDatabase.IResult => {
-              const r = results[i] || [];
+              const r = resultAny[i] || [];
               var f = fields[i] || [];
               const messages = [];
               if (r.affectedRows) {
@@ -114,12 +112,12 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     });
   }
 
-  private getColumnNames(fields: MySQLLib.FieldInfo[] = []): string[] {
+  private getColumnNames(fields: MySQLLib.FieldPacket[] = []): string[] {
     const count = countBy(fields, ({name}) => name);
     return fields.map(({table, name}) => count[name] > 1 ? `${table}.${name}` : name);
   }
 
-  private mapRows(rows: any[] = [], fields: MySQLLib.FieldInfo[] = []): any[] {
+  private mapRows(rows: any[] = [], fields: MySQLLib.FieldPacket[] = []): any[] {
     const names = this.getColumnNames(fields);
     return rows.map((row) => fields.reduce((r, {table, name}, i) => ({...r, [names[i]]: castResultsIfNeeded(row[table][name])}), {}));
   }
