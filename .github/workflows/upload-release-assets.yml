@@ -2,7 +2,9 @@
 
 name: ReleaseAssets
 
-on: [release]
+on:
+  release:
+    types: [published]
 
 jobs:
   build:
