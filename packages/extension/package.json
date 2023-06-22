@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Connecting users to many of the most commonly used databases. Welcome to database management done right.",
-    "version": "0.27.2-SNAPSHOT",
+    "version": "0.28.0",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,
@@ -18,7 +18,7 @@
     "author": "Matheus Teixeira <me@mteixeira.dev>",
     "private": true,
     "engines": {
-        "vscode": "^1.72.0"
+        "vscode": "^1.78.0"
     },
     "categories": [
         "Programming Languages",
