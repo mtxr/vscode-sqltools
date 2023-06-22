@@ -23,7 +23,7 @@ function existsSync(directoryPath) {
 }
 
 function writeFileSync(directoryPath, content) {
-  mockFiles[directoryPath] = new Buffer(content);
+  mockFiles[directoryPath] = Buffer.from(content);
 }
 
 fs.readFileSync = readFileSync;
