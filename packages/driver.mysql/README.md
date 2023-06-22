@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.6.0
+
+- Support TiDB. Support SSL / TLS options in the `Connection Assistant` panel. Switch from `mysql` library to `mysql2`. [#1113](https://github.com/mtxr/vscode-sqltools/pull/1113) - thanks [@Icemap](https://github.com/Icemap).
+
 ### 0.5.2
 
 - Handle multi-statement queries correctly. [#1140](https://github.com/mtxr/vscode-sqltools/pull/1140)
