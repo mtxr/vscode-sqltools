@@ -485,7 +485,7 @@ export interface IResultsOptions {
    * @default 'next'
    * @memberof IResultsOptions
    */
-  location?: 'current' | 'next' | 'end' | number;
+  location?: 'none' | 'current' | 'next' | 'end' | number;
 
   /**
    * Customize results screen CSS
