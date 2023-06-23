@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mysql",
   "displayName": "SQLTools MySQL/MariaDB/TiDB",
   "description": "SQLTools MySQL/MariaDB/TiDB",
-  "version": "0.5.2-SNAPSHOT",
+  "version": "0.6.0",
   "engines": {
     "vscode": "^1.72.0"
   },

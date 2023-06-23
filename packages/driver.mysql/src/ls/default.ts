@@ -69,19 +69,27 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
           if (error) return reject(error);
           try {
             const queries = queryParse(query.toString());
-            var resultAny: any = results;
+            var resultsAny: any = results;
+            var fieldsAny: any = fields;
 
-            // Shape of results and fields is different when querystring contains multiple queries
-            if (results && !Array.isArray(results[0]) && typeof results[0] !== 'undefined') {
-              resultAny = [results];
+            // Shape of results and fields is different when querystring contains multiple queries.
+            // Must also cater for the result of an INSERT, where results is not an array and fields is undefined.
+            if (results
+                && (
+                    (!Array.isArray(results[0]) && typeof results[0] !== 'undefined')
+                  ||
+                    !Array.isArray(results)
+                  )
+              ) {
+              resultsAny = [results];
             }
             if (fields && !Array.isArray(fields[0]) && typeof fields[0] !== 'undefined') {
-              fields = [fields];
+              fieldsAny = [fields];
             }
             
             return resolve(queries.map((q, i): NSDatabase.IResult => {
-              const r = resultAny[i] || [];
-              var f = fields[i] || [];
+              const r = resultsAny[i] || [];
+              var f = fieldsAny ? fieldsAny[i] || [] : undefined;
               const messages = [];
               if (r.affectedRows) {
                 messages.push(`${r.affectedRows} rows were affected.`);

@@ -53,7 +53,7 @@ jobs:
       run: |
         for FILE in *.vsix; do
           echo "Publishing $FILE"
-          npx vsce publish --packagePath $FILE
-          npx ovsx publish $FILE -p $OVSX_TOKEN
+          npx vsce publish --skip-duplicate --packagePath $FILE
+          npx ovsx publish --skip-duplicate $FILE -p $OVSX_TOKEN
           echo "Published $FILE"
         done
