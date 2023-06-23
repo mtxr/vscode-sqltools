@@ -75,6 +75,6 @@
     "mssql": "^5.0.5",
     "rimraf": "^3.0.2",
     "typescript": "~4.8.3",
-    "vsce": "1.77.0"
+    "@vscode/vsce": "^2.19.0"
   }
 }
