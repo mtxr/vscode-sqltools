@@ -15,8 +15,13 @@
     "usePassword": {
       "title": "Use password",
       "type": "string",
-      "enum": ["Ask on connect", "Use empty password","Save password"],
-      "default": "Ask on connect"
+      "enum": [
+        "SQLTools Driver Credentials",
+        "Ask on connect",
+        "Use empty password",
+        "Save password"
+      ],
+      "default": "SQLTools Driver Credentials"
     },
     "password": {
       "title": "Password",
@@ -29,7 +34,11 @@
       "title": "Connect using",
       "type": "string",
       "minLength": 1,
-      "enum": ["Server and Port", "Socket File", "Connection String"],
+      "enum": [
+        "Server and Port",
+        "Socket File",
+        "Connection String"
+      ],
       "default": "Server and Port"
     },
     "connectionTimeout": {
@@ -61,7 +70,13 @@
         },
         "tdsVersion": {
           "type": "string",
-          "enum": ["7_1", "7_2", "7_3_A", "7_3_B", "7_4"]
+          "enum": [
+            "7_1",
+            "7_2",
+            "7_3_A",
+            "7_3_B",
+            "7_4"
+          ]
         }
       }
     }
@@ -72,7 +87,9 @@
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Server and Port"]
+              "enum": [
+                "Server and Port"
+              ]
             },
             "server": {
               "title": "Server Address",
@@ -86,32 +103,57 @@
               "default": 1433,
               "type": "integer"
             },
-            "database": { "$ref": "#/definitions/database" },
-            "username": { "$ref": "#/definitions/username" },
-            "usePassword": { "$ref": "#/definitions/usePassword" }
+            "database": {
+              "$ref": "#/definitions/database"
+            },
+            "username": {
+              "$ref": "#/definitions/username"
+            },
+            "usePassword": {
+              "$ref": "#/definitions/usePassword"
+            }
           },
-          "required": ["server", "port", "database", "username"]
+          "required": [
+            "server",
+            "port",
+            "database",
+            "username"
+          ]
         },
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Socket File"]
+              "enum": [
+                "Socket File"
+              ]
             },
             "socketPath": {
               "title": "Socket file path",
               "type": "string",
               "minLength": 1
             },
-            "database": { "$ref": "#/definitions/database" },
-            "username": { "$ref": "#/definitions/username" },
-            "usePassword": { "$ref": "#/definitions/usePassword" }
+            "database": {
+              "$ref": "#/definitions/database"
+            },
+            "username": {
+              "$ref": "#/definitions/username"
+            },
+            "usePassword": {
+              "$ref": "#/definitions/usePassword"
+            }
           },
-          "required": ["socketPath", "database", "username"]
+          "required": [
+            "socketPath",
+            "database",
+            "username"
+          ]
         },
         {
           "properties": {
             "connectionMethod": {
-              "enum": ["Connection String"]
+              "enum": [
+                "Connection String"
+              ]
             },
             "connectString": {
               "title": "Connection String",
@@ -119,7 +161,9 @@
               "minLength": 1
             }
           },
-          "required": ["connectString"]
+          "required": [
+            "connectString"
+          ]
         }
       ]
     },
@@ -127,21 +171,49 @@
       "oneOf": [
         {
           "properties": {
-            "usePassword": { "enum": ["Ask on connect"] },
-            "askForPassword": { "type": "boolean", "default": true }
+            "usePassword": {
+              "enum": [
+                "Ask on connect"
+              ]
+            },
+            "askForPassword": {
+              "type": "boolean",
+              "default": true
             }
-        },
-        {
-          "properties": {
-            "usePassword": { "enum": ["Use empty password"] }
           }
         },
         {
           "properties": {
-            "usePassword": { "enum": ["Save password"] },
-            "password": { "$ref": "#/definitions/password" }
+            "usePassword": {
+              "enum": [
+                "Use empty password"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "usePassword": {
+              "enum": [
+                "Save password"
+              ]
+            },
+            "password": {
+              "$ref": "#/definitions/password"
+            }
           },
-          "required": ["password"]
+          "required": [
+            "password"
+          ]
+        },
+        {
+          "properties": {
+            "usePassword": {
+              "enum": [
+                "SQLTools Driver Credentials"
+              ]
+            }
+          }
         }
       ]
     }
