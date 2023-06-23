@@ -66,6 +66,7 @@
   },
   "devDependencies": {
     "@sqltools/base-driver": "latest",
+    "@sqltools/types": "^0.1.7",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
     "@types/vscode": "^1.72.0",
