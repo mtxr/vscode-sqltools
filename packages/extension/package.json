@@ -759,6 +759,7 @@
                     ],
                     "default": "next",
                     "enum": [
+                        "none",
                         "next",
                         "current",
                         "end",
@@ -773,6 +774,7 @@
                         "9"
                     ],
                     "enumDescriptions": [
+                        "Do not open a results tab.",
                         "New group if nothing open. Second group if currently active text editor is in first group. Otherwise third group.",
                         "Current active group.",
                         "The third group.",
