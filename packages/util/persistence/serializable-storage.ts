@@ -15,7 +15,7 @@ export default class SerializableStorage<Item, Key = string | number | Symbol> {
 
   public read(): this {
     try {
-      const content = fs.readFileSync(this.storagePath, { encoding: this.encoding });
+      const content = fs.readFileSync(this.storagePath, this.encoding);
       if (content && content.length > 0) {
         this.items = JSON.parse(content);
       } else {
@@ -27,16 +27,11 @@ export default class SerializableStorage<Item, Key = string | number | Symbol> {
     return this;
   }
 
-  private serializeContent(): Buffer {
-    return new Buffer(JSON.stringify(this.items, null, 2), 'utf8');
-  }
   public save(): this {
-    return this.write();
-  }
-  private write(): this {
-    fs.writeFileSync(this.storagePath, this.serializeContent());
+    fs.writeFileSync(this.storagePath, JSON.stringify(this.items, null, 2), this.encoding);
     return this;
   }
+
   public reset(): this {
     this.items = JSON.parse(this.defaultSerializable);
     return this;
