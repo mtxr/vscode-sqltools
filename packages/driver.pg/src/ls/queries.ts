@@ -221,6 +221,8 @@ WHERE
   schema_name !~ '^pg_'
   AND schema_name <> 'information_schema'
   AND catalog_name = '${p => p.database}'
+ORDER BY
+  schema_name;
 `;
 
 export default {
