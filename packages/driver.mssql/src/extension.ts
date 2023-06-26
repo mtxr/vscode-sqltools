@@ -1,6 +1,7 @@
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
-import { ExtensionContext, extensions } from 'vscode';
+import { authentication, ExtensionContext, extensions } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
+const AUTHENTICATION_PROVIDER = 'sqltools-driver-credentials';
 const { publisher, name } = require('../package.json');
 const driverName = 'SQL Server/Azure';
 export async function activate(extContext: ExtensionContext): Promise<IDriverExtensionApi> {
@@ -26,11 +27,13 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       });
       DRIVER_ALIASES.forEach(({ value }) => {
         extension.resourcesMap().set(`driver/${value}/extension-id`, extensionId);
-        extension.resourcesMap().set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
+        extension
+          .resourcesMap()
+          .set(`driver/${value}/connection-schema`, extContext.asAbsolutePath('connection.schema.json'));
         extension.resourcesMap().set(`driver/${value}/ui-schema`, extContext.asAbsolutePath('ui.schema.json'));
       });
       await extension.client.sendRequest('ls/RegisterPlugin', { path: extContext.asAbsolutePath('out/ls/plugin.js') });
-    }
+    },
   };
   api.registerPlugin(plugin);
   return {
@@ -43,7 +46,10 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
           connInfo.password = '';
           propsToRemove.push('askForPassword');
-        } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('save')) {
+          propsToRemove.push('askForPassword');
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('secure')) {
+          propsToRemove.push('password');
           propsToRemove.push('askForPassword');
         }
       }
@@ -72,11 +78,36 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       } else if (typeof connInfo.password === 'string') {
         delete formData.askForPassword;
         formData.usePassword = connInfo.password ? 'Save password' : 'Use empty password';
+      } else {
+        formData.usePassword = 'SQLTools Driver Credentials';
       }
       return formData;
     },
+    resolveConnection: async ({ connInfo }) => {
+      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString) {
+        const scopes = [connInfo.name, (connInfo.username || "")];
+        let session = await authentication.getSession(
+          AUTHENTICATION_PROVIDER,
+          scopes,
+          { silent: true }
+        );
+        if (!session) {
+          session = await authentication.getSession(
+            AUTHENTICATION_PROVIDER,
+            scopes,
+            { createIfNone: true }
+          );
+        }
+        if (session) {
+          connInfo.password = session.accessToken;
+        }
+      }
+      return connInfo;
+
+      return connInfo;
+    },
     driverAliases: DRIVER_ALIASES,
-  }
+  };
 }
 
-export function deactivate() {}
+export function deactivate() { }
