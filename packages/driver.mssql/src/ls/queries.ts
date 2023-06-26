@@ -103,6 +103,8 @@ WHERE
   LOWER(schema_name) NOT IN ('information_schema', 'sys', 'guest')
   AND LOWER(schema_name) NOT LIKE 'db\\_%' ESCAPE '\\'
   AND catalog_name = '${p => p.database}'
+ORDER BY
+  schema_name;
 `;
 export const fetchDatabases: IBaseQueries['fetchDatabases'] = queryFactory`
 SELECT name AS label,
