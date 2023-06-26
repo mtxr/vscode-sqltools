@@ -1,7 +1,6 @@
 // Place your settings in this file to overwrite default and user settings.
 {
   "eslint.enable": true,
-  "deno.enable": false,
   "files.exclude": {
     "**/dist": false,
     "docs": true,
