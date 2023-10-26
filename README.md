@@ -73,6 +73,13 @@ Psst… we’re always on the lookout for maintainers for the official drivers, 
 | ![Trino](https://raw.githubusercontent.com/regadas/sqltools-trino-driver/master/icons/default.png)                                        | Trino                | [Link](https://marketplace.visualstudio.com/items?itemName=regadas.sqltools-trino-driver)                              | [@regadas](https://github.com/regadas) <br/> [regadas/sqltools-trino-driver](https://github.com/regadas/sqltools-trino-driver)                                                                         |
 | ![Vertica](https://raw.githubusercontent.com/vertica/sqltools-vertica-driver/main/vertica-logo-small.png)                                 | Vertica              | [Link](https://marketplace.visualstudio.com/items?itemName=vertica-official.sqltools-vertica-driver)                       | [@vertica](https://github.com/vertica) <br/> [vertica/sqltools-vertica-driver](https://github.com/vertica/sqltools-vertica-driver)                                                                     |
 
+**Related Tools**
+
+|     | Name | Download | Repository |
+| --- | ---- | -------- | ---------- |
+| ![Markdown SQL Pro Tools](https://raw.githubusercontent.com/RandomFractals/pro-data-tools/main/docs/images/markdown-sql-tools.png) | Markdown SQL Pro Tools | [Sign up](https://github.com/sponsors/RandomFractals/sponsorships?tier_id=295482) | [RandomFractals/pro-data-tools#markdown-sql-pro-tools](https://github.com/RandomFractals/pro-data-tools#markdown-sql-pro-tools) |
+| ![PRQL Pro Tools](https://raw.githubusercontent.com/RandomFractals/pro-data-tools/main/docs/images/prql-pro-tools.png) | PRQL Pro Tools | [Sign up](https://github.com/sponsors/RandomFractals/sponsorships?tier_id=18884) | [RandomFractals/pro-data-tools#prql-pro-tools](https://github.com/RandomFractals/pro-data-tools#prql-pro-tools) |
+
 ## Contributing
 
 We are grateful to our [contributors](https://github.com/mtxr/vscode-sqltools/graphs/contributors) for helping with this project ❤️ If you would like to join them you’ll find everything you need to know about contributing [here](https://vscode-sqltools.mteixeira.dev/contributing).
