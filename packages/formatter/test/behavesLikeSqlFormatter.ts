@@ -371,6 +371,7 @@ export default function behavesLikeSqlFormatter(language?: any) {
         expect(format("foo && bar")).toBe("foo && bar");
         expect(format("foo := bar")).toBe("foo := bar");
         expect(format("foo => bar")).toBe("foo => bar"); // Snowflake, TimescaleDB
+        expect(format("foo // bar")).toBe("foo // bar"); // CockroachDB floor division
         expect(format("foo <=> bar")).toBe("foo <=> bar");
     });
 
