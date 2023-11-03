@@ -31,6 +31,22 @@ Connects to MySQL, PostgreSQL, Microsoft SQL Server and many more...
 
 Find out more in the documentation [here](http://vscode-sqltools.mteixeira.dev/#features).
 
+## Getting Started
+
+SQLTools is a set of VS Code extensions that connect to, query, and display results from a SQL database manager.
+(Supported databases are listed below.)
+
+The installation process is straightforward: 
+
+* Open VS Code
+* Click the Extensions view (in the left bar), then search for `@tag:sqltools-driver`.
+This lists all the drivers available for SQLTools.
+* Install the driver for your database. This also installs the core SQLTools extension.
+* Click the SQLTools icon (in the left bar)
+* Create a _connection_ to your database. To do this, hover over **CONNECTIONS** in the SQLTools pane. Click the "Add New Connection" icon and choose the driver and enter the connection parameters.
+
+You can then open and query it from within VS Code.
+
 ## Supported Databases
 To use SQLTools you will also need to install the appropriate driver extension for your database.
 
