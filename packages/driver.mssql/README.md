@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.2
+
+- Support password storage using SQLTools Driver Credentials service. [#1175](https://github.com/mtxr/vscode-sqltools/pull/1175) - thanks [@raulcesar](https://github.com/raulcesar)
+- List schemas in alphabetical order. [#1176](https://github.com/mtxr/vscode-sqltools/issues/1176) - thanks [@bombillazo](https://github.com/bombillazo)
+
 ### 0.4.1
 
 - Avoid storing redundant properties on connections that use `connectString`. [#1087](https://github.com/mtxr/vscode-sqltools/issues/1087)

@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.2
+
+- List schemas in alphabetical order. [#1176](https://github.com/mtxr/vscode-sqltools/issues/1176) - thanks [@bombillazo](https://github.com/bombillazo)
+
 ### 0.5.1
 
 - Use 0.27 extension's new ability to store connection passwords securely. [#1084](https://github.com/mtxr/vscode-sqltools/pull/1084)
