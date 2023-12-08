@@ -516,7 +516,7 @@ export interface ISettings {
    */
   autoConnectTo?: string | string[];
   /**
-   * Help SQLTools development.
+   * Deprecated. Use statusbar context menu option instead.
    * @type {boolean}
    * @default true
    * @memberof ISettings
