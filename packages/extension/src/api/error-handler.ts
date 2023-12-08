@@ -29,7 +29,7 @@ namespace ErrorHandler {
         commands.executeCommand(`${EXT_NAMESPACE}.showOutputChannel`);
         break;
       case 'Help!':
-        openExternal(`${DOCS_ROOT_URL}/connections/${error.data.driver.toLowerCase()}#${typeof error.code === 'string' ? error.code : error.name}`);
+        openExternal(`${DOCS_ROOT_URL}/en/drivers/${error.data.driver.toLowerCase()}#${typeof error.code === 'string' ? error.code : error.name}`);
         break;
     }
   }
