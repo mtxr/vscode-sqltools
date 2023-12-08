@@ -133,28 +133,28 @@ export interface IConnection<DriverOptions = any> {
    */
   connectString?: string;
   /**
-   * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options
+   * MSSQL specific driver options. See https://vscode-sqltools.mteixeira.dev/en/drivers/microsoft-sql-server-azure#11-specific-options
    * @type {any}
    * @memberof IConnection
    */
   mssqlOptions?: { encrypt?: boolean };
 
   /**
-   * MySQL specific driver options
+   * MySQL specific driver options. See https://vscode-sqltools.mteixeira.dev/en/drivers/my-sql#2-mysqloptions
    * @type {any}
    * @memberof IConnection
    */
   mysqlOptions?: DriverOptions;
 
   /**
-   * PostgreSQL/Redshift specific driver options. See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options
+   * PostgreSQL/Redshift specific driver options. See https://vscode-sqltools.mteixeira.dev/en/drivers/postgre-sql#11-specific-options
    * @type {any}
    * @memberof IConnection
    */
   pgOptions?: DriverOptions;
 
   /**
-   * OracleDB specific driver options (pool). See https://github.com/oracle/node-oracledb/blob/master/doc/api.md#createpoolpoolattrs
+   * OracleDB specific driver options (pool). See https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html#createpoolparams
    * @type {PoolAttributes}
    * @memberof IConnection
    */
