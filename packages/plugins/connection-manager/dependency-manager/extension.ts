@@ -86,7 +86,7 @@ export default class DependencyManager implements IExtensionPlugin {
           }
           break;
         case readMore:
-          openExternal(`${DOCS_ROOT_URL}/driver/${conn.driver ? conn.driver.toLowerCase() : ''}?umd_source=vscode&utm_medium=driver&utm_campaign=dependencies`);
+          openExternal(`${DOCS_ROOT_URL}/en/drivers/${conn.driver ? conn.driver.toLowerCase() : ''}?umd_source=vscode&utm_medium=driver&utm_campaign=dependencies`);
           break;
       }
     } catch (error) {

@@ -18,6 +18,7 @@ export default function decorateLSException(e: Error & { code?: number; data?: {
       mysqlOptions: conn.mysqlOptions,
       pgOptions: conn.pgOptions,
       oracleOptions: conn.oracleOptions,
+      cqlOptions: conn.cqlOptions,
     };
   }
   return new DecoratedException<typeof e.data>(e, data);

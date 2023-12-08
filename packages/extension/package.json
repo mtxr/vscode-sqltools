@@ -625,7 +625,7 @@
                                     "null",
                                     "object"
                                 ],
-                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/mssql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/en/drivers/microsoft-sql-server-azure#11-specific-options for more details.",
                                 "default": {},
                                 "properties": {
                                     "encrypt": {
@@ -643,7 +643,7 @@
                                     "object",
                                     "null"
                                 ],
-                                "description": "See https://vscode-sqltools.mteixeira.dev/connections/mysql#2-mysqloptions for more details.",
+                                "description": "See https://vscode-sqltools.mteixeira.dev/en/drivers/my-sql#2-mysqloptions for more details.",
                                 "default": {},
                                 "properties": {
                                     "authProtocol": {
@@ -671,7 +671,7 @@
                                     "null"
                                 ],
                                 "default": {},
-                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/postgresql#1-1-specific-options for more details.",
+                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/en/drivers/postgre-sql#11-specific-options for more details.",
                                 "properties": {
                                     "ssl": {
                                         "type": [
@@ -689,7 +689,15 @@
                                     "null"
                                 ],
                                 "default": {},
-                                "markdownDescription": "See https://vscode-sqltools.mteixeira.dev/connections/oracledb#2-3-specific-options for more details."
+                                "markdownDescription": "See https://node-oracledb.readthedocs.io/en/latest/api_manual/oracledb.html#createpoolparams for more details."
+                            },
+                            "cqlOptions": {
+                                "type": [
+                                    "object",
+                                    "null"
+                                ],
+                                "default": {},
+                                "markdownDescription": "See https://docs.datastax.com/en/developer/nodejs-driver/4.1/api/type.ClientOptions/ for more details."
                             },
                             "connectionTimeout": {
                                 "type": "number",
