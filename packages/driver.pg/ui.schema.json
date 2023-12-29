@@ -29,7 +29,7 @@
     },
     "ssl": {
       "rejectUnauthorized": {
-        "ui:help": "If true the server will reject any connection which is not authorized with the list of supplied CAs. This option only has an effect if requestCert is true. Default: true"
+        "ui:help": "If true the server will reject any connection which is not authorized with the list of supplied CAs. This option only has an effect if requestCert is true. Default: false"
       },
       "requestCert": {
         "ui:help": "If true the server will request a certificate from clients that connect and attempt to verify that certificate. Default: false"
