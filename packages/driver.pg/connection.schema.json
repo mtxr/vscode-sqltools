@@ -95,7 +95,7 @@
                   "properties": {
                     "rejectUnauthorized": {
                       "type": "boolean",
-                      "default": false
+                      "default": true
                     },
                     "requestCert": {
                       "type": "boolean"
