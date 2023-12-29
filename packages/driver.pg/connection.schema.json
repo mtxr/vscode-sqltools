@@ -94,7 +94,8 @@
                   "description": "Passed directly to node.TLSSocket. Check more here: https://nodejs.org/api/tls.html#tls_new_tls_tlssocket_socket_options",
                   "properties": {
                     "rejectUnauthorized": {
-                      "type": "boolean"
+                      "type": "boolean",
+                      "default": true
                     },
                     "requestCert": {
                       "type": "boolean"
