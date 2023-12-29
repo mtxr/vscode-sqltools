@@ -115,10 +115,7 @@
                     "passphrase": {
                       "type": "string"
                     }
-                  },
-                  "required": [
-                    "rejectUnauthorized"
-                  ]
+                  }
                 }
               }
             }
