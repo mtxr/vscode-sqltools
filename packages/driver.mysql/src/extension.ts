@@ -71,7 +71,14 @@ export async function activate(extContext: vscode.ExtensionContext): Promise<IDr
         propsToRemove.push('askForPassword');
       }
       propsToRemove.forEach(p => delete connInfo[p]);
-
+      connInfo.mysqlOptions = connInfo.mysqlOptions || {};
+      if (connInfo.mysqlOptions.enableSsl === 'Disabled') {
+        delete connInfo.mysqlOptions.ssl;
+      }
+      if (typeof connInfo.mysqlOptions.ssl === 'object' && Object.keys(connInfo.mysqlOptions.ssl).length === 0) {
+        connInfo.mysqlOptions.enableSsl = 'Disabled';
+        delete connInfo.mysqlOptions.ssl;
+      }
       return connInfo;
     },
     parseBeforeEditConnection: ({ connInfo }) => {
