@@ -39,13 +39,16 @@ export async function quickPick<T = QuickPickItem | any>(
       qPick.hide();
     });
 
+    // Handle case discrepancy between our property name and the vscode one
+    qPick.placeholder = qPickOptions.placeHolder;
+    delete qPickOptions.placeHolder;
+
     Object.keys(qPickOptions).forEach(k => {
       qPick[k] = qPickOptions[k];
     });
     qPick.items = items;
-    qPick.enabled = items.length > 0;
 
-    if (!qPick.enabled) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
+    if (!items.length) qPick.placeholder = placeHolderDisabled || qPick.placeholder;
 
     qPick.title = `${qPickOptions.title || 'Items'} (${items.length})`;
 

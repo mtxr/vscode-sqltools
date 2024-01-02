@@ -11,14 +11,13 @@ import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
 import { extractConnName, getQueryParameters } from '@sqltools/util/query';
 import { isEmpty } from '@sqltools/util/validation';
 import Context from '@sqltools/vscode/context';
-import { getIconPaths } from '@sqltools/vscode/icons';
 import { getOrCreateEditor, getSelectedText, readInput } from '@sqltools/vscode/utils';
 import { getEditorQueryDetails } from '@sqltools/vscode/utils/query';
 import { quickPick, quickPickSearch } from '@sqltools/vscode/utils/quickPick';
 import path from 'path';
 import { promises as fs } from 'fs';
 import { file } from 'tempy';
-import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, Uri, window, workspace } from 'vscode';
+import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, ThemeIcon, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
 import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
@@ -568,11 +567,11 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       matchOnDescription: true,
       matchOnDetail: true,
       placeHolder: 'Pick a connection',
-      placeHolderDisabled: 'You don\'t have any connections yet.',
-      title: 'Connections',
+      placeHolderDisabled: 'You don\'t have any connections defined yet. Use the \'+\' button above to add one.',
+      title: 'SQLTools Connections',
       buttons: [
         {
-          iconPath: getIconPaths('add-connection'),
+          iconPath: new ThemeIcon('add'),
           tooltip: 'Add New Connection',
           cb: () => commands.executeCommand(`${EXT_NAMESPACE}.openAddConnectionScreen`),
         } as any,

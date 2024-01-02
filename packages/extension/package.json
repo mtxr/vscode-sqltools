@@ -433,7 +433,8 @@
                 "sqltools.showStatusbar": {
                     "type": "boolean",
                     "default": true,
-                    "description": "Toggle statusbar visibility."
+                    "description": "Toggle statusbar item visibility.",
+                    "deprecationMessage": "Deprecated. Use statusbar context menu option instead."
                 },
                 "sqltools.disableChordKeybindings": {
                     "type": "boolean",
