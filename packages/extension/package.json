@@ -454,7 +454,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "markdownDescription": "Languages with SQL completion enabled.\n\nYou can use any language identifier, including those listed at https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL completion enabled. Restart to activate changes.\n\nYou can use any language identifier, including those listed at https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.formatLanguages": {
                     "type": "array",
@@ -464,7 +464,7 @@
                     "items": {
                         "type": "string"
                     },
-                    "markdownDescription": "Languages with SQL formatting enabled.\n\nYou can use any language identifier, including those listed at https://code.visualstudio.com/docs/languages/identifiers."
+                    "markdownDescription": "Languages with SQL formatting enabled. Restart to activate changes.\n\nYou can use any language identifier, including those listed at https://code.visualstudio.com/docs/languages/identifiers."
                 },
                 "sqltools.codelensLanguages": {
                     "type": "array",
@@ -858,7 +858,7 @@
                 "sqltools.languageServerEnv": {
                     "type": "object",
                     "default": {},
-                    "markdownDescription": "Set environment variables to be passed to language server. For example `ORACLE_HOME`, `PATH`..."
+                    "markdownDescription": "Set environment variables to be passed to language server. For example `ORACLE_HOME`, `PATH`...\n\nRestart to activate changes."
                 },
                 "sqltools.sortColumns": {
                     "type": [
