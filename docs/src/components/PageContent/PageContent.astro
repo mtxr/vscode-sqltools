@@ -7,10 +7,9 @@ import type { MarkdownHeading } from 'astro';
 type Props = {
   frontmatter: Frontmatter;
   headings: MarkdownHeading[];
-  githubEditUrl: string;
 };
 
-const { frontmatter, headings, githubEditUrl } = Astro.props as Props;
+const { frontmatter, headings } = Astro.props as Props;
 const title = frontmatter.title;
 ---
 
@@ -23,7 +22,7 @@ const title = frontmatter.title;
     <slot />
   </section>
   <nav class="block sm:hidden">
-    <MoreMenu editHref={githubEditUrl} />
+    <MoreMenu />
   </nav>
 </article>
 
