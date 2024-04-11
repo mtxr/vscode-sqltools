@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.3
+
+- Fix problem connecting to AWS RDS postgresql. [#1265](https://github.com/mtxr/vscode-sqltools/pull/1265) - thanks [@jqknono](https://github.com/jqknono)
+
 ### 0.5.2
 
 - List schemas in alphabetical order. [#1176](https://github.com/mtxr/vscode-sqltools/issues/1176) - thanks [@bombillazo](https://github.com/bombillazo)
