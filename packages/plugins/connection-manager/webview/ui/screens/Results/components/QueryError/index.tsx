@@ -10,7 +10,7 @@ const QueryError = ({ messages }: Pick<ResultsScreenState['resultTabs'][number],
       <ErrorIcon />
       <main>
         Query with errors. Please, check the error below.
-        {messages.length && <pre>{messages.map(m => (m as any).message || m.toString()).join('\n')}</pre>}
+        {messages.length && <pre style={{ whiteSpace: 'pre-wrap'}}>{messages.map(m => (m as any).message || m.toString()).join('\n')}</pre>}
       </main>
       <FooterActions />
     </div>
