@@ -6,6 +6,10 @@ See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lit
 
 ## Changelog
 
+### 0.5.1
+
+- Use NodeJS 16.
+
 ### 0.5.0
 
 - Sync with 0.27 release of main extension.

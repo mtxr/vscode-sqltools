@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.4
+
+- Use NodeJS 16.
+
 ### 0.5.3
 
 - Fix problem connecting to AWS RDS postgresql. [#1265](https://github.com/mtxr/vscode-sqltools/pull/1265) - thanks [@jqknono](https://github.com/jqknono)

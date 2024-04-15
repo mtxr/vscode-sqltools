@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.6.2
+
+- Use NodeJS 16.
+- Update mysql2 library package.
+
 ### 0.6.1
 
 - Delete SSL config if SSL is disabled on MySQL driver. [#1271](https://github.com/mtxr/vscode-sqltools/pull/1271) - thanks [@Fludem](https://github.com/Fludem).
