@@ -5757,6 +5757,11 @@ lru-cache@^7.14.1:
   resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-7.16.1.tgz#7acea16fecd9ed11430e78443c2bb81a06d3dea9"
   integrity sha512-9kkuMZHnLH/8qXARvYSjNvq8S1GYFFzynQTAfKeaJ0sIrR3PUPuu37Z+EiIANiZBvpfTf2B5y8ecDLSMWlLv+w==
 
+lru-cache@^8.0.0:
+  version "8.0.5"
+  resolved "https://registry.yarnpkg.com/lru-cache/-/lru-cache-8.0.5.tgz#983fe337f3e176667f8e567cfcce7cb064ea214e"
+  integrity sha512-MhWWlVnuab1RG5/zMRRcVGXZLCXrZTgfwMikgzCegsPnG62yDQo5JnqKkrK4jO5iKqDAZGItAqN5CtKBCBWRUA==
+
 lru_map@^0.3.3:
   version "0.3.3"
   resolved "https://registry.npmjs.org/lru_map/-/lru_map-0.3.3.tgz"
@@ -5967,16 +5972,16 @@ mute-stream@~0.0.4:
   resolved "https://registry.npmjs.org/mute-stream/-/mute-stream-0.0.8.tgz"
   integrity sha512-nnbWWOkoWyUsTjKrhgD0dcz22mdkSnpYqbEjIm2nhwhuxlSkpywJmBo8h0ZqJdkp73mb90SssHkN4rsRaBAfAA==
 
-mysql2@~3.1.2:
-  version "3.1.2"
-  resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-3.1.2.tgz#024a8bf7c84a300a8ed5c8e39b20ba57e47a2e24"
-  integrity sha512-NXz6sUvHSEOKz1jv3koSga7eb2dHrwD/mnPmqbbZzMRvjQcSpb0Eh0ectWyYt1U60CLlEbjoA3XYjjbbReRF5Q==
+mysql2@~3.9.7:
+  version "3.9.7"
+  resolved "https://registry.yarnpkg.com/mysql2/-/mysql2-3.9.7.tgz#843755daf65b5ef08afe545fe14b8fb62824741a"
+  integrity sha512-KnJT8vYRcNAZv73uf9zpXqNbvBG7DJrs+1nACsjZP1HMJ1TgXEy8wnNilXAn/5i57JizXKtrUtwDB7HxT9DDpw==
   dependencies:
     denque "^2.1.0"
     generate-function "^2.3.1"
     iconv-lite "^0.6.3"
     long "^5.2.1"
-    lru-cache "^7.14.1"
+    lru-cache "^8.0.0"
     named-placeholders "^1.1.3"
     seq-queue "^0.0.5"
     sqlstring "^2.3.2"
