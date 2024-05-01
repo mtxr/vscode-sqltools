@@ -989,7 +989,8 @@
             "sqltoolsPanelContainer": [
                 {
                     "id": "sqltoolsViewConsoleMessages",
-                    "name": "Messages"
+                    "name": "Messages",
+                    "when": "sqltools.consoleMessages.active"
                 }
             ]
         },

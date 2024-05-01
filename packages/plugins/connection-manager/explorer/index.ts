@@ -234,6 +234,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
 
 export class MessagesProvider implements TreeDataProvider<TreeItem> {
   private items: TreeItem[] = [];
+  private active: boolean = false;
   private _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   getTreeItem(element: TreeItem): TreeItem | Thenable<TreeItem> {
@@ -249,6 +250,10 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
   }
 
   addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
+    if (!this.active && messages.length > 0) {
+      this.active = true;
+      commands.executeCommand('setContext', `${EXT_NAMESPACE}.consoleMessages.active`, true);
+    }
     this.items = messages.map(m => {
       let item: TreeItem;
       if (typeof m === 'string') {
