@@ -1,0 +1,23 @@
+---
+import * as CONFIG from '../config';
+
+type Props = {
+  frontmatter: CONFIG.Frontmatter;
+};
+
+const { frontmatter } = Astro.props as Props;
+---
+
+<html dir={frontmatter.dir ?? 'ltr'} lang={frontmatter.lang ?? 'en-us'} class="initial">
+  <head>
+    {frontmatter.redirect ? (
+    <meta 
+      http-equiv="refresh" 
+      content={ `0; url=${ frontmatter.redirect }` } 
+    />
+    ) : null}
+  </head>
+
+  <body>
+  </body>
+</html>

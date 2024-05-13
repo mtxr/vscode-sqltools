@@ -23,6 +23,7 @@ export type Frontmatter = {
 	dir?: 'ltr' | 'rtl';
 	ogLocale?: string;
 	lang?: string;
+	redirect?: string;
 };
 
 export const KNOWN_LANGUAGES = {
