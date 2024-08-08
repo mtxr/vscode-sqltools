@@ -472,6 +472,14 @@ export interface IResultsOptions {
   limit: number;
 
   /**
+   * Show SQL Console view automatically when an error has occurred
+   * @type {boolean}
+   * @default true
+   * @memberof IResultsOptions
+   */
+  showConsoleOnError?: boolean;
+
+  /**
    * Defines how results tabs are or are not reused
    * @type {string}
    * @default 'never'

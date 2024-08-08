@@ -8,7 +8,7 @@ const log = createLogger('Results:reducer');
 
 const initialState: ResultsScreenState = {
   loading: true,
-  hasError: false,
+  showConsole: false,
   resultTabs: [],
   activeTab: 0,
 };

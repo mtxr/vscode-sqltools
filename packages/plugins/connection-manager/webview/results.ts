@@ -122,7 +122,7 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
       this.title = `${prefix}: ${suffix}`;
     } catch (error) { }
     this.updatePanelName();
-    this.sendMessage(UIAction.RESPONSE_RESULTS, { resultTabs: payload, hasError: payload.some(p => !!p.error) });
+    this.sendMessage(UIAction.RESPONSE_RESULTS, { resultTabs: payload, showConsole: Config.results.showConsoleOnError  && payload.some(p => !!p.error) });
   }
 
   whereToShow = vscode.ViewColumn.Active;

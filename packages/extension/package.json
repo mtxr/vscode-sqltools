@@ -749,6 +749,11 @@
                     "description": "Maximum number of records to return in results.",
                     "default": 50
                 },
+                "sqltools.results.showConsoleOnError": {
+                    "type": "boolean",
+                    "description": "Show SQL Console view automatically when an error has occurred.",
+                    "default": true
+                },
                 "sqltools.results.reuseTabs": {
                     "type": "string",
                     "description": "How requests reuse results tabs.",

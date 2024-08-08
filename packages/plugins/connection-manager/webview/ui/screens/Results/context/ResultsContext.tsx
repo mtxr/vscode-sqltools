@@ -50,10 +50,10 @@ export const ResultsProvider = ({ children }: IResultsProviderProps) => {
   }, []);
 
   useEffect(() => {
-    if (state.hasError) {
+    if (state.showConsole) {
       openMessagesConsole();
     }
-  }, [state.hasError]);
+  }, [state.showConsole]);
 
   useEffect(() => {
     sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, state.resultTabs[state.activeTab]?.messages ?? []);

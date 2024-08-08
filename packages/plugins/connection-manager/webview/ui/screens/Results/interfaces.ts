@@ -10,7 +10,7 @@ export type ResultsReducerAction<
 
 export interface ResultsScreenState {
   loading: boolean;
-  hasError: boolean;
+  showConsole: boolean;
   resultTabs: NSDatabase.IResult[];
   activeTab: number;
 }
