@@ -16,7 +16,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
       return this.connection;
     }
 
-    const { encrypt, ...mssqlOptions }: any = this.credentials.mssqlOptions || { encrypt: true };
+    const { encrypt, trustServerCertificate, ...mssqlOptions }: any = this.credentials.mssqlOptions || { encrypt: true };
 
     let encryptAttempt = typeof encrypt !== 'undefined'
       ? encrypt : true;
@@ -42,6 +42,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
       options: {
         ...((mssqlOptions || {}).options || {}),
         encrypt: encryptAttempt,
+        trustServerCertificate: trustServerCertificate,
       },
     });
 
