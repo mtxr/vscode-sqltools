@@ -69,6 +69,10 @@
           "type": "boolean",
           "default": true
         },
+        "trustServerCertificate": {
+          "type": "boolean",
+          "default": false
+        },
         "tdsVersion": {
           "type": "string",
           "enum": [
