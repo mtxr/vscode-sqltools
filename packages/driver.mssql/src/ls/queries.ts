@@ -111,7 +111,7 @@ SELECT name AS label,
   name AS "database",
   '${ContextValue.DATABASE}' AS "type",
   'database' AS "detail"
-FROM MASTER.dbo.sysdatabases
+FROM sys.databases
 WHERE name NOT IN ('master', 'model', 'msdb', 'tempdb')
 `;
 export const searchTables: IBaseQueries['searchTables'] = queryFactory`
