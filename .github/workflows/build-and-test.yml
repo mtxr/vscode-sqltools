@@ -22,7 +22,7 @@ jobs:
       with:
         ref: ${{ github.ref }}
 
-    - uses: actions/cache@v2
+    - uses: actions/cache@v4
       id: yarn-cache # use this to check for `cache-hit` (`steps.yarn-cache.outputs.cache-hit != 'true'`)
       with:
         path: |
@@ -33,7 +33,7 @@ jobs:
           ${{ runner.os }}-yarn-
 
     - name: Use Node.js ${{ matrix.node-version }}
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v4
       with:
         node-version: ${{ matrix.node-version }}
     - env:
@@ -68,13 +68,13 @@ jobs:
         yarn run build
         yarn run pack:all
 
-    - uses: actions/upload-artifact@v2
+    - uses: actions/upload-artifact@v4
       with:
         name: VSIX packages
         path: ./*.vsix
 
     - name: 'Upload coverage'
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: coverage.tar
         path: ./coverage

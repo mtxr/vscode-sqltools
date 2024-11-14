@@ -69,12 +69,15 @@
         }
     ],
     "activationEvents": [
-        "*",
-        "onLanguage:sql",
-        "onCommand:sqltools.selectConnection",
-        "onAuthenticationRequest:sqltools-driver-credentials"
+        "*"
     ],
     "contributes": {
+        "authentication": [
+            {
+                "id": "sqltools-driver-credentials",
+                "label": "SQLTools Driver Credentials"
+            }
+        ],
         "colors": [
             {
                 "id": "sqltools.currentQueryBg",
