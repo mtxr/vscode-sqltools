@@ -1,4 +1,4 @@
-import { createMuiTheme } from '@material-ui/core';
+import { createTheme } from '@material-ui/core/styles';
 
 export const MuiTabHeight = '36px';
 export const defaultColors = {
@@ -6,7 +6,7 @@ export const defaultColors = {
   color: 'var(--vscode-editor-foreground)'
 }
 
-const theme = createMuiTheme({
+const theme = createTheme({
   palette: {
     background: {
       default: defaultColors.backgroundColor,

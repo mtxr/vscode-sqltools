@@ -143,6 +143,5 @@ module.exports = exports = function getWebviewConfig({ entries, packagePath }) {
 const minCssExtract = {
   loader: MiniCssExtractPlugin.loader,
   options: {
-    hmr: false,
   },
 };
