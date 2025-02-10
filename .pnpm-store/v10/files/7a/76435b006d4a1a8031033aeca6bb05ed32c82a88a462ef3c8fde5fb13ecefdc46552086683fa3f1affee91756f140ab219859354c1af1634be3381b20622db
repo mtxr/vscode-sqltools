@@ -1,0 +1,1 @@
+{"version":3,"file":"constant.js","sourceRoot":"","sources":["../../../src/geometry/shape/constant.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,MAAM,CAAC,IAAM,gBAAgB,GAAG,oBAAoB,CAAC","sourcesContent":["/**\n * Name of Background Shape\n */\nexport const BACKGROUND_SHAPE = 'element-background';\n"]}

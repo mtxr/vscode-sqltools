@@ -1,0 +1,1 @@
+{"version":3,"file":"slider.js","sourceRoot":"","sources":["../../src/types/slider.ts"],"names":[],"mappings":"","sourcesContent":["import { Types } from '@antv/g2';\n\nexport type Slider = Types.SliderOption;\n"]}

@@ -1,0 +1,86 @@
+import repl from 'repl';
+import process from 'process';
+import { fileURLToPath } from 'url';
+import { path } from "./path.js";
+import { t } from "./i18n/instance.js";
+import "./prototype.js";
+import { delay, set_inspect_options } from "./utils.js";
+set_inspect_options();
+let server;
+/** 谨慎使用，webpack 打包后可能会变成 /d:/1/mod/node_modules/xshell/ 这样的编译期路径 */
+export const fpd_root = path.dirname(fileURLToPath(import.meta.url)) + '/';
+export async function start_repl() {
+    // ------------ 加载库
+    // --- prevent from exiting
+    process.on('uncaughtException', error => {
+        console.error(error);
+    });
+    // --- start nodejs repl
+    repl.start({
+        prompt: '',
+        replMode: repl.REPL_MODE_SLOPPY,
+        useGlobal: true,
+        useColors: true,
+        terminal: true,
+    });
+    process.title = 'xshell';
+    await Promise.all([
+        pollute_global(),
+        (async () => {
+            // --- http server
+            let { Server } = await import('./server.ts');
+            server = new Server({
+                name: 'repl',
+                http: true,
+                http_port: 8421,
+                funcs: {}
+            });
+            await server.start();
+        })(),
+    ]);
+    console.log(t('xshell 启动成功，正在监听: http://localhost:8421').green);
+}
+export async function stop() {
+    console.log(t('xshell 正在退出').red);
+    server.stop();
+}
+export async function exit() {
+    await stop();
+    await delay(100);
+    process.exit();
+}
+export async function pollute_global() {
+    Object.assign(globalThis, {
+        __importDefault: (mod) => ((mod?.__esModule) ? mod : { default: mod }),
+        __importStar: (mod) => {
+            if (mod?.__esModule)
+                return mod;
+            let result = {};
+            // eslint-disable-next-line eqeqeq
+            if (mod != null)
+                for (let k in mod)
+                    if (Object.hasOwnProperty.call(mod, k))
+                        result[k] = mod[k];
+            result.default = mod;
+            return result;
+        },
+        exports: globalThis
+    });
+    await Promise.all([
+        pollute_module_exports('./path.js'),
+        pollute_module_exports('./prototype.js'),
+        pollute_module_exports('./utils.js'),
+        pollute_module_exports('./process.js'),
+        pollute_module_exports('./file.js'),
+        pollute_module_exports('./net.js'),
+        pollute_module_exports('./server.js'),
+        pollute_module_exports('./repl.js'),
+    ]);
+}
+export async function pollute_module_exports(fp_mod) {
+    Object.assign(globalThis, await import(fp_mod));
+}
+export async function pollute_module_default_export(fp_mod, name) {
+    globalThis[name] = (await import(fp_mod)).default;
+}
+//# sourceMappingURL=repl.js.map

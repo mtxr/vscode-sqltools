@@ -1,0 +1,5 @@
+#!/usr/bin/env node
+globalThis.tstarted = new Date();
+import { start_repl } from "./repl.js";
+start_repl();
+//# sourceMappingURL=xshell.js.map

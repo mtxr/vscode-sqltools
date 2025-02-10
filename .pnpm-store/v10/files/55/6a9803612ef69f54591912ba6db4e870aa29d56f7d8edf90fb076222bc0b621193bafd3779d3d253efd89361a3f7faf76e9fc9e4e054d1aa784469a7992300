@@ -1,0 +1,15 @@
+import type { Context } from 'koa';
+import './prototype.ts';
+declare global {
+    var __: any;
+    var tstarted: Date;
+    var repl_router: (ctx: Context) => Promise<boolean>;
+}
+/** 谨慎使用，webpack 打包后可能会变成 /d:/1/mod/node_modules/xshell/ 这样的编译期路径 */
+export declare const fpd_root: string;
+export declare function start_repl(): Promise<void>;
+export declare function stop(): Promise<void>;
+export declare function exit(): Promise<void>;
+export declare function pollute_global(): Promise<void>;
+export declare function pollute_module_exports(fp_mod: string): Promise<void>;
+export declare function pollute_module_default_export(fp_mod: string, name: string): Promise<void>;

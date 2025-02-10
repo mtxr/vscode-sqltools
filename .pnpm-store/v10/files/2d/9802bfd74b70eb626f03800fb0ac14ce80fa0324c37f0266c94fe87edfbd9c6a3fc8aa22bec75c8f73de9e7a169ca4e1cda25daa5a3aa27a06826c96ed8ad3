@@ -1,0 +1,42 @@
+{
+    "name": "dolphindb",
+    "description": "DolphinDB JavaScript API",
+    "version": "3.0.213",
+    "type": "module",
+    "main": "./index.js",
+    "browser": "./browser.js",
+    "scripts": {
+        "build": "tsc",
+        "test": "node --experimental-transform-types ./test.ts",
+        "lint": "eslint \"**/*.{ts,tsx}\"",
+        "fix": "eslint --fix \"**/*.{ts,tsx}\"",
+        "scan": "i18n-scan --input \"**/*.{ts,tsx}\""
+    },
+    "author": "Hongfei Shen <hongfei.shen@dolphindb.com> (https://dolphindb.net/hongfeishen)",
+    "publisher": "Hongfei Shen",
+    "license": "MIT",
+    "homepage": "https://github.com/dolphindb/api-javascript",
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/dolphindb/api-javascript.git"
+    },
+    "bugs": {
+        "url": "https://github.com/dolphindb/api-javascript/issues"
+    },
+    "keywords": [
+        "DolphinDB",
+        "API",
+        "JavaScript"
+    ],
+    "devDependencies": {
+        "@types/node": "^22.10.2",
+        "eslint": "^9.17.0",
+        "typescript": "^5.7.2"
+    },
+    "dependencies": {
+        "dayjs": "^1.11.13",
+        "ipaddr.js": "^2.2.0",
+        "tslib": "^2.8.1",
+        "xshell": "^1.1.22"
+    }
+}

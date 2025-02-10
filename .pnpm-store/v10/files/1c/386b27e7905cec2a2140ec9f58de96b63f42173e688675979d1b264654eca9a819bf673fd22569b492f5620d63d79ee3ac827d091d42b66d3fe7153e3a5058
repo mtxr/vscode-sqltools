@@ -1,0 +1,113 @@
+{
+    "暂时不支持序列化": {
+        "en": "serialization is not currently supported"
+    },
+    "不能自动转换 {{type}} 至 DdbObj": {
+        "en": "cannot automatically convert {{type}} to DdbObj"
+    },
+    "form 必须是 DdbForm.table, 否则不能 to_rows": {
+        "en": "form must be DdbForm.table, otherwise it cannot to_rows"
+    },
+    "this.form 必须是 DdbForm.dict, 否则不能调用 to_dict 转换为 js object": {
+        "en": "this.form must be DdbForm.dict, otherwise to_dict cannot be called to convert to js object"
+    },
+    "当前只支持自动转换 dict<string, any | ...dictables> 为 js object": {
+        "en": "currently api only supports automatic conversion of dict<string, any | ...dictables> to js object"
+    },
+    "deep = true 时必须设置 strip = true": {
+        "en": "strip = true must be set when deep = true"
+    },
+    "timestamp 字符串长度必须等于格式串长度": {
+        "en": "the length of the timestamp string must be equal to the length of the format string"
+    },
+    "格式串必须包含秒的格式 (ss)": {
+        "en": "the format string must contain the format for seconds (ss)"
+    },
+    "格式串必须包含纳秒的格式 (SSSSSSSSS)": {
+        "en": "format string must contain nanosecond format (SSSSSSSSS)"
+    },
+    "nanotimestamp 字符串长度必须等于格式串长度": {
+        "en": "nanotimestamp string length must be equal to format string length"
+    },
+    "指定 node 时必须设置 func_type": {
+        "en": "func_type must be set when specifying node"
+    },
+    "variable 指令参数不能为空且参数名不能为空，且数量应该匹配": {
+        "en": "variable command parameter cannot be empty and parameter name cannot be empty, and the number should match"
+    },
+    "session id 从 {{sid}} 变为 {{sid_}}": {
+        "en": "session id changed from {{sid}} to {{sid_}}"
+    },
+    "订阅流表成功:": {
+        "en": "subscribed to streaming table:"
+    },
+    "vector {{type}} 暂不支持序列化": {
+        "en": "vector {{type}} serialization is not currently supported"
+    },
+    "form 必须是 DdbForm.table, 否则不能 to_cols": {
+        "en": "form must be DdbForm.table, otherwise it cannot to_cols"
+    },
+    "这是在调用 this.rpc 之前默认的 on_message, 不应该被调用到，除非建立连接后 server 先推送了 message": {
+        "en": "This is the default on_message before calling this.rpc, it should not be called unless the server pushes the message first after the connection is established"
+    },
+    " 暂时不支持解析": {
+        "en": " parsing is currently not supported"
+    },
+    "array vector 存在非法 unit: {{unit}}": {
+        "en": "array vector has invalid unit: {{unit}}"
+    },
+    " 暂时不支持序列化": {
+        "en": " serialization is currently not supported"
+    },
+    "print 消息的 buffer 应该以 \\0 结束": {
+        "en": "The buffer of the print message should end with \\0"
+    },
+    "print 消息的 buffer 中间不应该有 \\0": {
+        "en": "There should not be \\0 in the buffer of the print message"
+    },
+    "已断开": {
+        "en": "is already disconnected"
+    },
+    "连接出错了，可能由于网络原因连接已被关闭，或服务器断开连接": {
+        "en": "connection errored. The connection may have been closed due to network reasons, or the server disconnected"
+    },
+    "new DdbBlob 不能传空的 value": {
+        "en": "new DdbBlob cannot pass an empty value"
+    },
+    "{{form}}<{{type}}> 暂时不支持解析": {
+        "en": "cannot parse {{form}}<{{type}}>"
+    },
+    "流数据订阅后一定先返回 schema": {
+        "en": "After subscribing to streaming data, the schema must be returned first."
+    },
+    "{{form}} {{type}} 暂不支持 data()": {
+        "en": "{{form}} {{type}} does not support data() yet"
+    },
+    " 暂时不支持转换为 js 对象": {
+        "en": " conversion to js object is not supported at the moment"
+    },
+    "{{time}} 心跳检测失败，连接已断开": {
+        "en": "{{time}} heartbeat detection failed, the connection has been disconnected"
+    },
+    "pack 时字符串中间不能含有 \\0, 否则上传给 DolphinDB 会导致连接断开": {
+        "en": "The string cannot contain \\0 in the middle when packing, otherwise uploading to DolphinDB will cause the connection to be disconnected"
+    },
+    "发送至 DolphinDB 执行的脚本中间不能含有 \\0": {
+        "en": "The script sent to DolphinDB for execution cannot contain \\0 in the middle"
+    },
+    "调用 ddb.invoke 的参数中不能同时有 DdbObj 与复杂 js 原生对象": {
+        "en": "The parameters of calling ddb.invoke cannot contain both DdbObj and complex js native objects"
+    },
+    "iife 执行的脚本行数应该至少为 2 行": {
+        "en": "The number of script lines executed by iife should be at least 2"
+    },
+    "iotany sub vector 不支持非 vector 类型": {
+        "en": "iotany sub vector does not support non-vector types"
+    },
+    "iotany 的 meta vector 长度至少为 2": {
+        "en": "The length of the iotany meta vector is at least 2"
+    },
+    "value 不能转换为 {{classname}}": {
+        "en": "value cannot be converted to {{classname}}"
+    }
+}

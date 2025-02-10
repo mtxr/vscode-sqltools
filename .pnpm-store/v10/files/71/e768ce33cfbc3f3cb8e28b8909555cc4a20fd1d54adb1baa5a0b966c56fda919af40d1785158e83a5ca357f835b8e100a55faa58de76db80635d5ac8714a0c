@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.Size = exports.Shape = exports.Position = exports.Opacity = exports.Color = exports.Attribute = exports.getAttribute = exports.registerAttribute = void 0;
+var tslib_1 = require("tslib");
+var base_1 = require("./attributes/base");
+exports.Attribute = base_1.default;
+var color_1 = require("./attributes/color");
+exports.Color = color_1.default;
+var opacity_1 = require("./attributes/opacity");
+exports.Opacity = opacity_1.default;
+var position_1 = require("./attributes/position");
+exports.Position = position_1.default;
+var shape_1 = require("./attributes/shape");
+exports.Shape = shape_1.default;
+var size_1 = require("./attributes/size");
+exports.Size = size_1.default;
+var factory_1 = require("./factory");
+Object.defineProperty(exports, "getAttribute", { enumerable: true, get: function () { return factory_1.getAttribute; } });
+Object.defineProperty(exports, "registerAttribute", { enumerable: true, get: function () { return factory_1.registerAttribute; } });
+(0, factory_1.registerAttribute)('Color', color_1.default);
+(0, factory_1.registerAttribute)('Opacity', opacity_1.default);
+(0, factory_1.registerAttribute)('Position', position_1.default);
+(0, factory_1.registerAttribute)('Shape', shape_1.default);
+(0, factory_1.registerAttribute)('Size', size_1.default);
+tslib_1.__exportStar(require("./interface"), exports);
+//# sourceMappingURL=index.js.map

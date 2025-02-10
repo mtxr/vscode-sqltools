@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../src/plots/mix/interactions/index.ts"],"names":[],"mappings":"AAAA;;GAEG;AACH,OAAO,eAAe,CAAC","sourcesContent":["/**\n * 相邻 view 的联动交互\n */\nimport './association';\n"]}

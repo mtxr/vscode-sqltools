@@ -1,0 +1,41 @@
+import './toaster.sass';
+import { delay } from "./utils.browser.js";
+export let toaster = {
+    messages: [],
+    state: 'IDLE',
+    async toast(message) {
+        this.messages.push(message);
+        this.show();
+    },
+    async show() {
+        if (this.state === 'SHOW')
+            return;
+        this.state = 'SHOW';
+        let div = document.createElement('div');
+        div.className = 'toast';
+        document.body.appendChild(div);
+        for (let i = 0; i < this.messages.length; i++) {
+            const message = this.messages[i];
+            let span;
+            if (i === 0) {
+                span = document.createElement('span');
+                span.className = 'text';
+                span.textContent = message;
+                div.appendChild(span);
+            }
+            else {
+                span = div.children[0];
+                span.textContent = message;
+            }
+            div.classList.add('active');
+            await delay(2 * 1000);
+            div.classList.remove('active');
+            await delay(500);
+        }
+        document.body.removeChild(div);
+        this.messages = [];
+        this.state = 'IDLE';
+    },
+};
+export const toast = toaster.toast.bind(toaster);
+//# sourceMappingURL=toaster.browser.js.map

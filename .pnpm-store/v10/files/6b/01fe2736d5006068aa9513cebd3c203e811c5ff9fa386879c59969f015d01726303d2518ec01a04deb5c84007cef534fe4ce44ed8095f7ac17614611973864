@@ -1,0 +1,710 @@
+import util from 'util';
+import EmojiRegex from 'emoji-regex';
+export const emoji_regex = EmojiRegex();
+import strip_ansi from 'strip-ansi';
+import { t } from "./i18n/instance.js";
+export const noop = () => { };
+export const ident = (x) => x;
+export const build_mapper = (key) => (obj) => obj[key];
+/** value 不为 null 或 undefined */
+export const not_empty = (value) => value !== null && value !== undefined;
+export const empty = (value) => value === undefined || value === null;
+const key_types = ['string', 'number', 'symbol'];
+export const is_key_type = ((key) => key_types.includes(typeof key));
+export function to_method_property_descriptors(methods) {
+    return Object.fromEntries(Object.entries(methods)
+        .map(([name, value]) => ([name, {
+            configurable: true,
+            writable: true,
+            enumerable: false,
+            value,
+        }])));
+}
+export function to_getter_property_descriptors(getters) {
+    return Object.fromEntries(Object.entries(getters)
+        .map(([name, get]) => ([name, {
+            configurable: true,
+            enumerable: false,
+            get,
+        }])));
+}
+export const cjk = '([\u2e80-\u9fff\uf900-\ufaff])';
+export const quotes = {
+    single: "'",
+    double: '"',
+    backtick: '`',
+};
+export const brackets = {
+    round: ['(', ')'],
+    square: ['[', ']'],
+    curly: ['{', '}'],
+    pointy: ['<', '>'],
+    corner: ['「', '」'],
+    fat: ['【', '】'],
+    tortoise_shell: ['〔', '〕'],
+};
+if (!globalThis.my_prototype_defined) {
+    // ------------------------------------ String.prototype
+    Object.defineProperties(String.prototype, {
+        ...to_getter_property_descriptors({
+            width() {
+                const s = strip_ansi(this.replace(emoji_regex, '  '));
+                let width = 0;
+                for (let i = 0; i < s.length; i++) {
+                    const code = s.codePointAt(i);
+                    if ((code <= 0x1f || (code >= 0x7f && code <= 0x9f)) || // ignore control characters
+                        code >= 0x300 && code <= 0x36f // ignore combining characters
+                    )
+                        continue;
+                    // surrogates
+                    if (code > 0xffff)
+                        i++;
+                    width += is_codepoint_fullwidth(code) ? 2 : 1;
+                }
+                return width;
+            }
+        }),
+        // ------------ 文本处理工具方法
+        ...to_method_property_descriptors({
+            /** 截取字符串不超过 width 显示宽度的部分，并保留颜色
+                找到并记录能容纳 字符串 + … 的最后一个字符的位置 i_fitted
+                  - 若完整的字符串长度超过 width，返回 slice(0, i_fitted + 1) + …
+                  - 否则                          返回 this
+             */
+            truncate(width) {
+                const color_bak = this.startsWith('\u001b') ? this.slice(0, 5) : '';
+                const s = strip_ansi(this);
+                if (width <= 2)
+                    return this.slice(0, width);
+                let i_fitted = 0;
+                let fitted_width = 0;
+                let cur_width = 0;
+                for (let i = 0; i < s.length; i++) {
+                    const code = s.codePointAt(i);
+                    if ((code <= 0x1F || (code >= 0x7F && code <= 0x9F)) || // Ignore control characters
+                        code >= 0x300 && code <= 0x36F // Ignore combining characters
+                    )
+                        continue;
+                    // surrogates (codepoint 需要用两个 utf-16 编码单位表示，因此这里跳过第二个编码单位，防止重复计算显示宽度)
+                    if (code > 0xFFFF)
+                        i++;
+                    const w = is_codepoint_fullwidth(code) ? 2 : 1;
+                    if (cur_width + w + 2 <= width) {
+                        i_fitted = i;
+                        fitted_width += w;
+                    }
+                    cur_width += w;
+                    if (cur_width > width) {
+                        const i_fitted_next = i_fitted + 1;
+                        // … 在 winterm 中对不齐，使用 ··· 代替
+                        const t = s.slice(0, i_fitted_next) + ' '.repeat(width - 2 - fitted_width) + '··';
+                        return color_bak ? color_bak + t + '\u001b[39m' : t;
+                    }
+                }
+                return this;
+            },
+            pad(width, { character = ' ', position = 'right' } = {}) {
+                const _width = this.width;
+                if (_width >= width)
+                    return this;
+                if (position === 'right')
+                    return this + character.repeat((width - _width) / character.width);
+                return character.repeat(width - _width) + this;
+            },
+            limit(width, { character = ' ', position = 'right' } = {}) {
+                return this.pad(width, { character, position }).truncate(width);
+            },
+            to_regexp(preservations, flags = '') {
+                const preserved_chars = new Set(preservations);
+                const replace_chars = Array.prototype.filter.call('|\\{}()[]^$+*?.-', (c) => !preserved_chars.has(c))
+                    .map((c) => c === ']' ? '\\]' : c).join('');
+                return new RegExp(this.replace(new RegExp(`[${replace_chars}]`, 'g'), '\\$&'), flags);
+            },
+            refmt(pattern, pattern_, preservations = '', flags = '', transformer = (name, value) => value || '', pattern_placeholder = /\{.*?\}/g) {
+                // --- 转换 pattern 为 pattern_regx
+                let last_end = 0;
+                // placeholder matched group indexes
+                let $placeholders = {};
+                let regx_parts = [];
+                function add_part(left, right) {
+                    const part = pattern.slice(left, right);
+                    if (part)
+                        regx_parts.push(part.to_regexp(preservations).source.bracket());
+                }
+                pattern.replace(pattern_placeholder, ($0, offset) => {
+                    add_part(last_end, offset);
+                    last_end = offset + $0.length;
+                    const placeholder = $0.slice(1, -1);
+                    let [placeholder_name, placeholder_pattern] = placeholder.split(':').map(s => s.trim());
+                    let optional = false;
+                    if (placeholder_name.endsWith('?')) {
+                        placeholder_name = placeholder_name.slice(0, -1);
+                        optional = true;
+                    }
+                    $placeholders[placeholder_name] = regx_parts.push(placeholder_pattern ?
+                        `${placeholder_pattern.bracket()}${optional ? '?' : ''}`
+                        :
+                            '(.*?)');
+                    return '';
+                });
+                add_part(last_end);
+                // 最后一个 (.*?) 改为贪心匹配，满足 .{suffix} 的需要
+                regx_parts = regx_parts.filter(part => part);
+                if (regx_parts.at(-1) === '(.*?)')
+                    regx_parts[regx_parts.length - 1] = '(.*)';
+                const pattern_regx = new RegExp(regx_parts.join(''), flags);
+                // --- 根据 pattern_regx 去匹配原有字符串，获取匹配结果，生成 placeholders 词典
+                const matches = pattern_regx.exec(this);
+                if (!matches)
+                    return this;
+                const placeholders = Object.fromEntries(Object.entries($placeholders)
+                    .map(([name, $i]) => [
+                    [name, matches[$i]],
+                    [`${name}.before`, matches[$i - 1] || ''],
+                    [`${name}.after`, matches[$i + 1] || ''],
+                ])
+                    .flat());
+                // --- 转换 pattern_ 为 replacement_str，如果有 transformer 则在遇到 placeholder 时应用
+                last_end = 0;
+                let replacement_parts = [];
+                pattern_.replace(pattern_placeholder, ($0, offset) => {
+                    replacement_parts.push(pattern_.slice(last_end, offset));
+                    last_end = offset + $0.length;
+                    const placeholder_name = $0.slice(1, -1);
+                    replacement_parts.push(transformer(placeholder_name, placeholders[placeholder_name], placeholders));
+                    return '';
+                });
+                replacement_parts.push(pattern_.slice(last_end));
+                return this.replace(pattern_regx, replacement_parts.join(''));
+            },
+            find(pattern, preservations = '', flags = '', pattern_placeholder = /\{.*?\}/g) {
+                // --- 转换 pattern 为 pattern_regx
+                let last_end = 0;
+                // placeholder matched group index
+                let $placeholders = {};
+                let regx_parts = [];
+                function add_part(left, right) {
+                    const part = pattern.slice(left, right);
+                    if (part)
+                        regx_parts.push(part.to_regexp(preservations).source.bracket());
+                }
+                pattern.replace(pattern_placeholder, ($0, offset) => {
+                    add_part(last_end, offset);
+                    last_end = offset + $0.length;
+                    const placeholder = $0.slice(1, -1);
+                    let [placeholder_name, placeholder_pattern] = placeholder.split(':').map(s => s.trim());
+                    let optional = false;
+                    if (placeholder_name.endsWith('?')) {
+                        placeholder_name = placeholder_name.slice(0, -1);
+                        optional = true;
+                    }
+                    $placeholders[placeholder_name] = regx_parts.push(placeholder_pattern ?
+                        `${placeholder_pattern.bracket()}${optional ? '?' : ''}`
+                        :
+                            '(.*?)');
+                    return '';
+                });
+                add_part(last_end);
+                // 最后一个 (.*?) 改为贪心匹配，满足 .{suffix} 的需要
+                regx_parts = regx_parts.filter(part => part);
+                if (regx_parts.at(-1) === '(.*?)')
+                    regx_parts[regx_parts.length - 1] = '(.*)';
+                const pattern_regx = new RegExp(regx_parts.join(''), flags);
+                // --- 根据 pattern_regx 去匹配原有字符串，获取匹配结果，生成 placeholders 词典
+                const matches = pattern_regx.exec(this);
+                if (!matches)
+                    return {};
+                return Object.fromEntries(Object.entries($placeholders)
+                    .map(([name, $i]) => [name, matches[$i] || '']));
+            },
+            /** 查找子串或字符出现的次数 */
+            count(search) {
+                if (!search)
+                    throw new Error('count 的 search 不能为空');
+                let count = 0;
+                for (let i = 0; (i = this.indexOf(search, i)) !== -1; i += search.length)
+                    count++;
+                return count;
+            },
+            quote(type = 'single') {
+                if (type === 'psh')
+                    return `& ${this.quote()}`;
+                return this.surround(quotes[type]);
+            },
+            quote_if_space(type = 'single') {
+                return this.includes(' ') ? this.quote(type) : this;
+            },
+            bracket(shape = 'round') {
+                return this.surround(...brackets[shape]);
+            },
+            surround(left, right) {
+                return left + this + (right || left);
+            },
+            surround_tag(tag_name) {
+                return '<' + tag_name + '>' + this + '</' + tag_name + '>';
+            },
+            to_lf() {
+                return this.replace(/\r\n/g, '\n');
+            },
+            rm(pattern, flags = 'g') {
+                if (typeof pattern === 'string')
+                    pattern = new RegExp(pattern, flags);
+                return this.replace(pattern, '');
+            },
+            split_lines(delimiter = /\r?\n/) {
+                let lines = this.split(delimiter);
+                if (lines.at(-1) === '')
+                    lines.pop();
+                return lines;
+            },
+            split_indent() {
+                let i = 0;
+                let indent = 0;
+                for (; i < this.length; i++)
+                    if (this[i] === ' ')
+                        indent++;
+                    else if (this[i] === '\t')
+                        indent += 4;
+                    else
+                        break;
+                return {
+                    indent,
+                    text: this.slice(i)
+                };
+            },
+            split2(splitter, { last = false, optional = false } = {}) {
+                const isplitter = last ? this.lastIndexOf(splitter) : this.indexOf(splitter);
+                if (isplitter === -1)
+                    if (optional)
+                        return [this];
+                    else
+                        throw new Error(`字符串: ${this} 必须包含 splitter: ${splitter}`);
+                return [this.slice(0, isplitter), this.slice(isplitter + splitter.length)];
+            },
+            trim_doc_comment() {
+                return `/** ${this.slice(3, -2).replace(/\s*\*\s*/g, '  ').replace(/@(param|params|return) \{.*?\}\s*/g, '').trim()} */`;
+            },
+            to_base64() {
+                return Buffer.from(this).toString('base64');
+            },
+            decode_base64(buffer = false) {
+                const buf = Buffer.from(this, 'base64');
+                if (buffer)
+                    return buf;
+                return buf.toString();
+            },
+            strip_ansi() {
+                return strip_ansi(this);
+            },
+            strip_start(prefix, validate) {
+                if (validate && !this.startsWith(prefix))
+                    throw new Error(`字符串没有以前缀 ${prefix} 开头: ${this}`);
+                return this.slice(prefix.length);
+            },
+            strip_if_start(prefix) {
+                return this.startsWith(prefix) ? this.slice(prefix.length) : this;
+            },
+            strip_end(suffix, validate) {
+                if (validate && !this.endsWith(suffix))
+                    throw new Error(`字符串没有以后缀 ${suffix} 结尾: ${this}`);
+                return this.slice(0, -suffix.length);
+            },
+            strip_if_end(suffix) {
+                return this.endsWith(suffix) ? this.slice(0, -suffix.length) : this;
+            },
+            ensure_start(prefix) {
+                return this.startsWith(prefix) ? this : prefix + this;
+            },
+            ensure_end(suffix = '\n') {
+                return this.endsWith(suffix) ? this : this + suffix;
+            },
+            slice_from(search, { include = false, last = false, optional = false } = {}) {
+                const i = last ? this.lastIndexOf(search) : this.indexOf(search);
+                if (i === -1)
+                    if (optional)
+                        return this;
+                    else
+                        throw new Error(`slice_from 在字符串 ${this} 中找不到 search: ${search}`);
+                else
+                    return this.slice(include ? i : i + search.length);
+            },
+            slice_to(search, { include = false, last = false, optional = false } = {}) {
+                const i = last ? this.lastIndexOf(search) : this.indexOf(search);
+                if (i === -1)
+                    if (optional)
+                        return this;
+                    else
+                        throw new Error(`slice_to 在字符串 ${this} 中找不到 search: ${search}`);
+                else
+                    return this.slice(0, include ? i + search.length : i);
+            },
+            space() {
+                if (!this)
+                    return this;
+                let text_;
+                text_ = this
+                    .replace(new RegExp(cjk + '([\'"])', 'g'), '$1 $2')
+                    .replace(new RegExp('([\'"])' + cjk, 'g'), '$1 $2')
+                    .replace(/(["']+)\s*(.+?)\s*(["']+)/g, '$1$2$3')
+                    .replace(new RegExp(cjk + '([\\+\\-\\*\\/=&\\\\\\|<>])([A-Za-z0-9])', 'g'), '$1 $2 $3')
+                    .replace(new RegExp('([A-Za-z0-9])([\\+\\-\\*\\/=&\\\\\\|<>])' + cjk, 'g'), '$1 $2 $3');
+                const text_bak = text_;
+                text_ = text_.replace(new RegExp(cjk + '([\\(\\[\\{<\u201c]+(.*?)[\\)\\]\\}>\u201d]+)' + cjk, 'g'), '$1 $2 $4');
+                if (text_ === text_bak)
+                    text_ = text_
+                        .replace(new RegExp(cjk + '([\\(\\[\\{<\u201c>])', 'g'), '$1 $2')
+                        .replace(new RegExp('([\\)\\]\\}>\u201d<])' + cjk, 'g'), '$1 $2');
+                return text_
+                    .replace(/([\(\[\{<\u201c]+)(\s*)(.+?)(\s*)([\)\]\}>\u201d]+)/g, '$1$3$5')
+                    .replace(new RegExp(cjk + '([~!;:,\\.\\?\u2026])([A-Za-z0-9])', 'g'), '$1$2 $3')
+                    .replace(new RegExp(cjk + '([A-Za-z0-9`\\$%\\^&\\*\\-=\\+\\\\\\|\\/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f])', 'g'), '$1 $2')
+                    .replace(new RegExp('([A-Za-z0-9`\\$%\\^&\\*\\-=\\+\\\\\\|\\/@\u00a1-\u00ff\u2022\u2027\u2150-\u218f])' + cjk, 'g'), '$1 $2');
+            },
+            to_backslash() {
+                return this.replaceAll('/', '\\');
+            }
+        }),
+        // ------------ colors
+        ...Object.fromEntries([
+            'red', 'green', 'yellow', 'blue', 'magenta', 'cyan', 'grey',
+            'red_', 'green_', 'yellow_', 'blue_', 'magenta_', 'cyan_',
+            'underline',
+        ].map(color => {
+            const style = color.endsWith('_') ? `${color.slice(0, -1)}Bright` : color;
+            return [color, {
+                    configurable: true,
+                    get() {
+                        // @ts-ignore
+                        return util.styleText(style, this, { validateStream: false });
+                    }
+                }];
+        })),
+        // ------------ 文件路径操作
+        ...to_getter_property_descriptors({
+            isdir() {
+                return this.endsWith('/');
+            },
+            fp() {
+                if (!this)
+                    return this;
+                const fp = this.replaceAll('\\', '/');
+                // 转换小写盘符开头的路径
+                return fp[1] === ':' && 'a' <= fp[0] && fp[0] <= 'z'
+                    ? fp[0].toUpperCase() + fp.slice(1)
+                    : fp;
+            },
+            fpd() {
+                const { fp } = this;
+                return fp.endsWith('/') ? fp : `${fp}/`;
+            },
+            fdir() {
+                return this.fp.strip_end(this.fname);
+            },
+            fname() {
+                const { fp } = this;
+                const ilast = fp.lastIndexOf('/');
+                if (ilast === -1)
+                    return fp; // 没有斜杠时返回整个字符串
+                // 以斜杠结尾的情况
+                if (ilast === fp.length - 1) {
+                    const iprev = fp.lastIndexOf('/', ilast - 1);
+                    return iprev === -1
+                        ? fp // 只有一个斜杠且在末尾
+                        : fp.slice(iprev + 1);
+                }
+                // 返回最后一个斜杠后的内容
+                return fp.slice(ilast + 1);
+            },
+            fext() {
+                const { fname } = this;
+                const index = fname.lastIndexOf('.');
+                return index <= 0
+                    ? ''
+                    : fname.slice(index + 1);
+            }
+        })
+    });
+    // ------------------------------------ Date.prototype
+    Object.defineProperties(Date.prototype, to_method_property_descriptors({
+        to_str(ms) {
+            return `${this.to_date_str()} ${this.to_time_str(ms)}`;
+        },
+        to_date_str() {
+            // 2024.01.01
+            return this.getFullYear() + '.' +
+                String(this.getMonth() + 1).padStart(2, '0') + '.' +
+                String(this.getDate()).padStart(2, '0');
+        },
+        to_time_str(ms) {
+            // 早上 09:00:00
+            const [ampm, hour] = get_twelve_hour_clock(this);
+            return `${ampm} ${get_time_str(this, hour, ms, ':')}`;
+        },
+        to_dot_time_str(ms) {
+            // 17.03.02
+            return get_time_str(this, this.getHours(), ms, '.');
+        },
+        to_dot_str(ms) {
+            return `${this.to_date_str()} ${this.to_dot_time_str(ms)}`;
+        },
+        to_formal_time_str(ms) {
+            // 17:03:02
+            return get_time_str(this, this.getHours(), ms, ':');
+        },
+        to_formal_str(ms) {
+            return `${this.to_date_str()} ${this.to_formal_time_str(ms)}`;
+        }
+    }));
+    function get_twelve_hour_clock(date) {
+        let hour = date.getHours();
+        if (hour <= 6)
+            return [t('凌晨'), hour];
+        if (hour <= 8)
+            return [t('清晨'), hour];
+        if (hour <= 9)
+            return [t('早上'), hour];
+        if (hour <= 10)
+            return [t('上午'), hour];
+        if (hour <= 12)
+            return [t('中午'), hour];
+        hour -= 12;
+        if (hour <= 5)
+            return [t('下午'), hour];
+        if (hour <= 10)
+            return [t('晚上'), hour];
+        return [t('深夜'), hour];
+    }
+    function get_time_str(date, hour, ms, splitter) {
+        return String(hour).padStart(2, '0') + splitter +
+            String(date.getMinutes()).padStart(2, '0') + splitter +
+            String(date.getSeconds()).padStart(2, '0') +
+            (ms
+                ? '.' + String(date.getMilliseconds()).padStart(3, '0')
+                : '');
+    }
+    // ------------------------------------ Number.prototype
+    Object.defineProperties(Number.prototype, to_method_property_descriptors({
+        to_fsize_str() {
+            return byte_size(this);
+        },
+        to_bin_str() {
+            return `0b${this.toString(2)}`;
+        },
+        to_hex_str(length) {
+            const s = Math.abs(this).toString(16);
+            // 长度自动对齐到 4 的倍数
+            if (length === undefined)
+                length = Math.ceil(s.length / 4) * 4;
+            return `${this < 0 ? '-' : ''}0x${'0'.repeat(length - s.length)}${s}`;
+        },
+        to_oct_str() {
+            return `0o${this.toString(8)}`;
+        },
+    }));
+    // ------------------------------------ Array.prototype
+    Object.defineProperties(Array.prototype, {
+        ...to_getter_property_descriptors({
+            last() {
+                return this.at(-1);
+            }
+        }),
+        // --- 文本处理工具方法
+        ...to_method_property_descriptors({
+            log(limit = 10000) {
+                const text = this.join('\n') + '\n';
+                if (limit === -1 || this.length <= limit)
+                    console.log(text);
+                else if (limit > 0)
+                    console.log(text.slice(0, limit) + '\n...'.blue);
+                else
+                    console.log('...\n'.blue + text.slice(limit));
+            },
+            trim_lines({ trim_line = true, rm_empty_lines = true, rm_last_empty_lines = false } = {}) {
+                if (!this.length)
+                    return this;
+                let lines = this;
+                if (trim_line)
+                    lines = lines.map(line => line.trim());
+                if (rm_empty_lines)
+                    return lines.filter(Boolean);
+                if (rm_last_empty_lines) {
+                    lines.reverse();
+                    const i_not_empty = lines.findIndex(Boolean);
+                    if (i_not_empty !== -1)
+                        lines = lines.slice(i_not_empty);
+                    lines.reverse();
+                    return lines;
+                }
+                return lines;
+            },
+            trim_license() {
+                const i = this.indexOf('/*');
+                const j = this.indexOf('*/');
+                if (i === 0 && this[i + 1].includes('License'))
+                    return this.slice(j + 1);
+                else
+                    return this;
+            },
+            split_indents() {
+                return this.map(line => line.split_indent());
+            },
+            indent(width = 4, character = ' ') {
+                const indent = character.repeat(width);
+                return this.map(line => indent + line);
+            },
+            indent2to4() {
+                return this.split_indents()
+                    .map(line => ' '.repeat(line.indent * 2) + line.text);
+            },
+            sum(mapper) {
+                if (!this.length)
+                    return undefined;
+                // 快捷路径
+                const first = this[0];
+                if ((typeof first === 'number' || typeof first === 'bigint') && !mapper)
+                    return this.reduce((acc, x) => acc + x, first);
+                if (is_key_type(mapper))
+                    mapper = build_mapper(mapper);
+                mapper ??= ident;
+                return this.reduce((acc, x) => acc + mapper(x), mapper(first));
+            },
+            max(mapper = ident) {
+                if (!this.length)
+                    return undefined;
+                if (is_key_type(mapper))
+                    mapper = build_mapper(mapper);
+                let max = mapper(this[0]);
+                let imax = 0;
+                for (let i = 0; i < this.length; i++) {
+                    const value = mapper(this[i]);
+                    if (value > max) {
+                        max = value;
+                        imax = i;
+                    }
+                }
+                return this[imax];
+            },
+            min(mapper = ident) {
+                if (!this.length)
+                    return undefined;
+                if (is_key_type(mapper))
+                    mapper = build_mapper(mapper);
+                let min = mapper(this[0]);
+                let imin = 0;
+                for (let i = 0; i < this.length; i++) {
+                    const value = mapper(this[i]);
+                    if (value < min) {
+                        min = value;
+                        imin = i;
+                    }
+                }
+                return this[imin];
+            },
+            unique(mapper) {
+                if (!mapper)
+                    return [...new Set(this)];
+                if (is_key_type(mapper))
+                    mapper = build_mapper(mapper);
+                let map = new Map();
+                for (const x of this)
+                    map.set(mapper(x), x);
+                return [...map.values()];
+            },
+            join_lines(append = true) {
+                return `${this.join('\n')}${append ? '\n' : ''}`;
+            }
+        })
+    });
+    Object.defineProperties(BigInt.prototype, to_method_property_descriptors({
+        to_fsize_str() {
+            return byte_size(this);
+        },
+        toJSON() {
+            return this.toString();
+        }
+    }));
+    Object.defineProperties(Error.prototype, to_method_property_descriptors({
+        toJSON() {
+            return Object.fromEntries(Object.getOwnPropertyNames(this)
+                .map(name => [name, this[name]]));
+        }
+    }));
+    Object.defineProperties(Set.prototype, to_method_property_descriptors({
+        map(mapfn) {
+            return Array.from(this, mapfn);
+        }
+    }));
+    Object.defineProperties(Uint8Array.prototype, to_getter_property_descriptors({
+        dataview() {
+            return new DataView(this.buffer, this.byteOffset, this.byteLength);
+        }
+    }));
+}
+export function to_json(obj, replacer) {
+    return JSON.stringify(obj, replacer, 4) + '\n';
+}
+export function to_json_safely(obj, replacer) {
+    return to_json(obj, replacer)
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029')
+        .replace(/<\/script>/g, '<\\/script>');
+}
+export function is_codepoint_fullwidth(codepoint) {
+    // code points are derived from:
+    // http://www.unix.org/Public/UNIDATA/EastAsianWidth.txt
+    return (!Number.isNaN(codepoint) &&
+        codepoint >= 0x1100 &&
+        (codepoint <= 0x115f || // hangul jamo
+            codepoint === 0x201c || codepoint === 0x201d || // 
+            codepoint === 0x2026 || // …
+            codepoint === 0x203b || // ※
+            // arrows
+            (0x2190 <= codepoint && codepoint <= 0x21FF) ||
+            codepoint === 0x2329 || // left-pointing angle bracket
+            codepoint === 0x232a || // right-pointing angle bracket
+            // ①
+            (0x2460 <= codepoint && codepoint <= 0x24ff) ||
+            // box drawing
+            (0x2500 <= codepoint && codepoint <= 0x257f) ||
+            // shapes, symbols, …
+            (0x2580 <= codepoint && codepoint <= 0x2bef) ||
+            // cjk radicals supplement .. enclosed cjk letters and months
+            (0x2e80 <= codepoint && codepoint <= 0x3247 && codepoint !== 0x303f) ||
+            // enclosed cjk letters and months .. cjk unified ideographs extension a
+            (0x3250 <= codepoint && codepoint <= 0x4dbf) ||
+            // cjk unified ideographs .. yi radicals
+            (0x4E00 <= codepoint && codepoint <= 0xA4C6) ||
+            // hangul jamo extended-a
+            (0xa960 <= codepoint && codepoint <= 0xa97c) ||
+            // hangul syllables
+            (0xac00 <= codepoint && codepoint <= 0xd7a3) ||
+            // cjk compatibility ideographs
+            (0xf900 <= codepoint && codepoint <= 0xfaff) ||
+            // vertical forms
+            (0xfe10 <= codepoint && codepoint <= 0xfe19) ||
+            // cjk compatibility forms .. small form variants
+            (0xfe30 <= codepoint && codepoint <= 0xfe6b) ||
+            // halfwidth and fullwidth forms
+            (0xff01 <= codepoint && codepoint <= 0xff60) ||
+            (0xffe0 <= codepoint && codepoint <= 0xffe6) ||
+            // kana supplement
+            (0x1b000 <= codepoint && codepoint <= 0x1b001) ||
+            // enclosed ideographic supplement
+            (0x1f200 <= codepoint && codepoint <= 0x1f251) ||
+            // cjk unified ideographs extension b .. tertiary ideographic plane
+            (0x20000 <= codepoint && codepoint <= 0x3fffd)));
+}
+const units = ['b', 'kb', 'mb', 'gb', 'tb', 'pb', 'eb', 'zb', 'yb'];
+const bytes_table = units.map((unit, i) => ({
+    start: i === 0 ? 0 : 2 ** (i * 10),
+    end: 2 ** ((i + 1) * 10),
+    unit
+}));
+export function byte_size(bytes) {
+    bytes = Number(bytes);
+    const sign = bytes < 0 ? '-' : '';
+    bytes = Math.abs(bytes);
+    const { unit, start } = bytes_table.find(range => bytes >= range.start && bytes < range.end);
+    return `${sign}${start === 0 ? bytes : (bytes / start).toFixed()} ${unit}`;
+}
+//# sourceMappingURL=prototype.js.map

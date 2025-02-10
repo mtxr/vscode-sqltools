@@ -15,5 +15,6 @@
     "**/dist": true,
     "docs": true,
     "packages": false,
-  }
+  },
+  "iis.configDir": ""
 }

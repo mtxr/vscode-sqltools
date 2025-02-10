@@ -1,0 +1,17 @@
+{
+    "ui:order": [
+        "server",
+        "port",
+        "username",
+        "password",
+        "autologin"
+    ],
+    "server": {
+        "ui:help": "ip address i.e. 127.0.0.1"
+      },
+    "port": {
+        "ui:help": "port i.e. 8848"
+    },
+    "username": {"ui:help": "default: admin"},
+    "password": {"ui:help": "default: 123456"}
+}

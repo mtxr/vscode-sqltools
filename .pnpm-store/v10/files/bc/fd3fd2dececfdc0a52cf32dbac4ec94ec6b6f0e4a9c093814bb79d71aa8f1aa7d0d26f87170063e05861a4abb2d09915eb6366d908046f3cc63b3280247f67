@@ -1,0 +1,12 @@
+export declare let storage: {
+    /** 通过 key 获取字符串类型的值，不存在时返回空字符串 ('') */
+    getstr<TString extends string = string>(key: string): TString;
+    /** 将字符串类型的值保存到 key */
+    setstr(key: string, value?: string): void;
+    /** 根据 key 获取 JSON 类型的值，不存在时返回通过第二个参数传入的默认值，默认为 null */
+    get<TValue = any>(key: string, _default?: TValue): TValue;
+    /** 保存 JSON 类型的值到 key, 并返回 value */
+    set<TValue>(key: string, value: TValue): TValue;
+    list(): string[];
+    delete(key: string): void;
+};

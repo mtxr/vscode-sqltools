@@ -1,0 +1,34 @@
+/** 面向对象的 react 状态管理  Object-oriented state management for react.
+    @see https://github.com/ShenHongFei/react-object-model
+    @example ```ts
+    class User extends Model <User> {
+        name = 'Tom'
+        age = 16
+    }
+    
+    let user = new User()
+    ``` */
+export declare class Model<TModel> {
+    /** Map<rerender, selector> */
+    protected _selectors: Map<({}: {}) => void, (keyof TModel)[]>;
+    /** 保存上次渲染的状态用于比较  last state */
+    protected _state: any;
+    constructor();
+    /** 像使用 react hooks 那样订阅模型属性  use and watch model's properties like react hooks
+        use 之后，通过 set 更新属性才会触发组件重新渲染  After `use`, properties updated by `set` will trigger rerender
+        @param selector 订阅属性名称组成的数组  selector array of properties to watch
+        @returns 模型本身  model self
+        @example ```ts
+            const { name, age } = user.use(['name', 'age'])
+            ``` */
+    use<Key extends keyof TModel>(selector?: Key[]): Pick<TModel, Key>;
+    /** 更新模型属性，diff, 重新渲染对应组件  assign properties to model then diff then rerender (when changed)
+        @param data 属性  data properties
+        @example ```ts
+            user.set({ name: 'Tom', age: 16 })
+            ``` */
+    set(data: Partial<TModel>): void;
+    /** - 未传 diffs 时，根据当前 model 状态与上一次状态 diff 计算出变化属性，重新渲染订阅了变化属性的组件
+        - 手动传入 diffs 时，重新渲染订阅了其中属性的组件 */
+    render(diffs?: (keyof TModel)[]): void;
+}

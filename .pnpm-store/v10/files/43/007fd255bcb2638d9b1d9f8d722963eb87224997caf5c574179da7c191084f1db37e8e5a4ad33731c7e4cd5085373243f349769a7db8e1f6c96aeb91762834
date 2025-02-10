@@ -1,0 +1,55 @@
+import { type CallOptions } from './process.ts';
+export declare class Git {
+    static exe: string;
+    cwd: string;
+    constructor(cwd: string);
+    static init(cwd: string, print?: boolean): Promise<Git>;
+    static clone(repo: string, fpd: string, shallow?: boolean | string): Promise<Git>;
+    call(args?: any[], { color, print, on_stderr, throw_code, }?: {
+        color?: boolean;
+        print?: CallOptions['print'];
+        on_stderr?: CallOptions['on_stderr'];
+        throw_code?: CallOptions['throw_code'];
+    }): Promise<import("./process.ts").CallResult<string>>;
+    get_branch(): Promise<string>;
+    /** - print: `true` */
+    get_branches(print?: boolean): Promise<string[]>;
+    has_branch(branch: string): Promise<boolean>;
+    /** - last?: `4` */
+    log({ n, graph, format, }?: {
+        n?: number;
+        graph?: boolean;
+        format?: string;
+    }): Promise<import("./process.ts").CallResult<string>>;
+    get_last_commits(n?: number): Promise<{
+        time: Date;
+        commiter: string;
+        hash: string;
+        message: string;
+    }[]>;
+    fetch({ print, remote }?: {
+        print?: boolean;
+        remote?: string;
+    }): Promise<void>;
+    /** 创建或者切换到分支
+       - branch?: `'main'` */
+    checkout(branch?: 'main'): Promise<void>;
+    checkout(branch?: string): Promise<void>;
+    _checkout(branch: string, create: boolean, remote_branch?: string): Promise<void>;
+    get_version_info(version?: string): Promise<{
+        version: string;
+        branch: string;
+        time: string;
+        hash: string;
+        commiter: string;
+        message: string;
+    }>;
+}
+export interface GitVersionInfo {
+    version: string;
+    branch: string;
+    time: string;
+    hash: string;
+    commiter: string;
+    message: string;
+}

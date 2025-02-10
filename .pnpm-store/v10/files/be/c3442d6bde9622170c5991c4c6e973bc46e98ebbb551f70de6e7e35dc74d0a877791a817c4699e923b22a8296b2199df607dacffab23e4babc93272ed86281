@@ -1,0 +1,643 @@
+import { fileURLToPath } from 'url';
+import { not_empty } from "./prototype.js";
+import { noprint } from "./process.js";
+import { Lock, check, filter_values } from "./utils.js";
+import { fcopy, fmkdir, fwrite } from "./file.js";
+import { path } from "./path.js";
+const monaco_files = [
+    'loader.js',
+    'nls.messages.zh-cn.js',
+    'editor/editor.main.js',
+    'editor/editor.main.css',
+    'base/worker/workerMain.js',
+    'base/browser/ui/codicons/codicon/codicon.ttf',
+    ...['python', 'javascript', 'typescript', 'css', 'html', 'cpp', 'sql', 'scss', 'shell'].map(language => `basic-languages/${language}/${language}.js`),
+    // 太大了，先不加
+    // 'language/typescript/tsMode.js',
+    // 'language/typescript/tsWorker.js',
+];
+function get_react_js(production, src, map) {
+    return `${src ? import.meta.dirname.fpd : 'vendors/react/'}react.${production ? 'production' : 'development'}.js${map ? '.map' : ''}`;
+}
+function get_react_asset(production, map) {
+    return {
+        src: get_react_js(production, true, map),
+        out: get_react_js(production, false, map),
+    };
+}
+const dependencies = {
+    react: {
+        productions: [get_react_asset(true, false)],
+        devs: [get_react_asset(false, false)],
+        maps: {
+            productions: [get_react_asset(true, true)],
+            devs: [get_react_asset(false, true)],
+        }
+    },
+    lodash: {
+        productions: ['lodash/lodash.min.js'],
+        devs: ['lodash/lodash.js'],
+    },
+    jquery: {
+        productions: ['jquery/dist/jquery.min.js']
+    },
+    xterm: {
+        productions: ['@xterm/xterm/lib/xterm.js'],
+        maps: {
+            productions: ['@xterm/xterm/lib/xterm.js.map'],
+        }
+    },
+    swiper: {
+        productions: ['swiper/swiper-bundle.min.js']
+    },
+    dayjs: {
+        productions: ['dayjs/dayjs.min.js'],
+    },
+    antd: {
+        dependencies: ['dayjs', 'react'],
+        productions: ['antd/dist/antd.min.js'],
+        devs: ['antd/dist/antd.js'],
+        maps: {
+            productions: ['antd/dist/antd.min.js.map'],
+            devs: ['antd/dist/antd.js.map'],
+        }
+    },
+    'antd-icons': {
+        dependencies: ['antd'],
+        productions: ['@ant-design/icons/dist/index.umd.min.js'],
+        devs: ['@ant-design/icons/dist/index.umd.js']
+    },
+    'vscode-oniguruma': {
+        assets: {
+            productions: ['vscode-oniguruma/release/onig.wasm']
+        }
+    },
+    'antd-plots': {
+        productions: ['@ant-design/plots/dist/plots.min.js'],
+        maps: {
+            productions: ['@ant-design/plots/dist/plots.min.js.map']
+        }
+    },
+    gridstack: {
+        productions: ['gridstack/dist/gridstack-all.js'],
+        maps: {
+            productions: ['gridstack/dist/gridstack-all.js.map']
+        }
+    },
+    quill: {
+        productions: ['react-quill-new/dist/react-quill.js']
+    },
+    monaco: {
+        assets: {
+            productions: monaco_files.map(fp => `monaco-editor/min/vs/${fp}`),
+            devs: monaco_files.map(fp => `monaco-editor/dev/vs/${fp}`)
+        },
+        maps: {
+            productions: [
+                'monaco-editor/min-maps/vs/base/worker/workerMain.js.map',
+                'monaco-editor/min-maps/vs/editor/editor.main.js.map',
+                'monaco-editor/min-maps/vs/loader.js.map',
+                'monaco-editor/min-maps/nls.messages.zh-cn.js.map',
+            ],
+            devs: [
+                'monaco-editor/dev/vs/base/worker/workerMain.js.map',
+                'monaco-editor/dev/vs/editor/editor.main.js.map',
+            ],
+        }
+    },
+    echarts: {
+        devs: ['echarts/dist/echarts.js'],
+        productions: ['echarts/dist/echarts.min.js'],
+        maps: {
+            devs: ['echarts/dist/echarts.js.map']
+        }
+    }
+};
+function get_asset_out(asset) {
+    return typeof asset === 'string'
+        ? asset
+        : asset.out || asset.src;
+}
+function get_vendor_asset_out(asset) {
+    return typeof asset === 'string'
+        ? `vendors/${asset}`
+        : asset.out || asset.src;
+}
+export class Bundler {
+    name;
+    fpd_root;
+    target;
+    production;
+    fpd_out;
+    source_map;
+    dependencies = [];
+    analyzer;
+    config;
+    htmls;
+    assets;
+    assets_root;
+    template;
+    globals;
+    exclude_modules;
+    license;
+    lcompiler;
+    /** 通过 webpack 从入口文件打包所有依赖生成单个 index.{mjs,cjs} 文件
+        - name: 项目名称
+        - target: 目标环境 nodejs | web
+        - fpd_root: 项目根目录
+        - fpd_out: 输出文件目录
+        - fpd_cache: webpack 缓存目录
+        - entry: 入口文件
+        - options?: 打包配置, 按常用顺序排列
+            - source_map?: `true` 启用源码映射 .map 文件
+            - globals?: 全局变量定义
+            - external_dayjs?: `false` 配置 dayjs 为 external 来配合 antd 使用, 减小一点体积
+            - externals?: 配置外部模块
+            - htmls?: 配置要生成的 html, 比如 { 'index.html', { title: '文件', ... } }
+            - assets?: 项目中需要直接复制到输出目录的资源，有 productions 但无 devs 时 (是同一套)，
+                在 dev 模式下会用 productions 中的资源，如果不需要 productions 资源， devs 可以设置为 [ ],
+                每一项是  string 或者 { src: '...', out: '...' }，路径相对于 fpd_root 和 fpd_out
+            - assets_root?: `'/'` 生成的 html 中是否使用 / 开头的绝对路径，以支持 browser router 路由能力
+                启用后 assets, html 中的 icon, scripts 路径直接在前面添加 assets_root 来生成最终 html href
+                未启用时使用相对 html 路径来生成最终 html href
+            - template?: `false` 除了生成对应的 html 之外，还生成所有路径为 `{root}/...` 的模板 html 文件, 方便后续 server 替换渲染
+            - local_loaders?: `true` true 时使用项目 node_modules/ 中的 loader;  false 时使用 D:/0/ 下面的
+            - commonjs2?: `false` 打包为 commonjs2 (.cjs) 的文件
+            - expose?: `false` 入口模块所有导出的属性赋值到全局对象 globalThis 上
+            - single_chunk?: `true` 输出为单个文件，将依赖也打包到其中，不要生成多个 chunk
+            - dynamic_import?: `true` 对于 await import('...') 要不要打包外部模块到输出文件中
+            - resolve_alias?: 配置 resolve alias
+            - resolve_fallback?: 配置 resolve fallback
+            - assets_stats?: `true` 打印输出的文件信息
+            - analyzer?: `false` 启用 WebpackBundleAnalyzer 插件分析构建产物大小
+            - dts?: `false` 生成 .d.ts 文件
+            - exclude_modules?: 传入正则表达式 ，匹配时使用 IgnorePlugin 强制不打包这个模块，但是一旦导入就会报错
+            - cache_version?: webpack cache version, 用于区分同一个 name 的不同版本
+            - production?: `true` webpack mode 设置为 'production'
+            - sass?: 传入 sass 实例避免 webpack 重复加载 .cjs 版本
+            - license?: 使用 license-webpack-plugin 构建 ThirdPartyNotice.txt */
+    constructor(name, target, fpd_root, fpd_out, fpdt_cache, entry, { source_map = true, globals, external_dayjs = false, externals, htmls, assets, assets_root = '/', template = false, commonjs2 = false, expose = false, single_chunk = true, dynamic_import = true, resolve_alias, resolve_fallback, assets_stats = true, analyzer = false, dts = false, exclude_modules, cache_version, production = true, sass, dependencies, license, } = {}) {
+        this.name = name;
+        this.analyzer = analyzer;
+        this.production = production;
+        this.target = target;
+        this.fpd_root = fpd_root;
+        this.fpd_out = fpd_out;
+        this.source_map = source_map;
+        this.htmls = htmls;
+        this.assets = assets;
+        this.assets_root = assets_root;
+        this.template = template;
+        this.globals = globals;
+        this.exclude_modules = exclude_modules;
+        if (dependencies) {
+            check(target === 'web');
+            this.dependencies = dependencies;
+        }
+        if (expose && commonjs2)
+            throw new Error('expose 和 commonjs2 不能同时启用');
+        const output_module = !commonjs2 && !expose;
+        this.license = license;
+        // let smp = new SpeedMeasurePlugin()
+        // const config: Webpack.Configuration = smp.wrap({
+        let resolve_cache = {};
+        const get_loader = (name) => resolve_cache[name] ??= fileURLToPath(import.meta.resolve(`${name}/package.json`)).fdir;
+        this.config = {
+            name,
+            mode: production ? 'production' : 'development',
+            devtool: source_map ? 'source-map' : false,
+            context: fpd_root,
+            entry,
+            experiments: {
+                outputModule: output_module,
+            },
+            output: {
+                path: fpd_out,
+                filename: '[name]',
+                publicPath: '/',
+                pathinfo: true,
+                globalObject: 'globalThis',
+                module: output_module,
+                // 在 bundle 中导出 entry 文件的 export
+                library: {
+                    type: commonjs2 ? 'commonjs2' : expose ? 'global' : 'module',
+                },
+                ...single_chunk ? {
+                    chunkLoading: false
+                } : {},
+            },
+            target: [target === 'web' ? 'web' : 'node23', 'es2024'],
+            // 结合 output.globalObject, 会生成 globalThis['React'] 这样的引用
+            externalsType: target === 'nodejs' ? 'commonjs2' : 'global',
+            // 以 react: 'React', 为例，含义为
+            // 取全局变量 window.React 的值作为 import { useState } from 'react' 中 { ... } 这部分的结果，再解构里面的 useState 属性
+            externals: filter_values({
+                react: 'React',
+                'react/jsx-runtime': 'ReactJSX',
+                'react-dom': 'ReactDOM',
+                'react-dom/client': 'ReactDOMClient',
+                jquery: '$',
+                ...target === 'web' ? {
+                    lodash: '_',
+                } : {
+                    vscode: 'commonjs2 vscode'
+                },
+                // import { Terminal } from 'xterm'
+                // 实际上 Terminal 直接暴露在了 window 上，而不是 window.Terminal.Terminal
+                '@xterm/xterm': 'window',
+                swiper: 'Swiper',
+                ...external_dayjs ? { dayjs: 'dayjs' } : {},
+                antd: 'antd',
+                '@ant-design/icons': 'icons',
+                '@ant-design/plots': 'Plots',
+                echarts: 'echarts',
+                ...externals
+            }),
+            resolve: {
+                symlinks: true,
+                extensions: ['.js'],
+                extensionAlias: {
+                    '.js': ['.js', '.ts', '.tsx']
+                },
+                ...resolve_alias ? { alias: resolve_alias } : {},
+                // modules: [
+                //     '',
+                // ],
+                ...resolve_fallback ? { fallback: resolve_fallback } : {},
+                // fallback: {
+                //     os: false,
+                // }
+            },
+            ...sass ? {
+                loader: { sass }
+            } : {},
+            module: {
+                ...dynamic_import === false ? {
+                    parser: {
+                        javascript: {
+                            // 保留 await import() 这样的引用
+                            import: false,
+                            // dynamicImportMode: 'weak',
+                        }
+                    },
+                } : {},
+                rules: [
+                    ...source_map ? [
+                        {
+                            test: /\.js$/,
+                            enforce: 'pre',
+                            use: [get_loader('source-map-loader')],
+                        },
+                    ] : [],
+                    {
+                        test: target === 'nodejs' ? /\.ts$/ : /\.tsx?$/,
+                        exclude: /node_modules/,
+                        loader: get_loader('ts-loader'),
+                        // https://github.com/TypeStrong/ts-loader
+                        options: {
+                            configFile: `${fpd_root}tsconfig.json`,
+                            onlyCompileBundledFiles: true,
+                            transpileOnly: !dts,
+                            compilerOptions: {
+                                module: 'ESNext',
+                                moduleResolution: 'Bundler',
+                                declaration: dts,
+                                noEmit: false,
+                                allowImportingTsExtensions: false,
+                                ...commonjs2 ? {
+                                    // 编译为 commonjs 后 import 的依赖是通过 require 引入的，所以需要 interop 去生成 default
+                                    // nodejs 默认的 import 会自动加上 default，所以不需要 interop
+                                    esModuleInterop: true
+                                } : {},
+                            }
+                        }
+                    },
+                    ...target === 'web' ? [
+                        {
+                            test: /\.s[ac]ss$/,
+                            use: [
+                                get_loader('style-loader'),
+                                {
+                                    // https://github.com/webpack-contrib/css-loader
+                                    loader: get_loader('css-loader'),
+                                    options: {
+                                        url: false,
+                                    }
+                                },
+                                {
+                                    // https://webpack.js.org/loaders/sass-loader
+                                    loader: get_loader('sass-loader'),
+                                    options: {
+                                        api: 'modern-compiler',
+                                        ...sass ? {
+                                            implementation: sass
+                                        } : {},
+                                        // 解决 url(search.png) 打包出错的问题
+                                        webpackImporter: false,
+                                        sassOptions: {
+                                            indentWidth: 4,
+                                        }
+                                    }
+                                },
+                            ]
+                        },
+                        {
+                            test: /\.css$/,
+                            use: [get_loader('style-loader'), get_loader('css-loader')]
+                        },
+                        {
+                            oneOf: [
+                                {
+                                    test: /\.icon\.svg$/,
+                                    issuer: /\.[jt]sx?$/,
+                                    loader: get_loader('@svgr/webpack'),
+                                    options: { icon: true }
+                                },
+                                {
+                                    test: /\.(svg|ico|png|jpe?g|gif|woff2?|ttf|eot|otf|mp4|webm|ogg|mp3|wav|flac|aac)$/,
+                                    type: 'asset/inline',
+                                },
+                            ]
+                        },
+                    ] : [],
+                    {
+                        test: /\.(txt|csv|dos)$/,
+                        type: 'asset/source',
+                    }
+                ]
+            },
+            optimization: {
+                minimize: false
+            },
+            cache: {
+                type: 'filesystem',
+                compression: false,
+                cacheDirectory: fpdt_cache,
+                ...cache_version ? {
+                    version: cache_version
+                } : {}
+            },
+            ignoreWarnings: [
+                ...source_map ? [/Failed to parse source map/] : [],
+                ...this.license ? [
+                    /** LicenseWebpackPlugin 会添加过时的 string 类型的 warning，无法被正则表达式的逻辑匹配，这里只能手动用函数过滤 */
+                    (warning) => typeof warning === 'string' && warning.startsWith('license-webpack-plugin: could not find any license ')
+                ] : [],
+                ...target === 'nodejs' ? [
+                    /Can't resolve '(bufferutil|utf-8-validate)'/,
+                    // 打包 ali-oss 时可能的报错
+                    (warning) => {
+                        if (!warning)
+                            return false;
+                        const { message, module } = warning;
+                        if (!message)
+                            return false;
+                        const fp = module?.context?.fp || '';
+                        if (message.includes('the request of a dependency is an expression'))
+                            return fp.endsWith('any-promise') ||
+                                fp.includes('/@sqltools/base-driver/');
+                        else if (message.includes('require function is used in a way in which dependencies cannot be statically extracted'))
+                            return fp.includes('/vscode-languageserver-types/');
+                        else
+                            return false;
+                    }
+                ] : [],
+            ],
+            performance: {
+                hints: false,
+            },
+            stats: {
+                colors: true,
+                context: fpd_root,
+                entrypoints: false,
+                errors: true,
+                errorDetails: true,
+                hash: false,
+                version: false,
+                timings: true,
+                children: true,
+                assets: assets_stats,
+                assetsSpace: 20,
+                modules: false,
+                modulesSpace: 20,
+                cachedAssets: false,
+                cachedModules: false,
+                chunks: false,
+                // logging: 'info',
+            }
+        };
+    }
+    async build(print = true) {
+        if (!this.lcompiler) {
+            const { default: Webpack } = await import('webpack');
+            this.config.plugins = [
+                ...this.globals ? [
+                    new Webpack.DefinePlugin({
+                        ...this.globals
+                        // process: { env: { }, argv: [] }
+                    })
+                ] : [],
+                // 使用 IgnorePlugin 能够不打包，但是一旦导入就会报错
+                ...this.exclude_modules ? [
+                    new Webpack.IgnorePlugin({
+                        resourceRegExp: this.exclude_modules,
+                        // checkResource: (resource, context) => 
+                        //     resource.startsWith('./vendors/') && !context.fp.startsWith(fpd_node_modules) ,
+                    })
+                ] : [],
+                ...this.analyzer ? await (async () => {
+                    const { BundleAnalyzerPlugin } = await import('webpack-bundle-analyzer');
+                    return [
+                        new BundleAnalyzerPlugin({
+                            analyzerPort: 8880,
+                            openAnalyzer: false,
+                        })
+                    ];
+                })() : [],
+                ...this.license ? await (async () => {
+                    const { LicenseWebpackPlugin } = await import('license-webpack-plugin');
+                    return [
+                        new LicenseWebpackPlugin({
+                            perChunkOutput: false,
+                            outputFilename: 'ThirdPartyNotice.txt',
+                        })
+                    ];
+                })() : [],
+            ];
+            this.lcompiler = new Lock(Webpack(this.config));
+        }
+        const stats = await this.lcompiler.request(async (compiler) => new Promise((resolve, reject) => {
+            compiler.run((error, stats) => {
+                if (error)
+                    reject(error);
+                else if (stats.hasErrors()) {
+                    console.log(stats.toString(compiler.options.stats));
+                    reject(new Error(`${this.name} 构建失败`));
+                }
+                else
+                    resolve(stats);
+            });
+        }));
+        if (print) {
+            const statstr = stats.toString(this.config.stats)
+                .replace(new RegExp(`\\n\\s*.*${this.name}.* compiled .*successfully.* in (.*)`), '').trimEnd();
+            console.log((statstr ? `${statstr}\n` : '') +
+                `${this.name} 成功构建到 ${this.fpd_out}`.green);
+        }
+    }
+    async close() {
+        await this.lcompiler?.request(async (compiler) => new Promise((resolve, reject) => {
+            compiler.close(error => {
+                if (error)
+                    reject(error);
+                else
+                    resolve();
+            });
+        }));
+    }
+    async build_all(print = true) {
+        await Promise.all([
+            this.build(print),
+            this.copy_files({ print: { info: print, files: false } }),
+            this.target === 'web' && this.htmls && this.build_htmls({ info: print, files: false })
+        ]);
+    }
+    /** 打包构建 js, 构建 html, 复制依赖文件 */
+    async build_all_and_close(print = true) {
+        await Promise.all([
+            this.build_and_close(print),
+            this.copy_files({ print: { info: print, files: false } }),
+            this.target === 'web' && this.htmls && this.build_htmls({ info: print, files: false })
+        ]);
+    }
+    /** 仅打包构建 js, 不复制依赖 */
+    async build_and_close(print = true) {
+        await this.build(print);
+        await this.close();
+    }
+    async build_htmls(print = { info: true, files: false }) {
+        await Promise.all(Object.entries(this.htmls).map(async ([fp_html, { entry = 'index.js', device_viewport: device_width = false, icon, manifest, dependencies: _dependencies = [], title, scripts, mscripts, notice = false, heads, }]) => {
+            const html_template = '<!doctype html>\n' +
+                '<html>\n' +
+                '    <head>\n' +
+                `        <title>${title}</title>\n` +
+                "        <meta charset='utf-8' />\n" +
+                (heads ? heads.map(head => `        ${head}`).join_lines() : '') +
+                (device_width ? "        <meta name='viewport' content='width=device-width, initial-scale=1.0' />\n" : '') +
+                (icon ? `        <link rel='icon' href='{root}${get_asset_out(icon)}' />\n` : '') +
+                (manifest ? `        <link rel='manifest' href='{root}${manifest}' />\n` : '') +
+                this.resolve_dependency_assets(_dependencies, false, { production: this.production }).map(asset => `        <script src='{root}${get_vendor_asset_out(asset)}' defer></script>`).join_lines() +
+                (scripts?.before
+                    ? scripts.before.map(asset => `        <script src='{root}${get_asset_out(asset)}' defer></script>`).join_lines()
+                    : '') +
+                (mscripts
+                    ? mscripts.map(mscript => `        <script src='{root}${get_asset_out(mscript)}' type='module'></script>`).join_lines()
+                    : '') +
+                `        <script src='{root}${entry}' type='module'></script>\n` +
+                (scripts?.after
+                    ? scripts.after.map(asset => `        <script src='{root}${get_asset_out(asset)}' defer></script>`).join_lines()
+                    : '') +
+                '    </head>\n' +
+                '    <body>\n' +
+                "        <div class='root'>" +
+                (notice
+                    ? '\n            <h2>正在加载 ··· (最多需要十秒钟)</h2>\n' +
+                        '            <h2>如果一直停留在此页面请按 f12 或右键 > 检查，打开开发者工具查看底部控制台报错，并尝试更换浏览器或将浏览器更新到最新版本，同时检查网络连接情况</h2>\n' +
+                        '        '
+                    : '') +
+                '</div>\n' +
+                '    </body>\n' +
+                '</html>\n';
+            await Promise.all([
+                fwrite(`${this.fpd_out}${fp_html}`, html_template.replaceAll('{root}', this.assets_root), noprint),
+                this.template && fwrite(`${this.fpd_out}${fp_html.strip_end('.html', true)}.template.html`, html_template, noprint)
+            ]);
+            if (print.files)
+                console.log(`已构建 ${fp_html}`);
+        }));
+        if (print.files)
+            console.log(`${this.name} 的所有 html 页面构建完成`);
+    }
+    resolve_dependencies(dependency_ids, resolveds = new Set()) {
+        dependency_ids.forEach(id => {
+            if (!resolveds.has(id)) {
+                const { dependencies: dependency_ids_ } = dependencies[id];
+                if (dependency_ids_)
+                    this.resolve_dependencies(dependency_ids_, resolveds);
+                resolveds.add(id);
+            }
+        });
+        return resolveds;
+    }
+    /** 解析依赖的文件
+        - dependencies: 依赖 id
+        - assets: false 时只包括在 script 标签加载的文件;  true 时包括 assets, maps 等 */
+    resolve_dependency_assets(_dependencies, assets, { production = this.production, source_map = this.source_map } = {}) {
+        return this.resolve_dependencies(_dependencies).map(id => {
+            const dependency = dependencies[id];
+            const { assets: _assets, maps } = dependency;
+            return [
+                ...assets ? this.resolve_config(_assets, production) : [],
+                ...assets && source_map ? this.resolve_config(maps, production) : [],
+                ...this.resolve_config(dependency, production)
+            ];
+        }).flat();
+    }
+    async copy_files({ dependencies = this.dependencies, production = this.production, assets = this.assets, fpd_root = this.fpd_root, fpd_out = this.fpd_out, print = { info: true, files: false } } = {}) {
+        if (print.files)
+            console.log(`复制 ${this.name} 的依赖文件到 ${this.fpd_out}`);
+        if (dependencies.length)
+            await fmkdir(`${fpd_out}vendors/`, noprint);
+        // 输出路径 -> 原路径，用来保证只复制一次且是同样的映射
+        let records = new Map();
+        const { name } = this;
+        async function fcopy_asset(asset) {
+            let src, out;
+            if (typeof asset === 'string')
+                src = out = asset;
+            else {
+                ({ src, out } = asset);
+                out ??= src;
+            }
+            await fcopy_record(path.resolve_with_slash(fpd_root, src), `${fpd_out}${out}`);
+        }
+        /** 保证同样的输出资源只被写入一次 */
+        async function fcopy_record(fp_src, fp_out) {
+            const fp_src_old = records.get(fp_out);
+            if (fp_src_old) {
+                if (fp_src_old !== fp_src)
+                    throw new Error(`${name} 复制项目资源冲突, ${fp_src_old} 和 ${fp_src} 均复制到 ${fp_out}`);
+            }
+            else {
+                records.set(fp_out, fp_src);
+                await fcopy(fp_src, fp_out, { print: print.files });
+            }
+        }
+        await Promise.all([
+            ...this.resolve_dependency_assets(dependencies, true, { production })
+                .map(async (asset) => typeof asset === 'string'
+                ? fcopy_record(`${fpd_root}node_modules/${asset}`, `${fpd_out}vendors/${asset}`)
+                : fcopy_record(path.resolve_with_slash(fpd_root, asset.src), path.resolve_with_slash(fpd_out, asset.out || asset.src))),
+            ...this.resolve_config(assets, production)
+                .map(fcopy_asset),
+            ...this.htmls
+                ? Object.values(this.htmls).map(async ({ icon, manifest, scripts, mscripts }) => Promise.all([
+                    icon,
+                    manifest,
+                    ...(scripts?.before || []),
+                    ...(scripts?.after || []),
+                    ...(mscripts || [])
+                ].filter(not_empty)
+                    .map(fcopy_asset))) : []
+        ]);
+    }
+    /** 为空时返回空数组 */
+    resolve_config(config, production) {
+        return config
+            ? (production
+                ? config.productions
+                : config.devs || config.productions) || []
+            : [];
+    }
+}
+//# sourceMappingURL=builder.js.map

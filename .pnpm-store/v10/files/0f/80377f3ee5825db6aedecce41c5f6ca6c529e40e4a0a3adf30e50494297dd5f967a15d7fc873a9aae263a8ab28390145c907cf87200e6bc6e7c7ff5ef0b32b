@@ -1,0 +1,58 @@
+{
+    "compilerOptions": {
+        // --- module
+        "module": "ESNext", // none, CommonJS, amd, system, umd, es6, es2015, ESNext
+        "moduleResolution": "Bundler",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": false,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        
+        // --- build
+        "target": "ESNext",
+        "allowJs": false,
+        "checkJs": false,
+        "pretty": true,
+        "newLine": "lf",
+        "lib": ["ESNext", "DOM"],
+        "importHelpers": true,
+        
+        "incremental": true,
+        "tsBuildInfoFile": "T:/1/xsh/.tsbuildinfo",
+        
+        
+        // --- emit
+        "noEmit": false,
+        "declaration": true,
+        "emitDeclarationOnly": false,
+        "noEmitOnError": false,
+        "listEmittedFiles": true,
+        "rewriteRelativeImportExtensions": true,
+        
+        // --- source maps
+        "sourceMap": true,
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        
+        // --- features
+        "preserveSymlinks": false,
+        "jsx": "react-jsx",
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowImportingTsExtensions": true,
+        
+        
+        // --- type checking
+        "strict": false,
+        "alwaysStrict": false,
+        "noImplicitAny": false,
+        "noImplicitReturns": false,
+        "noImplicitThis": true,
+        "noImplicitOverride": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "skipLibCheck": true,
+    }
+}
+

@@ -1,0 +1,22 @@
+.toast
+    position: absolute
+    left: 0
+    right: 0
+    bottom: 12%
+    z-index: 100000
+    
+    display: flex
+    justify-content: center
+    
+    .text
+        background-color: #f6f6f6
+        color: #333333
+        border-radius: 24px
+        padding: 15px 30px
+        font-size: 16px
+        
+        opacity: 0
+        transition: opacity 0.5s
+        
+    &.active .text
+        opacity: 1

@@ -1,0 +1,117 @@
+import { default as i18next } from 'i18next';
+import { Dict } from "./dict.js";
+export const LANGUAGES = ['zh', 'en', 'ja', 'ko'];
+/**
+    提供翻译文本功能，自动解析当前语言
+    @see https://github.com/ShenHongFei/xshell/tree/master/i18n
+*/
+export class I18N {
+    static LANGUAGE_REGEXP = /^(zh|en|ja|ko)$/;
+    /** (ISO 639-1 标准语言代码) 可能取 zh, en, ja, ko */
+    language;
+    /** hostname shortcuts */
+    hosts;
+    /** url prefix shortcuts */
+    roots;
+    /** 标记静态文本，以便扫描词条，并在运行时根据当前语言获取翻译 */
+    t;
+    /** render: 翻译配置字段 */
+    r;
+    i18next;
+    /** react-i18next <Trans/> 组件 */
+    Trans = ({ children }) => children;
+    /** ```ts
+        import dict from './dict.json'  // { "添加": { "en": "Add", "ja": "追加", "ko": "추가" } }
+        
+        const i18n = new I18N(dict, 'zh')  // 创建实例，传入词典 dict 并指定语言（NodeJS 环境），
+        const i18n = new I18N(dict)        // 创建实例，传入词典 dict 并自动判断当前语言（浏览器环境），
+        const i18n = new I18N({ })         // 创建实例，传入空词典
+        ```
+        @see https://github.com/ShenHongFei/xshell/tree/master/i18n
+    */
+    constructor(_dict, language) {
+        const is_browser = typeof window !== 'undefined' && typeof location !== 'undefined';
+        const dict = new Dict(_dict);
+        if (!language && is_browser)
+            language = (new URLSearchParams(location.search).get('language') ||
+                window.language);
+        if (!language)
+            language = Intl.DateTimeFormat().resolvedOptions().locale.slice(0, 2);
+        if (!I18N.LANGUAGE_REGEXP.test(language)) {
+            if (language)
+                console.error('invalid language:', language);
+            language = 'zh';
+        }
+        // console.log('language:', language)
+        this.language = language;
+        this.t = (text, options) => {
+            options = options || {};
+            const language = options.language || this.language;
+            return this.i18next.t(text, { ...options, lng: language, defaultValue: text });
+        };
+        this.r = (field, language = this.language) => field ?
+            field[language] || field.zh || field.en || field || ''
+            :
+                field || '';
+        // --- init i18next
+        this.i18next = i18next.createInstance();
+        if (is_browser)
+            try {
+                // 在无 React 的浏览器环境下避免 react-i18next 中执行 React.createContext() 报错
+                // const React = require('react') as typeof import('react')
+                const { initReactI18next, Trans: I18NextTrans } = require('react-i18next');
+                this.i18next.use(initReactI18next);
+                const _i18next = this.i18next;
+                // 绑定 Trans 组件的 i18n 到 this.i18next, 解决多个 i18next 冲突的问题
+                // react-i18next/context.js 中 i18n 实例只在模块级别维护，多次 this.i18next.use(initReactI18next) 会覆盖前面的 i18n，导致 Trans 无法翻译
+                // https://github.com/i18next/react-i18next/issues/726
+                this.Trans = function Trans({ i18n = _i18next, ...others }) {
+                    // 简单转发，性能更好
+                    return I18NextTrans({ i18n, ...others });
+                    // return React.createElement(I18NextTrans, { i18n, ...others } as any, children)
+                    // return <I18NextTrans {...{ i18n, ...others } }>{children}</I18NextTrans>
+                };
+            }
+            catch { }
+        this.i18next.init({
+            lng: this.language,
+            // LOCAL
+            // debug: true,
+            debug: false,
+            fallbackLng: {
+                en: ['zh'],
+                ja: ['en', 'zh'],
+                ko: ['en', 'zh']
+            },
+            // 禁用 : 和 . 作为 seperator
+            keySeparator: false,
+            nsSeparator: false,
+            resources: dict.to_resources(),
+            interpolation: {
+                escapeValue: false
+            },
+            react: {
+                transKeepBasicHtmlNodesFor: []
+            },
+        });
+        if (typeof window !== 'undefined' && window && !('i18n' in window))
+            window.i18n = this;
+    }
+    /** 加载词典文件 (需要将这两行单独放一个文件里，以保证在 import 其他文件之前执行)
+        
+        @example
+        import dict from './dict.json'  // { "添加": { "en": "Add", "ja": "追加", "ko": "추가" } }
+        i18n.init(dict)
+    */
+    init(dict) {
+        const resources = new Dict(dict).to_resources();
+        for (const language in resources)
+            this.i18next.addResources(language, 'translation', resources[language].translation);
+    }
+    toJSON() {
+        return {
+            language: this.language,
+        };
+    }
+}
+//# sourceMappingURL=index.js.map

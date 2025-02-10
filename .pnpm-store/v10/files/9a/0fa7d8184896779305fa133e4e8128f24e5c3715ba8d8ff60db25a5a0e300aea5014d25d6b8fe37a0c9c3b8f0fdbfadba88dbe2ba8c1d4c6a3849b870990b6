@@ -1,0 +1,7 @@
+/// <reference types="pino" />
+import factory from './lib/factory';
+declare let logger: ReturnType<typeof factory>;
+export declare function createLogger(ns?: string, bindings?: {
+    [k: string]: any;
+}): import("pino").Logger;
+export default logger;

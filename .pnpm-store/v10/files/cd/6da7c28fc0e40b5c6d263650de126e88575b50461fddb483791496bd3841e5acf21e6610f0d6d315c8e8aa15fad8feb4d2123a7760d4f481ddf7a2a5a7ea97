@@ -1,0 +1,35 @@
+import process from 'process';
+import { fcopy, fexists, ramdisk } from "./file.js";
+import { noprint } from "./process.js";
+/** 监听终端按键 (输入)，并调用 key_processor 处理
+    - on_key: 按键处理函数
+    - on_exit?: ctrl + c 会退出进程，可加入退出前自定义处理逻辑 */
+export function process_stdin(on_key, on_exit) {
+    // https://stackoverflow.com/a/12506613/7609214
+    let { stdin } = process;
+    if (stdin.isTTY) {
+        stdin.setRawMode(true);
+        stdin.resume();
+    }
+    stdin.setEncoding('utf-8');
+    // on any data into stdin
+    stdin.on('data', async (key) => {
+        // ctrl-c ( end of text )
+        if (key === '\u0003') {
+            await on_exit?.();
+            process.exit();
+        }
+        // write the key to stdout all normal like
+        console.log(key);
+        await on_key(key);
+    });
+}
+/** 自动配置项目 vscode 设置 */
+export async function setup_vscode_settings(fpd_root) {
+    if (!ramdisk) {
+        const fp_settings = `${fpd_root}.vscode/settings.json`;
+        if (!fexists(fp_settings, noprint))
+            await fcopy(`${fp_settings.strip_end('json')}template.json`, fp_settings);
+    }
+}
+//# sourceMappingURL=development.js.map

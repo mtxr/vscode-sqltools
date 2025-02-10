@@ -1,0 +1,572 @@
+import { promises as fsp, default as fs } from 'fs';
+import { isUint8Array } from 'util/types';
+import { t } from "./i18n/instance.js";
+import { to_json } from "./prototype.js";
+import { pack, parse } from "./io.js";
+import { path } from "./path.js";
+import { check, Lock, WritableMemoryStream, url_width } from "./utils.js";
+export { fsp };
+export const encodings = ['utf-8', 'gb18030', 'shift-jis', 'utf-16le'];
+export const ramdisk = fexists('T:/TEMP/', { print: false });
+/** fp 所指向的 文件/ 文件夹 是否存在
+    Does the file/folder pointed to by fp exist?  */
+export function fexists(fp, { print = true } = {}) {
+    const exists = fs.existsSync(fp);
+    if (print)
+        console.log(exists ? t('已存在') : t('不存在'), fp);
+    return exists;
+}
+/** 打开或创建文件，返回 FileHandle, 如果文件夹不存在，会自动创建文件夹
+    Some characters (`< > : " / \ | ? *`) are reserved under Windows as documented
+    by [Naming Files, Paths, and Namespaces](https://docs.microsoft.com/en-us/windows/desktop/FileIO/naming-a-file). Under NTFS, if the filename contains
+    a colon, Node.js will open a file system stream, as described by [this MSDN page](https://docs.microsoft.com/en-us/windows/desktop/FileIO/using-streams).
+    
+    - flags: `'r'`  https://nodejs.org/docs/latest/api/fs.html#file-system-flags
+    - options?:
+        - mode?: `'0o666'` Sets the file mode (permission and sticky bits) if the file is created. */
+export async function fopen(fp, flags = 'r', { mode, print } = {}) {
+    if (print)
+        console.log(t('打开文件'), fp);
+    await fmkdir(fp.fdir, { print: false });
+    return Object.assign(await fsp.open(fp, flags, mode), { fp, flags, mode });
+}
+export async function fread(fp, { encoding = 'utf-8', print = true } = {}) {
+    check(!fp.isdir, t('fp 必须是文件，不能以 / 结尾'));
+    check(path.isAbsolute(fp), `${t('fp 必须是绝对路径:')} ${fp}`);
+    check(encoding !== 'auto');
+    if (print)
+        console.log(t('读取'), fp);
+    switch (encoding) {
+        case 'utf-8':
+            return fsp.readFile(fp, { encoding: 'utf-8' });
+        case 'binary':
+            return fsp.readFile(fp);
+        default:
+            return new TextDecoder(encoding)
+                .decode(await fsp.readFile(fp));
+    }
+}
+/** 读取文件，划分为行，并去掉最后一个 \n 之后的 '' */
+export async function fread_lines(fp, options = {}) {
+    return (await fread(fp, options))
+        .split_lines();
+}
+export async function fread_json(fp, options = {}) {
+    return JSON.parse(await fread(fp, options));
+}
+export async function fparse(fp, options) {
+    return parse(await fread(fp, { ...options, encoding: 'binary' }));
+}
+/** 比较两个文件是否一致，遇到任何文件系统错误都返回 false */
+export async function fequals(fp_left, fp_right, { print = true } = {}) {
+    if (print)
+        console.log(`比较 ${fp_left} 和 ${fp_right}`);
+    try {
+        const fps = [fp_left, fp_right];
+        const [{ size: size_left }, { size: size_right }] = await Promise.all(fps.map(async (fp) => fstat(fp)));
+        if (size_left === size_right) {
+            const [data_left, data_right] = await Promise.all(fps.map(async (fp) => fread(fp, { encoding: 'binary', print: false })));
+            return data_left.equals(data_right);
+        }
+        else
+            return false;
+    }
+    catch {
+        return false;
+    }
+}
+export async function fwrite(fp, data, { print = true } = {}) {
+    const is_handle = typeof fp === 'object' && fp && 'fd' in fp;
+    if (is_handle) {
+        if (print)
+            console.log(t('写入'), fp.fp);
+    }
+    else {
+        check(path.isAbsolute(fp), `${t('fp 必须是绝对路径，当前为:')} ${fp}`);
+        if (print)
+            console.log(t('写入'), fp);
+    }
+    if (!isUint8Array(data) && typeof data !== 'string')
+        data = to_json(data);
+    try {
+        await fsp.writeFile(fp, data);
+    }
+    catch (error) {
+        if (error.code === 'ENOENT' && !is_handle) {
+            await fmkdir(fp.fdir, { print: false });
+            await fsp.writeFile(fp, data);
+        }
+        else
+            throw error;
+    }
+    return fp;
+}
+export async function fpack(fp, data, options) {
+    return fwrite(fp, pack(data), options);
+}
+/** 追加内容到文件末尾，如果文件不存在会自动创建 */
+export async function fappend(fp, data, { print = true } = {}) {
+    check(path.isAbsolute(fp), `${t('fp 必须是绝对路径，当前为:')} ${fp}`);
+    if (print)
+        console.log(t('追加'), fp);
+    check(isUint8Array(data) || typeof data === 'string');
+    try {
+        await fsp.appendFile(fp, data);
+    }
+    catch (error) {
+        if (error.code === 'ENOENT') {
+            await fmkdir(fp.fdir, { print: false });
+            await fsp.appendFile(fp, data);
+        }
+        else
+            throw error;
+    }
+}
+const fake_time = new Date(0);
+const fake_stats = {
+    fp: '',
+    size: 0n,
+    atimeNs: 0n,
+    mtimeNs: 0n,
+    ctimeNs: 0n,
+    birthtimeNs: 0n,
+    atimeMs: 0n,
+    mtimeMs: 0n,
+    ctimeMs: 0n,
+    birthtimeMs: 0n,
+    mtime: fake_time,
+    atime: fake_time,
+    ctime: fake_time,
+    birthtime: fake_time,
+};
+export async function flist(fpd, options = {}) {
+    const { filter, deep = false, absolute = false, print = true, stats = false, best_effort = false } = options;
+    check(path.isAbsolute(fpd), t("flist: 参数 fpd: '{{fpd}}' 必须是绝对路径", { fpd }));
+    check(fpd.isdir, t("flist: 参数 fpd: '{{fpd}}' 必须以 / 结尾", { fpd }));
+    if (!path.isAbsolute(fpd))
+        throw new Error(t('参数 fpd: ') + fpd + t(' 必须是绝对路径'));
+    if (!fpd.isdir)
+        throw new Error(t('参数 fpd: ') + fpd + t(' 必须以 / 结尾'));
+    // readdir withFileTypes 参数在底层有什么区别，速度上有什么差异
+    // 都调用了 uv_fs_scandir, 且调用参数相同，仅仅是 Node.js 侧的回调不同 AfterScanDir / AfterScanDirWithTypes
+    // 回调中通过 uv_fs_scandir_next 获取到每个条目的信息，而 uv_fs_scandir_next 中都会读取 type
+    // 速度上：都在 0.2 ms 左右就可以完成
+    const files = await fsp.readdir(fpd, { withFileTypes: true, encoding: 'utf-8' });
+    const filter_regexp = filter instanceof RegExp;
+    const filter_fn = Boolean(filter && !filter_regexp);
+    let fps = [];
+    for (const file of files) {
+        const fp = (absolute ? fpd : '') +
+            file.name +
+            (file.isDirectory() ? '/' : '');
+        if (filter_regexp && !filter.test(fp))
+            continue;
+        if (filter_fn && !filter(fp))
+            continue;
+        if (print)
+            console.log(fp);
+        fps.push(fp);
+    }
+    async function _fstat(fp) {
+        let _stats;
+        try {
+            _stats = await fstat(absolute ? fp : fpd + fp);
+        }
+        catch (error) {
+            if (best_effort)
+                _stats = { ...fake_stats };
+            else
+                throw error;
+        }
+        if (!absolute)
+            _stats.fp = fp;
+        return _stats;
+    }
+    if (deep)
+        return (await Promise.all(
+        // 顶层文件/文件夹
+        fps.map(async (fp) => {
+            /** 顶层文件夹的大小 */
+            let fpd_stats;
+            return fp.isdir ?
+                [
+                    stats ? (fpd_stats = await _fstat(fp)) : fp,
+                    ...(await flist(absolute ? fp : fpd + fp, options)).map((fp_or_stats) => {
+                        if (stats) {
+                            if (!absolute)
+                                fp_or_stats.fp = fp + fp_or_stats.fp;
+                            // 所有顶层文件夹中的文件（不包括文件夹）大小总和加起来作为文件夹大小
+                            if (!fp_or_stats.fp.isdir)
+                                fpd_stats.size += fp_or_stats.size;
+                            return fp_or_stats;
+                        }
+                        else
+                            return absolute ? fp_or_stats : fp + fp_or_stats;
+                    })
+                ]
+                :
+                    stats ? _fstat(fp) : fp;
+        }))).flat();
+    else if (stats)
+        return Promise.all(fps.map(_fstat));
+    else
+        return fps;
+}
+export async function fstat(fp) {
+    check(path.isAbsolute(fp), t("fstat: 参数 fp: '{{fp}}' 必须是绝对路径", { fp }));
+    let stat = await fsp.stat(fp, { bigint: true });
+    stat.fp = fp;
+    return stat;
+}
+export async function flstat(fp) {
+    check(path.isAbsolute(fp), t("flstat: 参数 fp: '{{fp}}' 必须是绝对路径", { fp }));
+    let stat = await fsp.lstat(fp, { bigint: true });
+    stat.fp = fp;
+    return stat;
+}
+export async function ffstat(handle) {
+    return new Promise((resolve, reject) => {
+        fs.fstat(handle.fd, { bigint: true }, (error, stats) => {
+            if (error)
+                reject(error);
+            else
+                resolve(stats);
+        });
+    });
+}
+/** 删除文件或文件夹，返回是否实际进行了删除操作
+    - fp: 文件或文件夹的完整路径
+    - options?:
+        - print?: `true` */
+export async function fdelete(fp, { print = true } = {}) {
+    check(fp.length >= 6, `fp: ${fp} ${t('不能太短，防止误删文件')}`);
+    check(path.isAbsolute(fp), t('fp 必须是绝对路径'));
+    const { isdir } = fp;
+    try {
+        await fsp.rm(fp, { recursive: true });
+        if (print)
+            console.log(`${isdir ? t('删除了文件夹') : t('删除了文件')} ${fp}`);
+        return true;
+    }
+    catch (error) {
+        if (error.code === 'ENOENT') {
+            if (print)
+                console.log(`${isdir ? t(`已不存在文件`) : t('已不存在文件夹')} ${fp}`);
+            return false;
+        }
+        throw error;
+    }
+}
+/** 清空文件夹中的内容，实际为删除该文件夹后新建 */
+export async function fdclear(fpd, { print = true } = {}) {
+    await fdelete(fpd, { print: false });
+    await fmkdir(fpd, { print: false });
+    if (print)
+        console.log(`清空了文件夹 ${fpd}`);
+}
+/** 复制文件或文件夹
+    会在因不存在父文件夹导致复制失败时，自动创建父文件夹，并再次尝试复制
+    最好预先创建父文件夹，减少文件系统操作，提升性能
+    - fp_src: 源 文件/文件夹 完整路径
+    - fp_dst: 目标 文件/文件夹 完整路径
+    - options?:
+        - print?: `true`
+        - overwrite?: `true`
+        - filter?: 当 fp_src 为文件夹时选择性复制里面的部分内容，
+            和 flist 的 filter 选项不同，只支持函数，且函数返回值决定是否要继续进行过滤
+            - true: 复制文件夹的所有文件，交给 fsp.cp
+            - false 或不返回任何值: 不复制
+            - 'partial': 进一步进行过滤复制（先 flist with filter 再 fcopy），只有文件夹能返回这个值
+        
+    @example
+    fcopy('D:/temp/camera/', 'D:/camera/') */
+export async function fcopy(fp_src, fp_dst, { print = true, overwrite = true, filter, } = {}) {
+    const { isdir } = fp_src;
+    check(isdir === fp_dst.isdir, t('fp_src 和 fp_dst 必须同为文件路径或文件夹路径'));
+    check(path.isAbsolute(fp_src) && path.isAbsolute(fp_dst), t('fp_src 和 fp_dst 必须为完整路径'));
+    if (!isdir && filter)
+        throw new Error(t('filter 选项只适用于 fp_src 为文件夹'));
+    if (print)
+        log_action('复制', fp_src, fp_dst);
+    if (isdir)
+        if (filter) {
+            await fmkdir(fp_dst, { print });
+            await Promise.all((await flist(fp_src, { filter, print: false }))
+                .map(async (fname) => fcopy(`${fp_src}${fname}`, `${fp_dst}${fname}`, {
+                print,
+                overwrite,
+                ...fname.isdir && filter(fname) === 'filter' ? {
+                    filter: fp => filter(`${fname}${fp}`),
+                } : {}
+            })));
+        }
+        else
+            await fsp.cp(fp_src, fp_dst, {
+                recursive: true,
+                force: overwrite,
+                errorOnExist: !overwrite,
+                mode: overwrite ? 0 : fs.constants.COPYFILE_EXCL,
+            });
+    else
+        try {
+            await fsp.copyFile(fp_src, fp_dst, overwrite ? 0 : fs.constants.COPYFILE_EXCL);
+        }
+        catch (error) {
+            if (error.code === 'ENOENT') {
+                await fmkdir(fp_dst.fdir, { print });
+                await fsp.copyFile(fp_src, fp_dst, overwrite ? 0 : fs.constants.COPYFILE_EXCL);
+            }
+            else
+                throw error;
+        }
+}
+/** 移动文件或文件夹
+    相同分区 / 文件系统下使用 rename, 否则 fallback 到复制后删除源文件
+    - src: 源 文件/文件夹 完整路径
+    - dst: 目标 文件/文件夹 完整路径
+    - options?:
+        - print?: `true`
+        - overwrite?: `false`
+    
+    @example
+    fmove('D:/temp/camera/', 'D:/camera/') */
+export async function fmove(fp_src, fp_dst, { overwrite = false, print = true } = {}) {
+    check(fp_src.isdir === fp_dst.isdir, t('fp_src 和 fp_dst 必须同为文件路径或文件夹路径'));
+    check(path.isAbsolute(fp_src) && path.isAbsolute(fp_dst), t('fp_src 和 fp_dst 必须为完整路径'));
+    if (print)
+        log_action('移动', fp_src, fp_dst);
+    if (!overwrite && fexists(fp_dst, { print: false }))
+        throw new Error(`${t('已存在')} ${fp_dst}`);
+    await fmkdir(fp_dst.fdir, { print: false });
+    async function copy_and_delete() {
+        await fcopy(fp_src, fp_dst, { overwrite, print: false });
+        await fdelete(fp_src, { print: false });
+    }
+    if (fp_src[0] !== fp_dst[0] || overwrite)
+        await copy_and_delete();
+    else
+        try {
+            await fsp.rename(fp_src, fp_dst);
+        }
+        catch (error) {
+            if (error.code === 'EXDEV')
+                await copy_and_delete();
+            else
+                throw error;
+        }
+}
+/** 重命名文件  rename file
+    - fp:  当前文件名／路径  current filename/path
+    - fp_: 新的文件名／路径  new filename/path
+    - options?:
+        - fpd?: fp 和 fp_ 在同一文件夹内  fp and fp_ is in same directory
+        - print?: `true`
+        - overwrite?: `true`  默认覆盖（不检查效率更高）  better performance without check */
+export async function frename(fp, fp_, { fpd, print = true, overwrite = true } = {}) {
+    if (fpd) {
+        check(fpd.isdir);
+        fp = fpd + fp;
+        fp_ = fpd + fp_;
+    }
+    check(path.isAbsolute(fp) && path.isAbsolute(fp_), t('fp 和 fp_ 必须是绝对路径'));
+    if (print)
+        log_action('重命名', fp, fp_);
+    if (!overwrite && fexists(fp_, { print: false }))
+        throw new Error(`${t('已存在')} ${fp}`);
+    await fsp.rename(fp, fp_);
+}
+/**
+    递归创建文件夹，确保 fpd 指向的文件夹存在  Create folders recursively, make sure the folder pointed to by fpd exists
+    返回首个创建的文件夹或 undefined  Returns the first created folder or undefined
+    
+    - fpd: 文件夹完整路径  Folder full path
+    - options?:
+        - print?: `true`
+        - mode?: `'0o777'` */
+export async function fmkdir(fpd, { print = true, mode, } = {}) {
+    check(path.isAbsolute(fpd), t('fpd 必须是绝对路径: ') + fpd);
+    check(fpd.isdir, t('fpd 必须以 / 结尾: ') + fpd);
+    // 类似 D:/ 这样的根路径，调用 fsp.mkdir 会报错无权限
+    if (fpd.length === 3 &&
+        'A' <= fpd[0] && fpd[0] <= 'Z' && fpd[1] === ':' && fpd[2] === '/')
+        if (fexists(fpd)) {
+            if (print)
+                console.log(t('已存在文件夹'), fpd);
+            return fpd;
+        }
+        else
+            throw new Error(t('不存在且无法创建文件夹 {{fpd}}', { fpd }));
+    // Calling fs.promises.mkdir() when path is a directory that exists results in a rejection only when recursive is false.
+    const fpd_ = (await fsp.mkdir(fpd, { recursive: true, mode }))?.fpd;
+    if (fpd_) {
+        if (print)
+            console.log(t('已创建文件夹'), fpd);
+    }
+    else if (print)
+        console.log(t('已存在文件夹'), fpd);
+    return fpd_;
+}
+/** 创建软链接
+    - fp_real: 现在真实文件/文件夹的路径
+    - fp_link: 目标链接文件/文件夹的路径 */
+export async function flink(fp_real, fp_link, { junction = false, print = true, skip_existing = false } = {}) {
+    check(path.isAbsolute(fp_real) && path.isAbsolute(fp_link), 'fp 必须是绝对路径');
+    const is_fpd_real = fp_real.isdir;
+    const is_fpd_link = fp_link.isdir;
+    check(is_fpd_real === is_fpd_link, 'fp_real 和 fp_link 必须同为文件路径或文件夹路径');
+    if (fexists(fp_link, { print: false }))
+        if (!skip_existing)
+            throw new Error(`存在同名${is_fpd_link ? '文件夹' : '文件'}: ${fp_link}，无法创建链接`);
+        else {
+            if (print)
+                console.log('跳过已存在:', fp_link);
+            return;
+        }
+    if (print)
+        log_action('已将源文件', fp_real, fp_link, '链接到');
+    if (junction)
+        await fsp.symlink(fp_real, fp_link, 'junction');
+    else
+        await fsp.symlink(fp_real, fp_link, is_fpd_real ? 'dir' : 'file');
+}
+/** 将文件夹或文件列表压缩为 zip，返回生成的压缩包路径 (fp_zip)
+    - data:
+        - fpd_src: 被压缩文件夹路径 (string) 或
+        - entries: 文件列表 (Record<压缩后相对路径, 原文件绝对路径 (string) | 数据 (Uint8Array)>)
+    - fp_zip: 生成的压缩包路径 (string)
+    - options?:
+        - dirname?: `fpd_src.fname` 传入 fpd_src 才生效，修改 zip 中顶层的文件夹的名字（需要以 / 结尾），如 'web/', 为空字符串时去掉顶层文件夹，不要多一个文件夹层级 (flat)
+        - print?:
+            - info?: `true` 开始压缩、压缩完成
+            - files?: `true` 打印压缩文件列表 */
+export async function fzip(data, fp_zip, options) {
+    return _zip(data, fp_zip, options);
+}
+/** 将文件夹或文件列表压缩为 zip，返回压缩包数据 (Uint8Array)
+    - data:
+        - fpd_src: 被压缩文件夹路径 (string) 或
+        - entries: 文件列表 (Record<压缩后相对路径, 原文件绝对路径 (string) | 数据 (Uint8Array)>)
+    - options?:
+        - print?:
+            - info?: `true` 开始压缩、压缩完成
+            - files?: `true` 打印压缩文件列表 */
+export async function zip(data, options) {
+    return _zip(data, undefined, options);
+}
+async function _zip(data, fp_zip, { dirname, print = { files: true, info: true } } = {}) {
+    let entries;
+    let fpd_src;
+    if (typeof data === 'string') {
+        if (!path.isAbsolute(data) || !data.isdir)
+            throw new Error('fpd_src 必须是绝对路径且以 / 结尾');
+        fpd_src = data;
+        if (dirname === undefined)
+            dirname = fpd_src.fname;
+        if (!dirname.isdir)
+            throw new Error('dirname 需要以 / 结尾');
+        entries = Object.fromEntries((await flist(fpd_src, { print: false }))
+            .map(fp => ([dirname + fp, fpd_src + fp])));
+    }
+    else {
+        check(!dirname, 'dirname 在传入 fpd_src 时才生效');
+        entries = data;
+    }
+    if (print.info)
+        log_action('开始压缩', fpd_src ? ` ${fpd_src}` : '文件索引', fp_zip ? `${fp_zip}/${dirname || '{entries}'}` : '内存');
+    const { default: archiver } = await import('archiver');
+    let archive = archiver('zip');
+    let ostream = fp_zip ?
+        fs.createWriteStream(fp_zip, { highWaterMark: 16 * 2 ** 20 /* 16 MB */ })
+        :
+            new WritableMemoryStream();
+    const size = await new Promise(async (resolve, reject) => {
+        ostream.once('close', () => {
+            resolve(archive.pointer());
+        });
+        ostream.once('error', reject);
+        archive.once('error', reject);
+        archive.on('warning', error => {
+            console.log(error);
+        });
+        archive.pipe(ostream);
+        for (const fp in entries) {
+            const fdata = entries[fp];
+            if (fdata instanceof Uint8Array) {
+                if (print.files)
+                    log_action('压缩', fdata.length.to_fsize_str(), fp);
+                archive.append(Buffer.isBuffer(fdata) ? fdata : Buffer.from(fdata.buffer), { name: fp });
+            }
+            else {
+                check(fp.isdir === fdata.isdir);
+                check(path.isAbsolute(fdata));
+                if (print.files)
+                    log_action('压缩', fdata, fp);
+                if (fp.isdir)
+                    archive.directory(fdata, fp);
+                else
+                    archive.file(fdata, { name: fp });
+            }
+        }
+        await archive.finalize();
+    });
+    if (print.info)
+        console.log(`压缩完成，总大小 ${size.to_fsize_str()}`);
+    return fp_zip || ostream.pbuffer;
+}
+export let fwatchers = {};
+/** 跟踪文本文件追加的内容，类似 tail -f */
+export async function ftail(fp, handler, { print = true } = {}) {
+    fwatchers[fp]?.close();
+    const { size } = await fstat(fp);
+    let pointer = Number(size);
+    let lock = new Lock(await fopen(fp));
+    let fbuf = Buffer.allocUnsafe(2 ** 20);
+    let strbuf = '';
+    let decoder = new TextDecoder();
+    if (print)
+        console.log('开始跟踪追加内容', fp);
+    const { default: throttle } = await import('lodash/throttle.js');
+    const onchange_throttled = throttle(async () => {
+        if (lock.locked)
+            return;
+        await lock.request(async (handle) => {
+            const { bytesRead } = await handle.read(fbuf, 0, fbuf.length, pointer);
+            pointer += bytesRead;
+            const chunk = decoder.decode(fbuf.subarray(0, bytesRead), { stream: true });
+            let lines = [];
+            let j = 0;
+            for (let i = 0; (i = chunk.indexOf('\n', j)) >= 0;) {
+                let line = chunk.slice(j, i);
+                if (strbuf) {
+                    line = strbuf + line;
+                    strbuf = '';
+                }
+                j = i + 1;
+                lines.push(line);
+            }
+            strbuf = chunk.slice(j);
+            await handler(lines);
+        });
+    }, 250);
+    let watcher = fs.watch(fp, event => {
+        if (event === 'change')
+            onchange_throttled();
+        else {
+            console.error(`被监听的文件 ${fp.quote()} 出现了 rename 事件，结束 ftail`);
+            watcher.close();
+        }
+    });
+    watcher.on('error', error => {
+        console.error(error);
+    });
+    return fwatchers[fp] = watcher;
+}
+/** 打开一个文件并搜索替换某个 pattern */
+export async function freplace(fp, pattern, replacement, { print = true } = {}) {
+    await fwrite(fp, (await fread(fp, { print }))
+        .replaceAll(pattern, replacement), { print });
+}
+function log_action(action, fp_src, fp_dst, sep = '->') {
+    console.log(`${`${action}  ${fp_src}`.pad(url_width)}  ${sep}  ${fp_dst}`);
+}
+//# sourceMappingURL=file.js.map

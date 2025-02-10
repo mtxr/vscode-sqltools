@@ -1,0 +1,1 @@
+declare function define(proto: any, key: string, func: Function): void;

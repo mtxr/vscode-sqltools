@@ -1,0 +1,17 @@
+import { type CallOptions } from './process.ts';
+export declare let npm: {
+    bin: string;
+    call(cwd: string, bin: string, args: string[], options?: CallOptions): Promise<import("./process.ts").CallResult<string>>;
+    /** node.exe E:/sdk/nodejs/node_modules/corepack/dist/pnpm.js install
+        - cwd
+        - pkgs?: `[ ]` */
+    install(cwd: string, pkgs?: string[], { save_dev, save_peer, legacy, force, term, inspect, break: _break, }?: {
+        save_dev?: boolean;
+        save_peer?: boolean;
+        legacy?: boolean;
+        force?: boolean;
+        term?: boolean;
+        inspect?: boolean;
+        break?: boolean;
+    }): Promise<void>;
+};

@@ -1,0 +1,1 @@
+export declare function try_load_dict(fp_dict: string): Promise<any>;

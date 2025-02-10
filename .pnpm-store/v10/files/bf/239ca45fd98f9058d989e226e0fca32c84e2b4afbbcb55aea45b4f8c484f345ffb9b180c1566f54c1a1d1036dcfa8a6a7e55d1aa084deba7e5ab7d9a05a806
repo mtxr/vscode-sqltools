@@ -1,0 +1,28 @@
+{
+  "name": "aria-fs",
+  "version": "0.4.5",
+  "description": "Asynchronous Nodejs FileSystem",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aelbore/aria-fs.git"
+  },
+  "keywords": [
+    "fs",
+    "glob",
+    "files",
+    "mkdir",
+    "async"
+  ],
+  "author": "Arjay Elbore <aelbore.sg@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/aelbore/aria-fs/issues"
+  },
+  "homepage": "https://github.com/aelbore/aria-fs#readme",
+  "dependencies": {
+    "minimatch": "^3.0.4"
+  },
+  "main": "aria-fs.js",
+  "module": "aria-fs.es.js",
+  "typings": "aria-fs.d.ts"
+}

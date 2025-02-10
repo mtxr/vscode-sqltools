@@ -1,0 +1,54 @@
+export declare const keywords: string[];
+export declare const constants: readonly ["DFLT", "NULL", "true", "false", "pi", "e", "SCALAR", "VECTOR", "PAIR", "MATRIX", "SET", "DICT", "TABLE", "VOID", "BOOL", "CHAR", "SHORT", "INT", "INDEX", "LONG", "DATE", "MONTH", "TIME", "MINUTE", "SECOND", "DATETIME", "TIMESTAMP", "NANOTIME", "NANOTIMESTAMP", "FLOAT", "DOUBLE", "SYMBOL", "STRING", "UUID", "FUNCTIONDEF", "HANDLE", "CODE", "DATASOURCE", "RESOURCE", "ANY", "DICTIONARY", "DATEHOUR", "IPADDR", "INT128", "BLOB", "COMPLEX", "POINT", "DURATION", "OBJECT", "DECIMAL32", "DECIMAL64", "DECIMAL128", "IOTANY", "SEQ", "RANGE", "HASH", "VALUE", "LIST", "COMPO", "VAR", "SHARED", "DEF", "GLOBAL", "TABLE_READ", "TABLE_WRITE", "TABLE_INSERT", "TABLE_UPDATE", "TABLE_DELETE", "DBOBJ_CREATE", "DBOBJ_DELETE", "DB_DELETE", "DB_INSERT", "DB_MANAGE", "DB_OWNER", "DB_READ", "DB_UPDATE", "DB_WRITE", "CATALOG_MANAGE", "CATALOG_READ", "CATALOG_WRITE", "CATALOG_INSERT", "CATALOG_UPDATE", "CATALOG_DELETE", "SCHEMA_MANAGE", "SCHEMAOBJ_CREATE", "SCHEMAOBJ_DELETE", "SCHEMA_READ", "SCHEMA_WRITE", "SCHEMA_INSERT", "SCHEMA_UPDATE", "SCHEMA_DELETE", "SCRIPT_EXEC", "TASK_GROUP_MEM_LIMIT", "TEST_EXEC", "VIEW_EXEC", "VIEW_OWNER", "QUERY_RESULT_MEM_LIMIT", "HINT_HASH", "HINT_SNAPSHOT", "HINT_KEEPORDER", "HINT_SEQ", "HINT_EXPLAIN", "HINT_VECTORIZED", "HEAD", "CURRENT", "TAIL", "LINE", "PIE", "COLUMN", "BAR", "AREA", "SCATTER", "HISTOGRAM", "KLINE", "DEBUG", "INFO", "WARNING", "ERROR", "FIRST", "LAST", "ALL", "NONE", "HASH_PTN", "True", "False", "None"];
+export declare const tm_language: Block;
+export declare const tm_language_python: Block;
+interface Block {
+    patterns: Pattern[];
+    repository?: Record<string, Pattern | Block>;
+}
+type Pattern = Match | Include | Block;
+type Match = MatchOne | MatchBeginEnd;
+interface MatchOne {
+    /** a single-line regular expression */
+    match: RegExp | string;
+    /** This is the scope that will be applied to the matched text */
+    name?: string;
+    /** This use of the captures > patterns structure is extremely important.
+        Without it, a stretch of text matched by a match rule is considered finished, and
+        TextMate’s search proceeds to the rest of the line after the matched text.
+        With it, the stretch of matched text itself becomes a candidate for further matches.
+    */
+    captures?: Captures;
+}
+interface MatchBeginEnd {
+    begin: RegExp | string;
+    end: RegExp | string;
+    /** This is the scope (or an expression evaluating to a scope) to be applied to
+        the entire matched stretch(es) of text starting at the start of the begin match.
+    */
+    name?: string;
+    /** This is the scope to be applied to what’s between the begin match and the end match (or the end of the document). */
+    contentName?: string;
+    /** it applies to the region between the begin and end matches. */
+    patterns?: Pattern[];
+    beginCaptures?: Captures;
+    endCaptures?: Captures;
+    whileCaptures?: Captures;
+    /** If the name or number of the matched group happens to be the same for both the begin pattern and the other pattern,
+        you can (if appropriate) use captures as a shorthand to avoid saying the same thing twice.
+    */
+    captures?: Captures;
+    applyEndPatternLast?: 1;
+}
+interface Include {
+    include: string;
+}
+type Captures = Record<string | number, {
+    /** This is the scope that will be assigned to the matched group text. */
+    name?: string;
+    /** This is a list of match rules to be sought within the matched group text
+        — thus permitting the search for matches to continue inside the matched text.
+    */
+    patterns?: Pattern[];
+}>;
+export {};

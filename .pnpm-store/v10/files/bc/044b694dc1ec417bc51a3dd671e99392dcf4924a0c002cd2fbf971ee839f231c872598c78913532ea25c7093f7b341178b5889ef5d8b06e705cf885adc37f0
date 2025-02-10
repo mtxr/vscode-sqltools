@@ -1,0 +1,95 @@
+{
+  "name": "@antv/attr",
+  "version": "0.3.5",
+  "description": "The Attribute module for G2, F2.",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "src",
+    "lib",
+    "esm",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "clean": "rimraf lib esm",
+    "lint": "lint-staged",
+    "test": "jest",
+    "test-live": "DEBUG_MODE=1 jest --watch tests/unit",
+    "coverage": "jest --coverage",
+    "lib:cjs": "tsc -p tsconfig.json --target ES5 --module commonjs --outDir lib",
+    "lib:esm": "tsc -p tsconfig.json --target ES5 --module ESNext --outDir esm",
+    "lib": "run-p lib:*",
+    "build": "run-s clean lib",
+    "prepublishOnly": "run-s lint test build",
+    "ci": "run-s build test",
+    "changelog": "conventional-changelog -p angular -i CHANGELOG.md -s -r 0"
+  },
+  "dependencies": {
+    "@antv/color-util": "^2.0.1",
+    "@antv/scale": "^0.3.0",
+    "@antv/util": "~2.0.0",
+    "tslib": "^2.3.1"
+  },
+  "devDependencies": {
+    "@antv/scale": "^0.3.0",
+    "@types/jest": "^24.0.18",
+    "jest": "^24.9.0",
+    "jest-electron": "^0.1.7",
+    "jest-extended": "^0.11.2",
+    "ts-jest": "^24.1.0",
+    "husky": "^3.0.4",
+    "lint-staged": "^9.2.3",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^1.18.2",
+    "rimraf": "^3.0.0",
+    "tslint": "^5.18.0",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^4.1.5",
+    "conventional-changelog-cli": "^2.0.28"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "run-s lint build test"
+    }
+  },
+  "lint-staged": {
+    "*.{js,css,json,md}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{ts}": [
+      "tslint -c tslint.json --fix",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "jest": {
+    "runner": "jest-electron/runner",
+    "testEnvironment": "jest-electron/environment",
+    "preset": "ts-jest",
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "src/**/*.{ts,js}",
+      "!**/node_modules/**",
+      "!**/vendor/**"
+    ],
+    "testRegex": "/tests/.*-spec\\.ts?$"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:antvis/attr.git"
+  },
+  "bugs": {
+    "url": "https://github.com/antvis/attr/issues"
+  },
+  "keywords": [
+    "antv",
+    "attr",
+    "g2",
+    "f2"
+  ],
+  "author": "https://github.com/orgs/antvis/people",
+  "license": "MIT"
+}

@@ -1,0 +1,15 @@
+# Installation
+> `npm install --save @types/sass-loader`
+
+# Summary
+This package contains type definitions for sass-loader (https://github.com/webpack-contrib/sass-loader).
+
+# Details
+Files were exported from https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/sass-loader.
+
+### Additional Details
+ * Last updated: Thu, 01 Aug 2024 15:07:24 GMT
+ * Dependencies: [@types/node](https://npmjs.com/package/@types/node), [@types/node-sass](https://npmjs.com/package/@types/node-sass), [@types/webpack](https://npmjs.com/package/@types/webpack), [sass](https://npmjs.com/package/sass)
+
+# Credits
+These definitions were written by [Jason Kwok](https://github.com/JasonHK).

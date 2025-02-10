@@ -1,0 +1,60 @@
+{
+  "name": "@antv/g-math",
+  "version": "0.1.9",
+  "description": "geometry math",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "src",
+    "package.json",
+    "esm",
+    "lib",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "npm run clean && run-p build:*",
+    "build:esm": "tsc -p tsconfig.json --target ES5 --module ESNext --outDir esm",
+    "build:cjs": "tsc -p tsconfig.json --target ES5 --module commonjs --outDir lib",
+    "clean": "rm -rf esm lib",
+    "watch:cjs": "tsc-watch -p tsconfig.json --target ES5 --module commonjs --outDir lib --compiler typescript/bin/tsc",
+    "coverage": "npm run coverage-generator && npm run coverage-viewer",
+    "coverage-generator": "torch --coverage --compile --source-pattern src/*.js,src/**/*.js --opts tests/mocha.opts",
+    "coverage-viewer": "torch-coverage",
+    "test": "torch --renderer --compile --opts tests/mocha.opts",
+    "test-live": "torch --compile --interactive --opts tests/mocha.opts",
+    "tsc": "tsc --noEmit",
+    "typecheck": "tsc --noEmit"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/antvis/util.git"
+  },
+  "keywords": [
+    "util",
+    "antv",
+    "g"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
+  "author": "https://github.com/orgs/antvis/people",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/antvis/util/issues"
+  },
+  "devDependencies": {
+    "@antv/torch": "^1.0.0",
+    "electron": "11.2.3",
+    "less": "^4.1.1",
+    "npm-run-all": "^4.1.5",
+    "tsc-watch": "^4.0.0"
+  },
+  "homepage": "https://github.com/antvis/util#readme",
+  "dependencies": {
+    "@antv/util": "~2.0.0",
+    "gl-matrix": "^3.0.0"
+  },
+  "gitHead": "2d3bf5b25fb8412c05d53f04fc0cd8414d1fd7cc"
+}

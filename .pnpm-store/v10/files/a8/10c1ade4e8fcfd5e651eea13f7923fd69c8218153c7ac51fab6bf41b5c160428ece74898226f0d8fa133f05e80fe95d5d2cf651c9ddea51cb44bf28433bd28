@@ -1,0 +1,36 @@
+{
+  "name": "acorn-static-class-features",
+  "description": "Support for static class features in acorn",
+  "homepage": "https://github.com/acornjs/acorn-static-class-features",
+  "contributors": [
+    "Adrian Heine <mail@adrianheine.de>"
+  ],
+  "engines": {
+    "node": ">=4.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acornjs/acorn-static-class-features"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha",
+    "test:test262": "node run_test262.js",
+    "lint": "eslint -c .eslintrc.json ."
+  },
+  "peerDependencies": {
+    "acorn": "^6.1.0 || ^7 || ^8"
+  },
+  "version": "0.2.4",
+  "devDependencies": {
+    "acorn": "^8",
+    "eslint": "^7",
+    "eslint-plugin-node": "^11",
+    "mocha": "^8",
+    "test262": "git+https://github.com/tc39/test262.git#e0758bbeacac7776dae2a69f88eb4742f0930d7c",
+    "test262-parser-runner": "^0.5.0"
+  },
+  "dependencies": {
+    "acorn-private-class-elements": "^0.2.7"
+  }
+}

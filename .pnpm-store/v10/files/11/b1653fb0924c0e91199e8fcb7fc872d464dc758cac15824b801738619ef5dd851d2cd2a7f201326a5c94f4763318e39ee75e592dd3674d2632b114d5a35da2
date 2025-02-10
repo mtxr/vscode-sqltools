@@ -1,0 +1,43 @@
+export interface FunctionSignature {
+    full: string;
+    name: string;
+    parameters: {
+        full: string;
+        name: string;
+        optional?: boolean;
+        default?: string;
+    }[];
+}
+export interface Doc {
+    /** 文档的公网链接 */
+    url: string;
+    /** 部分函数存在多个签名，例如 append! 和 x.append!, eachPre 和 func:P 这两组，最好在分析阶段就处理好 */
+    signatures: FunctionSignature[] | null;
+    /** 文档内容 */
+    markdown: string;
+}
+export type Docs = Record<string, Doc>;
+export declare class DocsProvider {
+    /** 文档原始信息 */
+    docs?: Docs;
+    /** 函数名列表 */
+    functions: string[];
+    /** 转化成小写字母的函数名列表 */
+    functions_lower: string[];
+    constants_lower: string[];
+    /** - docs: docs.zh.json 等文件对应的文档对象 */
+    constructor(docs: Docs);
+    get_function_markdown(name: string): string;
+    get_signatures(name: string): FunctionSignature[];
+    /** 根据用户输入提供补全列表，返回匹配的关键字、常量和函数 */
+    complete(query: string): {
+        keywords: string[];
+        constants: string[];
+        functions: string[];
+    };
+    get_signature_help(text: string): {
+        signature: FunctionSignature;
+        active_parameter: number;
+        documentation_md: string;
+    };
+}

@@ -1,0 +1,63 @@
+{
+  "name": "license-webpack-plugin",
+  "version": "4.0.2",
+  "description": "Outputs licenses from 3rd party libraries to a file",
+  "main": "dist/index.js",
+  "typings": "dist/index.d.ts",
+  "files": [
+    "/dist/**/*",
+    "/MIGRATION.md",
+    "/DOCUMENTATION.md"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "format": "cross-env prettier --single-quote --write 'src/**/*.ts'",
+    "format:e2e": "cross-env prettier --ignore-path .gitignore --single-quote --write 'e2e/**/*.js'",
+    "lint": "cross-env tslint 'src/**/*.ts' --project tsconfig.json",
+    "build": "yarn run format && yarn run lint && yarn run clean && tsc",
+    "prepublishOnly": "yarn run build",
+    "jest": "jest",
+    "test:unit": "yarn run build && yarn run jest",
+    "test:e2e": "yarn run format:e2e && yarn --cwd e2e/webpack-v4 && yarn --cwd e2e/webpack-v5 && jest --config jest.config.e2e.js --runInBand",
+    "test": "yarn run test:unit && yarn run test:e2e"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/xz64/license-webpack-plugin.git"
+  },
+  "keywords": [
+    "license",
+    "plugin",
+    "webpack"
+  ],
+  "author": "S K (xz64)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/xz64/license-webpack-plugin/issues"
+  },
+  "homepage": "https://github.com/xz64/license-webpack-plugin#readme",
+  "devDependencies": {
+    "@types/jest": "^22.2.2",
+    "@types/webpack-sources": "^0.1.5",
+    "cross-env": "^5.2.0",
+    "jest": "^22.4.3",
+    "prettier": "^1.19.1",
+    "rimraf": "^2.6.2",
+    "ts-jest": "^22.4.2",
+    "tslint": "^5.9.1",
+    "tslint-config-airbnb": "^5.8.0",
+    "tslint-config-prettier": "^1.10.0",
+    "typescript": "^3.8.0"
+  },
+  "dependencies": {
+    "webpack-sources": "^3.0.0"
+  },
+  "peerDependenciesMeta": {
+    "webpack": {
+      "optional": true
+    },
+    "webpack-sources": {
+      "optional": true
+    }
+  }
+}

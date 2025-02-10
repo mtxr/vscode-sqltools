@@ -1,0 +1,22 @@
+import './prototype.browser.ts';
+/** 二进制消息格式, 按 key 的顺序序列化值 */
+export interface Message<TData = any> {
+    /** rpc id: 在 rpc 系统中认为是唯一的。用来在单个 websocket 连接上同时进行多个 rpc 请求。
+        多个相同 id 的 message 组成一个请求流 */
+    id?: number;
+    /** 只在 rpc 发起时指定被调用的 function name，发起时 rpc 时必传 */
+    func?: string;
+    /** 传输的数据
+        - rpc 发起方调用 func 的参数（此时为数组），或者请求流 message 携带的数据
+        - 调用结果（通常为单个返回值）或者响应流的数据，传给请求发起方 */
+    data?: TData;
+    /** 通知对方这里产生的错误，本质上类似 data 也是一种数据，并不代表 rpc 的结束，后续可能继续有 rpc message 交换 */
+    error?: Error;
+    /** 通过这个 flag 主动表明这是发往对方的最后一个 message, 对方可以销毁 handler 了
+        并非强制，可以设置，由双方的函数自己约定 */
+    done?: boolean;
+}
+/** 用这个符号来标识 message 对象 */
+export declare const message_symbol: unique symbol;
+export declare function parse<TReturn>(_buf: Uint8Array): TReturn;
+export declare function pack(obj: any): Uint8Array<ArrayBuffer>;

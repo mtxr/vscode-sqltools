@@ -1,0 +1,54 @@
+{
+  "name": "ensure-type",
+  "version": "1.5.1",
+  "description": "Ensure runtime type safety and perform type coercion if needed.",
+  "homepage": "https://github.com/cheton/ensure-type",
+  "main": "dist/cjs/index.js",
+  "module": "dist/esm/index.js",
+  "files": [
+    "dist/cjs/*.js",
+    "dist/esm/*.js"
+  ],
+  "scripts": {
+    "build": "rollup --config rollup.config.js",
+    "clean": "del coverage dist yarn.lock",
+    "test": "jest",
+    "coveralls": "jest --coverage && cat coverage/lcov.info | coveralls"
+  },
+  "author": "Cheton Wu <cheton@gmail.com>",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:cheton/ensure-type.git"
+  },
+  "keywords": [
+    "javascript",
+    "ensure",
+    "runtime",
+    "type",
+    "coercion"
+  ],
+  "devDependencies": {
+    "@babel/preset-env": "^7.11.5",
+    "@rollup/plugin-node-resolve": "^9.0.0",
+    "@trendmicro/babel-config": "^1.0.0-alpha",
+    "coveralls": "^3.1.0",
+    "del-cli": "^3.0.1",
+    "jest": "^26.5.3",
+    "rollup": "^2.30.0",
+    "rollup-plugin-babel": "^4.4.0"
+  },
+  "jest": {
+    "testMatch": [
+      "<rootDir>/test/**/*.js"
+    ],
+    "collectCoverageFrom": [
+      "<rootDir>/src/**/*.js"
+    ],
+    "coverageReporters": [
+      "lcov",
+      "text",
+      "html"
+    ]
+  }
+}

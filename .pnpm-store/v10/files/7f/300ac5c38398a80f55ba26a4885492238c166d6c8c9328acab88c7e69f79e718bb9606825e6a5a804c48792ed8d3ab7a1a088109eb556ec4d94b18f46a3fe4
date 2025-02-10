@@ -1,0 +1,43 @@
+.ant-modal-root
+    // 增加 modal 标题下方空白
+    .ant-modal-header
+        margin-bottom: 18px
+    
+    .ant-modal-mask
+        background-color: unset
+    
+    .ant-modal
+        .ant-modal-content
+            padding: 20px
+
+
+@mixin height()
+    .ant-table-wrapper
+        height: 100%
+        
+        .ant-spin-nested-loading
+            height: 100%
+            
+            .ant-spin-container
+                height: 100%
+                display: flex
+                flex-direction: column
+            
+            .ant-table-container
+                height: 100%
+                display: flex
+                flex-direction: column
+                
+                .ant-table-body
+                    position: relative
+                    flex: 1
+                    
+                    table
+                        position: absolute
+                        left: 0
+                        top: 0
+                        right: 0
+                        bottom: 0
+            
+            .ant-table
+                flex: 1

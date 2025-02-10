@@ -1,0 +1,8 @@
+import './toaster.sass';
+export declare let toaster: {
+    messages: string[];
+    state: "IDLE" | "SHOW";
+    toast(message: string): Promise<void>;
+    show(): Promise<void>;
+};
+export declare const toast: (typeof toaster)["toast"];

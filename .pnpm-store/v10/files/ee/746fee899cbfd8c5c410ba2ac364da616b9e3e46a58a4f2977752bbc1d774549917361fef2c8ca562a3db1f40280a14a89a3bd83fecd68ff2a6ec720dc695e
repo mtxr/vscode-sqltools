@@ -1,0 +1,11 @@
+export declare const X_FIELD = "x";
+export declare const VIOLIN_Y_FIELD = "violinY";
+export declare const VIOLIN_SIZE_FIELD = "violinSize";
+export declare const MIN_MAX_FIELD = "minMax";
+export declare const QUANTILE_FIELD = "quantile";
+export declare const MEDIAN_FIELD = "median";
+export declare const VIOLIN_VIEW_ID = "violin_view";
+export declare const MIN_MAX_VIEW_ID = "min_max_view";
+export declare const QUANTILE_VIEW_ID = "quantile_view";
+export declare const MEDIAN_VIEW_ID = "median_view";
+export declare const DEFAULT_OPTIONS: any;

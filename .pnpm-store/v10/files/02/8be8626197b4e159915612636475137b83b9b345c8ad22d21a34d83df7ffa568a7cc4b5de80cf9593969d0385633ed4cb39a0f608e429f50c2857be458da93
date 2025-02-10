@@ -1,0 +1,378 @@
+import { spawn } from 'child_process';
+import os from 'os';
+import node_sea from 'node:sea';
+import "./prototype.js";
+import { fopen } from "./file.js";
+import { inspect, DecoderStream, filter_values, check, colored, timeout } from "./utils.js";
+export const sea = node_sea.isSea();
+export const exe_nodejs = process.execPath.fp;
+export const platform = os.platform();
+export const username = os.userInfo().username;
+export const noprint = { print: false };
+export const print_no_command = { print: { command: false, code: false, stdout: true, stderr: true } };
+export function get_command(exe, args) {
+    return (short_exe_names[exe] || exe.quote_if_space()) +
+        (args?.length
+            ? ` ${args.map(arg => arg.quote_if_space()).join(' ')}`
+            : '');
+}
+async function prepare_spawn(detached, exe, args, { cwd, window: _window = false, envs, 
+// @ts-ignore
+input, stdin = Boolean(input), stdout = !detached, stderr = stdout, print = true, proxy, }) {
+    // --- 处理 proxy, envs
+    if (proxy === true) {
+        const { MyProxy } = await import("./net.js");
+        proxy = MyProxy.socks5;
+    }
+    let envs_;
+    if (envs || proxy)
+        envs_ = filter_values({
+            ...process.env,
+            ...proxy ? {
+                http_proxy: proxy,
+                https_proxy: proxy,
+                no_proxy: '127.0.0.1,::1,localhost,192.168.0.0/20,192.168.100.0/24'
+            } : {},
+            ...envs
+        });
+    // --- 处理 stdio: 将 stdio 中的 true, false, string 转换为对应的 node.js stdio 值
+    check(stdout !== 'ignore' || stderr !== 'ignore');
+    if (detached)
+        check([stdin, stdout, stderr].every(io => io !== true), '调用 start 启动 detached 进程时 stdio 不能为 true (pipe)');
+    let opened_handles = [];
+    async function close_all_handles() {
+        await Promise.all(opened_handles.map(async (handle) => handle.close()));
+    }
+    async function resolve_stdio(io, flags) {
+        if (io === true)
+            return 'pipe';
+        else if (typeof io === 'string') {
+            const handle = await fopen(io, flags);
+            opened_handles.push(handle);
+            return handle.fd;
+        }
+        else
+            return 'ignore';
+    }
+    let pstdout;
+    let stdio;
+    try {
+        stdio = await Promise.all([
+            resolve_stdio(stdin, 'r'),
+            (pstdout = resolve_stdio(stdout, 'w')),
+            // 若 stderr 和 stdout 相同，则复用其 fd
+            stderr === stdout && typeof stderr === 'string'
+                ? pstdout
+                : resolve_stdio(stderr, 'w')
+        ]);
+    }
+    catch (error) {
+        await close_all_handles();
+        throw error;
+    }
+    // --- 处理 print
+    if (typeof print === 'boolean')
+        print = {
+            command: print,
+            code: print,
+            stdout: print,
+            stderr: print
+        };
+    print = {
+        command: print.command ?? true,
+        code: print.code ?? true,
+        stdout: stdout && (print.stdout ?? true),
+        stderr: stderr && (print.stderr ?? true)
+    };
+    const command = get_command(exe, args);
+    if (print.command)
+        console.log(command.blue);
+    return {
+        // 已经转为了完整的 FullPrintOptions
+        print: print,
+        command,
+        spawn_options: {
+            cwd,
+            shell: false,
+            windowsHide: !_window,
+            detached,
+            stdio,
+            ...envs_ ? { env: envs_ } : {}
+        },
+        close_all_handles: opened_handles.length ? close_all_handles : undefined
+    };
+}
+function to_subprocess(child, { title, exe, args, command, }) {
+    if (title)
+        child.title = title;
+    child.exe = exe;
+    child.args = args || [];
+    child.command = command;
+    child[inspect.custom] = () => {
+        const { title, command, running, exitCode, presult } = child;
+        return {
+            ...title ? { title } : {},
+            command,
+            running,
+            ...running ? {} : {
+                code: exitCode,
+                presult
+            }
+        };
+    };
+    Object.defineProperties(child, {
+        finished: {
+            get() {
+                return this.exitCode !== null;
+            }
+        },
+        running: {
+            get() {
+                return this.exitCode === null;
+            }
+        }
+    });
+    return child;
+}
+/** 使用 exe 启动独立 (detached) 的进程，不受当前 node.js 进程退出的影响，可重定向 stdio 到文件（默认直接忽略）
+    - exe: .exe 路径或文件名 (建议使用完整路径，跳过 path 搜索，性能更高)
+    - args?: `[ ]` 参数列表
+    - options?: {@link StartOptions} 继承自 {@link BaseOptions}
+        - cwd?: `'T:/'`
+        - envs?: `process.env` 覆盖／添加到 process.env 的环境变量，传 null 时可以取消设置该变量
+        - proxy?: 创建子进程时添加 http_proxy, https_proxy, no_proxy 环境变量以启用代理
+        - print?: `true` 是否打印启动命令行
+        - stdin?: 控制子进程 stdin，默认为 `false` ('ignore', 读空设备)
+            可传入 string，设置子进程 stdin 为某个文件路径 (打开文件，将句柄设置为子进程 stdin)
+        - stdout?: 控制子进程 stdout，默认为 `false` ('ignore', 写空设备)
+            可传入 string，设置子进程 stdout 某个文件路径 (打开文件，将句柄设置为子进程 stdout)
+        - stderr?: 控制子进程 stderr，默认为 `stdout` 的值，用法同 stdout
+        - window?: 默认为 false，不显示窗口，设置启动进程的参数 CREATE_NO_WINDOW, 和 SW_HIDE
+        - title?: 由创建进程的调用者设置的，用于区分、识别、记忆的可选名称 */
+export async function start(exe, args = [], options = {}) {
+    const { spawn_options, close_all_handles, command } = await prepare_spawn(true, exe, args, options);
+    try {
+        let child = to_subprocess(spawn(exe, args, spawn_options), { exe, command, args, title: options.title });
+        child.unref();
+        return child;
+    }
+    finally {
+        if (close_all_handles)
+            await close_all_handles();
+    }
+}
+export class CallError extends Error {
+    name = 'CallError';
+    constructor({ message, pid, stdout, stderr, code, signal, command, child, print }) {
+        super(message);
+        // defineProperty 默认 enumerable: false，不会在 inspect 中显示
+        Object.defineProperties(this, {
+            pid: { value: pid },
+            stdout: { value: stdout },
+            stderr: { value: stderr },
+            code: { value: code },
+            signal: { value: signal },
+            command: { value: command },
+            child: { value: child },
+            print: { value: print }
+        });
+    }
+    [inspect.custom](depth, options, inspect) {
+        const { colors } = options;
+        return (!this.print.stdout && this.stdout
+            ? `${colored('标准输出:\n', 'yellow', colors)}${this.stdout.toString().ensure_end()}`
+            : '') +
+            (!this.print.stderr && this.stderr
+                ? `${colored('标准错误:\n', 'yellow', colors)}${this.stderr.toString().ensure_end()}`
+                : '') +
+            inspect(this, { ...options, customInspect: false });
+    }
+}
+export async function call(exe, args = [], options = {}) {
+    const { print, spawn_options, close_all_handles, command } = await prepare_spawn(false, exe, args, options);
+    let child;
+    try {
+        child = to_subprocess(spawn(exe, args, spawn_options), { exe, args, command, title: options.title });
+    }
+    finally {
+        if (close_all_handles)
+            await close_all_handles();
+    }
+    const { stdio } = spawn_options;
+    const { encoding = 'utf-8', throw_code = true, input, on_stdout, on_stderr, on_child } = options;
+    // 防止 child spawn 失败时 crash nodejs 进程
+    child.on('error', error => {
+        console.error(error);
+    });
+    if (stdio[0] === 'pipe') {
+        child.stdin.setDefaultEncoding('utf-8');
+        if (input)
+            child.stdin.end(input);
+    }
+    // --- 收集进程输出
+    const piped_stdout = stdio[1] === 'pipe';
+    const piped_stderr = stdio[2] === 'pipe';
+    let stdouts = [];
+    let stderrs = [];
+    if (piped_stdout) {
+        if (encoding === 'utf-8' || encoding === 'utf-16le')
+            child.stdout.setEncoding(encoding);
+        else if (encoding !== 'binary')
+            child.stdout = child.stdout.pipe(new DecoderStream(encoding));
+        child.stdout.on('data', on_stdout || (print.stdout
+            ? (chunk) => {
+                stdouts.push(chunk);
+                process.stdout.write(chunk);
+            }
+            : (chunk) => {
+                stdouts.push(chunk);
+            }));
+    }
+    if (piped_stderr) {
+        if (encoding === 'utf-8' || encoding === 'utf-16le')
+            child.stderr.setEncoding(encoding);
+        else if (encoding !== 'binary')
+            child.stderr = child.stderr.pipe(new DecoderStream(encoding));
+        child.stderr.on('data', on_stderr || (print.stderr
+            ? (chunk) => {
+                stderrs.push(chunk);
+                process.stderr.write(chunk);
+            }
+            : (chunk) => {
+                stderrs.push(chunk);
+            }));
+    }
+    on_child?.(child);
+    let code, signal;
+    await new Promise(resolve => {
+        child.once('close', (_code, _signal) => {
+            code = _code;
+            signal = _signal;
+            resolve();
+        });
+    });
+    const message = `进程 ${command} ` + (code
+        ? `${throw_code ? '异常' : ''}结束，退出码: ${code}${signal ? `，信号: ${signal}` : ''}`
+        : '正常结束');
+    if (print.code && !code)
+        console.log(message.blue);
+    const result = {
+        pid: child.pid,
+        stdout: encoding === 'binary'
+            ? Buffer.concat(stdouts)
+            : stdouts.join(''),
+        stderr: encoding === 'binary'
+            ? Buffer.concat(stderrs)
+            : stderrs.join(''),
+        code,
+        signal,
+        command,
+        message,
+        child,
+        print,
+        [inspect.custom]() {
+            const { stdout, stderr, command, print, code, signal } = this;
+            return {
+                ...!print.command ? { command } : {},
+                ...piped_stdout && !print.stdout ? { stdout } : {},
+                ...piped_stderr && !print.stderr ? { stderr } : {},
+                ...code ? { code } : {},
+                ...signal ? { signal } : {},
+            };
+        }
+    };
+    if (throw_code && code)
+        throw new CallError(result);
+    return result;
+}
+export async function launch(exe, args, options) {
+    return new Promise(resolve => {
+        const presult = call(exe, args, {
+            on_child(child) {
+                child.presult = presult;
+                resolve(child);
+            },
+            ...options,
+        });
+    });
+}
+/** 调用 node <js> 并等待结果
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args?: `[ ]` 参数列表
+    - options?: {@link CallNodeJsOptions} 继承自 {@link CallOptions} 和 {@link NodeJsOptions}
+        - cwd?: `'T:/'`
+        - envs?: `process.env` 覆盖／添加到 process.env 的环境变量
+        - encoding?: `'utf-8'` 子进程输出编码
+        - print?: `true` print 选项，支持设置细项
+        - stdio?: `'pipe'` 设置为 'ignore' 时忽略 stdio 处理
+        - throw_code?: `true` code 不为 0 时是否抛出异常
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: break at first line */
+export async function call_nodejs(js, args, options) {
+    return call(exe_nodejs, get_nodejs_args(js, args, options), options);
+}
+/** 启动独立的 node.js 进程 (detached)，执行某个 js 文件
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args: `[]` 参数列表
+    - options?: {@link StartNodeJsOptions} 继承自 {@link StartOptions} 和 {@link NodeJsOptions}
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: 在第一行停止 */
+export async function start_nodejs(js, args, options) {
+    return start(exe_nodejs, get_nodejs_args(js, args, options), options);
+}
+/** 启动子 node.js 进程（通常是长期在后台运行的，或者可交互的，需要能控制），执行某个 js 文件，
+    返回 {@link SubProcess} 对象 (继承自 ChildProcess)，可以做 .kill() 等操作
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args: `[]` 参数列表
+    - options?: {@link CallNodeJsOptions} 继承自 {@link CallOptions} 和 {@link NodeJsOptions}
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: 在第一行停止 */
+export async function launch_nodejs(js, args, options) {
+    return launch(exe_nodejs, get_nodejs_args(js, args, options), options);
+}
+function get_nodejs_args(js, args = [], { inspect, break: _break } = {}) {
+    return [
+        '--enable-source-maps',
+        ...inspect ? [`--inspect${_break ? '-brk' : ''}=localhost:${inspect === true ? 9229 : inspect}`] : [],
+        js,
+        ...args
+    ];
+}
+/** 可选的向子进程输入内容，并等待子进程输出特定的内容，类似一次无返回值，仅有完成状态的 rpc 调用
+    根据文本内容匹配其实不太好，实在是没有别的 rpc 方法再使用吧
+    - ps: 子进程
+    - pattern: 匹配内容，支持 string 和 RegExp
+    - input?: 要输入的内容
+    - timeout?: 等待超时时间 */
+export async function wait_output(ps, pattern, input, _timeout) {
+    const { stdin, stdout } = ps;
+    const matcher = typeof pattern === 'string'
+        ? (chunk) => chunk.includes(pattern)
+        : (chunk) => pattern.test(chunk);
+    let on_data;
+    let pfound = new Promise(resolve => {
+        on_data = (chunk) => {
+            if (matcher(chunk)) {
+                stdout.off('data', on_data);
+                resolve();
+            }
+        };
+        stdout.on('data', on_data);
+        if (input)
+            stdin.write(input);
+    });
+    if (_timeout)
+        try {
+            await timeout(_timeout, pfound);
+        }
+        catch (error) {
+            stdout.off('data', on_data);
+            throw error;
+        }
+    else
+        await pfound;
+}
+const short_exe_names = {
+    [exe_nodejs]: 'node',
+};
+//# sourceMappingURL=process.js.map

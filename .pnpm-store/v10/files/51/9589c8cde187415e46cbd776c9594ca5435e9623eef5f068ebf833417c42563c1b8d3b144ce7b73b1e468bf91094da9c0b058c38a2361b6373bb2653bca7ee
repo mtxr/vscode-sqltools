@@ -1,0 +1,98 @@
+import { jsx as _jsx } from "react/jsx-runtime";
+import '@xterm/xterm/css/xterm.css';
+import { useEffect, useRef } from 'react';
+import { Terminal as XTerminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import { WebglAddon } from '@xterm/addon-webgl';
+import { WebLinksAddon } from '@xterm/addon-web-links';
+// 没有 ui
+// import { SearchAddon } from '@xterm/addon-search'
+import { Model } from 'react-object-model';
+import { assert, defer, genid } from "./utils.browser.js";
+export function Terminal({ font }) {
+    let rterminal = useRef(undefined);
+    useEffect(() => {
+        (async () => {
+            await document.fonts.ready;
+            let term = new XTerminal({
+                fontFamily: font,
+                fontSize: 16,
+                cursorStyle: 'bar',
+                disableStdin: true,
+                convertEol: true,
+                allowProposedApi: true,
+                theme: {
+                    ...myscheme,
+                    magenta: myscheme.purple,
+                    brightMagenta: myscheme.brightPurple,
+                }
+            });
+            const fit_addon = new FitAddon();
+            const link_addon = new WebLinksAddon();
+            // const search_addon = new SearchAddon()
+            term.loadAddon(fit_addon);
+            term.loadAddon(link_addon);
+            // term.loadAddon(search_addon)
+            term.open(rterminal.current);
+            if (document.createElement('canvas').getContext('webgl2'))
+                term.loadAddon(new WebglAddon());
+            fit_addon.fit();
+            terminal.pterm.resolve(term);
+            terminal.set({ term, fit_addon });
+        })();
+    }, []);
+    return _jsx("div", { className: 'term', ref: rterminal });
+}
+class TerminalModel extends Model {
+    pterm = defer();
+    term;
+    fit_addon;
+    stdio_id = 0;
+    fit() {
+        this.fit_addon?.fit();
+    }
+    async subscribe_stdio(remote) {
+        assert(!this.stdio_id);
+        const id = this.stdio_id = genid();
+        remote.handlers.set(id, ({ data, error }) => {
+            if (error)
+                throw error;
+            else
+                this.term.write(data[0]);
+        });
+        await remote.send({ id, func: 'subscribe_stdio' });
+    }
+    async unsubscribe_stdio(remote) {
+        let { stdio_id } = this;
+        assert(stdio_id);
+        await remote.call('unsubscribe_stdio', [stdio_id]);
+        remote.handlers.delete(stdio_id);
+        this.stdio_id = 0;
+    }
+}
+export let terminal = new TerminalModel();
+/** winterm.json */
+const myscheme = {
+    background: '#FFFFFF',
+    black: '#000000',
+    blue: '#0070C0',
+    brightBlack: '#444444',
+    brightBlue: '#0000FF',
+    brightCyan: '#008080',
+    brightGreen: '#718C00',
+    brightPurple: '#8959A8',
+    brightRed: '#DF0000',
+    brightWhite: '#AAAAAA',
+    brightYellow: '#FF81FF',
+    cursorColor: '#000000',
+    cyan: '#821717',
+    foreground: '#000000',
+    green: '#008000',
+    name: 'myscheme',
+    purple: '#800080',
+    red: '#C82829',
+    selectionBackground: '#ADD6FF',
+    white: '#888888',
+    yellow: '#EC7600'
+};
+//# sourceMappingURL=Terminal.js.map

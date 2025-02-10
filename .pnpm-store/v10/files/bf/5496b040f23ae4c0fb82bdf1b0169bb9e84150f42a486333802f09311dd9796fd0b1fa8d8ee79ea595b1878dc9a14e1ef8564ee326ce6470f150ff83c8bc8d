@@ -1,0 +1,10 @@
+/// <reference types="pino" />
+declare const logger: import("pino").BaseLogger & {
+    [key: string]: import("pino").LogFn;
+} & {
+    show: () => void;
+    outputChannel?: {
+        show: () => void;
+    };
+};
+export default logger;

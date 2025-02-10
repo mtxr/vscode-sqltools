@@ -1,0 +1,3 @@
+import type { ESLint, Linter } from 'eslint';
+export declare const xlint_plugin: ESLint.Plugin;
+export declare const xlint_config: Linter.Config;

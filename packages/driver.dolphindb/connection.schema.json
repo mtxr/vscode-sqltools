@@ -1,0 +1,39 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "type": "object",
+    "properties": {
+        "server": {
+            "title": "IP",
+            "type": "string",
+            "default": "localhost"
+        },
+        "port": {
+            "title": "Port",
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 65535,
+            "default": "8848"
+        },
+        "username": {
+            "title": "Username",
+            "type": "string",
+            "minLength": 1,
+            "default": "admin"
+        },
+        "password": {
+            "title": "Password",
+            "type": "string",
+            "minLength": 1,
+            "default": "123456"
+        },
+        "autologin": {
+            "title": "Auto Login",
+            "type": "boolean",
+            "default": true
+        }
+    },
+    "required": [
+        "server",
+        "port"
+    ]
+}

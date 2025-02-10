@@ -1,0 +1,3 @@
+import '../../prototype.ts';
+/** file:///D:/0/i18next-scanner/src/parser.js */
+export declare function mix_parse_trans_from_string_by_babel(parser: any): void;

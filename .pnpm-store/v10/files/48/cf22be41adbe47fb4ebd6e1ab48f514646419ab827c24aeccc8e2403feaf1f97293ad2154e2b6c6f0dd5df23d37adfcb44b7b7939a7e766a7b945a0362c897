@@ -1,0 +1,1 @@
+{"version":3,"file":"parse-path-array.js","sourceRoot":"","sources":["../src/parse-path-array.ts"],"names":[],"mappings":"AAAA,IAAM,GAAG,GAAG,eAAe,CAAC;AAE5B,MAAM,CAAC,OAAO,UAAU,cAAc,CAAC,IAAW;IAChD,OAAO,IAAI,CAAC,IAAI,CAAC,GAAG,CAAC,CAAC,OAAO,CAAC,GAAG,EAAE,IAAI,CAAC,CAAC;AAC3C,CAAC"}

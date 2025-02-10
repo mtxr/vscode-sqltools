@@ -1,0 +1,1 @@
+{"version":3,"file":"point-in-path.js","sourceRoot":"","sources":["../../../src/util/in-path/point-in-path.ts"],"names":[],"mappings":";;AAAA,uCAAmD;AAEnD,SAAwB,aAAa,CAAC,KAAK,EAAE,CAAC,EAAE,CAAC;IAC/C,IAAM,GAAG,GAAG,4BAAmB,EAAE,CAAC;IAClC,KAAK,CAAC,UAAU,CAAC,GAAG,CAAC,CAAC;IACtB,OAAO,GAAG,CAAC,aAAa,CAAC,CAAC,EAAE,CAAC,CAAC,CAAC;AACjC,CAAC;AAJD,gCAIC"}

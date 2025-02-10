@@ -1,0 +1,540 @@
+import "./prototype.js";
+import { decode, encode_into, ceil2, seq } from "./utils.js";
+// 类型            | 编码
+// --------------- | -------------------
+// small int +     | 0x00 - 0x1f (0 - 31 自然数)
+// small bin       | 0x20 - 0x3f (32 - 63)   0 - 31 个字节的 uint8array
+// small string    | 0x40 - 0x7f (64 - 127)  0 - 63 长度的字符串
+// small array     | 0x80 - 0x8f (128 - 143) 0 - 15 个元素的数组
+// small set       | 0x90 - 0x9f (144 - 159) 0 - 15 个 key 的 set
+// small object    | 0xa0 - 0xaf (160 - 175) 0 - 15 个 key 的对象
+// small map       | 0xb0 - 0xbf (176 - 191) 0 - 15 个 kv 的 map
+// undefined       | 0xc0
+// null            | 0xc1
+// false           | 0xc2
+// true            | 0xc3
+// int 8           | 0xc4
+// int 16          | 0xc5
+// int 32          | 0xc6
+// float 64        | 0xc7
+// bigint 64       | 0xc8  int64
+// bigint string   | 0xc9  string
+// error 8         | 0xca  长度 1 b + kv 对
+// regexp          | 0xcb  source string + flags string
+// rpc message     | 0xcc  small array, 格式为 [id, func, data, error, done], 最后的 undefined 的项去掉
+// date            | 0xcd  8 b float64
+// url             | 0xce  string
+// bin 8           | 0xd0  长度 1 b + 内容
+// bin 16          | 0xd1  长度 2 b + 内容
+// bin 32          | 0xd2  长度 4 b + 内容
+// string 8        | 0xd3  长度 1 b + 内容
+// string 16       | 0xd4  长度 2 b + 内容
+// string 32       | 0xd5  长度 4 b + 内容
+// array 8         | 0xd6
+// array 32        | 0xd7
+// set 8           | 0xd8
+// set 32          | 0xd9
+// object kv 对数量只有全部遍历才知道，因此只用 small object / object 16
+// object 16       | 0xda  kv 对数 2 b + kv 对
+// map 8           | 0xdb
+// map 32          | 0xdc
+// small int -     | 0xe0 - 0xff  (-32 ~ -1)
+// --- 共享状态，可以看成是模块对象的属性 (隐式 this)，有以下好处:
+// 避免函数调用时传一堆参数，返回一堆值
+// 方便设计 buffer pool, 减少对象创建
+// --- 解码
+/** 待解码的 buffer */
+let buf = new Uint8Array(0);
+/** 待解码的 buffer 对应的 dataview */
+let dv = buf.dataview;
+/** 指针，指向下一个要读取 / 写入的位置 */
+let p = 0;
+// --- 编码
+/** 编码缓冲区，持续往里写入，满了就用一个两倍大小的替换，将旧的未写完的部分复制过来 */
+let buffer = new Uint8Array(Buffer.poolSize);
+/** 编码缓冲区对应的 dataview */
+let dataview = buffer.dataview;
+/** 指针，编码缓冲区可以写入的位置，只增不减，除非换新 buffer */
+let q = 0;
+/** 某次编码开始时的位置，用于换缓冲区时从这里开始复制，以及最终返回时的起点 */
+let qstart = 0;
+const int64max = 1n << 63n;
+/** 用这个符号来标识 message 对象 */
+export const message_symbol = Symbol('message');
+const message_keys = ['id', 'func', 'data', 'error', 'done'];
+export function parse(_buf) {
+    // 初始化共享状态
+    buf = _buf;
+    dv = _buf.dataview;
+    p = 0;
+    return _parse();
+}
+function _parse() {
+    const type = buf[p++];
+    // 0 - 31 自然数
+    if (type <= 0x1f)
+        return type;
+    // small bin
+    if (type <= 0x3f)
+        return buf.subarray(p, p += type - 0x20);
+    // small string (0 - 63 长度的字符串)
+    if (type <= 0x7f)
+        return parse_string(type - 0x40);
+    // small array
+    if (type <= 0x8f)
+        return parse_array(type - 0x80);
+    // small set
+    if (type <= 0x9f)
+        return parse_set(type - 0x90);
+    // small object
+    if (type <= 0xaf)
+        return parse_object(type - 0xa0);
+    // small map
+    if (type <= 0xbf)
+        return parse_map(type - 0xb0);
+    // -32 ~ -1 小负整数
+    if (type >= 0xe0)
+        return type - 0x100;
+    switch (type) {
+        case 0xc0:
+            return undefined;
+        case 0xc1:
+            return null;
+        case 0xc2:
+            return false;
+        case 0xc3:
+            return true;
+        // int 8
+        case 0xc4:
+            return dv.getInt8(p++);
+        // int 16
+        case 0xc5:
+            return dv.getInt16(inc(2), true);
+        // int 32
+        case 0xc6:
+            return dv.getInt32(inc(4), true);
+        // float 64
+        case 0xc7:
+            return dv.getFloat64(inc(8), true);
+        // bigint 64
+        case 0xc8:
+            return dv.getBigInt64(inc(8), true);
+        // bigint string
+        case 0xc9:
+            return BigInt(_parse());
+        // error 8
+        case 0xca:
+            return Object.assign(new Error(), parse_object(buf[p++]));
+        // regexp
+        case 0xcb:
+            return new RegExp(_parse(), _parse());
+        // rpc message
+        case 0xcc: {
+            const values = _parse();
+            let message = {};
+            for (let i = 0; i < values.length; i++)
+                message[message_keys[i]] = values[i];
+            return message;
+        }
+        // date
+        case 0xcd:
+            return new Date(dv.getFloat64(inc(8), true));
+        // url
+        case 0xce:
+            return new URL(_parse());
+        // bin 8, 16, 32
+        case 0xd0:
+        case 0xd1:
+        case 0xd2: {
+            const len = parse_length(type - 0xd0);
+            return buf.subarray(p, p += len);
+        }
+        // string 8, 16, 32
+        case 0xd3:
+        case 0xd4:
+        case 0xd5:
+            return parse_string(parse_length(type - 0xd3));
+        // array 8, 32
+        case 0xd6:
+        case 0xd7:
+            return parse_array(parse_length(type === 0xd6 ? 0 : 2));
+        // set 8, 32
+        case 0xd8:
+        case 0xd9:
+            return parse_set(parse_length(type === 0xd8 ? 0 : 2));
+        // object 16
+        case 0xda:
+            return parse_object(dv.getUint16(inc(2), true));
+        // map 8, 32
+        case 0xdb:
+        case 0xdc:
+            return parse_map(parse_length(type === 0xdb ? 0 : 2));
+    }
+}
+/** 模拟自增 (后置++) 运算符 */
+function inc(len) {
+    p += len;
+    return p - len;
+}
+function parse_length(length_type) {
+    switch (length_type) {
+        case 0:
+            return buf[p++];
+        case 1:
+            return dv.getUint16(inc(2), true);
+        case 2:
+            return dv.getUint32(inc(4), true);
+    }
+}
+function parse_string(len) {
+    return decode(buf.subarray(p, p += len));
+}
+function parse_array(len) {
+    let a = new Array(len);
+    for (let i = 0; i < len; i++)
+        a[i] = _parse();
+    return a;
+}
+function parse_set(size) {
+    let s = new Set();
+    for (let i = 0; i < size; i++)
+        s.add(_parse());
+    return s;
+}
+function parse_object(nentries) {
+    let o = {};
+    for (let i = 0; i < nentries; i++) {
+        const key = _parse();
+        o[key] = _parse();
+    }
+    return o;
+}
+function parse_map(nentries) {
+    let map = new Map();
+    for (let i = 0; i < nentries; i++)
+        map.set(_parse(), _parse());
+    return map;
+}
+export function pack(obj) {
+    qstart = q;
+    _pack(obj);
+    return buffer.subarray(qstart, q);
+}
+/** 申请空间，确保 [q, q + size) 可以写入，不够时扩容，换缓冲区，并复制现有内容
+    - size: 准备写入多少字节的内容，取值 >= 1 */
+function alloc(size) {
+    if (q + size <= buffer.byteLength)
+        return;
+    let buffer_ = new Uint8Array(ceil2(q + size));
+    // console.log('扩容:', buffer_.byteLength / 2**20)
+    buffer_.set(buffer.subarray(qstart, q));
+    buffer = buffer_;
+    dataview = buffer_.dataview;
+    q -= qstart;
+    qstart = 0;
+}
+function _pack(value) {
+    // 提前判断以减少一次函数调用
+    if (q + 1 >= buffer.byteLength)
+        alloc(1);
+    switch (typeof value) {
+        case 'undefined':
+            buffer[q++] = 0xc0;
+            return;
+        case 'boolean':
+            buffer[q++] = value ? 0xc3 : 0xc2;
+            return;
+        case 'string': {
+            const { length } = value;
+            // 分配空间按照极限情况 strlen * 3 考虑，反正先申请着，后面也可以作他用
+            // 提前判断以减少一次函数调用
+            if (q + 1 + 4 + length * 3 >= buffer.byteLength)
+                alloc(1 + 4 + length * 3);
+            // 按最乐观的估计，如果估计错误，且影响到布局，再复制
+            // 通常受影响的都是小字符串，且概率不大，因此总体复制开销不大
+            let lensize = 0;
+            if (length <= 0x3f)
+                lensize = 0;
+            else if (length <= 0xff)
+                lensize = 1;
+            else if (length <= 0xffff)
+                lensize = 2;
+            else
+                lensize = 4;
+            // q (类型), lensize ..., qstr ...
+            const qstr = q + 1 + lensize;
+            const blen = pack_string(value, qstr);
+            if (blen <= 0x3f)
+                buffer[q++] = 0x40 + blen;
+            else if (blen <= 0xff) {
+                if (lensize < 1)
+                    buffer.copyWithin(q + 1 + 1, qstr, qstr + blen);
+                buffer[q++] = 0xd3;
+                buffer[q++] = blen;
+            }
+            else if (blen <= 0xffff) {
+                if (lensize < 2)
+                    buffer.copyWithin(q + 1 + 2, qstr, qstr + blen);
+                buffer[q++] = 0xd4;
+                dataview.setUint16(q, blen, true);
+                q += 2;
+            }
+            else {
+                if (lensize < 4)
+                    buffer.copyWithin(q + 1 + 4, qstr, qstr + blen);
+                buffer[q++] = 0xd5;
+                dataview.setUint32(q, blen, true);
+                q += 4;
+            }
+            q += blen;
+            return;
+        }
+        case 'number':
+            // 是一个有效的 32 位有符号整数
+            if (value >> 0 === value)
+                if (value >= 0)
+                    if (value <= 0x1f)
+                        buffer[q++] = value;
+                    else if (value <= 0x7f) {
+                        buffer[q++] = 0xc4;
+                        alloc(1);
+                        buffer[q++] = value;
+                    }
+                    else if (value <= 0x7fff) {
+                        buffer[q++] = 0xc5;
+                        alloc(2);
+                        dataview.setInt16(q, value, true);
+                        q += 2;
+                    }
+                    else {
+                        buffer[q++] = 0xc6;
+                        alloc(4);
+                        dataview.setInt32(q, value, true);
+                        q += 4;
+                    }
+                else if (value >= -0x20)
+                    // 等价于 dataview.setInt8
+                    buffer[q++] = value + 0x100;
+                else if (value >= -0x80) {
+                    buffer[q++] = 0xc4;
+                    alloc(1);
+                    buffer[q++] = value + 0x100;
+                }
+                else if (value >= -0x8000) {
+                    buffer[q++] = 0xc5;
+                    alloc(2);
+                    dataview.setInt16(q, value, true);
+                    q += 2;
+                }
+                else {
+                    buffer[q++] = 0xc6;
+                    alloc(4);
+                    dataview.setInt32(q, value, true);
+                    q += 4;
+                }
+            else { // 是浮点数或大于 int32 范围的数
+                buffer[q++] = 0xc7;
+                alloc(8);
+                dataview.setFloat64(q, value, true);
+                q += 8;
+            }
+            return;
+        case 'object':
+            if (value === null)
+                buffer[q++] = 0xc1;
+            else if (Array.isArray(value)) {
+                const { length } = value;
+                if (length <= 0x0f)
+                    buffer[q++] = 0x80 + length;
+                else if (length <= 0xff) {
+                    buffer[q++] = 0xd6;
+                    alloc(1);
+                    buffer[q++] = length;
+                }
+                else {
+                    buffer[q++] = 0xd7;
+                    alloc(4);
+                    dataview.setUint32(q, length, true);
+                    q += 4;
+                }
+                for (let i = 0; i < length; i++)
+                    _pack(value[i]);
+            }
+            else if (value instanceof Uint8Array) {
+                const { length } = value;
+                if (length <= 0x1f) {
+                    buffer[q++] = 0x20 + length;
+                    alloc(length);
+                }
+                else if (length <= 0xff) {
+                    buffer[q++] = 0xd0;
+                    alloc(1 + length);
+                    buffer[q++] = length;
+                }
+                else if (length <= 0xffff) {
+                    buffer[q++] = 0xd1;
+                    alloc(2 + length);
+                    dataview.setUint16(q, length, true);
+                    q += 2;
+                }
+                else {
+                    buffer[q++] = 0xd2;
+                    alloc(4 + length);
+                    dataview.setUint32(q, length, true);
+                    q += 4;
+                }
+                buffer.set(value, q);
+                q += length;
+            }
+            else if (value instanceof Error) {
+                // 乐观认为 error 不超过 255 个 key, 超过的部分直接忽略
+                buffer[q++] = 0xca;
+                const keys = Object.getOwnPropertyNames(value);
+                alloc(1);
+                buffer[q++] = keys.length;
+                for (const key of keys) {
+                    _pack(key);
+                    _pack(value[key]);
+                }
+            }
+            else if (value instanceof Date) {
+                buffer[q++] = 0xcd;
+                alloc(8);
+                dataview.setFloat64(q, value.getTime(), true);
+                q += 8;
+            }
+            else if (value instanceof Set) {
+                const { size } = value;
+                if (size <= 0x0f)
+                    buffer[q++] = 0x90 + size;
+                else if (size <= 0xff) {
+                    buffer[q++] = 0xd8;
+                    alloc(1);
+                    buffer[q++] = size;
+                }
+                else {
+                    buffer[q++] = 0xd9;
+                    alloc(4);
+                    dataview.setUint32(q, size, true);
+                    q += 4;
+                }
+                for (const v of value)
+                    _pack(v);
+            }
+            else if (value instanceof Map) {
+                const { size } = value;
+                if (size <= 0x0f)
+                    buffer[q++] = 0xb0 + size;
+                else if (size <= 0xff) {
+                    buffer[q++] = 0xdb;
+                    alloc(1);
+                    buffer[q++] = size;
+                }
+                else {
+                    buffer[q++] = 0xdc;
+                    alloc(4);
+                    dataview.setUint32(q, size, true);
+                    q += 4;
+                }
+                for (const [k, v] of value) {
+                    _pack(k);
+                    _pack(v);
+                }
+            }
+            else if (value instanceof RegExp) {
+                buffer[q++] = 0xcb;
+                _pack(value.source);
+                _pack(value.flags);
+            }
+            else if (value instanceof URL) {
+                buffer[q++] = 0xce;
+                _pack(value.toString());
+            }
+            else if (message_symbol in value) {
+                buffer[q++] = 0xcc;
+                let values = seq(message_keys.length, i => value[message_keys[i]]);
+                let iend = message_keys.length;
+                for (; iend >= 1 && values[iend - 1] === undefined; --iend)
+                    _pack(values.slice(0, iend));
+            }
+            else {
+                // 先检查 kv 对的数量是否小于等于 15 (small object)
+                // 先不序列化，防止某个 key 对应的 value 很大
+                let nkv = 0;
+                for (const key in value)
+                    if (++nkv === 16)
+                        break;
+                // 记录相对位置，避免 buffer 替换后位置错误
+                const offset = q + 1 - qstart;
+                if (nkv <= 0x0f) // small object
+                    buffer[q++] = 0xa0 + nkv;
+                else {
+                    buffer[q++] = 0xda;
+                    // 预留长度，先不填 kv 对数
+                    alloc(2);
+                    q += 2;
+                }
+                nkv = 0;
+                for (const key in value) {
+                    const v = value[key];
+                    if (typeof v === 'function')
+                        continue;
+                    _pack(key);
+                    _pack(v);
+                    if (++nkv > 0xffff)
+                        throw new Error('对象 key 数量大于 65535，无法序列化');
+                }
+                if (nkv >= 16)
+                    // 补填 kv 对数
+                    dataview.setUint16(qstart + offset, nkv, true);
+            }
+            return;
+        case 'bigint':
+            if (value < int64max && value >= -int64max) {
+                buffer[q++] = 0xc8;
+                alloc(8);
+                dataview.setBigInt64(q, value, true);
+                q += 8;
+            }
+            else {
+                buffer[q++] = 0xc9;
+                _pack(value.toString());
+            }
+            return;
+    }
+}
+/** 从 qstr 位置开始写入编码后的 utf8 内容，使用前需要用 alloc 提前预分配空间，
+    返回编码后的字节数 */
+function pack_string(value, qstr) {
+    const { length } = value;
+    if (length <= 0x3f) {
+        let j = qstr;
+        for (let i = 0; i < length; i++) {
+            let c1 = value.charCodeAt(i), c2 = 0;
+            if (c1 < 0x80)
+                buffer[j++] = c1;
+            else if (c1 < 0x800) {
+                buffer[j++] = (c1 >> 6) | 0xc0;
+                buffer[j++] = (c1 & 0x3f) | 0x80;
+            }
+            else if ((c1 & 0xfc00) === 0xd800 && ((c2 = value.charCodeAt(i + 1)) & 0xfc00) === 0xdc00) {
+                c1 = 0x10000 + ((c1 & 0x03ff) << 10) + (c2 & 0x03ff);
+                i++;
+                buffer[j++] = (c1 >> 18) | 0xf0;
+                buffer[j++] = ((c1 >> 12) & 0x3f) | 0x80;
+                buffer[j++] = ((c1 >> 6) & 0x3f) | 0x80;
+                buffer[j++] = (c1 & 0x3f) | 0x80;
+            }
+            else {
+                buffer[j++] = (c1 >> 12) | 0xe0;
+                buffer[j++] = ((c1 >> 6) & 0x3f) | 0x80;
+                buffer[j++] = (c1 & 0x3f) | 0x80;
+            }
+        }
+        return j - qstr;
+    }
+    else
+        return encode_into(value, buffer.subarray(qstr))
+            .written;
+}
+//# sourceMappingURL=io.js.map

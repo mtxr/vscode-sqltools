@@ -1,0 +1,33 @@
+export class Dict {
+    _dict;
+    constructor(_dict = {}) {
+        this._dict = _dict;
+    }
+    get(key, language) {
+        if (!key)
+            return '';
+        const item = this._dict[key];
+        if (language)
+            return item ?
+                item[language] || ''
+                :
+                    '';
+        return item;
+    }
+    to_resources() {
+        return Object.entries(this._dict).reduce((acc, [key, item]) => {
+            Object.entries(item).forEach(([language, translation]) => {
+                if (!translation || !acc[language])
+                    return;
+                acc[language].translation[key] = translation;
+            });
+            return acc;
+        }, {
+            zh: { translation: {} },
+            en: { translation: {} },
+            ja: { translation: {} },
+            ko: { translation: {} },
+        });
+    }
+}
+//# sourceMappingURL=dict.js.map

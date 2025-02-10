@@ -1,0 +1,38 @@
+import { IConnectionDriver, IBaseQueries, IConnection, IExpectedResult, NodeDependency, ContextValue, MConnectionExplorer, IQueryOptions, NSDatabase, LSIConnection } from '@sqltools/types';
+import { createLogger } from '@sqltools/log';
+export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
+    credentials: IConnection<DriverOptions>;
+    protected getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders'];
+    log: ReturnType<typeof createLogger>;
+    readonly deps: NodeDependency[];
+    getId(): string;
+    connection: Promise<ConnectionType>;
+    abstract queries: IBaseQueries;
+    constructor(credentials: IConnection<DriverOptions>, getWorkspaceFolders: LSIConnection['workspace']['getWorkspaceFolders']);
+    abstract open(): Promise<ConnectionType>;
+    abstract close(): Promise<void>;
+    abstract query<R = any, Q = any>(queryOrQueries: Q | string | String, opt: IQueryOptions): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>[]>;
+    singleQuery<R = any, Q = any>(query: Q | string | String, opt: IQueryOptions): Promise<NSDatabase.IResult<Q extends IExpectedResult<infer U> ? U : R>>;
+    protected queryResults: <R = any, Q = any>(query: string | String | Q, opt?: IQueryOptions) => Promise<((Q extends IExpectedResult<infer U> ? U : R) extends {
+        [key: string]: any;
+    } ? Q extends IExpectedResult<infer U> ? U : R : any)[]>;
+    describeTable(metadata: NSDatabase.ITable, opt: IQueryOptions): Promise<NSDatabase.IResult<any>[]>;
+    showRecords(table: NSDatabase.ITable, opt: IQueryOptions & {
+        limit: number;
+        page?: number;
+    }): Promise<NSDatabase.IResult<any>[]>;
+    checkDependencies(): Promise<void>;
+    requireDep: (name: string) => any;
+    resolveDep: (name: string) => string;
+    getChildrenForItem(_params: {
+        item: NSDatabase.SearchableItem;
+        parent?: NSDatabase.SearchableItem;
+    }): Promise<MConnectionExplorer.IChildItem[]>;
+    searchItems(_itemType: ContextValue, _search: string, _extraParams?: any): Promise<NSDatabase.SearchableItem[]>;
+    toAbsolutePath(fsPath: string): Promise<string>;
+    protected prepareMessage(message: any): NSDatabase.IResult['messages'][number];
+    static readonly CONSTANTS: {
+        DEPENDENCY_PACKAGE: "package" | "npmscript";
+        DEPENDENCY_NPM_SCRIPT: "package" | "npmscript";
+    };
+}

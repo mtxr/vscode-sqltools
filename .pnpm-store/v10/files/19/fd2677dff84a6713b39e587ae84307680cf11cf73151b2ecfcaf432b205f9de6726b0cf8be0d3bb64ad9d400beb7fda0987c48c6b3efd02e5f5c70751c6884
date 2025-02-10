@@ -1,0 +1,389 @@
+{
+    "存在": {
+        "en": "exists"
+    },
+    "不存在": {
+        "en": "not exists"
+    },
+    "打开文件": {
+        "en": "open file"
+    },
+    "fp 必须是绝对路径，或传入 dir 参数: ": {
+        "en": "fp must be absolute path, or pass in 'dir' parameters:"
+    },
+    "读取": {
+        "en": "read"
+    },
+    " 的编码可能是 ": {
+        "en": "'s encoding might be "
+    },
+    "写入": {
+        "en": "write"
+    },
+    "追加": {
+        "en": "append"
+    },
+    "data 不是 Buffer 或 string": {
+        "en": "data is not a buffer or string"
+    },
+    " 必须是绝对路径": {
+        "en": " must be absolute path"
+    },
+    "参数 fpd: ": {
+        "en": "argument fpd: "
+    },
+    " 必须以 / 结尾": {
+        "en": "must ends with /"
+    },
+    "fp 必须是绝对路径": {
+        "en": "fp must be absolute path"
+    },
+    "删除了文件夹: ": {
+        "en": "deleted folder: "
+    },
+    "删除了文件: ": {
+        "en": "deleted file: "
+    },
+    "文件夹已不存在: ": {
+        "en": "folder no longer exists: "
+    },
+    "文件已不存在: ": {
+        "en": "file no longer exists: "
+    },
+    "fp_src 和 fp_dst 必须同为文件路径或文件夹路径": {
+        "en": "fp_src and fp_dst must be the same as file paths or folder paths"
+    },
+    "fp_src 和 fp_dst 必须为完整路径": {
+        "en": "fp_src and fp_dst must be complete paths"
+    },
+    "复制": {
+        "en": "copy"
+    },
+    "src 和 dst 必须同为文件路径或文件夹路径": {
+        "en": "src and dst must be the same as file paths or folder paths"
+    },
+    "src 和 dst 必须为完整路径": {
+        "en": "src and dst must be complete paths"
+    },
+    "移动": {
+        "en": "move"
+    },
+    "fp 和 fp_ 必须是绝对路径": {
+        "en": "fp and fp_ must be absolute paths"
+    },
+    "重命名": {
+        "en": "rename"
+    },
+    "文件已存在：": {
+        "en": "file already exists: "
+    },
+    "fpd 必须是绝对路径: ": {
+        "en": "fpd must be absolute path"
+    },
+    "fpd 必须以 / 结尾: ": {
+        "en": "fpd must end with /"
+    },
+    "fp_real 和 fp_link 必须同为文件路径或文件夹路径": {
+        "en": "fp_real and fp_link must be the same as file paths or folder paths"
+    },
+    "存在同名": {
+        "en": "exists the same name "
+    },
+    "文件夹": {
+        "en": "folder"
+    },
+    "文件": {
+        "en": "file"
+    },
+    "，无法创建链接": {
+        "en": ", unable to create link"
+    },
+    "已将源文件 ": {
+        "en": "linked src file"
+    },
+    " 链接到 ": {
+        "en": " to "
+    },
+    "fp 必须是完整路径": {
+        "en": "fp must be complete path"
+    },
+    "文件修改 (": {
+        "en": "file changed ("
+    },
+    "remote.send(): websocket client 已断开": {
+        "en": "remote.send(): websocket client disconnected"
+    },
+    "找不到 rpc handler": {
+        "en": "cannot find rpc handler"
+    },
+    "凌晨": {
+        "en": "early morning"
+    },
+    "清晨": {
+        "en": "early morning"
+    },
+    "早上": {
+        "en": "morning"
+    },
+    "上午": {
+        "en": "morning"
+    },
+    "中午": {
+        "en": "noon"
+    },
+    "下午": {
+        "en": "afternoon"
+    },
+    "晚上": {
+        "en": "night"
+    },
+    "深夜": {
+        "en": "late at night"
+    },
+    "断言失败": {
+        "en": "assertion failed"
+    },
+    "检查失败": {
+        "en": "check failed"
+    },
+    " 太短": {
+        "en": " is too short"
+    },
+    "xshell 正在启动": {
+        "en": "xshell is booting"
+    },
+    "repl 已启动": {
+        "en": "repl has started"
+    },
+    "server 正在启动": {
+        "en": "server is starting"
+    },
+    "server 已启动": {
+        "en": "server has started"
+    },
+    "xshell 启动完成": {
+        "en": "xshell booted"
+    },
+    "xshell 正在监听: ": {
+        "en": "xshell is listening at: "
+    },
+    "已加载": {
+        "en": "loaded"
+    },
+    "所有模块全部加载": {
+        "en": "all modules were loaded"
+    },
+    "状态码 {{status}}, 非 2xx: {{url}}": {
+        "en": "status code {{code}} is not 2xx: {{url}}"
+    },
+    "请求参数:": {
+        "en": "request.params:"
+    },
+    "请求体:": {
+        "en": "request.body:"
+    },
+    "响应状态码:": {
+        "en": "response.code:"
+    },
+    "响应错误:": {
+        "en": "response.error:"
+    },
+    "响应头:": {
+        "en": "response.headers:"
+    },
+    "响应体:": {
+        "en": "response.body:"
+    },
+    "调用栈:": {
+        "en": "call stack:"
+    },
+    "已存在": {
+        "en": "exists"
+    },
+    "进程": {
+        "en": "process"
+    },
+    "异常结束, 错误码:": {
+        "en": "exited abnormally with error code:"
+    },
+    "信号:": {
+        "en": "signal"
+    },
+    "正常结束": {
+        "en": "exited normally"
+    },
+    "xshell 开始启动": {
+        "en": "xshell is booting"
+    },
+    "nodejs.repl 启动成功": {
+        "en": "nodejs.repl started successfully"
+    },
+    "server 启动成功": {
+        "en": "server started successfully"
+    },
+    "xshell 启动成功": {
+        "en": "xshell started successfully"
+    },
+    "xshell 正在退出": {
+        "en": "xshell is exiting"
+    },
+    "所有模块加载成功": {
+        "en": "all modules were loaded successfully"
+    },
+    " 已连接": {
+        "en": " connected"
+    },
+    " 已正常关闭": {
+        "en": " closed normally"
+    },
+    "被关闭": {
+        "en": "was closed"
+    },
+    "原因": {
+        "en": "reason"
+    },
+    "已创建文件夹": {
+        "en": "created folder"
+    },
+    "已存在文件夹": {
+        "en": "folder already exists:"
+    },
+    " 太短，防止误删文件": {
+        "en": " is too short (prevent accidental deletion of files)"
+    },
+    "异常结束": {
+        "en": "exited abnormally"
+    },
+    "结束": {
+        "en": "exited"
+    },
+    "不能太短，防止误删文件": {
+        "en": "can not be too short to prevent accidental deletion of files"
+    },
+    "连接出错了": {
+        "en": "connection errored"
+    },
+    "超过等待时间:": {
+        "en": "response.timeout exceeded:"
+    },
+    "等待 {{duration}} 秒后重试 fetch ({{_count}}) …": {
+        "en": "Wait {{duration}} seconds to retry fetching ({{_count}}) …"
+    },
+    "状态码 {{status}} 非 2xx": {
+        "en": "Status code {{status}} is not 2xx"
+    },
+    "传入 request 的 headers 参数中 key 应该都是小写的，实际为 {{key}}": {
+        "en": "The key in the headers parameter of the incoming request should be all lowercase, and it is actually {{key}}"
+    },
+    "dir 必须以 / 结尾": {
+        "en": "dir must end with /"
+    },
+    "fp 必须是文件，不能以 / 结尾": {
+        "en": "fp must be a file and cannot end with /"
+    },
+    "fp 必须是绝对路径:": {
+        "en": "fp must be an absolute path:"
+    },
+    "fp 必须是绝对路径，当前为:": {
+        "en": "fp must be an absolute path, currently:"
+    },
+    "已正常关闭": {
+        "en": "closed normally"
+    },
+    "websocket close 事件时应该已经 settled": {
+        "en": "Promise should have been settled in websocket close event"
+    },
+    "连接被关闭": {
+        "en": "connection closed"
+    },
+    "状态码 {{status}}, 非 2xx": {
+        "en": "Status code {{status}}, not 2xx"
+    },
+    "构建 Remote 时 url 和 websocket 最多只能传一个": {
+        "en": "When building Remote, only one url and websocket can be passed at most"
+    },
+    "创建 Remote 时传入的 websocket 连接已断开": {
+        "en": "The incoming websocket connection was broken while creating the Remote"
+    },
+    "传入的 websocket 连接已断开": {
+        "en": "The incoming websocket connection was disconnected"
+    },
+    "尝试释放未锁定的锁，这不应该发生": {
+        "en": "Attempt to release an unlocked lock, this should not happen"
+    },
+    "超时错误": {
+        "en": "timeout error"
+    },
+    "xshell 启动成功，用时 {{duration}}，正在监听: http://localhost:8421\n": {
+        "en": "xshell started successfully, took {{duration}}, is listening: http://localhost:8421\n"
+    },
+    "xshell 启动成功，用时 ": {
+        "en": "xshell started successfully, it took "
+    },
+    "正在监听: http://localhost:8421\n": {
+        "en": "listening: http://localhost:8421\n"
+    },
+    "flist: 参数 fpd: '{{fpd}}' 必须是绝对路径": {
+        "en": "flist: parameter fpd: '{{fpd}}' must be an absolute path"
+    },
+    "flist: 参数 fpd: '{{fpd}}' 必须以 / 结尾": {
+        "en": "flist: argument fpd: '{{fpd}}' must end with /"
+    },
+    "fstat: 参数 fp: '{{fp}}' 必须是绝对路径": {
+        "en": "fstat: parameter fp: '{{fp}}' must be an absolute path"
+    },
+    "不存在且无法创建文件夹 {{fpd}}": {
+        "en": "Folder {{fpd}} does not exist and cannot be created"
+    },
+    "message.data 必须是数组": {
+        "en": "message.data must be an array"
+    },
+    "fsend 必须传 absolute 选项或 root 文件夹": {
+        "en": "fsend must pass absolute option or root folder"
+    },
+    "message.data 数组中不能有 undefined 的项, 因为 json 序列化后会变为 null": {
+        "en": "There cannot be undefined items in the message.data array, because json will become null after serialization"
+    },
+    "xshell 启动成功，正在监听: http://localhost:8421": {
+        "en": "xshell started successfully and is listening: http://localhost:8421"
+    },
+    "flstat: 参数 fp: '{{fp}}' 必须是绝对路径": {
+        "en": "flstat: parameter fp: '{{fp}}' must be an absolute path"
+    },
+    "filter 选项只适用于 fp_src 为文件夹": {
+        "en": "filter option only applies to fp_src for folders"
+    },
+    "已订阅 stdio": {
+        "en": "subscribed to stdio"
+    },
+    "由于 websocket 连接关闭，stdio 订阅被关闭": {
+        "en": "stdio subscription was closed due to websocket connection closed"
+    },
+    "已取消订阅 stdio": {
+        "en": "stdio unsubscribed"
+    },
+    "{{name}} 启动成功，正在监听 {{ports}} 端口": {
+        "en": "{{name}} started successfully and is listening on {{ports}} port"
+    },
+    "删除了文件夹": {
+        "en": "deleted folder"
+    },
+    "删除了文件": {
+        "en": "deleted file"
+    },
+    "已不存在文件": {
+        "en": "file no longer exists:"
+    },
+    "已不存在文件夹": {
+        "en": "folder no longer exists:"
+    },
+    "不支持 content-encoding: {{encoding}} 的 http 请求": {
+        "en": "http requests with content-encoding: {{encoding}} are not supported"
+    },
+    "等待 {{duration}} 秒后重试 request (已尝试 {{_count}} 次) …": {
+        "en": "Wait {{duration}} seconds before retrying request (tried {{_count}} times) …"
+    },
+    "fsend 必须传 absolute 选项, sea 选项, 或 fpd_root 文件夹": {
+        "en": "fsend must be passed the absolute option, the sea option, or the fpd_root folder"
+    }
+}

@@ -1,0 +1,41 @@
+function define(proto, key, func) {
+    Object.defineProperty(proto, key, {
+        configurable: true,
+        writable: true,
+        enumerable: false,
+        value: func
+    });
+}
+if (!Promise.withResolvers)
+    define(Promise, 'withResolvers', function PromiseWithResolvers() {
+        let resolve, reject;
+        let promise = new Promise((_resolve, _reject) => {
+            resolve = _resolve;
+            reject = _reject;
+        });
+        return { promise, resolve, reject };
+    });
+if (!Array.prototype.toReversed)
+    define(Array.prototype, 'toReversed', function toReversed() {
+        return [...this].reverse();
+    });
+if (!Array.prototype.toSpliced)
+    define(Array.prototype, 'toSpliced', function toSpliced(...args) {
+        const copy = [...this];
+        copy.splice(...args);
+        return copy;
+    });
+if (!Array.prototype.at)
+    define(Array.prototype, 'at', function at(index) {
+        return index >= 0 ? this[index] : this[index + this.length];
+    });
+if (!Object.groupBy)
+    define(Object, 'groupBy', function groupBy(array, callback) {
+        return array.reduce((result, element, index) => {
+            const key = callback(element, index);
+            result[key] ??= [];
+            result[key].push(element);
+            return result;
+        }, {});
+    });
+//# sourceMappingURL=polyfill.browser.js.map

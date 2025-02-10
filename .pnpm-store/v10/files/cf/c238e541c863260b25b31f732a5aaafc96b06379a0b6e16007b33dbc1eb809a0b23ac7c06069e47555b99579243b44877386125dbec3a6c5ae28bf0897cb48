@@ -1,0 +1,10 @@
+export var CONTAINER_CLASS = 'g2-tooltip';
+export var TITLE_CLASS = 'g2-tooltip-title';
+export var LIST_CLASS = 'g2-tooltip-list';
+export var LIST_ITEM_CLASS = 'g2-tooltip-list-item';
+export var MARKER_CLASS = 'g2-tooltip-marker';
+export var VALUE_CLASS = 'g2-tooltip-value';
+export var NAME_CLASS = 'g2-tooltip-name';
+export var CROSSHAIR_X = 'g2-tooltip-crosshair-x';
+export var CROSSHAIR_Y = 'g2-tooltip-crosshair-y';
+//# sourceMappingURL=css-const.js.map

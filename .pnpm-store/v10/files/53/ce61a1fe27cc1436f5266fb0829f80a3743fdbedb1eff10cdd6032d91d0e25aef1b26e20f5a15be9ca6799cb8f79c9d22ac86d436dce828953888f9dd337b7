@@ -1,0 +1,29 @@
+import type { Language } from './index.ts';
+export declare class Dict {
+    _dict: _Dict;
+    constructor(_dict?: _Dict);
+    get(key: string): Item | undefined;
+    get(key: string, language: Language): string | '';
+    to_resources(): {
+        zh: {
+            translation: {};
+        };
+        en: {
+            translation: {};
+        };
+        ja: {
+            translation: {};
+        };
+        ko: {
+            translation: {};
+        };
+    };
+}
+/** 配置字段 */
+export type Item = {
+    [language in Language]?: string;
+};
+/** JSON.parse(词典文件.json) 得到的对象 */
+export interface _Dict {
+    [key: string]: Item;
+}

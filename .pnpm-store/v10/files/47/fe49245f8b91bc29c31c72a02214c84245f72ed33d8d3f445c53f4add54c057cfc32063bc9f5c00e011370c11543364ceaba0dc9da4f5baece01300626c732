@@ -1,0 +1,1 @@
+{"version":3,"file":"axis.js","sourceRoot":"","sources":["../../src/types/axis.ts"],"names":[],"mappings":"","sourcesContent":["import { Types } from '@antv/g2';\nimport { Meta } from './meta';\n\nexport type Axis = false | (Types.AxisCfg & Omit<Meta, 'values' | 'formatter'>);\n"]}

@@ -1,0 +1,231 @@
+import type { InspectOptions } from 'util';
+import { type ChildProcess } from 'child_process';
+import './prototype.ts';
+import { type Encoding } from './file.ts';
+import type { MyProxy } from './net.ts';
+export declare const sea: boolean;
+export declare const exe_nodejs: string;
+export declare const platform: NodeJS.Platform;
+export declare const username: string;
+export declare const noprint: {
+    readonly print: false;
+};
+export declare const print_no_command: {
+    readonly print: {
+        readonly command: false;
+        readonly code: false;
+        readonly stdout: true;
+        readonly stderr: true;
+    };
+};
+export interface FullPrintOptions {
+    stdout: boolean;
+    stderr: boolean;
+    command: boolean;
+    /** 进程执行成功的消息 */
+    code: boolean;
+}
+interface BaseOptions {
+    cwd?: string;
+    /** `process.env` 覆盖/添加到 process.env 的环境变量 */
+    envs?: Record<string, string>;
+    /** 创建子进程时添加 http_proxy, https_proxy, no_proxy 环境变量以启用代理 */
+    proxy?: MyProxy | true;
+    /** 控制子进程 stdin，默认为 `false` (读空设备)，除非传入了 {@link CallOptions.input} 属性
+        - 默认值:
+            - start(): false ('ignore', 空设备)
+            - (call|launch)(): true (pipe, 作为 child.stdout 可读流)
+        - `true` 设置子进程 stdin 为 'pipe'
+        - `false` 设置子进程 stdin 为 'ignore' (空设备)
+        - `string` 设置子进程 stdin 为某个文件路径 (打开文件，将句柄设置为子进程 stdin) */
+    stdin?: boolean | string;
+    /** 控制子进程 stdout
+        - 默认值:
+            - start(): false ('ignore', 空设备)
+            - (call|launch)(): true (pipe, 作为 child.stdout 可读流)
+        - `true` 设置子进程 stdout 为 'pipe' (作为 child.stdout 可读流)
+        - `false` 设置子进程 stdout 为 'ignore' (空设备)
+        - `string` 设置子进程 stdout 某个文件路径 (打开文件，将句柄设置为子进程 stdout) */
+    stdout?: boolean | string;
+    /** 控制子进程 stderr，默认为 `stdout` 的值，用法同 {@link BaseOptions.stdout} */
+    stderr?: boolean | string;
+    /** 默认为 false，不显示窗口，会设置 UV_PROCESS_WINDOWS_HIDE
+        然后设置启动进程的参数 CREATE_NO_WINDOW, 和 SW_HIDE
+        D:/0/libuv/src/win/process.c
+        CREATE_NO_WINDOW:
+        The process is a console application that is being run without a console window.
+        Therefore, the console handle for the application is not set.
+        This flag is ignored if the application is not a console application, or
+        if it is used with either CREATE_NEW_CONSOLE or DETACHED_PROCESS.
+        
+        具体有什么用还不清楚 */
+    window?: boolean;
+    /** 由创建进程的调用者设置的，用于区分、识别、记忆的可选名称 */
+    title?: string;
+}
+export interface StartOptions extends BaseOptions {
+    /** `true` 是否打印启动命令行 */
+    print?: boolean;
+}
+export declare function get_command(exe: string, args?: string[]): string;
+export interface SubProcess<TOutput extends string | Buffer = string> extends ChildProcess {
+    /** 由创建进程的调用者设置的，用于区分、识别、记忆的可选名称 */
+    title?: string;
+    /** 启动的 exe 路径，等于传入 call, start 的 exe */
+    exe: string;
+    /** 启动参数, 无参数时确保为 `[ ]` */
+    args: string[];
+    /** 启动命令 */
+    command: string;
+    /** 调用 call 的 Promise 结果，只有通过 launch 启动的进程有 */
+    presult?: Promise<CallResult<TOutput>>;
+    /** 是否还在运行 */
+    get running(): boolean;
+    /** 是否已结束，等价于 !running */
+    get finished(): boolean;
+}
+/** 使用 exe 启动独立 (detached) 的进程，不受当前 node.js 进程退出的影响，可重定向 stdio 到文件（默认直接忽略）
+    - exe: .exe 路径或文件名 (建议使用完整路径，跳过 path 搜索，性能更高)
+    - args?: `[ ]` 参数列表
+    - options?: {@link StartOptions} 继承自 {@link BaseOptions}
+        - cwd?: `'T:/'`
+        - envs?: `process.env` 覆盖／添加到 process.env 的环境变量，传 null 时可以取消设置该变量
+        - proxy?: 创建子进程时添加 http_proxy, https_proxy, no_proxy 环境变量以启用代理
+        - print?: `true` 是否打印启动命令行
+        - stdin?: 控制子进程 stdin，默认为 `false` ('ignore', 读空设备)
+            可传入 string，设置子进程 stdin 为某个文件路径 (打开文件，将句柄设置为子进程 stdin)
+        - stdout?: 控制子进程 stdout，默认为 `false` ('ignore', 写空设备)
+            可传入 string，设置子进程 stdout 某个文件路径 (打开文件，将句柄设置为子进程 stdout)
+        - stderr?: 控制子进程 stderr，默认为 `stdout` 的值，用法同 stdout
+        - window?: 默认为 false，不显示窗口，设置启动进程的参数 CREATE_NO_WINDOW, 和 SW_HIDE
+        - title?: 由创建进程的调用者设置的，用于区分、识别、记忆的可选名称 */
+export declare function start(exe: string, args?: string[], options?: StartOptions): Promise<SubProcess>;
+export interface CallOptions extends BaseOptions {
+    /** `true` print 选项，支持设置细项 */
+    print?: boolean | Partial<FullPrintOptions>;
+    /** `true` code 不为 0 时是否抛出异常 */
+    throw_code?: boolean;
+    /** `'utf-8'` 子进程输出编码，不传 'binary' 则 stdout, stderr 为 string 流 */
+    encoding?: 'binary' | Encoding;
+    /** 启动子进程之后写入到子进程 stdin 中的内容，写完后就关闭子进程 stdin，通知子进程处理 */
+    input?: string;
+    /** 可以传入回调函数及时获取通过 start 创建的子进程，便于执行 kill、获得 pid 等操作 */
+    on_child?(child: SubProcess): void;
+    /** 实时处理 stdout 的每个 chunk，设置后子进程输出不会自动 print，且 CallResult 中 stdout 属性为 '' */
+    on_stdout?(chunk: string): void;
+    /** 实时处理 stderr 的每个 chunk，设置后子进程输出不会自动 print，且 CallResult 中 stderr 属性为 '' */
+    on_stderr?(chunk: string): void;
+}
+export interface CallResult<TOutput extends string | Buffer = string> {
+    pid: number;
+    stdout: TOutput;
+    stderr: TOutput;
+    code: number | null;
+    signal: NodeJS.Signals | null;
+    command: string;
+    message: string;
+    child: SubProcess<TOutput>;
+    print: FullPrintOptions;
+}
+export interface CallError<TOutput extends string | Buffer = string> extends Error {
+    pid: number;
+    stdout: TOutput;
+    stderr: TOutput;
+    code: number;
+    signal: NodeJS.Signals;
+    command: string;
+    child: SubProcess<TOutput>;
+    print: FullPrintOptions;
+}
+export declare class CallError<TOutput extends string | Buffer = string> extends Error {
+    name: "CallError";
+    constructor({ message, pid, stdout, stderr, code, signal, command, child, print }: CallResult<TOutput>);
+    [inspect.custom](depth: number, options: InspectOptions, inspect: Function): string;
+}
+/** 调用 exe 启动子进程，等待并获取返回结果，错误时抛出 CallError
+    - exe: exe 路径或文件名 (建议使用路径，跳过 path 搜索，性能更高)
+    - args?: `[ ]` 参数列表
+    - options?: {@link CallOptions} 继承自 {@link BaseOptions}
+        - cwd?: `'T:/'`
+        - print?: `true` print 选项，支持设置细项 {@link FullPrintOptions}
+            - command?: `true` 打印启动命令行
+            - code?: `true` 打印进程执行成功的消息 (进程 ... 正常结束)
+            - stdout?: `true` 打印 stdout
+            - stderr?: `true` 打印 stderr
+        - throw_code?: `true` code 不为 0 时是否抛出异常
+        - envs?: `process.env` 覆盖／添加到 process.env 的环境变量，传 null 时可以取消设置该变量
+        - proxy?: 创建子进程时添加 http_proxy, https_proxy, no_proxy 环境变量以启用代理
+        - input?: string, 启动子进程之后写入到子进程 stdin 中的内容，写完后关闭子进程 stdin
+        - stdin?: 控制子进程 stdin，默认为 `false` (读空设备)，除非传入了 {@link CallOptions.input} 属性
+            - `true` 设置子进程 stdin 为 'pipe'
+            - `false` 设置子进程 stdin 为 'ignore' (空设备)
+            - `string` 设置子进程 stdin 为某个文件路径 (打开文件，将句柄设置为子进程 stdin)
+        - stdout?: 控制子进程 stdout，默认为 `true` (pipe, 作为 child.stdout 可读流)
+            - `true` 设置子进程 stdout 为 'pipe' (作为 child.stdout 可读流)
+            - `false` 设置子进程 stdout 为 'ignore' (空设备)
+            - `string` 设置子进程 stdout 某个文件路径 (打开文件，将句柄设置为子进程 stdout)
+        - stderr?: 控制子进程 stderr，用法同 {@link BaseOptions.stdout}
+        - window?: 默认为 false，不显示窗口，设置启动进程的参数 CREATE_NO_WINDOW, 和 SW_HIDE
+        - title?: 由创建进程的调用者设置的，用于区分、识别、记忆的可选名称
+        - encoding?: `'utf-8'` 子进程输出编码, 设置为 binary 时返回 stdout, stderr 类型为 Buffer; 否则是 string
+        - on_child?: 可以传入回调函数及时获取通过 spawn 创建的子进程，便于执行 kill、获得 pid 等操作
+        - on_stdout?: 实时处理 stdout 的每个 chunk，设置后子进程输出不会自动 print，且 CallResult 中 stdout 属性为 ''
+        - on_stderr?: 实时处理 stderr 的每个 chunk，设置后子进程输出不会自动 print，且 CallResult 中 stderr 属性为 '' */
+export declare function call(exe: string, args: string[], options: CallOptions & {
+    encoding: 'binary';
+}): Promise<CallResult<Buffer>>;
+export declare function call(exe: string, args?: string[], options?: CallOptions): Promise<CallResult<string>>;
+/** 调用 exe 启动子进程（通常是长期在后台运行的，或者可交互的，需要能控制）
+    返回 {@link SubProcess} 对象 (继承自 ChildProcess)，可以做 .kill() 等操作
+    其中有 presult 属性，是调用 call 的 Promise 结果
+    - exe: .exe 路径或文件名 (建议使用路径，跳过 path 搜索，性能更高)
+    - args: `[ ]` 参数列表
+    - options?: 见 {@link CallOptions} */
+export declare function launch(exe: string, args: string[], options: CallOptions & {
+    encoding: 'binary';
+}): Promise<SubProcess<Buffer>>;
+export declare function launch(exe: string, args?: string[], options?: CallOptions): Promise<SubProcess<string>>;
+export interface NodeJsOptions {
+    inspect?: number | true;
+    break?: boolean;
+}
+export interface CallNodeJsOptions extends CallOptions, NodeJsOptions {
+}
+/** 调用 node <js> 并等待结果
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args?: `[ ]` 参数列表
+    - options?: {@link CallNodeJsOptions} 继承自 {@link CallOptions} 和 {@link NodeJsOptions}
+        - cwd?: `'T:/'`
+        - envs?: `process.env` 覆盖／添加到 process.env 的环境变量
+        - encoding?: `'utf-8'` 子进程输出编码
+        - print?: `true` print 选项，支持设置细项
+        - stdio?: `'pipe'` 设置为 'ignore' 时忽略 stdio 处理
+        - throw_code?: `true` code 不为 0 时是否抛出异常
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: break at first line */
+export declare function call_nodejs(js: string, args?: string[], options?: CallNodeJsOptions): Promise<CallResult<string>>;
+export interface StartNodeJsOptions extends StartOptions, NodeJsOptions {
+}
+/** 启动独立的 node.js 进程 (detached)，执行某个 js 文件
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args: `[]` 参数列表
+    - options?: {@link StartNodeJsOptions} 继承自 {@link StartOptions} 和 {@link NodeJsOptions}
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: 在第一行停止 */
+export declare function start_nodejs(js: string, args?: string[], options?: StartNodeJsOptions): Promise<SubProcess<string>>;
+/** 启动子 node.js 进程（通常是长期在后台运行的，或者可交互的，需要能控制），执行某个 js 文件，
+    返回 {@link SubProcess} 对象 (继承自 ChildProcess)，可以做 .kill() 等操作
+    - js: .js 路径 (相对路径根据 cwd 解析)
+    - args: `[]` 参数列表
+    - options?: {@link CallNodeJsOptions} 继承自 {@link CallOptions} 和 {@link NodeJsOptions}
+        - inspect?: nodejs debugger port, 填 9229 端口 (或者传 true) 可以用临时配置来调试
+        - break?: 在第一行停止 */
+export declare function launch_nodejs(js: string, args?: string[], options?: CallNodeJsOptions): Promise<SubProcess<string>>;
+/** 可选的向子进程输入内容，并等待子进程输出特定的内容，类似一次无返回值，仅有完成状态的 rpc 调用
+    根据文本内容匹配其实不太好，实在是没有别的 rpc 方法再使用吧
+    - ps: 子进程
+    - pattern: 匹配内容，支持 string 和 RegExp
+    - input?: 要输入的内容
+    - timeout?: 等待超时时间 */
+export declare function wait_output(ps: SubProcess, pattern: string | RegExp, input?: string, _timeout?: number): Promise<void>;
+export {};

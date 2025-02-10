@@ -1,0 +1,80 @@
+import { __extends } from "tslib";
+import { ext } from '@antv/matrix-util';
+import { Action } from '..';
+import { distance } from '../util';
+var MIN_DISTANCE = 5;
+/**
+ * @ignore
+ * View 移动的 Action
+ */
+var Move = /** @class */ (function (_super) {
+    __extends(Move, _super);
+    function Move() {
+        var _this = _super !== null && _super.apply(this, arguments) || this;
+        _this.starting = false;
+        _this.isMoving = false;
+        // private cacheRange = null;
+        _this.startPoint = null;
+        _this.startMatrix = null;
+        return _this;
+    }
+    /**
+     * 开始移动
+     */
+    Move.prototype.start = function () {
+        this.starting = true;
+        this.startPoint = this.context.getCurrentPoint();
+        // 缓存开始时的矩阵，防止反复拖拽
+        this.startMatrix = this.context.view.middleGroup.getMatrix();
+    };
+    /**
+     * 移动
+     */
+    Move.prototype.move = function () {
+        if (!this.starting) {
+            return;
+        }
+        var startPoint = this.startPoint;
+        var currentPoint = this.context.getCurrentPoint();
+        var d = distance(startPoint, currentPoint);
+        if (d > MIN_DISTANCE && !this.isMoving) {
+            this.isMoving = true;
+        }
+        if (this.isMoving) {
+            var view = this.context.view;
+            var matrix = ext.transform(this.startMatrix, [
+                ['t', currentPoint.x - startPoint.x, currentPoint.y - startPoint.y],
+            ]);
+            view.backgroundGroup.setMatrix(matrix);
+            view.foregroundGroup.setMatrix(matrix);
+            view.middleGroup.setMatrix(matrix);
+        }
+    };
+    /**
+     * 结束移动
+     */
+    Move.prototype.end = function () {
+        if (this.isMoving) {
+            this.isMoving = false;
+        }
+        this.startMatrix = null;
+        this.starting = false;
+        this.startPoint = null;
+    };
+    /**
+     * 回滚
+     */
+    Move.prototype.reset = function () {
+        this.starting = false;
+        this.startPoint = null;
+        this.isMoving = false;
+        var view = this.context.view;
+        view.backgroundGroup.resetMatrix();
+        view.foregroundGroup.resetMatrix();
+        view.middleGroup.resetMatrix();
+        this.isMoving = false;
+    };
+    return Move;
+}(Action));
+export default Move;
+//# sourceMappingURL=move.js.map

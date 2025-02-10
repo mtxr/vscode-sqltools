@@ -1,0 +1,916 @@
+import { AST_TOKEN_TYPES, ASTUtils, TSESTree } from '@typescript-eslint/utils';
+import TSParser from '@typescript-eslint/parser';
+import ts_plugin from '@typescript-eslint/eslint-plugin';
+import react_plugin from 'eslint-plugin-react';
+import import_plugin from 'eslint-plugin-import';
+import stylistic_plugin from '@stylistic/eslint-plugin';
+const line_break_pattern = /\r\n|[\r\n\u2028\u2029]/u;
+const meta = {
+    fixable: 'whitespace',
+    type: 'layout',
+};
+const UNIONS = ['|', '&'];
+// 用 ast explorer 选 esprima 来看
+// node.loc.start.line 下标从 1 开始
+export const xlint_plugin = {
+    rules: {
+        'fold-jsdoc-comments': {
+            meta,
+            create: context => ({
+                Program() {
+                    for (const comment of context.sourceCode.getAllComments())
+                        if (comment.type === 'Block') {
+                            const lines = comment.value.split(line_break_pattern);
+                            if (lines.length >= 3 &&
+                                /^\*\s*$/u.test(lines[0]) &&
+                                lines.slice(1, -1).every(line => /^\s*\*/u.test(line)) &&
+                                /^[\s\*]*$/u.test(lines.at(-1)))
+                                context.report({
+                                    loc: {
+                                        start: comment.loc.start,
+                                        end: comment.loc.end
+                                    },
+                                    message: 'Redundant jsdoc comment.',
+                                    fix(fixer) {
+                                        const indent = ' '.repeat(comment.loc.start.column);
+                                        const indenter = (line) => line.replace(/^\s*\*\s?/u, `${indent}    `);
+                                        return fixer.replaceTextRange(comment.range, lines.length === 3 ?
+                                            `/** ${lines[1].replace(/^\s*\*\s*/u, '')} */`
+                                            :
+                                                [
+                                                    `/** ${lines[1].replace(/^\s*\*\s?/u, '')}`,
+                                                    ...lines.slice(2, -2).map(indenter),
+                                                    `${indenter(lines.at(-2))} */`
+                                                ].join('\n'));
+                                    }
+                                });
+                        }
+                }
+            })
+        },
+        // 一条语句作为 body 时强制换行缩进
+        // if (1) body
+        // 更改为
+        // if (1)
+        //     body
+        'nonblock-statement-body-position-with-indentation': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                const lines = source.getLines();
+                function lint(body, node) {
+                    if (body.type !== 'BlockStatement') {
+                        const token_before = source.getTokenBefore(body);
+                        let indent = 0;
+                        const line = lines[node.loc.start.line - 1];
+                        for (let i = 0; i < line.length; i++)
+                            if (line[i] === ' ')
+                                indent++;
+                            else if (line[i] === '\t')
+                                indent += 4;
+                            else
+                                break;
+                        if (token_before.loc.end.line === body.loc.start.line ||
+                            body.loc.start.column !== indent + 4)
+                            context.report({
+                                node: body,
+                                message: 'Expected a linebreak before this statement.',
+                                fix: fixer => fixer.replaceTextRange([token_before.range[1], body.range[0]], '\n' + ' '.repeat(indent + 4))
+                            });
+                    }
+                }
+                return {
+                    IfStatement(node) {
+                        lint(node.consequent, node);
+                        // Check the `else` node, but don't check 'else if' statements.
+                        if (node.alternate && node.alternate.type !== 'IfStatement')
+                            lint(node.alternate, node);
+                    },
+                    WhileStatement: node => { lint(node.body, node); },
+                    DoWhileStatement: node => { lint(node.body, node); },
+                    ForStatement: node => { lint(node.body, node); },
+                    ForInStatement: node => { lint(node.body, node); },
+                    ForOfStatement: node => { lint(node.body, node); }
+                };
+            },
+        },
+        // let o = { }
+        // let a = [ ]
+        // function foo () { }
+        'empty-bracket-spacing': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                return {
+                    ObjectExpression(node) {
+                        // 是 {} 这样的空对象
+                        if (node.properties.length === 0 && source.getText(node) === '{}')
+                            context.report({
+                                node,
+                                message: 'Expected a space in this empty object.',
+                                fix: fixer => fixer.replaceText(node, '{ }')
+                            });
+                    },
+                    ArrayExpression(node) {
+                        // 是 [] 这样的空数组
+                        if (node.elements.length === 0 && source.getText(node) === '[]')
+                            context.report({
+                                node,
+                                message: 'Expected a space in this empty array.',
+                                fix: fixer => fixer.replaceText(node, '[ ]')
+                            });
+                    },
+                    BlockStatement(node) {
+                        if (node.body.length === 0 && source.getText(node) === '{}')
+                            context.report({
+                                node,
+                                message: 'Expected a space in this empty block.',
+                                fix: fixer => fixer.replaceText(node, '{ }')
+                            });
+                    },
+                };
+            }
+        },
+        // a + b**c
+        'space-infix-ops-except-exponentiation': {
+            meta: {
+                ...meta,
+                messages: {
+                    missingSpace: "Operator '{{operator}}' must be spaced.",
+                    redundantSpace: "Operator '{{operator}}' must not be spaced."
+                }
+            },
+            // @ts-ignore
+            create(context) {
+                const int32Hint = true;
+                const { sourceCode } = context;
+                /** Returns the first token which violates the rule
+                    @param {ASTNode} left The left node of the main node
+                    @param {ASTNode} right The right node of the main node
+                    @param {string} op The operator of the main node
+                    @returns {Object} The violator token or null
+                    @private */
+                function getFirstNonSpacedToken(left, right, op) {
+                    const operator = sourceCode.getFirstTokenBetween(left, right, token => token.value === op);
+                    const prev = sourceCode.getTokenBefore(operator);
+                    const next = sourceCode.getTokenAfter(operator);
+                    if (!sourceCode.isSpaceBetween(prev, operator) || !sourceCode.isSpaceBetween(operator, next))
+                        return operator;
+                    return null;
+                }
+                /**
+                    Reports an AST node as a rule violation
+                    @param {ASTNode} mainNode The node to report
+                    @param {Object} culpritToken The token which has a problem
+                    @returns {void}
+                    @private
+                */
+                function report(mainNode, culpritToken) {
+                    context.report({
+                        node: mainNode,
+                        loc: culpritToken.loc,
+                        messageId: 'missingSpace',
+                        data: {
+                            operator: culpritToken.value
+                        },
+                        fix(fixer) {
+                            const previousToken = sourceCode.getTokenBefore(culpritToken);
+                            const afterToken = sourceCode.getTokenAfter(culpritToken);
+                            let fixString = '';
+                            if (culpritToken.range[0] - previousToken.range[1] === 0)
+                                fixString = ' ';
+                            fixString += culpritToken.value;
+                            if (afterToken.range[0] - culpritToken.range[1] === 0)
+                                fixString += ' ';
+                            return fixer.replaceText(culpritToken, fixString);
+                        }
+                    });
+                }
+                /**
+                    Check if the node is binary then report
+                    @param {ASTNode} node node to evaluate
+                    @returns {void}
+                    @private
+                */
+                function checkBinary(node) {
+                    const leftNode = node.left.typeAnnotation ? node.left.typeAnnotation : node.left;
+                    const rightNode = node.right;
+                    // search for = in AssignmentPattern nodes
+                    const operator = node.operator || '=';
+                    // 找到 ** operator
+                    if (operator === '**') {
+                        const op = sourceCode.getFirstTokenBetween(leftNode, rightNode, token => token.value === operator);
+                        const prev = sourceCode.getTokenBefore(op);
+                        const next = sourceCode.getTokenAfter(op);
+                        if (sourceCode.isSpaceBetween(prev, op) || sourceCode.isSpaceBetween(op, next))
+                            context.report({
+                                node,
+                                loc: op.loc,
+                                messageId: 'redundantSpace',
+                                data: {
+                                    operator: op.value
+                                },
+                                fix(fixer) {
+                                    const previousToken = sourceCode.getTokenBefore(op);
+                                    const afterToken = sourceCode.getTokenAfter(op);
+                                    let fixes = [];
+                                    if (op.range[0] > previousToken.range[1])
+                                        fixes.push(
+                                        // @ts-ignore
+                                        fixer.removeRange([previousToken.range[1], op.range[0]]));
+                                    if (afterToken.range[0] > op.range[1])
+                                        fixes.push(
+                                        // @ts-ignore
+                                        fixer.removeRange([op.range[1], afterToken.range[0]]));
+                                    return fixes;
+                                }
+                            });
+                    }
+                    else {
+                        const nonSpacedNode = getFirstNonSpacedToken(leftNode, rightNode, operator);
+                        if (nonSpacedNode)
+                            if (!(int32Hint && sourceCode.getText(node).endsWith('|0')))
+                                report(node, nonSpacedNode);
+                    }
+                }
+                /**
+                    Check if the node is conditional
+                    @param {ASTNode} node node to evaluate
+                    @returns {void}
+                    @private
+                */
+                function checkConditional(node) {
+                    const nonSpacedConsequentNode = getFirstNonSpacedToken(node.test, node.consequent, '?');
+                    const nonSpacedAlternateNode = getFirstNonSpacedToken(node.consequent, node.alternate, ':');
+                    if (nonSpacedConsequentNode)
+                        report(node, nonSpacedConsequentNode);
+                    if (nonSpacedAlternateNode)
+                        report(node, nonSpacedAlternateNode);
+                }
+                /**
+                    Check if the node is a variable
+                    @param {ASTNode} node node to evaluate
+                    @returns {void}
+                    @private
+                */
+                function checkVar(node) {
+                    const leftNode = node.id.typeAnnotation ? node.id.typeAnnotation : node.id;
+                    const rightNode = node.init;
+                    if (rightNode) {
+                        const nonSpacedNode = getFirstNonSpacedToken(leftNode, rightNode, '=');
+                        if (nonSpacedNode)
+                            report(node, nonSpacedNode);
+                    }
+                }
+                function ts_report(operator) {
+                    context.report({
+                        node: operator,
+                        messageId: 'missingSpace',
+                        data: {
+                            operator: operator.value
+                        },
+                        fix(fixer) {
+                            const previousToken = sourceCode.getTokenBefore(operator);
+                            const afterToken = sourceCode.getTokenAfter(operator);
+                            let fixString = '';
+                            if (operator.range[0] - previousToken.range[1] === 0)
+                                fixString = ' ';
+                            fixString += operator.value;
+                            if (afterToken.range[0] - operator.range[1] === 0)
+                                fixString += ' ';
+                            return fixer.replaceText(operator, fixString);
+                        }
+                    });
+                }
+                function isSpaceChar(token) {
+                    return token.type === AST_TOKEN_TYPES.Punctuator && /^[=?:]$/.test(token.value);
+                }
+                function checkAndReportAssignmentSpace(leftNode, rightNode) {
+                    if (!rightNode || !leftNode)
+                        return;
+                    const operator = sourceCode.getFirstTokenBetween(leftNode, rightNode, isSpaceChar);
+                    const prev = sourceCode.getTokenBefore(operator);
+                    const next = sourceCode.getTokenAfter(operator);
+                    if (!sourceCode.isSpaceBetween(prev, operator) || !sourceCode.isSpaceBetween(operator, next))
+                        ts_report(operator);
+                }
+                /**
+                    Check if it has an assignment char and report if it's faulty
+                    @param node The node to report
+                */
+                function checkForEnumAssignmentSpace(node) {
+                    checkAndReportAssignmentSpace(node.id, node.initializer);
+                }
+                /**
+                    Check if it has an assignment char and report if it's faulty
+                    @param node The node to report
+                */
+                function checkForPropertyDefinitionAssignmentSpace(node) {
+                    const leftNode = node.optional && !node.typeAnnotation ? sourceCode.getTokenAfter(node.key) : node.typeAnnotation ?? node.key;
+                    checkAndReportAssignmentSpace(leftNode, node.value);
+                }
+                /**
+                    Check if it is missing spaces between type annotations chaining
+                    @param typeAnnotation TypeAnnotations list
+                */
+                function checkForTypeAnnotationSpace(typeAnnotation) {
+                    const types = typeAnnotation.types;
+                    types.forEach(type => {
+                        const skipFunctionParenthesis = type.type === TSESTree.AST_NODE_TYPES.TSFunctionType ? ASTUtils.isNotOpeningBraceToken : 0;
+                        const operator = sourceCode.getTokenBefore(type, skipFunctionParenthesis);
+                        if (operator && UNIONS.includes(operator.value)) {
+                            const prev = sourceCode.getTokenBefore(operator);
+                            const next = sourceCode.getTokenAfter(operator);
+                            if (!sourceCode.isSpaceBetween(prev, operator) || !sourceCode.isSpaceBetween(operator, next))
+                                ts_report(operator);
+                        }
+                    });
+                }
+                /**
+                    Check if it has an assignment char and report if it's faulty
+                    @param node The node to report
+                */
+                function checkForTypeAliasAssignment(node) {
+                    checkAndReportAssignmentSpace(node.typeParameters ?? node.id, node.typeAnnotation);
+                }
+                function checkForTypeConditional(node) {
+                    checkAndReportAssignmentSpace(node.extendsType, node.trueType);
+                    checkAndReportAssignmentSpace(node.trueType, node.falseType);
+                }
+                return {
+                    AssignmentExpression: checkBinary,
+                    AssignmentPattern: checkBinary,
+                    BinaryExpression: checkBinary,
+                    LogicalExpression: checkBinary,
+                    ConditionalExpression: checkConditional,
+                    VariableDeclarator: checkVar,
+                    TSEnumMember: checkForEnumAssignmentSpace,
+                    PropertyDefinition: checkForPropertyDefinitionAssignmentSpace,
+                    TSTypeAliasDeclaration: checkForTypeAliasAssignment,
+                    TSUnionType: checkForTypeAnnotationSpace,
+                    TSIntersectionType: checkForTypeAnnotationSpace,
+                    TSConditionalType: checkForTypeConditional
+                };
+            }
+        },
+        // for (;;)
+        //     1;
+        // for (let i = 0;  i < 10;  i++)
+        // for (  ;  i < 10;  )
+        'space-in-for-statement': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                return {
+                    ForStatement(node) {
+                        const paren_left = source.getFirstToken(node, token => token.value === '(');
+                        const semi0 = source.getTokenAfter(node.init || paren_left);
+                        const semi1 = source.getTokenAfter(node.test || semi0);
+                        const semi0_prev = source.getTokenBefore(semi0, { includeComments: true });
+                        const semi0_next = source.getTokenAfter(semi0, { includeComments: true });
+                        const semi1_next = source.getTokenAfter(semi1, { includeComments: true });
+                        if (node.init || node.test || node.update) {
+                            // for (let i = 0;  i < 10;  i++)
+                            // for (  ;  i < 10;  )
+                            // for (  ;  ;  i++)
+                            // for (let i = 0;)
+                            if (node.init) {
+                                if (semi0.loc.start.line === semi0_prev.loc.end.line &&
+                                    semi0.loc.start.column !== semi0_prev.loc.end.column)
+                                    context.report({
+                                        loc: {
+                                            start: semi0_prev.loc.end,
+                                            end: semi0.loc.start
+                                        },
+                                        message: 'for 语句第一个分号前面应该没有多余空格',
+                                        node,
+                                        fix: fixer => fixer.removeRange([semi0_prev.range[1], semi0.range[0]])
+                                    });
+                            }
+                            else // for (  ;)
+                             if (semi0.loc.start.line === semi0_prev.loc.end.line &&
+                                semi0.loc.start.column - semi0_prev.loc.end.column !== 2)
+                                context.report({
+                                    loc: {
+                                        start: semi0_prev.loc.end,
+                                        end: semi0.loc.start
+                                    },
+                                    message: 'for 语句第一个分号前面应该为 2 个空格',
+                                    node,
+                                    fix: fixer => fixer.replaceTextRange([semi0_prev.range[1], semi0.range[0]], '  ')
+                                });
+                            // for (  ;  ;)
+                            if (semi0_next.loc.start.line === semi0.loc.end.line &&
+                                semi0_next.loc.start.column - semi0.loc.end.column !== 2)
+                                context.report({
+                                    loc: {
+                                        start: semi0.loc.end,
+                                        end: semi0_next.loc.start
+                                    },
+                                    message: 'for 语句第一个分号后面应为 2 个空格',
+                                    node,
+                                    fix: fixer => fixer.replaceTextRange([semi0.range[1], semi0_next.range[0]], '  ')
+                                });
+                            // // for (  ;  i > 0;)
+                            if (node.test) {
+                                const test_end = source.getLastToken(node.test);
+                                if (semi1.loc.start.line === test_end.loc.end.line &&
+                                    semi1.loc.start.column !== test_end.loc.end.column)
+                                    context.report({
+                                        loc: {
+                                            start: test_end.loc.end,
+                                            end: semi1.loc.start,
+                                        },
+                                        message: 'for 语句第二个分号前面没有多余的空格',
+                                        node,
+                                        fix: fixer => fixer.removeRange([test_end.range[1], semi1.range[0]])
+                                    });
+                            }
+                            if (semi1_next.loc.start.line === semi1.loc.end.line &&
+                                semi1_next.loc.start.column - semi1.loc.end.column !== 2)
+                                context.report({
+                                    loc: {
+                                        start: semi1.loc.end,
+                                        end: semi1_next.loc.start
+                                    },
+                                    message: 'for 语句第二个分号后面应为 2 个空格',
+                                    node,
+                                    fix: fixer => fixer.replaceTextRange([semi1.range[1], semi1_next.range[0]], '  ')
+                                });
+                        }
+                        else { // for (;;)
+                            if (semi0.loc.start.line === semi0_prev.loc.end.line &&
+                                semi0.loc.start.column !== semi0_prev.loc.end.column)
+                                context.report({
+                                    loc: {
+                                        start: semi0_prev.loc.end,
+                                        end: semi0.loc.start
+                                    },
+                                    message: '无条件 for 语句第一个分号前面应该没有空格',
+                                    node,
+                                    fix: fixer => fixer.removeRange([semi0_prev.range[1], semi0.range[0]])
+                                });
+                            if (semi0_next.loc.start.line === semi0.loc.end.line &&
+                                semi0_next.loc.start.column !== semi0.loc.end.column)
+                                context.report({
+                                    loc: {
+                                        start: semi0.loc.end,
+                                        end: semi0_next.loc.start
+                                    },
+                                    message: '无条件 for 语句第一个分号后面应该没有空格',
+                                    node,
+                                    fix: fixer => fixer.removeRange([semi0.range[1], semi0_next.range[0]])
+                                });
+                            if (semi1_next.loc.start.line === semi1.loc.end.line &&
+                                semi1_next.loc.start.column !== semi1.loc.end.column)
+                                context.report({
+                                    loc: {
+                                        start: semi1.loc.end,
+                                        end: semi1_next.loc.start
+                                    },
+                                    message: '无条件 for 语句第二个分号后面应该没有空格',
+                                    node,
+                                    fix: fixer => fixer.removeRange([semi1.range[1], semi1_next.range[0]])
+                                });
+                        }
+                    },
+                };
+            }
+        },
+        // return (
+        //     <div>1234</div>
+        // )
+        // 改为
+        // return <div>1234</div>
+        'jsx-no-redundant-parenthesis-in-return': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                return {
+                    ReturnStatement(node) {
+                        if (node.argument?.type === 'JSXElement' || node.argument?.type === 'JSXFragment') {
+                            const paren0 = source.getTokenBefore(node.argument);
+                            const paren1 = source.getTokenAfter(node.argument);
+                            if (paren0.type === 'Punctuator' && paren0.value === '(' &&
+                                paren1.type === 'Punctuator' && paren1.value === ')') {
+                                const paren0_next = source.getTokenAfter(paren0);
+                                const paren1_prev = source.getTokenBefore(paren1);
+                                context.report({
+                                    loc: {
+                                        start: paren0.loc.start,
+                                        end: paren1.loc.end
+                                    },
+                                    message: 'return jsx 表达式不应该有多余的括号',
+                                    node,
+                                    fix: fixer => ([
+                                        fixer.removeRange([paren0.range[0], paren0_next.range[0]]),
+                                        fixer.removeRange([paren1_prev.range[1], paren1.range[1]])
+                                    ])
+                                });
+                            }
+                        }
+                    },
+                    ArrowFunctionExpression(node) {
+                        if (node.body?.type === 'JSXElement' || node.body?.type === 'JSXFragment') {
+                            const paren0 = source.getTokenBefore(node.body);
+                            const paren1 = source.getTokenAfter(node.body);
+                            if (paren0.type === 'Punctuator' && paren0.value === '(' &&
+                                paren1.type === 'Punctuator' && paren1.value === ')') {
+                                const paren0_next = source.getTokenAfter(paren0);
+                                const paren1_prev = source.getTokenBefore(paren1);
+                                context.report({
+                                    loc: {
+                                        start: paren0.loc.start,
+                                        end: paren1.loc.end
+                                    },
+                                    message: 'return jsx 表达式不应该有多余的括号',
+                                    node,
+                                    fix: fixer => ([
+                                        fixer.removeRange([paren0.range[0], paren0_next.range[0]]),
+                                        fixer.removeRange([paren1_prev.range[1], paren1.range[1]])
+                                    ])
+                                });
+                            }
+                        }
+                    },
+                };
+            }
+        },
+        'keep-indent': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                const lines = source.getLines();
+                return {
+                    Program() {
+                        // 参考 keep_indent 逻辑
+                        if (lines.length >= 2) {
+                            let last_line = { indent: 0, text: '' };
+                            for (let i = 0; i < lines.length - 1; i++) {
+                                const _line = split_indent(lines[i]);
+                                if (!_line.indent && !_line.text && last_line.indent) {
+                                    const pos = { column: 0, line: i + 1 };
+                                    const index = source.getIndexFromLoc(pos);
+                                    const node = source.getNodeByRangeIndex(index);
+                                    if (node && node.type !== 'Program')
+                                        context.report({
+                                            message: '空行应保留与上一个区块相同的缩进',
+                                            loc: { start: pos, end: pos },
+                                            fix: fixer => fixer.replaceTextRange([index, index], ' '.repeat(last_line.indent))
+                                        });
+                                }
+                                last_line = _line;
+                            }
+                        }
+                    }
+                };
+            }
+        },
+        'func-style': {
+            meta,
+            create(context) {
+                const source = context.sourceCode;
+                let stack = [];
+                const fix = (fixer, node) => fixer.replaceText(node.parent.parent, `${node.async ? 'async ' : ''}function ${node.generator ? '* ' : ''}` +
+                    // todo: 丢失了泛型参数 const foo = <D = Zippable> (xxx: D) => { }，如何加回来？
+                    node.parent.id.name +
+                    ' (' +
+                    node.params.map(param => source.getText(param)).join(', ') +
+                    ') ' +
+                    source.getText(node.body));
+                return {
+                    FunctionDeclaration(node) {
+                        stack.push(false);
+                    },
+                    'FunctionDeclaration:exit'() {
+                        stack.pop();
+                    },
+                    FunctionExpression(node) {
+                        stack.push(false);
+                        if (node.parent.type === 'VariableDeclarator' &&
+                            // 忽略 let a = 1, b = function () { } 这样的情况
+                            node.parent.parent.declarations.length === 1)
+                            context.report({
+                                node: node.parent.parent,
+                                message: '函数应该使用 function foo { } 这样来声明而不是 const foo = function () { }',
+                                loc: node.parent.parent.loc,
+                                fix: fixer => fix(fixer, node)
+                            });
+                    },
+                    'FunctionExpression:exit'() {
+                        stack.pop();
+                    },
+                    ThisExpression() {
+                        if (stack.length > 0)
+                            stack[stack.length - 1] = true;
+                    },
+                    ArrowFunctionExpression() {
+                        stack.push(false);
+                    },
+                    'ArrowFunctionExpression:exit'(node) {
+                        if (!stack.pop() && // not has this expr
+                            (node.parent.type === 'VariableDeclarator' &&
+                                // 忽略 let a = 1, b = () => { } 这样的情况
+                                node.parent.parent.declarations.length === 1) &&
+                            // 多条语句才转换
+                            node.body.type === 'BlockStatement' && node.body.body.length)
+                            context.report({
+                                node: node.parent.parent,
+                                message: '多条语句的函数应该使用 function foo { } 这样来声明而不是 const foo = () => { }',
+                                loc: node.parent.parent.loc,
+                                fix: fixer => fix(fixer, node)
+                            });
+                    }
+                };
+            }
+        },
+        // 规则太复杂了，暂时写不出来
+        // ... color ? [ ] : [
+        //     '-c', 'color.status=false', 
+        //     '-c', 'color.ui=false', 
+        //     '-c', 'color.branch=false',
+        //     '-c', 'color.ui=false',
+        // ],
+        // test ? 
+        //      ...
+        // : [ ]
+        // 'conditional-expresssion-style': {
+        //     meta,
+        //     create (context) {
+        //         const source = context.sourceCode
+        //         const lines = source.getLines()
+        //         return {
+        //             ConditionalExpression (node) {
+        //                 const question = source.getTokenAfter(node.test, not_closing_paren)
+        //                 const colon = source.getTokenAfter(node.consequent, not_closing_paren)
+        //                 const test_tail = source.getTokenBefore(question, { includeComments: true })
+        //                 const test_head = source.getFirstToken(node, { includeComments: true })
+        //                 const consequent_start = source.getTokenAfter(question, not_opening_paren)
+        //                 const consequent_tail = source.getTokenBefore(colon, not_closing_paren)
+        //                 const alternate_start = source.getTokenAfter(colon, not_opening_paren)
+        //                 const node_tail = source.getLastToken(node)
+        //                 // 三元运算符的 ? 应该和 test 条件末尾在同一行
+        //                 if (test_tail.loc.start.line !== question.loc.start.line)
+        //                     context.report({
+        //                         node,
+        //                         loc: {
+        //                             start: colon.loc.start,
+        //                             end: colon.loc.end
+        //                         },
+        //                         message: '条件表达式的 ? 应该和 test 条件末尾在同一行',
+        //                         fix: fixer => fixer.replaceTextRange([test_tail.range[1], colon.range[0]], ' ')
+        //                     })
+        //                 // 单行的条件表达式
+        //                 if (colon.loc.start.line === question.loc.start.line) {
+        //                     const alternate_start_with_comments = source.getTokenAfter(colon, { includeComments: true, filter: not_opening_paren })
+        //                     if (node_tail.loc.end.line !== colon.loc.start.line)
+        //                         context.report({
+        //                             node,
+        //                             loc: {
+        //                                 start: node.alternate.loc.start,
+        //                                 end: node_tail.loc.end
+        //                             },
+        //                             message: '单行条件表达式的 else 条件也应该在同一行',
+        //                             fix: fixer => fixer.replaceTextRange([colon.range[1], alternate_start_with_comments.range[0]], ' ')
+        //                         })
+        //                 } else {  // 多行条件表达式
+        //                     if (consequent_tail.loc.end.line === colon.loc.start.line)
+        //                         context.report({
+        //                             node,
+        //                             loc: {
+        //                                 start: consequent_tail.loc.start,
+        //                                 end: colon.loc.start
+        //                             },
+        //                             message: '多行条件表达式的 : 应该在单独的一行',
+        //                             fix: fixer => 
+        //                                 fixer.insertTextBefore(
+        //                                     colon,
+        //                                     '\n' +
+        //                                     ' '.repeat(
+        //                                         Math.max(split_indent(lines[consequent_tail.loc.end.line - 1]).indent - 4, 0)
+        //                                     )
+        //                                 )
+        //                         })
+        //                     if (
+        //                         alternate_start.loc.start.line === colon.loc.start.line && 
+        //                         (node.alternate.loc.start.line !== node.alternate.loc.end.line)
+        //                     )
+        //                         context.report({
+        //                             node,
+        //                             loc: {
+        //                                 start: colon.loc.end,
+        //                                 end: alternate_start.loc.start
+        //                             },
+        //                             message: '多行条件表达式的 : 应该在单独的一行',
+        //                             fix: fixer => fixer.insertTextBefore(
+        //                                 alternate_start,
+        //                                 '\n' +
+        //                                 ' '.repeat(
+        //                                     split_indent(lines[colon.loc.start.line - 1]).indent + 4
+        //                                 )
+        //                             )
+        //                         })
+        //                     if (consequent_start.loc.start.line === question.loc.start.line)
+        //                         context.report({
+        //                             node,
+        //                             loc: {
+        //                                 start: question.loc.end,
+        //                                 end: test_head.loc.start
+        //                             },
+        //                             message: '多行条件表达式的 ? 这一行后面不应该有其他表达式，请换行',
+        //                             fix: fixer => fixer.insertTextBefore(
+        //                                 consequent_start,
+        //                                 '\n' +
+        //                                 ' '.repeat(
+        //                                     split_indent(lines[colon.loc.start.line - 1]).indent + 4
+        //                                 )
+        //                             )
+        //                         })
+        //                 }
+        //             }
+        //         }
+        //     }
+        // }
+    }
+};
+export const xlint_config = {
+    files: ['**/*.{js,mjs,cjs,ts,tsx,mts,cts}'],
+    ignores: [
+        '*.d.ts',
+        'node_modules/',
+        '.git/',
+    ],
+    languageOptions: {
+        ecmaVersion: 'latest',
+        parser: TSParser,
+        parserOptions: {
+            ecmaVersion: 'latest',
+            sourceType: 'module',
+            projectService: true,
+            ecmaFeatures: {
+                jsx: true
+            },
+        },
+    },
+    plugins: {
+        '@typescript-eslint': ts_plugin,
+        react: react_plugin,
+        import: import_plugin,
+        '@stylistic': stylistic_plugin,
+        xlint: xlint_plugin,
+    },
+    settings: {
+        react: {
+            version: 'detect'
+        }
+    },
+    rules: {
+        'xlint/fold-jsdoc-comments': 'error',
+        // 取代 nonblock-statement-body-position
+        'xlint/nonblock-statement-body-position-with-indentation': 'error',
+        'xlint/empty-bracket-spacing': 'error',
+        // a + b**c
+        'xlint/space-infix-ops-except-exponentiation': 'error',
+        'xlint/space-in-for-statement': 'error',
+        'xlint/jsx-no-redundant-parenthesis-in-return': 'error',
+        'xlint/keep-indent': 'error',
+        // 函数使用 function 来声明而不是 const foo = () => { }
+        'xlint/func-style': 'error',
+        '@stylistic/semi': ['error', 'never'],
+        '@stylistic/no-extra-semi': 'error',
+        '@stylistic/semi-style': ['error', 'first'],
+        // 使用 ===
+        eqeqeq: 'error',
+        // 父类尽量返回 this 类型
+        '@typescript-eslint/prefer-return-this-type': 'error',
+        // 尽量使用 . 访问属性而不是 []
+        '@typescript-eslint/dot-notation': 'error',
+        // 必须 throw Error
+        '@typescript-eslint/only-throw-error': 'error',
+        // ------------ async
+        // 返回 Promise 的函数一定要标记为 async 函数
+        '@typescript-eslint/promise-function-async': 'error',
+        // 不要 return await promise, 直接 return promise, 除非外面有 try catch
+        '@typescript-eslint/return-await': 'error',
+        // ------------ 括号
+        // a => { } 而不是 (a) => { }
+        '@stylistic/arrow-parens': ['error', 'as-needed', { requireForBlockBody: false }],
+        // arrow function 在 return 单条表达式时去掉后面的大括号, a => 1
+        'arrow-body-style': 'error',
+        // 不要多余的大括号
+        // if (true)
+        //     console.log()
+        curly: ['error', 'multi'],
+        // 简单属性不要冗余的大括号 <Component prop='simple-value' />
+        '@stylistic/jsx-curly-brace-presence': ['error', 'never'],
+        // ------------ 空格
+        // { a, b } 这样的对象，大括号里面要有空格
+        '@stylistic/object-curly-spacing': ['error', 'always'],
+        // [a, b, c]
+        '@stylistic/comma-spacing': 'error',
+        // foo()
+        '@stylistic/func-call-spacing': 'error',
+        // a => { } 中箭头左右两边空格
+        '@stylistic/arrow-spacing': ['error'],
+        // 注释双斜杠后面要有空格
+        '@stylistic/spaced-comment': ['error', 'always', { markers: ['/'] }],
+        // 函数声明中，名称后面要有空格
+        '@stylistic/space-before-function-paren': 'error',
+        // { return true } 这样的 block 大括号里面要有空格
+        '@stylistic/block-spacing': ['error', 'always'],
+        // aaa: 123
+        '@stylistic/key-spacing': ['error', { beforeColon: false, afterColon: true, mode: 'minimum' }],
+        // aaa: string
+        '@stylistic/type-annotation-spacing': 'error',
+        // if ()
+        '@stylistic/keyword-spacing': ['error', { before: true, after: true }],
+        // if (1) { }
+        '@stylistic/space-before-blocks': 'error',
+        // case 1: ...
+        '@stylistic/switch-colon-spacing': 'error',
+        // <Hello name={firstname} />
+        '@stylistic/jsx-equals-spacing': ['error', 'never'],
+        // 不允许使用 tab
+        '@stylistic/no-tabs': 'error',
+        // 使用 \n 换行
+        '@stylistic/linebreak-style': ['error', 'unix'],
+        // 文件以 \n 结尾
+        '@stylistic/eol-last': ['error', 'always'],
+        // ------------ 引号
+        // 用单引号
+        '@stylistic/jsx-quotes': ['error', 'prefer-single'],
+        // 用单引号
+        '@stylistic/quotes': ['error', 'single', { avoidEscape: true, allowTemplateLiterals: false }],
+        // 不要冗余的引号包裹属性
+        '@stylistic/quote-props': ['error', 'as-needed', { keywords: false, unnecessary: true }],
+        // ------------ 其它
+        // boolean 属性不要冗余的 ={true} <Component boolprop />
+        'react/jsx-boolean-value': ['error', 'never'],
+        // 没有 children 的 Component 写成闭合标签 <Component />
+        'react/self-closing-comp': 'error',
+        // 单行类型声明用 `,` 分割，多行类型声明结尾不要加分号
+        '@stylistic/member-delimiter-style': [
+            'error',
+            {
+                multiline: {
+                    delimiter: 'none',
+                    requireLast: false
+                },
+                singleline: {
+                    delimiter: 'comma',
+                    requireLast: false
+                }
+            }
+        ],
+        '@typescript-eslint/prefer-includes': 'error',
+        '@typescript-eslint/prefer-regexp-exec': 'error',
+        // 禁止使用 export default
+        'no-restricted-exports': [
+            'error',
+            { restrictDefaultExports: { direct: true, named: true, defaultFrom: true, namedFrom: true, namespaceFrom: true } }
+        ],
+        '@typescript-eslint/consistent-type-imports': ['error', { fixStyle: 'inline-type-imports', disallowTypeAnnotations: false }],
+        // () => { 返回 void 的表达式 }
+        '@typescript-eslint/no-confusing-void-expression': 'error',
+        // ------------ import
+        'import/no-duplicates': ['error', { 'prefer-inline': true }],
+        'import/order': [
+            'error',
+            {
+                'newlines-between': 'always-and-inside-groups',
+                pathGroups: [
+                    {
+                        pattern: '@/**',
+                        group: 'parent'
+                    },
+                    {
+                        pattern: '@i18n/**',
+                        group: 'parent'
+                    }
+                ]
+            }
+        ]
+    }
+};
+function split_indent(line) {
+    let i = 0;
+    let indent = 0;
+    for (; i < line.length; i++)
+        if (line[i] === ' ')
+            indent++;
+        else if (line[i] === '\t')
+            indent += 4;
+        else
+            break;
+    return {
+        indent,
+        text: line.slice(i)
+    };
+}
+function not_opening_paren(token) {
+    return !(['(', '[', '{'].includes(token.value) && token.type === 'Punctuator');
+}
+function not_closing_paren(token) {
+    return !([')', ']', '}'].includes(token.value) && token.type === 'Punctuator');
+}
+//# sourceMappingURL=xlint.js.map

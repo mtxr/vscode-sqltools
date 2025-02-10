@@ -1,0 +1,24 @@
+{
+  "name": "ts-node-esm",
+  "version": "0.0.6",
+  "description": "Example code for using using ts-node/esm",
+  "main": "./ts-node-esm.js",
+  "module": "./ts-node-esm.js",
+  "typings": "./ts-node-esm.d.ts",
+  "bin": {
+    "ts-node-esm": "./bin/cli.mjs"
+  },
+  "keywords": [
+    "ts-node",
+    "esm"
+  ],
+  "author": "Arjay Elbore",
+  "license": "MIT",
+  "peerDependencies": {
+    "typescript": ">=^3.9.3"
+  },
+  "dependencies": {
+    "aria-build": "^0.4.3",
+    "aria-fs": "^0.4.3"
+  }
+}

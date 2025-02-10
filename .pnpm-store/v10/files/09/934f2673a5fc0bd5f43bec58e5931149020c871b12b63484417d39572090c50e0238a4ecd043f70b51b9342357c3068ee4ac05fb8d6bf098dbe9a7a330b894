@@ -1,0 +1,24 @@
+import util from 'util';
+import { call_nodejs, platform, username } from "./process.js";
+export let npm = {
+    bin: platform == 'win32' ? `C:/Users/${username}/AppData/Roaming/npm/node_modules/pnpm/bin/pnpm.cjs` : '/usr/bin/pnpm',
+    async call(cwd, bin, args, options) {
+        return call_nodejs(bin, args, { cwd, ...options });
+    },
+    /** node.exe E:/sdk/nodejs/node_modules/corepack/dist/pnpm.js install
+        - cwd
+        - pkgs?: `[ ]` */
+    async install(cwd, pkgs = [], { save_dev = false, save_peer = false, legacy = false, force = false, term = false, inspect = false, break: _break = false, } = {}) {
+        const args = [
+            'install',
+            ...util.inspect.defaultOptions.colors ? ['--color'] : [],
+            ...legacy ? ['--legacy-peer-deps'] : [],
+            ...force ? ['--force'] : [],
+            ...save_dev ? ['--save-dev'] : [],
+            ...save_peer ? ['--save-peer'] : [],
+            ...pkgs || []
+        ];
+        await this.call(cwd, this.bin, args);
+    },
+};
+//# sourceMappingURL=apps.js.map

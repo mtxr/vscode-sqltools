@@ -1,0 +1,90 @@
+{
+  "name": "@antv/scale",
+  "version": "0.3.18",
+  "description": "The scale module for G2",
+  "author": "https://github.com/orgs/antvis/people",
+  "license": "MIT",
+  "main": "lib/index.js",
+  "module": "esm/index.js",
+  "types": "lib/index.d.ts",
+  "files": [
+    "src",
+    "lib",
+    "esm",
+    "README.md",
+    "LICENSE"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:antvis/scale.git"
+  },
+  "scripts": {
+    "build": "run-s clean lib",
+    "clean": "rimraf lib esm",
+    "lib": "run-p lib:*",
+    "lib:cjs": "tsc -p tsconfig.json --target ES5 --module commonjs --outDir lib",
+    "lib:esm": "tsc -p tsconfig.json --target ES5 --module ESNext --outDir esm",
+    "lint-stage": "lint-staged",
+    "lint": "tslint -c tslint.json src/**/* tests/**/*.*",
+    "lint-fix": "run-s lint-fix:*",
+    "lint-fix:prettier": "prettier --write 'src/**/*.ts'",
+    "lint-fix:tslint": "tslint -c tslint.json --fix 'src/**/*.ts' 'tests/**/*'",
+    "coverage": "jest --coverage",
+    "test": "jest",
+    "test-live": "DEBUG_MODE=1 jest --watch",
+    "ci": "run-s lint build coverage",
+    "prepublishOnly": "npm-run-all --parallel lint test clean lib dist",
+    "dist": "webpack --config webpack.config.js --mode production"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "run-s lint-stage build test"
+    }
+  },
+  "devDependencies": {
+    "@types/jest": "^25.2.1",
+    "husky": "^4.2.5",
+    "jest": "^24.9.0",
+    "jest-electron": "^0.1.6",
+    "lint-staged": "^10.2.2",
+    "npm-run-all": "^4.1.5",
+    "prettier": "^2.0.5",
+    "rimraf": "^3.0.0",
+    "ts-jest": "^24.1.0",
+    "tslint": "^6.1.2",
+    "ts-loader": "^7.0.4",
+    "babel-loader": "^8.0.4",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.5.3",
+    "webpack": "^4.26.1",
+    "webpack-cli": "^3.1.2"
+  },
+  "dependencies": {
+    "@antv/util": "~2.0.3",
+    "fecha": "~4.2.0",
+    "tslib": "^2.0.0"
+  },
+  "lint-staged": {
+    "*.{js,css,json,md}": [
+      "prettier --write",
+      "git add"
+    ],
+    "*.{ts}": [
+      "tslint -c tslint.json --fix",
+      "prettier --write",
+      "git add"
+    ]
+  },
+  "jest": {
+    "runner": "jest-electron/runner",
+    "testEnvironment": "jest-electron/environment",
+    "preset": "ts-jest",
+    "collectCoverage": false,
+    "collectCoverageFrom": [
+      "src/**/*.{ts,js}",
+      "!**/node_modules/**",
+      "!**/vendor/**"
+    ],
+    "testRegex": "/tests/.*spec\\.ts?$"
+  }
+}

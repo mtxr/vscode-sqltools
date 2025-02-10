@@ -1,0 +1,25 @@
+{
+    "name": "@types/relateurl",
+    "version": "0.2.33",
+    "description": "TypeScript definitions for relateurl",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/relateurl",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Tanguy Krotoff",
+            "githubUsername": "tkrotoff",
+            "url": "https://github.com/tkrotoff"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/relateurl"
+    },
+    "scripts": {},
+    "dependencies": {},
+    "typesPublisherContentHash": "e0c35e9a134fc50bda60c2b05d15821659fd5eb1c44559ba5d5c74fb7dfb8287",
+    "typeScriptVersion": "4.5"
+}

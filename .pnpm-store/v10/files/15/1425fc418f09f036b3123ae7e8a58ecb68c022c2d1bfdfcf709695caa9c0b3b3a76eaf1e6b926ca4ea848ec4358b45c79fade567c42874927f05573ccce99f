@@ -1,0 +1,42 @@
+::-webkit-scrollbar, ::-webkit-scrollbar:horizontal, ::-webkit-scrollbar:vertical
+    width: 12px !important
+    height: 12px !important
+    background-color: #aaaaaa !important
+
+::-webkit-scrollbar-track-piece
+    background-color: #ffffff !important
+    box-shadow: inset 0 0 0px #aaaaaa !important
+    border: 0px solid #aaaaaa !important
+    border-radius: 0px !important
+    
+    &:vertical
+        background-image: ''
+        
+        &:hover
+            background-image: ''
+    
+    &:horizontal
+        background-image: ''
+        
+        &:hover
+            background-image: ''
+    
+    &:hover
+        background-color: #d9d9d9 !important
+        box-shadow: inset 0 0 0px #aaaaaa !important
+    
+::-webkit-scrollbar-thumb
+    background-color: #aaaaaa !important
+    box-shadow: inset 0 0 0px #aaaaaa !important
+    border-radius: 0px !important
+    border: 0px solid #aaaaaa !important
+    
+    &:vertical
+        background-image: ''
+    
+    &:horizontal
+        background-image: ''
+
+::-webkit-scrollbar-corner
+    background-color: #B0BEC5 !important
+

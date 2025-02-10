@@ -1,0 +1,9 @@
+import { I18N } from './index.ts';
+export declare let i18n: I18N;
+declare const t: (text: string, options?: {
+    language?: import("./index.ts").Language;
+    context?: string;
+    count?: number;
+    [key: string]: any;
+}) => string, language: import("./index.ts").Language;
+export { t, language };

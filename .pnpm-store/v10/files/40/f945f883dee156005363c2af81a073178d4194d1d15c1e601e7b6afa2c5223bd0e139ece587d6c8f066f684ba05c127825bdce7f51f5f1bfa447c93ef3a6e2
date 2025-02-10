@@ -1,0 +1,255 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.doGroupAppearAnimate = exports.doAnimate = exports.getDefaultAnimateCfg = exports.DEFAULT_ANIMATE_CFG = void 0;
+var tslib_1 = require("tslib");
+var util_1 = require("@antv/util");
+var constant_1 = require("../constant");
+var animation_1 = require("./animation");
+// 默认的动画参数配置
+exports.DEFAULT_ANIMATE_CFG = {
+    appear: {
+        duration: 450,
+        easing: 'easeQuadOut',
+    },
+    update: {
+        duration: 400,
+        easing: 'easeQuadInOut',
+    },
+    enter: {
+        duration: 400,
+        easing: 'easeQuadInOut',
+    },
+    leave: {
+        duration: 350,
+        easing: 'easeQuadIn',
+    }, // 更新时销毁动画配置
+};
+// 各个 Geometry 默认的动画执行函数
+var GEOMETRY_ANIMATE_CFG = {
+    interval: function (coordinate) {
+        return {
+            enter: {
+                animation: coordinate.isRect ? (coordinate.isTransposed ? 'scale-in-x' : 'scale-in-y') : 'fade-in',
+            },
+            update: {
+                animation: coordinate.isPolar && coordinate.isTransposed ? 'sector-path-update' : null,
+            },
+            leave: {
+                animation: 'fade-out',
+            },
+        };
+    },
+    line: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    path: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    point: {
+        appear: {
+            animation: 'zoom-in',
+        },
+        enter: {
+            animation: 'zoom-in',
+        },
+        leave: {
+            animation: 'zoom-out',
+        },
+    },
+    area: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    polygon: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    schema: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    edge: {
+        enter: {
+            animation: 'fade-in',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+    label: {
+        appear: {
+            animation: 'fade-in',
+            delay: 450,
+        },
+        enter: {
+            animation: 'fade-in',
+        },
+        update: {
+            animation: 'position-update',
+        },
+        leave: {
+            animation: 'fade-out',
+        },
+    },
+};
+// 各个 Geometry 默认的群组出场动画
+var GEOMETRY_GROUP_APPEAR_ANIMATION = {
+    line: function () {
+        return {
+            animation: 'wave-in',
+        };
+    },
+    area: function () {
+        return {
+            animation: 'wave-in',
+        };
+    },
+    path: function () {
+        return {
+            animation: 'fade-in',
+        };
+    },
+    interval: function (coordinate) {
+        var animation;
+        if (coordinate.isRect) {
+            animation = coordinate.isTransposed ? 'grow-in-x' : 'grow-in-y';
+        }
+        else {
+            animation = 'grow-in-xy';
+            if (coordinate.isPolar && coordinate.isTransposed) {
+                // pie chart
+                animation = 'wave-in';
+            }
+        }
+        return {
+            animation: animation,
+        };
+    },
+    schema: function (coordinate) {
+        var animation;
+        if (coordinate.isRect) {
+            animation = coordinate.isTransposed ? 'grow-in-x' : 'grow-in-y';
+        }
+        else {
+            animation = 'grow-in-xy';
+        }
+        return {
+            animation: animation,
+        };
+    },
+    polygon: function () {
+        return {
+            animation: 'fade-in',
+            duration: 500,
+        };
+    },
+    edge: function () {
+        return {
+            animation: 'fade-in',
+        };
+    },
+};
+// 解析用户的动画配置
+function parseAnimateConfig(animateCfg, data) {
+    return {
+        delay: (0, util_1.isFunction)(animateCfg.delay) ? animateCfg.delay(data) : animateCfg.delay,
+        easing: (0, util_1.isFunction)(animateCfg.easing) ? animateCfg.easing(data) : animateCfg.easing,
+        duration: (0, util_1.isFunction)(animateCfg.duration) ? animateCfg.duration(data) : animateCfg.duration,
+        callback: animateCfg.callback,
+        repeat: animateCfg.repeat,
+    };
+}
+/**
+ * @ignore
+ * 获取 elementName 对应的动画配置，当声明了 `animateType`，则返回 `animateType` 对应的动画配置
+ * @param elementName 元素名称
+ * @param coordinate 做表弟类型
+ * @param animateType 可选，动画类型
+ */
+function getDefaultAnimateCfg(elementName, coordinate, animateType) {
+    var animateCfg = GEOMETRY_ANIMATE_CFG[elementName];
+    if (animateCfg) {
+        if ((0, util_1.isFunction)(animateCfg)) {
+            animateCfg = animateCfg(coordinate);
+        }
+        animateCfg = (0, util_1.deepMix)({}, exports.DEFAULT_ANIMATE_CFG, animateCfg);
+        if (animateType) {
+            return animateCfg[animateType];
+        }
+    }
+    return animateCfg;
+}
+exports.getDefaultAnimateCfg = getDefaultAnimateCfg;
+/**
+ * @ignore
+ * 工具函数
+ * 根据用户传入的配置为 shape 执行动画
+ * @param shape 执行动画的图形元素
+ * @param animateCfg 动画配置
+ * @param cfg 额外的信息
+ */
+function doAnimate(shape, animateCfg, cfg) {
+    var data = (0, util_1.get)(shape.get('origin'), 'data', constant_1.FIELD_ORIGIN);
+    var animation = animateCfg.animation; // 获取动画执行函数
+    var parsedAnimateCfg = parseAnimateConfig(animateCfg, data);
+    if (animation) {
+        // 用户声明了动画执行函数
+        var animateFunction = (0, animation_1.getAnimation)(animation);
+        if (animateFunction) {
+            animateFunction(shape, parsedAnimateCfg, cfg);
+        }
+    }
+    else {
+        // 没有声明，则根据 toAttrs 做差值动画
+        shape.animate(cfg.toAttrs, parsedAnimateCfg);
+    }
+}
+exports.doAnimate = doAnimate;
+/**
+ * @ignore
+ * 执行 Geometry 群组入场动画
+ * @param container 执行群组动画的图形元素
+ * @param animateCfg 动画配置
+ * @param geometryType geometry 类型
+ * @param coordinate 坐标系对象
+ * @param minYPoint y 轴最小值对应的画布坐标点
+ */
+function doGroupAppearAnimate(container, animateCfg, geometryType, coordinate, minYPoint) {
+    if (GEOMETRY_GROUP_APPEAR_ANIMATION[geometryType]) {
+        var defaultCfg = GEOMETRY_GROUP_APPEAR_ANIMATION[geometryType](coordinate);
+        var animation = (0, animation_1.getAnimation)((0, util_1.get)(defaultCfg, 'animation', ''));
+        if (animation) {
+            var cfg = tslib_1.__assign(tslib_1.__assign(tslib_1.__assign({}, exports.DEFAULT_ANIMATE_CFG.appear), defaultCfg), animateCfg);
+            container.stopAnimate(); // 先结束当前 container 动画
+            animation(container, cfg, {
+                coordinate: coordinate,
+                minYPoint: minYPoint,
+                toAttrs: null,
+            });
+        }
+    }
+}
+exports.doGroupAppearAnimate = doGroupAppearAnimate;
+//# sourceMappingURL=index.js.map

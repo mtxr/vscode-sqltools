@@ -1,0 +1,26 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.DEFAULT_OPTIONS = void 0;
+/**
+ * 仪表盘默认配置项
+ */
+exports.DEFAULT_OPTIONS = {
+    percent: 0.2,
+    innerRadius: 0.8,
+    radius: 0.98,
+    color: ['#FAAD14', '#E8EDF3'],
+    statistic: {
+        title: false,
+        content: {
+            style: {
+                fontSize: '14px',
+                fontWeight: 300,
+                fill: '#4D4D4D',
+                textAlign: 'center',
+                textBaseline: 'middle',
+            },
+        },
+    },
+    animation: {},
+};
+//# sourceMappingURL=constants.js.map

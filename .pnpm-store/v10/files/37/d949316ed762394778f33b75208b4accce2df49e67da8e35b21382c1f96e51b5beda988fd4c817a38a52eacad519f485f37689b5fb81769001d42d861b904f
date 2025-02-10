@@ -1,0 +1,38 @@
+{
+  "name": "acorn-stage3",
+  "description": "Support for stage 3 proposals in acorn",
+  "homepage": "https://github.com/acornjs/acorn-stage3",
+  "contributors": [
+    "Adrian Heine <mail@adrianheine.de>"
+  ],
+  "engines": {
+    "node": ">=4.8.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/acornjs/acorn-stage3"
+  },
+  "license": "MIT",
+  "scripts": {
+    "test": "mocha",
+    "test:test262": "node run_test262.js",
+    "lint": "eslint -c .eslintrc.json ."
+  },
+  "peerDependencies": {
+    "acorn": "^7.4 || ^8"
+  },
+  "dependencies": {
+    "acorn-class-fields": "^0.3.7",
+    "acorn-private-methods": "^0.3.3",
+    "acorn-static-class-features": "^0.2.4"
+  },
+  "version": "4.0.0",
+  "devDependencies": {
+    "acorn": "^8",
+    "eslint": "^7",
+    "eslint-plugin-node": "^11",
+    "mocha": "^8",
+    "test262": "git+https://github.com/tc39/test262.git#e0758bbeacac7776dae2a69f88eb4742f0930d7c",
+    "test262-parser-runner": "^0.5.0"
+  }
+}

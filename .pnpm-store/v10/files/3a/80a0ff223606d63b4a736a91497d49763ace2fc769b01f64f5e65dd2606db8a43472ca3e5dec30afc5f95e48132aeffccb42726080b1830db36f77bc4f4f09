@@ -1,0 +1,19 @@
+import { type Dispatch, type RefObject, type SetStateAction } from 'react';
+export declare function use_rerender(): () => void;
+export declare function use_modal(): ModalController;
+export interface ModalController {
+    visible: boolean;
+    open(): void;
+    close(): void;
+}
+/** 类似 useState, 同时将 state 绑定到 ref 从而方便的获取其最新的值, 返回 [state, ref, set_state] */
+export declare function use_ref_state<TState>(initial_state?: TState | (() => TState)): [
+    TState,
+    RefObject<TState>,
+    Dispatch<SetStateAction<TState>>
+];
+/** 根据 html element 渲染的高度更新 height state */
+export declare function use_height<TElement extends HTMLElement = HTMLElement>(initial_height: number): [
+    number,
+    RefObject<TElement>
+];

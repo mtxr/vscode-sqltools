@@ -1,0 +1,1 @@
+{"version":3,"file":"constant.js","sourceRoot":"","sources":["../../src/trend/constant.ts"],"names":[],"mappings":"AAAA,MAAM,CAAC,IAAM,gBAAgB,GAAG;IAC9B,eAAe;IACf,OAAO,EAAE,CAAC;CACX,CAAC;AAEF,MAAM,CAAC,IAAM,UAAU,GAAG;IACxB,MAAM,EAAE,SAAS;IACjB,aAAa,EAAE,IAAI;CACpB,CAAC;AAEF,MAAM,CAAC,IAAM,UAAU,GAAG;IACxB,IAAI,EAAE,SAAS;IACf,OAAO,EAAE,IAAI;CACd,CAAC"}

@@ -1,0 +1,52 @@
+import '../../prototype.ts';
+/** 默认 i18next 扫描配置 */
+declare const DEFAULT_CONFIG: {
+    debug: boolean;
+    input: string[];
+    output: string;
+    dict: string[];
+    lngs: string[];
+    ns: string[];
+    defaultLng: string;
+    defaultNs: string;
+    func: {
+        list: string[];
+        extensions: any[];
+    };
+    trans: {
+        extensions: any[];
+        fallbackKey: boolean;
+        babylon: import("@babel/parser").ParserOptions;
+        acorn: {
+            ecmaVersion: string;
+            sourceType: string;
+        };
+    };
+    keySeparator: boolean;
+    nsSeparator: boolean;
+    context: boolean;
+    contextFallback: boolean;
+    contextSeparator: string;
+    plural(language: string, ns: string, key: string, options: any /** Config */): language is "en";
+    pluralFallback: boolean;
+    pluralSeparator: string;
+    interpolation: {
+        prefix: string;
+        suffix: string;
+    };
+};
+export type Config = Partial<(typeof DEFAULT_CONFIG) & {
+    defaultValue?: string;
+    resource?: {
+        loadPath?: string;
+        savePath?: string;
+        jsonIndent?: number;
+        lineEnding?: '\n';
+    };
+}>;
+/** 扫描源码中的词条，以及收集未翻译的词条，将结果保存到 dict.json 和 untranslateds.json
+    - `process.cwd()` rootdir 要扫描根目录
+    - config 配置信息
+*/
+export declare function scanner(rootdir?: string, config?: Config): Promise<number>;
+export {};

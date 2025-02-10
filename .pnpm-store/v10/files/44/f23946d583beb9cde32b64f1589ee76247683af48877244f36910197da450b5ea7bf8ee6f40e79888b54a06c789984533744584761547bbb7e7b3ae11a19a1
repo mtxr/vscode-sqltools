@@ -1,0 +1,29 @@
+export let storage = {
+    /** 通过 key 获取字符串类型的值，不存在时返回空字符串 ('') */
+    getstr(key) {
+        return (localStorage.getItem(key) || '');
+    },
+    /** 将字符串类型的值保存到 key */
+    setstr(key, value = '') {
+        localStorage.setItem(key, value);
+    },
+    /** 根据 key 获取 JSON 类型的值，不存在时返回通过第二个参数传入的默认值，默认为 null */
+    get(key, _default = null) {
+        const strvalue = localStorage.getItem(key);
+        return strvalue === null
+            ? _default
+            : JSON.parse(strvalue);
+    },
+    /** 保存 JSON 类型的值到 key, 并返回 value */
+    set(key, value) {
+        localStorage.setItem(key, JSON.stringify(value));
+        return value;
+    },
+    list() {
+        return Object.keys(localStorage);
+    },
+    delete(key) {
+        localStorage.removeItem(key);
+    }
+};
+//# sourceMappingURL=storage.js.map

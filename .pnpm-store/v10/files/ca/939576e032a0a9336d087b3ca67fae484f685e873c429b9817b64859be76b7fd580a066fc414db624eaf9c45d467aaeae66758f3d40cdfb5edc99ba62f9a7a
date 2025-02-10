@@ -1,0 +1,19 @@
+import '@xterm/xterm/css/xterm.css';
+import { Terminal as XTerminal } from '@xterm/xterm';
+import { FitAddon } from '@xterm/addon-fit';
+import { Model } from 'react-object-model';
+import type { Remote } from './net.browser.ts';
+export declare function Terminal({ font }: {
+    font: string;
+}): import("react/jsx-runtime").JSX.Element;
+declare class TerminalModel extends Model<TerminalModel> {
+    pterm: import("./utils.browser.ts").Deferred<XTerminal>;
+    term: XTerminal;
+    fit_addon: FitAddon;
+    stdio_id: number;
+    fit(): void;
+    subscribe_stdio(remote: Remote): Promise<void>;
+    unsubscribe_stdio(remote: Remote): Promise<void>;
+}
+export declare let terminal: TerminalModel;
+export {};

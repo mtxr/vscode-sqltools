@@ -1,0 +1,135 @@
+import { type Mapper } from './prototype.browser.ts';
+export declare function assert<T>(assertion: T, message?: string): T;
+/** 做参数校验，逻辑检查 */
+export declare function check<T>(condition: T, message?: string): T;
+/** 通过 console.log 打印对象并返回
+    @example
+    log('label', obj)
+    log(obj) */
+export declare function log<TObj>(obj: TObj): TObj;
+export declare function log<TObj>(label: string, obj: TObj): TObj;
+/** 数组或 iterable 去重（可按 mapper 选择或计算某个值来去重），重复值保留最后出现的那个
+    - mapper?: 可以是 key (string, number, symbol) 或 (obj: any) => any */
+export declare function unique<TObj>(iterable: TObj[] | Iterable<TObj>, mapper?: keyof TObj | Mapper<TObj>): TObj[];
+/** 生成 0, 1, ..., n - 1 (不包括 n) 的数组，支持传入 generator 函数，通过 index 生成各个元素
+    @example seq(10, i => `item-${i}`) */
+export declare function seq<T = number>(n: number, generator?: (index: number) => T): T[];
+/** 将 keys, values 数组按对应的顺序组合成一个对象 */
+export declare function zip_object<TValue>(keys: (string | number)[], values: TValue[]): Record<string, TValue>;
+/** 过滤对象中的 values, 返回新对象
+    - obj
+    - filter?: `not_empty` */
+export declare function filter_values<TObj extends Record<string, any>>(obj: TObj, filter?: (value: TObj[string]) => any): TObj;
+export declare function delay(milliseconds: number, { signal }?: {
+    signal?: AbortSignal;
+}): Promise<void>;
+export declare class TimeoutError extends Error {
+    name: "TimeoutError";
+}
+/** 在指定的时间 (milliseconds) 内运行某个任务，超时之后抛出错误或调用 on_timeout
+    - milliseconds: 限时毫秒数
+    - action?: 要等待运行的任务, async function 或 promise
+    - on_timeout?: 超时后调用的函数
+        - 如果传入了 on_timeout 参数: 调用 on_timeout，然后 timeout 函数正常返回 null
+        - 如果没传入 on_timeout 参数: 抛出 TimeoutError
+    - print?: 打印已超时任务的错误 */
+export declare function timeout<TReturn>(milliseconds: number, action: Promise<TReturn> | (() => Promise<TReturn>), on_timeout?: () => void | Promise<void>, print?: boolean): Promise<TReturn>;
+/** https://stackoverflow.com/questions/63297164/how-to-only-accept-arraybuffer-as-parameter */
+export type StrictArrayBuffer = ArrayBuffer & {
+    buffer?: undefined;
+};
+export interface Deferred<TValue> extends Promise<TValue> {
+    resolve(value: TValue | PromiseLike<TValue>): void;
+    reject(reason?: Error): void;
+}
+/** 创建一个 promise，后续可调用 promise.resolve, promise.reject 方法设置其状态和值
+    - initial?: `undefined` 传入非 undefined 值（包括 null）时直接设置为 resolved 状态
+    注: 下面的方法不能标记为 aysnc function, 否则会对返回值再做一层 Promise.resolve() 导致 reject, resolve 属性丢失 */
+export declare function defer<TValue>(initial?: TValue): Deferred<TValue>;
+export interface LockedAction<TResource, TResult> {
+    (resource: TResource): TResult | Promise<TResult>;
+}
+/** @example
+    let lock = new Lock(redis)
+    
+    // 锁定资源后在 action 回调中操作资源，回调 promise 完成后自动释放资源，
+    // 三秒内未成功独占资源直接抛出 TimeoutError (开始执行后不受 signal abort 影响)
+    await lock.request(async redis => {
+        const value = await redis.get('key')
+        await redis.set('key', value * 2)
+    }, AbortSignal.timeout(3000))
+    
+    参考:
+    https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API
+    https://github.com/metarhia/web-locks
+    https://www.npmjs.com/package/async-lock  */
+export declare class Lock<TResource = void> {
+    /** 如果操作不需要独占资源，可以直接通过 lock.resource 访问，否则需要通过 await lock.request() 独占资源后再访问 */
+    resource: TResource;
+    /** 等待链，新的 await lock.request() 调用会等待当前等待链尾部的 promise 完成，并作为新的尾部 */
+    ptail: Deferred<void>;
+    /** 查询当前资源是否属于被锁定的状态，方便在资源闲置时做一些可选操作（操作前仍需锁定），或者做一些状态展示 */
+    locked: boolean;
+    /** 可以不传 resource，表示管理某个抽象或虚拟的资源 */
+    constructor(resource?: TResource);
+    /** 通过 await lock.request() 锁定资源以便独占访问
+        成功返回之后由调用方负责调用 release 方法释放资源
+        在 signal aborted 时抛出错误结束等待，且由内部实现自动释放资源 */
+    request<TResult>(action: LockedAction<TResource, TResult>, signal?: AbortSignal): Promise<TResult>;
+}
+export declare function pause(milliseconds?: number): Promise<void>;
+/** 将字符串简单的编码为 utf-8 的 buffer (Uint8Array)。高频使用或者在流式处理时，考虑使用 TextEncoder 的 encodeInto 方法 */
+export declare function encode(str: string): Uint8Array<ArrayBufferLike>;
+export declare function encode_into(str: string, buf: Uint8Array): TextEncoderEncodeIntoResult;
+/** 将 utf-8 buffer (Uint8Array) 简单的解码为 string。
+    在流式处理 (buffer 可能不完整) 时，应使用独立的 TextDecoder 实例调用 decode(buffer, { stream: true }) */
+export declare function decode(buffer: Uint8Array): string;
+/** 字符串字典序比较 */
+export declare function strcmp(l: string, r: string): 0 | 1 | -1;
+/** 比较 1.10.02 这种版本号
+    - l, r: 两个版本号字符串
+    - loose?: 宽松模式，允许两个版本号格式（位数）不一致 */
+export declare function vercmp(l: string, r: string, loose?: boolean): number;
+/** 过滤符合 pattern 的行 */
+export declare function grep(str: string, pattern: string | RegExp): string;
+/** 模糊过滤字符串列表或对象列表，常用于根据用户输入补全或搜索过滤
+    如果有完全匹配的，只返回那一项的数组
+    - query: 查询字符串，要求为全小写
+    - list: 要过滤的列表
+    - list_lower?: 要过滤的列表对应的全小写字符串列表形式，传入时可复用缓存，加快搜索速度 */
+export declare function fuzzyfilter<TItem = string>(query: string, list: TItem[], mapper?: keyof TItem | Mapper<TItem>, list_lower?: string[], single_char_startswith?: boolean): TItem[];
+export declare function get<TReturn = any>(obj: any, keypath: string): TReturn;
+export declare function global_get<TReturn = any>(keypath: string): TReturn;
+export declare function invoke<TReturn = any>(obj: any, funcpath: string, args: any[]): TReturn;
+/** 拼接 TypedArrays 生成一个完整的 Uint8Array */
+export declare function concat(arrays: ArrayBufferView[]): Uint8Array<ArrayBuffer>;
+/** 时间间隔 (milliseconds) 格式化 */
+export declare function delta2str(delta: number): string;
+/** generate random id */
+export declare function genid(): number;
+/** 默认日期时间格式 */
+export declare const datetime_format: "YYYY.MM.DD HH:mm:ss";
+/** 默认日期格式 */
+export declare const date_format: "YYYY.MM.DD";
+/** 默认时间格式 */
+export declare const time_format: "HH:mm:ss";
+export declare class Timer {
+    started: number;
+    ended: number;
+    /** 停止秒表，保存读数 */
+    stop(): void;
+    /** 如果秒表未停止，获取当前秒表读数；
+        如果秒表已停止，获取停止时的秒表读数; */
+    get(): number;
+    /** 获取时间表示字符串，如 1.2 s
+        - parenthesis?: `true` 字符串前后加上括号，如 (1.2 s) */
+    getstr(parenthesis?: boolean): string;
+    print(): void;
+    /** 重置 started */
+    reset(): void;
+    get_and_reset(): number;
+    getstr_and_reset(parenthesis?: boolean): string;
+}
+export declare function lowercase_first_letter(str: string): string;
+/** 大于 n 的最小的 2 的幂次 */
+export declare function ceil2(n: number): number;

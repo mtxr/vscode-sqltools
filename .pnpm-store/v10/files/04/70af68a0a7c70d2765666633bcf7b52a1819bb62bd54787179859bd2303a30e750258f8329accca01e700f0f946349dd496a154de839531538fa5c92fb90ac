@@ -1,0 +1,9 @@
+import { I18N } from 'xshell/i18n/index.js';
+export declare let i18n: I18N;
+declare const t: (text: string, options?: {
+    language?: import("xshell/i18n").Language;
+    context?: string;
+    count?: number;
+    [key: string]: any;
+}) => string, language: import("xshell/i18n").Language;
+export { t, language };

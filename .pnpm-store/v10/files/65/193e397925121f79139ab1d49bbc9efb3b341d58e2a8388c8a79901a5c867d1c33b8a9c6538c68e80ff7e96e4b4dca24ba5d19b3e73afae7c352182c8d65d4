@@ -1,0 +1,1 @@
+{"version":3,"file":"types.js","sourceRoot":"","sources":["../../../src/plots/_template/types.ts"],"names":[],"mappings":"","sourcesContent":["import { Options } from '../../types';\n\n/** 配置类型定义 */\nexport interface TemplateOptions extends Options {\n  /** x 轴字段 */\n  readonly xField?: string;\n  /** y 轴字段 */\n  readonly yField?: string;\n}\n"]}

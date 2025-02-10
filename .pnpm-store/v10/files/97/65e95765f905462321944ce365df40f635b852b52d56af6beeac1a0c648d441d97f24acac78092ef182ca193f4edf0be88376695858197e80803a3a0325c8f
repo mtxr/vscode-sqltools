@@ -1,0 +1,40 @@
+import '../prototype.ts';
+import type { Language } from './index.ts';
+import { Dict, type Item, type _Dict } from './dict.ts';
+/** read write Dict for scanner */
+export declare class RWDict extends Dict {
+    /** 更新词条 */
+    set_item(key: string, item: Item, { print, placeholder, overwrite, dryrun, create }?: {
+        print?: boolean;
+        placeholder?: boolean;
+        overwrite?: boolean;
+        dryrun?: boolean;
+        create?: boolean;
+    }): void;
+    /** 更新词条翻译 */
+    set_translation(key: string, language: Language, translation: string, { 
+    /** 允许新增词条 */
+    create, 
+    /** 允许更新翻译 */
+    overwrite, print, placeholder, dryrun }?: {
+        create?: boolean;
+        overwrite?: boolean;
+        print?: boolean;
+        placeholder?: boolean;
+        dryrun?: boolean;
+    }): void;
+    /** 合并、更新词典
+        print?: true
+        dryrun?: false
+        overwrite?: false
+        create?: true
+    */
+    merge(_dict: _Dict, { print, overwrite, dryrun, create }?: {
+        print?: boolean;
+        overwrite?: boolean;
+        dryrun?: boolean;
+        create?: boolean;
+    }): this;
+    /** trim?: [true] 是否过滤掉空词条及空翻译 */
+    to_json(trim?: boolean): string;
+}

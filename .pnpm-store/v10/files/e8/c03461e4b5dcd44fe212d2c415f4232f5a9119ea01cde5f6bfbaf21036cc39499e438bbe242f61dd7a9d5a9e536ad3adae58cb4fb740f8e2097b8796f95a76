@@ -1,0 +1,902 @@
+import { type Dayjs } from 'dayjs';
+import 'xshell/prototype.browser.js';
+import { Lock } from 'xshell/utils.browser.js';
+import { type WebSocketConnectionError } from 'xshell/net.browser.js';
+export declare const nulls: {
+    readonly int8: -128;
+    readonly int16: -32768;
+    readonly int32: -2147483648;
+    readonly int64: -9223372036854775808n;
+    readonly int128: -170141183460469231731687303715884105728n;
+    readonly float32: -3.4028234663852886e+38;
+    /** -Number.MAX_VALUE */
+    readonly double: number;
+    readonly bytes16: Uint8Array<ArrayBuffer>;
+};
+export declare enum DdbForm {
+    scalar = 0,
+    vector = 1,
+    pair = 2,
+    matrix = 3,
+    set = 4,
+    dict = 5,
+    table = 6,
+    chart = 7,
+    /** 节点内部通信可能会使用，调用函数执行脚本一般不会返回这种类型 */
+    chunk = 8,
+    /** sysobj */
+    object = 9,
+    tensor = 10
+}
+/** DolphinDB DataType
+    对应的 array vector 类型为 64 + 基本类型
+    对应的 extended 类型为 128 + 基本类型 */
+export declare enum DdbType {
+    void = 0,
+    bool = 1,
+    char = 2,
+    short = 3,
+    int = 4,
+    long = 5,
+    date = 6,
+    month = 7,
+    time = 8,
+    minute = 9,
+    second = 10,
+    datetime = 11,
+    timestamp = 12,
+    nanotime = 13,
+    nanotimestamp = 14,
+    float = 15,
+    double = 16,
+    symbol = 17,
+    string = 18,
+    uuid = 19,
+    functiondef = 20,
+    handle = 21,
+    code = 22,
+    datasource = 23,
+    resource = 24,
+    any = 25,
+    compressed = 26,
+    dict = 27,
+    datehour = 28,
+    ipaddr = 30,
+    int128 = 31,
+    blob = 32,
+    complex = 34,
+    point = 35,
+    duration = 36,
+    decimal32 = 37,
+    decimal64 = 38,
+    decimal128 = 39,
+    object = 40,
+    iotany = 41,
+    symbol_extended = 145
+}
+export declare enum DdbFunctionType {
+    SystemFunc = 0,
+    SystemProc = 1,
+    OperatorFunc = 2,
+    UserDefinedFunc = 3,
+    PartialFunc = 4,
+    DynamicFunc = 5,
+    PiecewiseFunc = 6,
+    JitFunc = 7,
+    JitPartialFunc = 8
+}
+export declare enum DdbDurationUnit {
+    ns = 0,
+    us = 1,
+    ms = 2,
+    s = 3,
+    m = 4,
+    H = 5,
+    d = 6,
+    w = 7,
+    M = 8,
+    y = 9,
+    B = 10
+}
+export declare enum DdbChartType {
+    area = 0,
+    bar = 1,
+    column = 2,
+    histogram = 3,
+    line = 4,
+    pie = 5,
+    scatter = 6,
+    trend = 7,
+    kline = 8
+}
+export declare enum DdbVoidType {
+    undefined = 0,
+    null = 1,
+    default = 2
+}
+export interface DdbFunctionDefValue {
+    type: DdbFunctionType;
+    name: string;
+}
+export interface DdbDurationValue {
+    unit: DdbDurationUnit;
+    /** int32 */
+    data: number;
+}
+export interface DdbDecimal32Value {
+    /** int32, data 需要除以 10^scale 得到原值 */
+    scale: number;
+    /** int32, 空值为 null  ddb null is js null */
+    data: number | null;
+}
+export interface DdbDecimal64Value {
+    /** int32, data 需要除以 10^scale 得到原值 */
+    scale: number;
+    /** int64, 空值为 null  empty value is null */
+    data: bigint | null;
+}
+export interface DdbDecimal128Value {
+    /** int32, data 需要除以 10^scale 得到原值 */
+    scale: number;
+    /** int128, 空值为 null  empty value is null */
+    data: bigint | null;
+}
+export interface DdbDecimal32VectorValue {
+    scale: number;
+    data: Int32Array;
+}
+export interface DdbDecimal64VectorValue {
+    scale: number;
+    data: BigInt64Array;
+}
+export interface DdbDecimal128VectorValue {
+    scale: number;
+    data: BigInt128Array;
+}
+export type DdbDecimalVectorValue = DdbDecimal32VectorValue | DdbDecimal64VectorValue | DdbDecimal128VectorValue;
+export type DdbDurationVectorValue = DdbDurationValue[];
+export interface DdbSymbolExtendedValue {
+    base_id: number;
+    base: string[];
+    data: Uint32Array;
+}
+export interface DdbArrayVectorBlock {
+    unit: 1 | 2 | 4;
+    rows: number;
+    lengths: Uint8Array | Uint16Array | Uint32Array;
+    data: Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array | BigInt128Array;
+}
+export type DdbArrayVectorValue = DdbArrayVectorBlock[] & /* decimal 数据会有这个属性 */ {
+    scale?: number;
+};
+export declare const dictables: Set<DdbType>;
+export interface DdbMatrixValue {
+    rows: DdbVectorObj | null;
+    cols: DdbVectorObj | null;
+    data: DdbVectorValue;
+}
+/** 工具，取得某个 DdbType 的字节数 */
+export declare const ddb_tensor_bytes: Record<DdbType.bool | DdbType.char | DdbType.short | DdbType.int | DdbType.long | DdbType.float | DdbType.double, number>;
+type TensorElem = TensorData | boolean | number | bigint | null | string;
+interface TensorData extends Array<TensorElem> {
+}
+interface DdbTensorMetadata {
+    /** Tensor 的元素的数据类型 */
+    data_type: DdbType;
+    /** Tensor 类型 */
+    tensor_type: number;
+    /** 设备类型 */
+    device_type: number;
+    /** Tensor Flags */
+    tensor_flags: number;
+    /** 维度 */
+    dimensions: number;
+    /** shape, shape[i] 表示第 i 个维度的 size */
+    shape: number[];
+    /** strides, strides[i] 表示在第 i 个维度，一个元素与下一个元素的距离 */
+    strides: number[];
+    /** 保留值 */
+    preserve_value: bigint;
+    /** 元素个数 */
+    elem_count: number;
+}
+export interface DdbTensorValue extends DdbTensorMetadata {
+    /** 数据 */
+    data: Uint8Array;
+}
+export type DdbDictValue = [DdbVectorObj, DdbVectorObj];
+export interface DdbChartValue {
+    /** 原属性 chartType  original: chartType */
+    type: DdbChartType;
+    stacking: boolean;
+    /** 直方图 (Histogram), plotHist 函数返回的 chart 可能具有该属性
+        原属性 binStart
+        数值类型的 DdbObj 都有可能？
+    */
+    bin_start?: DdbObj;
+    /** 原属性 binEnd */
+    bin_end?: DdbObj;
+    /** 原属性 binCount */
+    bin_count?: DdbObj;
+    titles: {
+        chart: string;
+        x_axis: string;
+        y_axis: string;
+    };
+    extras?: {
+        multi_y_axes: boolean;
+    };
+    data: DdbMatrixObj;
+}
+export type DdbScalarValue = null | boolean | number | bigint | string | Uint8Array | // uuid, ipaddr, int128, blob
+[
+    number,
+    number
+] | // complex, point
+DdbFunctionDefValue | DdbDurationValue | DdbDecimal32Value | DdbDecimal64Value | DdbDecimal128Value;
+export type DdbVectorValue = null | Uint8Array | Int8Array | Int16Array | Int32Array | Float32Array | Float64Array | BigInt64Array | BigInt128Array | string[] | // string[]
+Uint8Array[] | // blob
+DdbObj[] | // any
+IotVectorItemValue | DdbSymbolExtendedValue | DdbArrayVectorValue | DdbDecimal32VectorValue | DdbDecimal64VectorValue | DdbDecimal128VectorValue | DdbDurationVectorValue;
+export type DdbValue = DdbScalarValue | DdbVectorValue | DdbMatrixValue | DdbDictValue | DdbChartValue | DdbTensorValue;
+export type DdbStringObj = DdbObj<string>;
+export type DdbVectorObj<TValue extends DdbVectorValue = DdbVectorValue> = DdbObj<TValue>;
+export type DdbVectorAnyObj = DdbVectorObj<DdbObj[]>;
+export type DdbVectorStringObj = DdbVectorObj<string[]>;
+export type DdbTableObj<TColumns extends DdbVectorObj[] = DdbVectorObj[]> = DdbObj<TColumns>;
+export type DdbDictObj<TKeys extends DdbVectorObj = DdbVectorObj, TValues extends DdbVectorObj = DdbVectorObj> = DdbObj<[TKeys, TValues]>;
+export type DdbMatrixObj<TValue extends DdbMatrixValue = DdbMatrixValue> = DdbObj<TValue>;
+export type DdbChartObj = DdbObj<DdbChartValue>;
+export type DdbTensorObj = DdbObj<DdbTensorValue>;
+/** DdbObj.data() 返回的表格对象 */
+export interface DdbTableData<TRow = any> {
+    /** 表名 */
+    name: string;
+    /** 每一列的名称 */
+    columns: string[];
+    /** 每一列的原始 ddb 数据类型 */
+    types: DdbType[];
+    /** 表格数据，每一行的对象组成的数组 */
+    data: TRow[];
+}
+/** DdbObj.data() 返回的 Tensor 对象 */
+export interface DdbTensorData extends DdbTensorMetadata {
+    /** 数据 */
+    data: TensorData;
+}
+/** DdbObj.data() 返回的矩阵对象 */
+export interface DdbMatrixData {
+    /** 原始数据类型 */
+    type: DdbType;
+    /** 行数 */
+    nrows: number;
+    /** 列数 */
+    ncolumns: number;
+    /** 行名称 */
+    rows?: any[];
+    /** 列名称 */
+    columns?: any[];
+    /** 数据， data[0][1] 为第 0 行第 1 列数据 */
+    data: any[][];
+}
+export type IotVectorItemValue = [number | string | bigint | boolean][];
+export type DdbIotAnyVector = DdbObj<IotVectorItemValue>;
+export type Convertable = DdbObj | string | boolean | null | undefined;
+/** 可以表示所有 DolphinDB 数据库中的数据类型  Can represent data types in all DolphinDB databases */
+export declare class DdbObj<TValue extends DdbValue = DdbValue> {
+    static dec: TextDecoder;
+    static enc: TextEncoder;
+    /** 维护已解析的 symbol base，比如流数据中后续的 symbol 向量可能只发送一个 base.id, base.size == 0, 依赖之前发送的 symbol base ？
+        只是暂存，如果一张表有多个 symbol 列，可能这个 symbol base 会被复用，不同的对象之间 symbol base 一般不复用
+    */
+    static symbol_bases: Record<number, string[]>;
+    /** little endian (client) */
+    static le_client: boolean;
+    /** 是否为小端 (little endian) */
+    le: boolean;
+    /** 数据形式 https://www.dolphindb.cn/cn/help/DataTypesandStructures/DataForms/index.html */
+    form: DdbForm;
+    /** 数据类型 https://www.dolphindb.cn/cn/help/DataTypesandStructures/DataTypes/index.html */
+    type: DdbType;
+    /** 占用 parse 时传入的 buf 的长度 */
+    length: number;
+    /** table name / column name */
+    name?: string;
+    /** 最低维、第 1 维
+        - vector: rows = n, cols = 1
+        - pair:   rows = 2, cols = 1
+        - matrix: rows = n, cols = m
+        - set:    同 vector
+        - dict:   包含 keys, values 向量
+        - table:  同 matrix */
+    rows?: number;
+    /** 第 2 维 */
+    cols?: number;
+    /** 实际数据。不同的 DdbForm, DdbType 使用 DdbValue 中不同的类型来表示实际数据
+        The actual data. Different DdbForm, DdbType use different types in DdbValue to represent actual data */
+    value: TValue;
+    /** 原始二进制数据，仅在 parse_object 为 false 时通过 parse_message 生成的顶层对象有这个属性 */
+    buffer?: Uint8Array;
+    constructor(data: Partial<DdbObj> & {
+        form: DdbForm;
+        type: DdbType;
+    });
+    static parse(buf: Uint8Array, le: boolean): DdbObj<DdbValue>;
+    static parse_scalar(buf: Uint8Array, le: boolean, type: DdbType): [number, DdbScalarValue];
+    /** parse: rows, cols, items
+        返回的 ddbobj.length 不包括 vector 的 type 和 form */
+    static parse_vector(buf: Uint8Array, le: boolean, type: DdbType): DdbVectorObj;
+    /** 有可能没有字节对齐，不能直接使用原有 message 的 arraybuffer, 统一复制出来，让原有 arraybuffer 被回收掉比较好 */
+    static parse_vector_items(buf: Uint8Array, le: boolean, type: DdbType, length: number): [
+        number,
+        DdbVectorValue
+    ];
+    pack(): Uint8Array;
+    static pack_vector_body(value: DdbVectorValue, type: DdbType, length: number): ArrayBufferView[];
+    /** 将 DdbObj 转换为 js 原生数据类型
+        - 标量对应 number, bigint 或者字符串 (其中时间类型转换为常用的字符串表示)
+        - 数组对应 js 原生数组
+        - 表格对应 DdbTableData
+        - 矩阵对应 DdbMatrixData
+        - 字典对应普通的 js 对象 Record<string, any>
+        - 图对应 DdbChartValue */
+    data<TResult extends any[]>(this: DdbVectorObj, options?: ConvertOptions): TResult;
+    data<TResult = any>(this: DdbObj, options?: ConvertOptions): TResult;
+    /** 构建 Tensor
+        @param buildParams 构建参数
+        @param limit 限制每个维度最大元素个数（仅用于 log，不作他用）
+        @returns  */
+    static parse_tensor(buildParams: {
+        currentDim: number;
+        dimensions: number;
+        rawData: Uint8Array;
+        le: boolean;
+        dataByte: number;
+        dataType: DdbType;
+        shape: number[];
+        strides: number[];
+    }, limit?: number): TensorData;
+    toString(options?: InspectOptions): string;
+    inspect_type(): string;
+    /** 自动转换 Convertable 为 DdbObj */
+    static to_ddbobj(value: Convertable): DdbObj;
+    /** 转换 js 数组为 DdbObj[] */
+    static to_ddbobjs(values: Convertable[]): DdbObj<DdbValue>[];
+    /** @deprecated 用 data() */
+    to_cols(): {
+        title: string;
+        dataIndex: string;
+        render: (value: any) => string;
+    }[];
+    /** 将 table 转换为 rows，空值转换为 null
+        @deprecated 用 data() */
+    to_rows<T extends Record<string, any> = Record<string, any>>(): T[];
+    /** 将 dict<string, any> 自动转换为 js object (Record<string, any>)  Automatically convert dict<string, any> to js object (Record<string, any>)
+        @deprecated 用 data()
+        - options?:
+            - strip?: `false` 是否将 dict<string, any> 中的 value 直接提取、剥离出来作为 js object 的 value (丢弃 DdbObj 中的其余信息，只保留 value)
+            - deep?: `false` 是否递归转换
+                Whether to convert recursively */
+    to_dict<T extends Record<string, DdbObj> = Record<string, DdbObj>>(): T;
+    to_dict<T extends Record<string, any> = Record<string, any>>(options: {
+        strip: true;
+    }): T;
+    to_dict<T extends Record<string, any> = Record<string, any>>(options?: {
+        strip?: boolean;
+        deep?: boolean;
+    }): T;
+}
+/** 根据 DdbType 获取其名称，array vector type 自动在后面加上 [] */
+export declare function get_type_name(type: DdbType): string;
+export declare function is_decimal_type(type: DdbType): type is DdbType.decimal32 | DdbType.decimal64 | DdbType.decimal128;
+export declare function is_decimal_null_value(type: DdbType, value: number | bigint): boolean;
+export declare function get_duration_unit(code: number): string;
+export interface InspectOptions {
+    /** `false` */
+    colors?: boolean;
+    /** `null` decimal places 小数位数 */
+    decimals?: number;
+    /** `false` 决定 null 值如何返回. nullstr ? 'null' : '' */
+    nullstr?: boolean;
+    /** `在 format 中默认为 false，在 toString 中默认为 true` 决定 string, symbol, char 类型是否加引号 */
+    quote?: boolean;
+    /** `true` 决定格式化后的数据是否有千分位 */
+    grouping?: boolean;
+    /** timestamp 类型转换为字符串表示时显示到秒还是毫秒 */
+    timestamp?: 's' | 'ms';
+}
+/** 根据 DdbType 格式化单个元素 (value) 为字符串 */
+export declare function format(type: DdbType, value: DdbValue, le: boolean, options?: InspectOptions): string;
+/** 格式化向量、集合中的第 index 项为字符串，空值返回 'null' 字符串  formatted vector, the index-th item in the collection is a string, a null value returns a 'null' string */
+export declare function formati(obj: DdbVectorObj, index: number, options?: InspectOptions): string;
+export interface ConvertOptions {
+    /** `'string'` blob 转换格式 */
+    blob?: 'string' | 'binary';
+    /** `'string'` char 转换格式: string 转为 string[]，number 转为 number[] */
+    char?: 'string' | 'number';
+    /** `'strings'` char vector 转换格式: strings 转为 string[], binary 转为 Uint8Array */
+    chars?: 'strings' | 'binary';
+    /** `'ms'` timestamp 类型转换为字符串表示时显示到秒还是毫秒 */
+    timestamp?: 's' | 'ms';
+}
+export declare function convert(type: DdbType, value: DdbValue, le: boolean, { blob, char, timestamp }?: ConvertOptions): string | number | bigint | boolean | number[] | Uint8Array<ArrayBufferLike> | DdbFunctionDefValue | DdbDurationValue | DdbDecimal32Value | DdbDecimal64Value | Int8Array<ArrayBufferLike> | Int16Array<ArrayBufferLike> | Int32Array<ArrayBufferLike> | Float32Array<ArrayBufferLike> | Float64Array<ArrayBufferLike> | BigInt64Array<ArrayBufferLike> | BigInt128Array | string[] | Uint8Array<ArrayBufferLike>[] | DdbObj<DdbValue>[] | IotVectorItemValue | DdbSymbolExtendedValue | DdbArrayVectorValue | DdbDecimal32VectorValue | DdbDecimal64VectorValue | DdbDecimal128VectorValue | DdbDurationVectorValue | DdbMatrixValue | DdbChartValue | DdbTensorValue;
+/** 转换一个向量到 js 原生数组 */
+export declare function converts(type: DdbType, value: DdbVectorValue, rows: number, le: boolean, options?: ConvertOptions): any[] | Uint8Array;
+/** 构造 void 类型，默认为 `DdbVoidType.undefined` */
+export declare class DdbVoid extends DdbObj<undefined> {
+    constructor(value?: DdbVoidType);
+}
+export declare class DdbBool extends DdbObj<boolean> {
+    constructor(value: boolean | null);
+}
+export declare class DdbChar extends DdbObj<string> {
+    constructor(value: string | number | null);
+}
+export declare class DdbInt extends DdbObj<number> {
+    constructor(value: number | null);
+}
+export declare class DdbString extends DdbObj<string> {
+    constructor(value: string);
+}
+export declare class DdbLong extends DdbObj<bigint> {
+    constructor(value: bigint | number | null);
+}
+export declare class DdbDouble extends DdbObj<number> {
+    constructor(value: number | null);
+}
+export declare class DdbDateTime extends DdbObj<number> {
+    constructor(value?: null | number | string | Date | Dayjs);
+}
+export declare class DdbTimeStamp extends DdbObj<bigint> {
+    constructor(value?: null | number | string | Date | Dayjs);
+}
+export declare class DdbNanoTimeStamp extends DdbObj<bigint> {
+    constructor(value?: null | number | string | Date | Dayjs);
+}
+export declare class DdbDate extends DdbObj<number> {
+    constructor(value?: null | number | string | Date | Dayjs);
+}
+export declare class DdbBlob extends DdbObj<Uint8Array> {
+    constructor(value: Uint8Array | ArrayBuffer);
+}
+export declare class DdbPair extends DdbObj<Int32Array> {
+    constructor(l: number | null, r?: number | null);
+}
+export declare class DdbFunction extends DdbObj<DdbFunctionDefValue> {
+    constructor(name: string, type: DdbFunctionType);
+}
+export declare class DdbVectorInt extends DdbObj<Int32Array> {
+    constructor(ints: (number | null)[] | Int32Array, name?: string);
+}
+export declare class DdbVectorLong extends DdbObj<BigInt64Array> {
+    constructor(longs: (number | null)[] | BigInt64Array, name?: string);
+}
+export declare class DdbVectorDouble extends DdbObj<Float64Array> {
+    constructor(doubles: (number | null)[] | Float64Array, name?: string);
+}
+export declare class DdbVectorString extends DdbObj<string[]> {
+    constructor(strings: string[], name?: string);
+}
+export declare class DdbVectorAny extends DdbObj {
+    constructor(objs: (DdbObj | string | boolean)[], name?: string);
+}
+export declare class DdbVectorSymbol extends DdbObj<DdbSymbolExtendedValue> {
+    constructor(strings: string[], name?: string);
+}
+export declare class DdbSetInt extends DdbObj<Int32Array> {
+    constructor(ints: (number | null)[] | Set<number> | Int32Array);
+}
+export declare class DdbSetDouble extends DdbObj<Float64Array> {
+    constructor(doubles: (number | null)[] | Set<number> | Float64Array);
+}
+export declare class DdbSetString extends DdbObj<string[]> {
+    constructor(strings: string[] | Set<string>);
+}
+/** 构造 DdbDict 对象，支持两种用法:  Constructs a DdbDict object, which supports two usages:
+     - 传入类型是 DdbVectorObj 的 keys, values 两个参数直接组成 dict<keys.type, values.type> 的 DdbDict
+         The incoming type is the keys of DdbObj<DdbVectorValue>, and the two parameters of values directly form the DdbDict of dict<keys.type, values.type>
+     - 传入 js object (类型是 Record<string, boolean | string | DdbObj>), 自动转换为 dict<string, any> 的 DdbDict
+         Pass in js object (type is Record<string, boolean | string | DdbObj>), automatically converted to DdbDict of dict<string, any> */
+export declare class DdbDict extends DdbObj<DdbDictValue> {
+    constructor(obj: Record<string, boolean | string | DdbObj>);
+    constructor(keys: DdbVectorObj, values: DdbVectorObj);
+}
+export declare class DdbTable extends DdbObj<DdbObj[]> {
+    constructor(columns: DdbObj[], name?: string);
+}
+export declare function date2ms(date: number | null): number;
+export declare function date2str(date: number | null, format?: string): string;
+export declare function month2ms(month: number | null): number | null;
+export declare function month2str(month: number | null): string;
+export declare function time2ms(time: number | null): number | null;
+export declare function time2str(time: number | null, format?: string): string;
+export declare function minute2ms(minute: number | null): number | null;
+export declare function minute2str(minute: number | null, format?: string): string;
+export declare function second2ms(second: number | null): number | null;
+export declare function second2str(second: number | null, format?: string): string;
+export declare function datetime2ms(datetime: number | null): number | null;
+export declare function datetime2str(datetime: number | null, format?: string): string;
+/** _datetime_formatter.format 会在 date 为 Invalid Date 时抛出错误 */
+export declare function timestamp2ms(timestamp: bigint | number | null): number | null;
+/** format timestamp (bigint) to string
+    - timestamp: bigint value
+    - format?:
+        格式串，默认是 `YYYY.MM.DD HH:mm:ss.SSS`  format string, default to `YYYY.MM.DD HH:mm:ss.SSS`
+        https://day.js.org/docs/en/parse/string-format#list-of-all-available-parsing-tokens */
+export declare function timestamp2str(timestamp: bigint | null, format?: string): string;
+export declare function datehour2ms(datehour: number | null): number | null;
+export declare function datehour2str(datehour: number | null, format?: string): string;
+/** parse timestamp string to bigint value
+    - str: timestamp string, 如果为空字符串或 'null' 会返回对应的空值 (nulls.int64)
+        timestamp string, If it is an empty string or 'null', it will return the corresponding empty value (nulls.int64)
+    - format?:
+        对应传入字符串的格式串，默认是 `YYYY.MM.DD HH:mm:ss.SSS`
+        The format string corresponding to the incoming string, the default is `YYYY.MM.DD HH:mm:ss.SSS`
+        https://day.js.org/docs/en/parse/string-format#list-of-all-available-parsing-tokens */
+export declare function str2timestamp(str: string, format?: string): bigint;
+export declare function nanotime2ns(nanotime: bigint | null): bigint | null;
+export declare function nanotime2str(nanotime: bigint | null, format?: string): string;
+export declare function nanotimestamp2ns(nanotimestamp: bigint | null): bigint | null;
+/** format nanotimestamp value (bigint) to string
+    - nanotimestamp: bigint value
+    - format?:
+        格式串，默认是 `YYYY.MM.DD HH:mm:ss.SSSSSSSSS`  format string, default is `YYYY.MM.DD HH:mm:ss.SSSSSSSSS`
+        秒的格式为 ss (必须包含); 纳秒的格式为 SSSSSSSSS (必须包含)  Seconds are in the format ss (must be included); nanoseconds are in the format SSSSSSSSS (must be included)
+        https://day.js.org/docs/en/parse/string-format#list-of-all-available-parsing-tokens
+*/
+export declare function nanotimestamp2str(nanotimestamp: bigint | null, format?: string): string;
+/** parse nano timestamp string to bigint value
+    - str: nano timestamp string, 如果为空字符串或 'null' 会返回对应的空值 (nulls.int64)
+        nano timestamp string, If it is an empty string or 'null', it will return the corresponding empty value (nulls.int64)
+    - format?:
+        对应传入字符串的格式串，默认是 `YYYY.MM.DD HH:mm:ss.SSSSSSSSS`
+        秒的格式为 ss (必须包含); 纳秒的格式为 SSSSSSSSS (必须包含)
+        https://day.js.org/docs/en/parse/string-format#list-of-all-available-parsing-tokens
+        The format string corresponding to the incoming string, the default is `YYYY.MM.DD HH:mm:ss.SSSSSSSSS`
+        Seconds are in the format ss (must be included); nanoseconds are in the format SSSSSSSSS (must be included) */
+export declare function str2nanotimestamp(str: string, format?: string): bigint;
+export declare function ipaddr2str(buffer: Uint8Array, le?: boolean, ipv6?: boolean): string;
+export declare function uuid2str(buffer: Uint8Array, le?: boolean): string;
+export declare function int1282str(buffer: Uint8Array, le?: boolean): string;
+export interface StreamingParams {
+    table: string;
+    action?: string;
+    /** offset 是订阅任务开始后的第一条消息所在的位置。消息是流数据表中的行。
+        如果未指定，或设为-1，订阅将会从流数据表的当前行开始。
+        如果 offset = -2，系统会获取持久化到磁盘上的 offset，并从该位置开始订阅。注意：须同时设置 persistOffset = true，offset = -2 才会生效；否则 offset 会变为 -1。
+        offset 与流数据表创建时的第一行对应。如果某些行因为内存限制被删除，在决定订阅开始的位置时，这些行仍然考虑在内。 */
+    offset?: number;
+    filters?: {
+        /** https://test.dolphindb.cn/zh/funcs/s/subscribeTable.html#:~:text=filter%20%E5%8F%82%E6%95%B0%E9%9C%80%E8%A6%81%E9%85%8D%E5%90%88%20setStreamTableFilterColumn%20%E5%87%BD%E6%95%B0%E4%B8%80%E8%B5%B7%E4%BD%BF%E7%94%A8 */
+        column?: DdbObj;
+        /** 过滤条件的 DolphinDB 表达式 https://dolphindb1.atlassian.net/wiki/spaces/dev/pages/760840447/WebSocketConsole */
+        expression?: string;
+    };
+    handler(message: StreamingMessage): any;
+}
+export interface StreamingMessage<TRows = any> extends StreamingParams {
+    /** server 发送消息的时间 (nano seconds since epoch)   The time the server sent the message (nano seconds since epoch)
+        std::chrono::system_clock::now().time_since_epoch() / std::chrono::nanoseconds(1) */
+    time: bigint;
+    /** message id */
+    id: bigint;
+    /** 订阅主题，即一个订阅的名称。  Subscription topic, which is the name of a subscription.
+        它是一个字符串，由订阅表所在节点的别名、流数据表名称和订阅任务名称（如果指定了 actionName）组合而成，使用 `/` 分隔
+        It is a string consisting of the alias of the node where the subscription table is located, the stream data table name, and the subscription task name (if actionName is specified), separated by `/` */
+    topic: string;
+    /** 流数据，类型是 any vector, 其中的每一个元素对应被订阅表的一个列 (没有 name)，列 (DdbObj<DdbVectorValue>) 中的内容是新增的数据值
+        Stream data, the type is any vector, each element of which corresponds to a column (without name) of the subscribed table, and the content in the column (DdbObj<DdbVectorValue>) is the new data value */
+    obj: DdbObj<DdbVectorObj[]>;
+    /** 流数据 */
+    data: DdbTableData<TRows>;
+    window: {
+        /** 建立连接开始 offset = 0, 随着 window 的移动逐渐增加  The establishment of the connection starts offset = 0, and gradually increases as the window moves */
+        offset: number;
+        /** 历史数据  Historical data */
+        data: TRows[];
+        /** 每次接收到的 obj 组成的数组  An array of obj received each time */
+        objs: DdbObj<DdbVectorObj[]>[];
+    };
+    /** 成功订阅后，后续推送过来的 message 解析错误，则会设置 error 并调用 handler
+        After successfully subscribed, if the subsequently pushed message is parsed incorrectly, the error will be set and the handler will be called. */
+    error?: Error;
+}
+export declare const winsize: 10000;
+export interface DdbEvalOptions {
+    urgent?: boolean;
+    listener?: DdbMessageListener;
+    parse_object?: boolean;
+    iife?: boolean;
+}
+export interface DdbExecuteOptions extends DdbEvalOptions, ConvertOptions {
+}
+type DdbRpcType = 'script' | 'function' | 'variable' | 'connect';
+export interface DdbRpcOptions extends DdbEvalOptions {
+    script?: string;
+    func?: string;
+    args?: (DdbObj | string | boolean)[];
+    vars?: string[];
+    skip_connection_check?: boolean;
+    on_more_messages?: (buffer: Uint8Array) => void;
+}
+export declare class DdbConnectionError extends Error {
+    name: string;
+    cause?: WebSocketConnectionError;
+    url: string;
+    constructor(url: string, error?: WebSocketConnectionError);
+}
+export declare class DdbDatabaseError extends Error {
+    name: string;
+    url: string;
+    id: number;
+    type: DdbRpcType;
+    options: DdbRpcOptions;
+    constructor(message: string, url: string, type: DdbRpcType, options: DdbRpcOptions, id: number);
+}
+/** SQL Standrd 标准类型 */
+export declare enum SqlStandard {
+    DolphinDB = 0,
+    Oracle = 1,
+    MySQL = 2
+}
+export interface DdbOptions {
+    autologin?: boolean;
+    username?: string;
+    password?: string;
+    python?: boolean;
+    sql?: SqlStandard;
+    streaming?: StreamingParams;
+    verbose?: boolean;
+    proxy?: string;
+}
+export interface DdbCallOptions extends DdbEvalOptions {
+    node?: string;
+    nodes?: string[];
+    add_node_alias?: boolean;
+    skip_connection_check?: boolean;
+    on_more_messages?: DdbRpcOptions['on_more_messages'];
+}
+export interface DdbInvokeOptions extends DdbCallOptions, ConvertOptions {
+}
+export declare class DDB {
+    /** 当前的 session id (http 或 tcp) */
+    sid: string;
+    /** utf-8 text decoder */
+    dec: TextDecoder;
+    enc: TextEncoder;
+    /** DolphinDB WebSocket URL
+        e.g. `ws://127.0.0.1:8848/`, `wss://dolphindb.com` */
+    url: string;
+    /** 为所有 websocket 操作加锁，包括设置 this.on_message, this.on_error, websocket.send */
+    lwebsocket: Lock<WebSocket>;
+    /** little endian (server) */
+    le: boolean;
+    /** little endian (client) */
+    static le_client: boolean;
+    /** 是否在建立连接后自动登录，默认 true  Whether to automatically log in after the connection is established, the default is true */
+    autologin: boolean;
+    /** DolphinDB 登录用户名  DolphinDB username */
+    username: string;
+    /** DolphinDB 登录密码  DolphinDB password */
+    password: string;
+    /** python session flag (2048) */
+    python: boolean;
+    /** 表示本次会话执行的 SQL 标准 */
+    sql: SqlStandard;
+    /** 是否为流数据连接，非流数据这个字段恒为 null  Whether it is a streaming data connection, this field is always null for non-streaming data */
+    streaming: StreamingParams;
+    /** 是否打印每个 rpc 的信息用于调试 */
+    verbose: boolean;
+    print_message_buffer: boolean;
+    print_object_buffer: boolean;
+    print_message: boolean;
+    parse_object: boolean;
+    heartbeat_aborter?: AbortController;
+    /** 在 websocket 收到的第一个 error 时，
+        在 connect_websocket 的 on_error 回调中构造 DdbConnectionError 并保存到 DDB 对象上，
+        这个 error 的错误信息最准确 */
+    error: DdbConnectionError;
+    /** DdbMessage listeners */
+    listeners: DdbMessageListener[];
+    /** 首次 connect 连接的 promise, 后面的 connect 调用都返回这个 */
+    pconnect: Promise<void>;
+    /** 首次定义 pnode_run 的 promise，保证并发调用 rpc 时只定义一次 pnode_run */
+    ppnode_run: Promise<DdbVoid>;
+    /** 首次定义 invoke 的 promise，保证并发调用 rpc 时只定义一次 invoke */
+    pinvoke: Promise<DdbVoid>;
+    /** 首次定义 jsrpc 的 promise，保证并发调用 rpc 时只定义一次 jsrpc */
+    pjsrpc: Promise<DdbVoid>;
+    get connected(): boolean;
+    /**
+        使用 WebSocket URL 初始化连接到 DolphinDB 的实例（不建立实际的网络连接）
+        Initialize an instance of DolphinDB Client using the WebSocket URL (without establishing an actual network connection)
+        - url?: DolphinDB WebSocket URL，如：`ws://127.0.0.1:8848`, 默认为当前页面 URL
+            DolphinDB WebSocket URL. e.g.：`ws://127.0.0.1:8848`, Defaults to the current page URL
+        - options?: DdbOptions
+            - autologin?: 是否在建立连接后自动登录，默认 `true`  Whether to log in automatically after establishing a connection, default `true`
+            - username?: DolphinDB 登录用户名，默认 `'admin'`  DolphinDB username, default `'admin'`
+            - password?: DolphinDB 登录密码，默认 `'123456'`  DolphinDB password, default `'123456'`
+            - python?: 设置 python session flag，默认 `false`  set python session flag, default `false`
+            - streaming?: 设置该选项后，该 WebSocket 连接只用于流数据  When this option is set, the WebSocket connection is only used for streaming data
+            - verbose?: 是否打印每个 rpc 的信息用于调试
+            - sql?: 设置当前会话执行的 sql 标准, 请使用 SqlStandard 枚举进行传参，默认 `DolphinDB`
+        
+        @example
+        let ddb = new DDB('ws://127.0.0.1:8848')
+        
+        // 使用 HTTPS 加密  Encrypt with HTTPS
+        let ddbsecure = new DDB('wss://dolphindb.com', {
+            autologin: true,
+            username: 'admin',
+            password: '123456',
+            python: false
+        }) */
+    constructor(url: string, options?: DdbOptions);
+    private on_message;
+    private on_error;
+    /** 调用后会确保和数据库的连接是正常的 (this.connected === true)，否则抛出错误
+        这个方法是幂等的，首次调用建立实际的 WebSocket 连接到 URL 对应的 DolphinDB，然后执行自动登录，
+        如果是流数据连接，还会调用 publishTable 订阅流表
+        后续调用检查上面的条件
+        连接断开后禁止再次调用 connect 重连原有 ddb 对象，应该通过 new DDB() 的方式新建连接对象，原因是：
+        1. on_error 回调和某个 websocket 绑定了，不方便解绑后重新绑定
+        2. session 是有状态的，重连也无法恢复之前的状态
+        3. 断线后所有之前的 ddb.call, ddb.eval 都应该抛出连接错误
+        
+        After calling, it will ensure that the connection with the database is normal (this.connected === true), otherwise an error will be thrown
+        This method is idempotent, the first call establishes an actual WebSocket connection to the DolphinDB corresponding to the URL, and subsequent calls check the above conditions
+        After the connection is disconnected, it is forbidden to call connect again to reconnect the original ddb object. You should use new DDB() to create a new connection object because:
+        1. The on_error callback is bound to a certain websocket, and it is inconvenient to unbind and rebind
+        2. The session is stateful, and the previous state cannot be restored even after reconnection
+        3. After disconnection, all previous ddb.call, ddb.eval should throw a connection error */
+    connect(): Promise<void>;
+    get_rpc_options({ urgent, secondary, async: _async, pickle, clear, api, compress, cancellable, priority, parallelism, root_id, limit, }?: {
+        urgent?: boolean;
+        /** API 提交的任务, secondary 必须为 false */
+        secondary?: boolean;
+        /** 是否异步任务（不返回结果） */
+        async?: boolean;
+        /** 让服务端以 pickle 协议返回数据 */
+        pickle?: boolean;
+        /** 本次任务完成后 clear session memory */
+        clear?: boolean;
+        /** 是否为 api client */
+        api?: boolean;
+        compress?: boolean;
+        /** 任务是否可以取消 */
+        cancellable?: boolean;
+        priority?: number;
+        /** `8` 0 ~ 64, 指定本任务并行度 */
+        parallelism?: number;
+        /** 根任务编号，内部使用，API中固定为空 */
+        root_id?: string;
+        /** 指定分块返回的块大小 */
+        limit?: boolean;
+    }): string;
+    disconnect(): void;
+    /** (内部使用的方法) rpc through websocket (function/script/variable command)
+        未连接到 DDB 时调用会自动连接，连接断开时调用会抛出 DdbConnectionError
+        When the DDB is not connected, the call will be automatically connected. When the connection is disconnected, the call will throw the DdbConnectionError
+        - type: API 类型: 'script' | 'function' | 'variable' | 'connect'
+        - options:
+            - urgent?: 决定 `行为标识` 那一行字符串的取值（只适用于 script 和 function）
+            - vars?: type === 'variable' 时必传，variable 指令中待上传的变量名
+            - listener?: 处理本次 rpc 期间的消息 (DdbMessage)
+            - parse_object?: 在本次 rpc 期间设置 parse_object, 结束后恢复原有
+                为 false 时返回的 DdbObj 仅含有 buffer 和 le，不做解析，以便后续转发、序列化
+            - skip_connection_check?: 在首次 await ddb.connect() 建立连接时不能再次调用 await this.connect() 确保连接状态，会导致循环依赖，
+                将这个 flag 设为 true 跳过连接状态检查 */
+    rpc<TResult extends DdbObj = DdbObj>(type: DdbRpcType, options: DdbRpcOptions): Promise<TResult>;
+    /** eval script through websocket (script command)
+        - script?: 执行的脚本  Script to execute
+        - options?: 执行选项  execution options
+            - urgent?: 紧急 flag，确保提交的脚本使用 urgent worker 处理，防止被其它作业阻塞
+                Urgent flag to ensure that submitted scripts are processed by urgent workers to prevent being blocked by other jobs
+            - listener?: 处理本次 rpc 期间的消息 (DdbMessage)  Process messages during this rpc (DdbMessage)
+            - parse_object?: 在该次 rpc 期间设置 parse_object, 结束后恢复原有，为 false 时返回的 DdbObj 仅含有 buffer 和 le，
+                不做解析，以便后续转发、序列化
+                Set parse_object during this rpc, and restore the original after the end.
+                When it is false, the returned DdbObj only contains buffer and le without parsing,
+                so as to facilitate subsequent forwarding and serialization
+            - iife?: 使用 `def () { ... } ()` 包裹脚本，return 最后一行，避免变量泄漏 */
+    eval<T extends DdbObj>(script: string, { urgent, listener, parse_object, iife, }?: DdbEvalOptions): Promise<T>;
+    /** call function through websocket (function command)
+        - func: 函数名  function name
+        - args?: `[ ]` 调用参数 (传入的原生 string 和 boolean 会被自动转换为 DdbObj<string> 和 DdbObj<boolean>)
+            Call parameters (the incoming native string and boolean will be automatically converted to DdbObj<string> and DdbObj<boolean>)
+        - options?: 调用选项  call options
+            - urgent?: 紧急 flag。使用 urgent worker 执行，防止被其它作业阻塞
+                Emergency flag. Use urgent worker execution to prevent being blocked by other jobs
+            - node?: 设置结点 alias 时发送到集群中对应的结点执行 (使用 DolphinDB 中的 rpc 方法)
+                When the node alias is set, it is sent to the corresponding node in the cluster for execution (using the rpc method in DolphinDB)
+            - nodes?: 设置多个结点 alias 时发送到集群中对应的多个结点执行 (使用 DolphinDB 中的 pnodeRun 方法)
+                When setting multiple node aliases, send them to the corresponding multiple nodes in the cluster for execution (using the pnodeRun method in DolphinDB)
+            - add_node_alias?: 设置 nodes 参数时选传，其它情况不传
+                Select to pass when setting the nodes parameter, otherwise not pass
+            - listener?: 处理本次 rpc 期间的消息 (DdbMessage)
+                Process messages during this rpc (DdbMessage)
+            - parse_object?: 在该次 rpc 期间设置 parse_object, 结束后恢复原有，为 false 时返回的 DdbObj 仅含有 buffer 和 le，
+                不做解析，以便后续转发、序列化
+                Set parse_object during this rpc, and restore the original after the end.
+                When it is false, the returned DdbObj only contains buffer and le without parsing,
+                so as to facilitate subsequent forwarding and serialization
+            - skip_connection_check?: (内部使用) 在首次 await ddb.connect() 建立连接时不能再次调用 await this.connect() 确保连接状态，会导致循环依赖，
+                将这个 flag 设为 true 跳过连接状态检查
+                (internal use) When await ddb.connect() establishes a connection for the first time, you cannot call await this.connect() again to ensure the connection status, which will lead to circular dependencies.
+                 Set this flag to true to skip connection status checks */
+    call<TResult extends DdbObj>(func: string, args?: (DdbObj | string | boolean)[], { urgent, node, nodes, add_node_alias, listener, parse_object, skip_connection_check, on_more_messages }?: DdbCallOptions): Promise<TResult>;
+    /** 调用 dolphindb 函数，传入 js 原生数组作为参数，返回 js 原生对象或值（调用 DdbObj.data() 后的结果）
+        - func: 函数名
+        - args?: `[ ]` 调用参数，可以是 js 原生数组，参数在中间且想用 server 函数的默认参数值时可以传 null 占位
+        - options?: 调用选项
+            - urgent?: 紧急 flag。使用 urgent worker 执行，防止被其它作业阻塞
+            - node?: 设置结点 alias 时发送到集群中对应的结点执行 (使用 DolphinDB 中的 rpc 方法)
+            - nodes?: 设置多个结点 alias 时发送到集群中对应的多个结点执行 (使用 DolphinDB 中的 pnodeRun 方法)
+            - add_node_alias?: 设置 nodes 参数时选传，其它情况不传
+            - listener?: 处理本次 rpc 期间的消息 (DdbMessage) */
+    invoke<TResult = any>(func: string, args?: any[], options?: DdbInvokeOptions): Promise<TResult>;
+    /** 执行 dolphindb 脚本，返回 js 原生对象或值（调用 DdbObj.data() 后的结果）
+        - script?: 执行的脚本
+        - options?: 执行选项
+            - urgent?: 紧急 flag，确保提交的脚本使用 urgent worker 处理，防止被其它作业阻塞
+            - listener?: 处理本次 rpc 期间的消息 (DdbMessage) */
+    execute<TResult = any>(script: string, options?: DdbExecuteOptions): Promise<TResult>;
+    /** upload variable through websocket (variable command) */
+    upload(
+    /** 上传的变量名  Uploaded variables' name */
+    vars: string[], 
+    /** 上传的变量值  Uploaded variables' value */
+    args: (DdbObj | string | boolean)[], { listener, parse_object, }?: {
+        listener?: DdbMessageListener;
+        parse_object?: boolean;
+    }): Promise<DdbObj<DdbValue>>;
+    /** 取消当前 session id 对应的所有 console jobs  Cancel all console jobs corresponding to the current session id */
+    cancel(): Promise<void>;
+    /** 解析服务端响应报文，返回去掉 header 的 data buf */
+    parse_message(buf: Uint8Array, error: DdbDatabaseError): DdbMessage;
+    /** 内部的流订阅方法  Internal stream subscription method */
+    subscribe(): Promise<void>;
+}
+export interface DdbMessageListener {
+    (message: DdbMessage, _this: DDB): any;
+}
+export interface DdbPrintMessage {
+    type: 'print';
+    data: string;
+}
+export interface DdbObjectMessage {
+    type: 'object';
+    data: DdbObj;
+}
+export interface DdbErrorMessage {
+    type: 'error';
+    data: DdbDatabaseError;
+}
+export type DdbMessage = DdbPrintMessage | DdbObjectMessage | DdbErrorMessage;
+export declare class BigInt128Array {
+    static of(...items: bigint[]): BigInt128Array;
+    static from(arrayLike: ArrayLike<bigint>): BigInt128Array;
+    static from<U>(arrayLike: ArrayLike<U>, mapfn: (v: U, k: number) => bigint, thisArg?: any): BigInt128Array;
+    readonly BYTES_PER_ELEMENT: number;
+    readonly buffer: ArrayBufferLike;
+    readonly byteLength: number;
+    readonly byteOffset: number;
+    constructor(length?: number);
+    constructor(array: Iterable<bigint>);
+    constructor(buffer: ArrayBufferLike, byteOffset?: number, length?: number);
+    get length(): number;
+    set(array: ArrayLike<bigint>, offset?: number): void;
+    at(index: number): bigint;
+    subarray(begin?: number, end?: number): BigInt128Array;
+    [Symbol.iterator](): {
+        next(): {
+            value: bigint;
+            done: boolean;
+        } | {
+            done: boolean;
+            value?: undefined;
+        };
+    };
+    toString(): string;
+}
+export {};

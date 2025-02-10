@@ -1,0 +1,25 @@
+declare type A = ['a' | 'A', number, number, number, number, number, number, number];
+declare type C = ['c' | 'C', number, number, number, number, number, number];
+declare type O = ['o' | 'O', number, number];
+declare type H = ['h' | 'H', number];
+declare type L = ['l' | 'L', number, number];
+declare type M = ['m' | 'M', number, number];
+declare type R = ['r' | 'R', number, number, number, number];
+declare type Q = ['q' | 'Q', number, number, number, number];
+declare type S = ['s' | 'S', number, number, number, number, number, number, number];
+declare type T = ['t' | 'T', number, number];
+declare type V = ['v' | 'V', number];
+declare type U = ['u' | 'U', number, number, number];
+declare type Z = ['z' | 'Z'];
+export declare type PathCommand = A | C | O | H | L | M | R | Q | S | T | V | U | Z;
+export declare type ProcessParams = {
+    x1: number;
+    y1: number;
+    x2: number;
+    y2: number;
+    x: number;
+    y: number;
+    qx: number | null;
+    qy: number | null;
+};
+export {};

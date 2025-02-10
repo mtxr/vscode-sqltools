@@ -1,0 +1,168 @@
+import { type Server as HttpServer, type IncomingHttpHeaders, type IncomingMessage } from 'http';
+import { type Http2SecureServer, type IncomingHttpHeaders as IncomingHttp2Headers } from 'http2';
+import type { Duplex } from 'stream';
+import type { WebSocketServer } from 'ws';
+import { default as Koa, type Context, type Next } from 'koa';
+import { Remote, type RequestOptions, type RawResponse } from './net.ts';
+declare module 'http' {
+    interface IncomingMessage {
+        body?: Buffer;
+    }
+    interface ServerResponse {
+        body?: Buffer;
+    }
+}
+declare module 'koa' {
+    interface Request {
+        /** 经过 decodeURIComponent 后，在路径重写之前的路径 */
+        _path: string;
+        body: any;
+    }
+    interface Context {
+        compress: boolean;
+    }
+}
+export declare class Server {
+    /** proxy 时需要丢弃的 resposne headers */
+    static drop_response_headers: Set<string>;
+    name: string;
+    print: {
+        info: boolean;
+        logs: boolean;
+        errors: boolean;
+    };
+    /** sea 下最后修改时间，用于 http 资源缓存 */
+    last_modified_str?: string;
+    static js_exts: Set<string>;
+    static logger_ignore_fexts: Set<string>;
+    static empty_body_statuses: Set<number>;
+    static empty_body_methods: Set<string>;
+    app: Koa;
+    handler: ReturnType<Koa['callback']>;
+    /** 启用 http server */
+    http: boolean;
+    /** 启用 http2 server */
+    http2: boolean;
+    http_port: number;
+    http2_port: number;
+    /** http2 server 证书文件夹路径，设置后才会启用 http2 server */
+    fpd_certs?: string;
+    default_hostnames?: string[];
+    http_server: HttpServer;
+    http2_server?: Http2SecureServer;
+    websocket_server?: WebSocketServer;
+    /** 设置后会启用 websocket rpc */
+    remote?: Remote;
+    /** 输出日志时包含日期 */
+    log_date: boolean;
+    /** 启用后增加 stdio 订阅相关的 remote.funcs */
+    stdio_subscribable?: boolean;
+    stdio_subscribers: (((chunk: Uint8Array | string) => Promise<void>) & {
+        id: number;
+        close: () => void;
+    })[];
+    /** 原始 process.stdout.write 函数 bind 后的备份 */
+    stdout_write: Function;
+    stderr_write: Function;
+    constructor({ name, print, http, http2, http_port, http2_port, fpd_certs, default_hostnames, remote, funcs, stdio_subscribable, log_date }: {
+        name: string;
+        print?: boolean | {
+            info?: boolean;
+            logs?: boolean;
+            errors: boolean;
+        };
+        http?: boolean;
+        http2?: boolean;
+        http_port?: number;
+        http2_port?: number;
+        fpd_certs?: string;
+        default_hostnames?: string[];
+        remote?: Remote;
+        funcs?: Remote['funcs'];
+        stdio_subscribable?: boolean;
+        log_date?: boolean;
+    });
+    /** start http server and listen */
+    start(): Promise<void>;
+    stop(): void;
+    /** 可被子类重写定义错误处理逻辑 */
+    on_error(error: Error & {
+        code?: string;
+    }, ctx?: Context): void;
+    on_upgrade(request: IncomingMessage, socket: Duplex, head: Buffer): void;
+    /** 可被子类重写添加额外的中间件，在 start 时被调用 */
+    init_app(app: Koa): Promise<void>;
+    /** 可被子类重写，有了 http_server 和 http2_server 后在 listen 之前做一些自定义处理逻辑 */
+    init_server(): Promise<void>;
+    entry(ctx: Context, next: Next): Promise<void>;
+    /** 解析 req.body to request.body
+        处理 request.ip */
+    parse(ctx: Context): Promise<void>;
+    _router(ctx: Context, next: Next): Promise<void>;
+    /** 被子类重写以自定义处理逻辑 */
+    router(ctx: Context): Promise<boolean>;
+    /** 重定向 ctx 到 url (可以是完整 url 也可以是路径)，设置 status code 为 code
+        - code: 301 (永久重定向) | 302 (临时重定向) | 307 (非 GET 请求保持原有方法和 body 的临时重定向) */
+    redirect(ctx: Context, url: string, code: 301 | 302 | 307): true;
+    logger(ctx: Context): void;
+    process_ua(ctx: Context): string;
+    format_ua(headers: IncomingHttpHeaders | IncomingHttp2Headers): string;
+    /** 转发请求到其他 http 服务，实现网关的功能
+        - ctx
+        - path_url: 只含 host, path, 不含 queries 的 url, 如 http://localhost:8080/api/get-user
+            实际请求时会自动带上 ctx 中的 queries
+        - options?: ServerRequestOptions
+            - headers?: 修改 (添加、覆盖、null 值时删除) 请求的 http headers, Record<string, string | null>
+            - queries?: 修改 (添加、覆盖、null 值时删除) 请求的 http queries, Record<string, string | null>
+            - redirect?: `manual` 重定向处理策略，默认按原样返回给客户端
+            - timeout?: `1000 * 5` 请求超时时间，可以传入 0 禁用超时
+            - throw_error?: `false` 在遇到 request 请求错误时直接 throw 出来，而不是自动设置到 response */
+    request(ctx: Context, path_url: string | URL, { headers: headers_, redirect, queries, timeout, throw_error, proxy }?: ServerRequestOptions): Promise<true>;
+    static filter_response_headers(headers: RawResponse['headers']): Record<string, string>;
+    /** 提供静态文件
+        @example
+        const prefix_docs = '/zh/'
+        if (path.startsWith(prefix_docs)) {
+            await this.try_send(
+                ctx,
+                (path.endsWith('/') ? `${path}index.html` : path).strip_start(prefix_docs),
+                { fpd_root: `T:/t/docs${prefix_docs}` },
+            )
+            return
+        } */
+    try_send(ctx: Context, fp: string, { fpd_root, assets_root, sea: _sea, log_404, }?: {
+        fpd_root?: string;
+        assets_root?: string;
+        sea?: boolean;
+        log_404?: boolean;
+    }): Promise<boolean>;
+    /** 将 body 设置为 fp 所指文件的 ReadStream
+        检查 fp 是否合法，设置对应的 content-type，支持缓存，支持分块下载
+        - ctx: Koa.Context
+        - fp: 文件路径，有 fpd_root 时为相对路径或以 fpd_root 开头的绝对路径，无 fpd_root 时必须是绝对路径
+        - options?:
+            - fpd_root?: 只能访问 fpd_root 下面的文件
+            - absolute?: `false` 使用绝对路径指定发送的文件
+            - download?: `undefined` 在 response.headers 中加上 content-disposition: attachment 指示浏览器下载文件
+            - assets_root?: 替换模板 xxx.template.html 中 {root} 占位符 */
+    fsend(ctx: Context, fp: string, { fpd_root, absolute, download, assets_root, sea: _sea }?: {
+        fpd_root?: string;
+        absolute?: boolean;
+        download?: boolean;
+        assets_root?: string;
+        sea?: boolean;
+    }): Promise<string>;
+    set_content_type(response: Koa.Response, fext: string): void;
+    /** - range: 取值为逗号分割的多个可用端口或端口区间 (不能含有空格，包含区间右值)，比如：`8321,8322,8300-8310,11000-11999
+        - reverse?: `false` 在 range 内从后往前尝试 */
+    static get_available_port(range: string, reverse?: boolean): Promise<number>;
+}
+export interface ServerRequestOptions {
+    headers?: Record<string, string | null>;
+    queries?: Record<string, string>;
+    redirect?: RequestOptions['redirect'];
+    timeout?: RequestOptions['timeout'];
+    throw_error?: boolean;
+    proxy?: RequestOptions['proxy'];
+}
+export declare const text_plain: "text/plain; charset=utf-8";

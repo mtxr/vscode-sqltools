@@ -1,0 +1,116 @@
+import { default as npath } from 'path';
+/** Normalize a string path, reducing '..' and '.' parts.
+    When multiple slashes are found, they're replaced by a single one; when the path contains a trailing slash, it is preserved.
+    @param path string path to normalize.
+    @throws {TypeError} if `path` is not a string. */
+export function normalize(path) {
+    return npath.normalize(path).fp;
+}
+/** Join all arguments together and normalize the resulting path.
+    @param paths paths to join.
+    @throws {TypeError} if any of the path segments is not a string. */
+export function join(...paths) {
+    return npath.join(...paths.map(p => p.fp)).fp;
+}
+/** The right-most parameter is considered {to}. Other parameters are considered an array of {from}.
+    
+    Starting from leftmost {from} parameter, resolves {to} to an absolute path.
+    
+    If {to} isn't already absolute, {from} arguments are prepended in right to left order,
+    until an absolute path is found. If after using all {from} paths still no absolute path is found,
+    the current working directory is used as well. The resulting path is normalized,
+    and trailing slashes are removed unless the path gets resolved to the root directory.
+    
+    @param paths A sequence of paths or path segments.
+    @throws {TypeError} if any of the arguments is not a string. */
+export function resolve(...paths) {
+    return npath.resolve(...paths.map(p => p.fp)).fp;
+}
+/** 和 resolve 一样，但是保留最后一个 path 结尾的 / */
+export function resolve_with_slash(...paths) {
+    let fp = path.resolve(...paths);
+    if (paths.last.endsWith('/'))
+        fp += '/';
+    return fp;
+}
+/** Determines whether {path} is an absolute path.
+    An absolute path will always resolve to the same location, regardless of the working directory.
+    
+    If the given {path} is a zero-length string, `false` will be returned.
+    
+    @param path path to test.
+    @throws {TypeError} if `path` is not a string. */
+export function isAbsolute(path) {
+    return npath.isAbsolute(path.fp);
+}
+/** Solve the relative path from {from} to {to} based on the current working directory.
+    At times we have two absolute paths, and we need to derive the relative path from one to the other. This is actually the reverse transform of path.resolve.
+    
+    @throws {TypeError} if either `from` or `to` is not a string. */
+export function relative(from, to) {
+    return npath.relative(from.fp, to.fp).fp;
+}
+/** Return the directory name of a path. Similar to the Unix dirname command.
+    @param path the path to evaluate.
+    @throws {TypeError} if `path` is not a string. */
+export function dirname(path) {
+    return npath.dirname(path.fp).fp;
+}
+/** Return the last portion of a path. Similar to the Unix basename command.
+    Often used to extract the file name from a fully qualified path.
+    @param path the path to evaluate.
+    @param suffix optionally, an extension to remove from the result.
+    @throws {TypeError} if `path` is not a string or if `ext` is given and is not a string. */
+export function basename(path, suffix) {
+    return npath.basename(path.fp, suffix);
+}
+/** Return the extension of the path, from the last '.' to end of string in the last portion of the path.
+    If there is no '.' in the last portion of the path or the first character of it is '.', then it returns an empty string.
+    
+    @param path the path to evaluate.
+    @throws {TypeError} if `path` is not a string. */
+export function extname(path) {
+    return npath.extname(path.fp);
+}
+/** `/` */
+export const sep = '/';
+/** The platform-specific file delimiter. ';' or ':'. */
+export const delimiter = npath.delimiter;
+/** Returns an object from a path string - the opposite of format().
+    @param path path to evaluate.
+    @throws {TypeError} if `path` is not a string. */
+export function parse(path) {
+    return npath.parse(path.fp);
+}
+/** Returns a path string from an object - the opposite of parse().
+    @param pathObject path to evaluate. */
+export function format(pathObject) {
+    return npath.format(pathObject).fp;
+}
+/** On Windows systems only, returns an equivalent namespace-prefixed path for the given path.
+    If path is not a string, path will be returned without modifications.
+    This method is meaningful only on Windows system.
+    On POSIX systems, the method is non-operational and always returns path without modifications. */
+export function toNamespacedPath(path) {
+    return npath.toNamespacedPath(path.fp).fp;
+}
+export const posix = npath.posix;
+export const win32 = npath.win32;
+/** 统一使用 / 作为分隔符的 path 模块 */
+export let path = {
+    normalize,
+    join,
+    resolve,
+    resolve_with_slash,
+    isAbsolute,
+    relative,
+    dirname,
+    basename,
+    extname,
+    sep,
+    delimiter,
+    parse,
+    format,
+    toNamespacedPath
+};
+//# sourceMappingURL=path.js.map

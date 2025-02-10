@@ -1,0 +1,176 @@
+import type Webpack from 'webpack';
+import { Lock } from './utils.ts';
+/** target web 时的 npm 包依赖管理
+    有 productions 但无 devs 时，大部分情况是相同配置，因此在 dev 模式下会用 productions
+    也可以手动设置 [ ] 禁用 fallback */
+export interface Dependency {
+    /** 项目隐含的子依赖 */
+    dependencies?: string[];
+    /** 开发环境依赖的 .js 文件
+        string 类型时为 node_modules 下的相对路径，输出到 {fpd_out}vendors/ 同样的相对路径
+        AssetOption 类型时见 {@link AssetOption} */
+    devs?: (string | AssetOption)[];
+    /** 生产环境依赖的 .js 文件
+        string 类型时为 node_modules 下的相对路径，输出到 {fpd_out}vendors/ 同样的相对路径
+        AssetOption 类型时见 {@link AssetOption} */
+    productions?: (string | AssetOption)[];
+    /** 需要直接复制到输出目录的资源 */
+    assets?: {
+        productions: string[];
+        devs?: string[];
+    };
+    /** .map 代码映射 */
+    maps?: {
+        productions?: (string | AssetOption)[];
+        devs?: (string | AssetOption)[];
+    };
+}
+type DependencyId = 'react' | 'lodash' | 'jquery' | 'xterm' | 'swiper' | 'dayjs' | 'antd' | 'antd-icons' | 'vscode-oniguruma' | 'antd-plots' | 'gridstack' | 'quill' | 'monaco' | 'echarts';
+export interface HtmlOptions {
+    title: string;
+    /** `index.js` 也可以设置 entries 中的其他项, 应填写相对于 fpd_out 的路径 */
+    entry?: string;
+    device_viewport?: boolean;
+    /** 也会在 copy_files 中一并被复制，应填写相对于 fpd_root 和 fpd_out 的路径 */
+    icon?: string | AssetOption;
+    /** 仅用于生成 html 中 script 标签，文件复制由 BundlerOptions['dependencies'] 决定 */
+    dependencies?: DependencyId[];
+    manifest?: string | AssetOption;
+    /** 额外需要加载的脚本 */
+    scripts?: {
+        /** 在 index.js 之前加载 */
+        before?: (string | AssetOption)[];
+        /** 在 index.js 之后加载 */
+        after?: (string | AssetOption)[];
+    };
+    /** 额外需要加载的 module 脚本, 在 index.js 之前 */
+    mscripts?: (string | AssetOption)[];
+    heads?: string[];
+    notice?: boolean;
+}
+interface AssetOption {
+    /** 相对 fpd_root 的路径，或者绝对路径 */
+    src: string;
+    /** 相对 fpd_out 的路径，或者绝对路径，默认等于 src 的值 */
+    out?: string;
+}
+type Assets = {
+    productions?: (string | AssetOption)[];
+    devs?: (string | AssetOption)[];
+};
+export interface BundlerOptions {
+    dependencies?: DependencyId[];
+    source_map?: boolean;
+    production?: boolean;
+    external_dayjs?: boolean;
+    externals?: Record<string, string | string[]>;
+    sass?: typeof import('sass');
+    dynamic_import?: boolean;
+    commonjs2?: boolean;
+    expose?: boolean;
+    assets_stats?: boolean;
+    globals?: Record<string, string>;
+    resolve_alias?: Record<string, string>;
+    resolve_fallback?: Record<string, any>;
+    analyzer?: boolean;
+    dts?: boolean;
+    cache_version?: string;
+    single_chunk?: boolean;
+    exclude_modules?: RegExp;
+    assets?: Assets;
+    assets_root?: string;
+    template?: boolean;
+    license?: boolean;
+    htmls?: Record<string, HtmlOptions>;
+}
+export declare class Bundler {
+    name: string;
+    fpd_root: string;
+    target: 'nodejs' | 'web';
+    production: boolean;
+    fpd_out: string;
+    source_map: BundlerOptions['source_map'];
+    dependencies: DependencyId[];
+    analyzer: boolean;
+    config: Webpack.Configuration;
+    htmls?: Record<string, HtmlOptions>;
+    assets?: Assets;
+    assets_root: string;
+    template: boolean;
+    globals?: BundlerOptions['globals'];
+    exclude_modules?: BundlerOptions['exclude_modules'];
+    license?: boolean;
+    lcompiler: Lock<Webpack.Compiler>;
+    /** 通过 webpack 从入口文件打包所有依赖生成单个 index.{mjs,cjs} 文件
+        - name: 项目名称
+        - target: 目标环境 nodejs | web
+        - fpd_root: 项目根目录
+        - fpd_out: 输出文件目录
+        - fpd_cache: webpack 缓存目录
+        - entry: 入口文件
+        - options?: 打包配置, 按常用顺序排列
+            - source_map?: `true` 启用源码映射 .map 文件
+            - globals?: 全局变量定义
+            - external_dayjs?: `false` 配置 dayjs 为 external 来配合 antd 使用, 减小一点体积
+            - externals?: 配置外部模块
+            - htmls?: 配置要生成的 html, 比如 { 'index.html', { title: '文件', ... } }
+            - assets?: 项目中需要直接复制到输出目录的资源，有 productions 但无 devs 时 (是同一套)，
+                在 dev 模式下会用 productions 中的资源，如果不需要 productions 资源， devs 可以设置为 [ ],
+                每一项是  string 或者 { src: '...', out: '...' }，路径相对于 fpd_root 和 fpd_out
+            - assets_root?: `'/'` 生成的 html 中是否使用 / 开头的绝对路径，以支持 browser router 路由能力
+                启用后 assets, html 中的 icon, scripts 路径直接在前面添加 assets_root 来生成最终 html href
+                未启用时使用相对 html 路径来生成最终 html href
+            - template?: `false` 除了生成对应的 html 之外，还生成所有路径为 `{root}/...` 的模板 html 文件, 方便后续 server 替换渲染
+            - local_loaders?: `true` true 时使用项目 node_modules/ 中的 loader;  false 时使用 D:/0/ 下面的
+            - commonjs2?: `false` 打包为 commonjs2 (.cjs) 的文件
+            - expose?: `false` 入口模块所有导出的属性赋值到全局对象 globalThis 上
+            - single_chunk?: `true` 输出为单个文件，将依赖也打包到其中，不要生成多个 chunk
+            - dynamic_import?: `true` 对于 await import('...') 要不要打包外部模块到输出文件中
+            - resolve_alias?: 配置 resolve alias
+            - resolve_fallback?: 配置 resolve fallback
+            - assets_stats?: `true` 打印输出的文件信息
+            - analyzer?: `false` 启用 WebpackBundleAnalyzer 插件分析构建产物大小
+            - dts?: `false` 生成 .d.ts 文件
+            - exclude_modules?: 传入正则表达式 ，匹配时使用 IgnorePlugin 强制不打包这个模块，但是一旦导入就会报错
+            - cache_version?: webpack cache version, 用于区分同一个 name 的不同版本
+            - production?: `true` webpack mode 设置为 'production'
+            - sass?: 传入 sass 实例避免 webpack 重复加载 .cjs 版本
+            - license?: 使用 license-webpack-plugin 构建 ThirdPartyNotice.txt */
+    constructor(name: string, target: 'web' | 'nodejs', fpd_root: string, fpd_out: string, fpdt_cache: string, entry: Record<string, string>, { source_map, globals, external_dayjs, externals, htmls, assets, assets_root, template, commonjs2, expose, single_chunk, dynamic_import, resolve_alias, resolve_fallback, assets_stats, analyzer, dts, exclude_modules, cache_version, production, sass, dependencies, license, }?: BundlerOptions);
+    build(print?: boolean): Promise<void>;
+    close(): Promise<void>;
+    build_all(print?: boolean): Promise<void>;
+    /** 打包构建 js, 构建 html, 复制依赖文件 */
+    build_all_and_close(print?: boolean): Promise<void>;
+    /** 仅打包构建 js, 不复制依赖 */
+    build_and_close(print?: boolean): Promise<void>;
+    build_htmls(print?: {
+        info: boolean;
+        files: boolean;
+    }): Promise<void>;
+    resolve_dependencies(dependency_ids: DependencyId[], resolveds?: Set<DependencyId>): Set<DependencyId>;
+    /** 解析依赖的文件
+        - dependencies: 依赖 id
+        - assets: false 时只包括在 script 标签加载的文件;  true 时包括 assets, maps 等 */
+    resolve_dependency_assets(_dependencies: DependencyId[], assets: boolean, { production, source_map }?: {
+        production?: boolean;
+        source_map?: BundlerOptions['source_map'];
+    }): (string | AssetOption)[];
+    copy_files({ dependencies, production, assets, fpd_root, fpd_out, print }?: {
+        dependencies?: DependencyId[];
+        production?: boolean;
+        assets?: Assets;
+        fpd_root?: string;
+        fpd_out?: string;
+        print?: {
+            info: boolean;
+            files: boolean;
+        };
+    }): Promise<void>;
+    /** 为空时返回空数组 */
+    resolve_config(config: {
+        productions?: string[];
+        devs?: string[];
+    } | Assets | undefined, production: boolean): (string | AssetOption)[];
+}
+export {};

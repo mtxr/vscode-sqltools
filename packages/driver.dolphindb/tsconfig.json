@@ -1,0 +1,65 @@
+{
+    "include": [
+        "src/**/*",
+        "./build.ts",
+        "./dev.ts"
+    ],
+
+    "compilerOptions": {
+        "paths": {
+            "@i18n/*": ["./i18n/*"],
+        },
+        
+        
+        // --- module
+        "module": "ESNext", // none, CommonJS, amd, system, umd, es6, es2015, ESNext
+        "moduleResolution": "Bundler",
+        "allowSyntheticDefaultImports": true,
+        "esModuleInterop": false,
+        "resolveJsonModule": true,
+        "isolatedModules": true,
+        
+        // --- build
+        "target": "ESNext",
+        "allowJs": false,
+        "checkJs": false,
+        "pretty": true,
+        "newLine": "lf",
+        "lib": ["ESNext", "DOM"],
+        "importHelpers": true,
+        
+        
+        // --- emit
+        "noEmit": true,
+        "declaration": false,
+        "emitDeclarationOnly": false,
+        "noEmitOnError": false,
+        "listEmittedFiles": true,
+        
+        // --- source maps
+        "sourceMap": true,
+        "inlineSourceMap": false,
+        "inlineSources": false,
+        
+        // --- features
+        "preserveSymlinks": false,
+        "jsx": "react-jsx",
+        "removeComments": false,
+        "preserveConstEnums": true,
+        "forceConsistentCasingInFileNames": true,
+        "allowImportingTsExtensions": true,
+        
+        
+        // --- type checking
+        "strict": false,
+        "alwaysStrict": false,
+        "noImplicitAny": false,
+        "noImplicitReturns": false,
+        "noImplicitThis": true,
+        "noImplicitOverride": true,
+        "noUnusedLocals": false,
+        "noUnusedParameters": false,
+        "skipLibCheck": true,
+    }
+}
+

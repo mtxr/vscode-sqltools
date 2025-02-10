@@ -1,0 +1,54 @@
+{
+  "name": "@koa/cors",
+  "version": "5.0.0",
+  "description": "Cross-Origin Resource Sharing(CORS) for koa",
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "contributor": "git-contributor",
+    "test": "NODE_ENV=test mocha --check-leaks -R spec -t 5000 test/*.test.js",
+    "test-cov": "NODE_ENV=test istanbul cover _mocha -- --check-leaks -t 5000 test/*.test.js",
+    "ci": "npm run lint && npm run test-cov",
+    "lint": "eslint index.js test"
+  },
+  "dependencies": {
+    "vary": "^1.1.2"
+  },
+  "devDependencies": {
+    "egg-ci": "^2.1.0",
+    "eslint": "^8.25.0",
+    "eslint-config-egg": "^12.0.0",
+    "git-contributor": "^1.0.10",
+    "istanbul": "*",
+    "koa": "^2.5.1",
+    "mocha": "^3.5.3",
+    "supertest": "^3.1.0"
+  },
+  "homepage": "https://github.com/koajs/cors",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/koajs/cors.git"
+  },
+  "bugs": {
+    "url": "https://github.com/koajs/cors/issues"
+  },
+  "keywords": [
+    "cors",
+    "koa-cors",
+    "Cross-Origin Resource Sharing",
+    "@koa/cors",
+    "koa",
+    "koajs"
+  ],
+  "engines": {
+    "node": ">= 14.0.0"
+  },
+  "ci": {
+    "version": "14, 16, 18, 20",
+    "os": "linux"
+  },
+  "author": "fengmk2 <fengmk2@gmail.com> (http://github.com/fengmk2)",
+  "license": "MIT"
+}

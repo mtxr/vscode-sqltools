@@ -1,0 +1,35 @@
+{
+  "name": "gulp-sort",
+  "description": "Sort files in stream by path or any custom sort comparator",
+  "repository": "pgilad/gulp-sort",
+  "version": "2.0.0",
+  "license": "MIT",
+  "author": {
+    "name": "Gilad Peleg",
+    "email": "giladp007@gmail.com",
+    "url": "http://giladpeleg.com"
+  },
+  "main": "index.js",
+  "files": [
+    "index.js"
+  ],
+  "scripts": {
+    "test": "mocha tests/*.js"
+  },
+  "keywords": [
+    "gulpplugin",
+    "gulp",
+    "sort",
+    "paths",
+    "order",
+    "comparator"
+  ],
+  "dependencies": {
+    "through2": "^2.0.1"
+  },
+  "devDependencies": {
+    "gulp-util": "^3.0.4",
+    "mocha": "^2.1.0",
+    "stable": "^0.1.5"
+  }
+}

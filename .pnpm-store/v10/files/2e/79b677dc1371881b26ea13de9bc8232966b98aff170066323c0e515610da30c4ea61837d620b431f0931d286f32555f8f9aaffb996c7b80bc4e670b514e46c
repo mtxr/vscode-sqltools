@@ -1,0 +1,6 @@
+/** 监听终端按键 (输入)，并调用 key_processor 处理
+    - on_key: 按键处理函数
+    - on_exit?: ctrl + c 会退出进程，可加入退出前自定义处理逻辑 */
+export declare function process_stdin(on_key: (key: string) => void | Promise<void>, on_exit?: () => void | Promise<void>): void;
+/** 自动配置项目 vscode 设置 */
+export declare function setup_vscode_settings(fpd_root: string): Promise<void>;

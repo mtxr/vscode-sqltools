@@ -1,0 +1,10 @@
+import pino, { LoggerOptions, DestinationStream } from 'pino';
+declare function factory(opts?: LoggerOptions, stream?: DestinationStream): pino.BaseLogger & {
+    [key: string]: pino.LogFn;
+} & {
+    show: () => void;
+    outputChannel?: {
+        show: () => void;
+    };
+};
+export default factory;

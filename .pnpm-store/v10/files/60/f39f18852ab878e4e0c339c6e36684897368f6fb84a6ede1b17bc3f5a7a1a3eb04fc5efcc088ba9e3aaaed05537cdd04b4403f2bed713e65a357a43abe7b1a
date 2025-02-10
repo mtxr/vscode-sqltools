@@ -1,0 +1,9 @@
+export declare const CONTAINER_CLASS = "g2-tooltip";
+export declare const TITLE_CLASS = "g2-tooltip-title";
+export declare const LIST_CLASS = "g2-tooltip-list";
+export declare const LIST_ITEM_CLASS = "g2-tooltip-list-item";
+export declare const MARKER_CLASS = "g2-tooltip-marker";
+export declare const VALUE_CLASS = "g2-tooltip-value";
+export declare const NAME_CLASS = "g2-tooltip-name";
+export declare const CROSSHAIR_X = "g2-tooltip-crosshair-x";
+export declare const CROSSHAIR_Y = "g2-tooltip-crosshair-y";

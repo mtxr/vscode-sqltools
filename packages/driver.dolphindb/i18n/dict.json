@@ -1,0 +1,509 @@
+{
+    "DolphinDB 插件已初始化": {
+        "en": "DolphinDB extension initialized"
+    },
+    "成功连接到 DolphinDB": {
+        "en": "Connected to DolphinDB"
+    },
+    "共享变量": {
+        "en": "Shared Variables"
+    },
+    "本地变量": {
+        "en": "Local Variables"
+    },
+    "DolphinDB 执行状态": {
+        "en": "DolphinDB Execution Status"
+    },
+    "取消作业": {
+        "en": "Cancel Job"
+    },
+    "执行中": {
+        "en": "Executing"
+    },
+    "空闲中": {
+        "en": "Idle"
+    },
+    "DolphinDB 小数显示位数": {
+        "en": "DolphinDB decimal places:"
+    },
+    "设置 DolphinDB 小数显示位数": {
+        "en": "Set DolphinDB decimal places:"
+    },
+    "小数位数:": {
+        "en": "Decimals:"
+    },
+    "设置小数点后显示的位数 (可取 0 ~ 20) (置空时重置为实际数据的位数)": {
+        "en": "Set the number of digits displayed after the decimal point (can be 0 ~ 20) (Leave it empty to display the actual number of digits)"
+    },
+    "实际数据的位数": {
+        "en": "the actual number of digits (default)"
+    },
+    "小数位数应为空或介于 0 - 20": {
+        "en": "Number of decimal places should be empty or between 0 - 20"
+    },
+    "dolphindb.decimals 配置被修改": {
+        "en": "dolphindb.decimals configuration modified"
+    },
+    "webview 已订阅 repl": {
+        "en": "webview is subscribed to repl"
+    },
+    "webview 的 repl 订阅被关闭，因为 dataview 被关闭": {
+        "en": "The repl subscription of the webview is closed because the dataview is closed"
+    },
+    "webview 已订阅 inspection": {
+        "en": "webview has subscribed inspection"
+    },
+    "webview 的 inspection 订阅被关闭，因为 dataview 被关闭": {
+        "en": "The inspection subscription of the webview is closed because the dataview is closed"
+    },
+    "dolphindb 终端被关闭": {
+        "en": "dolphindb terminal is closed"
+    },
+    "是否取消执行中的任务？": {
+        "en": "Cancel the task in progress?"
+    },
+    "是": {
+        "en": "Yes"
+    },
+    "否": {
+        "en": "No"
+    },
+    "断开 dolphindb 连接:": {
+        "en": "Disconnect dolphindb:"
+    },
+    "查看 dolphindb 变量:": {
+        "en": "Inspect the dolphindb variable:"
+    },
+    "查看 dolphindb 表结构:": {
+        "en": "Inspect the dolphindb table schema:"
+    },
+    "在新窗口查看变量:": {
+        "en": "View variables in new window:"
+    },
+    "上传到服务器端的路径": {
+        "en": "The path to upload to the server side"
+    },
+    "文件上传成功": {
+        "en": "File uploaded successfully"
+    },
+    "文件上传路径不能为空": {
+        "en": "File upload path cannot be empty"
+    },
+    "切换连接:": {
+        "en": "Change connection:"
+    },
+    "连接成功:": {
+        "en": "Connection succeeded:"
+    },
+    "page 已订阅 repl": {
+        "en": "page subscribed to repl"
+    },
+    "page 的 repl 订阅被关闭，因为 websocket 连接被关闭": {
+        "en": "The page's repl subscription was closed because the websocket connection was closed"
+    },
+    "page 已订阅 inspection": {
+        "en": "page Subscribed inspection"
+    },
+    "page 的 inspection 订阅被关闭，因为 websocket 连接被关闭": {
+        "en": "The page's inspection subscription was closed because the websocket connection was closed"
+    },
+    "实际": {
+        "en": "Actual"
+    },
+    "设置小数位数为:": {
+        "en": "Set the number of decimal places to:"
+    },
+    "是否取消执行中的作业？": {
+        "en": "Cancel this running job?"
+    },
+    "不要取消": {
+        "en": "Do Not Cancel"
+    },
+    "已连接": {
+        "en": "Connected"
+    },
+    "词典": {
+        "en": "dict"
+    },
+    "个键": {
+        "en": "keys"
+    },
+    "集合": {
+        "en": "set"
+    },
+    "向量": {
+        "en": "vector"
+    },
+    "个元素": {
+        "en": "items"
+    },
+    "在新窗口中打开": {
+        "en": "Open in new window"
+    },
+    "表格": {
+        "en": "table"
+    },
+    "行": {
+        "en": "rows"
+    },
+    "列": {
+        "en": "columns"
+    },
+    "流表": {
+        "en": "streaming table"
+    },
+    "窗口": {
+        "en": "window"
+    },
+    "偏移量": {
+        "en": "offset"
+    },
+    "继续显示流表更新": {
+        "en": "continue to show flow table updates"
+    },
+    "暂停显示流表更新": {
+        "en": "pause showing flow table updates"
+    },
+    "实时": {
+        "en": "real time"
+    },
+    "this.streaming.data 中的元素应该是 vector": {
+        "en": "Elements in this.streaming.data should be vector"
+    },
+    "矩阵": {
+        "en": "matrix"
+    },
+    "成交量": {
+        "en": "vol"
+    },
+    "开盘价": {
+        "en": "open"
+    },
+    "收盘价": {
+        "en": "close"
+    },
+    "最高价": {
+        "en": "high"
+    },
+    "最低价": {
+        "en": "low"
+    },
+    "用户已取消设置小数位数": {
+        "en": "User has abandoned decimal places settings"
+    },
+    "DolphinDB 终端": {
+        "en": "DolphinDB Terminal"
+    },
+    "如:": {
+        "en": "e.g."
+    },
+    "DolphinDB 插件初始化成功": {
+        "en": "DolphinDB plugin initialized successfully"
+    },
+    "DolphinDB 插件的 http 服务器启动成功，正在监听:": {
+        "en": "The http server of the DolphinDB plugin started successfully and is listening:"
+    },
+    "的词典": {
+        "en": " dict"
+    },
+    "的 {{type}} 集合": {
+        "en": " {{type}} set"
+    },
+    "的 {{type}} 向量": {
+        "en": "{{type}} vector"
+    },
+    "的表格": {
+        "en": " table"
+    },
+    "的流表": {
+        "en": " streaming table"
+    },
+    "的矩阵": {
+        "en": " matrix"
+    },
+    "函数文档 {{fname}} 已加载": {
+        "en": "function documentation {{fname}} loaded"
+    },
+    "dolphindb 插件运行在{{mode}}模式下": {
+        "en": "The dolphindb plugin runs in {{mode}} mode"
+    },
+    "开发": {
+        "en": "development"
+    },
+    "生产": {
+        "en": "production"
+    },
+    "先尝试用浏览器访问对应的 server 地址，如: http://192.168.1.111:8848\n": {
+        "en": "First try to access the corresponding server address with a browser, e.g. http://192.168.1.111:8848\n"
+    },
+    "如果可以打开网页且正常使用，再检查:\n": {
+        "en": "If you can open the web page and use it normally, check again:\n"
+    },
+    "- 执行 `version()` 函数，返回的 DolphinDB Server 版本应不低于 `1.30.16` 或 `2.00.4`\n": {
+        "en": "- Execute the `version()` function, the returned version of DolphinDB Server should not be lower than `1.30.16` or `2.00.4`\n"
+    },
+    "- 如果有配置系统代理，则代理软件以及代理服务器需要支持 WebSocket 连接，否则请在系统中关闭代理，或者将 DolphinDB Server IP 添加到排除列表，然后重启 VSCode\n": {
+        "en": "- If there is a configured system proxy, the proxy software and proxy server need to support WebSocket connections, otherwise please turn off the proxy in the system, or add the DolphinDB Server IP to the exclusion list, and then restart VSCode\n"
+    },
+    "调用栈:\n": {
+        "en": "call stack:\n"
+    },
+    "连接数据库失败，当前连接的一部分配置如下:\n": {
+        "en": "Failed to connect to the database. Part of the current connection configuration is as follows:\n"
+    },
+    "如果可以打开网页且正常登录使用，再检查:\n": {
+        "en": "If you can open the webpage and log in normally, check:\n"
+    },
+    "编辑配置": {
+        "en": "Edit Settings"
+    },
+    "确认": {
+        "en": "Confirm"
+    },
+    "dataview 已准备就绪": {
+        "en": "dataview is ready"
+    },
+    "page 已准备就绪": {
+        "en": "page is ready"
+    },
+    "标量": {
+        "en": "scalar"
+    },
+    "张量": {
+        "en": "tensor"
+    },
+    "数对": {
+        "en": "pair"
+    },
+    "绘图": {
+        "en": "chart"
+    },
+    "对象": {
+        "en": "object"
+    },
+    "找不到 rpc handler": {
+        "en": "rpc handler not found"
+    },
+    "重连连接:": {
+        "en": "reconnect:"
+    },
+    "正在连接中，请稍等": {
+        "en": "Connecting, please wait"
+    },
+    "连接:": {
+        "en": "connect:"
+    },
+    "数据库连接被断开，请检查网络是否稳定、网络转发节点是否会自动关闭 websocket 长连接、server 日志\n": {
+        "en": "The database connection is disconnected, please check whether the network is stable, whether the network forwarding node will automatically close the websocket long connection, server log\n"
+    },
+    "重连": {
+        "en": "Reconnect"
+    },
+    "本地找不到文件 {{fp_main}}，请先将这个文件下载到本地再启动调试\n": {
+        "en": "The file {{fp_main}} cannot be found locally, please download this file to the local and then start debugging\n"
+    },
+    "文件 {{fp_src}} 中设置了断点，但在本次调试会话的中不会被使用到，将自动忽略\n": {
+        "en": "A breakpoint is set in the file {{fp_src}}, but it will not be used in this debugging session and will be ignored\n"
+    },
+    "本地文件 {{fp_src}} 与服务器文件不一致，在本地文件中设置的断点可能导致未知错误，建议先同步文件\n": {
+        "en": "The local file {{fp_src}} is inconsistent with the server file. Breakpoints set in the local file may cause unknown errors. It is recommended to synchronize the file first\n"
+    },
+    "调试服务器连接失败\n": {
+        "en": "Failed to connect to debug server\n"
+    },
+    "已有作业正在执行中，完成后才能执行下个作业": {
+        "en": "An existing job is in progress, and the next job can only be executed after it is completed"
+    },
+    "正在执行": {
+        "en": "Executing"
+    },
+    "是否取消执行中的作业？点击取消作业后，会发送指令并等待当前正在执行的子任务完成后停止": {
+        "en": "Cancel this running job? After clicking to cancel the job, it will send an instruction and wait for the currently executing subtask to complete before stopping"
+    },
+    "断开连接": {
+        "en": "Disconnect"
+    },
+    "正在连接": {
+        "en": "Connecting"
+    },
+    "dolphindb 连接配置中的 url 非法: url 应该非空，类型是字符串，且以 ws:// 或 wss:// 开头": {
+        "en": "Illegal url in dolphindb connection configuration: url should be non-empty, of type string, and start with ws:// or wss://"
+    },
+    "当前连接 ({{connection}}) 正在执行作业，请等待\r\n": {
+        "en": "The current connection ({{connection}}) is running a job, please wait\r\n"
+    },
+    "先尝试用浏览器访问对应的 server 地址，如: {{url}}\n": {
+        "en": "First try to access the corresponding server address with a browser, such as: {{url}}\n"
+    },
+    "共享": {
+        "en": "shared"
+    },
+    "第 {{iline}} 行": {
+        "en": "line {{iline}}"
+    },
+    "··· 共 {{total_lines}} 行 ···": {
+        "en": "··· {{total_lines}} lines in total ···"
+    },
+    "调试服务器已启动，等待 VSCode 调试器连接端口 {{port}}": {
+        "en": "The debug server has started, waiting for the VSCode debugger to connect to port {{port}}"
+    },
+    "与 VSCode 调试器建立了连接": {
+        "en": "Connected with VSCode debugger"
+    },
+    "与 VSCode 调试器的连接已断开": {
+        "en": "The connection to the VSCode debugger has been lost"
+    },
+    "调试当前 DolphinDB 脚本文件": {
+        "en": "Debug the current DolphinDB script file"
+    },
+    "调试配置 program 字段为空，请指定为待调试的脚本路径": {
+        "en": "The debug configuration program field is empty, please specify the script path to be debugged"
+    },
+    "DolphinDB License 已过期，请联系管理人员立即更新，避免数据库关闭": {
+        "en": "DolphinDB License has expired, please contact the administrator to update immediately to avoid database shutdown"
+    },
+    "DolphinDB License 将在两周内过期，请提醒管理人员及时更新，避免数据库过期后自动关闭": {
+        "en": "The DolphinDB License will expire within two weeks, please remind the administrators to update it in time to avoid automatic shutdown of the database after expiration"
+    },
+    "接收到消息:": {
+        "en": "received message:"
+    },
+    " 调试服务器连接失败，请确保 DolphinDB Server 版本不低于 2.00.10 或 1.30.22\n": {
+        "en": " Debug server connection failed, please make sure DolphinDB Server version is not lower than 2.00.10 or 1.30.22\n"
+    },
+    "发送消息:": {
+        "en": "send message:"
+    },
+    "发送消息错误:": {
+        "en": "send message errored:"
+    },
+    "文件成功上传到: ": {
+        "en": "The file was successfully uploaded to: "
+    },
+    "模块成功上传到: ": {
+        "en": "The module was successfully uploaded to: "
+    },
+    "配置文件中的 dolphindb.mappings 中存在路径类型错误映射项（\"文件夹\" 路径错误映射到 \"文件\" 路径或 \"文件\" 路径错误映射到 \"文件夹\" 路径），请检查后修改。": {
+        "en": "There is a wrong path mapping item in dolphindb.mappings in the configuration file (the \"folder\" path is incorrectly mapped to the \"file\" path or the \"file\" path is incorrectly mapped to the \"folder\" path), please check and modify. "
+    },
+    "您未配置 dolphindb.mappings，是否现在配置？": {
+        "en": "You have not configured dolphindb.mappings, would you like to do so now?"
+    },
+    "不再提醒": {
+        "en": "No More Reminders"
+    },
+    "配置文件中的 dolphindb.mappings 中存在路径类型错误映射项（1. \"文件夹\" 路径错误映射到 \"文件\" 路径；2. \"文件\" 路径错误映射到 \"文件夹\" 路径；3. \"default\" 没有映射到 \"文件夹\" 路径。）请检查后修改。": {
+        "en": "There is a wrong path type mapping item in dolphindb.mappings in the configuration file (1. \"folder\" path is incorrectly mapped to \"file\" path; 2. \"file\" path is incorrectly mapped to \"folder\" path; 3. \"default\" is not mapped to \"folder\" path.) Please check and modify."
+    },
+    "是否上传后加密模块？\n若加密，服务器端只保存加密后的 .dom 文件，无法查看源码\n若不加密，服务器端将保存原始文件": {
+        "en": "Do you want to encrypt the module after uploading? \nIf it is encrypted, the server will only save the encrypted .dom file, and the source code cannot be viewed\nIf it is not encrypted, the server will save the original file"
+    },
+    "当前连接未配置路径映射关系，文件会默认上传至 {getHomeDir()}/uploads/ 文件夹下。建议在 dolphindb.connections 的每个连接配置对象中添加 mappings 属性，将本地路径关联到远程路径，后续上传会根据 mappings 进行路径匹配。是否现在配置？": {
+        "en": "The current connection has no path mapping configured, and files will be uploaded to the {getHomeDir()}/uploads/ folder by default. It is recommended to add the mappings attribute to each connection configuration object of dolphindb.connections to associate the local path with the remote path. Subsequent uploads will perform path matching based on mappings. Do you want to configure it now?"
+    },
+    "当前连接配置中的 mappings 中存在路径类型错误映射项（1. \"文件夹\" 路径错误映射到 \"文件\" 路径；2. \"文件\" 路径错误映射到 \"文件夹\" 路径；3. \"default\" 没有映射到 \"文件夹\" 路径。）请检查后修改。": {
+        "en": "There is a path type error mapping item in the mappings in the current connection configuration (1. \"folder\" path is incorrectly mapped to \"file\" path; 2. \"file\" path is incorrectly mapped to \"folder\" path; 3. \"default\" is not mapped to \"folder\" path.) Please check and modify."
+    },
+    "连接到:": {
+        "en": "connect to:"
+    },
+    "已连接到 server": {
+        "en": "connected to server"
+    },
+    "连接错误:": {
+        "en": "connection error:"
+    },
+    "偏移": {
+        "en": "offset"
+    },
+    " 调试服务器连接失败，请确保 DolphinDB Server 版本不低于 2.00.10.1 或 1.30.22.1\n": {
+        "en": " Debug server connection failed, please make sure DolphinDB Server version is not lower than 2.00.10.1 or 1.30.22.1\n"
+    },
+    "uploadModule 返回值类型应该为 string": {
+        "en": "uploadModule return value type should be string"
+    },
+    "当前连接未配置路径映射关系，文件会默认上传至 <getHomeDir()>/uploads 文件夹下。建议在 dolphindb.connections 的每个连接配置对象中添加 mappings 属性，将本地路径关联到远程路径，后续上传会根据 mappings 进行路径匹配。是否现在配置？": {
+        "en": "The current connection has no path mapping configured, and files will be uploaded to the <getHomeDir()>/uploads folder by default. It is recommended to add the mappings attribute to each connection configuration object of dolphindb.connections to associate the local path with the remote path. Subsequent uploads will perform path matching based on mappings. Do you want to configure it now?"
+    },
+    "查看文档": {
+        "en": "View Document"
+    },
+    "请确认是否将选中的 {{file_num}} 个文件/文件夹上传至 {{fp_remote}} {{notice}}（目前版本暂不支持上传二进制文件，二进制文件会被自动忽略）": {
+        "en": "Please confirm whether to upload the selected {{file_num}} file(s)/folder(s) to {{fp_remote}} {{notice}} (the current version does not support uploading binary files, and binary files will be automatically ignored)"
+    },
+    "\n··· 等，共 {{num}} 个路径": {
+        "en": "... and so on, a total of {{num}} paths"
+    },
+    "导出文件": {
+        "en": "Export File"
+    },
+    "确定": {
+        "en": "Confirm"
+    },
+    "文件已成功导出到 {{path}}": {
+        "en": "File exported successfully to {{path}}"
+    },
+    "仅支持导出表格": {
+        "en": "Only supports exporting tables"
+    },
+    "server 版本低于 2.00.11，请升级后再使用此功能": {
+        "en": "The server version is lower than 2.00.11, please upgrade before using this function."
+    },
+    "当前变量所属连接非选中连接，无法导出": {
+        "en": "The connection to which the current variable belongs is not a selected connection and cannot be exported."
+    },
+    "当前没有可导出的表格": {
+        "en": "There are currently no tables available for export"
+    },
+    "请将 server 版本升级至 2.00.11.2 及以上再使用此功能": {
+        "en": "Please upgrade the server version to 2.00.11.2 and above before using this function"
+    },
+    "总是加密": {
+        "en": "Always"
+    },
+    "总是不加密": {
+        "en": "Never"
+    },
+    "正在导出 ···": {
+        "en": "Exporting ···"
+    },
+    "查看 dolphindb 表格:": {
+        "en": "Inspect the dolphindb table:"
+    },
+    "数据库路径应该以 dfs:// 开头": {
+        "en": "The database path should start with dfs://"
+    },
+    "前 100 行": {
+        "en": "Top 100 rows of table"
+    },
+    "导出表格": {
+        "en": "Export Table"
+    },
+    "文件成功导出到 {{path}}": {
+        "en": "File successfully exported to {{path}}"
+    },
+    "查看 dolphindb 数据库结构:": {
+        "en": "Inspect the dolphindb database schema:"
+    },
+    "当前使用的语言为:": {
+        "en": "The language currently used is:"
+    },
+    "当前有 debug 进程进行中，无法切换连接": {
+        "en": "There is currently a debug process in progress and the connection cannot be switched."
+    },
+    "python parser 暂不支持调试功能": {
+        "en": "Python parser does not support debugging function."
+    },
+    "请选择连接并登录后查看": {
+        "en": "Please select a connection and log in to view"
+    },
+    "当前集群无数据节点和计算节点存活，且当前节点不为单机节点": {
+        "en": "There are no data nodes or computing nodes alive in the current cluster, and the current node is not a stand-alone node"
+    },
+    "错误行:": {
+        "en": "Error Line:"
+    },
+    "dolphindb 插件运行在{{mode}}模式下，版本为 {{version}}": {
+        "en": "The dolphindb plugin is running in {{mode}} mode and the version is {{version}}"
+    }
+}

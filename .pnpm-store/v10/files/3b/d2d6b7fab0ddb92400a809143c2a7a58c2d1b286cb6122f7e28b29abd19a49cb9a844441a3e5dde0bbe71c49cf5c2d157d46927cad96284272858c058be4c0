@@ -1,0 +1,697 @@
+import { Stream, Writable, Transform } from 'stream';
+import util from 'util';
+import timers from 'timers/promises';
+import { t } from "./i18n/instance.js";
+import { build_mapper, not_empty, is_key_type, noop, ident } from "./prototype.js";
+/** `180` 输出字符宽度 */
+export const output_width = 180;
+export const url_width = 52;
+export function set_inspect_options(colors = true) {
+    util.inspect.defaultOptions.maxArrayLength = 40;
+    util.inspect.defaultOptions.maxStringLength = 10000;
+    util.inspect.defaultOptions.breakLength = output_width;
+    util.inspect.defaultOptions.colors = colors;
+    util.inspect.defaultOptions.compact = false;
+    util.inspect.defaultOptions.getters = true;
+    util.inspect.defaultOptions.depth = 2;
+    util.inspect.defaultOptions.sorted = false;
+    util.inspect.defaultOptions.showProxy = true;
+    util.inspect.styles.number = 'green';
+    util.inspect.styles.string = 'cyan';
+    util.inspect.styles.boolean = 'blue';
+    util.inspect.styles.date = 'magenta';
+    util.inspect.styles.special = 'white';
+}
+export function assert(assertion, message) {
+    if (!assertion) {
+        debugger;
+        throw new Error(`${t('断言失败')}: ${message ? `${message}: ` : ''}`);
+    }
+    return assertion;
+}
+/** 做参数校验，逻辑检查 */
+export function check(condition, message) {
+    if (!condition) {
+        debugger;
+        throw new Error(message || t('检查失败'));
+    }
+    return condition;
+}
+export function log(...args) {
+    if (args.length === 2) {
+        const [label, obj] = args;
+        console.log(label, obj);
+        return obj;
+    }
+    else {
+        const obj = args[0];
+        console.log(obj);
+        return obj;
+    }
+}
+/** 数组或 iterable 去重（可按 mapper 选择或计算某个值来去重），重复值保留最后出现的那个
+    - mapper?: 可以是 key (string, number, symbol) 或 (obj: any) => any */
+export function unique(iterable, mapper) {
+    if (!mapper)
+        return [...new Set(iterable)];
+    if (is_key_type(mapper))
+        mapper = build_mapper(mapper);
+    let map = new Map();
+    for (const x of iterable)
+        map.set(mapper(x), x);
+    return [...map.values()];
+}
+/** 生成 0, 1, ..., n - 1 (不包括 n) 的数组，支持传入 generator 函数，通过 index 生成各个元素
+    @example seq(10, i => `item-${i}`) */
+export function seq(n, generator) {
+    let a = new Array(n);
+    for (let i = 0; i < n; i++)
+        a[i] = generator ? generator(i) : i;
+    return a;
+}
+/** 排序对象中 keys 的顺序，返回新的对象 */
+export function sort_keys(obj) {
+    return Object.fromEntries(Object.entries(obj)
+        .sort(([key_l], [key_r]) => strcmp(key_l, key_r)));
+}
+/** 将 keys, values 数组按对应的顺序组合成一个对象 */
+export function zip_object(keys, values) {
+    return keys.reduce((obj, key, i) => {
+        obj[key] = values[i];
+        return obj;
+    }, {});
+}
+/** 映射对象中的 keys, 返回新对象 */
+export function map_keys(obj, mapper) {
+    return Object.fromEntries(Object.entries(obj)
+        .map(([key, value]) => [mapper(key), value]));
+}
+/** 映射对象中的 values, 返回新对象 */
+export function map_values(obj, mapper) {
+    return Object.fromEntries(Object.entries(obj)
+        .map(([key, value]) => [key, mapper(value, key)]));
+}
+/** 过滤对象中的 keys, 返回新对象 */
+export function filter_keys(obj, filter) {
+    return Object.fromEntries(Object.entries(obj)
+        .filter(([key]) => filter(key)));
+}
+/** 过滤对象中的 values, 返回新对象
+    - obj
+    - filter?: `not_empty` */
+export function filter_values(obj, filter = not_empty) {
+    return Object.fromEntries(Object.entries(obj)
+        .filter(([, value]) => filter(value)));
+}
+/** 忽略对象中的 keys, 返回新对象 */
+export function omit(obj, omit_keys) {
+    const omit_keys_ = new Set(omit_keys);
+    return filter_keys(obj, key => !omit_keys_.has(key));
+}
+/** 字符串字典序比较 */
+export function strcmp(l, r) {
+    if (l === r)
+        return 0;
+    if (l < r)
+        return -1;
+    return 1;
+}
+/** 比较 1.10.02 这种版本号
+    - l, r: 两个版本号字符串
+    - loose?: 宽松模式，允许两个版本号格式（位数）不一致 */
+export function vercmp(l, r, loose = false) {
+    const lparts = l.split('.').map(x => Number(x));
+    const rparts = r.split('.').map(x => Number(x));
+    if (!loose && lparts.length !== rparts.length)
+        throw new Error('传入 vercmp 的两个版本号格式不一致');
+    let minlen = Math.min(lparts.length, rparts.length);
+    for (let i = 0; i < minlen; i++) {
+        const l = lparts[i];
+        const r = rparts[i];
+        assert(!isNaN(l) && !isNaN(r), '传入 vercmp 的版本非法');
+        if (l !== r)
+            return l - r;
+    }
+    // loose 下按短的优先，否则应该一样，为 0
+    return lparts.length - rparts.length;
+}
+/** 过滤符合 pattern 的行 */
+export function grep(str, pattern) {
+    return str.split_lines()
+        .filter(typeof pattern === 'string'
+        ? line => line.includes(pattern)
+        : line => pattern.test(line))
+        .join_lines();
+}
+/** 模糊过滤字符串列表或对象列表，常用于根据用户输入补全或搜索过滤
+    如果有完全匹配的，只返回那一项的数组
+    - query: 查询字符串，要求为全小写
+    - list: 要过滤的列表
+    - list_lower?: 要过滤的列表对应的全小写字符串列表形式，传入时可复用缓存，加快搜索速度 */
+export function fuzzyfilter(query, list, mapper = ident, list_lower, single_char_startswith = false) {
+    if (!query)
+        return list;
+    if (is_key_type(mapper))
+        mapper = build_mapper(mapper);
+    mapper ??= ident;
+    list_lower ??= list.map(item => mapper(item).toLowerCase());
+    const query_lower = query.toLowerCase();
+    let ifullmatch;
+    if ((ifullmatch = list_lower.indexOf(query_lower)) !== -1)
+        return [list[ifullmatch]];
+    if (single_char_startswith && query.length === 1) {
+        const c = query[0];
+        return list.filter((_, i) => list_lower[i].startsWith(c));
+    }
+    return list.filter((_, i) => {
+        const str_lower = list_lower[i];
+        let j = 0;
+        for (const c of query_lower) {
+            j = str_lower.indexOf(c, j) + 1;
+            if (!j) // 找不到则 j === 0
+                return false;
+        }
+        return true;
+    });
+}
+export function get(obj, keypath) {
+    let obj_ = obj;
+    for (const key of keypath.split('.'))
+        obj_ = obj_[key];
+    return obj_;
+}
+export function global_get(keypath) {
+    return get(globalThis, keypath);
+}
+export function invoke(obj, funcpath, args) {
+    const paths = funcpath.split('.');
+    let obj_ = obj;
+    for (let i = 0; i < paths.length - 1; i++)
+        obj_ = obj_[paths[i]];
+    return obj_[paths.at(-1)].call(obj_, ...args);
+}
+/** 拼接 TypedArrays 生成一个完整的 Uint8Array */
+export function concat(arrays) {
+    let length = 0;
+    for (const a of arrays)
+        length += a.byteLength;
+    let buf = Buffer.allocUnsafe(length);
+    let offset = 0;
+    for (const a of arrays) {
+        const uint8view = new Uint8Array(a.buffer, a.byteOffset, a.byteLength);
+        buf.set(uint8view, offset);
+        offset += uint8view.byteLength;
+    }
+    return buf;
+}
+export function typed_array_to_buffer(view) {
+    return Buffer.from(view.buffer, view.byteOffset, view.byteLength);
+}
+/** 时间间隔 (milliseconds) 格式化 */
+export function delta2str(delta) {
+    if (delta < 1)
+        return '0 ms';
+    // [1, 100) ms
+    if (delta < 100)
+        return `${delta.toFixed(0)} ms`;
+    // [100, 1000) ms
+    // 0.8 s
+    if (delta <= 950)
+        return `${(delta / 1000).toFixed(1)} s`;
+    // 3 s
+    if (delta < 1000 * 60)
+        return `${(delta / 1000).toFixed()} s`;
+    // 1 min 12 s [1 min 0s, 60 min)
+    const seconds = Math.trunc(delta / 1000);
+    if (seconds < 60 * 60)
+        return `${Math.trunc(seconds / 60)} min ${seconds % 60} s`;
+    const hour = Math.trunc(seconds / 3600);
+    return `${hour} h ${Math.trunc((seconds - 3600 * hour) / 60)} min ${seconds % 60} s`;
+}
+/** generate random id */
+export function genid() {
+    return Math.random() * 2 ** 53;
+}
+/** 默认日期时间格式 */
+export const datetime_format = 'YYYY.MM.DD HH:mm:ss';
+/** 默认日期格式 */
+export const date_format = 'YYYY.MM.DD';
+/** 默认时间格式 */
+export const time_format = 'HH:mm:ss';
+export class Timer {
+    started = new Date().getTime();
+    ended;
+    /** 停止秒表，保存读数 */
+    stop() {
+        this.ended = new Date().getTime();
+    }
+    /** 如果秒表未停止，获取当前秒表读数；
+        如果秒表已停止，获取停止时的秒表读数; */
+    get() {
+        return (this.ended || new Date().getTime()) - this.started;
+    }
+    /** 获取时间表示字符串，如 1.2 s
+        - parenthesis?: `true` 字符串前后加上括号，如 (1.2 s) */
+    getstr(parenthesis = false) {
+        let s = delta2str(this.get());
+        if (parenthesis)
+            return s.bracket();
+        else
+            return s;
+    }
+    print() {
+        console.log(this.getstr(true));
+    }
+    /** 重置 started */
+    reset() {
+        this.started = new Date().getTime();
+        this.ended = null;
+    }
+    get_and_reset() {
+        const result = this.get();
+        this.reset();
+        return result;
+    }
+    getstr_and_reset(parenthesis) {
+        const result = this.getstr(parenthesis);
+        this.reset();
+        return result;
+    }
+}
+export function log_line() {
+    console.log('---');
+}
+export async function delay(milliseconds, options) {
+    return timers.setTimeout(milliseconds, undefined, options);
+}
+export class TimeoutError extends Error {
+    name = 'TimeoutError';
+}
+/** 在指定的时间 (milliseconds) 内运行某个任务，超时之后抛出错误或调用 on_timeout
+    - milliseconds: 限时毫秒数
+    - action?: 要等待运行的任务, async function 或 promise
+    - on_timeout?: 超时后调用的函数
+        - 如果传入了 on_timeout 参数: 调用 on_timeout，然后 timeout 函数正常返回 null
+        - 如果没传入 on_timeout 参数: 抛出 TimeoutError
+    - print?: 打印已超时任务的错误 */
+export async function timeout(milliseconds, action, on_timeout, print = true) {
+    const error = new TimeoutError();
+    return new Promise((resolve, reject) => {
+        let done = false;
+        let rejected = false;
+        (async () => {
+            await delay(milliseconds);
+            if (!done)
+                if (on_timeout)
+                    try {
+                        await on_timeout();
+                        resolve(null);
+                    }
+                    catch (error) {
+                        if (rejected)
+                            throw error; // 会成为 unhandled rejection
+                        else {
+                            rejected = true;
+                            reject(error);
+                        }
+                    }
+                else {
+                    rejected = true;
+                    reject(error);
+                }
+        })();
+        (async () => {
+            try {
+                resolve(await (typeof action === 'function' ? action() : action));
+            }
+            catch (error) {
+                if (rejected) {
+                    if (print)
+                        console.log(`已超时任务的错误: ${error.message}`);
+                }
+                else {
+                    rejected = true;
+                    reject(error);
+                }
+            }
+            finally {
+                done = true;
+            }
+        })();
+    });
+}
+/** 创建一个 promise，后续可调用 promise.resolve, promise.reject 方法设置其状态和值
+    - initial?: `undefined` 传入非 undefined 值（包括 null）时直接设置为 resolved 状态
+    注: 下面的方法不能标记为 aysnc function, 否则会对返回值再做一层 Promise.resolve() 导致 reject, resolve 属性丢失 */
+// eslint-disable-next-line @typescript-eslint/promise-function-async
+export function defer(initial) {
+    if (initial === undefined) {
+        let { promise, resolve, reject } = Promise.withResolvers();
+        return Object.assign(promise, { resolve, reject });
+    }
+    else
+        return Object.assign(Promise.resolve(initial), {
+            resolve: noop,
+            reject: noop
+        });
+}
+/** @example
+    let lock = new Lock(redis)
+    
+    // 锁定资源后在 action 回调中操作资源，回调 promise 完成后自动释放资源，
+    // 三秒内未成功独占资源直接抛出 TimeoutError (开始执行后不受 signal abort 影响)
+    await lock.request(async (redis) => {
+        const value = await redis.get('key')
+        await redis.set('key', value * 2)
+    }, AbortSignal.timeout(3000))
+    
+    参考:
+    https://developer.mozilla.org/en-US/docs/Web/API/Web_Locks_API
+    https://github.com/metarhia/web-locks
+    https://www.npmjs.com/package/async-lock  */
+export class Lock {
+    /** 如果操作不需要独占资源，可以直接通过 lock.resource 访问，否则需要通过 await lock.request() 独占资源后再访问 */
+    resource;
+    /** 等待链，新的 await lock.request() 调用会等待当前等待链尾部的 promise 完成，并作为新的尾部 */
+    ptail = defer(null);
+    /** 查询当前资源是否属于被锁定的状态，方便在资源闲置时做一些可选操作（操作前仍需锁定），或者做一些状态展示 */
+    locked = false;
+    /** 可以不传 resource，表示管理某个抽象或虚拟的资源 */
+    constructor(resource) {
+        this.resource = resource;
+    }
+    /** 通过 await lock.request() 锁定资源以便独占访问
+        成功返回之后由调用方负责调用 release 方法释放资源
+        在 signal aborted 时抛出错误结束等待，且由内部实现自动释放资源 */
+    // async request (action: (resource: TResource) => Promise<void>, signal?: AbortSignal): Promise<void>
+    // async request <TResult> (action: <TResult> (resource: TResource) => Promise<TResult>, signal?: AbortSignal): Promise<TResult>
+    async request(action, signal) {
+        signal?.throwIfAborted();
+        const ptail = this.ptail;
+        let pcurrent = this.ptail = defer();
+        this.locked = true;
+        return new Promise((resolve, reject) => {
+            // 下面两种情况，先发生的决定 request 返回的 promise 状态
+            // 不管是否 aborted, 都要等资源被前一次调用释放，先 aborted 只是将控制权交回给调用者，在锁定资源后不执行 action， 直接释放
+            /** 防止执行过程中 signal abort */
+            let executing = false;
+            signal?.addEventListener('abort', () => {
+                if (!executing)
+                    // 这里不能释放锁，需要等 ptail resolve 后拿到资源再释放
+                    reject(signal.reason);
+            }, { once: true });
+            ptail.then(async () => {
+                // 这里已经能保证独占访问资源
+                // 如果 aborted, 可以理解为独占资源失败，调用者不会使用资源，直接释放
+                if (signal?.aborted)
+                    reject(signal.reason);
+                else
+                    // 由调用者去操作资源
+                    try {
+                        executing = true;
+                        resolve(await action(this.resource));
+                    }
+                    catch (error) {
+                        reject(error);
+                    }
+                // 下面开始释放锁
+                // assert(this.locked)
+                if (!this.locked)
+                    reject(new Error(t('尝试释放未锁定的锁，这不应该发生')));
+                this.locked = false;
+                pcurrent.resolve();
+            });
+        });
+    }
+}
+// ------------ text
+let encoder = new TextEncoder();
+export function encode(str) {
+    // 用 Buffer.from 是因为可以利用 buffer pool，避免 encoder.encode 创建大量小且独立的 array buffer
+    return Buffer.from(str);
+}
+export function encode_into(str, buf) {
+    // 这个是直接用 v8 String::WriteUtf8 最高效的方法了
+    return encoder.encodeInto(str, buf);
+}
+let decoder = new TextDecoder();
+/** 将 utf-8 buffer (Uint8Array) 简单的解码为 string。
+    在流式处理 (buffer 可能不完整) 时，应使用独立的 TextDecoder 实例调用 decode(buffer, { stream: true }) */
+export function decode(buffer) {
+    return decoder.decode(buffer);
+}
+export function has_chinese(str) {
+    return /[\u4E00-\u9FA5]/.test(str);
+}
+export function escape_line_feed(str) {
+    return str.replace(/\n/g, '\\n');
+}
+export function lowercase_first_letter(str) {
+    return str[0].toLowerCase() + str.slice(1);
+}
+/** util.inspect(obj)
+    - options
+        - limit?: `10000`  传 0 时不限制
+        - omit?: string[] */
+export function inspect(obj, options = {}) {
+    if (options.omit) {
+        obj = { ...obj };
+        for (const key of options.omit)
+            delete obj[key];
+        // 改变了 obj 的引用，去掉 inspect.custom 防止无限递归 inspect
+        delete obj[inspect.custom];
+    }
+    let text = util.inspect(obj, options);
+    const limit = options.limit ?? 10000;
+    if (limit && text.length > limit)
+        return `${text.slice(0, limit)}……'\u001b[39m\n`;
+    else
+        return text;
+}
+/** 根据 enabled 选项返回有 / 无颜色的字符串 (str) */
+export function colored(str, color, enabled = inspect.defaultOptions.colors) {
+    return enabled ? str[color] : str;
+}
+(function (inspect) {
+    inspect.custom = util.inspect.custom;
+    inspect.defaultOptions = util.inspect.defaultOptions;
+})(inspect || (inspect = {}));
+// ------------------------------------ stream
+/** npm map-stream
+    filter will reemit the data if cb(err,pass) pass is truthy
+    
+    reduce is more tricky
+    maybe we want to group the reductions or emit progress updates occasionally
+    the most basic reduce just emits one 'data' event after it has recieved 'end'
+    
+    create an event stream and apply function to each .write,
+    emitting each response as data unless it's an empty callback
+ */
+export function map_stream(mapper, options) {
+    options = options || {};
+    let inputs = 0, outputs = 0, ended = false, paused = false, destroyed = false, last_written = 0, in_next = false;
+    let stream = Object.assign(new Stream(), {
+        readable: true,
+        writable: true,
+        write(data) {
+            if (ended)
+                throw new Error('map stream is not writable');
+            in_next = false;
+            inputs++;
+            try {
+                // catch sync errors and handle them like async errors
+                const written = wrapped_mapper(data, inputs, next);
+                paused = (written === false);
+                return !paused;
+            }
+            catch (err) {
+                // if the callback has been called syncronously, and the error has occured in an listener, throw it again.
+                if (in_next)
+                    throw err;
+                next(err);
+                return !paused;
+            }
+        },
+        end(data) {
+            if (ended)
+                return;
+            _end(data);
+        },
+        destroy() {
+            ended = destroyed = true;
+            stream.writable = stream.readable = paused = false;
+            process.nextTick(function () {
+                stream.emit('close');
+            });
+        },
+        pause() {
+            paused = true;
+        },
+        resume() {
+            paused = false;
+        }
+    });
+    let error_event_name = options.failures ? 'failure' : 'error';
+    // Items that are not ready to be written yet (because they would come out of order) get stuck in a queue for later.
+    let write_queue = {};
+    function queue_data(data, number) {
+        let next_to_write = last_written + 1;
+        if (number === next_to_write) {
+            // If it's next, and its not undefined write it
+            if (data !== undefined)
+                stream.emit('data', data);
+            last_written++;
+            next_to_write++;
+        }
+        else
+            // Otherwise queue it for later.
+            write_queue[number] = data;
+        // If the next value is in the queue, write it
+        if (Object.prototype.hasOwnProperty.call(write_queue, next_to_write)) {
+            let data_to_write = write_queue[next_to_write];
+            delete write_queue[next_to_write];
+            return queue_data(data_to_write, next_to_write);
+        }
+        outputs++;
+        if (inputs === outputs) {
+            if (paused) {
+                paused = false;
+                stream.emit('drain'); // written all the incoming events
+            }
+            if (ended)
+                _end();
+        }
+    }
+    function next(err, data, number) {
+        if (destroyed)
+            return;
+        in_next = true;
+        if (!err || options.failures)
+            queue_data(data, number);
+        if (err)
+            stream.emit(error_event_name, err);
+        in_next = false;
+    }
+    /** Wrap the mapper function by calling its callback with the order number of the item in the stream. */
+    function wrapped_mapper(input, number, callback) {
+        return mapper.call(null, input, function (err, data) {
+            callback(err, data, number);
+        });
+    }
+    function _end(data) {
+        // if end was called with args, write it, 
+        ended = true; // write will emit 'end' if ended is true
+        stream.writable = false;
+        if (data !== undefined)
+            return queue_data(data, inputs);
+        else if (inputs === outputs) { // wait for processing 
+            stream.readable = false;
+            stream.emit('end');
+            stream.destroy();
+        }
+    }
+    return stream;
+}
+export async function* stream_to_lines(stream) {
+    let buf = '';
+    for await (const chunk of stream) {
+        let j = 0;
+        for (let i = 0; (i = chunk.indexOf('\n', j)) >= 0;) {
+            let line = chunk.slice(j, i);
+            if (buf) {
+                line = buf + line;
+                buf = '';
+            }
+            j = i + 1;
+            yield line;
+        }
+        buf = chunk.slice(j);
+    }
+}
+export function pipe_with_error(readable, writable) {
+    // 不知道 transform 作为 AsyncIterable 使用时， emit error 是否会在 for await (...) 循环中触发错误
+    readable.once('error', error => { writable.emit('error', error); });
+    return readable.pipe(writable);
+}
+export class WritableMemoryStream extends Writable {
+    chunks = [];
+    pbuffer = defer();
+    constructor() {
+        super({ highWaterMark: 2 ** 30, decodeStrings: false });
+    }
+    _write(chunk, encoding, callback) {
+        this.chunks.push(chunk);
+        callback();
+    }
+    _writev(chunks, callback) {
+        for (const { chunk } of chunks)
+            this.chunks.push(chunk);
+        callback();
+    }
+    _final(callback) {
+        this.pbuffer.resolve(Buffer.concat(this.chunks));
+        this.chunks = null;
+        callback();
+    }
+}
+/** 用 TextDecoder 通过 .pipe 方法持续的解码 process.stdout 等流，
+    主要在 process.ts#start 中使用
+    https://nodejs.org/api/stream.html#implementing-a-transform-stream */
+export class DecoderStream extends Transform {
+    decoder;
+    constructor(encoding) {
+        super({ encoding: 'utf-8' });
+        this.decoder = new TextDecoder(encoding);
+    }
+    _transform(chunk, encoding, callback) {
+        assert(chunk instanceof Uint8Array);
+        const str = this.decoder.decode(chunk, { stream: true });
+        if (str.length)
+            this.push(str, 'utf-8');
+        callback();
+    }
+    _flush(callback) {
+        const str = this.decoder.decode();
+        if (str.length)
+            this.push(str, 'utf-8');
+        callback();
+    }
+}
+/** 消费一个可读流 */
+export async function consume_stream(stream, ignore_error = false) {
+    try {
+        for await (const chunk of stream)
+            ;
+    }
+    catch (error) {
+        if (!ignore_error)
+            throw error;
+    }
+}
+/** 根据 range 生成整数序列 (iterable)
+    - range: 取值为逗号分割的多个可用值或值区间 (不能含有空格)，比如：`8321,8322,8300-8310,11000-11999`
+    - reverse?: `false` 在 range 内从后往前生成 */
+export function* range_to_numbers(range, reverse = false) {
+    let parts = range.split(',');
+    if (reverse)
+        parts.reverse();
+    for (const part of parts) {
+        const [left, right] = part.split('-').map(n => Number(n));
+        if (!right)
+            yield left;
+        if (reverse)
+            for (let i = right; i >= left; i--)
+                yield i;
+        else
+            for (let i = left; i <= right; i++)
+                yield i;
+    }
+}
+/** 大于 n 的最小的 2 的幂次 */
+export function ceil2(n) {
+    let power = 1;
+    for (; power <= n; power <<= 1)
+        ;
+    return power;
+}
+//# sourceMappingURL=utils.js.map

@@ -1,0 +1,5 @@
+import { PluginItem } from '@babel/core';
+export declare let unmarkeds: any[];
+export declare function Checker({ filepath }: {
+    filepath: any;
+}): PluginItem;

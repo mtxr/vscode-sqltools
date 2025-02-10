@@ -1,0 +1,37 @@
+import { View } from '../view';
+import { Controller } from './base';
+export default class GestureController extends Controller {
+    private canvas;
+    private processEvent;
+    private startTime;
+    private startPoints;
+    private startDistance;
+    private center;
+    private pressTimeout;
+    private direction;
+    private prevMoveTime;
+    private prevMovePoints;
+    private lastMoveTime;
+    private lastMovePoints;
+    private eventType;
+    constructor(view: View);
+    get name(): string;
+    init(): void;
+    render(): void;
+    layout(): void;
+    update(): void;
+    destroy(): void;
+    private delegateEvent;
+    private offEvent;
+    private touchStart;
+    private touchMove;
+    private touchEnd;
+    private emitEvent;
+    private emitStart;
+    private emitEnd;
+    private enable;
+    private isProcess;
+    private reset;
+    private clearPressTimeout;
+    private getEventType;
+}

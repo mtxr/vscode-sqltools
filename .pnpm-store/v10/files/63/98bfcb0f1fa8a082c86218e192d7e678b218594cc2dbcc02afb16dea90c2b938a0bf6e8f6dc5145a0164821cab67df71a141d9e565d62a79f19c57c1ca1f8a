@@ -1,0 +1,26 @@
+{
+    "name": "@types/vscode",
+    "version": "1.96.0",
+    "description": "TypeScript definitions for vscode",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/vscode",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Visual Studio Code Team, Microsoft",
+            "githubUsername": "microsoft",
+            "url": "https://github.com/microsoft"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/vscode"
+    },
+    "scripts": {},
+    "dependencies": {},
+    "peerDependencies": {},
+    "typesPublisherContentHash": "c095c866f3a03a82b9efd3b9b18a4ae8358a5f8f2cf9d2d895cab3021db8e3b9",
+    "typeScriptVersion": "5.0"
+}

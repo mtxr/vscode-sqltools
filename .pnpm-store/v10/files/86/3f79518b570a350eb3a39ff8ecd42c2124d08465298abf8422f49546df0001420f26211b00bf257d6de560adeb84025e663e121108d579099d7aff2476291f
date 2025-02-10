@@ -1,0 +1,135 @@
+import { call, print_no_command } from "./process.js";
+import { fread, fmkdir } from "./file.js";
+export class Git {
+    static exe = 'git';
+    cwd;
+    constructor(cwd) {
+        this.cwd = cwd;
+    }
+    static async init(cwd, print = true) {
+        const git = new Git(cwd);
+        await git.call(['init'], { print });
+        return git;
+    }
+    static async clone(repo, fpd, shallow = false) {
+        await fmkdir(fpd);
+        let git = new this(fpd);
+        await git.call([
+            'clone',
+            ...typeof shallow === 'string' ? ['--branch', shallow, '--single-branch'] : [],
+            ...shallow ? ['--depth', '1'] : [],
+            repo,
+            '.'
+        ]);
+        return git;
+    }
+    async call(args = [], { color = true, print, on_stderr, throw_code, } = {}) {
+        return call(Git.exe, [
+            ...color ? [] : [
+                '-c', 'color.status=false',
+                '-c', 'color.ui=false',
+                '-c', 'color.branch=false',
+                '-c', 'color.diff=false',
+            ],
+            ...args,
+        ], {
+            cwd: this.cwd,
+            print,
+            throw_code,
+            on_stderr
+        });
+    }
+    async get_branch() {
+        const head = (await fread(`${this.cwd}.git/HEAD`, { print: false })).trim();
+        const branch = head.find('ref: refs/heads/{branch}').branch || head;
+        if (!branch)
+            throw new Error(`${this.cwd} 仓库 Git.get_branch 无法获取到 branch`);
+        return branch;
+        // 需要 100+ ms ，性能太差
+        // this.branch = (await this.git('branch --show-current')).stdout.trim().strip_ansi()
+    }
+    /** - print: `true` */
+    async get_branches(print = true) {
+        return (await this.call(['branch', '-a'], { print })).stdout
+            .split_lines()
+            .map(l => l.strip_ansi())
+            .filter(branch => !branch.includes('origin/HEAD'))
+            .map(branch => branch.rm(/^\* /))
+            .trim_lines();
+    }
+    async has_branch(branch) {
+        return (await this.get_branches(false))
+            .includes(branch);
+    }
+    /** - last?: `4` */
+    async log({ n = 4, graph = false, format, } = {}) {
+        if (!graph && !format)
+            // 多行 commit message 会被 join 在一起，用空格隔开
+            format = ['ct', 'cn', 'H', 's'].map(x => `%${x}`).join('%x00');
+        return this.call([
+            'log',
+            ...graph ? ['--graph'] : [],
+            `-${n}`,
+            ...format ? [`--pretty=format:${format}`] : [],
+        ], { color: !format, print: !format });
+    }
+    async get_last_commits(n = 100) {
+        const { stdout } = await this.log({ n });
+        return stdout.split_lines()
+            .map(line => {
+            const [unixtime, commiter, hash, message] = line.split('\x00');
+            return {
+                time: new Date(Number(unixtime) * 1000),
+                commiter,
+                hash,
+                message
+            };
+        });
+    }
+    async fetch({ print = true, remote } = {}) {
+        await this.call([
+            'fetch',
+            remote || '--all',
+            '--prune'
+        ], print_stdout);
+        if (print)
+            console.log('更新远程分支成功');
+    }
+    async checkout(branch = 'main') {
+        let create = false;
+        if (branch !== 'main') {
+            const branches = await this.get_branches(false);
+            // 无本地及远程对应分支
+            if (!(branches.includes(branch) ||
+                branches.find(b => b.endsWith(`/${branch}`) && b.startsWith('remotes/'))))
+                create = true;
+        }
+        if (create)
+            console.log(`创建分支 ${branch}`);
+        await this._checkout(branch, create);
+    }
+    async _checkout(branch, create, remote_branch) {
+        await this.call([
+            'checkout',
+            ...create ? ['-b'] : [],
+            branch,
+            ...remote_branch ? [remote_branch] : []
+        ], print_no_command);
+    }
+    async get_version_info(version) {
+        const branch = await this.get_branch();
+        const { hash, time, commiter, message } = (await this.get_last_commits(1))[0];
+        version ||= branch;
+        const timestr = time.to_formal_str();
+        return {
+            version,
+            branch,
+            time: timestr,
+            hash: hash.slice(0, 6),
+            commiter,
+            message
+        };
+    }
+}
+const print_stdout = { print: { code: false, command: false, stdout: true, stderr: true } };
+//# sourceMappingURL=git.js.map

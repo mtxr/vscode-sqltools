@@ -1,0 +1,737 @@
+import { createServer as http_create_server, } from 'http';
+import { createSecureServer as http2_create_server } from 'http2';
+import { createSecureContext } from 'tls';
+import zlib from 'zlib';
+import fs from 'fs';
+import { buffer as stream_to_buffer } from 'stream/consumers';
+import node_sea from 'node:sea';
+import { default as Koa } from 'koa';
+import KoaCors from '@koa/cors';
+import KoaCompress from 'koa-compress';
+import { UAParser } from 'ua-parser-js';
+import resolve_safely from 'resolve-path';
+import { contentType as get_content_type } from 'mime-types';
+// --- my libs
+import { t } from "./i18n/instance.js";
+import { request as _request, Remote } from "./net.js";
+import { inspect, check, range_to_numbers, encode, filter_keys, filter_values, consume_stream, colored, url_width } from "./utils.js";
+import { flist, fread, fstat } from "./file.js";
+import { exe_nodejs, sea } from "./process.js";
+// ------------ my server
+export class Server {
+    /** proxy 时需要丢弃的 resposne headers */
+    static drop_response_headers = new Set([
+        // : 开头的 key
+        'connection',
+        'content-encoding',
+        'keep-alive',
+        'transfer-encoding',
+        'x-powered-by'
+    ]);
+    name;
+    print = {
+        info: true,
+        logs: true,
+        errors: true
+    };
+    /** sea 下最后修改时间，用于 http 资源缓存 */
+    last_modified_str;
+    static js_exts = new Set(['js', 'mjs', 'cjs']);
+    static logger_ignore_fexts = new Set(['js', 'css', 'map', 'png', 'jpg', 'svg', 'ico', 'json', 'woff2', 'ttf', 'php']);
+    static empty_body_statuses = new Set([304, 204, 205]);
+    static empty_body_methods = new Set(['HEAD', 'OPTIONS']);
+    app;
+    handler;
+    /** 启用 http server */
+    http = false;
+    /** 启用 http2 server */
+    http2 = false;
+    http_port = 80;
+    http2_port = 443;
+    /** http2 server 证书文件夹路径，设置后才会启用 http2 server */
+    fpd_certs;
+    default_hostnames;
+    http_server;
+    http2_server;
+    websocket_server;
+    /** 设置后会启用 websocket rpc */
+    remote;
+    /** 输出日志时包含日期 */
+    log_date = false;
+    /** 启用后增加 stdio 订阅相关的 remote.funcs */
+    stdio_subscribable;
+    stdio_subscribers = [];
+    /** 原始 process.stdout.write 函数 bind 后的备份 */
+    stdout_write;
+    stderr_write;
+    constructor({ name, print, http, http2, http_port, http2_port, fpd_certs, default_hostnames, remote, funcs, stdio_subscribable, log_date }) {
+        this.name = name;
+        if (print !== undefined) {
+            if (typeof print === 'boolean')
+                print = { info: print, logs: print, errors: print };
+            this.print = print;
+        }
+        if (http)
+            this.http = http;
+        if (http2)
+            this.http2 = http2;
+        check(this.http || this.http2, 'http 和 http2 至少启用一个');
+        if (http_port !== undefined)
+            this.http_port = http_port;
+        if (http2_port !== undefined)
+            this.http2_port = http2_port;
+        if (fpd_certs)
+            this.fpd_certs = fpd_certs;
+        if (default_hostnames)
+            this.default_hostnames = default_hostnames;
+        if (log_date !== undefined)
+            this.log_date = log_date;
+        if (remote)
+            this.remote = remote;
+        else if (funcs)
+            this.remote = new Remote({ funcs, print: this.print.errors });
+        if (stdio_subscribable !== undefined) {
+            check(remote || funcs);
+            this.stdio_subscribable = stdio_subscribable;
+        }
+    }
+    /** start http server and listen */
+    async start() {
+        if (sea)
+            this.last_modified_str = (await fstat(exe_nodejs))
+                .mtime.toUTCString();
+        // --- init koa app
+        let app = new Koa();
+        app.on('error', this.on_error.bind(this));
+        app.use(this.entry.bind(this));
+        app.use(KoaCompress({
+            br: {
+                chunkSize: 64 * 1024,
+                // https://nodejs.org/api/zlib.html#zlib_class_brotlioptions
+                params: {
+                    [zlib.constants.BROTLI_PARAM_MODE]: zlib.constants.BROTLI_MODE_TEXT,
+                    [zlib.constants.BROTLI_PARAM_QUALITY]: 3 // 默认为 11 (最大压缩)，会导致 news/get 生成的 14 mb 的 json 压缩时长高达 24s
+                },
+            },
+            threshold: 512
+        }));
+        app.use(KoaCors({
+            credentials: true,
+            origin: (ctx) => ctx.request.get('origin') || '*'
+        }));
+        await this.init_app(app);
+        app.use(this._router.bind(this));
+        this.app = app;
+        this.handler = this.app.callback();
+        this.http_server = http_create_server(this.handler);
+        const { http, http2 } = this;
+        if (http2) {
+            const { fpd_certs } = this;
+            let lazy_secure_ctxs = Object.fromEntries(await Promise.all(
+            // fpd_certs 文件夹下面的每个 .key 对应一个证书及域名
+            (await flist(fpd_certs, { print: false, filter: /\.key$/ }))
+                .map(async (fname) => {
+                let domain = fname.strip_end('.key');
+                const [key, cert] = await Promise.all([
+                    fname,
+                    `${domain}.crt`,
+                ].map(async (fname) => fread(`${fpd_certs}${fname}`, { print: false })));
+                if (domain.startsWith('star.'))
+                    domain = `*.${domain.strip_start('star.')}`;
+                return [domain, { key, cert }];
+            })));
+            const default_ctx = lazy_secure_ctxs[this.default_hostnames.find(hostname => hostname in lazy_secure_ctxs)];
+            check(default_ctx);
+            this.http2_server = http2_create_server({
+                SNICallback(servername, callback) {
+                    let lazy_ctx = lazy_secure_ctxs[servername] ||
+                        lazy_secure_ctxs[servername.replace(/^.*?\./, '*.')] ||
+                        lazy_secure_ctxs[`*.${servername}`] ||
+                        default_ctx;
+                    callback(null, lazy_ctx.ctx ??= createSecureContext(lazy_ctx));
+                },
+                allowHTTP1: true,
+            }, this.handler);
+        }
+        // websocket rpc
+        if (this.remote) {
+            const { WebSocketServer } = await import('ws');
+            this.websocket_server = new WebSocketServer({
+                noServer: true,
+                skipUTF8Validation: true,
+                perMessageDeflate: true,
+                allowSynchronousEvents: true,
+                maxPayload: 2 ** 30 // 1 GB
+            });
+            this.websocket_server.on('connection', (ws, request) => {
+                ws.addEventListener('message', ({ data }) => {
+                    this.remote.handle(new Uint8Array(data), ws);
+                });
+            });
+            const on_upgrade = this.on_upgrade.bind(this);
+            this.http_server.on('upgrade', on_upgrade);
+            this.http2_server?.on('upgrade', on_upgrade);
+            // 将输出到 stdout, stderr 的内容 copy 一份通过 websocket 发到 web shell
+            if (this.stdio_subscribable) {
+                this.remote.funcs = {
+                    ...this.remote.funcs,
+                    subscribe_stdio: ({ id }, websocket) => {
+                        const subscriber = async (chunk) => {
+                            // send 时有可能 websocket 连接断开，抛异常，为防止循环调用 (console.error -> stdio subscriber -> throw error -> console.error)
+                            // 这里只能忽略错误
+                            try {
+                                await this.remote.send({
+                                    id,
+                                    data: typeof chunk === 'string' ? encode(chunk) : chunk
+                                }, websocket);
+                            }
+                            catch { }
+                        };
+                        // 让后续可以通过 unsubscribe_stdio 取消订阅
+                        subscriber.id = id;
+                        const close = subscriber.close = () => {
+                            const length = this.stdio_subscribers.length;
+                            const stdio_subscribers_ = this.stdio_subscribers.filter(s => s !== subscriber);
+                            if (stdio_subscribers_.length !== length)
+                                this.stdio_subscribers = stdio_subscribers_;
+                        };
+                        this.stdio_subscribers.push(subscriber);
+                        websocket.addEventListener('close', close, { once: true });
+                    },
+                    /** 主动取消订阅，需要清理 stdio listener, websocket close lisener */
+                    unsubscribe_stdio: ({ data: [id] }, websocket) => {
+                        this.stdio_subscribers = this.stdio_subscribers.filter(s => {
+                            if (s.id === id) {
+                                websocket.removeEventListener('close', s.close);
+                                return false;
+                            }
+                            else
+                                return true;
+                        });
+                        return [];
+                    },
+                };
+                this.stdout_write = process.stdout.write.bind(process.stdout);
+                this.stderr_write = process.stderr.write.bind(process.stderr);
+                process.stdout.write = (...args) => {
+                    if (this.stdio_subscribers.length)
+                        (async () => {
+                            try {
+                                await Promise.all(this.stdio_subscribers.map(async (subscriber) => subscriber(args[0])));
+                            }
+                            catch {
+                                this.stdout_write('stdio_subscriber error\n');
+                            }
+                        })();
+                    return this.stdout_write(...args);
+                };
+                process.stderr.write = (...args) => {
+                    if (this.stdio_subscribers.length)
+                        (async () => {
+                            try {
+                                await Promise.all(this.stdio_subscribers.map(async (subscriber) => subscriber(args[0])));
+                            }
+                            catch {
+                                this.stderr_write('stderr_subscriber error\n');
+                            }
+                        })();
+                    return this.stderr_write(...args);
+                };
+            }
+        }
+        await this.init_server();
+        await Promise.all([
+            http && new Promise(resolve => {
+                this.http_server.listen(this.http_port, resolve);
+            }),
+            http2 && new Promise(resolve => {
+                this.http2_server.listen(this.http2_port, resolve);
+            }),
+        ]);
+        if (this.print.info)
+            console.log(t('{{name}} 启动成功，正在监听 {{ports}} 端口', {
+                name: this.name,
+                ports: [
+                    ...http ? [this.http_port] : [],
+                    ...http2 ? [this.http2_port] : []
+                ].join(', ')
+            }));
+    }
+    stop() {
+        this.http_server.close();
+        if (this.http2_server)
+            this.http2_server.close();
+    }
+    /** 可被子类重写定义错误处理逻辑 */
+    on_error(error, ctx) {
+        if (this.print.errors) {
+            const code = error?.code;
+            if (code === 'EPIPE' || code === 'ECONNRESET')
+                console.log(`${error.code}:`, ctx?.request?.url);
+            else {
+                console.error(error);
+                if (ctx)
+                    console.log('ctx:', ctx);
+            }
+        }
+    }
+    on_upgrade(request, socket, head) {
+        // url 只有路径部分
+        const { url, headers, headers: { host = '' }, } = request;
+        if (this.print.logs) {
+            let s = 
+            // 时间
+            `${this.log_date ? new Date().to_str() : new Date().to_time_str()}  ` +
+                // wss://
+                `ws${socket.encrypted ? 's' : ''}://`.yellow +
+                // host
+                host +
+                // path
+                url;
+            s = s.pad(url_width);
+            // ip
+            s += `  <-  ${request.socket.remoteAddress.strip_if_start('::ffff:')}`;
+            // ua
+            const ua = this.format_ua(headers);
+            if (ua)
+                s += `／${ua}`;
+            console.log(s);
+        }
+        switch (url) {
+            case '/':
+                this.websocket_server.handleUpgrade(request, socket, head, ws => {
+                    ws.binaryType = 'arraybuffer';
+                    this.websocket_server.emit('connection', ws, request);
+                });
+                return;
+            default:
+                if (this.print.logs)
+                    console.log(`未知路径的 upgrade 请求: ${url}`.red);
+                socket.destroy();
+        }
+    }
+    /** 可被子类重写添加额外的中间件，在 start 时被调用 */
+    async init_app(app) {
+    }
+    /** 可被子类重写，有了 http_server 和 http2_server 后在 listen 之前做一些自定义处理逻辑 */
+    async init_server() {
+    }
+    async entry(ctx, next) {
+        let { response } = ctx;
+        await this.parse(ctx);
+        // ------------ next
+        try {
+            await next();
+        }
+        catch (error) {
+            if (error.status !== 404)
+                console.error(error);
+            response.status = error.status || 500;
+            response.set('content-type', text_plain);
+            response.body = inspect(error, { colors: false });
+        }
+    }
+    /** 解析 req.body to request.body
+        处理 request.ip */
+    async parse(ctx) {
+        let { req, request } = ctx;
+        const buf = await stream_to_buffer(req);
+        if (buf.length)
+            req.body = buf;
+        // --- parse request.ip
+        request.ip = (request.headers['x-real-ip'] || request.ip).replace(/^::ffff:/, '');
+        // --- parse body
+        if (!req.body)
+            return;
+        request.body = ctx.is('application/json') || ctx.is('text/plain') ?
+            JSON.parse(req.body.toString())
+            :
+                req.body;
+    }
+    async _router(ctx, next) {
+        let { request } = ctx;
+        const _path = request._path = decodeURIComponent(request.path);
+        Object.defineProperty(request, 'path', {
+            value: _path,
+            configurable: true,
+            enumerable: true,
+            writable: true
+        });
+        // ------------ log
+        if (this.print.logs)
+            this.logger(ctx);
+        // ------------ repl_router hook
+        if (await globalThis.repl_router?.(ctx))
+            return;
+        if (await this.router(ctx))
+            return;
+        await next?.();
+    }
+    /** 被子类重写以自定义处理逻辑 */
+    async router(ctx) {
+        return false;
+    }
+    /** 重定向 ctx 到 url (可以是完整 url 也可以是路径)，设置 status code 为 code
+        - code: 301 (永久重定向) | 302 (临时重定向) | 307 (非 GET 请求保持原有方法和 body 的临时重定向) */
+    redirect(ctx, url, code) {
+        const { request: { _path } } = ctx;
+        let { response } = ctx;
+        response.redirect(url);
+        response.status = code;
+        if (this.print.logs)
+            console.log(`${code} 重定向  ${_path} -> ${url}`.yellow);
+        return true;
+    }
+    logger(ctx) {
+        const { request } = ctx;
+        const { query: queries, body, path, _path, protocol, host, req: { httpVersion: http_version }, ip, headers, } = request;
+        let { method } = request;
+        if (Server.logger_ignore_fexts.has(path.fext))
+            return;
+        // 时间
+        let s = `${this.log_date ? new Date().to_str() : new Date().to_time_str()}  `;
+        // method
+        method = method.toLowerCase();
+        if (method !== 'get')
+            s += `${method.yellow} `;
+        // http, https, http2, websocket
+        s += colored(`${protocol}://`, 'magenta', http_version === '2.0');
+        // host
+        s += host;
+        // path
+        s += path.toLowerCase() !== _path.toLowerCase()
+            ? _path === '/'
+                ? '/'.blue
+                : `${_path} -> ${path}`
+            : path.includes('.')
+                ? path
+                : path.yellow;
+        // range
+        const range = headers.range;
+        if (headers.range) {
+            let [, start, end] = /(\d*)-(\d*)/.exec(range) || [];
+            if (start)
+                start = Number(start).to_fsize_str();
+            if (end)
+                end = Number(end).to_fsize_str();
+            s += ` (${start} - ${end || ''})`.limit(18);
+        }
+        s += ' ';
+        // queries
+        if (Object.keys(queries).length) {
+            s += inspect(queries, { compact: true })
+                .replace('[Object: null prototype] ', '')
+                .strip_if_end('\n');
+            s += ' ';
+        }
+        s = s.pad(url_width);
+        // ip
+        s += `  <-  ${ip.strip_if_start('::ffff:')}`;
+        // ua
+        const ua = this.process_ua(ctx);
+        if (ua)
+            s += `／${ua}`;
+        // body
+        if (body)
+            s += '\n' + inspect(body);
+        // 打印日志
+        console.log(s);
+    }
+    process_ua(ctx) {
+        const { headers, headers: { 'user-agent': ua_str } } = ctx.request;
+        if (!ua_str)
+            return '';
+        ctx.response.set('accept-ch', 'Sec-CH-UA, Sec-CH-UA-Mobile, Sec-CH-UA-Model, Sec-CH-UA-Platform, Sec-CH-UA-Platform-Version, RTT, Device-Memory');
+        return this.format_ua(headers);
+    }
+    format_ua(headers) {
+        const { rtt, 'device-memory': memory } = headers;
+        const { device, os, browser } = UAParser(headers).withClientHints();
+        const vendor = device.vendor?.toLowerCase();
+        const model = device.model?.toLowerCase();
+        const osname = os.name?.toLowerCase();
+        const browser_name = browser.name?.toLowerCase();
+        let s = '';
+        if (vendor && vendor !== 'apple')
+            s += vendor;
+        if (model && model !== 'k' && model !== 'macintosh') {
+            if (s)
+                s += ' ';
+            s += model.replace('22127rk46c', 'redmi k60 pro');
+        }
+        if (osname) {
+            if (s)
+                s += '／';
+            s += osname;
+            if (os.version)
+                s += ` ${os.version.split('.')[0].toLowerCase()}`;
+        }
+        if (browser_name) {
+            if (s)
+                s += '／';
+            s += browser_name.replace('mobile chrome', 'chrome');
+            if (browser.version) {
+                const [major, minor] = browser.version.toLowerCase().split('.');
+                s += ` ${major}`;
+                if (minor && minor !== '0')
+                    s += `.${minor}`;
+            }
+        }
+        if (memory) {
+            s += `／${memory}g`;
+            if (rtt && rtt !== '0')
+                s += ` ${rtt}ms`;
+        }
+        return s;
+    }
+    /** 转发请求到其他 http 服务，实现网关的功能
+        - ctx
+        - path_url: 只含 host, path, 不含 queries 的 url, 如 http://localhost:8080/api/get-user
+            实际请求时会自动带上 ctx 中的 queries
+        - options?: ServerRequestOptions
+            - headers?: 修改 (添加、覆盖、null 值时删除) 请求的 http headers, Record<string, string | null>
+            - queries?: 修改 (添加、覆盖、null 值时删除) 请求的 http queries, Record<string, string | null>
+            - redirect?: `manual` 重定向处理策略，默认按原样返回给客户端
+            - timeout?: `1000 * 5` 请求超时时间，可以传入 0 禁用超时
+            - throw_error?: `false` 在遇到 request 请求错误时直接 throw 出来，而不是自动设置到 response */
+    async request(ctx, path_url, { headers: headers_, redirect = 'manual', queries, timeout, throw_error, proxy } = {}) {
+        const { request: { method, headers, query: _queries, body, ip } } = ctx;
+        let { response } = ctx;
+        const x_forwarded_for = headers['x-forwarded-for'] ? `${headers['x-forwarded-for']}, ${ip}` : ip;
+        try {
+            const response_ = await _request(path_url, {
+                method: method,
+                queries: queries
+                    ? filter_values({ ..._queries, ...queries })
+                    : _queries,
+                body,
+                headers: (headers_
+                    ? filter_values({
+                        ...headers,
+                        'x-forwarded-for': x_forwarded_for,
+                        ...headers_
+                    })
+                    : { ...headers, 'x-forwarded-for': x_forwarded_for }),
+                raw: true,
+                redirect,
+                timeout,
+                proxy
+            });
+            response.status = response_.status;
+            response.set(Server.filter_response_headers(response_.headers));
+            if (response_.body)
+                // 如果设置了 response.status 为 304 等状态码，koa/application.js#respond() 方法中会执行
+                // ctx.body = null
+                // response.res.end()
+                // 而 res.end() 会触发 res 流的 finish, 然后由于之前 response.body = response_.body 这条语句
+                // 关联了 response_.body 到 res 的 finish 事件，(koa/response.js#set body() 中 onFinish(res, destroy.bind(null, response_.body))
+                // 会让 response_.body 这个 UndiciBodyReadable 被提前 finish，而此时
+                // 流还没 emit end, 会触发错误 RequestAbortedError [AbortError]: Request aborted
+                if (Server.empty_body_statuses.has(response_.status) || Server.empty_body_methods.has(method))
+                    consume_stream(response_.body, true);
+                else
+                    response.body = response_.body;
+        }
+        catch (error) {
+            if (throw_error)
+                throw error;
+            if (error.response?.status !== 404 && this.print.errors)
+                console.log(error);
+            if (error.response) {
+                const { status, headers, body } = error.response;
+                if (this.print.errors)
+                    if (status === 404)
+                        console.log(method, '404:', path_url);
+                    else
+                        console.log(error);
+                response.status = status;
+                response.set(Server.filter_response_headers(headers));
+                response.body = body;
+            }
+            else {
+                if (this.print.errors)
+                    console.log(error);
+                response.status = 500;
+                response.body = inspect(error, { colors: false });
+            }
+        }
+        return true;
+    }
+    static filter_response_headers(headers) {
+        return filter_keys(headers, key => !key.startsWith(':') && !this.drop_response_headers.has(key));
+    }
+    /** 提供静态文件
+        @example
+        const prefix_docs = '/zh/'
+        if (path.startsWith(prefix_docs)) {
+            await this.try_send(
+                ctx,
+                (path.endsWith('/') ? `${path}index.html` : path).strip_start(prefix_docs),
+                { fpd_root: `T:/t/docs${prefix_docs}` },
+            )
+            return
+        } */
+    async try_send(ctx, fp, { fpd_root, assets_root, sea: _sea = sea, log_404 = true, } = {}) {
+        const { request: { _path, path, method }, response, } = ctx;
+        if (response.body !== undefined || response.status !== 404)
+            return true;
+        if (method !== 'HEAD' && method !== 'GET')
+            return false;
+        try {
+            await this.fsend(ctx, fp, { fpd_root, assets_root, sea: _sea });
+            return true;
+        }
+        catch (error) {
+            if (error.status !== 404)
+                throw error;
+            if (log_404 && this.print.logs) {
+                let s = `${' '.repeat(11)}    ${method.toLowerCase()} 404: ${path}`;
+                if (_path !== path)
+                    s += ` ${_path.bracket()}`;
+                console.log(s.red);
+            }
+            return false;
+        }
+    }
+    /** 将 body 设置为 fp 所指文件的 ReadStream
+        检查 fp 是否合法，设置对应的 content-type，支持缓存，支持分块下载
+        - ctx: Koa.Context
+        - fp: 文件路径，有 fpd_root 时为相对路径或以 fpd_root 开头的绝对路径，无 fpd_root 时必须是绝对路径
+        - options?:
+            - fpd_root?: 只能访问 fpd_root 下面的文件
+            - absolute?: `false` 使用绝对路径指定发送的文件
+            - download?: `undefined` 在 response.headers 中加上 content-disposition: attachment 指示浏览器下载文件
+            - assets_root?: 替换模板 xxx.template.html 中 {root} 占位符 */
+    async fsend(ctx, fp, { fpd_root, absolute, download, assets_root, sea: _sea = sea } = {}) {
+        check(absolute || _sea || fpd_root?.isdir, t('fsend 必须传 absolute 选项, sea 选项, 或 fpd_root 文件夹'));
+        const { request, request: { method } } = ctx;
+        let { response } = ctx;
+        if (!absolute && !_sea) {
+            fp = fp.strip_if_start(fpd_root).strip_if_start('/');
+            try {
+                fp = resolve_safely(fpd_root, fp).fp;
+            }
+            catch (error) {
+                error.message += `, fp: ${fp}`;
+                throw error;
+            }
+        }
+        // stats, asset
+        let stats;
+        let asset; // koa 不能理解 Uint8Array 作为 response.body, 只能用 Buffer
+        try {
+            if (_sea)
+                asset = Buffer.from(node_sea.getRawAsset(fp));
+            else
+                stats = await fstat(fp);
+        }
+        catch (error) {
+            if (_sea || ['ENOENT', 'ENAMETOOLONG', 'ENOTDIR'].includes(error.code)) {
+                error.status = 404;
+                throw error;
+            }
+            error.status = 500;
+            error.message = `fs.stat 出错: ${error.message}`;
+            throw error;
+        }
+        const size = _sea ? asset.length : Number(stats.size);
+        // 上面的 fstat 异步操作之后有可能 socket 已经关闭，那么这里什么都不做，直接结束吧
+        // 如果不这么做，后续 createReadStream 打开的流会赋给 response.body，但是 response.res 不再触发 finish, close 事件，
+        // 打开的流永远不会关闭，最终导致资源泄露，文件句柄一直打开
+        if (!response.socket) {
+            response.res.end();
+            return fp;
+        }
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Accept-Ranges
+        // advertise server support of partial requests
+        response.set('accept-ranges', 'bytes');
+        // https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control#up-to-date_contents_always
+        if (!response.get('cache-control'))
+            response.set('cache-control', 'no-cache');
+        const last_modified_str = _sea
+            ? this.last_modified_str
+            : stats.mtime.toUTCString();
+        if (!response.get('last-modified'))
+            response.set('last-modified', last_modified_str);
+        if (download)
+            response.set('content-disposition', `attachment; filename="${encodeURIComponent(fp.fname)}"`);
+        if (!response.get('content-type'))
+            this.set_content_type(response, fp.fext);
+        const modified_since_str = request.get('if-modified-since');
+        if ((method === 'GET' || method === 'HEAD') && modified_since_str === last_modified_str) {
+            response.status = 304;
+            // 以上会自动设置 response.body = null
+            return fp;
+        }
+        if (assets_root) {
+            check(fp.endsWith('.html'), '传入 assets_root 参数时 fp 应该为 .html 文件');
+            response.body = (_sea
+                ? asset.toString()
+                : (await fread(fp, { print: false }))).replaceAll('{root}', assets_root);
+            return fp;
+        }
+        const range_header = request.headers.range;
+        if (range_header)
+            try {
+                const range_value = /=(.*)$/.exec(range_header)[1];
+                const range = /^[\w]*?(\d*)-(\d*)$/.exec(range_value);
+                let start = range[1] ? Number(range[1]) : undefined;
+                let end = range[2] ? Number(range[2]) : size - 1;
+                if (start === undefined) {
+                    start = size - end;
+                    end = size - 1;
+                }
+                const chunksize = (end - start + 1);
+                response.status = 206;
+                response.set('content-length', String(chunksize));
+                response.set('content-range', `bytes ${start}-${end}/${size}`);
+                response.body = _sea
+                    ? asset.subarray(start, end)
+                    : fs.createReadStream(fp, { start, end });
+            }
+            catch {
+                response.status = 416;
+                response.set('content-length', String(size));
+                response.set('content-range', `bytes */${size}`);
+                response.body = fs.createReadStream(fp);
+            }
+        else {
+            response.set('content-length', String(size));
+            response.body = _sea ? asset : fs.createReadStream(fp);
+        }
+        return fp;
+    }
+    set_content_type(response, fext) {
+        response.set('content-type', (Server.js_exts.has(fext)
+            ? 'text/javascript; chatset=utf-8'
+            : get_content_type(`file.${fext}`) || 'application/octet-stream'));
+    }
+    /** - range: 取值为逗号分割的多个可用端口或端口区间 (不能含有空格，包含区间右值)，比如：`8321,8322,8300-8310,11000-11999
+        - reverse?: `false` 在 range 内从后往前尝试 */
+    static async get_available_port(range, reverse = false) {
+        for (const port of range_to_numbers(range, reverse)) {
+            let server = http_create_server();
+            try {
+                await new Promise((resolve, reject) => {
+                    server.once('error', reject);
+                    server.listen(port, resolve);
+                });
+                return port;
+            }
+            catch (error) {
+                if (error.code === 'EADDRINUSE')
+                    console.log(`端口 ${port} 监听失败：${error.message}`);
+                else
+                    throw error;
+            }
+            finally {
+                // 旧的 nodejs 没这个函数
+                server.closeAllConnections?.();
+                server.close();
+            }
+        }
+        throw new Error(`端口范围 {${range}} 内没有可用的端口`);
+    }
+}
+export const text_plain = 'text/plain; charset=utf-8';
+//# sourceMappingURL=server.js.map

@@ -1,0 +1,1 @@
+{"version":3,"file":"scrollbar.js","sourceRoot":"","sources":["../../src/types/scrollbar.ts"],"names":[],"mappings":"","sourcesContent":["import { Types } from '@antv/g2';\n\nexport type Scrollbar = Types.ScrollbarOption;\n"]}

@@ -1,0 +1,1 @@
+{"version":3,"file":"eslint.config.js","sourceRoot":"","sources":["eslint.config.ts"],"names":[],"mappings":"AAAA,OAAO,EAAE,YAAY,EAAE,MAAM,iBAAiB,CAAA;AAE9C,iDAAiD;AACjD,eAAe,CAAC,YAAY,CAAC,CAAA","sourcesContent":["import { xlint_config } from 'xshell/xlint.js'\n\n// eslint-disable-next-line no-restricted-exports\nexport default [xlint_config]\n"]}

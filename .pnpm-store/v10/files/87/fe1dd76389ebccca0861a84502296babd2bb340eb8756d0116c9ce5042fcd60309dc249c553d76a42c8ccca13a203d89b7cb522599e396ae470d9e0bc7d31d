@@ -1,0 +1,247 @@
+/** 在浏览器端修改 prototype，需要更加小心 */
+declare global {
+    interface String {
+        readonly width: number;
+        /** 截取字符串不超过 width 显示宽度的部分，并保留颜色
+            找到并记录能容纳 字符串 + … 的最后一个字符的位置 i_fitted
+                若完整的字符串长度超过 width，返回 slice(0, i_fitted + 1) + …
+                否则                          返回 this
+         */
+        truncate(this: string, width: number): string;
+        /** pad string to `<width>`
+            - character?: `' '`
+            - position?: `'right'` */
+        pad(this: string, width: number, { character, position }?: {
+            character?: string;
+            position?: 'left' | 'right';
+        }): string;
+        limit(this: string, width: number, { character, position }?: {
+            character?: string;
+            position?: 'left' | 'right';
+        }): string;
+        to_regexp(this: string, preservations?: string, flags?: string): RegExp;
+        /** 字符串模式替换
+            - pattern: 匹配部分的格式
+            - pattern_: 替换后的格式
+            - preservations?: `''` 保留的正则表达式字符
+            - flags?: `''` 正则匹配选项
+            - transformer?: `(name, matched) => matched || ''` placeholder transformer
+            - pattern_placeholder?: `/\{.*?\}/g`
+            
+            ```ts
+            'g:/acgn/海贼王/[Skytree][海贼王][One_Piece][893][GB_BIG5_JP][X264_AAC][1080P][CRRIP][天空树双语字幕组].mkv'.refmt(
+                '{dirp}/[Skytree][海贼王][{ en_name: \\w+ }][{ episode: \\d+ }][GB_BIG5_JP][{encoding}_AAC][1080P][CRRIP][天空树双语字幕组].{format}',
+                'g:/acgn/海贼王/{episode} {encoding}.{format}',
+                '\\+',
+                'i',
+                (name, value) => name === 'episode'  ?  String(+value + 1)  :  value.toLowerCase()
+            )
+            ```
+         */
+        refmt(this: string, pattern: string, pattern_: string, preservations?: string, flags?: string, transformer?: (name: string, value: string, placeholders: {
+            [name: string]: string;
+        }) => string, pattern_placeholder?: RegExp): string;
+        /** 字符串模式搜索
+            ```ts
+            'git+https://github.com/tamino-martinius/node-ts-dedent-123.git'.find(
+                '^{protocol:[\\w+]+}://{hostname:[\\w\\.]+}/{username}/{project}-{index:\\d+}.{suffix}', '^', 'i'
+            )
+            {
+                protocol: 'git+https',
+                hostname: 'github.com',
+                ...
+            }
+            ```
+            
+            为空时返回 { }
+            
+            - preservations?: `''` 保留的正则表达式字符
+            - flags?: `''` 正则匹配选项
+            - pattern_placeholder?: `/\{.*?\}/g` */
+        find(this: string, pattern: string, preservations?: string, flags?: string, pattern_placeholder?: RegExp): Record<string, string>;
+        /** 查找子串或字符出现的次数 */
+        count(this: string, search: string): number;
+        /** - type?: `'single'` 引号类型 */
+        quote(this: string, type?: keyof typeof quotes | 'psh'): string;
+        /** - shape?: `'parenthesis'` */
+        bracket(this: string, shape?: keyof typeof brackets): string;
+        surround(this: string, left: string, right?: string): string;
+        surround_tag(this: string, tag_name: string): string;
+        to_lf(this: string): string;
+        /** 'xxx'.replace(/pattern/g, '')
+            如果 pattern 是 string 则在创建 RegExp 时自动加上 flags (默认 'g'), 否则忽略 flags */
+        rm(this: string, pattern: string | RegExp, flags?: string): string;
+        /** 将 string 划分为行，并去掉最后一个 \n 之后的 '' */
+        split_lines(this: string): string[];
+        split_indent(this: string): {
+            indent: number;
+            text: string;
+        };
+        /** 将 string 根据首个找到的 splitter 拆分 string 为两个部分
+            - spitter: 不会包含在结果中
+            - options?:
+                - last?: `false` 为 true 时从后往前找 splitter
+                - optional?: `false`
+                    - false: 必须包含 splitter，否则抛出错误
+                    - true: 允许不存在 splitter, 返回的数组为 [this] */
+        split2(this: string, splitter: string, options?: {
+            last?: boolean;
+            optional?: boolean;
+        }): [string, string?];
+        space(this: string): string;
+        /** 返回去掉 prefix 开头的字符串
+            - validate?: `false` 传 true 时确保字符串以 prefix 开头（失败时抛出错误） */
+        strip_start(this: string, prefix: string, validate?: boolean): string;
+        /** 返回去掉 prefix 开头的字符串，如果没有以 prefix 开头则返回原字符串 */
+        strip_if_start(this: string, prefix: string): string;
+        /** 返回去掉 suffix 结尾的字符串
+            - validate?: `false` 传 true 时确保字符串以 suffix 结尾（失败时抛出错误） */
+        strip_end(this: string, suffix: string, validate?: boolean): string;
+        /** 返回去掉 suffix 结尾的字符串，如果没有以 suffix 结尾则返回原字符串 */
+        strip_if_end(this: string, suffix: string): string;
+        /** 确保字符串以 prefix 开头，否则在头部追加 prefix */
+        ensure_start(this: string, prefix: string): string;
+        /** 确保字符串以 suffix (默认 '\n') 结尾，否则在尾部追加 suffix */
+        ensure_end(this: string, suffix?: string): string;
+        /** 从 search 字符串出现的位置开始截取到最后
+            - options?:
+                - include?: `false` 传 true 时包括 search 部分
+                - last?: `false` true 时从最后一次出现的地方开始截取，否则默认从第一次出现的地方开始截取
+                - optional?: `false` 传 true 时允许不存在 search，此时返回完整的 this */
+        slice_from(this: string, search: string, options?: SliceOptions): string;
+        /** 从 search 字符串出现的位置开始截断，去掉尾部
+            - options?:
+                - include?: `false` 传 true 时包括 search 部分
+                - last?: `false` 传 true 时截取到最后一次出现的地方，否则默认截取到第一次出现的地方
+                - optional?: `false` 传 true 时允许不存在 search，此时返回完整的 this */
+        slice_to(this: string, search: string, options?: SliceOptions): string;
+        /** 等价于 .endsWith('/') */
+        isdir: boolean;
+        /** 转换为以 `/` 分割的路径，可能以 / 结尾 */
+        fp: string;
+        /** 转换为以 `/` 分割的文件夹路径，一定以 / 结尾 */
+        fpd: string;
+        /** 父文件夹路径，一定以 `/` 结尾，或为空
+            特殊情况:
+            - '/'.fdir === ''
+            - 'D:/'.fdir === '' */
+        fdir: string;
+        /** 文件或文件夹名, 保留结尾的 /
+            常规情况:
+            - D:/0/aaa.txt -> aaa.txt
+            - D:/aaa/ -> aaa/
+            特殊情况:
+            - '/'.fname === '/'
+            - 'D:/'.fname === 'D:/' */
+        fname: string;
+        /** 文件后缀名，不带点，如: txt, zip，没有后缀时返回空字符串
+            特殊情况: .aaa 的 fext 为 '' */
+        fext: string;
+    }
+    interface Date {
+        /** - ms?: `false` 显示到 ms */
+        to_str(this: Date, ms?: boolean): string;
+        /** 格式化为 2024.01.01 这样的日期 */
+        to_date_str(this: Date): string;
+        /** 格式化为 早上 09:00:00 这样的十二小时制可读友好的时间
+            - ms?: `false` 显示到 ms */
+        to_time_str(this: Date, ms?: boolean): string;
+        /** 格式化为 17.00.00 这样的时间 */
+        to_dot_time_str(this: Date, ms?: boolean): string;
+        /** 格式化为 2024.01.01 17.00.00 这样的时间 */
+        to_dot_str(this: Date, ms?: boolean): string;
+        /** 格式化为 17:00:00 这样的时间 */
+        to_formal_time_str(this: Date, ms?: boolean): string;
+        /** 格式化为 2024.01.01 17:00:00 这样的时间 */
+        to_formal_str(this: Date, ms?: boolean): string;
+    }
+    interface Number {
+        /** 12.4 kb (1 kb = 1024 b) */
+        to_fsize_str(this: number): string;
+        to_bin_str(this: number): string;
+        /** 转换为 0x???? 这样的十六进制形式
+            - length?: 位数自动对齐到 4 的倍数 */
+        to_hex_str(this: number, length?: number): string;
+        to_oct_str(this: number): string;
+    }
+    interface Array<T> {
+        /** 等价于 .at(-1) */
+        last: T;
+        indent(this: string[], width?: number, c?: string): string[];
+        /** 对数组中所有元素求和 (+), 返回结果，可传入 mapper 计算出某个值，用作求和 */
+        sum<TReturn = T>(this: T[], mapper?: keyof T | Mapper<T>): TReturn;
+        /** 查找数组中最大的元素，可传入 mapper 计算出某个值，用作大小比较 */
+        max(this: T[], mapper?: keyof T | Mapper<T>): T;
+        /** 查找数组中最小的元素，可传入 mapper 计算出某个值，用作大小比较 */
+        min(this: T[], mapper?: keyof T | Mapper<T>): T;
+        /** 去除重复元素（可按 mapper 选择或计算某个值来去重），重复值保留最后出现的那个
+            - mapper?: 可以是 key (string, number, symbol) 或 (obj: any) => any */
+        unique(this: T[], mapper?: keyof T | Mapper<T>): T[];
+        /**
+            - trim_line?: `true`
+            - rm_empty_lines?: `true`
+            - rm_last_empty_lines?: `false`
+        */
+        trim_lines(this: string[], { trim_line, rm_empty_lines, rm_last_empty_lines }?: {
+            trim_line?: boolean;
+            rm_empty_lines?: boolean;
+            rm_last_empty_lines?: boolean;
+        }): string[];
+        /** - append?: `true` 是否在 join 之后增加 \n */
+        join_lines(append?: boolean): string;
+    }
+    interface BigInt {
+        /** 12.4 kb (1 kb = 1024 b) */
+        to_fsize_str(this: bigint): string;
+        toJSON(this: bigint): string;
+    }
+    interface Error {
+        toJSON(this: Error): string;
+    }
+    interface Set<T> {
+        map<TResult>(mapper: (value: T, index: number) => TResult): TResult[];
+    }
+    interface Uint8Array<TArrayBuffer extends ArrayBufferLike> {
+        dataview: DataView<TArrayBuffer>;
+    }
+}
+interface SliceOptions {
+    include?: boolean;
+    last?: boolean;
+    optional?: boolean;
+}
+export declare const emoji_regex: RegExp;
+export declare const noop: () => void;
+export declare const ident: <T>(x: T) => T;
+export declare const build_mapper: <TObj, TKey extends keyof TObj>(key: TKey) => (obj: TObj) => TObj[TKey];
+export type Mapper<TObj = any, TKey extends keyof TObj = keyof TObj> = (obj: TObj) => TObj[TKey];
+/** value 不为 null 或 undefined */
+export declare const not_empty: (value: any) => boolean;
+export declare const empty: (value: any) => boolean;
+export declare const is_key_type: IsKeyType;
+type IsKeyType = (key: any) => key is string | number | symbol;
+export declare function to_method_property_descriptors(methods: {
+    [name: string]: Function;
+}): PropertyDescriptorMap;
+export declare function to_getter_property_descriptors(getters: {
+    [name: string]: Function;
+}): PropertyDescriptorMap;
+export declare const cjk = "([\u2E80-\u9FFF\uF900-\uFAFF])";
+export declare const quotes: {
+    single: string;
+    double: string;
+    backtick: string;
+};
+export declare const brackets: {
+    readonly round: readonly ["(", ")"];
+    readonly square: readonly ["[", "]"];
+    readonly curly: readonly ["{", "}"];
+    readonly pointy: readonly ["<", ">"];
+    readonly corner: readonly ["「", "」"];
+    readonly fat: readonly ["【", "】"];
+    readonly tortoise_shell: readonly ["〔", "〕"];
+};
+export declare function to_json(obj: any, replacer?: any): string;
+export declare function is_codepoint_fullwidth(codepoint: number): boolean;
+export declare function byte_size(bytes: number | bigint): string;
+export {};

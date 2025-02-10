@@ -1,0 +1,34 @@
+# (node:23592) UnsupportedWarning: Status message is not supported by HTTP/2 (RFC7540 8.1.2.4)
+#     at statusMessageWarn (node:internal/http2/compat:118:13)
+#     at Http2ServerResponse.get statusMessage [as statusMessage] (node:internal/http2/compat:649:5)
+#     at Object.get message [as message] (d:\0\node_modules\koa\lib\response.js:102:21)
+#     at d:\0\node_modules\only\index.js:6:20
+#     at Array.reduce (<anonymous>)
+#     at module.exports (d:\0\node_modules\only\index.js:5:15)
+#     at Object.toJSON (d:\0\node_modules\koa\lib\response.js:560:12)
+#     at Object.toJSON (d:\0\node_modules\koa\lib\context.js:51:31)
+#     at Object.inspect (d:\0\node_modules\koa\lib\context.js:33:17)
+#     at formatValue (node:internal/util/inspect:761:19)
+#
+# 复现方法
+#     ctx.throw 后触发 app.on('error', (error, ctx) => ...)
+#     打印了 ctx, inspect ctx 时出现错误
+#
+# 解决方法
+#     D:/0/node_modules/koa/lib/response.js#toJSON
+#         注释掉 message
+# 或者 console.log(ctx) 改为 console.log(ctx.reqeust)
+
+diff --git a/lib/response.js b/lib/response.js
+index 54f9d49f788b3640527cf44dd431c0bc930afb2f..8c935617304de5d9e0fced0565b7140593b5e4fb 100644
+--- a/lib/response.js
++++ b/lib/response.js
+@@ -561,7 +561,7 @@ module.exports = {
+   toJSON() {
+     return only(this, [
+       'status',
+-      'message',
++      // 'message',
+       'header'
+     ]);
+   },

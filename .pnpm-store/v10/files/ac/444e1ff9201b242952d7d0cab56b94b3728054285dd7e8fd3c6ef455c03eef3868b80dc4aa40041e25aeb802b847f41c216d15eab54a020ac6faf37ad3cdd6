@@ -1,0 +1,1 @@
+{"version":3,"file":"register.js","sourceRoot":"","sources":["../../src/tick-method/register.ts"],"names":[],"mappings":";;;AAIA,IAAM,WAAW,GAAc,EAAE,CAAC;AAElC;;;;GAIG;AACH,SAAgB,aAAa,CAAC,GAAW;IACvC,OAAO,WAAW,CAAC,GAAG,CAAC,CAAC;AAC1B,CAAC;AAFD,sCAEC;AAED;;;;GAIG;AACH,SAAgB,kBAAkB,CAAC,GAAW,EAAE,MAAkB;IAChE,WAAW,CAAC,GAAG,CAAC,GAAG,MAAM,CAAC;AAC5B,CAAC;AAFD,gDAEC"}

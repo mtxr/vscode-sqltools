@@ -1,0 +1,64 @@
+import { type i18n as I18Next } from 'i18next';
+import type { Trans } from 'react-i18next';
+import { type _Dict, type Item } from './dict.ts';
+export type Language = 'zh' | 'en' | 'ja' | 'ko';
+export declare const LANGUAGES: readonly ["zh", "en", "ja", "ko"];
+declare global {
+    interface Window {
+        language: Language;
+    }
+}
+/**
+    提供翻译文本功能，自动解析当前语言
+    @see https://github.com/ShenHongFei/xshell/tree/master/i18n
+*/
+export declare class I18N {
+    static LANGUAGE_REGEXP: RegExp;
+    /** (ISO 639-1 标准语言代码) 可能取 zh, en, ja, ko */
+    language: Language;
+    /** hostname shortcuts */
+    hosts: Hosts;
+    /** url prefix shortcuts */
+    roots: Roots;
+    /** 标记静态文本，以便扫描词条，并在运行时根据当前语言获取翻译 */
+    t: (text: string, options?: {
+        language?: Language;
+        context?: string;
+        count?: number;
+        [key: string]: any;
+    }) => string;
+    /** render: 翻译配置字段 */
+    r: (field: Item | undefined | null, language?: Language) => string;
+    i18next: I18Next;
+    /** react-i18next <Trans/> 组件 */
+    Trans: typeof Trans;
+    /** ```ts
+        import dict from './dict.json'  // { "添加": { "en": "Add", "ja": "追加", "ko": "추가" } }
+        
+        const i18n = new I18N(dict, 'zh')  // 创建实例，传入词典 dict 并指定语言（NodeJS 环境），
+        const i18n = new I18N(dict)        // 创建实例，传入词典 dict 并自动判断当前语言（浏览器环境），
+        const i18n = new I18N({ })         // 创建实例，传入空词典
+        ```
+        @see https://github.com/ShenHongFei/xshell/tree/master/i18n
+    */
+    constructor(_dict: _Dict, language?: Language);
+    /** 加载词典文件 (需要将这两行单独放一个文件里，以保证在 import 其他文件之前执行)
+        
+        @example
+        import dict from './dict.json'  // { "添加": { "en": "Add", "ja": "追加", "ko": "추가" } }
+        i18n.init(dict)
+    */
+    init(dict: _Dict): void;
+    toJSON(): {
+        language: Language;
+    };
+}
+export interface Hosts {
+}
+export interface Roots {
+}
+export type { _Dict, Item };
+export interface I18NBasic {
+    intl: boolean;
+    language: Language;
+}

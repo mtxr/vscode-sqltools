@@ -1,0 +1,1 @@
+{"version":3,"file":"index.js","sourceRoot":"","sources":["../../../../src/plots/scatter/interactions/index.ts"],"names":[],"mappings":"AAAA,OAAO,iCAAiC,CAAC","sourcesContent":["import '../../../interactions/drag-move';\n"]}

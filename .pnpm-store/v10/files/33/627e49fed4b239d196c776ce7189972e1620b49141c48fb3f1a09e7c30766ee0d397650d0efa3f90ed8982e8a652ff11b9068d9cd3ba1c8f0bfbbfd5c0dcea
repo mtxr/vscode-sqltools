@@ -1,0 +1,38 @@
+{
+  "name": "@sqltools/log",
+  "version": "1.0.3",
+  "description": "Logging utility for VSCode SQLTools and Drivers",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist/**/*"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/log"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/issues"
+  },
+  "author": "Matheus Teixeira <me@mteixeira.dev>",
+  "license": "MIT",
+  "scripts": {
+    "prebuild": "rimraf -rf dist *.tgz",
+    "build": "tsc -p tsconfig.json",
+    "prepack": "yarn run build",
+    "prepare": "yarn run build",
+    "release": "npm pack && npm publish *.tgz --tag latest --access public",
+    "beta": "npm pack && npm publish *.tgz --tag beta --access public"
+  },
+  "dependencies": {
+    "pino": "^6.5.0",
+    "pino-pretty": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/pino": "^6.3.0",
+    "@types/vscode": "^1.47.0",
+    "rimraf": "^3.0.0",
+    "typescript": "^3.7.3"
+  }
+}

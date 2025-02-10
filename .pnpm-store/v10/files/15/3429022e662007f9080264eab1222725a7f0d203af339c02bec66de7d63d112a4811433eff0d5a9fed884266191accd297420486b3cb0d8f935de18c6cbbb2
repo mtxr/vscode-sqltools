@@ -1,0 +1,50 @@
+{
+  "name": "koa-compress",
+  "description": "Compress middleware for koa",
+  "version": "5.1.1",
+  "author": {
+    "name": "Jonathan Ong",
+    "email": "me@jongleberry.com",
+    "url": "http://jongleberry.com",
+    "twitter": "https://twitter.com/jongleberry"
+  },
+  "contributors": [
+    {
+      "name": "Imed Jaberi",
+      "email": "imed-jaberi@outlook.com",
+      "url": "https://www.3imed-jaberi.com/"
+    }
+  ],
+  "license": "MIT",
+  "repository": "koajs/compress",
+  "dependencies": {
+    "bytes": "^3.1.2",
+    "compressible": "^2.0.18",
+    "http-errors": "^1.8.1",
+    "koa-is-json": "^1.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "eslint-config-standard": "^16.0.3",
+    "eslint-plugin-import": "^2.26.0",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^5.2.0",
+    "eslint-plugin-standard": "^5.0.0",
+    "jest": "^27.5.1",
+    "koa": "^2.13.4",
+    "supertest": "^6.2.4"
+  },
+  "scripts": {
+    "eslint": "eslint --ignore-path .gitignore .",
+    "test": "jest"
+  },
+  "files": [
+    "lib",
+    "LICENSE",
+    "HISTORY.md"
+  ],
+  "main": "lib",
+  "engines": {
+    "node": ">= 12"
+  }
+}

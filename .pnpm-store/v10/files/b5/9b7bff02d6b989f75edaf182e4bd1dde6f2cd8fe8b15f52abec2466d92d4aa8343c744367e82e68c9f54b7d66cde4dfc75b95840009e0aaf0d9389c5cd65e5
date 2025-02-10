@@ -1,0 +1,60 @@
+export declare const theme_dark: {
+    name: string;
+    settings: ({
+        settings: {
+            foreground: string;
+            background: string;
+            fontStyle?: undefined;
+        };
+        scope?: undefined;
+        name?: undefined;
+    } | {
+        scope: string[];
+        settings: {
+            foreground: string;
+            background?: undefined;
+            fontStyle?: undefined;
+        };
+        name?: undefined;
+    } | {
+        scope: string;
+        settings: {
+            fontStyle: string;
+            foreground?: undefined;
+            background?: undefined;
+        };
+        name?: undefined;
+    } | {
+        scope: string;
+        settings: {
+            foreground: string;
+            background?: undefined;
+            fontStyle?: undefined;
+        };
+        name?: undefined;
+    } | {
+        scope: string;
+        settings: {
+            fontStyle: string;
+            foreground: string;
+            background?: undefined;
+        };
+        name?: undefined;
+    } | {
+        name: string;
+        scope: string;
+        settings: {
+            foreground: string;
+            background?: undefined;
+            fontStyle?: undefined;
+        };
+    } | {
+        name: string;
+        scope: string[];
+        settings: {
+            foreground: string;
+            background?: undefined;
+            fontStyle?: undefined;
+        };
+    })[];
+};

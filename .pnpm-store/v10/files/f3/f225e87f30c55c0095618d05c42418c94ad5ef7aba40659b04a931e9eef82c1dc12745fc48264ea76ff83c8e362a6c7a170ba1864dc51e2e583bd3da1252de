@@ -1,0 +1,424 @@
+import { __assign } from "tslib";
+import { each, every, find, findIndex, get, isBoolean, isEqual, isObject } from '@antv/util';
+import { animation as commonAnimation, annotation as commonAnnotation, interaction as commonInteraction, limitInPlot as commonLimitInPlot, scale, theme as commonTheme, } from '../../adaptor/common';
+import { deepAssign, flow } from '../../utils';
+import { percent } from '../../utils/transform/percent';
+import { findViewById } from '../../utils/view';
+import { LEFT_AXES_VIEW, RIGHT_AXES_VIEW } from './constant';
+import { AxisType, DualAxesGeometry } from './types';
+import { drawSingleGeometry } from './util/geometry';
+import { getViewLegendItems } from './util/legend';
+import { getGeometryOption, getYAxisWithDefault, isColumn, transformObjectToArray } from './util/option';
+import { doSliderFilter } from './util/render-sider';
+/**
+ * transformOptions，双轴图整体的取参逻辑如下
+ * 1. get index getOptions: 对应的是默认的图表参数，如 appendPadding，syncView 等
+ * 2. get adpator transformOption: 对应的是双轴图的默认参数，deepAssign 优先级从低到高如下
+ *    2.1 defaultoption，如 tooltip，legend
+ *    2.2 用户填写 options
+ *    2.3 根据用户填写的 options 补充的数组型 options，如 yaxis，GeometryOption，因为 deepAssign 无法 assign 数组
+ *
+ * @param params
+ */
+export function transformOptions(params) {
+    var _a;
+    var options = params.options;
+    var _b = options.geometryOptions, geometryOptions = _b === void 0 ? [] : _b, xField = options.xField, yField = options.yField;
+    var allLine = every(geometryOptions, function (_a) {
+        var geometry = _a.geometry;
+        return geometry === DualAxesGeometry.Line || geometry === undefined;
+    });
+    return deepAssign({}, {
+        options: {
+            geometryOptions: [],
+            meta: (_a = {},
+                _a[xField] = {
+                    // 默认为 cat 类型
+                    type: 'cat',
+                    // x 轴一定是同步 scale 的
+                    sync: true,
+                    // 如果有没有柱子，则
+                    range: allLine ? [0, 1] : undefined,
+                },
+                _a),
+            tooltip: {
+                showMarkers: allLine,
+                // 存在柱状图，不显示 crosshairs
+                showCrosshairs: allLine,
+                shared: true,
+                crosshairs: {
+                    type: 'x',
+                },
+            },
+            interactions: !allLine
+                ? [{ type: 'legend-visible-filter' }, { type: 'active-region' }]
+                : [{ type: 'legend-visible-filter' }],
+            legend: {
+                position: 'top-left',
+            },
+        },
+    }, params, {
+        options: {
+            // yAxis
+            yAxis: transformObjectToArray(yField, options.yAxis),
+            // geometryOptions
+            geometryOptions: [
+                getGeometryOption(xField, yField[0], geometryOptions[0]),
+                getGeometryOption(xField, yField[1], geometryOptions[1]),
+            ],
+            // annotations
+            annotations: transformObjectToArray(yField, options.annotations),
+        },
+    });
+}
+/**
+ * 创建 双轴图 中绘制图形的 view，提前创建是因为 theme 适配器的需要
+ * @param params
+ */
+function createViews(params) {
+    var _a, _b;
+    var chart = params.chart, options = params.options;
+    var geometryOptions = options.geometryOptions;
+    var SORT_MAP = { line: 0, column: 1 };
+    // 包含配置，id，数据的结构
+    var geometries = [
+        { type: (_a = geometryOptions[0]) === null || _a === void 0 ? void 0 : _a.geometry, id: LEFT_AXES_VIEW },
+        { type: (_b = geometryOptions[1]) === null || _b === void 0 ? void 0 : _b.geometry, id: RIGHT_AXES_VIEW },
+    ];
+    // 将线的 view 放置在更上一层，防止线柱遮挡。先柱后先
+    geometries.sort(function (a, b) { return -SORT_MAP[a.type] + SORT_MAP[b.type]; }).forEach(function (g) { return chart.createView({ id: g.id }); });
+    return params;
+}
+/**
+ * 绘制图形
+ * @param params
+ */
+function geometry(params) {
+    var chart = params.chart, options = params.options;
+    var xField = options.xField, yField = options.yField, geometryOptions = options.geometryOptions, data = options.data, tooltip = options.tooltip;
+    // 包含配置，id，数据的结构
+    var geometries = [
+        __assign(__assign({}, geometryOptions[0]), { id: LEFT_AXES_VIEW, data: data[0], yField: yField[0] }),
+        __assign(__assign({}, geometryOptions[1]), { id: RIGHT_AXES_VIEW, data: data[1], yField: yField[1] }),
+    ];
+    geometries.forEach(function (geometry) {
+        var id = geometry.id, data = geometry.data, yField = geometry.yField;
+        // 百分比柱状图需要额外处理一次数据
+        var isPercent = isColumn(geometry) && geometry.isPercent;
+        var formatData = isPercent ? percent(data, yField, xField, yField) : data;
+        var view = findViewById(chart, id).data(formatData);
+        var tooltipOptions = isPercent
+            ? __assign({ formatter: function (datum) { return ({
+                    name: datum[geometry.seriesField] || yField,
+                    value: (Number(datum[yField]) * 100).toFixed(2) + '%',
+                }); } }, tooltip) : tooltip;
+        // 绘制图形
+        drawSingleGeometry({
+            chart: view,
+            options: {
+                xField: xField,
+                yField: yField,
+                tooltip: tooltipOptions,
+                geometryOption: geometry,
+            },
+        });
+    });
+    return params;
+}
+export function color(params) {
+    var _a;
+    var chart = params.chart, options = params.options;
+    var geometryOptions = options.geometryOptions;
+    var themeColor = ((_a = chart.getTheme()) === null || _a === void 0 ? void 0 : _a.colors10) || [];
+    var start = 0;
+    /* 为 geometry 添加默认 color。
+     * 1. 若 geometryOptions 存在 color，则在 drawGeometry 时已处理
+     * 2. 若 不存在 color，获取 Geometry group scales个数，在 theme color 10 中提取
+     * 3. 为防止 group 过多导致右色板无值或值很少，右 view 面板在依次提取剩下的 N 个 后再 concat 一次 themeColor
+     * 4. 为简便获取 Geometry group scales个数，在绘制完后再执行 color
+     * 5. 考虑之后将不同 view 使用同一个色板的需求沉淀到 g2
+     */
+    chart.once('beforepaint', function () {
+        each(geometryOptions, function (geometryOption, index) {
+            var view = findViewById(chart, index === 0 ? LEFT_AXES_VIEW : RIGHT_AXES_VIEW);
+            if (geometryOption.color)
+                return;
+            var groupScale = view.getGroupScales();
+            var count = get(groupScale, [0, 'values', 'length'], 1);
+            var color = themeColor.slice(start, start + count).concat(index === 0 ? [] : themeColor);
+            view.geometries.forEach(function (geometry) {
+                if (geometryOption.seriesField) {
+                    geometry.color(geometryOption.seriesField, color);
+                }
+                else {
+                    geometry.color(color[0]);
+                }
+            });
+            start += count;
+        });
+        chart.render(true);
+    });
+    return params;
+}
+/**
+ * meta 配置
+ * @param params
+ */
+export function meta(params) {
+    var _a, _b;
+    var chart = params.chart, options = params.options;
+    var xAxis = options.xAxis, yAxis = options.yAxis, xField = options.xField, yField = options.yField;
+    scale((_a = {},
+        _a[xField] = xAxis,
+        _a[yField[0]] = yAxis[0],
+        _a))(deepAssign({}, params, { chart: findViewById(chart, LEFT_AXES_VIEW) }));
+    scale((_b = {},
+        _b[xField] = xAxis,
+        _b[yField[1]] = yAxis[1],
+        _b))(deepAssign({}, params, { chart: findViewById(chart, RIGHT_AXES_VIEW) }));
+    return params;
+}
+/**
+ * axis 配置
+ * @param params
+ */
+export function axis(params) {
+    var chart = params.chart, options = params.options;
+    var leftView = findViewById(chart, LEFT_AXES_VIEW);
+    var rightView = findViewById(chart, RIGHT_AXES_VIEW);
+    var xField = options.xField, yField = options.yField, xAxis = options.xAxis, yAxis = options.yAxis;
+    chart.axis(xField, false);
+    chart.axis(yField[0], false);
+    chart.axis(yField[1], false);
+    // 左 View
+    leftView.axis(xField, xAxis);
+    leftView.axis(yField[0], getYAxisWithDefault(yAxis[0], AxisType.Left));
+    // 右 Y 轴
+    rightView.axis(xField, false);
+    rightView.axis(yField[1], getYAxisWithDefault(yAxis[1], AxisType.Right));
+    return params;
+}
+/**
+ * tooltip 配置
+ * @param params
+ */
+export function tooltip(params) {
+    var chart = params.chart, options = params.options;
+    var tooltip = options.tooltip;
+    var leftView = findViewById(chart, LEFT_AXES_VIEW);
+    var rightView = findViewById(chart, RIGHT_AXES_VIEW);
+    // tooltip 经过 getDefaultOption 处理后，一定不为 undefined
+    chart.tooltip(tooltip);
+    // 在 view 上添加 tooltip，使得 shared 和 interaction active-region 起作用
+    // view 应该继承 chart 里的 shared，但是从表现看来，继承有点问题
+    leftView.tooltip({
+        shared: true,
+    });
+    rightView.tooltip({
+        shared: true,
+    });
+    return params;
+}
+/**
+ * interaction 配置
+ * @param params
+ */
+export function interaction(params) {
+    var chart = params.chart;
+    commonInteraction(deepAssign({}, params, { chart: findViewById(chart, LEFT_AXES_VIEW) }));
+    commonInteraction(deepAssign({}, params, { chart: findViewById(chart, RIGHT_AXES_VIEW) }));
+    return params;
+}
+/**
+ * annotation 配置
+ * @param params
+ */
+export function annotation(params) {
+    var chart = params.chart, options = params.options;
+    var annotations = options.annotations;
+    var a1 = get(annotations, [0]);
+    var a2 = get(annotations, [1]);
+    commonAnnotation(a1)(deepAssign({}, params, {
+        chart: findViewById(chart, LEFT_AXES_VIEW),
+        options: {
+            annotations: a1,
+        },
+    }));
+    commonAnnotation(a2)(deepAssign({}, params, {
+        chart: findViewById(chart, RIGHT_AXES_VIEW),
+        options: {
+            annotations: a2,
+        },
+    }));
+    return params;
+}
+export function theme(params) {
+    var chart = params.chart;
+    /*
+     * 双轴图中，部分组件是绘制在子 view 层（例如 axis，line），部分组件是绘制在 chart （例如 legend)
+     * 为 chart 和 子 view 均注册 theme，使其自行遵循 G2 theme geometry > view > chart 进行渲染。
+     */
+    commonTheme(deepAssign({}, params, { chart: findViewById(chart, LEFT_AXES_VIEW) }));
+    commonTheme(deepAssign({}, params, { chart: findViewById(chart, RIGHT_AXES_VIEW) }));
+    commonTheme(params);
+    return params;
+}
+export function animation(params) {
+    var chart = params.chart;
+    commonAnimation(deepAssign({}, params, { chart: findViewById(chart, LEFT_AXES_VIEW) }));
+    commonAnimation(deepAssign({}, params, { chart: findViewById(chart, RIGHT_AXES_VIEW) }));
+    return params;
+}
+/**
+ * 双轴图 limitInPlot
+ * @param params
+ */
+export function limitInPlot(params) {
+    var chart = params.chart, options = params.options;
+    var yAxis = options.yAxis;
+    commonLimitInPlot(deepAssign({}, params, {
+        chart: findViewById(chart, LEFT_AXES_VIEW),
+        options: {
+            yAxis: yAxis[0],
+        },
+    }));
+    commonLimitInPlot(deepAssign({}, params, {
+        chart: findViewById(chart, RIGHT_AXES_VIEW),
+        options: {
+            yAxis: yAxis[1],
+        },
+    }));
+    return params;
+}
+/**
+ * legend 配置
+ * 使用 custom，便于和类似于分组柱状图-单折线图的逻辑统一
+ * @param params
+ */
+export function legend(params) {
+    var chart = params.chart, options = params.options;
+    var legend = options.legend, geometryOptions = options.geometryOptions, yField = options.yField, data = options.data;
+    var leftView = findViewById(chart, LEFT_AXES_VIEW);
+    var rightView = findViewById(chart, RIGHT_AXES_VIEW);
+    if (legend === false) {
+        chart.legend(false);
+    }
+    else if (isObject(legend) && legend.custom === true) {
+        chart.legend(legend);
+    }
+    else {
+        var leftLegend_1 = get(geometryOptions, [0, 'legend'], legend);
+        var rightLegend_1 = get(geometryOptions, [1, 'legend'], legend);
+        // 均使用自定义图例
+        chart.once('beforepaint', function () {
+            var leftItems = data[0].length
+                ? getViewLegendItems({
+                    view: leftView,
+                    geometryOption: geometryOptions[0],
+                    yField: yField[0],
+                    legend: leftLegend_1,
+                })
+                : [];
+            var rightItems = data[1].length
+                ? getViewLegendItems({
+                    view: rightView,
+                    geometryOption: geometryOptions[1],
+                    yField: yField[1],
+                    legend: rightLegend_1,
+                })
+                : [];
+            chart.legend(deepAssign({}, legend, {
+                custom: true,
+                // todo 修改类型定义
+                // @ts-ignore
+                items: leftItems.concat(rightItems),
+            }));
+        });
+        if (geometryOptions[0].seriesField) {
+            leftView.legend(geometryOptions[0].seriesField, leftLegend_1);
+        }
+        if (geometryOptions[1].seriesField) {
+            rightView.legend(geometryOptions[1].seriesField, rightLegend_1);
+        }
+        // 自定义图例交互
+        chart.on('legend-item:click', function (evt) {
+            var delegateObject = get(evt, 'gEvent.delegateObject', {});
+            if (delegateObject && delegateObject.item) {
+                var _a = delegateObject.item, field_1 = _a.value, isGeometry = _a.isGeometry, viewId = _a.viewId;
+                // geometry 的时候，直接使用 view.changeVisible
+                if (isGeometry) {
+                    var idx = findIndex(yField, function (yF) { return yF === field_1; });
+                    if (idx > -1) {
+                        var geometries = get(findViewById(chart, viewId), 'geometries');
+                        each(geometries, function (g) {
+                            g.changeVisible(!delegateObject.item.unchecked);
+                        });
+                    }
+                }
+                else {
+                    var legendItem_1 = get(chart.getController('legend'), 'option.items', []);
+                    // 分组柱线图
+                    each(chart.views, function (view) {
+                        // 单折柱图
+                        var groupScale = view.getGroupScales();
+                        each(groupScale, function (scale) {
+                            if (scale.values && scale.values.indexOf(field_1) > -1) {
+                                view.filter(scale.field, function (value) {
+                                    var curLegendItem = find(legendItem_1, function (item) { return item.value === value; });
+                                    // 使用 legend 中的 unchecked 来判断，使得支持关闭多个图例
+                                    return !curLegendItem.unchecked;
+                                });
+                            }
+                        });
+                        chart.render(true);
+                    });
+                }
+            }
+        });
+    }
+    return params;
+}
+/**
+ * 双轴图 slider 适配器
+ * @param params
+ */
+export function slider(params) {
+    var chart = params.chart, options = params.options;
+    var slider = options.slider;
+    var leftView = findViewById(chart, LEFT_AXES_VIEW);
+    var rightView = findViewById(chart, RIGHT_AXES_VIEW);
+    if (slider) {
+        // 左 View
+        leftView.option('slider', slider);
+        // 监听左侧 slider 改变事件， 同步右侧 View 视图
+        leftView.on('slider:valuechanged', function (evt) {
+            var _a = evt.event, value = _a.value, originValue = _a.originValue;
+            if (isEqual(value, originValue)) {
+                return;
+            }
+            doSliderFilter(rightView, value);
+        });
+        chart.once('afterpaint', function () {
+            // 初始化数据，配置默认值时需要同步
+            if (!isBoolean(slider)) {
+                var start = slider.start, end = slider.end;
+                if (start || end) {
+                    doSliderFilter(rightView, [start, end]);
+                }
+            }
+        });
+    }
+    return params;
+}
+/**
+ * 双折线图适配器
+ * @param chart
+ * @param options
+ */
+export function adaptor(params) {
+    // transformOptions 一定在最前面处理；color legend 使用了 beforepaint，为便于理解放在最后面
+    return flow(transformOptions, createViews, 
+    // 主题靠前设置，作为最低优先级
+    theme, geometry, meta, axis, limitInPlot, tooltip, interaction, annotation, animation, color, legend, slider)(params);
+}
+//# sourceMappingURL=adaptor.js.map

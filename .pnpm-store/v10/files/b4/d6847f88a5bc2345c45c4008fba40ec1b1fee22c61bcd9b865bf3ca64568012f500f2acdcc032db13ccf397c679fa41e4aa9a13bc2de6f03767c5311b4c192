@@ -1,0 +1,30 @@
+{
+    "name": "@types/sass-loader",
+    "version": "8.0.9",
+    "description": "TypeScript definitions for sass-loader",
+    "homepage": "https://github.com/DefinitelyTyped/DefinitelyTyped/tree/master/types/sass-loader",
+    "license": "MIT",
+    "contributors": [
+        {
+            "name": "Jason Kwok",
+            "githubUsername": "JasonHK",
+            "url": "https://github.com/JasonHK"
+        }
+    ],
+    "main": "",
+    "types": "index.d.ts",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/DefinitelyTyped/DefinitelyTyped.git",
+        "directory": "types/sass-loader"
+    },
+    "scripts": {},
+    "dependencies": {
+        "@types/node": "*",
+        "@types/node-sass": "*",
+        "@types/webpack": "^4",
+        "sass": "^1.45.0"
+    },
+    "typesPublisherContentHash": "64f563d634f3ba71cb3dec18ed6e1b14608d117dd28757b380d3173245244547",
+    "typeScriptVersion": "4.8"
+}

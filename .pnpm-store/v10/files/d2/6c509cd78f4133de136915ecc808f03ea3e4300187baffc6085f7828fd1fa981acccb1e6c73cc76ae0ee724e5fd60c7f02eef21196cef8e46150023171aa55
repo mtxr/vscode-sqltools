@@ -1,0 +1,76 @@
+{
+  "title": "detectEurope.js",
+  "name": "detect-europe-js",
+  "version": "0.1.2",
+  "author": "Faisal Salman <f@faisalman.com>",
+  "description": "Detect if a user is from a country around the European Union (EU) area",
+  "type": "commonjs",
+  "main": "./dist/cjs/index.js",
+  "module": "./dist/esm/index.js",
+  "exports": {
+    ".": {
+      "require": "./dist/cjs/index.js",
+      "import": "./dist/esm/index.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "directories": {
+    "dist": "dist",
+    "src": "src",
+    "test": "test"
+  },
+  "scripts": {
+    "build:cjs": "tsc --module commonjs --outDir ./dist/cjs --target es5",
+    "build:esm": "tsc --module esnext --outDir ./dist/esm --target es6 && echo '{\"type\":\"module\"}' > ./dist/esm/package.json",
+    "build": "npm run build:cjs && npm run build:esm",
+    "build+test": "npm run build && npm run test",
+    "test": "playwright test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/faisalman/detect-europe-js.git"
+  },
+  "keywords": [
+    "ua-parser-js",
+    "detect-europe-js",
+    "detect-country",
+    "timezone",
+    "europe",
+    "eu",
+    "eea",
+    "efta",
+    "schengen",
+    "gdpr",
+    "dma",
+    "dsa",
+    "dga",
+    "data-act",
+    "ai-act",
+    "cybersecurity-act"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/faisalman/detect-europe-js/issues"
+  },
+  "homepage": "https://github.com/faisalman/detect-europe-js#readme",
+  "funding": [
+    {
+      "type": "github",
+      "url": "https://github.com/sponsors/faisalman"
+    },
+    {
+      "type": "opencollective",
+      "url": "https://opencollective.com/ua-parser-js"
+    },
+    {
+      "type": "paypal",
+      "url": "https://paypal.me/faisalman"
+    }
+  ],
+  "devDependencies": {
+    "@playwright/test": "~1.32.2",
+    "typescript": "^5.2.2"
+  }
+}
