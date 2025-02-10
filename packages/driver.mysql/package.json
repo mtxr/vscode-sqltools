@@ -72,7 +72,7 @@
     "@types/mysql": "^2.15.12",
     "compare-versions": "3.6.0",
     "concurrently": "^5.2.0",
-    "esbuild": "^0.15.7",
+    "esbuild": "^0.25.0",
     "lodash": "^4.17.19",
     "mysql2": "~3.9.8",
     "rimraf": "^3.0.2",
