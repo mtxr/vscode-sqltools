@@ -27,41 +27,15 @@ import { queries } from './queries.ts'
 
 import * as ddbUtils from './ddbUtils.ts'
 
-/** set Driver lib to the type of your connection.
-    Eg for postgres:
-    import { Pool, PoolConfig } from 'pg';
-    ...
-    type DriverLib = Pool;
-    type DriverOptions = PoolConfig;
-    
-    This will give you completions iside of the library */
 
 type DriverLib = DDB
 type DriverOptions = DdbConfig
 
-// // import your actual DB library here
-// import dblib from 'your-db-library';
 
 export class dolphindbDriver extends AbstractDriver<DriverLib, DriverOptions> implements IConnectionDriver {
     
-    /* If you driver depends on node packages, list it below on `deps` prop.
-        It will be installed automatically on first use of your driver.     
-    */
-    // public override readonly deps: typeof AbstractDriver.prototype['deps'] = [{
-    //     type: AbstractDriver.CONSTANTS.DEPENDENCY_PACKAGE,
-    //     name: 'dolphindb',
-    //     version: '3.0.210',
-    //         }
-    //     ];
     queries = queries
     
-    /** if you need to require your lib in runtime and then
-     * use `this.lib.methodName()` anywhere and vscode will take care of the dependencies
-     * to be installed on a cache folder
-     **/
-    // private get lib() {
-    //   return this.requireDep('node-packge-name') as DriverLib;
-    // }
     public async open (): Promise<DDB> {
         if (this.connection) 
             return this.connection

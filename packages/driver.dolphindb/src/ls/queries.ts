@@ -5,7 +5,6 @@ import type { DDB, DdbTableData } from 'dolphindb'
 
 import type { DdbConfig } from './types.ts'
 
-/** write your queries here go fetch desired data. This queries are just examples copied from SQLite driver */
 
 const describeTable: IBaseQueries['describeTable'] = queryFactory`
   select *

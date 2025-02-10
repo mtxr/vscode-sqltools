@@ -4,7 +4,7 @@ import type { DdbConfig } from './types.ts'
 
 
 export async function createDDBClient (configOptions: DdbConfig): Promise<DDB> {
-    const urladdress = `ws://${configOptions.ip}:${configOptions.port}` // 模板字符串合并url
+    const urladdress = `ws://${configOptions.ip}:${configOptions.port}` 
     const ddb = new DDB(urladdress,
         { 
             autologin: configOptions.autologin,
@@ -13,6 +13,6 @@ export async function createDDBClient (configOptions: DdbConfig): Promise<DDB> {
             verbose: true
         }
     )
-    await ddb.connect() // 建立链接
+    await ddb.connect() 
     return Promise.resolve(ddb) 
 }
