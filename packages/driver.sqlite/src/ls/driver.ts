@@ -8,7 +8,7 @@ import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
 
-const SQLite3Version = '5.1.1';
+const SQLite3Version = '5.1.7';
 
 export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> implements IConnectionDriver {
 

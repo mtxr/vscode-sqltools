@@ -64,7 +64,7 @@
   },
   "devDependencies": {
     "@sqltools/base-driver": "^0.1.11",
-    "@types/sqlite3": "^3.1.8",
+    "@types/sqlite3": "^5.1.0",
     "@types/vscode": "^1.72.0",
     "concurrently": "^5.2.0",
     "cross-env": "^7.0.2",
