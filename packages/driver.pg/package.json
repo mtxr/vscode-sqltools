@@ -2,9 +2,9 @@
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Cockroach Driver",
   "description": "SQLTools PostgreSQL/Cockroach Driver",
-  "version": "0.5.5-SNAPSHOT",
+  "version": "0.5.5",
   "engines": {
-    "vscode": "^1.72.0"
+    "vscode": "^1.78.0"
   },
   "publisher": "mtxr",
   "license": "MIT",

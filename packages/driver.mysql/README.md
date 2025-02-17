@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.6.4
+
+- Use NodeJS 20.
+
 ### 0.6.3
 
 - Update mysql2 library package.

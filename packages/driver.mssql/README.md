@@ -4,6 +4,18 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.4
+
+- Improvements and fixes by [@fzhem](https://github.com/fzhem) - [#1396](https://github.com/mtxr/vscode-sqltools/pull/1396) and  [#1399](https://github.com/mtxr/vscode-sqltools/pull/1399)
+    - Use Microsoft recommended system table to get a list of databases.
+    - Better error handling: Throw database configuration errors rather than retrying.
+    - Set default connection timeout to 15 - same as the tedious driver.
+    - Add tedious specific option - trustServerCertificate.
+    - Database is now optional in connection UI.
+    - Use database specific information_schema in queries, fixing empty schemas, tables/views when clicking on a database that is not "master".
+    - Return empty list when schema is inaccessible, fixing "sqltools.getChildrenForTreeItem" when clicking on inaccessible schema in sidebar.
+- Use NodeJS 20.
+
 ### 0.4.3
 
 - Use NodeJS 16.

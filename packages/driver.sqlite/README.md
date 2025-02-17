@@ -6,6 +6,11 @@ See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lit
 
 ## Changelog
 
+### 0.5.2
+
+- Use sqlite3@5.1.7
+- Use NodeJS 20.
+
 ### 0.5.1
 
 - Use NodeJS 16.
