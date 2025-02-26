@@ -55,6 +55,13 @@ function copyTextHandler(item: { value: string } | string, items?: ({ value: str
   return env.clipboard.writeText(copyText);
 }
 
+function copyMessagesHandler(item: { value: string } | string, items?: ({ value: string } | string)[]) {
+  items = items ? items : [item];
+  const copyText = items.filter(n => n !== null && typeof n !== 'undefined').map(item => `${(<any>item).label || item} [${(<any>item).description}]`).join('\n');
+  if (!copyText) return;
+  return env.clipboard.writeText(copyText);
+}
+
 async function generateInsertQueryHandler(item: SidebarItem) {
   const columns: NSDatabase.IColumn[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
     conn: item.conn,
@@ -76,6 +83,7 @@ const register = (extension: IExtension) => {
   extension.registerTextEditorCommand(`formatSql`, formatSqlHandler)
     .registerCommand(`insertText`, insertTextHandler)
     .registerCommand(`copyText`, copyTextHandler)
+    .registerCommand(`copyMessages`, copyMessagesHandler)
     .registerCommand(`generateInsertQuery`, generateInsertQueryHandler)
     .registerCommand(`newSqlFile`, newSqlFileHandler);
 }

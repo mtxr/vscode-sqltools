@@ -105,7 +105,7 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
       }
     });
     this.messagesTreeViewProvider = new MessagesProvider();
-    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}ViewConsoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: false, showCollapseAll: true });
+    this.messagesTreeView = window.createTreeView(`${EXT_NAMESPACE}ViewConsoleMessages`, { treeDataProvider: this.messagesTreeViewProvider, canSelectMany: true, showCollapseAll: true });
     Context.subscriptions.push(this.treeView, this.messagesTreeView);
   }
 

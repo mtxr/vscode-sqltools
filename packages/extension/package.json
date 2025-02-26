@@ -291,6 +291,10 @@
                 "category": "SQLTools Sidebar"
             },
             {
+                "title": "Copy Selected Message(s)",
+                "command": "sqltools.copyTextFromConsoleMessages"
+            },
+            {
                 "title": "Generate Insert Query",
                 "command": "sqltools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
@@ -1035,6 +1039,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.copyTextFromConsoleMessages",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.refreshTree",
                     "when": "false"
                 },
@@ -1160,9 +1168,9 @@
                     "group": "sqltools.connectionExplorer.edit@1"
                 },
                 {
-                    "command": "sqltools.copyTextFromTreeItem",
+                    "command": "sqltools.copyTextFromConsoleMessages",
                     "when": "view == sqltoolsViewConsoleMessages",
-                    "group": "sqltools.connectionExplorer.edit@1"
+                    "group": "sqltools.consoleMessages.edit@1"
                 },
                 {
                     "command": "sqltools.selectConnection",
