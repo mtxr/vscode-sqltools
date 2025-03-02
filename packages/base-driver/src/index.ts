@@ -16,7 +16,9 @@ import sqltoolsRequire, { sqltoolsResolve } from './lib/require';
 import { createLogger } from '@sqltools/log';
 import path from 'path';
 import fs from 'fs';
-import {URI} from 'vscode-uri';
+import { URI } from 'vscode-uri';
+import { createTunnel } from 'tunnel-ssh';
+import { AddressInfo } from 'net';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
   public log: ReturnType<typeof createLogger>;
@@ -127,6 +129,41 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
 
   protected prepareMessage(message: any): NSDatabase.IResult['messages'][number] {
     return { message: message.toString(), date: new Date() };
+  }
+
+  protected async createSshTunnel(
+    ssh: {
+      host: string;
+      port: number;
+      username: string;
+      password?: string;
+      privateKeyPath?: string;
+    },
+    db: {
+      host: string;
+      port: number;
+    }
+  ) {
+    const [sshTunnel] = await createTunnel(
+      {
+        autoClose: true,
+        reconnectOnError: false,
+      },
+      null,
+      {
+        host: ssh.host,
+        port: ssh.port,
+        username: ssh.username,
+        privateKey: fs.readFileSync(ssh.privateKeyPath),
+      },
+      {
+        dstAddr: db.host,
+        dstPort: db.port,
+      }
+    );
+    return {
+      port: (sshTunnel.address() as AddressInfo).port,
+    };
   }
 
   static readonly CONSTANTS = {
