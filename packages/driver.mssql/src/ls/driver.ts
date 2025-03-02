@@ -29,22 +29,49 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
       this.credentials.password = null;
     }
 
+    let pool: MSSQLLib.ConnectionPool;
 
-    const pool = new MSSQLLib.ConnectionPool(this.credentials.connectString || {
-      database: this.credentials.database,
-      connectionTimeout: this.credentials.connectionTimeout * 1000,
-      server: this.credentials.server,
-      user: this.credentials.username,
-      password: this.credentials.password,
-      domain: this.credentials.domain || undefined,
-      port: this.credentials.port,
-      ...mssqlOptions,
-      options: {
-        ...((mssqlOptions || {}).options || {}),
-        encrypt: encryptAttempt,
-        trustServerCertificate: trustServerCertificate,
-      },
-    });
+    if (this.credentials.connectString) {
+      pool = new MSSQLLib.ConnectionPool(this.credentials.connectString);
+    } else {
+      const poolConfig = {
+        database: this.credentials.database,
+        connectionTimeout: this.credentials.connectionTimeout * 1000,
+        server: this.credentials.server,
+        user: this.credentials.username,
+        password: this.credentials.password,
+        domain: this.credentials.domain || undefined,
+        port: this.credentials.port,
+        ...mssqlOptions,
+        options: {
+          ...((mssqlOptions || {}).options || {}),
+          encrypt: encryptAttempt,
+          trustServerCertificate: trustServerCertificate,
+        },
+      };
+
+      if (this.credentials.ssh === 'Enabled' && this.credentials.sshOptions) {
+        const { port: localPort } = await this.createSshTunnel(
+          {
+            host: this.credentials.sshOptions.host,
+            port: this.credentials.sshOptions.port,
+            username: this.credentials.sshOptions.username,
+            password: this.credentials.sshOptions.password,
+            privateKeyPath: this.credentials.sshOptions.privateKeyPath,
+          },
+          {
+            host: this.credentials.server,
+            port: this.credentials.port,
+          }
+        );
+        Object.assign(poolConfig, {
+          server: 'localhost',
+          port: localPort,
+        });
+      }
+
+      pool = new MSSQLLib.ConnectionPool(poolConfig);
+    }
 
     await new Promise((resolve, reject) => {
       pool.on('error', reject);

@@ -41,7 +41,28 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
           user: this.credentials.username,
           ...poolConfig,
         };
+
+        if (this.credentials.ssh === 'Enabled' && this.credentials.sshOptions) {
+          const { port: localPort } = await this.createSshTunnel(
+            {
+              host: this.credentials.sshOptions.host,
+              port: this.credentials.sshOptions.port,
+              username: this.credentials.sshOptions.username,
+              password: this.credentials.sshOptions.password,
+              privateKeyPath: this.credentials.sshOptions.privateKeyPath,
+            },
+            {
+              host: this.credentials.server,
+              port: this.credentials.port,
+            }
+          );
+          Object.assign(poolConfig, {
+            host: 'localhost',
+            port: localPort,
+          });
+        }
       }
+
       if (ssl) {
         if (typeof ssl === 'object') {
           const useSsl = {
