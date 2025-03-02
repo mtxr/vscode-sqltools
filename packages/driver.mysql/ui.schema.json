@@ -1,5 +1,18 @@
 {
-  "ui:order": ["connectionMethod", "server", "port", "socketPath", "connectString", "database", "username", "usePassword","password", "mysqlOptions"],
+  "ui:order": [
+    "connectionMethod",
+    "server",
+    "port",
+    "socketPath",
+    "connectString",
+    "database",
+    "username",
+    "usePassword",
+    "password",
+    "mysqlOptions",
+    "ssh",
+    "sshOptions"
+  ],
   "password": { "ui:widget": "password" },
   "socketPath": { "ui:widget": "file" },
   "mysqlOptions": {
