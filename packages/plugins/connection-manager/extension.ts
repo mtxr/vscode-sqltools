@@ -255,7 +255,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     return query;
   }
 
-  private ext_executeQuery = async (query?: string, { connNameOrId, connId, ...opt }: IQueryOptions = {}) => {
+  private ext_executeQuery = async (query?: string, { connNameOrId, connId, runInNotebook, ...opt }: IQueryOptions & { runInNotebook?: boolean } = {}) => {
     try {
       query = typeof query === 'string' ? query : await getSelectedText('execute query');
       connNameOrId = connId || connNameOrId;
@@ -267,7 +267,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
         connNameOrId = getAttachedConnection(window.activeTextEditor.document.uri);
       }
 
-      if (connNameOrId && connNameOrId.trim()) {
+      // Convert connNameOrId to string if it's an object
+      if (connNameOrId && typeof connNameOrId === 'object') {
+        connNameOrId = connNameOrId.id || connNameOrId.name;
+        log.info(`Connection identifier converted from object to: ${connNameOrId}`);
+      }
+
+      // Now check if we have a valid string connection identifier
+      if (connNameOrId && typeof connNameOrId === 'string' && connNameOrId.trim()) {
         connNameOrId = connNameOrId.trim();
         const conn = (await this.ext_getConnections({ connectedOnly: false, sort: 'connectedFirst' })).find(c => getConnectionId(c) === connNameOrId || c.name === connNameOrId);
         if (!conn) {
@@ -281,10 +288,17 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       const conn = await this.explorer.getActive()
       query = await this.replaceParams(query, conn);
       
-      const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
-      const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
-      this.updateViewResults(view, payload);
-      return payload;
+      // If runInNotebook is true, skip opening the results webview
+      if (runInNotebook) {
+        // Just run the query and return the results directly
+        return await this._runConnectionCommandWithArgs('query', query, { ...opt });
+      } else {
+        // Normal execution with results webview
+        const view = await this._openResultsWebview(conn && conn.id, opt.requestId);
+        const payload = await this._runConnectionCommandWithArgs('query', query, { ...opt, requestId: view.requestId });
+        this.updateViewResults(view, payload);
+        return payload;
+      }
     } catch (e) {
       this.errorHandler('Error fetching records.', e);
     }

@@ -113,6 +113,17 @@
                 "configuration": "./language/language-configuration.json"
             }
         ],
+        "notebooks": [
+            {
+                "type": "sqltools-notebook",
+                "displayName": "SQLTools Notebook",
+                "selector": [
+                    {
+                        "filenamePattern": "*.sqlnb"
+                    }
+                ]
+            }
+        ],
         "grammars": [
             {
                 "language": "sql",
@@ -121,6 +132,47 @@
             }
         ],
         "commands": [
+            {
+                "title": "List Available SQLTools Commands",
+                "command": "sqltools.notebook.listCommands",
+                "category": "SQLTools Notebook Debug"
+            },
+            {
+                "title": "Select Connection for Cell",
+                "command": "sqltools.notebook.selectCellConnection",
+                "category": "SQLTools Notebook",
+                "icon": {
+                    "light": "icons/connect-light.svg",
+                    "dark": "icons/connect-dark.svg"
+                }
+            },
+            {
+                "title": "Clear Connection for Cell",
+                "command": "sqltools.notebook.clearCellConnection",
+                "category": "SQLTools Notebook",
+                "icon": {
+                    "light": "icons/disconnect-light.svg",
+                    "dark": "icons/disconnect-dark.svg"
+                }
+            },
+            {
+                "title": "Show SQL Notebook Connection Help",
+                "command": "sqltools.notebook.showConnectionHelp",
+                "category": "SQLTools Notebook",
+                "icon": {
+                    "light": "icons/help-light.svg",
+                    "dark": "icons/help-dark.svg"
+                }
+            },
+            {
+                "title": "Limit Query Results",
+                "command": "sqltools.notebook.limitResults",
+                "category": "SQLTools Notebook",
+                "icon": {
+                    "light": "icons/limit-light.svg",
+                    "dark": "icons/limit-dark.svg"
+                }
+            },
             {
                 "title": "Connect",
                 "command": "sqltools.selectConnection",
@@ -411,6 +463,54 @@
                 "key": "ctrl+e ctrl+q",
                 "mac": "cmd+e q",
                 "when": "!config.sqltools.disableChordKeybindings && editorTextFocus && editorHasSelection"
+            },
+            {
+                "command": "sqltools.executeQuery",
+                "key": "ctrl+alt+e",
+                "mac": "cmd+alt+e",
+                "when": "editorTextFocus && editorLangId == 'sql'"
+            },
+            {
+                "command": "sqltools.executeCurrentQuery",
+                "key": "ctrl+alt+q",
+                "mac": "cmd+alt+q",
+                "when": "editorTextFocus && editorLangId == 'sql'"
+            },
+            {
+                "command": "sqltools.executeQueryFromFile",
+                "key": "ctrl+alt+f",
+                "mac": "cmd+alt+f",
+                "when": "editorTextFocus && editorLangId == 'sql'"
+            },
+            {
+                "command": "sqltools.formatSql",
+                "key": "shift+alt+f",
+                "mac": "shift+alt+f",
+                "when": "editorHasSelection && editorLangId == 'sql'"
+            },
+            {
+                "command": "sqltools.formatSql",
+                "key": "shift+alt+f",
+                "mac": "shift+alt+f",
+                "when": "editorHasSelection"
+            },
+            {
+                "command": "sqltools.notebook.selectCellConnection",
+                "key": "ctrl+k ctrl+c",
+                "mac": "cmd+k cmd+c",
+                "when": "notebookEditorFocused && notebookType == 'sqltools-notebook'"
+            },
+            {
+                "command": "sqltools.notebook.clearCellConnection",
+                "key": "ctrl+k ctrl+r",
+                "mac": "cmd+k cmd+r",
+                "when": "notebookEditorFocused && notebookType == 'sqltools-notebook'"
+            },
+            {
+                "command": "sqltools.notebook.showConnectionHelp",
+                "key": "ctrl+k ctrl+h",
+                "mac": "cmd+k cmd+h",
+                "when": "notebookType == 'sqltools-notebook'"
             }
         ],
         "configuration": {
@@ -1069,6 +1169,22 @@
                 {
                     "command": "sqltools.bookmarkSelection",
                     "when": "editorHasSelection"
+                },
+                {
+                    "command": "sqltools.notebook.selectConnection",
+                    "when": "notebookType == 'sqltools-notebook'"
+                }
+            ],
+            "notebook/title": [
+                {
+                    "command": "sqltools.notebook.selectCellConnection",
+                    "when": "notebookType == 'sqltools-notebook'",
+                    "group": "navigation"
+                },
+                {
+                    "command": "sqltools.notebook.showConnectionHelp",
+                    "when": "notebookType == 'sqltools-notebook'",
+                    "group": "navigation"
                 }
             ],
             "view/title": [
