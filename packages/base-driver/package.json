@@ -1,6 +1,6 @@
 {
   "name": "@sqltools/base-driver",
-  "version": "0.1.11",
+  "version": "0.2.0",
   "description": "SQLTools Base Driver",
   "publishConfig": {
     "access": "public",
