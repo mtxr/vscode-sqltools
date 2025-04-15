@@ -12,6 +12,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.2.0
+
+- Added SSH tunneling support.
+
 ### v0.1.11
 
 - Fix `toAbsolutePath` for Windows by using `vscode-uri`.
