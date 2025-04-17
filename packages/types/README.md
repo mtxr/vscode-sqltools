@@ -10,6 +10,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 # Changelog
 
+### v0.2.0
+
+- Add IConnectionDriver.createSshTunnel() to align with SSH tunneling support implemented in AbstractDriver in @sqltools/base-driver@0.2.0
+
 ### v0.1.7
 
 - New 0.27.0 features:
