@@ -25,6 +25,7 @@
     "@types/react": "^17.0.45",
     "@types/react-dom": "^18.0.0",
     "astro": "^1.9.2",
+    "lodash": "^4.17.19",
     "preact": "^10.7.3",
     "react": "^18.1.0",
     "react-dom": "^18.1.0",
