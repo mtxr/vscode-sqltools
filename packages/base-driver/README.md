@@ -12,6 +12,14 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.2.2
+
+- createSshTunnel needs to be public rather than protected.
+
+### v0.2.1
+
+- Use @sqltools/types@0.2.0.
+
 ### v0.2.0
 
 - Added SSH tunneling support.

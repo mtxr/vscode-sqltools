@@ -131,7 +131,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return { message: message.toString(), date: new Date() };
   }
 
-  protected async createSshTunnel(
+  public async createSshTunnel(
     ssh: {
       host: string;
       port: number;
