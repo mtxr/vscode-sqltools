@@ -1844,19 +1844,6 @@
   dependencies:
     "@sinonjs/commons" "^1.7.0"
 
-"@sqltools/base-driver@^0.1.11", "@sqltools/base-driver@latest":
-  version "0.1.11"
-  resolved "https://registry.npmjs.org/@sqltools/base-driver/-/base-driver-0.1.11.tgz"
-  integrity sha512-HvmblI2MbdZUkDGIjU87FTiE/Q1NfIM6SFQJGbg5Y2vCHQ8mkUnU8QS+ANbeq3YChDpjLH+b3EHq4zdavIGk5Q==
-  dependencies:
-    "@sqltools/log" latest
-    "@sqltools/types" latest
-    env-paths "^2.2.0"
-    make-dir "^3.1.0"
-    resolve "^1.17.0"
-    vscode-languageserver "6.1.1"
-    vscode-uri "^3.0.3"
-
 "@sqltools/log@latest":
   version "1.0.3"
   resolved "https://registry.npmjs.org/@sqltools/log/-/log-1.0.3.tgz"
@@ -1864,11 +1851,6 @@
   dependencies:
     pino "^6.5.0"
     pino-pretty "^4.1.0"
-
-"@sqltools/types@latest":
-  version "0.1.6"
-  resolved "https://registry.npmjs.org/@sqltools/types/-/types-0.1.6.tgz"
-  integrity sha512-KwP3m4xWmZ0XRG3OtIaIHcqYxuuT3EL3ZeK/S97v9qOH0qL/fg1DU0PbvRO0EComETV78GEvMDE863Hjgx77LQ==
 
 "@tootallnate/once@1":
   version "1.1.2"

@@ -63,7 +63,7 @@
     "ts": "tsc -p ."
   },
   "devDependencies": {
-    "@sqltools/base-driver": "latest",
+    "@sqltools/base-driver": "^0.2.2",
     "@types/sqlite3": "^5.1.0",
     "@types/vscode": "^1.72.0",
     "concurrently": "^5.2.0",
