@@ -1,6 +1,7 @@
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
 import { ExtensionContext, extensions, authentication } from 'vscode';
 import { DRIVER_ALIASES } from './constants';
+import { Connection } from 'pg';
 const { publisher, name } = require('../package.json');
 const driverName = 'PostgreSQL/Cockroach';
 const AUTHENTICATION_PROVIDER = 'sqltools-driver-credentials';
@@ -54,14 +55,21 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         if (connInfo.usePassword.toString().toLowerCase().includes('ask')) {
           connInfo.askForPassword = true;
           propsToRemove.push('password');
+          propsToRemove.push('environ');
         } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
           connInfo.password = '';
           propsToRemove.push('askForPassword');
+          propsToRemove.push('environ');
         } else if (connInfo.usePassword.toString().toLowerCase().includes('save')) {
+          propsToRemove.push('askForPassword');
+          propsToRemove.push('environ');
+        } else if (connInfo.usePassword.toString().toLowerCase().includes('environ')) {
+          propsToRemove.push('password');
           propsToRemove.push('askForPassword');
         } else if (connInfo.usePassword.toString().toLowerCase().includes('secure')) {
           propsToRemove.push('password');
           propsToRemove.push('askForPassword');
+          propsToRemove.push('environ');
         }
       }
       if (connInfo.connectString) {
@@ -102,6 +110,8 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
       } else if (typeof connInfo.password === 'string') {
         delete formData.askForPassword;
         formData.usePassword = connInfo.password ? 'Save as plaintext in settings' : 'Use empty password';
+      } else if (connInfo.environ) {
+        formData.usePassword = "Retrieve from environ"
       } else {
         formData.usePassword = 'SQLTools Driver Credentials';
       }
@@ -123,7 +133,7 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
        * This hook is called after a connection definition has been fetched
        * from settings and is about to be used to connect.
        */
-      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString) {
+      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString && !connInfo.environ) {
         const scopes = [connInfo.name, (connInfo.username || "")];
         let session = await authentication.getSession(
           AUTHENTICATION_PROVIDER,
@@ -140,6 +150,9 @@ export async function activate(extContext: ExtensionContext): Promise<IDriverExt
         if (session) {
           connInfo.password = session.accessToken;
         }
+      }
+      else if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString && connInfo.environ) {
+          connInfo.password = process.env[connInfo.environ]
       }
       return connInfo;
     },
