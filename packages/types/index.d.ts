@@ -1,5 +1,5 @@
 import { ErrorHandler as LanguageClientErrorHandler, LanguageClient } from 'vscode-languageclient';
-import { IConnection as LSIConnection, TextDocuments } from 'vscode-languageserver';
+import { IConnection as LSIConnection, TextDocuments, CompletionItem } from 'vscode-languageserver';
 import { RequestType, RequestType0 } from 'vscode-languageserver-protocol';
 
 export declare namespace NodeJS {
@@ -207,7 +207,7 @@ export interface IConnection<DriverOptions = any> {
    * @memberof IConnection
    */
   ssh?: 'Enabled' | 'Disabled';
-  
+
   /**
    * SSH connection options. Required when ssh is 'Enabled'
    * @type {object}
@@ -220,7 +220,7 @@ export interface IConnection<DriverOptions = any> {
      * @memberof IConnection.sshOptions
      */
     host: string;
-    
+
     /**
      * SSH port
      * @type {number}
@@ -228,14 +228,14 @@ export interface IConnection<DriverOptions = any> {
      * @memberof IConnection.sshOptions
      */
     port: number;
-    
+
     /**
      * SSH username
      * @type {string}
      * @memberof IConnection.sshOptions
      */
     username: string;
-    
+
     /**
      * SSH password. You can use option askForPassword to prompt password before connect
      * @type {string}
@@ -243,7 +243,7 @@ export interface IConnection<DriverOptions = any> {
      * @memberof IConnection.sshOptions
      */
     password?: string;
-    
+
     /**
      * Path to private key file
      * @type {string}
@@ -284,10 +284,6 @@ export interface IQueryOptions {
 export interface IConnectionDriverConstructor {
   new(credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
 }
-export interface IRawCompletionItem {
-  // TODO add more fields or maybe reuse existing types
-  label: string;
-}
 export interface IConnectionDriver {
   connection: any;
   credentials: IConnection<any>;
@@ -315,7 +311,7 @@ export interface IConnectionDriver {
       port: number;
     }
   ): Promise<{ port: number }>;
-  getCompletionsForRawQuery?(text: string, currentOffset: number): Promise<IRawCompletionItem[]>;
+  getCompletionsForRawQuery?(text: string, currentOffset: number): Promise<CompletionItem[]>;
 }
 
 export declare enum ContextValue {
@@ -752,13 +748,13 @@ export interface ISettings {
    */
   useNodeRuntime?: null | boolean | string;
 
-    /**
-   * Disable node runtime detection notifications.
-   * @default false
-   * @type {boolean}
-   * @memberof ISettings
-   */
-    disableNodeDetectNotifications?: boolean;
+  /**
+ * Disable node runtime detection notifications.
+ * @default false
+ * @type {boolean}
+ * @memberof ISettings
+ */
+  disableNodeDetectNotifications?: boolean;
 
   /**
    * Columns sort order

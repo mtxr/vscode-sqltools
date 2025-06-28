@@ -1,10 +1,10 @@
-import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue, InternalID, IQueryOptions, IRawCompletionItem } from '@sqltools/types';
+import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue, InternalID, IQueryOptions } from '@sqltools/types';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
 import generateId from '@sqltools/util/internal-id';
 import LSContext from './context';
-import { IConnection as LSIconnection } from 'vscode-languageserver';
+import { IConnection as LSIconnection, CompletionItem } from 'vscode-languageserver';
 import DriverNotInstalledError from './exception/driver-not-installed';
 import { createLogger } from '@sqltools/log/src';
 
@@ -178,7 +178,7 @@ export default class Connection {
     return this.conn.getStaticCompletions();
   }
 
-  public getCompletionsForRawQuery(text: string, currentOffset: number): Promise<IRawCompletionItem[] | null> {
+  public getCompletionsForRawQuery(text: string, currentOffset: number): Promise<CompletionItem[] | null> {
     if (typeof this.conn.getCompletionsForRawQuery !== 'function') return Promise.resolve(null);
     return this.conn.getCompletionsForRawQuery(text, currentOffset);
   }

@@ -52,7 +52,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     }
   }
 
-  private getDatabasesCompletions = async ({ currentWord, conn, suggestDatabases }: { conn: Connection; currentWord: string; suggestDatabases: any }) => {
+  private getDatabasesCompletions = async ({ currentWord, conn, suggestDatabases }: { conn: Connection; currentWord: string; suggestDatabases: any }): Promise<CompletionItem[]> => {
     const prefix = (suggestDatabases.prependQuestionMark ? "? " : "") + (suggestDatabases.prependFrom ? "FROM " : "");
     const suffix = suggestDatabases.appendDot ? "." : "";
 
@@ -70,7 +70,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private getTableCompletions = async ({ currentWord, conn, suggestTables }: { conn: Connection; currentWord: string; suggestTables: any }) => {
+  private getTableCompletions = async ({ currentWord, conn, suggestTables }: { conn: Connection; currentWord: string; suggestTables: any }): Promise<CompletionItem[]> => {
     const prefix = (suggestTables.prependQuestionMark ? "? " : "") + (suggestTables.prependFrom ? "FROM " : "");
     const database = suggestTables.identifierChain && suggestTables.identifierChain[0].name;
     const suffix = suggestTables.appendDot ? "." : "";
@@ -89,7 +89,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private getColumnCompletions = async ({ currentWord, conn, suggestColumns }: { conn: Connection; currentWord: string; suggestColumns: any }) => {
+  private getColumnCompletions = async ({ currentWord, conn, suggestColumns }: { conn: Connection; currentWord: string; suggestColumns: any }): Promise<CompletionItem[]> => {
     const tables = suggestColumns.tables
       .map(table => table.identifierChain.map(id => id.name || id.cte))
       .map((t: [string]) => (<NSDatabase.ITable>{ label: t.pop(), database: t.pop() }));
@@ -107,7 +107,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private getCompletionsFromHueAst = async ({ currentWord, conn, text, currentOffset }: { currentWord: string; conn: Connection | null; text: string; currentOffset: number }) => {
+  private getCompletionsFromHueAst = async ({ currentWord, conn, text, currentOffset }: { currentWord: string; conn: Connection | null; text: string; currentOffset: number }): Promise<CompletionItem[]> => {
     let completionsMap = {
       query: [],
       tables: [],
@@ -166,7 +166,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
       .concat(completionsMap.tables)
       .concat(completionsMap.dbs)
       .concat(completionsMap.query);
-    
+
     return completions;
   }
 
@@ -182,13 +182,12 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
       // First try to get completions from connection's getCompletionsForRawQuery method
       const connectionCompletions = await conn.getCompletionsForRawQuery(text, currentOffset);
       if (connectionCompletions !== null) {
-        log.debug('using connection completions, count: %d', connectionCompletions.length);
+        log.debug('Got completions from raw the query, count: %d', connectionCompletions.length);
         return connectionCompletions;
       }
-      
 
       // Fallback to hue AST-based completions
-      log.debug('falling back to hue AST completions');
+      log.debug('Using completions based on hue SQL parser');
       const completions = await this.getCompletionsFromHueAst({ currentWord, conn, text, currentOffset });
       log.debug('total completions %d', completions.length);
       return completions;
