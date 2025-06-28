@@ -1,4 +1,4 @@
-import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue, InternalID, IQueryOptions } from '@sqltools/types';
+import { NSDatabase, IConnectionDriver, IConnection, MConnectionExplorer, ContextValue, InternalID, IQueryOptions, IRawCompletionItem } from '@sqltools/types';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { getConnectionId } from '@sqltools/util/connection';
 import ConfigRO from '@sqltools/util/config-manager';
@@ -176,5 +176,10 @@ export default class Connection {
   public getStaticCompletions: IConnectionDriver['getStaticCompletions'] = () => {
     if (typeof this.conn.getStaticCompletions !== 'function') return Promise.resolve({} as any);
     return this.conn.getStaticCompletions();
+  }
+
+  public getCompletionsForRawQuery(text: string, currentOffset: number): Promise<IRawCompletionItem[] | null> {
+    if (typeof this.conn.getCompletionsForRawQuery !== 'function') return Promise.resolve(null);
+    return this.conn.getCompletionsForRawQuery(text, currentOffset);
   }
 }

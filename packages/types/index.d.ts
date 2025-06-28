@@ -284,6 +284,10 @@ export interface IQueryOptions {
 export interface IConnectionDriverConstructor {
   new(credentials: IConnection<any>, getWorkspaceFolders?: LSIConnection['workspace']['getWorkspaceFolders']): IConnectionDriver;
 }
+export interface IRawCompletionItem {
+  // TODO add more fields or maybe reuse existing types
+  label: string;
+}
 export interface IConnectionDriver {
   connection: any;
   credentials: IConnection<any>;
@@ -311,6 +315,7 @@ export interface IConnectionDriver {
       port: number;
     }
   ): Promise<{ port: number }>;
+  getCompletionsForRawQuery?(text: string, currentOffset: number): Promise<IRawCompletionItem[]>;
 }
 
 export declare enum ContextValue {
