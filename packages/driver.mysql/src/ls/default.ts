@@ -9,7 +9,7 @@ import generateId from '@sqltools/util/internal-id';
 
 export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolOptions> implements IConnectionDriver {
   queries = Queries;
-  public open() {
+  public async open() {
     if (this.connection) {
       return this.connection;
     }
@@ -22,20 +22,48 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
       });
     }
 
-    const pool = MySQLLib.createPool(this.credentials.connectString || {
-      connectTimeout: this.credentials.connectionTimeout * 1000,
-      database: this.credentials.database,
-      socketPath: this.credentials.socketPath,
-      host: this.credentials.server,
-      port: this.credentials.port,
-      password: this.credentials.password,
-      user: this.credentials.username,
-      multipleStatements: true,
-      dateStrings: true,
-      bigNumberStrings: true,
-      supportBigNumbers: true,
-      ...mysqlOptions
-    });
+    let pool: MySQLLib.Pool;
+
+    if (this.credentials.connectString) {
+      pool = MySQLLib.createPool(this.credentials.connectString);
+    } else {
+      const poolConfig = {
+        host: this.credentials.server,
+        port: this.credentials.port,
+        connectTimeout: this.credentials.connectionTimeout * 1000,
+        database: this.credentials.database,
+        socketPath: this.credentials.socketPath,
+        password: this.credentials.password,
+        user: this.credentials.username,
+        multipleStatements: true,
+        dateStrings: true,
+        bigNumberStrings: true,
+        supportBigNumbers: true,
+        ...mysqlOptions,
+      };
+
+      if (this.credentials.ssh === 'Enabled' && this.credentials.sshOptions) {
+        const { port: localPort } = await this.createSshTunnel(
+          {
+            host: this.credentials.sshOptions.host,
+            port: this.credentials.sshOptions.port,
+            username: this.credentials.sshOptions.username,
+            password: this.credentials.sshOptions.password,
+            privateKeyPath: this.credentials.sshOptions.privateKeyPath,
+          },
+          {
+            host: this.credentials.server,
+            port: this.credentials.port,
+          }
+        );
+        Object.assign(poolConfig, {
+          host: 'localhost',
+          port: localPort,
+        });
+      }
+
+      pool = MySQLLib.createPool(poolConfig);
+    }
 
     return new Promise<MySQLLib.Pool>((resolve, reject) => {
       pool.getConnection((err, conn) => {

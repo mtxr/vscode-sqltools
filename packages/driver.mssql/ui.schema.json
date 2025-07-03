@@ -1,5 +1,18 @@
 {
-  "ui:order": ["connectionMethod", "server", "port", "socketPath", "connectString", "database", "username", "usePassword","password", "mssqlOptions"],
+  "ui:order": [
+    "connectionMethod",
+    "server",
+    "port",
+    "socketPath",
+    "connectString",
+    "database",
+    "username",
+    "usePassword",
+    "password",
+    "mssqlOptions",
+    "ssh",
+    "sshOptions"
+  ],
   "password": { "ui:widget": "password" },
   "askForPassword": { "ui:widget": "hidden" },
   "socketPath": { "ui:widget": "file" },

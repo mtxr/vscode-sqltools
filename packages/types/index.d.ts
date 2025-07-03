@@ -200,6 +200,58 @@ export interface IConnection<DriverOptions = any> {
     [key: string]: string
   }
 
+  /**
+   * SSH connection setting, 'Enabled' or 'Disabled'
+   * @type {string}
+   * @default "Disabled"
+   * @memberof IConnection
+   */
+  ssh?: 'Enabled' | 'Disabled';
+  
+  /**
+   * SSH connection options. Required when ssh is 'Enabled'
+   * @type {object}
+   * @memberof IConnection
+   */
+  sshOptions?: {
+    /**
+     * SSH server address
+     * @type {string}
+     * @memberof IConnection.sshOptions
+     */
+    host: string;
+    
+    /**
+     * SSH port
+     * @type {number}
+     * @default 22
+     * @memberof IConnection.sshOptions
+     */
+    port: number;
+    
+    /**
+     * SSH username
+     * @type {string}
+     * @memberof IConnection.sshOptions
+     */
+    username: string;
+    
+    /**
+     * SSH password. You can use option askForPassword to prompt password before connect
+     * @type {string}
+     * @default null
+     * @memberof IConnection.sshOptions
+     */
+    password?: string;
+    
+    /**
+     * Path to private key file
+     * @type {string}
+     * @memberof IConnection.sshOptions
+     */
+    privateKeyPath?: string;
+  };
+
   // WONT BE INCLUDED IN SETTINGS
   /**
   * Connection flag. This is not a setting. It is determined at runtime
@@ -246,6 +298,19 @@ export interface IConnectionDriver {
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
   getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
+  createSshTunnel?(
+    ssh: {
+      host: string;
+      port: number;
+      username: string;
+      password?: string;
+      privateKeyPath?: string;
+    },
+    db: {
+      host: string;
+      port: number;
+    }
+  ): Promise<{ port: number }>;
 }
 
 export declare enum ContextValue {

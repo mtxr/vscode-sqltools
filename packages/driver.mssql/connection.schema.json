@@ -84,6 +84,12 @@
           ]
         }
       }
+    },
+    "ssh": {
+      "title": "Over SSH",
+      "type": "string",
+      "enum": ["Enabled", "Disabled"],
+      "default": "Disabled"
     }
   },
   "dependencies": {
@@ -219,9 +225,57 @@
           }
         }
       ]
+    },
+    "ssh": {
+      "oneOf": [
+        {
+          "properties": {
+            "ssh": {
+              "enum": ["Disabled"]
+            }
+          }
+        },
+        {
+          "properties": {
+            "ssh": {
+              "enum": ["Enabled"]
+            },
+            "sshOptions": {
+              "type": "object",
+              "title": "SSH Connection Options",
+              "properties": {
+                "host": {
+                  "type": "string",
+                  "title": "Server Address",
+                  "minLength": 1
+                },
+                "port": {
+                  "type": "integer",
+                  "title": "Port",
+                  "default": 22,
+                  "minimum": 1
+                },
+                "username": {
+                  "type": "string",
+                  "title": "Username",
+                  "minLength": 1
+                },
+                "password": {
+                  "type": "string",
+                  "title": "Password"
+                },
+                "privateKeyPath": {
+                  "type": "string",
+                  "title": "Private Key File Path"
+                }
+              },
+              "required": ["host", "username"]
+            }
+          },
+          "required": ["sshOptions"]
+        }
+      ]
     }
   },
-  "required": [
-    "connectionMethod"
-  ]
+  "required": ["connectionMethod"]
 }

@@ -14,9 +14,12 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
 
     try {
       const mysqlOptions = this.credentials.mysqlOptions || <IConnection['mysqlOptions']>{};
-      const client = MySQLXLib.getClient(
-        this.credentials.connectString ||
-        {
+      let connectionOptions: string | MySQLXLib.ConnectionOptions;
+
+      if (this.credentials.connectString) {
+        connectionOptions = this.credentials.connectString;
+      } else {
+        connectionOptions = {
           host: this.credentials.server,
           password: this.credentials.password,
           port: this.credentials.port,
@@ -24,17 +27,38 @@ export default class MySQLX extends AbstractDriver<any, any> implements IConnect
           schema: this.credentials.database,
           connectTimeout: this.credentials.connectionTimeout * 1000,
           socket: this.credentials.socketPath,
-          ...mysqlOptions
-        },
-        {
-          pooling: {
-            enabled: true,
-            maxIdleTime: this.credentials.connectionTimeout * 1000,
-            maxSize: 15,
-            queueTimeout: 30000
-          }
+          ...mysqlOptions,
+        };
+
+        if (this.credentials.ssh === 'Enabled' && this.credentials.sshOptions) {
+          const { port: localPort } = await this.createSshTunnel(
+            {
+              host: this.credentials.sshOptions.host,
+              port: this.credentials.sshOptions.port,
+              username: this.credentials.sshOptions.username,
+              password: this.credentials.sshOptions.password,
+              privateKeyPath: this.credentials.sshOptions.privateKeyPath,
+            },
+            {
+              host: this.credentials.server,
+              port: this.credentials.port,
+            }
+          );
+          Object.assign(connectionOptions, {
+            host: 'localhost',
+            port: localPort,
+          });
         }
-      );
+      }
+
+      const client = MySQLXLib.getClient(connectionOptions, {
+        pooling: {
+          enabled: true,
+          maxIdleTime: this.credentials.connectionTimeout * 1000,
+          maxSize: 15,
+          queueTimeout: 30000,
+        },
+      });
 
       await client.getSession();
       this.connection = Promise.resolve(client);

@@ -1,14 +1,23 @@
 {
-  "ui:order": ["connectionMethod", "server", "port", "socketPath", "connectString", "database", "username", "usePassword","password", "pgOptions"],
+  "ui:order": [
+    "connectionMethod",
+    "server",
+    "port",
+    "socketPath",
+    "connectString",
+    "database",
+    "username",
+    "usePassword",
+    "password",
+    "pgOptions",
+    "ssh",
+    "sshOptions"
+  ],
   "password": { "ui:widget": "password" },
   "askForPassword": { "ui:widget": "hidden" },
   "socketPath": { "ui:widget": "file" },
   "pgOptions": {
-    "ui:order": [
-      "enableSsl",
-      "ssl",
-      "*"
-    ],
+    "ui:order": ["enableSsl", "ssl", "*"],
     "statement_timeout": {
       "ui:help": "Number of milliseconds before a statement in query will time out. Default is no timeout"
     },
