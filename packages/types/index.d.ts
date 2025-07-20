@@ -311,6 +311,11 @@ export interface IConnectionDriver {
       port: number;
     }
   ): Promise<{ port: number }>;
+  /** 
+   * If implemented, will be used to provide completions based on the provided text and position.
+   * @param text The full query text
+   * @param currentOffset The position in the query where the completion is requested.
+  */
   getCompletionsForRawQuery?(text: string, currentOffset: number): Promise<CompletionItem[]>;
 }
 
