@@ -8,7 +8,7 @@ import { EXT_CONFIG_NAMESPACE, EXT_NAMESPACE } from '@sqltools/util/constants';
 import generateId from '@sqltools/util/internal-id';
 import { default as logger, createLogger } from '@sqltools/log/src';
 import { getDataPath, SESSION_FILES_DIRNAME } from '@sqltools/util/path';
-import { extractConnName, getQueryParameters } from '@sqltools/util/query';
+import { extractConnName, getQueryParameters, extractCommentVariables } from '@sqltools/util/query';
 import { isEmpty } from '@sqltools/util/validation';
 import Context from '@sqltools/vscode/context';
 import { getOrCreateEditor, getSelectedText, readInput } from '@sqltools/vscode/utils';
@@ -220,7 +220,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     const regex = Config['queryParams.regex']
     const params = getQueryParameters(query, regex);
     if (params.length > 0) {
-      const connVariables = conn.variables || {}
+      const commentVariables = extractCommentVariables(query);
+      const connVariables = { ...conn.variables || {}, ...commentVariables || {} };
       const connParams = params.filter(p => p.varName && Object.keys(connVariables).includes(p.varName))
       for (const connParam of connParams) {
         const r = new RegExp(connParam.param.replace(/([\$\[\]])/g, '\\$1'), 'g');

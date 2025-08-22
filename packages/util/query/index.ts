@@ -55,6 +55,19 @@ export function extractConnName(query: string) {
   return ((query.match(/@conn\s*(.+)$/m) || [])[1] || '').trim() || null;
 }
 
+export function extractCommentVariables(query: string): { [key: string]: string } {
+  const variables: { [key: string]: string } = {};
+  const regex = /@var\s+(.+?)\s*=\s*(.+?)\s*$/gm;
+  
+  let match;
+  while ((match = regex.exec(query)) !== null) {
+    const [, key, value] = match;
+    variables[key] = value.trim();
+  }
+  
+  return variables;
+}
+
 export function getQueryParameters(query: string, regexStr: string) {
   if (!query || !regexStr) return [];
 
