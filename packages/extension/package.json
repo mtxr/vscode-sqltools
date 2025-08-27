@@ -2,7 +2,7 @@
     "name": "sqltools",
     "displayName": "SQLTools",
     "description": "Connecting users to many of the most commonly used databases. Welcome to database management done right.",
-    "version": "0.28.5-SNAPSHOT",
+    "version": "0.28.5",
     "publisher": "mtxr",
     "license": "MIT",
     "preview": false,

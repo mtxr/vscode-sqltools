@@ -4,6 +4,11 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.7
+
+- Support connections over SSH. [#1470](https://github.com/mtxr/vscode-sqltools/pull/1470) - thanks [@d-mato](https://github.com/d-mato)
+- Change icon to resolve copyright issues.
+
 ### 0.4.4
 
 - Improvements and fixes by [@fzhem](https://github.com/fzhem) - [#1396](https://github.com/mtxr/vscode-sqltools/pull/1396) and  [#1399](https://github.com/mtxr/vscode-sqltools/pull/1399)

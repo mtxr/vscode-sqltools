@@ -6,6 +6,10 @@ See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lit
 
 ## Changelog
 
+### 0.5.3
+
+- Update `base-driver` package.
+
 ### 0.5.2
 
 - Use sqlite3@5.1.7

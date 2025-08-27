@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.6.5
+
+- Support connections over SSH. [#1470](https://github.com/mtxr/vscode-sqltools/pull/1470) - thanks [@d-mato](https://github.com/d-mato)
+
 ### 0.6.4
 
 - Use NodeJS 20.
