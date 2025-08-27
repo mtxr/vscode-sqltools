@@ -238,7 +238,7 @@
   },
   "extensions": {
     "recommendations": [
-      "ms-azuretools.vscode-docker",
+      "ms-azuretools.vscode-containers",
       "mtxr.sqltools",
       "mtxr.sqltools-driver-mssql",
       "mtxr.sqltools-driver-mysql",
