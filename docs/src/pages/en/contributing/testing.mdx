@@ -19,7 +19,7 @@ This page describes how to test changes you make to the project in a local branc
 2. Accept extension recommendations. The SQLTools extension and the driver extensions for the testing targets will need to be installed. The `ms-azuretools.vscode-containers` extension is optional but these instructions assume you install it.
 3. Go to the NPM Scripts view (e.g. run command `Explorer: Focus on NPM Scripts View`). Its tree will show one root folder, `package.json`. In this the `up` script launches containerized services that the bundled drivers can connect to. The `up:*` scripts each launch an individual service in a container, and are useful if you only want to test one driver.
 4. Run the `up` script. Example of output is shown below.
-5. Select Docker in VS Code activity bar. In the Containers section you should see five running containers.
+5. Select Containers in VS Code activity bar. In the Containers section you should see five running containers.
 6. Select SQLTools in activity bar. In the Connections section there are entries for each of the testable targets. Most connect to the port exposed by the corresponding running container. SQLite is an exception because it accesses a local .db file directly.
 7. Connect and run queries.
 
