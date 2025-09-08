@@ -154,7 +154,8 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
         host: ssh.host,
         port: ssh.port,
         username: ssh.username,
-        privateKey: fs.readFileSync(ssh.privateKeyPath),
+        ...(ssh.password ? { password: ssh.password } : {}),
+        ...(ssh.privateKeyPath ? { privateKey: fs.readFileSync(ssh.privateKeyPath) } : {}),
       },
       {
         dstAddr: db.host,
