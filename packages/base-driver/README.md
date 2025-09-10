@@ -12,6 +12,10 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.2.3
+
+- Support SSH tunnel that uses password.
+
 ### v0.2.2
 
 - createSshTunnel needs to be public rather than protected.
