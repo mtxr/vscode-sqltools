@@ -4,6 +4,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.5.7
+
+- Support password connections over SSH.
+
 ### 0.5.6
 
 - Support connections over SSH. [#1470](https://github.com/mtxr/vscode-sqltools/pull/1470) - thanks [@d-mato](https://github.com/d-mato)

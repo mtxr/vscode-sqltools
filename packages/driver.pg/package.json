@@ -2,7 +2,7 @@
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Cockroach Driver",
   "description": "SQLTools PostgreSQL/Cockroach Driver",
-  "version": "0.5.7-SNAPSHOT",
+  "version": "0.5.7",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -67,7 +67,7 @@
     "ts": "tsc -p ."
   },
   "devDependencies": {
-    "@sqltools/base-driver": "^0.2.2",
+    "@sqltools/base-driver": "^0.2.3",
     "@sqltools/types": "^0.2.0",
     "@types/lodash": "^4.14.123",
     "@types/pg": "^7.14.3",

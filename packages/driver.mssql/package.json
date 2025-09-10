@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mssql",
   "displayName": "SQLTools Microsoft SQL Server/Azure",
   "description": "SQLTools Microsoft SQL Server/Azure",
-  "version": "0.4.8-SNAPSHOT",
+  "version": "0.4.8",
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -65,7 +65,7 @@
     "ts": "tsc -p ."
   },
   "devDependencies": {
-    "@sqltools/base-driver": "^0.2.2",
+    "@sqltools/base-driver": "^0.2.3",
     "@sqltools/types": "^0.2.0",
     "@types/lodash": "^4.14.123",
     "@types/mssql": "^4.0.12",
