@@ -17,7 +17,7 @@ import { createLogger } from '@sqltools/log';
 import path from 'path';
 import fs from 'fs';
 import { URI } from 'vscode-uri';
-import { createTunnel } from 'tunnel-ssh';
+import { createTunnel, TunnelOptions } from 'tunnel-ssh';
 import { AddressInfo } from 'net';
 
 export default abstract class AbstractDriver<ConnectionType extends any, DriverOptions extends any> implements IConnectionDriver {
@@ -142,12 +142,14 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     db: {
       host: string;
       port: number;
-    }
+    },
+    tunnelOptions?: Partial<TunnelOptions>
   ) {
     const [sshTunnel] = await createTunnel(
       {
         autoClose: true,
         reconnectOnError: false,
+        ...tunnelOptions,
       },
       null,
       {
@@ -164,6 +166,9 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     );
     return {
       port: (sshTunnel.address() as AddressInfo).port,
+      close: () => {
+        sshTunnel.close();
+      },
     };
   }
 
