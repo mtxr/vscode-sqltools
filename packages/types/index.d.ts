@@ -40,6 +40,10 @@ export interface IBaseQueries {
   fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
   searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
   searchColumns: QueryBuilder<{ search: string, tables: NSDatabase.ITable[], limit?: number }, NSDatabase.IColumn>;
+  searchFunctions?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.IFunction>;
+  searchProcedures?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.IProcedure>;
+  searchTriggers?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.ITrigger>;
+  searchIndexes?: QueryBuilder<{ search: string, parent?: NSDatabase.ITable, limit?: number }, NSDatabase.IIndex>;
   // old api
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
@@ -317,13 +321,20 @@ export declare enum ContextValue {
   CONNECTION = 'connection',
   CONNECTED_CONNECTION = 'connectedConnection',
   COLUMN = 'connection.column',
+  KEY = 'connection.key',
+  CONSTRAINT = 'connection.constraint',
+  TRIGGER = 'connection.trigger',
+  INDEX = 'connection.index',
   FUNCTION = 'connection.function',
+  PROCEDURE = 'connection.procedure',
   SCHEMA = 'connection.schema',
   RESOURCE_GROUP = 'connection.resource_group',
   DATABASE = 'connection.database',
   TABLE = 'connection.table',
   VIEW = 'connection.view',
   MATERIALIZED_VIEW = 'connection.materializedView',
+  TYPE = 'connection.type',
+  SEQUENCE = 'connection.sequence',
   NO_CHILD = 'NO_CHILD',
   KEYWORDS = 'KEYWORDS',
 }
@@ -407,6 +418,16 @@ export namespace NSDatabase {
 
   export interface IProcedure extends IFunction { }
 
+  export interface IIndex extends MConnectionExplorer.IChildItem {
+    name: string;
+    parent: ITable;
+  }
+
+  export interface ITrigger extends MConnectionExplorer.IChildItem {
+    name: string;
+    parent: IDatabase | ITable;
+  }
+
   export interface IStaticCompletion {
     label: string;
     filterText?: string;
@@ -446,6 +467,7 @@ export namespace NSDatabase {
     queryParams?: { [k: string]: any };
   }
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
+  export type ParentItem = IDatabase | ISchema | ITable;
 }
 
 export interface INotifyErrorData {
