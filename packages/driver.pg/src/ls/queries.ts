@@ -14,11 +14,17 @@ SELECT
   '${ContextValue.COLUMN}' as type,
   C.TABLE_NAME AS table,
   C.DATA_TYPE AS "dataType",
-  UPPER(C.DATA_TYPE || (
-    CASE WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
-      '(' || C.CHARACTER_MAXIMUM_LENGTH || ')'
-    ) ELSE '' END
-  )) AS "detail",
+  UPPER(C.DATA_TYPE ||
+    CASE
+      WHEN C.CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+        THEN '(' || C.CHARACTER_MAXIMUM_LENGTH || ')'
+      WHEN C.DATETIME_PRECISION IS NOT NULL
+        THEN '(' || C.DATETIME_PRECISION || ')'
+      WHEN C.DATA_TYPE IN ('decimal', 'numeric', 'money')
+        THEN '(' || C.NUMERIC_PRECISION || ', ' || C.NUMERIC_SCALE || ')'
+      ELSE ''
+    END
+  ) || ', ' || CASE WHEN C.IS_NULLABLE = 'YES' THEN 'NULL' ELSE 'NOT NULL' END AS "detail",
   C.CHARACTER_MAXIMUM_LENGTH::INT AS size,
   C.TABLE_CATALOG AS database,
   C.TABLE_SCHEMA AS schema,
@@ -57,6 +63,7 @@ SELECT count(1) AS total
 FROM ${p => escapeTableName(p.table)};
 `;
 
+// NOTE this remains for backward compatibility
 const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`
 SELECT
   '${ContextValue.FUNCTION}' as type,
@@ -225,6 +232,93 @@ ORDER BY
   schema_name;
 `;
 
+const searchFunctionsAndProcedures = (type: ContextValue.FUNCTION | ContextValue.PROCEDURE): IBaseQueries['searchFunctions'] => queryFactory`
+SELECT
+  '${type}' as type,
+  f.proname AS name,
+  f.proname AS label,
+  n.nspname AS schema,
+  current_database() AS database,
+  quote_ident(n.nspname) || '.' || quote_ident(f.proname) AS signature,
+  oidvectortypes(f.proargtypes) AS args,
+  format_type(f.prorettype, null) AS "resultType",
+  '(' || oidvectortypes(f.proargtypes)::text || ')' AS detail,
+  proargnames AS "argsNames",
+  f.prosrc AS source,
+  '${type.slice(11)}' AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM
+  pg_catalog.pg_proc AS f
+INNER JOIN pg_catalog.pg_namespace AS n on n.oid = f.pronamespace
+WHERE f.prokind = '${type[11]}'
+  ${p => p.parent ? `AND n.nspname = '${p.parent.schema}'` : ''}
+  ${p => p.search ? `AND lower(f.proname) LIKE '%${p.search.toLowerCase()}%'` : 
+    p.parent ? `AND n.nspname = '${p.parent.schema}'` : ''
+  }
+ORDER BY
+  f.proname
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const searchFunctions: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.FUNCTION);
+const searchProcedures: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.PROCEDURE);
+
+const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
+SELECT
+  '${ContextValue.INDEX}' AS "type",
+  i.indexrelid::regclass::name AS "name",
+  i.indexrelid::regclass::name AS "label",
+  '(' || CASE WHEN i.indisunique THEN '' ELSE 'non-' END || 'unique)' AS "detail",
+  CASE
+    WHEN i.indisprimary THEN 'pk'
+    WHEN i.indisunique THEN 'index-uq'
+    ELSE 'index'
+  END AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM pg_catalog.pg_class AS c
+INNER JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = c.relnamespace
+JOIN pg_catalog.pg_index AS i
+  ON i.indrelid = c.oid
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(i.indexrelid::regclass::name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      `AND c.relname = '${p.parent.label}'
+      AND n.nspname = '${p.parent.schema}'`
+      : ''
+  }
+ORDER BY
+  i.indexrelid::regclass::name
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const searchTriggers: IBaseQueries['searchTriggers'] = queryFactory`
+SELECT
+  '${ContextValue.TRIGGER}' AS "type",
+  tr.tgname AS "name",
+  tr.tgname AS "label"
+FROM (
+  SELECT oid, tgrelid, tgfoid, tgname FROM pg_catalog.pg_trigger
+  UNION ALL
+  SELECT oid, null, evtfoid, evtname FROM pg_catalog.pg_event_trigger
+) AS tr
+LEFT JOIN pg_catalog.pg_class AS c
+  ON c.oid = tr.tgrelid
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(tr.tgname) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      (p.parent.type === ContextValue.DATABASE ? 'AND tr.tgrelid IS NULL' :
+        `AND tr.tgrelid::regclass::name = '${p.parent.label}'
+        AND c.relnamespace::regnamespace::name = '${p.parent.schema}'`) :
+      'AND tr.tgrelid IS NOT NULL'
+  }
+ORDER BY
+  tr.tgname
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
 export default {
   describeTable,
   countRecords,
@@ -238,4 +332,8 @@ export default {
   fetchMaterializedViews,
   searchTables,
   searchColumns,
+  searchFunctions,
+  searchProcedures,
+  searchTriggers,
+  searchIndexes
 };
