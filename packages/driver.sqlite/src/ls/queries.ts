@@ -17,6 +17,12 @@ SELECT C.name AS label,
   C.type AS dataType,
   C."notnull" AS isNullable,
   C.pk AS isPk,
+  UPPER(
+    CONCAT(
+      C.type, ', ', 
+      CASE WHEN "NOTNULL" THEN 'NOT ' ELSE '' END, 'NULL'
+    )
+  ) AS detail,
   '${ContextValue.COLUMN}' as type
 FROM pragma_table_info('${p => p.label}') AS C
 ORDER BY cid ASC
@@ -79,6 +85,46 @@ ORDER BY C.name ASC,
 LIMIT ${p => p.limit || 100}
 `;
 
+const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
+SELECT
+  '${ContextValue.INDEX}' AS "type",
+  ix.name as "name",
+  ix.name as "label",
+  '(' || CASE WHEN ix."unique" THEN '' ELSE 'non-' END || 'unique' || ')' as detail,
+  CASE
+    WHEN ix.origin = 'pk' THEN 'pk'
+    WHEN NOT ix.origin = 'u' THEN 'index-uq'
+    ELSE 'index'
+  END AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"  
+FROM
+  sqlite_schema AS sc,
+  pragma_index_list(sc.name) AS ix
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(ix.name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ? `AND sc.tbl_name = '${p.parent.label}'` : ''
+  }
+ORDER BY
+  ix.name
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const searchTriggers: IBaseQueries['searchTriggers'] = queryFactory`
+SELECT
+  '${ContextValue.TRIGGER}' AS "type",
+  tr.name AS "name",
+  tr.name AS "label"
+FROM sqlite_master AS tr
+WHERE tr.type = 'trigger'
+  ${p => p.search ? `AND LOWER(tr.name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ? `AND tr.tbl_name = '${p.parent.label}'` : ''
+  }
+ORDER BY
+  tr.name
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
 export default {
   describeTable,
   countRecords,
@@ -87,8 +133,11 @@ export default {
   fetchTables,
   fetchViews,
   searchTables,
-  searchColumns
+  searchColumns,
+  searchIndexes,
+  searchTriggers
 }
+
 // export default {
 //   listFks: `PRAGMA foreign_key_list(\':table\');`
 // } as IBaseQueries;
