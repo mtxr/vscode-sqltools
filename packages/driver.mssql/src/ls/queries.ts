@@ -21,11 +21,19 @@ SELECT
   '${ContextValue.COLUMN}' as "type",
   C.TABLE_NAME AS "table",
   C.DATA_TYPE AS "dataType",
-  UPPER(C.DATA_TYPE + (
-    CASE WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
-      '(' + CONVERT(VARCHAR, C.CHARACTER_MAXIMUM_LENGTH) + ')'
-    ) ELSE '' END
-  )) AS "detail",
+  UPPER(C.DATA_TYPE +
+    CASE
+      WHEN C.CHARACTER_MAXIMUM_LENGTH = -1
+        THEN IIF(C.DATA_TYPE = 'XML', '', '(MAX)')
+      WHEN C.CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+        THEN '(' + CONVERT(VARCHAR, C.CHARACTER_MAXIMUM_LENGTH) + ')'
+      WHEN C.DATETIME_PRECISION IS NOT NULL
+        THEN '(' + CONVERT(VARCHAR, C.DATETIME_PRECISION) + ')'
+      WHEN C.DATA_TYPE IN ('decimal', 'numeric', 'money')
+        THEN '(' + CONVERT(VARCHAR, C.NUMERIC_PRECISION) + ', ' + CONVERT(VARCHAR, C.NUMERIC_SCALE) + ')'
+      ELSE ''
+    END
+  ) + ', ' + IIF(C.IS_NULLABLE = 'YES', 'NULL', 'NOT NULL') AS "detail",
   C.CHARACTER_MAXIMUM_LENGTH AS size,
   C.TABLE_CATALOG AS "database",
   C.TABLE_SCHEMA AS "schema",
@@ -112,7 +120,7 @@ SELECT name AS label,
   '${ContextValue.DATABASE}' AS "type",
   'database' AS "detail"
 FROM sys.databases
-WHERE name NOT IN ('master', 'model', 'msdb', 'tempdb')
+/* WHERE name NOT IN ('master', 'model', 'msdb', 'tempdb') */
 `;
 export const searchTables: IBaseQueries['searchTables'] = queryFactory`
 SELECT
@@ -187,59 +195,112 @@ OFFSET 0 ROWS
 FETCH NEXT ${p => p.limit || 100} ROWS ONLY
 `;
 
+const searchFunctionsAndProcedures = (type: ContextValue.FUNCTION | ContextValue.PROCEDURE): IBaseQueries['searchFunctions'] => queryFactory`
+SELECT
+  ${p => p.search ? `TOP ${p.limit || 100}` : ''}
+  '${type}' AS "type",
+  f.specific_name AS "name",
+  f.specific_name AS "label",
+  f.specific_schema AS "schema",
+  f.specific_catalog AS "database",
+  calc.quoted_signature AS "signature",
+  COALESCE(STUFF(p.args, 1, 2, N''), N'') AS "args",
+  f.data_type AS "resultType",
+  '(' + COALESCE(STUFF(p.args, 1, 2, N''), N'') + ')' AS "detail",
+  '${type.slice(11)}' AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM ${p => p.parent ? `${escapeTableName({ database: p.parent.database, schema: "INFORMATION_SCHEMA", label: "ROUTINES" })}` : 'INFORMATION_SCHEMA.ROUTINES'} AS f
+  CROSS APPLY (SELECT
+    CONCAT(
+      f.specific_catalog, '.',
+      f.specific_schema, '.',
+      f.specific_name
+    ) AS "signature",
+    CONCAT(
+      QUOTENAME(f.specific_catalog), '.',
+      QUOTENAME(f.specific_schema), '.',
+      QUOTENAME(f.specific_name)
+    ) AS "quoted_signature"
+  ) AS calc
+  OUTER APPLY (
+    SELECT ', ' + pm.data_type
+    FROM ${p => p.parent ? `${escapeTableName({ database: p.parent.database, schema: "INFORMATION_SCHEMA", label: "PARAMETERS" })}` : 'INFORMATION_SCHEMA.PARAMETERS'} AS pm
+    WHERE pm.specific_name = f.specific_name
+      AND pm.specific_schema = f.specific_schema
+      AND pm.specific_catalog = f.specific_catalog
+    ORDER BY pm.ORDINAL_POSITION
+    FOR XML PATH('')
+  ) AS p (args)
+WHERE
+  f.routine_schema NOT IN (
+    'information_schema',
+    'performance_schema',
+    'mysql',
+    'sys'
+  )
+  AND CHARINDEX(LOWER(f.routine_type), '${type}') > 0 
+  ${p => p.search ? `AND LOWER(f.specific_name) LIKE '%${p.search}%'` : 
+    p.parent ? `AND f.specific_schema = '${p.parent.schema}'` : ''
+  }
+ORDER BY
+  f.specific_name;
+`;
 
-// export default {
-//   fetchFunctions: `
-// SELECT
-//   f.specific_name AS name,
-//   f.routine_schema AS dbSchema,
-//   f.routine_catalog AS dbName,
-//   (
-//     ISNULL(f.routine_schema, '') +
-//     ISNULL('.', '') +
-//     ISNULL(f.routine_name, '')
-//   ) as signature,
-//   COALESCE(STUFF(
-//     (ISNULL(', ' + p.data_type, '')), 1, 2, N''
-//   ), N'') AS args,
-//   f.data_type AS resultType,
-//   (
-//     ISNULL(f.routine_catalog, '') +
-//     ISNULL('${TREE_SEP}', '') +
-//     ISNULL(f.routine_schema, '') +
-//     ISNULL('${TREE_SEP}', '') +
-//     (
-//       CASE
-//         WHEN f.routine_type = 'PROCEDURE' THEN 'procedures'
-//         ELSE 'functions'
-//       END
-//     ) +
-//     ISNULL('${TREE_SEP}', '') +
-//     ISNULL(f.specific_name, '')
-//   ) AS tree
-// FROM
-//   information_schema.routines AS f
-//   LEFT JOIN information_schema.parameters AS p ON (
-//     f.specific_name = p.specific_name
-//     AND f.routine_schema = p.specific_schema
-//     AND f.routine_catalog = p.specific_catalog
-//   )
-// WHERE
-//   f.routine_schema NOT IN (
-//     'information_schema',
-//     'performance_schema',
-//     'mysql',
-//     'sys'
-//   )
-// GROUP BY
-//   f.routine_catalog,
-//   f.specific_name,
-//   f.routine_schema,
-//   f.routine_name,
-//   f.data_type,
-//   f.routine_type,
-//   p.data_type
-// ORDER BY
-//   f.specific_name;
-// `
-// } as IBaseQueries;
+export const searchFunctions: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.FUNCTION);
+export const searchProcedures: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.PROCEDURE);
+
+export const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
+SELECT
+  ${p => p.search ? `TOP ${p.limit || 100}` : ''}
+  '${ContextValue.INDEX}' AS "type",
+  ix.name AS "name",
+  ix.name AS "label",
+  CONCAT(
+    '(', LOWER(ix.type_desc COLLATE database_default), ', ',
+    IIF(ix.is_unique = 1, '', 'non-'), 'unique)'
+  ) AS "detail",
+  CASE
+    WHEN ix.is_primary_key = 1 THEN 'pk'
+    WHEN ix.is_unique = 1 THEN 'index-uq'
+    ELSE 'index'
+  END AS "iconName"
+FROM ${p => p.parent ? escapeTableName({ database: p.parent.database, schema: 'sys', label: 'indexes' }) : 'sys.indexes'} AS ix
+JOIN ${p => p.parent ? escapeTableName({ database: p.parent.database, schema: 'sys', label: 'tables' }) : 'sys.tables'} AS tb
+  ON tb.object_id = ix.object_id
+WHERE ix.name IS NOT NULL
+  ${p => p.search ?
+    `AND LOWER(ix.name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      `AND OBJECT_NAME(ix.object_id, db_id('${p.parent.database}')) = '${p.parent.label}'
+      AND OBJECT_SCHEMA_NAME(ix.object_id, db_id('${p.parent.database}')) = '${p.parent.schema}'`
+      : ''
+  }
+ORDER BY
+  ix.name
+`;
+
+export const searchTriggers: IBaseQueries['searchTriggers'] = queryFactory`
+SELECT
+  ${p => p.search ? `TOP ${p.limit || 100}` : ''}
+  '${ContextValue.TRIGGER}' AS "type",
+  tr.name AS "name",
+  tr.name AS "label"
+FROM (
+  SELECT name COLLATE DATABASE_DEFAULT AS "name", parent_class, parent_id
+  FROM ${p => p.parent ? escapeTableName({ database: p.parent.database, schema: 'sys', label: 'triggers' }) : 'sys.triggers'}
+  UNION
+  SELECT name COLLATE DATABASE_DEFAULT AS "name", parent_class, parent_id
+  FROM sys.server_triggers
+) AS tr
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(tr.name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      (p.parent.type === ContextValue.DATABASE ? 'AND tr.parent_class = 0' :
+        `AND OBJECT_NAME(tr.parent_id, db_id('${p.parent.database}')) = '${p.parent.label}'
+        AND OBJECT_SCHEMA_NAME(tr.parent_id, db_id('${p.parent.database}')) = '${p.parent.schema}'`) :
+      'AND tr.parent_class = 100'
+  }
+ORDER BY
+  tr.name
+`;

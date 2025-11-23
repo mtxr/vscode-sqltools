@@ -11,6 +11,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
   queries = Queries;
 
   private retryCount = 0;
+  private SYSTEM_DATABASES = ['master', 'model', 'msdb', 'tempdb']
   public async open(encryptOverride?: boolean) {
     if (this.connection) {
       return this.connection;
@@ -154,22 +155,40 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     switch (item.type) {
       case ContextValue.CONNECTION:
       case ContextValue.CONNECTED_CONNECTION:
-        return this.queryResults(this.queries.fetchDatabases());
-      case ContextValue.TABLE:
-      case ContextValue.VIEW:
-        return this.getColumns(item as NSDatabase.ITable);
+        const databases = await this.queryResults(this.queries.fetchDatabases());
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'System databases', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.DATABASE },
+          ...databases.filter(database => !this.SYSTEM_DATABASES.includes(database.label)),
+          { label: 'Instance triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'server-process', childType: ContextValue.TRIGGER },
+        ];
       case ContextValue.DATABASE:
         return <MConnectionExplorer.IChildItem[]>[
           { label: 'Schemas', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.SCHEMA },
+          { label: 'Database triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TRIGGER },
         ];
-      case ContextValue.RESOURCE_GROUP:
-        return this.getChildrenForGroup({ item, parent });
       case ContextValue.SCHEMA:
         return <MConnectionExplorer.IChildItem[]>[
           { label: 'Tables', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TABLE },
           { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
-          // { label: 'Functions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.FUNCTION },
+          { label: 'Functions', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.FUNCTION },
+          { label: 'Procedures', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.PROCEDURE },
         ];
+      case ContextValue.TABLE:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Columns', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.COLUMN },
+          // { label: 'Keys', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.KEY },
+          // { label: 'Constraints', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.CONSTRAINT },
+          { label: 'Indexes', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.INDEX },
+          { label: 'Triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TRIGGER },
+        ];
+      case ContextValue.VIEW:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Columns', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.COLUMN },
+          { label: 'Indexes', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.INDEX },
+          { label: 'Triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TRIGGER },
+        ];
+      case ContextValue.RESOURCE_GROUP:
+        return this.getChildrenForGroup({ item, parent });
     }
     return [];
   }
@@ -183,6 +202,9 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
   }
   private async getChildrenForGroup({ parent, item }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.childType) {
+      case ContextValue.DATABASE:
+        const databases = await this.queryResults(this.queries.fetchDatabases());
+        return databases.filter(database => this.SYSTEM_DATABASES.includes(database.label));
       case ContextValue.SCHEMA:
         try {
           const result = await this.queryResults(
@@ -197,8 +219,23 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
         return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema));
       case ContextValue.VIEW:
         return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema));
+      case ContextValue.COLUMN:
+        return this.getColumns(parent as NSDatabase.ITable);
       case ContextValue.FUNCTION:
-        return []; //this.queryResults(this.queries.fetchFunctions(parent as NSDatabase.ISchema));
+        return this.queryResults(this.queries.searchFunctions({search: null, parent: parent as NSDatabase.ParentItem}));
+      case ContextValue.PROCEDURE:
+        return this.queryResults(this.queries.searchProcedures({search: null, parent: parent as NSDatabase.ParentItem}));
+      case ContextValue.INDEX:
+        return this.getIndexes(parent as NSDatabase.ITable)
+      case ContextValue.TRIGGER:
+        if (parent.type === ContextValue.CONNECTION || parent.type === ContextValue.CONNECTED_CONNECTION)
+          return this.getTriggers();
+        else
+          return this.getTriggers(parent as (NSDatabase.IDatabase | NSDatabase.ITable));
+      // case ContextValue.KEY:
+      //   return [];
+      // case ContextValue.CONSTRAINT:
+      //   return [];
     }
     return [];
   }
@@ -213,12 +250,44 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
     }));
   }
 
+  private async getIndexes(parent?: NSDatabase.ITable): Promise<NSDatabase.IIndex[]> {
+    const results = await this.queryResults(this.queries.searchIndexes({search: null, parent: parent as NSDatabase.ITable}));
+    return results.map(index => ({
+      ...index,
+      childType: ContextValue.NO_CHILD,
+      database: parent ? parent.database : '',
+      schema: parent ? parent.schema : '',
+      parent: parent,
+    }));
+  }
+
+  private async getTriggers(parent?: NSDatabase.IDatabase | NSDatabase.ITable): Promise<NSDatabase.ITrigger[]> {
+    const results = await this.queryResults(this.queries.searchTriggers({search: null, parent: parent}));
+    return results.map(trigger => ({
+      ...trigger,
+      iconId: 'symbol-event',
+      childType: ContextValue.NO_CHILD,
+      database: parent ? parent.database : '',
+      schema: parent ? parent.schema : '',
+      parent: parent ?? null,
+    }));
+  }
+
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
+      case ContextValue.VIEW:
         return this.queryResults(this.queries.searchTables({ search }));
       case ContextValue.COLUMN:
         return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
+      case ContextValue.FUNCTION:
+        return this.queryResults(this.queries.searchFunctions({ search, ...extraParams }));
+      case ContextValue.PROCEDURE:
+        return this.queryResults(this.queries.searchProcedures({ search, ...extraParams }));
+      case ContextValue.INDEX:
+        return this.queryResults(this.queries.searchIndexes({ search, ...extraParams }));
+      case ContextValue.TRIGGER:
+        return this.queryResults(this.queries.searchTriggers({ search, ...extraParams }));
     }
   }
 
