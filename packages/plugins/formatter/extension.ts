@@ -1,5 +1,6 @@
 import { createLogger } from '@sqltools/log/src';
 import { TextEditor, TextEditorEdit, commands, SnippetString, env, workspace } from 'vscode';
+import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { formatInsertQuery, format as queryFormat } from '@sqltools/util/query';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
@@ -62,6 +63,15 @@ function copyMessagesHandler(item: { value: string } | string, items?: ({ value:
   return env.clipboard.writeText(copyText);
 }
 
+async function generateDefinitionQueryHandler(item: SidebarItem) {
+  const definitionQuery: string = await commands.executeCommand(`${EXT_NAMESPACE}.getDefinitionQueryForItem`, {
+    conn: item.conn,
+    item: item.metadata
+  })
+  const document = await vscode.workspace.openTextDocument({ language: "sql", content: definitionQuery });
+  await vscode.window.showTextDocument(document);
+}
+
 async function generateInsertQueryHandler(item: SidebarItem) {
   const columns: NSDatabase.IColumn[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
     conn: item.conn,
@@ -85,6 +95,7 @@ const register = (extension: IExtension) => {
     .registerCommand(`copyText`, copyTextHandler)
     .registerCommand(`copyMessages`, copyMessagesHandler)
     .registerCommand(`generateInsertQuery`, generateInsertQueryHandler)
+    .registerCommand(`generateDefinitionQuery`, generateDefinitionQueryHandler)
     .registerCommand(`newSqlFile`, newSqlFileHandler);
 }
 

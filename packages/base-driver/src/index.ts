@@ -115,6 +115,11 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return Promise.resolve([]);
   }
 
+  public getDefinitionForItem(_params: { item: NSDatabase.DefinableItem }): Promise<string> {
+    this.log.error(`###### Attention ######\getDefinitionForItem not implemented for ${this.credentials.driver}\n####################`);
+    return Promise.resolve("");
+  }
+
   public async toAbsolutePath(fsPath: string) {
     if (!path.isAbsolute(fsPath) && /\$\{workspaceFolder:(.+)}/g.test(fsPath)) {
       const workspaceName = fsPath.match(/\$\{workspaceFolder:(.+)}/)[1];

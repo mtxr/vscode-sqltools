@@ -19,7 +19,7 @@ import { promises as fs } from 'fs';
 import { file } from 'tempy';
 import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, ThemeIcon, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
-import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
 import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
@@ -63,6 +63,13 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   private ext_getChildrenForTreeItem: RequestHandler<typeof GetChildrenForTreeItemRequest> = async (params) => {
     return this.client.sendRequest(
       GetChildrenForTreeItemRequest,
+      params,
+    );
+  }
+
+  private ext_getDefinitionQueryForItem: RequestHandler<typeof GetDefinitionQueryForItemRequest> = async (params) => {
+    return this.client.sendRequest(
+      GetDefinitionQueryForItemRequest,
       params,
     );
   }
@@ -800,6 +807,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`copyTextFromConsoleMessages`, this.ext_copyTextFromConsoleMessages)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)
+      .registerCommand(`getDefinitionQueryForItem`, this.ext_getDefinitionQueryForItem)
       .registerCommand(`getInsertQuery`, this.ext_getInsertQuery);
 
     this.errorHandler = extension.errorHandler;

@@ -44,6 +44,13 @@ export interface IBaseQueries {
   searchProcedures?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.IProcedure>;
   searchTriggers?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.ITrigger>;
   searchIndexes?: QueryBuilder<{ search: string, parent?: NSDatabase.ITable, limit?: number }, NSDatabase.IIndex>;
+  // definitions
+  fetchTableDefinition?: QueryBuilder<NSDatabase.ITable, string>;
+  fetchViewDefinition?: QueryBuilder<NSDatabase.ITable, string>;
+  fetchFunctionDefinition?: QueryBuilder<NSDatabase.IFunction, string>;
+  fetchProcedureDefinition?: QueryBuilder<NSDatabase.IProcedure, string>;
+  fetchTriggerDefinition?: QueryBuilder<NSDatabase.ITrigger, string>;
+  fetchIndexDefinition?: QueryBuilder<NSDatabase.IIndex, string>;
   // old api
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
@@ -301,6 +308,7 @@ export interface IConnectionDriver {
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
+  getDefinitionForItem?(params: { item: NSDatabase.DefinableItem }): Promise<string>;
   getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
   createSshTunnel?(
     ssh: {
@@ -468,6 +476,7 @@ export namespace NSDatabase {
   }
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
   export type ParentItem = IDatabase | ISchema | ITable;
+  export type DefinableItem = ITable | IFunction | IProcedure | IIndex | ITrigger;
 }
 
 export interface INotifyErrorData {

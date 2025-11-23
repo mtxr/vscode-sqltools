@@ -3,7 +3,7 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, ReleaseResultsRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ReleaseResultsRequest } from './contracts';
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
@@ -234,6 +234,16 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     return c.getChildrenForItem(params);
   };
 
+  private GetDefinitionQueryForItemHandler: RequestHandler<typeof GetDefinitionQueryForItemRequest> = async (req) => {
+    if (!req || !req.conn) {
+      return "";
+    }
+    const { conn, ...params } = req;
+    let c = await this.getConnectionInstance(conn);
+    if (!c) return "";
+    return c.getDefinitionForItem(params);
+  };
+
   private GetInsertQueryHandler: RequestHandler<typeof GetInsertQueryRequest> = async (req) => {
     if (!req || !req.conn) {
       return "";
@@ -257,6 +267,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server.onRequest(TestConnectionRequest, this.testConnectionHandler);
     this.server.onRequest(GetConnectionsRequest, this.clientRequestConnectionHandler);
     this.server.onRequest(GetChildrenForTreeItemRequest, this.GetChildrenForTreeItemHandler);
+    this.server.onRequest(GetDefinitionQueryForItemRequest, this.GetDefinitionQueryForItemHandler);
     this.server.onRequest(GetInsertQueryRequest, this.GetInsertQueryHandler);
     this.server.addOnDidChangeConfigurationHooks(() => this._autoConnectIfActive());
   }

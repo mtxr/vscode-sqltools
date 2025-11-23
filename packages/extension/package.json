@@ -304,6 +304,15 @@
                 }
             },
             {
+                "title": "Generate Definition Query",
+                "command": "sqltools.generateDefinitionQuery",
+                "category": "SQLTools Sidebar",
+                "icon": {
+                    "light": "icons/definition-light.svg",
+                    "dark": "icons/definition-dark.svg"
+                }
+            },
+            {
                 "title": "Refresh",
                 "command": "sqltools.refreshTree",
                 "category": "SQLTools Sidebar",
@@ -1051,6 +1060,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.generateDefinitionQuery",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.attachFileToConnection",
                     "when": "!sqltools.file.connectionAttached && editorLangId == sql"
                 },
@@ -1158,6 +1171,11 @@
                     "group": "navigation@3"
                 },
                 {
+                    "command": "sqltools.generateDefinitionQuery",
+                    "when": "!editorReadonly && view == sqltoolsViewConnectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView|function|procedure|index|trigger)$/",
+                    "group": "navigation@4"
+                },
+                {
                     "command": "sqltools.insertText",
                     "when": "!editorReadonly && view == sqltoolsViewConnectionExplorer && viewItem =~ /^connection\\.(.+)/",
                     "group": "sqltools.connectionExplorer.edit@0"
@@ -1185,6 +1203,11 @@
                 {
                     "command": "sqltools.generateInsertQuery",
                     "when": "view == sqltoolsViewConnectionExplorer && viewItem =~ /^connection\\.(table|view)$/",
+                    "group": "inline@0"
+                },
+                {
+                    "command": "sqltools.generateDefinitionQuery",
+                    "when": "view == sqltoolsViewConnectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView|function|procedure|index|trigger)$/",
                     "group": "inline@0"
                 },
                 {
