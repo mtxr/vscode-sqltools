@@ -24,16 +24,16 @@ SELECT
     CONCAT(
       C.DATA_TYPE,
       CASE
-        WHEN C.DATA_TYPE = 'text' THEN ''
-        ELSE (
-          CASE
-            WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
-              CONCAT('(', C.CHARACTER_MAXIMUM_LENGTH, ')')
-            )
-            ELSE ''
-          END
-        )
-      END
+        WHEN C.DATA_TYPE NOT LIKE '%text' AND C.CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+          THEN CONCAT('(', CONVERT(C.CHARACTER_MAXIMUM_LENGTH, CHAR), ')')
+        WHEN C.DATETIME_PRECISION IS NOT NULL
+          THEN CONCAT('(', CONVERT(C.DATETIME_PRECISION, CHAR), ')')
+        WHEN C.DATA_TYPE IN ('decimal')
+          THEN CONCAT('(', CONVERT(C.NUMERIC_PRECISION, CHAR), ', ', CONVERT(C.NUMERIC_SCALE, CHAR), ')')
+        ELSE ''
+      END,
+      ', ',
+      CASE WHEN C.IS_NULLABLE = 'YES' THEN 'NULL' ELSE 'NOT NULL' END
     )
   ) AS CHAR CHARACTER SET utf8) AS "detail",
   C.TABLE_CATALOG AS "catalog",
@@ -182,84 +182,97 @@ ORDER BY
 LIMIT ${p => p.limit || 100}
 
 `;
-// export default {
-//   fetchFunctions: `
-// SELECT
-//   f.specific_name AS name,
-//   f.routine_schema AS dbschema,
-//   f.routine_schema AS dbname,
-//   concat(
-//     case
-//       WHEN f.routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_schema, '\`')
-//       ELSE f.routine_schema
-//     end,
-//     '.',
-//     case
-//       WHEN f.routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_name, '\`')
-//       ELSE f.routine_name
-//     end
-//   ) as signature,
-//   GROUP_CONCAT(p.data_type) as args,
-//   f.data_type AS resultType,
-//   CONCAT(
-//     f.routine_schema,
-//     '${TREE_SEP}',
-//     'functions',
-//     '${TREE_SEP}',
-//     f.specific_name
-//   ) AS tree,
-//   f.routine_definition AS source
-// FROM
-//   information_schema.routines AS f
-//   LEFT JOIN information_schema.parameters AS p ON (
-//     f.specific_name = p.specific_name
-//     AND f.routine_schema = p.specific_schema
-//     AND f.routine_catalog = p.specific_catalog
-//   )
-// WHERE
-//   f.routine_schema NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
-// GROUP BY
-//   f.specific_name,
-//   f.routine_schema,
-//   f.routine_name,
-//   f.data_type,
-//   f.routine_definition
-// ORDER BY
-//   f.specific_name;`,
-//   fetchFunctionsV55Older: `
-// SELECT
-//   f.specific_name AS name,
-//   f.routine_schema AS dbschema,
-//   f.routine_schema AS dbname,
-//   concat(
-//     case
-//       WHEN f.routine_schema REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_schema, '\`')
-//       ELSE f.routine_schema
-//     end,
-//     '.',
-//     case
-//       WHEN f.routine_name REGEXP '[^0-9a-zA-Z$_]' then concat('\`', f.routine_name, '\`')
-//       ELSE f.routine_name
-//     end
-//   ) as signature,
-//   CONCAT(
-//     f.routine_schema,
-//     '${TREE_SEP}',
-//     'functions',
-//     '${TREE_SEP}',
-//     f.specific_name
-//   ) AS tree,
-//   f.routine_definition AS source
-// FROM
-//   information_schema.routines AS f
-// WHERE
-//   f.routine_schema NOT IN ('information_schema', 'performance_schema', 'mysql', 'sys')
-// GROUP BY
-//   f.specific_name,
-//   f.routine_schema,
-//   f.routine_name,
-//   f.routine_definition
-// ORDER BY
-//   f.specific_name;
-// `
-// } as IBaseQueries;
+
+const searchFunctionsAndProcedures = (type: ContextValue.FUNCTION | ContextValue.PROCEDURE): IBaseQueries['searchFunctions'] => queryFactory`
+SELECT
+  '${type}' AS "type",
+  f.ROUTINE_NAME AS "name",
+  f.ROUTINE_NAME AS "label",
+  '' AS "schema",
+  f.ROUTINE_SCHEMA AS "database",
+  f.ROUTINE_NAME AS signature,
+  p.args AS "args",
+  f.data_type AS "resultType",
+  CONCAT('(', IFNULL(p.args, ''), ')')  AS "detail",
+  '${type.slice(11)}' AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM INFORMATION_SCHEMA.ROUTINES AS f
+LEFT JOIN (
+	SELECT
+	  SPECIFIC_SCHEMA,
+    SPECIFIC_NAME,
+    TRIM(GROUP_CONCAT(' ', DATA_TYPE)) AS "args"
+	FROM INFORMATION_SCHEMA.PARAMETERS
+  WHERE ORDINAL_POSITION > 0
+	GROUP BY
+      SPECIFIC_SCHEMA,
+      SPECIFIC_NAME
+) AS p
+  ON p.SPECIFIC_SCHEMA = f.ROUTINE_SCHEMA
+  AND p.SPECIFIC_NAME = f.ROUTINE_NAME
+WHERE
+  f.routine_schema NOT IN (
+    'information_schema',
+    'performance_schema',
+    'mysql',
+    'sys'
+  )
+  AND LOCATE(LOWER(f.ROUTINE_TYPE), '${type}') > 0 
+  ${p => p.search ? `AND LOWER(f.SPECIFIC_NAME) LIKE '%${p.search}%'` :
+    p.parent ? `AND f.ROUTINE_SCHEMA = '${p.parent.database}'` : ''
+  }
+ORDER BY
+  f.ROUTINE_NAME;
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+export const searchFunctions: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.FUNCTION);
+export const searchProcedures: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.PROCEDURE);
+
+export const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
+SELECT
+  DISTINCT
+  '${ContextValue.INDEX}' AS "type",
+  ix.INDEX_NAME AS "name",
+  ix.INDEX_NAME AS "label",
+  CONCAT(
+    '(',
+    CASE WHEN ix.NON_UNIQUE THEN 'non-' ELSE '' END, 'unique',
+    ')'
+  ) AS "detail",
+  CASE
+    WHEN ix.INDEX_NAME = 'PRIMARY' THEN 'pk'
+    WHEN NOT ix.NON_UNIQUE THEN 'index-uq'
+    ELSE 'index'
+  END AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM INFORMATION_SCHEMA.STATISTICS AS ix
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(ix.INDEX_NAME) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      `AND ix.TABLE_NAME = '${p.parent.label}'
+      AND ix.TABLE_SCHEMA = '${p.parent.database}'`
+      : ''
+  }
+ORDER BY
+  ix.INDEX_NAME
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+export const searchTriggers: IBaseQueries['searchTriggers'] = queryFactory`
+SELECT
+  '${ContextValue.TRIGGER}' AS "type",
+  tr.TRIGGER_NAME AS "name",
+  tr.TRIGGER_NAME AS "label"
+FROM INFORMATION_SCHEMA.TRIGGERS AS tr
+WHERE 1=1
+  ${p => p.search ? `AND LOWER(tr.TRIGGER_NAME) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ? `
+    AND tr.EVENT_OBJECT_TABLE = '${p.parent.label}'
+    AND tr.EVENT_OBJECT_SCHEMA = '${p.parent.database}'` : ''
+  }
+ORDER BY
+  tr.TRIGGER_NAME
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
