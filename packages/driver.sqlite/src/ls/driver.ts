@@ -3,7 +3,7 @@ import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
 import * as mkdir from 'make-dir';
 import { dirname } from 'path';
-import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
+import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0, IExpectedResult } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
@@ -146,6 +146,26 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
       //   return [];
     }
     return [];
+  }
+  
+  public async getDefinitionForItem({ item }: Arg0<IConnectionDriver['getDefinitionForItem']>) {
+    let query: IExpectedResult<string>;
+    switch (item.type) {
+      case ContextValue.TABLE:
+        query = this.queries.fetchTableDefinition(item as NSDatabase.ITable);
+        break;
+      case ContextValue.VIEW:
+        query = this.queries.fetchViewDefinition(item as unknown as NSDatabase.ITable);
+        break;
+      case ContextValue.INDEX:
+        query = this.queries.fetchIndexDefinition(item as NSDatabase.IIndex);
+        break;
+      case ContextValue.TRIGGER:
+        query = this.queries.fetchTriggerDefinition(item as NSDatabase.ITrigger);
+        break;
+    }
+    const result = await this.singleQuery(query, {});
+    return result.results[0].definition;
   }
 
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {

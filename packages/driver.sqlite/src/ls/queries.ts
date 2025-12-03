@@ -125,6 +125,35 @@ ORDER BY
 ${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
 `;
 
+const fetchTableDefinition: IBaseQueries['fetchTableDefinition'] = queryFactory`
+SELECT sql AS "definition"
+FROM sqlite_schema
+WHERE type = 'table'
+  AND name = '${item => item.label}'
+`;
+
+const fetchViewDefinition: IBaseQueries['fetchViewDefinition'] = queryFactory`
+SELECT sql AS "definition"
+FROM sqlite_schema
+WHERE type = 'view'
+  AND name = '${item => item.label}'
+`;
+
+const fetchIndexDefinition: IBaseQueries['fetchIndexDefinition'] = queryFactory`
+SELECT
+  COALESCE(
+    (SELECT sql FROM sqlite_schema WHERE type = 'index' AND name = '${item => item.label}'),
+    (SELECT sql FROM sqlite_schema WHERE type = 'table' AND name = '${item => item.parent.label}')
+  ) AS "definition"
+`;
+
+const fetchTriggerDefinition: IBaseQueries['fetchTriggerDefinition'] = queryFactory`
+SELECT sql AS "definition"
+FROM sqlite_schema
+WHERE type = 'trigger'
+  AND name = '${item => item.label}'
+`;
+
 export default {
   describeTable,
   countRecords,
@@ -135,7 +164,11 @@ export default {
   searchTables,
   searchColumns,
   searchIndexes,
-  searchTriggers
+  searchTriggers,
+  fetchTableDefinition,
+  fetchViewDefinition,
+  fetchIndexDefinition,
+  fetchTriggerDefinition
 }
 
 // export default {
