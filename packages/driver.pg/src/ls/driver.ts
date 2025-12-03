@@ -1,6 +1,6 @@
 import { Pool, PoolConfig, PoolClient, types, FieldDef } from 'pg';
 import Queries from './queries';
-import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer } from '@sqltools/types';
+import { IConnectionDriver, NSDatabase, Arg0, ContextValue, MConnectionExplorer, IExpectedResult } from '@sqltools/types';
 import AbstractDriver from '@sqltools/base-driver';
 import fs from 'fs';
 import zipObject from 'lodash/zipObject';
@@ -277,6 +277,33 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       //   return [];
       }
     return [];
+  }
+
+  public async getDefinitionForItem({ item }: Arg0<IConnectionDriver['getDefinitionForItem']>) {
+    let query: IExpectedResult<string>;
+    switch (item.type) {
+      case ContextValue.TABLE:
+        query = this.queries.fetchTableDefinition(item as NSDatabase.ITable);
+        break;
+      case ContextValue.VIEW:
+      case ContextValue.MATERIALIZED_VIEW:
+        query = this.queries.fetchViewDefinition(item as unknown as NSDatabase.ITable);
+        break;
+      case ContextValue.FUNCTION:
+        query = this.queries.fetchFunctionDefinition(item as NSDatabase.IFunction);
+        break;
+      case ContextValue.PROCEDURE:
+        query = this.queries.fetchProcedureDefinition(item as NSDatabase.IProcedure);
+        break;
+      case ContextValue.INDEX:
+        query = this.queries.fetchIndexDefinition(item as NSDatabase.IIndex);
+        break;
+      case ContextValue.TRIGGER:
+        query = this.queries.fetchTriggerDefinition(item as NSDatabase.ITrigger);
+        break;
+    }
+    const result = await this.singleQuery(query, {});
+    return result.results[0].definition;
   }
 
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
