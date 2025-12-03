@@ -3,7 +3,7 @@ import * as Queries from './queries';
 import MySQLX from './xprotocol';
 import MySQLDefault from './default';
 // import compareVersions from 'compare-versions';
-import { IConnectionDriver, IConnection, NSDatabase, Arg0, MConnectionExplorer, ContextValue } from '@sqltools/types';
+import { IConnectionDriver, IConnection, NSDatabase, Arg0, MConnectionExplorer, ContextValue, IExpectedResult } from '@sqltools/types';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
 
@@ -104,6 +104,40 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     }
     return [];
   }
+
+  public async getDefinitionForItem({ item }: Arg0<IConnectionDriver['getDefinitionForItem']>) {
+    let query: IExpectedResult<string>;
+    let key: string;
+    switch (item.type) {
+      case ContextValue.TABLE:
+        query = this.queries.fetchTableDefinition(item as NSDatabase.ITable);
+        key = 'Create Table';
+        break;
+      case ContextValue.VIEW:
+        query = this.queries.fetchViewDefinition(item as unknown as NSDatabase.ITable);
+        key = 'Create View';
+        break;
+      case ContextValue.FUNCTION:
+        query = this.queries.fetchFunctionDefinition(item as NSDatabase.IFunction);
+        key = 'Create Function';
+        break
+      case ContextValue.PROCEDURE:
+        query = this.queries.fetchProcedureDefinition(item as NSDatabase.IProcedure);
+        key = 'Create Procedure';
+        break;
+      case ContextValue.INDEX:
+        query = this.queries.fetchTableDefinition((item as NSDatabase.IIndex).parent);
+        key = 'Create Table';
+        break;
+      case ContextValue.TRIGGER:
+        query = this.queries.fetchTriggerDefinition(item as NSDatabase.ITrigger);
+        key = 'SQL Original Statement';
+        break;
+    }
+    const result = await this.singleQuery(query, {});
+    return result.results[0][key];
+  }
+
 
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {

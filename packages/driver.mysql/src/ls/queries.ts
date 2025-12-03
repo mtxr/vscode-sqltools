@@ -276,3 +276,23 @@ ORDER BY
   tr.TRIGGER_NAME
 ${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
 `;
+
+export const fetchTableDefinition: IBaseQueries['fetchTableDefinition'] = queryFactory`
+SHOW CREATE TABLE \`${item => item.label}\`
+`;
+
+export const fetchViewDefinition: IBaseQueries['fetchViewDefinition'] = queryFactory`
+SHOW CREATE VIEW \`${item => item.label}\`
+`;
+
+export const fetchFunctionDefinition: IBaseQueries['fetchFunctionDefinition'] = queryFactory`
+SHOW CREATE FUNCTION \`${item => item.label}\`
+`;
+
+export const fetchProcedureDefinition: IBaseQueries['fetchProcedureDefinition'] = queryFactory`
+SHOW CREATE PROCEDURE \`${item => item.label}\`
+`;
+
+export const fetchTriggerDefinition: IBaseQueries['fetchTriggerDefinition'] = queryFactory`
+SHOW CREATE TRIGGER \`${item => item.label}\`
+`;
