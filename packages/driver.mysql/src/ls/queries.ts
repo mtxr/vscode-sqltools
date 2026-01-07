@@ -256,7 +256,7 @@ WHERE 1=1
       : ''
   }
 ORDER BY
-  ix.INDEX_NAME
+  "name"
 ${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
 `;
 
