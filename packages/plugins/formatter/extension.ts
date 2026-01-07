@@ -4,7 +4,7 @@ import vscode from 'vscode';
 import Config from '@sqltools/util/config-manager';
 import { formatInsertQuery, format as queryFormat } from '@sqltools/util/query';
 import { insertText, getOrCreateEditor } from '@sqltools/vscode/utils';
-import { NSDatabase, IExtension } from '@sqltools/types';
+import { NSDatabase, IExtension, ContextValue } from '@sqltools/types';
 import { SidebarItem } from '../connection-manager/explorer';
 import { EXT_NAMESPACE } from '@sqltools/util/constants';
 
@@ -73,10 +73,22 @@ async function generateDefinitionQueryHandler(item: SidebarItem) {
 }
 
 async function generateInsertQueryHandler(item: SidebarItem) {
-  const columns: NSDatabase.IColumn[] = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
+  let columns: NSDatabase.IColumn[];
+  columns = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
     conn: item.conn,
-    item: item.metadata,
+    item: {
+      type: ContextValue.RESOURCE_GROUP,
+      childType: ContextValue.COLUMN
+    },
+    parent: item.metadata,
   });
+  // this is for backward compatibility with third-party drivers
+  if (columns.filter((item) => item.type === ContextValue.COLUMN).length === 0) {
+    columns = await commands.executeCommand(`${EXT_NAMESPACE}.getChildrenForTreeItem`, {
+      conn: item.conn,
+      item: item.metadata,
+    });
+  }
   const insertQuery: string = await commands.executeCommand(`${EXT_NAMESPACE}.getInsertQuery`, {
     conn: item.conn,
     item: item.metadata,
