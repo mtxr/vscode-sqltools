@@ -301,15 +301,39 @@ export interface IConnectionDriver {
   open(): Promise<any>;
   close(): Promise<any>;
   checkDependencies?(): Promise<void>;
+  /**
+   * Get columns metadata (generally from information_schema)
+   */
   describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
+  /**
+   * Make a simple SELECT * FROM table
+   */
   showRecords(tableName: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }): Promise<NSDatabase.IResult[]>;
+  /**
+   * Send a query to the SQL instance and receive the result
+   */
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
+  /**
+   * Get a list of interface elements, i.e. folders, tables, colums, etc.
+   */
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
+  /**
+   * Used by the language server for auto-completions
+   */
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
+  /**
+   * Get a DDL statement for item
+   */
   getDefinitionForItem?(params: { item: NSDatabase.DefinableItem }): Promise<string>;
+  /**
+   * Get an INSERT query for item
+   */
   getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
+  /**
+   * Create an SSH tunnel
+   */
   createSshTunnel?(
     ssh: {
       host: string;

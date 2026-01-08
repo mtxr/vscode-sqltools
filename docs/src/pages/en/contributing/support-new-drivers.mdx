@@ -50,7 +50,9 @@ For an overview on how to create VScode extensions, refer to VSCode guide at [](
 Now we will be updating `src/ls/driver.ts` and `src/ls/queries.ts`. Here is where the magic happens.
 
 `src/ls/driver.ts` is where we do the code to query the desired database, for example, where you would be using `node-pg` to
-guide SQLTools to get Postgres results. Please take a look in the file, there are further comments there.
+guide SQLTools to get Postgres results. In order for your driver to support SQLTools features, you need to implement the methods according to the `IConnectionDriver` interface.
+Please take a look in the [file](https://github.com/mtxr/vscode-sqltools/blob/dev/packages/types/index.d.ts#L287), there are further comments there.
+Also you can check out the implementation of the standard drivers (`driver.mssql`, `driver.mysql`, `driver.pg`, `driver.sqlite`).
 
 `src/ls/queries.ts` is the file where your base queries are stored. This file is not required, but having those queries split from `driver.ts`
 help us to keep the code organized.
