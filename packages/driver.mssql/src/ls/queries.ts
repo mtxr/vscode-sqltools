@@ -369,7 +369,7 @@ CROSS APPLY (
           /* masked with function */
           + iif(col.is_masked = 1, ' MASKED WITH (FUNCTION = ''' + msc.masking_function + ''')', '')
           /* default */
-          + isnull(' DEFAULT ' + dfc.definition, '')
+          + iif(col.generated_always_type = 0, isnull(' DEFAULT ' + dfc.definition, ''), '')
           /* identity */
           + iif(col.is_identity = 1, ' IDENTITY(' + cast(idc.seed_value AS varchar(max)) + ', ' + cast(idc.increment_value AS varchar(max)) + ')', '')
           /* not for replication */
@@ -477,7 +477,7 @@ OUTER APPLY (SELECT
     AND cole.column_id = per.end_column_id
   WHERE per.object_id = t.object_id) AS system_period_row,
   (SELECT
-    concat(quotename(ht.name), '.', quotename(hs.name))
+    concat(quotename(hs.name), '.', quotename(ht.name))
   FROM ${database}sys.tables AS ht
   JOIN ${database}sys.schemas AS hs
     ON hs.schema_id = ht.schema_id
