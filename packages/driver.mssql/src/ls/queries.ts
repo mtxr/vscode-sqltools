@@ -571,7 +571,7 @@ SELECT 'CREATE '
         + 'PAD_INDEX = ' + iif(ix.is_padded = 1, 'ON, FILLFACTOR = ' + cast(ix.fill_factor AS varchar(max)), 'OFF') + ', '
         + 'IGNORE_DUP_KEY = ' + iif(ix.ignore_dup_key = 1, 'ON', 'OFF') + ', '
         + 'ALLOW_ROW_LOCKS = ' + iif(ix.allow_row_locks = 1, 'ON', 'OFF') + ', '
-        + 'ALLOW_PAGE_LOCKS = ' + iif(ix.allow_page_locks = 1, 'ON', 'OFF')
+        + 'ALLOW_PAGE_LOCKS = ' + iif(ix.allow_page_locks = 1, 'ON', 'OFF') + ', '
         + 'STATISTICS_NORECOMPUTE = ' + iif(st.no_recompute = 1, 'ON', 'OFF') + ', '
         + 'STATISTICS_INCREMENTAL = ' + iif(st.is_incremental = 1, 'ON', 'OFF') + ', '
         + 'OPTIMIZE_FOR_SEQUENTIAL_KEY = ' + iif(ix.optimize_for_sequential_key = 1, 'ON', 'OFF')
