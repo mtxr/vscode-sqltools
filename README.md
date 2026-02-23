@@ -31,6 +31,11 @@ Connects to MySQL, PostgreSQL, SQL Server and many more...
 
 Find out more in the documentation [here](http://vscode-sqltools.mteixeira.dev/#features).
 
+## ChangeLog
+
+- Add a flag `sqltools.strategy` to control the Database connection configrations save path. For `global`, it's saved to 
+user settings, for `workspace`, it follows the workspace or the folder.
+
 ## Getting Started
 
 SQLTools is a set of VS Code extensions that connect to, query, and display results from a SQL database manager.

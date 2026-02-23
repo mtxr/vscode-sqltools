@@ -3,13 +3,13 @@
   "displayName": "SQLTools - Database tools",
   "description": "Database management done right. Connection explorer, query runner, intellisense, bookmarks, query history. Feel like a database hero!",
   "version": "1.0.0",
-  "publisher": "mtxr",
-  "author": "Matheus Teixeira <me@mteixeira.dev>",
+  "publisher": "COMP",
+  "author": "Compass",
   "license": "MIT",
   "main": "./dist/extension.js",
   "homepage": "https://vscode-sqltools.mteixeira.dev/",
   "repository": {
-    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "url": "https://github.com/Donald-Lao/vscode-sqltools.git",
     "type": "git"
   },
   "engines": {
