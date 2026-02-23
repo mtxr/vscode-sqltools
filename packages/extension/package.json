@@ -1,21 +1,21 @@
 {
-    "name": "sqltools",
-    "displayName": "SQLTools",
+    "name": "sqltools-enhanced",
+    "displayName": "SQLTools - Enhanced Workspace Management",
     "description": "Connecting users to many of the most commonly used databases. Welcome to database management done right.",
-    "version": "0.28.6-SNAPSHOT",
-    "publisher": "mtxr",
+    "version": "0.0.1",
+    "publisher": "COMP",
     "license": "MIT",
     "preview": false,
     "repository": {
-        "url": "https://github.com/mtxr/vscode-sqltools.git",
+        "url": "https://github.com/Donald-Lao/vscode-sqltools.git",
         "type": "git"
     },
     "homepage": "https://vscode-sqltools.mteixeira.dev/?umd_source=marketplace&utm_medium=readme&utm_campaign=ext",
     "bugs": {
-        "url": "https://github.com/mtxr/vscode-sqltools/issues"
+        "url": "https://github.com/Donald-Lao/vscode-sqltools/issues"
     },
     "main": "./dist/extension.js",
-    "author": "Matheus Teixeira <me@mteixeira.dev>",
+    "author": "Compass",
     "private": true,
     "engines": {
         "vscode": "^1.78.0"
@@ -980,6 +980,16 @@
                     "type": "boolean",
                     "description": "Display connections in two groups, 'Connected' and 'Not Connected'.",
                     "default": false
+                },
+                "sqltools.strategy": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "global",
+                        "workspace"
+                    ],
+                    "default": "auto",
+                    "description": "SQLTools configuration strategy. 'auto' will use workspace settings if a workspace is open, and global settings otherwise. 'global' and 'workspace' will force the usage of global or workspace settings respectively."
                 }
             }
         },
