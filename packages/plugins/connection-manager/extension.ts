@@ -480,11 +480,27 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       log.warn('Nothing to do. No parameter received');
       return;
     }
+    let target: ConfigurationTarget;
+    const strategy = Config.strategy || 'auto';
+    if (!writeTo) {
+      switch (strategy) {
+        case 'global':
+          target = ConfigurationTarget.Global;
+          break;
+        case 'workspace':
+          target = ConfigurationTarget.Workspace;
+          break;
+        default:
+          target = workspace.workspaceFolders ? ConfigurationTarget.Workspace : ConfigurationTarget.Global;
+      }
+    } else {
+      target = ConfigurationTarget[writeTo];
+    }
 
-    const connList = this.getConnectionList(ConfigurationTarget[writeTo] || undefined);
+    const connList = this.getConnectionList(target || undefined);
     this._throwIfNotUnique(connInfo, connList);
     connList.push(connInfo);
-    return this.saveConnectionList(connList, ConfigurationTarget[writeTo]);
+    return this.saveConnectionList(connList, target);
   }
 
   private ext_updateConnection = (oldId: string, connInfo: IConnection, writeTo?: keyof typeof ConfigurationTarget) => {

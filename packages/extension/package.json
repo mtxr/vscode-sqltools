@@ -980,6 +980,16 @@
                     "type": "boolean",
                     "description": "Display connections in two groups, 'Connected' and 'Not Connected'.",
                     "default": false
+                },
+                "sqltools.strategy": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "global",
+                        "workspace"
+                    ],
+                    "default": "auto",
+                    "description": "SQLTools configuration strategy. 'auto' will use workspace settings if a workspace is open, and global settings otherwise. 'global' and 'workspace' will force the usage of global or workspace settings respectively."
                 }
             }
         },
