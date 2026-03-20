@@ -1,8 +1,14 @@
 {
     "name": "sqltools-enhanced",
+<<<<<<< Updated upstream
     "displayName": "SQLTools - Enhanced Workspace Management",
     "description": "Connecting users to many of the most commonly used databases. Welcome to database management done right.",
     "version": "0.0.1",
+=======
+    "displayName": "SQLTools - Enhanced Workspace Management for Compass",
+    "description": "Connecting Compass users to many of the most commonly used databases. Welcome to database management done right.",
+    "version": "0.0.4",
+>>>>>>> Stashed changes
     "publisher": "COMP",
     "license": "MIT",
     "preview": false,
@@ -60,7 +66,7 @@
         "theme": "dark",
         "color": "#555555"
     },
-    "icon": "icons/icon-128.png",
+    "icon": "icons/compass-sqltools.png",
     "badges": [
         {
             "description": "LICENSE",

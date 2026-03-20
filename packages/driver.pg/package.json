@@ -1,8 +1,15 @@
 {
+<<<<<<< Updated upstream
   "name": "sqltools-driver-pg",
   "displayName": "SQLTools PostgreSQL/Cockroach Driver",
   "description": "SQLTools PostgreSQL/Cockroach Driver",
   "version": "0.5.7",
+=======
+  "name": "sqltools-driver-postgres",
+  "displayName": "SQLTools PostgreSQL/Cockroach Driver by Compass",
+  "description": "SQLTools PostgreSQL/Cockroach Driver by Compass",
+  "version": "0.5.9",
+>>>>>>> Stashed changes
   "engines": {
     "vscode": "^1.78.0"
   },
@@ -29,7 +36,7 @@
     "theme": "dark",
     "color": "#333333"
   },
-  "icon": "icon.png",
+  "icon": "compass-sqltools-postgres-driver.png",
   "categories": [
     "Programming Languages",
     "Snippets",
