@@ -1,14 +1,8 @@
 {
     "name": "sqltools-enhanced",
-<<<<<<< Updated upstream
-    "displayName": "SQLTools - Enhanced Workspace Management",
-    "description": "Connecting users to many of the most commonly used databases. Welcome to database management done right.",
-    "version": "0.0.1",
-=======
     "displayName": "SQLTools - Enhanced Workspace Management for Compass",
     "description": "Connecting Compass users to many of the most commonly used databases. Welcome to database management done right.",
-    "version": "0.0.4",
->>>>>>> Stashed changes
+    "version": "0.0.5",
     "publisher": "COMP",
     "license": "MIT",
     "preview": false,
@@ -16,7 +10,7 @@
         "url": "https://github.com/Donald-Lao/vscode-sqltools.git",
         "type": "git"
     },
-    "homepage": "https://vscode-sqltools.mteixeira.dev/?umd_source=marketplace&utm_medium=readme&utm_campaign=ext",
+    "homepage": "https://github.com/Donald-Lao/vscode-sqltools/tree/dev",
     "bugs": {
         "url": "https://github.com/Donald-Lao/vscode-sqltools/issues"
     },
@@ -71,7 +65,7 @@
         {
             "description": "LICENSE",
             "url": "https://img.shields.io/github/license/mtxr/vscode-sqltools?style=for-the-badge",
-            "href": "https://github.com/mtxr/vscode-sqltools/blob/dev/LICENSE.md"
+            "href": "https://github.com/Donald-Lao/vscode-sqltools/blob/dev/LICENSE.md"
         }
     ],
     "activationEvents": [

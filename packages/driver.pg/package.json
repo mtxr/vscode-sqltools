@@ -1,28 +1,21 @@
 {
-<<<<<<< Updated upstream
-  "name": "sqltools-driver-pg",
-  "displayName": "SQLTools PostgreSQL/Cockroach Driver",
-  "description": "SQLTools PostgreSQL/Cockroach Driver",
-  "version": "0.5.7",
-=======
   "name": "sqltools-driver-postgres",
   "displayName": "SQLTools PostgreSQL/Cockroach Driver by Compass",
   "description": "SQLTools PostgreSQL/Cockroach Driver by Compass",
-  "version": "0.5.9",
->>>>>>> Stashed changes
+  "version": "0.5.10",
   "engines": {
     "vscode": "^1.78.0"
   },
-  "publisher": "mtxr",
+  "publisher": "COMP",
   "license": "MIT",
   "private": true,
   "repository": {
     "type": "git",
-    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "url": "https://github.com/Donald-Lao/vscode-sqltools.git",
     "directory": "packages/drivers.pg"
   },
   "bugs": {
-    "url": "https://github.com/mtxr/vscode-sqltools/labels/pg"
+    "url": "https://github.com/Donald-Lao/vscode-sqltools/labels/pg"
   },
   "keywords": [
     "sqltools-driver",
@@ -44,7 +37,7 @@
     "Other"
   ],
   "extensionDependencies": [
-    "mtxr.sqltools"
+    "compass.sqltools-enhanced"
   ],
   "activationEvents": [
     "*",
