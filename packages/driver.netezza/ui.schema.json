@@ -1,0 +1,30 @@
+{
+  "ui:order": [
+    "connectionMethod",
+    "server",
+    "port",
+    "socketPath",
+    "connectString",
+    "database",
+    "username",
+    "usePassword",
+    "password",
+    "nzOptions",
+    "ssh",
+    "sshOptions"
+  ],
+  "password": { "ui:widget": "password" },
+  "askForPassword": { "ui:widget": "hidden" },
+  "socketPath": { "ui:widget": "file" },
+  "nzOptions": {
+    "connectionTimeoutMillis": {
+      "ui:help": "Number of milliseconds to wait before timing out when connecting a new client. By default this is 0 which means no timeout"
+    },
+    "idleTimeoutMillis": {
+      "ui:help": "Number of milliseconds a client must sit idle in the pool and not be checked out before it is disconnected from the backend and discarded. Default is 10000 (10 seconds) - set to 0 to disable auto-disconnection of idle clients"
+    },
+    "max": {
+      "ui:help": "Maximum number of clients the pool should contain. By default this is set to 10."
+    }
+  }
+}

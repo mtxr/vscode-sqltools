@@ -1,0 +1,59 @@
+// A launch configuration that compiles the extension and then opens it inside a new window
+// Use IntelliSense to learn about possible attributes.
+// Hover to view descriptions of existing attributes.
+// For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Run NETEZZA Extension",
+            "type": "extensionHost",
+            "request": "launch",
+            "runtimeExecutable": "${execPath}",
+            "args": [
+                "${workspaceFolder}/../../test/test-vscode-sqltools.code-workspace",
+                "--extensionDevelopmentPath=${workspaceFolder}"
+            ],
+            "outFiles": [
+                "${workspaceFolder}/../../dist/*.js",
+                "${workspaceFolder}/out/**/*.js",
+            ],
+            "sourceMapPathOverrides": {
+                "src/*": "${workspaceRoot}/src/*",
+            },
+            "sourceMaps": true,
+            "preLaunchTask": "npm: dev",
+            "env": {
+                "SQLTOOLS_DEBUG_PORT_LS": "6099"
+            }
+        },
+        {
+            "type": "node",
+            "request": "attach",
+            "name": "Attach SQLTools LS",
+            "port": 6099,
+            "restart": true,
+            "sourceMapPathOverrides": {
+                "src/*": "${workspaceRoot}/src/*",
+            },
+            "sourceMaps": true,
+            "protocol": "inspector",
+            "timeout": 100000,
+            "outFiles": [
+                "${workspaceFolder}/out/**/*.js"
+            ],
+            "skipFiles": [
+                "<node_internals>/**"
+            ],
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Run NETEZZA Driver Ext and Attach LS",
+            "configurations": [
+                "Attach SQLTools LS",
+                "Run NETEZZA Extension"
+            ]
+        }
+    ]
+}

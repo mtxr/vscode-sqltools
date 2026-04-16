@@ -4629,6 +4629,11 @@ hyphenate-style-name@^1.0.3:
   resolved "https://registry.npmjs.org/hyphenate-style-name/-/hyphenate-style-name-1.0.4.tgz"
   integrity sha512-ygGZLjmXfPHj+ZWh6LwbC37l43MhfztxetbFCoYTM2VjkIUpeHgSNn7QIyVFj7YQ1Wl9Cbw5sholVJPzWvC2MQ==
 
+ibm-netezza@^1.0.3:
+  version "1.0.3"
+  resolved "https://registry.yarnpkg.com/ibm-netezza/-/ibm-netezza-1.0.3.tgz#541346561d251b51f81467fa45738a7d9b191442"
+  integrity sha512-mMZ961dMy2g6erBtjzu2+PCupQz2FNgxrs5FFsnAJskDdQoYiZR9K72GVXQvYX4BCK2S32k0UCYafnxhMPVdXw==
+
 iconv-lite@0.4, iconv-lite@0.4.24, iconv-lite@^0.4.23:
   version "0.4.24"
   resolved "https://registry.npmjs.org/iconv-lite/-/iconv-lite-0.4.24.tgz"

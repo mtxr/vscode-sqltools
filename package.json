@@ -42,7 +42,8 @@
     "driver:pack:pg": "(cd packages/driver.pg/ && yarn run package && mv *.vsix '../../.')",
     "driver:pack:mysql": "(cd packages/driver.mysql/ && yarn run package && mv *.vsix '../../.')",
     "driver:pack:mssql": "(cd packages/driver.mssql/ && yarn run package && mv *.vsix '../../.')",
-    "driver:pack:sqlite": "(cd packages/driver.sqlite/ && yarn run package && mv *.vsix '../../.')"
+    "driver:pack:sqlite": "(cd packages/driver.sqlite/ && yarn run package && mv *.vsix '../../.')",
+    "driver:pack:netezza": "(cd packages/driver.netezza/ && yarn run package && mv *.vsix '../../.')"
   },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",

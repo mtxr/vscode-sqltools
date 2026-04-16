@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "allowSyntheticDefaultImports": true,
+    "esModuleInterop": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "experimentalDecorators": true,
+    "lib": ["es2016"],
+    "module": "commonjs",
+    "noEmit": true,
+    "removeComments": true,
+    "resolveJsonModule": true,
+    "declaration": false,
+    "target": "esnext",
+    "outDir": "out",
+    "baseUrl": "."
+  },
+  "include": [
+    "src/**/*"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}
