@@ -52,7 +52,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     }
   }
 
-  private getDatabasesCompletions = async ({ currentWord, conn, suggestDatabases }: { conn: Connection; currentWord: string; suggestDatabases: any }) => {
+  private getDatabasesCompletions = async ({ currentWord, conn, suggestDatabases }: { conn: Connection; currentWord: string; suggestDatabases: any }): Promise<CompletionItem[]> => {
     const prefix = (suggestDatabases.prependQuestionMark ? "? " : "") + (suggestDatabases.prependFrom ? "FROM " : "");
     const suffix = suggestDatabases.appendDot ? "." : "";
 
@@ -70,7 +70,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private getTableCompletions = async ({ currentWord, conn, suggestTables }: { conn: Connection; currentWord: string; suggestTables: any }) => {
+  private getTableCompletions = async ({ currentWord, conn, suggestTables }: { conn: Connection; currentWord: string; suggestTables: any }): Promise<CompletionItem[]> => {
     const prefix = (suggestTables.prependQuestionMark ? "? " : "") + (suggestTables.prependFrom ? "FROM " : "");
     const database = suggestTables.identifierChain && suggestTables.identifierChain[0].name;
     const suffix = suggestTables.appendDot ? "." : "";
@@ -89,7 +89,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private getColumnCompletions = async ({ currentWord, conn, suggestColumns }: { conn: Connection; currentWord: string; suggestColumns: any }) => {
+  private getColumnCompletions = async ({ currentWord, conn, suggestColumns }: { conn: Connection; currentWord: string; suggestColumns: any }): Promise<CompletionItem[]> => {
     const tables = suggestColumns.tables
       .map(table => table.identifierChain.map(id => id.name || id.cte))
       .map((t: [string]) => (<NSDatabase.ITable>{ label: t.pop(), database: t.pop() }));
@@ -107,13 +107,75 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
     return [];
   }
 
-  private onCompletion: Arg0<ILanguageServer['onCompletion']> = async params => {
+  private getHueAst(text: string, currentOffset:number) {
+    return sqlAutocompleteParser.parseSql(text.substring(0, currentOffset), text.substring(currentOffset));
+  }
+
+  private getKeywordsCompletion(hueAst: any, currentWord: string): CompletionItem[] {
+    return (hueAst.suggestKeywords || []).filter(kw => kw.value.startsWith(currentWord)).map(kw => <CompletionItem>{
+      label: kw.value,
+      detail: kw.value,
+      filterText: kw.value,
+      // weights provided by hue are in reversed order
+      sortText: `${String(10000 - kw.weight).padStart(5, '0')}:${kw.value}`,
+      kind: CompletionItemKind.Keyword,
+      documentation: {
+        value: `\`\`\`yaml\nWORD: ${kw.value}\n\`\`\``,
+        kind: 'markdown'
+      }
+    })
+  }
+
+  private getCompletionsFromHueAst = async ({ currentWord, conn, text, currentOffset }: { currentWord: string; conn: Connection | null; text: string; currentOffset: number }): Promise<CompletionItem[]> => {
     let completionsMap = {
       query: [],
       tables: [],
       columns: [],
       dbs: []
     };
+
+    const hueAst = this.getHueAst(text, currentOffset);
+
+    completionsMap.query = this.getKeywordsCompletion(hueAst, currentWord);
+    const visitedKeywords: [string] = (hueAst.suggestKeywords || []).map(kw => kw.value)
+    
+    // Can't distinguish functions types, so put all other keywords
+    if (hueAst.suggestFunctions || hueAst.suggestAggregateFunctions || hueAst.suggestAnalyticFunctions) {
+      const staticCompletions = await conn.getStaticCompletions();
+      for (let keyword in staticCompletions) {
+        if (visitedKeywords.includes(keyword)) {
+          continue;
+        }
+        if (!keyword.startsWith(currentWord)) {
+          continue;
+        }
+        visitedKeywords.push(keyword);
+        const value: NSDatabase.IStaticCompletion = staticCompletions[keyword]
+        completionsMap.query.push({
+          ...value, sortText: `4:${value.label}`,
+          kind: CompletionItemKind.Function
+        });
+      }
+    }
+
+    const [tableCompletions, columnCompletions, dbCompletions] = await Promise.all([
+      (hueAst.suggestTables != undefined) ? this.getTableCompletions({ currentWord, conn, suggestTables: hueAst.suggestTables }) : [],
+      (hueAst.suggestColumns != undefined) ? this.getColumnCompletions({ currentWord, conn, suggestColumns: hueAst.suggestColumns }) : [],
+      (hueAst.suggestDatabases != undefined) ? this.getDatabasesCompletions({ currentWord, conn, suggestDatabases: hueAst.suggestDatabases }) : [],
+    ]);
+    completionsMap.tables = tableCompletions;
+    completionsMap.columns = columnCompletions;
+    completionsMap.dbs = dbCompletions;
+
+    const completions = completionsMap.columns
+      .concat(completionsMap.tables)
+      .concat(completionsMap.dbs)
+      .concat(completionsMap.query);
+
+    return completions;
+  }
+
+  private onCompletion: Arg0<ILanguageServer['onCompletion']> = async params => {
     try {
       const {
         currentWord,
@@ -122,61 +184,31 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
         currentOffset
       } = await this.getQueryData(params);
 
-      const hueAst = sqlAutocompleteParser.parseSql(text.substring(0, currentOffset), text.substring(currentOffset));
-
-      completionsMap.query = (hueAst.suggestKeywords || []).filter(kw => kw.value.startsWith(currentWord)).map(kw => <CompletionItem>{
-        label: kw.value,
-        detail: kw.value,
-        filterText: kw.value,
-        // weights provided by hue are in reversed order
-        sortText: `${String(10000 - kw.weight).padStart(5, '0')}:${kw.value}`,
-        kind: CompletionItemKind.Keyword,
-        documentation: {
-          value: `\`\`\`yaml\nWORD: ${kw.value}\n\`\`\``,
-          kind: 'markdown'
-        }
-      })
-      const visitedKeywords: [string] = (hueAst.suggestKeywords || []).map(kw => kw.value)
+      // When no active connection attatched to the file - return only SQL keywords
       if (!conn) {
-        log.info('no active connection completions count: %d', completionsMap.query.length);
-        return completionsMap.query;
+        const hueAst = this.getHueAst(text, currentOffset);
+        const keywordCompletions = this.getKeywordsCompletion(hueAst, currentWord);
+
+        log.info('no active connection, keyword completions:: %d', keywordCompletions.length);
+        return keywordCompletions;
       };
-      // Can't distinguish functions types, so put all other keywords
-      if (hueAst.suggestFunctions || hueAst.suggestAggregateFunctions || hueAst.suggestAnalyticFunctions) {
-        const staticCompletions = await conn.getStaticCompletions();
-        for (let keyword in staticCompletions) {
-          if (visitedKeywords.includes(keyword)) {
-            continue;
-          }
-          if (!keyword.startsWith(currentWord)) {
-            continue;
-          }
-          visitedKeywords.push(keyword);
-          const value: NSDatabase.IStaticCompletion = staticCompletions[keyword]
-          completionsMap.query.push({
-            ...value, sortText: `4:${value.label}`,
-            kind: CompletionItemKind.Function
-          });
-        }
+
+      // First try connection's getCompletionsForRawQuery method if the connection supports it
+      const connectionCompletions = await conn.getCompletionsForRawQuery(text, currentOffset);
+      if (connectionCompletions !== null) {
+        log.info('Got completions from the raw query, count: %d', connectionCompletions.length);
+        return connectionCompletions;
       }
 
-      const [tableCompletions, columnCompletions, dbCompletions] = await Promise.all([
-        (hueAst.suggestTables != undefined) ? this.getTableCompletions({ currentWord, conn, suggestTables: hueAst.suggestTables }) : [],
-        (hueAst.suggestColumns != undefined) ? this.getColumnCompletions({ currentWord, conn, suggestColumns: hueAst.suggestColumns }) : [],
-        (hueAst.suggestDatabases != undefined) ? this.getDatabasesCompletions({ currentWord, conn, suggestDatabases: hueAst.suggestDatabases }) : [],
-      ]);
-      completionsMap.tables = tableCompletions;
-      completionsMap.columns = columnCompletions;
-      completionsMap.dbs = dbCompletions;
+      // Fallback to hue AST-based completions
+      log.info('Using completions based on hue SQL parser');
+      const completions = await this.getCompletionsFromHueAst({ currentWord, conn, text, currentOffset });
+      log.info('total completions %d', completions.length);
+      return completions;
     } catch (error) {
       log.error('got an error:\n %O', error);
+      return [];
     }
-    const completions = completionsMap.columns
-      .concat(completionsMap.tables)
-      .concat(completionsMap.dbs)
-      .concat(completionsMap.query);
-    log.debug('total completions %d', completions.length);
-    return completions;
   }
 
   public register(server: T) {
