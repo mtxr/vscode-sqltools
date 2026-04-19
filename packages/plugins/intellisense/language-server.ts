@@ -196,7 +196,7 @@ export default class IntellisensePlugin<T extends ILanguageServer> implements IL
       // First try connection's getCompletionsForRawQuery method if the connection supports it
       const connectionCompletions = await conn.getCompletionsForRawQuery(text, currentOffset);
       if (connectionCompletions !== null) {
-        log.info('Got completions from raw the query, count: %d', connectionCompletions.length);
+        log.info('Got completions from the raw query, count: %d', connectionCompletions.length);
         return connectionCompletions;
       }
 
