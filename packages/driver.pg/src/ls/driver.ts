@@ -6,6 +6,7 @@ import fs from 'fs';
 import zipObject from 'lodash/zipObject';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
+import { signAwsIamToken, validateIamAuthOptions } from './aws-iam';
 
 const rawValue = (v: string) => v;
 
@@ -82,6 +83,28 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         } else {
           poolConfig.ssl =  ssl || false;
         }
+      }
+
+      if (this.credentials.useAwsIamAuth && !this.credentials.connectString) {
+        const awsIamOptions = this.credentials.awsIamOptions || {};
+        validateIamAuthOptions(awsIamOptions, {
+          ssl: !!poolConfig.ssl,
+          hostname: poolConfig.host,
+          port: poolConfig.port,
+          username: poolConfig.user,
+        });
+        const hostname = poolConfig.host;
+        const port = poolConfig.port;
+        const username = poolConfig.user;
+        // Use pg's async password callback so every new pool connection gets
+        // a freshly-signed token (IAM auth tokens expire after 15 minutes).
+        (poolConfig as any).password = () => signAwsIamToken({
+          hostname,
+          port,
+          username,
+          region: awsIamOptions.region,
+          profile: awsIamOptions.profile,
+        });
       }
 
       const pool = new Pool(poolConfig);

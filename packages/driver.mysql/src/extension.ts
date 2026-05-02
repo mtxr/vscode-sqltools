@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 import { IExtension, IExtensionPlugin, IDriverExtensionApi } from '@sqltools/types';
 import { DRIVER_ALIASES } from './constants';
+import { parseBeforeSaveConnection, parseBeforeEditConnection } from './connection-parser';
 const AUTHENTICATION_PROVIDER = 'sqltools-driver-credentials';
 const { publisher, name } = require('../package.json');
 const driverName = 'MySQL/MariaDB/TiDB';
@@ -50,65 +51,14 @@ export async function activate(extContext: vscode.ExtensionContext): Promise<IDr
   api.registerPlugin(plugin);
   return {
     driverName,
-    parseBeforeSaveConnection: ({ connInfo }) => {
-      const propsToRemove = ['connectionMethod', 'id', 'usePassword'];
-      if (connInfo.usePassword) {
-        if (connInfo.usePassword.toString().toLowerCase().includes('ask')) {
-          connInfo.askForPassword = true;
-          propsToRemove.push('password');
-        } else if (connInfo.usePassword.toString().toLowerCase().includes('empty')) {
-          connInfo.password = '';
-          propsToRemove.push('askForPassword');
-        } else if(connInfo.usePassword.toString().toLowerCase().includes('save')) {
-          propsToRemove.push('askForPassword');
-        } else if(connInfo.usePassword.toString().toLowerCase().includes('secure')) {
-          propsToRemove.push('password');
-          propsToRemove.push('askForPassword');
-        }
-      }
-      if (connInfo.connectString) {
-        propsToRemove.push('port');
-        propsToRemove.push('askForPassword');
-      }
-      propsToRemove.forEach(p => delete connInfo[p]);
-      connInfo.mysqlOptions = connInfo.mysqlOptions || {};
-      if (connInfo.mysqlOptions.enableSsl === 'Disabled') {
-        delete connInfo.mysqlOptions.ssl;
-      }
-      if (typeof connInfo.mysqlOptions.ssl === 'object' && Object.keys(connInfo.mysqlOptions.ssl).length === 0) {
-        connInfo.mysqlOptions.enableSsl = 'Disabled';
-        delete connInfo.mysqlOptions.ssl;
-      }
-      return connInfo;
-    },
-    parseBeforeEditConnection: ({ connInfo }) => {
-      const formData: typeof connInfo = {
-        ...connInfo,
-        connectionMethod: 'Server and Port',
-      };
-      if (connInfo.socketPath) {
-        formData.connectionMethod = 'Socket File';
-      } else if (connInfo.connectString) {
-        formData.connectionMethod = 'Connection String';
-      }
-
-      if (connInfo.askForPassword) {
-        formData.usePassword = 'Ask on connect';
-        delete formData.password;
-      } else if (typeof connInfo.password === 'string') {
-        delete formData.askForPassword;
-        formData.usePassword = connInfo.password ? 'Save as plaintext in settings' : 'Use empty password';
-      } else {
-        formData.usePassword = 'SQLTools Driver Credentials';
-      }
-      return formData;
-    },
+    parseBeforeSaveConnection,
+    parseBeforeEditConnection,
     resolveConnection: async ({ connInfo }) => {
       /**
        * This hook is called after a connection definition has been fetched
        * from settings and is about to be used to connect.
        */
-      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString) {
+      if (connInfo.password === undefined && !connInfo.askForPassword && !connInfo.connectString && !connInfo.useAwsIamAuth) {
         const scopes = [connInfo.name, (connInfo.username || "")];
         let session = await vscode.authentication.getSession(
           AUTHENTICATION_PROVIDER,

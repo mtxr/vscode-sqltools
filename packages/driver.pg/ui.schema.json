@@ -9,6 +9,7 @@
     "username",
     "usePassword",
     "password",
+    "awsIamOptions",
     "pgOptions",
     "ssh",
     "sshOptions"
@@ -16,6 +17,14 @@
   "password": { "ui:widget": "password" },
   "askForPassword": { "ui:widget": "hidden" },
   "socketPath": { "ui:widget": "file" },
+  "awsIamOptions": {
+    "region": {
+      "ui:help": "AWS region of the Amazon RDS / Aurora instance (e.g. us-east-1, eu-west-1)."
+    },
+    "profile": {
+      "ui:help": "Named profile from your AWS shared config. Leave empty to use the default credential provider chain (env vars, default profile, IMDS, SSO, etc.)."
+    }
+  },
   "pgOptions": {
     "ui:order": ["enableSsl", "ssl", "*"],
     "statement_timeout": {
