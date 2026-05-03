@@ -2,18 +2,6 @@
 
 This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/?umd_source=repository&utm_medium=readme&utm_campaign=mysql) extension.
 
-## IAM database authentication
-
-For MySQL on Amazon RDS or Aurora, you can authenticate using IAM instead of a password:
-
-1. In the connection form, set **Password mode** to **IAM database authentication**.
-2. Provide the **AWS Region** the Amazon RDS / Aurora instance is in.
-3. Optionally provide an **AWS Profile** name from your shared AWS config (`~/.aws/credentials` / `~/.aws/config`). Leave empty to use the default credential provider chain (env vars, default profile, IMDS, SSO, etc.).
-4. Enable SSL in **mysqlOptions > SSL** and supply the RDS CA bundle (download from [Using SSL/TLS to encrypt a connection to a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)). IAM database authentication requires SSL; it will not connect without it.
-5. Make sure your database user is configured for IAM auth: `CREATE USER <user> IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';`.
-
-An auth token is signed once per pool. Tokens expire after 15 minutes; reconnect to refresh. See [IAM database authentication for MariaDB, MySQL, and PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) for background.
-
 ## Changelog
 
 ### 0.6.7

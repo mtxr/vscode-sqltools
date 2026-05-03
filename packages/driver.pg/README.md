@@ -2,18 +2,6 @@
 
 This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/?umd_source=repository&utm_medium=readme&utm_campaign=pg) extension.
 
-## IAM database authentication
-
-For PostgreSQL on Amazon RDS or Aurora, you can authenticate using IAM instead of a password:
-
-1. In the connection form, set **Use password** to **IAM database authentication**.
-2. Provide the **AWS Region** the Amazon RDS / Aurora instance is in.
-3. Optionally provide an **AWS Profile** name from your shared AWS config (`~/.aws/credentials` / `~/.aws/config`). Leave empty to use the default credential provider chain (env vars, default profile, IMDS, SSO, etc.).
-4. Enable SSL in **pgOptions > SSL** and supply the RDS CA bundle (download from [Using SSL/TLS to encrypt a connection to a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)). IAM database authentication requires SSL; it will not connect without it.
-5. Make sure your database user is configured for IAM auth: `GRANT rds_iam TO <username>;`.
-
-A fresh 15-minute auth token is signed for each new pool connection, so the pool keeps working past the token's expiry. See [IAM database authentication for MariaDB, MySQL, and PostgreSQL](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) for background.
-
 ## Changelog
 
 ### 0.5.8

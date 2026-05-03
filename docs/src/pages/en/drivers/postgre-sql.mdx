@@ -112,6 +112,39 @@ Using a connectionURI for the same configurations from the previous example:
 }
 ```
 
+### 1.3 IAM database authentication (Amazon RDS / Aurora)
+
+For PostgreSQL on Amazon RDS or Aurora, you can authenticate using [IAM database authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) instead of a password. SQLTools signs a short-lived (15 min) auth token with the AWS SDK's RDS Signer on each new pool connection so long-running sessions keep working past the token's expiry.
+
+1. In the connection form, set **Use password** to **IAM database authentication**.
+2. Provide the **AWS Region** the RDS / Aurora instance is in (for example `us-east-1`).
+3. Optionally provide an **AWS Profile** name from your shared AWS config (`~/.aws/credentials` or `~/.aws/config`). Leave empty to use the default credential provider chain (environment variables, default profile, IMDS, SSO, etc.).
+4. Enable SSL under **pgOptions > SSL** and supply the RDS CA bundle (downloadable from [Using SSL/TLS to encrypt a connection to a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)). IAM database authentication requires SSL and will refuse to connect otherwise.
+5. Grant IAM access to the database user: `GRANT rds_iam TO <username>;`.
+
+Example stored connection:
+
+```json
+{
+  "name": "Aurora IAM",
+  "driver": "PostgreSQL",
+  "server": "my-cluster.cluster-xyz.us-east-1.rds.amazonaws.com",
+  "port": 5432,
+  "database": "app",
+  "username": "dbuser",
+  "useAwsIamAuth": true,
+  "awsIamOptions": {
+    "region": "us-east-1",
+    "profile": "dev"
+  },
+  "pgOptions": {
+    "ssl": {
+      "ca": "file:///path/to/rds-global-bundle.pem"
+    }
+  }
+}
+```
+
 <RenderConnectionOptions
   client:only="react"
   exclude={['mysqlOptions', 'oracleOptions', 'socketPath', 'mssqlOptions', 'icons', 'domain']}
