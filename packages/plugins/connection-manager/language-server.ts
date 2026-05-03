@@ -3,7 +3,7 @@ import ConfigRO from '@sqltools/util/config-manager';
 import { IConnection, NSDatabase, ILanguageServerPlugin, ILanguageServer, RequestHandler } from '@sqltools/types';
 import { getConnectionId, migrateConnectionSetting } from '@sqltools/util/connection';
 import csvStringify from 'csv-stringify/lib/sync';
-import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ReleaseResultsRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, SearchConnectionItemsRequest, GetConnectionPasswordRequest, GetConnectionsRequest, RunCommandRequest, GetResultsRequest, ProgressNotificationStart, ProgressNotificationComplete, TestConnectionRequest, GetChildrenForTreeItemRequest, ForceListRefresh, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ReleaseResultsRequest, GetERDiagramDataRequest } from './contracts';
 import Handlers from './cache/handlers';
 import decorateLSException from '@sqltools/util/decorators/ls-decorate-exception';
 import { createLogger } from '@sqltools/log/src';
@@ -254,6 +254,20 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     return c.getInsertQuery(params);
   };
 
+  private GetERDiagramDataHandler: RequestHandler<typeof GetERDiagramDataRequest> = async (req) => {
+    if (!req || !req.conn) {
+      return { tables: [], columns: {}, foreignKeys: [] };
+    }
+    const { conn, schema } = req;
+    const c = await this.getConnectionInstance(conn);
+    if (!c) return { tables: [], columns: {}, foreignKeys: [] };
+    // Ensure schema has database field populated from connection if missing
+    if (!schema.database && conn.database) {
+      schema.database = conn.database;
+    }
+    return c.getERDiagramData(schema);
+  };
+
   public register(server: typeof ConnectionManagerPlugin.prototype['server']) {
     this.server = this.server || server;
 
@@ -269,6 +283,7 @@ export default class ConnectionManagerPlugin implements ILanguageServerPlugin {
     this.server.onRequest(GetChildrenForTreeItemRequest, this.GetChildrenForTreeItemHandler);
     this.server.onRequest(GetDefinitionQueryForItemRequest, this.GetDefinitionQueryForItemHandler);
     this.server.onRequest(GetInsertQueryRequest, this.GetInsertQueryHandler);
+    this.server.onRequest(GetERDiagramDataRequest, this.GetERDiagramDataHandler);
     this.server.addOnDidChangeConfigurationHooks(() => this._autoConnectIfActive());
   }
 

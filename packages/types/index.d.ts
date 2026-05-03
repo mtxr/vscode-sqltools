@@ -55,6 +55,7 @@ export interface IBaseQueries {
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
   fetchFunctions?: QueryBuilder<NSDatabase.ISchema, NSDatabase.IFunction>;
+  fetchForeignKeys?: QueryBuilder<NSDatabase.ISchema, NSDatabase.IForeignKey>;
   [id: string]: string | ((params: any) => (string | IExpectedResult));
 }
 
@@ -331,6 +332,7 @@ export interface IConnectionDriver {
    * Get an INSERT query for item
    */
   getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
+  getERDiagramData?(schema: NSDatabase.ISchema): Promise<{ tables: NSDatabase.ITable[], columns: { [tableName: string]: NSDatabase.IColumn[] }, foreignKeys: NSDatabase.IForeignKey[] }>;
   /**
    * Create an SSH tunnel
    */
@@ -504,6 +506,16 @@ export namespace NSDatabase {
     queryType?: 'showRecords' | 'describeTable';
     queryParams?: { [k: string]: any };
   }
+  export interface IForeignKey {
+    constraintName: string;
+    sourceTableSchema: string;
+    sourceTableName: string;
+    sourceColumnName: string;
+    targetTableSchema: string;
+    targetTableName: string;
+    targetColumnName: string;
+  }
+
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
   export type ParentItem = IDatabase | ISchema | ITable;
   export type DefinableItem = ITable | IFunction | IProcedure | IIndex | ITrigger;

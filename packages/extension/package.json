@@ -362,6 +362,15 @@
                 "title": "Open Docs",
                 "command": "sqltools.openDocs",
                 "category": "SQLTools"
+            },
+            {
+                "title": "Show ER Diagram",
+                "command": "sqltools.showERDiagram",
+                "category": "SQLTools Connection",
+                "icon": {
+                    "light": "icons/show-light.svg",
+                    "dark": "icons/show-dark.svg"
+                }
             }
         ],
         "keybindings": [
@@ -1056,6 +1065,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.showERDiagram",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.generateInsertQuery",
                     "when": "false"
                 },
@@ -1158,6 +1171,11 @@
                 {
                     "command": "sqltools.showRecords",
                     "when": "view == sqltoolsViewConnectionExplorer && viewItem =~ /^connection\\.(table|view|materializedView)$/",
+                    "group": "navigation@1"
+                },
+                {
+                    "command": "sqltools.showERDiagram",
+                    "when": "view == sqltoolsViewConnectionExplorer && viewItem == connection.schema",
                     "group": "navigation@1"
                 },
                 {

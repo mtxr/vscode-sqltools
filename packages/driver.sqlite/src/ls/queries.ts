@@ -85,6 +85,22 @@ ORDER BY C.name ASC,
 LIMIT ${p => p.limit || 100}
 `;
 
+const fetchForeignKeys: IBaseQueries['fetchForeignKeys'] = queryFactory`
+SELECT
+  '' AS "constraintName",
+  '' AS "sourceTableSchema",
+  m.name AS "sourceTableName",
+  fk."from" AS "sourceColumnName",
+  '' AS "targetTableSchema",
+  fk."table" AS "targetTableName",
+  fk."to" AS "targetColumnName"
+FROM sqlite_master AS m
+JOIN pragma_foreign_key_list(m.name) AS fk ON 1 = 1
+WHERE m.type = 'table'
+  AND m.name NOT LIKE 'sqlite_%'
+ORDER BY m.name, fk.seq
+`;
+
 const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
 SELECT
   '${ContextValue.INDEX}' AS "type",
@@ -168,7 +184,8 @@ export default {
   fetchTableDefinition,
   fetchViewDefinition,
   fetchIndexDefinition,
-  fetchTriggerDefinition
+  fetchTriggerDefinition,
+  fetchForeignKeys
 }
 
 // export default {

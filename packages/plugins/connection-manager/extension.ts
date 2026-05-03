@@ -1,6 +1,7 @@
 import { ConnectionExplorer, SidebarConnection, SidebarItem } from '@sqltools/plugins/connection-manager/explorer';
 import ResultsWebviewManager from '@sqltools/plugins/connection-manager/webview/results';
 import SettingsWebview from '@sqltools/plugins/connection-manager/webview/settings';
+import ERDiagramWebview from '@sqltools/plugins/connection-manager/webview/er-diagram';
 import { ContextValue, IConnection, IExtension, IExtensionPlugin, ILanguageClient, IQueryOptions, NSDatabase, RequestHandler } from '@sqltools/types';
 import Config from '@sqltools/util/config-manager';
 import { getConnectionDescription, getConnectionId, getSessionBasename, migrateConnectionSettings } from '@sqltools/util/connection';
@@ -19,7 +20,7 @@ import { promises as fs } from 'fs';
 import { file } from 'tempy';
 import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, ThemeIcon, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
-import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest, GetERDiagramDataRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
 import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
@@ -32,6 +33,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   public client: ILanguageClient;
   public resultsWebview: ResultsWebviewManager;
   public settingsWebview: SettingsWebview;
+  public erDiagramWebview: ERDiagramWebview;
   private errorHandler: IExtension['errorHandler'];
   private explorer: ConnectionExplorer;
   private codeLensPlugin: CodeLensPlugin;
@@ -120,6 +122,56 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private ext_describeFunction() {
     window.showInformationMessage('Not implemented yet.');
+  }
+
+  private ext_showERDiagram = async (node?: SidebarItem) => {
+    try {
+      const conn = await this.explorer.getActive();
+      if (!conn) {
+        window.showWarningMessage('Please connect to a database first.');
+        return;
+      }
+
+      let schema: NSDatabase.ISchema;
+      if (node && node.metadata && node.metadata.type === ContextValue.SCHEMA) {
+        schema = node.metadata as unknown as NSDatabase.ISchema;
+      } else if (node && node.metadata && node.metadata.schema) {
+        schema = {
+          label: node.metadata.schema,
+          schema: node.metadata.schema,
+          database: node.metadata.database,
+          type: ContextValue.SCHEMA,
+          iconId: 'group-by-ref-type',
+        } as NSDatabase.ISchema;
+      } else {
+        // Try to pick a schema from the connection
+        const loadOptions = (search: string) => this.client.sendRequest(SearchConnectionItemsRequest, { conn, itemType: ContextValue.SCHEMA, search }).then(({ results }) => results);
+        schema = await quickPickSearch<NSDatabase.ISchema>(loadOptions, {
+          matchOnDescription: true,
+          matchOnDetail: true,
+          title: `Select a schema for ER Diagram`,
+          placeHolder: 'Type to search schemas...',
+        });
+      }
+
+      if (!schema) return;
+
+      // Ensure schema has database field from connection if missing
+      if (!schema.database && conn.database) {
+        schema.database = conn.database;
+      }
+
+      const erData = await this.client.sendRequest(GetERDiagramDataRequest, { conn, schema });
+
+      this.erDiagramWebview.show();
+      this.erDiagramWebview.updateDiagram({
+        ...erData,
+        schemaName: schema.label || schema.schema,
+        connectionName: conn.name,
+      });
+    } catch (e) {
+      this.errorHandler('Error generating ER diagram', e);
+    }
   }
 
   private ext_closeConnection = async (node?: SidebarConnection) => {
@@ -808,7 +860,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)
       .registerCommand(`getDefinitionQueryForItem`, this.ext_getDefinitionQueryForItem)
-      .registerCommand(`getInsertQuery`, this.ext_getInsertQuery);
+      .registerCommand(`getInsertQuery`, this.ext_getInsertQuery)
+      .registerCommand(`showERDiagram`, this.ext_showERDiagram);
 
     this.errorHandler = extension.errorHandler;
     this.explorer = new ConnectionExplorer();
@@ -825,6 +878,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     Context.subscriptions.push(
       (this.resultsWebview = new ResultsWebviewManager(this.syncConsoleMessages)),
       (this.settingsWebview = new SettingsWebview()),
+      (this.erDiagramWebview = new ERDiagramWebview()),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
       workspace.onDidOpenTextDocument(this.onDidOpenOrCloseTextDocument),

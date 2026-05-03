@@ -699,3 +699,30 @@ WHERE 1=1
   AND tr.name = '${item => item.label}'
   AND tr.parent_class ${item => item.parent && item.parent.type === ContextValue.DATABASE ? '=' : '!=' } 0
 `;
+
+export const fetchForeignKeys: IBaseQueries['fetchForeignKeys'] = queryFactory`
+SELECT
+  FK.CONSTRAINT_NAME AS "constraintName",
+  FK.TABLE_SCHEMA AS "sourceTableSchema",
+  FK.TABLE_NAME AS "sourceTableName",
+  CU.COLUMN_NAME AS "sourceColumnName",
+  PK.TABLE_SCHEMA AS "targetTableSchema",
+  PK.TABLE_NAME AS "targetTableName",
+  PT.COLUMN_NAME AS "targetColumnName"
+FROM
+  ${p => p.database ? `${escapeTableName({ database: p.database, schema: "INFORMATION_SCHEMA", label: "REFERENTIAL_CONSTRAINTS" })}` : 'INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS'} AS C
+  JOIN ${p => p.database ? `${escapeTableName({ database: p.database, schema: "INFORMATION_SCHEMA", label: "TABLE_CONSTRAINTS" })}` : 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS'} AS FK
+    ON C.CONSTRAINT_NAME = FK.CONSTRAINT_NAME AND C.CONSTRAINT_SCHEMA = FK.CONSTRAINT_SCHEMA
+  JOIN ${p => p.database ? `${escapeTableName({ database: p.database, schema: "INFORMATION_SCHEMA", label: "TABLE_CONSTRAINTS" })}` : 'INFORMATION_SCHEMA.TABLE_CONSTRAINTS'} AS PK
+    ON C.UNIQUE_CONSTRAINT_NAME = PK.CONSTRAINT_NAME AND C.UNIQUE_CONSTRAINT_SCHEMA = PK.CONSTRAINT_SCHEMA
+  JOIN ${p => p.database ? `${escapeTableName({ database: p.database, schema: "INFORMATION_SCHEMA", label: "KEY_COLUMN_USAGE" })}` : 'INFORMATION_SCHEMA.KEY_COLUMN_USAGE'} AS CU
+    ON C.CONSTRAINT_NAME = CU.CONSTRAINT_NAME AND C.CONSTRAINT_SCHEMA = CU.CONSTRAINT_SCHEMA
+  JOIN ${p => p.database ? `${escapeTableName({ database: p.database, schema: "INFORMATION_SCHEMA", label: "KEY_COLUMN_USAGE" })}` : 'INFORMATION_SCHEMA.KEY_COLUMN_USAGE'} AS PT
+    ON C.UNIQUE_CONSTRAINT_NAME = PT.CONSTRAINT_NAME AND C.UNIQUE_CONSTRAINT_SCHEMA = PT.CONSTRAINT_SCHEMA
+WHERE
+  FK.TABLE_SCHEMA = '${p => p.schema}'
+  AND FK.TABLE_CATALOG = '${p => p.database}'
+ORDER BY
+  FK.TABLE_NAME,
+  CU.COLUMN_NAME
+`;

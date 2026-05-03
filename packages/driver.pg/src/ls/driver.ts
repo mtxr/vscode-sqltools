@@ -127,12 +127,15 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     const messages = [];
     let cli : PoolClient;
+    let noticeHandler: (notice: any) => void;
     const { requestId } = opt;
     return this.open()
       .then(async (pool) => {
         cli = await pool.connect();
-        cli.on('notice', notice => messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`)));
+        noticeHandler = notice => messages.push(this.prepareMessage(`${notice.name.toUpperCase()}: ${notice.message}`));
+        cli.on('notice', noticeHandler);
         const results = await cli.query({ text: query.toString(), rowMode: 'array' });
+        cli.removeListener('notice', noticeHandler);
         cli.release();
         return results;
       })
@@ -160,6 +163,7 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
         });
       })
       .catch(err => {
+        if (cli && noticeHandler) cli.removeListener('notice', noticeHandler);
         cli && cli.release();
         return [<NSDatabase.IResult>{
           connId: this.getId(),
