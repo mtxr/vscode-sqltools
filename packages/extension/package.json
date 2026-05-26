@@ -981,7 +981,7 @@
                     "description": "Display connections in two groups, 'Connected' and 'Not Connected'.",
                     "default": false
                 },
-                "sqltools.strategy": {
+                "sqltools.connectionStore": {
                     "type": "string",
                     "enum": [
                         "auto",
