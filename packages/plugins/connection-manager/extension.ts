@@ -481,7 +481,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       return;
     }
     let target: ConfigurationTarget;
-    const strategy = Config.strategy || 'auto';
+    const connectionStore = Config.connectionStore || 'auto';
     if (!writeTo) {
       switch (strategy) {
         case 'global':
