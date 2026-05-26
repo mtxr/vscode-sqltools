@@ -989,7 +989,7 @@
                         "workspace"
                     ],
                     "default": "auto",
-                    "description": "SQLTools configuration strategy. 'auto' will use workspace settings if a workspace is open, and global settings otherwise. 'global' and 'workspace' will force the usage of global or workspace settings respectively."
+                    "description": "Where SQLTools will store connections you define. 'auto' will use workspace settings if a workspace is open, and global settings otherwise. 'global' and 'workspace' will force the usage of global or workspace settings respectively."
                 }
             }
         },
