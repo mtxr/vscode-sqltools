@@ -14,11 +14,17 @@ SELECT
   '${ContextValue.COLUMN}' as type,
   C.TABLE_NAME AS table,
   C.DATA_TYPE AS "dataType",
-  UPPER(C.DATA_TYPE || (
-    CASE WHEN C.CHARACTER_MAXIMUM_LENGTH > 0 THEN (
-      '(' || C.CHARACTER_MAXIMUM_LENGTH || ')'
-    ) ELSE '' END
-  )) AS "detail",
+  UPPER(C.DATA_TYPE ||
+    CASE
+      WHEN C.CHARACTER_MAXIMUM_LENGTH IS NOT NULL
+        THEN '(' || C.CHARACTER_MAXIMUM_LENGTH || ')'
+      WHEN C.DATETIME_PRECISION IS NOT NULL
+        THEN '(' || C.DATETIME_PRECISION || ')'
+      WHEN C.DATA_TYPE IN ('decimal', 'numeric', 'money')
+        THEN '(' || C.NUMERIC_PRECISION || ', ' || C.NUMERIC_SCALE || ')'
+      ELSE ''
+    END
+  ) || ', ' || CASE WHEN C.IS_NULLABLE = 'YES' THEN 'NULL' ELSE 'NOT NULL' END AS "detail",
   C.CHARACTER_MAXIMUM_LENGTH::INT AS size,
   C.TABLE_CATALOG AS database,
   C.TABLE_SCHEMA AS schema,
@@ -57,6 +63,7 @@ SELECT count(1) AS total
 FROM ${p => escapeTableName(p.table)};
 `;
 
+// NOTE this remains for backward compatibility
 const fetchFunctions: IBaseQueries['fetchFunctions'] = queryFactory`
 SELECT
   '${ContextValue.FUNCTION}' as type,
@@ -225,6 +232,219 @@ ORDER BY
   schema_name;
 `;
 
+const searchFunctionsAndProcedures = (type: ContextValue.FUNCTION | ContextValue.PROCEDURE): IBaseQueries['searchFunctions'] => queryFactory`
+SELECT
+  '${type}' as type,
+  f.proname AS name,
+  f.proname AS label,
+  n.nspname AS schema,
+  current_database() AS database,
+  quote_ident(n.nspname) || '.' || quote_ident(f.proname) AS signature,
+  oidvectortypes(f.proargtypes) AS args,
+  format_type(f.prorettype, null) AS "resultType",
+  '(' || oidvectortypes(f.proargtypes)::text || ')' AS detail,
+  proargnames AS "argsNames",
+  f.prosrc AS source,
+  '${type.slice(11)}' AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM
+  pg_catalog.pg_proc AS f
+INNER JOIN pg_catalog.pg_namespace AS n on n.oid = f.pronamespace
+WHERE f.prokind = '${type[11]}'
+  ${p => p.parent ? `AND n.nspname = '${p.parent.schema}'` : ''}
+  ${p => p.search ? `AND lower(f.proname) LIKE '%${p.search.toLowerCase()}%'` : 
+    p.parent ? `AND n.nspname = '${p.parent.schema}'` : ''
+  }
+ORDER BY
+  f.proname
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const searchFunctions: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.FUNCTION);
+const searchProcedures: IBaseQueries['searchFunctions'] = searchFunctionsAndProcedures(ContextValue.PROCEDURE);
+
+const searchIndexes: IBaseQueries['searchIndexes'] = queryFactory`
+SELECT
+  '${ContextValue.INDEX}' AS "type",
+  i.indexrelid::regclass::name AS "name",
+  i.indexrelid::regclass::name AS "label",
+  '(' || CASE WHEN i.indisunique THEN '' ELSE 'non-' END || 'unique)' AS "detail",
+  CASE
+    WHEN i.indisprimary THEN 'pk'
+    WHEN i.indisunique THEN 'index-uq'
+    ELSE 'index'
+  END AS "iconName",
+  '${ContextValue.NO_CHILD}' AS "childType"
+FROM pg_catalog.pg_class AS c
+INNER JOIN pg_catalog.pg_namespace AS n
+  ON n.oid = c.relnamespace
+JOIN pg_catalog.pg_index AS i
+  ON i.indrelid = c.oid
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(i.indexrelid::regclass::name) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      `AND c.relname = '${p.parent.label}'
+      AND n.nspname = '${p.parent.schema}'`
+      : ''
+  }
+ORDER BY
+  i.indexrelid::regclass::name
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const searchTriggers: IBaseQueries['searchTriggers'] = queryFactory`
+SELECT
+  '${ContextValue.TRIGGER}' AS "type",
+  tr.tgname AS "name",
+  tr.tgname AS "label"
+FROM (
+  SELECT oid, tgrelid, tgfoid, tgname FROM pg_catalog.pg_trigger
+  UNION ALL
+  SELECT oid, null, evtfoid, evtname FROM pg_catalog.pg_event_trigger
+) AS tr
+LEFT JOIN pg_catalog.pg_class AS c
+  ON c.oid = tr.tgrelid
+WHERE 1=1
+  ${p => p.search ?
+    `AND LOWER(tr.tgname) LIKE '%${p.search.toLowerCase()}%'` :
+    p.parent ?
+      (p.parent.type === ContextValue.DATABASE ? 'AND tr.tgrelid IS NULL' :
+        `AND tr.tgrelid::regclass::name = '${p.parent.label}'
+        AND c.relnamespace::regnamespace::name = '${p.parent.schema}'`) :
+      'AND tr.tgrelid IS NOT NULL'
+  }
+ORDER BY
+  tr.tgname
+${p => p.search ? `LIMIT ${p.limit || 100}` : ''}
+`;
+
+const fetchTableDefinition: IBaseQueries['fetchTableDefinition'] = queryFactory`
+SELECT
+  'CREATE '
+  || (SELECT
+      CASE
+        WHEN cl.relpersistence = 'u' THEN 'UNLOGGED '
+        ELSE ''
+      END
+    FROM pg_class cl
+    WHERE cl.oid = ns.oid
+    )
+  || 'TABLE ' || ns.label || ' (' || chr(13)
+  || c.def
+  || COALESCE(cs.def, '')
+  || chr(13)
+  || ')' AS "definition"
+FROM information_schema.tables AS t
+INNER JOIN LATERAL (
+  SELECT
+    FORMAT('%I.%I', t.table_schema, t.table_name) AS label,
+    to_regclass(format('%I.%I', t.table_schema, t.table_name))::oid AS oid
+) AS ns ON true
+LEFT JOIN LATERAL (
+  SELECT
+    STRING_AGG(
+      chr(9) || quote_ident(col.column_name) || ' '
+      /* column type */
+      || CASE
+        WHEN col.column_default like 'nextval(%::regclass)' THEN replace(col.udt_name, 'int', 'serial')
+        ELSE col.udt_name
+      end
+      || CASE
+        WHEN col.udt_name IN ('numeric', 'decimal') THEN CONCAT('(', col.numeric_precision, ', ', col.numeric_scale, ')')
+        WHEN col.udt_name IN ('char', 'varchar', 'varbit') THEN CONCAT('(', col.character_maximum_length, ')')
+        WHEN col.udt_name IN ('time', 'timestamp') THEN CONCAT('(', col.datetime_precision, ')')
+        WHEN col.udt_name IN ('interval') THEN CONCAT(' ', col.interval_type)
+        ELSE ''
+      end
+      /* default */
+      || CASE
+        WHEN col.column_default is null or col.column_default like 'nextval(%::regclass)' THEN ''
+        ELSE ' DEFAULT ' || col.column_default
+      end
+      /* generated */
+      || coalesce(' GENERATED ' || col.identity_generation
+      || ' AS IDENTITY (INCREMENT ' || col.identity_increment
+      || ' MINVALUE ' || col.identity_minimum
+      || ' MAXVALUE ' || col.identity_maximum
+      || CASE
+          WHEN col.identity_cycle = 'NO' THEN ' NO'
+          ELSE ''
+        end
+      || ' CYCLE START ' || col.identity_start
+      || ')', '')
+      /* nullable */
+      || CASE
+          WHEN col.is_nullable = 'NO' THEN ' NOT'
+          ELSE ''
+        end || ' NULL'
+      /* rows separator */
+      , ',' || chr(13)
+    ) AS def
+  FROM information_schema.columns AS col
+  WHERE 1=1
+    AND col.table_catalog = t.table_catalog
+    AND col.table_schema = t.table_schema
+    AND col.table_name = t.table_name
+  group by col.table_catalog
+    ,col.table_schema
+    ,col.table_name
+) AS c ON true
+LEFT JOIN lateral (
+  SELECT ',' || chr(13) 
+    || string_agg(chr(9) || 'CONSTRAINT ' || quote_ident(con.conname) || ' '
+    || pg_get_constraintdef(oid), ','
+    || chr(13)) AS def
+  FROM pg_catalog.pg_constraint AS con
+  WHERE con.conrelid = ns.oid
+    AND con.contype NOT IN ('n')
+  group by con.conrelid 
+) AS cs ON true
+WHERE 1=1
+  ${item => `
+    ${item.database ? `and t.table_catalog = '${item.database}'` : ''}
+    AND t.table_schema = '${item.schema}'
+    AND t.table_name = '${item.label}'
+  `}
+`;
+
+const fetchViewDefinition: IBaseQueries['fetchViewDefinition'] = queryFactory`
+SELECT pg_get_viewdef('${item => escapeTableName(item)}'::regclass::oid) AS "definition"
+`;
+
+const fetchFunctionOrProcedureDefinition: IBaseQueries['fetchFunctionDefinition' | 'fetchFunctionDefinition'] = queryFactory`
+SELECT pg_get_functiondef(oid) AS "definition"
+FROM pg_proc
+WHERE proname = '${item => item.label}';
+`;
+const fetchFunctionDefinition: IBaseQueries['fetchFunctionDefinition'] = fetchFunctionOrProcedureDefinition;
+const fetchProcedureDefinition: IBaseQueries['fetchProcedureDefinition'] = fetchFunctionOrProcedureDefinition;
+
+const fetchIndexDefinition: IBaseQueries['fetchIndexDefinition'] = queryFactory`
+SELECT pg_get_indexdef(indexrelid) AS "definition"
+FROM pg_index
+WHERE indexrelid::regclass::name = '${item => item.label}';
+`;
+
+const fetchTriggerDefinition: IBaseQueries['fetchTriggerDefinition'] = queryFactory`
+SELECT
+${item => item.parent && item.parent.type !== ContextValue.DATABASE ? `
+  pg_get_triggerdef(oid) AS "definition"
+FROM pg_trigger
+WHERE tgname = '${item.label}'
+  ` : `
+  'CREATE EVENT TRIGGER ' || quote_ident(tr.evtname) || ' ON ' || tr.evtevent || chr(10)
+  || COALESCE('WHEN TAG IN (' || array_to_string(tr.evttags, ', ') || ')' || chr(10), '')
+  || 'EXECUTE FUNCTION ' || quote_ident(n.nspname) || '.' || quote_ident(f.proname) || '();'
+  AS "definition"
+FROM pg_catalog.pg_event_trigger AS tr
+INNER JOIN pg_catalog.pg_proc AS f ON f.oid = tr.evtfoid
+INNER JOIN pg_catalog.pg_namespace AS n ON n.oid = f.pronamespace
+WHERE tr.evtname = '${item.label}'
+  `
+}`;
+
+
 export default {
   describeTable,
   countRecords,
@@ -238,4 +458,14 @@ export default {
   fetchMaterializedViews,
   searchTables,
   searchColumns,
+  searchFunctions,
+  searchProcedures,
+  searchTriggers,
+  searchIndexes,
+  fetchTableDefinition,
+  fetchViewDefinition,
+  fetchFunctionDefinition,
+  fetchProcedureDefinition,
+  fetchIndexDefinition,
+  fetchTriggerDefinition
 };

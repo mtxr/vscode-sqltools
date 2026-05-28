@@ -40,6 +40,17 @@ export interface IBaseQueries {
   fetchTables: QueryBuilder<NSDatabase.ISchema, NSDatabase.ITable>;
   searchTables: QueryBuilder<{ search: string, limit?: number }, NSDatabase.ITable>;
   searchColumns: QueryBuilder<{ search: string, tables: NSDatabase.ITable[], limit?: number }, NSDatabase.IColumn>;
+  searchFunctions?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.IFunction>;
+  searchProcedures?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.IProcedure>;
+  searchTriggers?: QueryBuilder<{ search: string, parent?: NSDatabase.ParentItem, limit?: number }, NSDatabase.ITrigger>;
+  searchIndexes?: QueryBuilder<{ search: string, parent?: NSDatabase.ITable, limit?: number }, NSDatabase.IIndex>;
+  // definitions
+  fetchTableDefinition?: QueryBuilder<NSDatabase.ITable, string>;
+  fetchViewDefinition?: QueryBuilder<NSDatabase.ITable, string>;
+  fetchFunctionDefinition?: QueryBuilder<NSDatabase.IFunction, string>;
+  fetchProcedureDefinition?: QueryBuilder<NSDatabase.IProcedure, string>;
+  fetchTriggerDefinition?: QueryBuilder<NSDatabase.ITrigger, string>;
+  fetchIndexDefinition?: QueryBuilder<NSDatabase.IIndex, string>;
   // old api
   describeTable: QueryBuilder<NSDatabase.ITable, any>;
   fetchColumns: QueryBuilder<NSDatabase.ITable, NSDatabase.IColumn>;
@@ -290,14 +301,39 @@ export interface IConnectionDriver {
   open(): Promise<any>;
   close(): Promise<any>;
   checkDependencies?(): Promise<void>;
+  /**
+   * Get columns metadata (generally from information_schema)
+   */
   describeTable(table: NSDatabase.ITable, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
+  /**
+   * Make a simple SELECT * FROM table
+   */
   showRecords(tableName: NSDatabase.ITable, opt: IQueryOptions & { limit: number, page?: number }): Promise<NSDatabase.IResult[]>;
+  /**
+   * Send a query to the SQL instance and receive the result
+   */
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
   testConnection?(): Promise<void>;
+  /**
+   * Get a list of interface elements, i.e. folders, tables, colums, etc.
+   */
   getChildrenForItem?(params: { item: NSDatabase.SearchableItem, parent?: NSDatabase.SearchableItem }): Promise<MConnectionExplorer.IChildItem[]>;
+  /**
+   * Used by the language server for auto-completions
+   */
   searchItems?(itemType: ContextValue, search: string, extraParams: any): Promise<NSDatabase.SearchableItem[]>;
   getStaticCompletions?(): Promise<{ [w: string]: NSDatabase.IStaticCompletion }>;
+  /**
+   * Get a DDL statement for item
+   */
+  getDefinitionForItem?(params: { item: NSDatabase.DefinableItem }): Promise<string>;
+  /**
+   * Get an INSERT query for item
+   */
   getInsertQuery?(params: { item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn> }): Promise<string>;
+  /**
+   * Create an SSH tunnel
+   */
   createSshTunnel?(
     ssh: {
       host: string;
@@ -323,13 +359,20 @@ export declare enum ContextValue {
   CONNECTION = 'connection',
   CONNECTED_CONNECTION = 'connectedConnection',
   COLUMN = 'connection.column',
+  KEY = 'connection.key',
+  CONSTRAINT = 'connection.constraint',
+  TRIGGER = 'connection.trigger',
+  INDEX = 'connection.index',
   FUNCTION = 'connection.function',
+  PROCEDURE = 'connection.procedure',
   SCHEMA = 'connection.schema',
   RESOURCE_GROUP = 'connection.resource_group',
   DATABASE = 'connection.database',
   TABLE = 'connection.table',
   VIEW = 'connection.view',
   MATERIALIZED_VIEW = 'connection.materializedView',
+  TYPE = 'connection.type',
+  SEQUENCE = 'connection.sequence',
   NO_CHILD = 'NO_CHILD',
   KEYWORDS = 'KEYWORDS',
 }
@@ -413,6 +456,16 @@ export namespace NSDatabase {
 
   export interface IProcedure extends IFunction { }
 
+  export interface IIndex extends MConnectionExplorer.IChildItem {
+    name: string;
+    parent: ITable;
+  }
+
+  export interface ITrigger extends MConnectionExplorer.IChildItem {
+    name: string;
+    parent: IDatabase | ITable;
+  }
+
   export interface IStaticCompletion {
     label: string;
     filterText?: string;
@@ -452,6 +505,8 @@ export namespace NSDatabase {
     queryParams?: { [k: string]: any };
   }
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
+  export type ParentItem = IDatabase | ISchema | ITable;
+  export type DefinableItem = ITable | IFunction | IProcedure | IIndex | ITrigger;
 }
 
 export interface INotifyErrorData {

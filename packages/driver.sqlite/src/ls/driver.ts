@@ -3,7 +3,7 @@ import AbstractDriver from '@sqltools/base-driver';
 import queries from './queries';
 import * as mkdir from 'make-dir';
 import { dirname } from 'path';
-import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0 } from '@sqltools/types';
+import { IConnectionDriver, MConnectionExplorer, NSDatabase, ContextValue, Arg0, IExpectedResult } from '@sqltools/types';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
 import keywordsCompletion from './keywords';
@@ -110,8 +110,18 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
           { label: 'Views', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.VIEW },
         ];
       case ContextValue.TABLE:
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Columns', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.COLUMN },
+          // { label: 'Keys', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.KEY },
+          // { label: 'Constraints', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.CONSTRAINT },
+          { label: 'Indexes', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.INDEX },
+          { label: 'Triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TRIGGER },
+        ];
       case ContextValue.VIEW:
-        return this.queryResults(this.queries.fetchColumns(item as NSDatabase.ITable));
+        return <MConnectionExplorer.IChildItem[]>[
+          { label: 'Columns', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.COLUMN },
+          { label: 'Triggers', type: ContextValue.RESOURCE_GROUP, iconId: 'folder', childType: ContextValue.TRIGGER },
+        ];
       case ContextValue.RESOURCE_GROUP:
         return this.getChildrenForGroup({ item, parent });
     }
@@ -124,19 +134,88 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
         return this.queryResults(this.queries.fetchTables(parent as NSDatabase.ISchema));
       case ContextValue.VIEW:
         return this.queryResults(this.queries.fetchViews(parent as NSDatabase.ISchema));
+      case ContextValue.COLUMN:
+        return this.getColumns(parent as NSDatabase.ITable);
+      case ContextValue.INDEX:
+        return this.getIndexes(parent as NSDatabase.ITable)
+      case ContextValue.TRIGGER:
+        return this.getTriggers(parent as (NSDatabase.IDatabase | NSDatabase.ITable));
+      // case ContextValue.KEY:
+      //   return [];
+      // case ContextValue.CONSTRAINT:
+      //   return [];
     }
     return [];
+  }
+  
+  public async getDefinitionForItem({ item }: Arg0<IConnectionDriver['getDefinitionForItem']>) {
+    let query: IExpectedResult<string>;
+    switch (item.type) {
+      case ContextValue.TABLE:
+        query = this.queries.fetchTableDefinition(item as NSDatabase.ITable);
+        break;
+      case ContextValue.VIEW:
+        query = this.queries.fetchViewDefinition(item as unknown as NSDatabase.ITable);
+        break;
+      case ContextValue.INDEX:
+        query = this.queries.fetchIndexDefinition(item as NSDatabase.IIndex);
+        break;
+      case ContextValue.TRIGGER:
+        query = this.queries.fetchTriggerDefinition(item as NSDatabase.ITrigger);
+        break;
+    }
+    const result = await this.singleQuery(query, {});
+    return result.results[0].definition;
   }
 
   public searchItems(itemType: ContextValue, search: string, extraParams: any = {}): Promise<NSDatabase.SearchableItem[]> {
     switch (itemType) {
       case ContextValue.TABLE:
+      // case ContextValue.VIEW:
         return this.queryResults(this.queries.searchTables({ search }));
       case ContextValue.COLUMN:
         return this.queryResults(this.queries.searchColumns({ search, ...extraParams }));
+      case ContextValue.INDEX:
+        return this.queryResults(this.queries.searchIndexes({ search, ...extraParams }));
+      case ContextValue.TRIGGER:
+        return this.queryResults(this.queries.searchTriggers({ search, ...extraParams }));
     }
   }
   public getStaticCompletions = async () => {
     return keywordsCompletion;
   }
+
+  private async getColumns(parent: NSDatabase.ITable): Promise<NSDatabase.IColumn[]> {
+    const results = await this.queryResults(this.queries.fetchColumns(parent));
+    return results.map(col => ({
+      ...col,
+      iconName: col.isPk ? 'pk' : (col.isFk ? 'fk' : null),
+      childType: ContextValue.NO_CHILD,
+      table: parent
+    }));
+  }
+
+  private async getIndexes(parent?: NSDatabase.ITable): Promise<NSDatabase.IIndex[]> {
+    const results = await this.queryResults(this.queries.searchIndexes({search: null, parent: parent as NSDatabase.ITable}));
+    return results.map(index => ({
+      ...index,
+      childType: ContextValue.NO_CHILD,
+      database: parent ? parent.database : '',
+      schema: parent ? parent.schema : '',
+      parent: parent,
+    }));
+  }
+
+  private async getTriggers(parent?: NSDatabase.IDatabase | NSDatabase.ITable): Promise<NSDatabase.ITrigger[]> {
+    const results = await this.queryResults(this.queries.searchTriggers({search: null, parent: parent}));
+    return results.map(trigger => ({
+      ...trigger,
+      iconId: 'symbol-event',
+      childType: ContextValue.NO_CHILD,
+      database: parent ? parent.database : '',
+      schema: parent ? parent.schema : '',
+      parent: parent ?? null,
+    }));
+  }
+
 }

@@ -157,6 +157,13 @@ export default class Connection {
     return this.conn.getChildrenForItem(params);
   }
 
+  public getDefinitionForItem(params: { item: NSDatabase.DefinableItem; }) {
+    if (this.conn.getDefinitionForItem && typeof this.conn.getDefinitionForItem === 'function') {
+      return this.conn.getDefinitionForItem(params);
+    }
+    return `-- Not supported by ${this.getDriver()}`;
+  }
+
   public getInsertQuery(params: { item: NSDatabase.ITable; columns: Array<NSDatabase.IColumn> }) {
     if (this.conn.getInsertQuery && typeof this.conn.getInsertQuery === 'function') {
       return this.conn.getInsertQuery(params);

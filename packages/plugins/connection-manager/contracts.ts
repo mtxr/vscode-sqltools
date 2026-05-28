@@ -74,6 +74,13 @@ export const GetChildrenForTreeItemRequest = new RequestType<
   void
 >('connection/GetChildrenForTreeItemRequest');
 
+export const GetDefinitionQueryForItemRequest = new RequestType<
+  { conn: IConnection, item: NSDatabase.DefinableItem},
+  string,
+  Error,
+  void
+>('connection/GetDefinitionQueryForItemRequest');
+
 export const GetInsertQueryRequest = new RequestType<
   { conn: IConnection, item: NSDatabase.ITable, columns: Array<NSDatabase.IColumn>},
   string,
