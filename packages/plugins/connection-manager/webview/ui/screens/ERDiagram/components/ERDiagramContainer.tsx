@@ -8,7 +8,6 @@ import ReactFlow, {
   Background,
   useNodesState,
   useEdgesState,
-  MarkerType,
   useReactFlow,
   ReactFlowProvider,
   NodeMouseHandler,

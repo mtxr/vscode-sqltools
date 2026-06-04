@@ -12,6 +12,7 @@
       "outDir": "./lib",
       "sourceMap": false,
       "declaration": true,
+      "skipLibCheck": true,
       "target": "ES3",
       "rootDir": "src",
     },

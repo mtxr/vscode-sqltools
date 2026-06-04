@@ -44,6 +44,9 @@
     "driver:pack:mssql": "(cd packages/driver.mssql/ && yarn run package && mv *.vsix '../../.')",
     "driver:pack:sqlite": "(cd packages/driver.sqlite/ && yarn run package && mv *.vsix '../../.')"
   },
+  "resolutions": {
+    "@types/d3-dispatch": "3.0.5"
+  },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
     "cross-env": "^7.0.2",
