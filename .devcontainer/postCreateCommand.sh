@@ -8,14 +8,6 @@ echo
 echo 'Setup will continue in 5 seconds...'
 sleep 5
 
-# Avoid unactionable prompt during GitHub Codespace setup, which causes the setup to fail.
-#  ! Corepack is about to download https://registry.yarnpkg.com/yarn/-/yarn-1.22.22.tgz
-#  ? Do you want to continue? [Y/n]  
-##npm install -g --no-update-notifier corepack@latest
-##corepack install
-##corepack enable yarn
-##echo "yarn version $(yarn --version)"
-
 # Build with Node.js version 20
 . $NVM_DIR/nvm.sh
 nvm install 20
