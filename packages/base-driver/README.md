@@ -12,6 +12,11 @@ Inactive icon: Opacity 50%, no margins and paddings
 
 ## Changelog
 
+### v0.2.4
+
+- Use @sqltools/types@0.2.1.
+- Support `passphrase` for private key.
+
 ### v0.2.3
 
 - Support SSH tunnel that uses password.
