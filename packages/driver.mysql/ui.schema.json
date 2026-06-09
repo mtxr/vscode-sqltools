@@ -15,6 +15,7 @@
     "sshOptions"
   ],
   "password": { "ui:widget": "password" },
+  "passphrase": { "ui:widget": "password" },
   "socketPath": { "ui:widget": "file" },
   "awsIamOptions": {
     "region": {
