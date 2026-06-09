@@ -341,6 +341,7 @@ export interface IConnectionDriver {
       username: string;
       password?: string;
       privateKeyPath?: string;
+      passphrase?: string;
     },
     db: {
       host: string;
