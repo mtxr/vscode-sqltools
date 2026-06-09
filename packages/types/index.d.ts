@@ -832,7 +832,7 @@ export interface ISettings {
    * @default 'auto'
    * @memberof ISettings
    */
-  strategy?: 'auto' | 'global' | 'workspace';
+  connectionStore?: 'auto' | 'global' | 'workspace';
 }
 
 export interface IConfig extends ISettings {
