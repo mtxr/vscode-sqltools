@@ -20,7 +20,6 @@
   "workspaces": [
     "packages/*"
   ],
-  "packageManager": "yarn@1.22.22",
   "scripts": {
     "test:tsc": "yarn workspaces run test:tsc",
     "build": "yarn --cwd ./build-tools run build",
