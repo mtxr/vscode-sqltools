@@ -10,6 +10,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev?
 
 # Changelog
 
+### v0.2.1
+
+- Add `passphrase` on createSshTunnel() to align with SSH tunneling enhancement implemented in AbstractDriver in @sqltools/base-driver@0.2.4
+
 ### v0.2.0
 
 - Add IConnectionDriver.createSshTunnel() to align with SSH tunneling support implemented in AbstractDriver in @sqltools/base-driver@0.2.0
