@@ -6,6 +6,7 @@ import { IConnectionDriver, NSDatabase } from '@sqltools/types';
 import {countBy} from 'lodash';
 import { parse as queryParse } from '@sqltools/util/query';
 import generateId from '@sqltools/util/internal-id';
+import { signAwsIamToken, validateIamAuthOptions } from './aws-iam';
 
 export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib.PoolOptions> implements IConnectionDriver {
   queries = Queries;
@@ -27,13 +28,34 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     if (this.credentials.connectString) {
       pool = MySQLLib.createPool(this.credentials.connectString);
     } else {
+      let password = this.credentials.password;
+      if (this.credentials.useAwsIamAuth) {
+        const awsIamOptions = this.credentials.awsIamOptions || {};
+        validateIamAuthOptions(awsIamOptions, {
+          ssl: !!mysqlOptions.ssl,
+          hostname: this.credentials.server,
+          port: this.credentials.port,
+          username: this.credentials.username,
+        });
+        // mysql2's pool doesn't support an async password callback so we
+        // sign a single token at pool creation. Tokens expire after 15
+        // minutes; reconnect to refresh.
+        password = await signAwsIamToken({
+          hostname: this.credentials.server,
+          port: this.credentials.port,
+          username: this.credentials.username,
+          region: awsIamOptions.region,
+          profile: awsIamOptions.profile,
+        });
+      }
+
       const poolConfig = {
         host: this.credentials.server,
         port: this.credentials.port,
         connectTimeout: this.credentials.connectionTimeout * 1000,
         database: this.credentials.database,
         socketPath: this.credentials.socketPath,
-        password: this.credentials.password,
+        password,
         user: this.credentials.username,
         multipleStatements: true,
         dateStrings: true,

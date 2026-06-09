@@ -105,6 +105,41 @@ Example configuration:
 }
 ```
 
+### 3. IAM database authentication (Amazon RDS / Aurora)
+
+For MySQL on Amazon RDS or Aurora, you can authenticate using [IAM database authentication](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.IAMDBAuth.html) instead of a password. SQLTools signs a short-lived (15 min) auth token with the AWS SDK's RDS Signer when opening the pool.
+
+1. In the connection form, set **Password mode** to **IAM database authentication**.
+2. Provide the **AWS Region** the RDS / Aurora instance is in (for example `us-east-1`).
+3. Optionally provide an **AWS Profile** name from your shared AWS config (`~/.aws/credentials` or `~/.aws/config`). Leave empty to use the default credential provider chain (environment variables, default profile, IMDS, SSO, etc.).
+4. Enable SSL under **mysqlOptions > SSL** and supply the RDS CA bundle (downloadable from [Using SSL/TLS to encrypt a connection to a DB instance](https://docs.aws.amazon.com/AmazonRDS/latest/UserGuide/UsingWithRDS.SSL.html)). IAM database authentication requires SSL and will refuse to connect otherwise.
+5. Configure the database user for IAM auth: `CREATE USER <user> IDENTIFIED WITH AWSAuthenticationPlugin AS 'RDS';`.
+
+Because the mysql2 library does not support an async password callback, the pool uses a single token for its lifetime. Tokens expire after 15 minutes; reconnect to refresh.
+
+Example stored connection:
+
+```json
+{
+  "name": "Aurora IAM",
+  "driver": "MySQL",
+  "server": "my-cluster.cluster-xyz.us-east-1.rds.amazonaws.com",
+  "port": 3306,
+  "database": "app",
+  "username": "dbuser",
+  "useAwsIamAuth": true,
+  "awsIamOptions": {
+    "region": "us-east-1",
+    "profile": "dev"
+  },
+  "mysqlOptions": {
+    "ssl": {
+      "ca": "/path/to/rds-global-bundle.pem"
+    }
+  }
+}
+```
+
 <RenderConnectionOptions
   client:only="react"
   exclude={['oracleOptions', 'mssqlOptions', 'icons', 'domain', 'pgOptions']}
