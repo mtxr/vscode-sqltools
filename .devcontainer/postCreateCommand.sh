@@ -8,9 +8,6 @@ echo
 echo 'Setup will continue in 5 seconds...'
 sleep 5
 
-# Suppress warnings triggered by engine value package.json of a VS Code extension
-yarn config set ignore-engines true -g
-
 # Build with Node.js version 20
 . $NVM_DIR/nvm.sh
 nvm install 20
@@ -18,6 +15,13 @@ nvm install 20
 # Appending this to .bashrc means shells opened within the project tree will use the Node.js version specified in .nvmrc in the project root,
 # provided no overriding .nvmrc is found between the shell's cwd and that root folder.
 echo nvm use >> $HOME/.bashrc
+
+# Install yarn
+npm install --global yarn
+echo "yarn version $(yarn --version)"
+
+# Suppress warnings triggered by engine value package.json of a VS Code extension
+yarn config set ignore-engines true -g
 
 # Initialize for building
 yarn
