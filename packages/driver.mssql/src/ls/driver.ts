@@ -59,6 +59,7 @@ export default class MSSQL extends AbstractDriver<MSSQLLib.ConnectionPool, any> 
             username: this.credentials.sshOptions.username,
             password: this.credentials.sshOptions.password,
             privateKeyPath: this.credentials.sshOptions.privateKeyPath,
+            passphrase: this.credentials.sshOptions.passphrase,
           },
           {
             host: this.credentials.server,

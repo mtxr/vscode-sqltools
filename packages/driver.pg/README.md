@@ -6,7 +6,8 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ### 0.5.8
 
-- Add IAM database authentication support for Amazon RDS / Aurora.
+- Add IAM database authentication support for Amazon RDS / Aurora. [#1588](https://github.com/mtxr/vscode-sqltools/pull/1588) - thanks [@jcjaskula-aws](https://github.com/jcjaskula-aws)
+- Support passphrase for SSH private key.
 
 ### 0.5.7
 
