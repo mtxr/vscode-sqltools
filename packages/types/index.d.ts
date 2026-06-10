@@ -261,6 +261,14 @@ export interface IConnection<DriverOptions = any> {
      * @memberof IConnection.sshOptions
      */
     privateKeyPath?: string;
+
+    /**
+     * Passphrase for the private key
+     * @type {string}
+     * @default null
+     * @memberof IConnection.sshOptions
+     */
+    passphrase?: string;
   };
 
   // WONT BE INCLUDED IN SETTINGS
@@ -341,6 +349,7 @@ export interface IConnectionDriver {
       username: string;
       password?: string;
       privateKeyPath?: string;
+      passphrase?: string;
     },
     db: {
       host: string;
