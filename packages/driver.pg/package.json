@@ -75,7 +75,7 @@
     "@types/pg": "^7.14.3",
     "@types/vscode": "^1.72.0",
     "concurrently": "^5.2.0",
-    "esbuild": "^0.25.0",
+    "esbuild": "^0.28.1",
     "lodash": "^4.18.1",
     "pg": "^8.2.1",
     "rimraf": "^3.0.2",
