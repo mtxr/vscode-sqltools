@@ -14,9 +14,12 @@
     "sshOptions"
   ],
   "password": { "ui:widget": "password" },
-  "passphrase": { "ui:widget": "password" },
   "askForPassword": { "ui:widget": "hidden" },
   "socketPath": { "ui:widget": "file" },
+  "sshOptions": {
+    "password": { "ui:widget": "password" },    
+    "passphrase": { "ui:widget": "password" }
+  },
   "mssqlOptions": {
     "abortTransactionOnError": {
       "ui:help": "A boolean determining whether to rollback a transaction automatically if any error is encountered during the given transaction's execution. This sets the value for XACT_ABORT during the initial SQL phase of a connection."
