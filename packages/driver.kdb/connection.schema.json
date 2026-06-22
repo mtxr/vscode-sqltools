@@ -1,0 +1,118 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "type": "object",
+  "properties": {
+    "server": {
+      "title": "Host",
+      "type": "string",
+      "default": "localhost",
+      "minLength": 1
+    },
+    "port": {
+      "title": "Port",
+      "type": "number",
+      "default": 5000,
+      "minimum": 1,
+      "maximum": 65535
+    },
+    "username": {
+      "title": "Username",
+      "type": "string"
+    },
+    "password": {
+      "title": "Password",
+      "type": "string"
+    },
+    "database": {
+      "title": "Namespace",
+      "description": "Optional q namespace used for object explorer metadata, for example . or .analytics.",
+      "type": "string",
+      "default": "."
+    },
+    "connectionTimeout": {
+      "title": "Timeout (seconds)",
+      "type": "number",
+      "default": 30,
+      "minimum": 0
+    },
+    "ssh": {
+      "title": "Over SSH",
+      "type": "string",
+      "enum": [
+        "Enabled",
+        "Disabled"
+      ],
+      "default": "Disabled"
+    }
+  },
+  "dependencies": {
+    "ssh": {
+      "oneOf": [
+        {
+          "properties": {
+            "ssh": {
+              "enum": [
+                "Disabled"
+              ]
+            }
+          }
+        },
+        {
+          "properties": {
+            "ssh": {
+              "enum": [
+                "Enabled"
+              ]
+            },
+            "sshOptions": {
+              "type": "object",
+              "title": "SSH Connection Options",
+              "properties": {
+                "host": {
+                  "title": "SSH Host",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "port": {
+                  "title": "SSH Port",
+                  "type": "integer",
+                  "default": 22,
+                  "minimum": 1,
+                  "maximum": 65535
+                },
+                "username": {
+                  "title": "SSH Username",
+                  "type": "string",
+                  "minLength": 1
+                },
+                "password": {
+                  "title": "SSH Password",
+                  "type": "string"
+                },
+                "privateKeyPath": {
+                  "title": "Private Key File Path",
+                  "type": "string"
+                },
+                "passphrase": {
+                  "title": "Private Key Passphrase",
+                  "type": "string"
+                }
+              },
+              "required": [
+                "host",
+                "username"
+              ]
+            }
+          },
+          "required": [
+            "sshOptions"
+          ]
+        }
+      ]
+    }
+  },
+  "required": [
+    "server",
+    "port"
+  ]
+}

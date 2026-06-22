@@ -1,0 +1,274 @@
+{
+  "name": "sqltools-driver-kdb",
+  "displayName": "SQLTools kdb+",
+  "description": "SQLTools driver for kdb+/q using q IPC over TCP",
+  "version": "0.1.0-SNAPSHOT",
+  "engines": {
+    "vscode": "^1.78.0"
+  },
+  "publisher": "mtxr",
+  "icon": "icons/marketplace.png",
+  "license": "MIT",
+  "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mtxr/vscode-sqltools.git",
+    "directory": "packages/driver.kdb"
+  },
+  "bugs": {
+    "url": "https://github.com/mtxr/vscode-sqltools/labels/kdb"
+  },
+  "keywords": [
+    "sqltools-driver",
+    "kdb",
+    "kdb+",
+    "q"
+  ],
+  "galleryBanner": {
+    "theme": "light",
+    "color": "#fafafa"
+  },
+  "categories": [
+    "Programming Languages",
+    "Snippets",
+    "Other"
+  ],
+  "extensionDependencies": [
+    "mtxr.sqltools"
+  ],
+  "activationEvents": [
+    "*",
+    "onLanguage:sql",
+    "onLanguage:q",
+    "onCommand:sqltools.*",
+    "onCommand:kdb-sqltools.runFile",
+    "onCommand:kdb-sqltools.runSelectionOrBlock",
+    "onCommand:kdb-sqltools.runFileInSqltools",
+    "onCommand:kdb-sqltools.runSelectionOrBlockInSqltools",
+    "onCommand:kdb-sqltools.runFileInKdbPanel",
+    "onCommand:kdb-sqltools.runSelectionOrBlockInKdbPanel",
+    "onCommand:kdb-sqltools.copyExampleConnectionSettings"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "languages": [
+      {
+        "id": "q",
+        "aliases": [
+          "q",
+          "kdb+ q",
+          "kdb q"
+        ],
+        "extensions": [
+          ".q"
+        ]
+      }
+    ],
+    "commands": [
+      {
+        "command": "kdb-sqltools.runFile",
+        "title": "Run q Script",
+        "category": "kdb+",
+        "icon": "$(play)"
+      },
+      {
+        "command": "kdb-sqltools.runSelectionOrBlock",
+        "title": "Run Selection",
+        "category": "kdb+",
+        "icon": "$(run)"
+      },
+      {
+        "command": "kdb-sqltools.runFileInSqltools",
+        "title": "Run q Script in SQLTools Results",
+        "category": "kdb+",
+        "icon": "$(play)"
+      },
+      {
+        "command": "kdb-sqltools.runSelectionOrBlockInSqltools",
+        "title": "Run Selection in SQLTools Results",
+        "category": "kdb+",
+        "icon": "$(run)"
+      },
+      {
+        "command": "kdb-sqltools.runFileInKdbPanel",
+        "title": "Run q Script in kdb Panel",
+        "category": "kdb+",
+        "icon": "$(table)"
+      },
+      {
+        "command": "kdb-sqltools.runSelectionOrBlockInKdbPanel",
+        "title": "Run Selection in kdb Panel",
+        "category": "kdb+",
+        "icon": "$(table)"
+      },
+      {
+        "command": "kdb-sqltools.copyExampleConnectionSettings",
+        "title": "Copy Example Global Connection Settings",
+        "category": "kdb+",
+        "icon": "$(copy)"
+      }
+    ],
+    "menus": {
+      "editor/title": [
+        {
+          "command": "kdb-sqltools.runFile",
+          "when": "editorLangId == q || resourceExtname == .q",
+          "group": "navigation"
+        }
+      ],
+      "editor/context": [
+        {
+          "command": "kdb-sqltools.runSelectionOrBlock",
+          "when": "editorLangId == q || resourceExtname == .q",
+          "group": "navigation"
+        },
+        {
+          "command": "kdb-sqltools.runFile",
+          "when": "editorLangId == q || resourceExtname == .q",
+          "group": "navigation"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "kdb-sqltools.runFile",
+          "when": "editorLangId == q || resourceExtname == .q"
+        },
+        {
+          "command": "kdb-sqltools.runSelectionOrBlock",
+          "when": "editorLangId == q || resourceExtname == .q"
+        },
+        {
+          "command": "kdb-sqltools.runFileInSqltools",
+          "when": "editorLangId == q || resourceExtname == .q"
+        },
+        {
+          "command": "kdb-sqltools.runSelectionOrBlockInSqltools",
+          "when": "editorLangId == q || resourceExtname == .q"
+        },
+        {
+          "command": "kdb-sqltools.runFileInKdbPanel",
+          "when": "editorLangId == q || resourceExtname == .q"
+        },
+        {
+          "command": "kdb-sqltools.runSelectionOrBlockInKdbPanel",
+          "when": "editorLangId == q || resourceExtname == .q"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "kdb-sqltools",
+      "properties": {
+        "kdb-sqltools.results.target": {
+          "type": "string",
+          "default": "kdbPanel",
+          "enum": [
+            "sqltools",
+            "kdbPanel"
+          ],
+          "enumDescriptions": [
+            "Use SQLTools' result grid.",
+            "Use the lightweight kdb results panel."
+          ],
+          "description": "Result target used by the default kdb-sqltools q run commands."
+        },
+        "kdb-sqltools.performance.trace": {
+          "type": "boolean",
+          "default": false,
+          "description": "Log query performance timings to the extension host console."
+        },
+        "kdb-sqltools.results.cellWidth": {
+          "type": "number",
+          "default": 160,
+          "minimum": 80,
+          "maximum": 600,
+          "description": "Cell width in pixels for the kdb results panel."
+        },
+        "kdb-sqltools.results.rowHeight": {
+          "type": "number",
+          "default": 28,
+          "minimum": 20,
+          "maximum": 80,
+          "description": "Base row height in pixels for the kdb results panel."
+        },
+        "kdb-sqltools.results.fontSize": {
+          "type": "number",
+          "default": 0,
+          "minimum": 0,
+          "maximum": 32,
+          "description": "Font size in pixels for the kdb results panel. Use 0 for the VS Code default."
+        },
+        "kdb-sqltools.results.density": {
+          "type": "string",
+          "default": "standard",
+          "enum": [
+            "compact",
+            "standard",
+            "comfortable"
+          ],
+          "enumDescriptions": [
+            "Use tighter row height and padding.",
+            "Use standard row height and padding.",
+            "Use roomier row height and padding."
+          ],
+          "description": "Visual density for the kdb results panel."
+        },
+        "kdb-sqltools.results.showRowIndex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Show the left row-number column in the kdb results panel."
+        },
+        "kdb-sqltools.results.includeHeaders": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include column headers by default when copying or exporting from the kdb results panel."
+        },
+        "kdb-sqltools.results.includeRowIndex": {
+          "type": "boolean",
+          "default": true,
+          "description": "Include 1-based row numbers by default when copying or exporting from the kdb results panel."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "test:tsc": "tsc --noEmit -p ./tsconfig.json --skipLibCheck",
+    "clean": "rimraf -rf out dist *.vsix",
+    "predev": "yarn run clean",
+    "dev": "yarn run watch",
+    "prebuild": "yarn run clean && yarn run tsc-check",
+    "build": "cross-env NODE_ENV=production concurrently \"npm:build:*\"",
+    "build:ext": "yarn run compile:ext --define:process.env.NODE_ENV=\"'production'\" --minify-whitespace",
+    "build:ls": "yarn run compile:ls --define:process.env.NODE_ENV=\"'production'\" --minify-whitespace",
+    "esbuild": "esbuild --platform=node --tsconfig=./tsconfig.json --external:vscode --external:../build/Release/cpufeatures.node --color=true --format=cjs --loader:.node=file",
+    "prepackage": "yarn run build",
+    "package": "vsce package --yarn -o .",
+    "compile:ext": "yarn run esbuild --bundle ./src/extension.ts --outfile=./out/extension.js --target=es2017 --define:process.env.PRODUCT=\"'ext'\"",
+    "compile:ls": "yarn run esbuild --bundle ./src/ls/plugin.ts --outfile=./out/ls/plugin.js --target=es2017 --define:process.env.PRODUCT=\"'ls'\"",
+    "tsc-check": "yarn run ts --noEmit --preserveWatchOutput --skipLibCheck",
+    "watch": "concurrently \"npm:watch:*\"",
+    "watch:ext": "yarn run compile:ext --define:process.env.NODE_ENV=\"'development'\" --sourcemap --watch",
+    "watch:ls": "yarn run compile:ls --define:process.env.NODE_ENV=\"'development'\" --sourcemap --watch",
+    "dev:tsc": "yarn run tsc-check -w",
+    "ts": "tsc -p .",
+    "test:unit": "yarn run ts --noEmit false --skipLibCheck && node test/run.js",
+    "test:live-kdb": "yarn run ts --noEmit false --skipLibCheck && node test/live/run.js"
+  },
+  "dependencies": {
+    "@sqltools/base-driver": "^0.2.4",
+    "@sqltools/types": "^0.2.1",
+    "jszip": "^3.10.1",
+    "uuid": "^7.0.2"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.9",
+    "@types/vscode": "^1.72.0",
+    "@vscode/test-electron": "^3.0.0",
+    "concurrently": "^5.2.0",
+    "cross-env": "^7.0.2",
+    "esbuild": "^0.28.1",
+    "mocha": "^11.7.6",
+    "rimraf": "^3.0.2",
+    "typescript": "~4.8.3",
+    "@vscode/vsce": "^2.19.0"
+  }
+}
