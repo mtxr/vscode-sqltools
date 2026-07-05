@@ -536,12 +536,13 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
 
   private async _openResultsWebview(connId: string, reUseId: string) {
-    const requestId = reUseId || Config.results.reuseTabs === 'connection' ? connId : generateId();
+    const requestId = reUseId || (Config.results.reuseTabs === 'connection' ? connId : generateId());
     const view = this.resultsWebview.get(requestId);
     view.onDidDispose(() => {
       this.client.sendRequest(ReleaseResultsRequest, { connId, requestId });
     });
     await view.show();
+    view.sendMessage('SET_STATE', { loading: true });
     return view;
   }
   private _connect = async (force = false): Promise<IConnection> => {
