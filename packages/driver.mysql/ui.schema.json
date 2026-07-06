@@ -16,6 +16,10 @@
   ],
   "password": { "ui:widget": "password" },
   "socketPath": { "ui:widget": "file" },
+  "sshOptions": {
+    "password": { "ui:widget": "password" },    
+    "passphrase": { "ui:widget": "password" }
+  },
   "awsIamOptions": {
     "region": {
       "ui:help": "AWS region of the Amazon RDS / Aurora instance (e.g. us-east-1, eu-west-1)."

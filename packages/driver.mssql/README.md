@@ -4,6 +4,18 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.11
+
+- Support passphrase for SSH private key.
+
+### 0.4.10
+
+- Update branding.
+
+### 0.4.9
+
+- Update branding.
+
 ### 0.4.8
 
 - Support password connections over SSH.
