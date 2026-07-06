@@ -8,6 +8,7 @@ See [SQLite Start Guide](https://vscode-sqltools.mteixeira.dev/en/drivers/sq-lit
 
 ### 0.5.3
 
+- Browse indexes and triggers, and surface DDL scripts for these. [#1541](https://github.com/mtxr/vscode-sqltools/pull/1541) - thanks [@j2cry](https://github.com/j2cry)
 - Update `base-driver` package.
 
 ### 0.5.2

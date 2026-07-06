@@ -6,8 +6,10 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ### 0.6.7
 
+- Browse procedures, functions, indexes and triggers, and surface DDL scripts for these. [#1541](https://github.com/mtxr/vscode-sqltools/pull/1541) - thanks [@j2cry](https://github.com/j2cry)
 - Add IAM database authentication support for Amazon RDS / Aurora. [#1588](https://github.com/mtxr/vscode-sqltools/pull/1588) - thanks [@jcjaskula-aws](https://github.com/jcjaskula-aws)
 - Support passphrase for SSH private key.
+- Mask SSH password and passphrase fields on setup form.
 
 ### 0.6.6
 
