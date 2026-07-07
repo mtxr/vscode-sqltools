@@ -2,7 +2,7 @@
   "name": "sqltools-driver-mssql",
   "displayName": "SQLTools SQL Server",
   "description": "SQLTools SQL Server",
-  "version": "0.4.11",
+  "version": "0.4.12-SNAPSHOT",
   "engines": {
     "vscode": "^1.78.0"
   },
