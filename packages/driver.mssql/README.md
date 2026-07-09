@@ -4,6 +4,20 @@ This package is part of [vscode-sqltools](https://vscode-sqltools.mteixeira.dev/
 
 ## Changelog
 
+### 0.4.11
+
+- Browse procedures, functions, indexes and triggers, and surface DDL scripts for these. [#1541](https://github.com/mtxr/vscode-sqltools/pull/1541) - thanks [@j2cry](https://github.com/j2cry)
+- Support passphrase for SSH private key.
+- Mask SSH password and passphrase fields on setup form.
+
+### 0.4.10
+
+- Update branding.
+
+### 0.4.9
+
+- Update branding.
+
 ### 0.4.8
 
 - Support password connections over SSH.

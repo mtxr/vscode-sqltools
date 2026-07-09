@@ -267,6 +267,10 @@
                 "privateKeyPath": {
                   "type": "string",
                   "title": "Private Key File Path"
+                },
+                "passphrase": {
+                  "type": "string",
+                  "title": "Passphrase of Private Key"
                 }
               },
               "required": ["host", "username"]
