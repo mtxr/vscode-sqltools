@@ -219,6 +219,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
   public get addConsoleMessages() {
     return this.messagesTreeViewProvider.addMessages;
   }
+
+  public get clearConsoleMessages() {
+    return this.messagesTreeViewProvider.clearMessages;
+  }
   //#region Drag and drop definitions
   dropMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer','text/uri-list'];
   dragMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer'];
@@ -235,6 +239,9 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
 export class MessagesProvider implements TreeDataProvider<TreeItem> {
   private items: TreeItem[] = [];
   private active: boolean = false;
+  // Maximum number of message TreeItems kept in memory across all runs.
+  // Oldest items are dropped when the list exceeds this value.
+  private static readonly MAX_ITEMS = 200;
   private _onDidChangeTreeData: EventEmitter<TreeItem> = new EventEmitter();
   public readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
   getTreeItem(element: TreeItem): TreeItem | Thenable<TreeItem> {
@@ -247,14 +254,35 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
 
   getParent = (_: TreeItem) => {
     return null;
-  }
+  };
+
+  clearMessages = () => {
+    this.items = [];
+    this._onDidChangeTreeData.fire(null);
+  };
 
   addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
     if (!this.active && messages.length > 0) {
       this.active = true;
       commands.executeCommand('setContext', `${EXT_NAMESPACE}.consoleMessages.active`, true);
     }
-    this.items = messages.map(m => {
+
+    if (messages.length === 0) return;
+
+    // Format time as HH:MM:SS (24-hour, zero-padded) regardless of locale.
+    const fmt24 = (d: Date) =>
+      `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
+
+    // Prepend a visual separator so the user can tell where one run ends and
+    // the next begins when multiple runs are visible in the panel.
+    const runDate = new Date();
+    const separator = new TreeItem(
+      `─────────────────── ${fmt24(runDate)} ───────────────────`,
+      TreeItemCollapsibleState.None
+    );
+    separator.tooltip = runDate.toString();
+
+    const newItems = messages.map(m => {
       let item: TreeItem;
       if (typeof m === 'string') {
         item = new TreeItem(m, TreeItemCollapsibleState.None);
@@ -262,7 +290,7 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
       } else {
         item = new TreeItem(m.message, TreeItemCollapsibleState.None);
         const date = new Date(m.date || undefined);
-        item.description = date.toLocaleTimeString();
+        item.description = fmt24(date);
         item.tooltip = date.toString();
       }
       (<any>item).detail = 'DETAIL';
@@ -274,8 +302,11 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
       };
       return item;
     });
+
+    // Newest run at the top; trim to MAX_ITEMS to cap memory usage.
+    this.items = [separator, ...newItems, ...this.items].slice(0, MessagesProvider.MAX_ITEMS);
     this._onDidChangeTreeData.fire(null);
-  }
+  };
 
 }
 

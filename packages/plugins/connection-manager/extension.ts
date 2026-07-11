@@ -138,9 +138,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private updateViewResults = (view: ResultsWebviewManager['viewsMap'][string], results: NSDatabase.IResult[]) => {
     view.updateResults(results);
-    if (results.length > 0)
-      this.syncConsoleMessages(results[0].messages);
-  }
+    if (results.length > 0) {
+      // Flatten messages from ALL result entries, not just results[0].
+      // Previously only the first statement's messages reached the Console
+      // panel, so SET/CALL/DELETE with no result set produced no feedback.
+      const allMessages = results.flatMap(r => r.messages ?? []);
+      this.syncConsoleMessages(allMessages);
+    }
+  };
 
   private syncConsoleMessages = (messages: NSDatabase.IResult['messages']) => {
     this.explorer.addConsoleMessages(messages || []);
@@ -666,6 +671,10 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     return commands.executeCommand(`${EXT_NAMESPACE}.copyMessages`, item, selectedNodes);
   }
 
+  private ext_clearConsoleMessages = async () => {
+    this.explorer.clearConsoleMessages();
+  }
+
   private ext_copyTextFromTreeItem = async () => {
     const nodes = this.explorer.getSelection();
     if (!nodes || nodes.length === 0) return;
@@ -806,6 +815,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromConsoleMessages`, this.ext_copyTextFromConsoleMessages)
+      .registerCommand(`clearConsoleMessages`, this.ext_clearConsoleMessages)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)
       .registerCommand(`getDefinitionQueryForItem`, this.ext_getDefinitionQueryForItem)

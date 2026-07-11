@@ -295,6 +295,11 @@
                 "command": "sqltools.copyTextFromConsoleMessages"
             },
             {
+                "title": "Clear Messages",
+                "command": "sqltools.clearConsoleMessages",
+                "icon": "$(clear-all)"
+            },
+            {
                 "title": "Generate Insert Query",
                 "command": "sqltools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
@@ -1052,6 +1057,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.refreshTree",
                     "when": "false"
                 },
@@ -1122,6 +1131,11 @@
                     "command": "sqltools.clearHistory",
                     "when": "view == sqltoolsViewHistoryExplorer",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "navigation@1"
                 }
             ],
             "view/item/context": [
@@ -1189,6 +1203,11 @@
                     "command": "sqltools.copyTextFromConsoleMessages",
                     "when": "view == sqltoolsViewConsoleMessages",
                     "group": "sqltools.consoleMessages.edit@1"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "sqltools.consoleMessages.edit@2"
                 },
                 {
                     "command": "sqltools.selectConnection",
