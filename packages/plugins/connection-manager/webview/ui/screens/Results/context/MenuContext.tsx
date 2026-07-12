@@ -37,15 +37,27 @@ export const MenuProvider = ({
 }: IMenuProviderProps) => {
   const [state, setState] = useState<IMenuContextState>(initialState);
   const { data, options, position, anchorEl } = state;
+
+  // Keep refs to the latest callbacks so openMenu/onSelect never close over
+  // stale versions.  Without this, openMenu is created once (when selection
+  // is empty) and never sees updated onOpen/getOptions even after selection
+  // changes - causing the first right-click to always use the stale closure.
+  const getOptionsRef = React.useRef(getOptions);
+  const onOpenRef = React.useRef(onOpen);
+  const onSelectRef = React.useRef(onSelectProp);
+  React.useEffect(() => { getOptionsRef.current = getOptions; }, [getOptions]);
+  React.useEffect(() => { onOpenRef.current = onOpen; }, [onOpen]);
+  React.useEffect(() => { onSelectRef.current = onSelectProp; }, [onSelectProp]);
+
   const openMenu = useCallback(
     (e: React.MouseEvent<HTMLElement>) => {
       e.preventDefault();
       const options =
-        typeof getOptions === 'function'
-          ? getOptions((e.target as any).dataset || {}, e)
+        typeof getOptionsRef.current === 'function'
+          ? getOptionsRef.current((e.target as any).dataset || {}, e)
           : [];
       if (!options || options.length === 0) return;
-      onOpen && onOpen((e.target as any).dataset || {});
+      onOpenRef.current && onOpenRef.current((e.target as any).dataset || {});
       setState({
         data: (e.target as any).dataset || {},
         options,
@@ -56,19 +68,19 @@ export const MenuProvider = ({
         },
       });
     },
-    [state, state.anchorEl]
+    [state.anchorEl]
   );
 
   const closeMenu = useCallback(() => {
     setState(initialState);
-  }, [state, state.anchorEl]);
+  }, []);
 
   const onSelect = useCallback(
     (choice: string) => {
       closeMenu();
-      onSelectProp && onSelectProp(choice, data || {});
+      onSelectRef.current && onSelectRef.current(choice, data || {});
     },
-    [state, state.anchorEl]
+    [data, closeMenu]
   );
   return (
     <MenuContext.Provider
