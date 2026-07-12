@@ -23,6 +23,21 @@ import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTree
 import DependencyManager from './dependency-manager/extension';
 import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
+
+/**
+ * Simple glob matcher: supports * as a wildcard, case-insensitive.
+ * Example: globMatch('*postgres*dev*', 'my-postgres-dev-query.sql') → true
+ */
+function globMatch(pattern: string, text: string): boolean {
+  const re = new RegExp(
+    '^' +
+    pattern.toLowerCase()
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // escape regex metacharacters
+      .replace(/\*/g, '.*')                   // * → .*
+    + '$'
+  );
+  return re.test(text.toLowerCase());
+}
 import { removeAttachedConnection, attachConnection, getAttachedConnection } from './attached-files';
 
 const log = createLogger('conn-man');
@@ -624,6 +639,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     this.explorer.refresh();
+    // Update the status bar immediately.
+    // The standard path explorer.refresh() → getChildren() → getRootItems()
+    // → _onDidChangeActiveConnection → statusBar.setText() only fires when
+    // the SQLTools TreeView is visible.  When any other panel (e.g. Explorer)
+    // is active the tree is not queried and the status bar never updates.
+    // A direct call here makes the status bar always reflect the active
+    // connection regardless of which panel is currently focused.
+    statusBar.setText(c ? c.name : null);
     return c;
   }
 
@@ -704,6 +727,39 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
+    // ── Auto-switch connection by file name pattern ───────────────────────
+    // Setting format: { "ConnectionName": ["*pattern*", "*other*"] }
+    // Patterns support * as wildcard; matched case-insensitively against
+    // the file's basename and its full path.
+    const connectionSwitch: Record<string, string[]> =
+      workspace.getConfiguration(EXT_CONFIG_NAMESPACE).get('connectionSwitch', {});
+
+    if (Object.keys(connectionSwitch).length > 0) {
+      const filePath = editor.document.uri.fsPath;
+      const fileName = path.basename(filePath);
+
+      for (const [connName, patterns] of Object.entries(connectionSwitch)) {
+        if (!Array.isArray(patterns)) continue;
+        const matched = patterns.some(
+          p => globMatch(p, fileName) || globMatch(p, filePath)
+        );
+        if (matched) {
+          const connections: IConnection[] = await this.ext_getConnections({
+            connectedOnly: false,
+            sort: 'connectedFirst',
+          });
+          const target = connections.find(
+            c => c.name === connName || getConnectionId(c) === connName
+          );
+          if (target) {
+            await this.ext_selectConnection(getConnectionId(target), false);
+            return; // first match wins
+          }
+        }
+      }
+    }
+
+    // ── Existing: restore connection attached to this file ─────────────────
     const connId = getAttachedConnection(editor.document.uri);
     if (!connId) {
       return commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, false);

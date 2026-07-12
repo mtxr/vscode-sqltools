@@ -945,6 +945,18 @@
                     "default": true,
                     "description": "Auto open session file when connecting."
                 },
+                "sqltools.connectionSwitch": {
+                    "type": "object",
+                    "description": "Automatically switch the active connection when the focused file name matches a pattern. Keys are connection names (must match exactly); values are arrays of glob patterns (use * as wildcard) tested case-insensitively against the file's basename and its full path. The first matching connection wins. Example: { \"Postgres_DEV\": [\"*postgres*\", \"*pg*dev*\"], \"BigQuery_dev\": [\"*bq*dev*\"] }",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "Glob pattern (* = wildcard). Matched case-insensitively against file basename and full path."
+                        }
+                    }
+                },
                 "sqltools.sessionFilesFolder": {
                     "type": "string",
                     "default": "",
