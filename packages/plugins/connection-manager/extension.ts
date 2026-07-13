@@ -694,6 +694,11 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     return commands.executeCommand(`${EXT_NAMESPACE}.copyMessages`, item, selectedNodes);
   }
 
+  private ext_copyAllConsoleMessages = async () => {
+    const items = this.explorer.getAllConsoleMessages();
+    return commands.executeCommand(`${EXT_NAMESPACE}.copyMessages`, null, items);
+  }
+
   private ext_clearConsoleMessages = async () => {
     this.explorer.clearConsoleMessages();
   }
@@ -871,6 +876,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromConsoleMessages`, this.ext_copyTextFromConsoleMessages)
+      .registerCommand(`copyAllConsoleMessages`, this.ext_copyAllConsoleMessages)
       .registerCommand(`clearConsoleMessages`, this.ext_clearConsoleMessages)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)

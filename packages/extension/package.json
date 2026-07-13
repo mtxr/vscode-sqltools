@@ -295,6 +295,10 @@
                 "command": "sqltools.copyTextFromConsoleMessages"
             },
             {
+                "title": "Copy All Messages",
+                "command": "sqltools.copyAllConsoleMessages"
+            },
+            {
                 "title": "Clear Messages",
                 "command": "sqltools.clearConsoleMessages",
                 "icon": "$(clear-all)"
@@ -1069,6 +1073,10 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.copyAllConsoleMessages",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.clearConsoleMessages",
                     "when": "false"
                 },
@@ -1217,9 +1225,14 @@
                     "group": "sqltools.consoleMessages.edit@1"
                 },
                 {
-                    "command": "sqltools.clearConsoleMessages",
+                    "command": "sqltools.copyAllConsoleMessages",
                     "when": "view == sqltoolsViewConsoleMessages",
                     "group": "sqltools.consoleMessages.edit@2"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "sqltools.consoleMessages.edit@3"
                 },
                 {
                     "command": "sqltools.selectConnection",

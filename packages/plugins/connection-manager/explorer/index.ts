@@ -223,6 +223,10 @@ export class ConnectionExplorer implements TreeDataProvider<SidebarTreeItem>, Tr
   public get clearConsoleMessages() {
     return this.messagesTreeViewProvider.clearMessages;
   }
+
+  public getAllConsoleMessages = () => {
+    return this.messagesTreeViewProvider.getAllMessages();
+  }
   //#region Drag and drop definitions
   dropMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer','text/uri-list'];
   dragMimeTypes: readonly string[] = ['application/vnd.code.tree.connectionExplorer'];
@@ -261,6 +265,10 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
     this._onDidChangeTreeData.fire(null);
   };
 
+  getAllMessages = () => {
+    return this.items;
+  };
+
   addMessages = (messages: NSDatabase.IResult['messages'] = []) => {
     if (!this.active && messages.length > 0) {
       this.active = true;
@@ -272,15 +280,6 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
     // Format time as HH:MM:SS (24-hour, zero-padded) regardless of locale.
     const fmt24 = (d: Date) =>
       `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}:${String(d.getSeconds()).padStart(2, '0')}`;
-
-    // Prepend a visual separator so the user can tell where one run ends and
-    // the next begins when multiple runs are visible in the panel.
-    const runDate = new Date();
-    const separator = new TreeItem(
-      `─────────────────── ${fmt24(runDate)} ───────────────────`,
-      TreeItemCollapsibleState.None
-    );
-    separator.tooltip = runDate.toString();
 
     const newItems = messages.map(m => {
       let item: TreeItem;
@@ -304,7 +303,7 @@ export class MessagesProvider implements TreeDataProvider<TreeItem> {
     });
 
     // Newest run at the top; trim to MAX_ITEMS to cap memory usage.
-    this.items = [separator, ...newItems, ...this.items].slice(0, MessagesProvider.MAX_ITEMS);
+    this.items = [...newItems, ...this.items].slice(0, MessagesProvider.MAX_ITEMS);
     this._onDidChangeTreeData.fire(null);
   };
 
