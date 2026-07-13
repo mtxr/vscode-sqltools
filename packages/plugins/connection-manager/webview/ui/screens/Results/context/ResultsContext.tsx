@@ -55,9 +55,14 @@ export const ResultsProvider = ({ children }: IResultsProviderProps) => {
     }
   }, [state.showConsole]);
 
+  const lastSyncedMessagesRef = useRef<string>('');
   useEffect(() => {
-    sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, state.resultTabs[state.activeTab]?.messages ?? []);
-  }, [state, state.activeTab]);
+    const allMessages = state.resultTabs.reduce<typeof state.resultTabs[0]['messages']>((acc, tab) => acc.concat(tab?.messages ?? []), []);
+    const serialized = JSON.stringify(allMessages);
+    if (serialized === lastSyncedMessagesRef.current) return;
+    lastSyncedMessagesRef.current = serialized;
+    sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, allMessages);
+  }, [state.resultTabs]);
 
   return (
     <ResultsContext.Provider value={{

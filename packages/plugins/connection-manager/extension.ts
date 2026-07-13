@@ -152,14 +152,11 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   }
 
   private updateViewResults = (view: ResultsWebviewManager['viewsMap'][string], results: NSDatabase.IResult[]) => {
+    // Messages reach the Console panel via the webview's own
+    // REQUEST_SYNC_CONSOLE_MESSAGES echo (see ResultsContext.tsx), which fires
+    // once resultTabs updates below and flattens messages from ALL result
+    // entries. Syncing directly here as well would double-add every message.
     view.updateResults(results);
-    if (results.length > 0) {
-      // Flatten messages from ALL result entries, not just results[0].
-      // Previously only the first statement's messages reached the Console
-      // panel, so SET/CALL/DELETE with no result set produced no feedback.
-      const allMessages = results.flatMap(r => r.messages ?? []);
-      this.syncConsoleMessages(allMessages);
-    }
   };
 
   private syncConsoleMessages = (messages: NSDatabase.IResult['messages']) => {
