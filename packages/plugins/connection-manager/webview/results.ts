@@ -25,21 +25,8 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
       case UIAction.NOTIFY_VIEW_READY:
         this.isOpen = payload;
         return;
-      case UIAction.REQUEST_SYNC_CONSOLE_MESSAGES:
-        return this.syncConsoleMessages(payload);
     }
   };
-
-  onViewActive = async (active: boolean) => {
-    if (!active) {
-      this.syncConsoleMessages(['Not focused to results view']);
-      return;
-    };
-    try {
-      const state = await this.getState();
-      this.syncConsoleMessages(state.resultTabs[state.activeTab].messages);
-    } catch (e) { }
-  }
 
   public get cssVariables() {
     if (!Config.results.customization) {
