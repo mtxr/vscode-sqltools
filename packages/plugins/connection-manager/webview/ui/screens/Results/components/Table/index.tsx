@@ -102,7 +102,7 @@ const Table = ({ setContextState }) => {
         e.preventDefault();
         setSelection([]);
         anchorIndexRef.current = null;
-      } else if ((e.ctrlKey || e.metaKey) && e.key === 'a') {
+      } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyA' || e.key.toLowerCase() === 'a')) {
         e.preventDefault();
         setSelection(rows.map((_, i) => i));
       }
