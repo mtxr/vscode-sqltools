@@ -59,6 +59,9 @@ const Table = ({ setContextState }) => {
   // Shift+click range selection.  A ref (not state) so it never triggers
   // re-renders on its own.
   const anchorIndexRef = useRef<number | null>(null);
+  // Last cell the user clicked (left or right click) — the target for
+  // Ctrl+C.  A ref since it never needs to trigger a re-render.
+  const activeCellRef = useRef<{ rowindex: number; colname: string } | null>(null);
   const { exportResults } = useContextAction();
   const { result } = useCurrentResult();
   const { results: rows = [], cols = [], error, messages = [], page, pageSize, total, queryType, queryParams, requestId } = result || {};
@@ -90,8 +93,10 @@ const Table = ({ setContextState }) => {
   }, [setFilters]);
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────
-  // Esc   → clear selection
+  // Esc    → clear selection
   // Ctrl+A → select all rows
+  // Ctrl+C → copy the active cell's value (skipped if the user has an
+  //          actual text selection — let the browser copy that instead)
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       // Ignore when focus is inside an input/textarea (e.g. filter row).
@@ -105,15 +110,35 @@ const Table = ({ setContextState }) => {
       } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyA' || e.key.toLowerCase() === 'a')) {
         e.preventDefault();
         setSelection(rows.map((_, i) => i));
+      } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyC' || e.key.toLowerCase() === 'c')) {
+        // Don't hijack a real text selection made by the user (e.g. dragging
+        // across part of a cell's value) — let the native copy handle that.
+        if (window.getSelection()?.toString()) return;
+        const active = activeCellRef.current;
+        if (!active) return;
+        const row = rows[active.rowindex];
+        if (!row) return;
+        e.preventDefault();
+        clipboardInsert(row[active.colname]);
       }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, [rows]);
 
-  const onMenuOpen = useCallback(({ rowindex }) => {
+  // Track the last-clicked cell (left or right click) so Ctrl+C knows what
+  // to copy.  Runs on mousedown, which — unlike click — isn't stopped from
+  // bubbling up by the row's selection handler.
+  const onCellMouseDown = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    const cell = (e.target as HTMLElement).closest<HTMLElement>('[data-rowindex][data-colname]');
+    if (!cell || !cell.dataset.colname) return;
+    activeCellRef.current = { rowindex: Number(cell.dataset.rowindex), colname: cell.dataset.colname };
+  }, []);
+
+  const onMenuOpen = useCallback(({ rowindex, colname }) => {
     rowindex = Number(rowindex);
     if (isNaN(rowindex) || rowindex < 0) return;
+    if (colname) activeCellRef.current = { rowindex, colname };
     // Preserve any existing selection on right-click so the user never loses
     // a multi-row selection just by opening the context menu.
     // Only auto-select the right-clicked row as a fallback when nothing is
@@ -299,7 +324,7 @@ const Table = ({ setContextState }) => {
       getOptions={getMenuOptions}
       onSelect={onMenuSelect}
     >
-      <Paper square elevation={0} className="result">
+      <Paper square elevation={0} className="result" onMouseDown={onCellMouseDown}>
         {error && <QueryError messages={messages} />}
         {!error && <Grid rows={rows} columns={columnObjNames} rootComponent={GridRoot}>
           <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
