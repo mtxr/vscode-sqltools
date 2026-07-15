@@ -890,8 +890,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     });
     this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
-    this.client.onRequest(ForceListRefresh, () => {
+    this.client.onRequest(ForceListRefresh, async () => {
       this.explorer.refresh();
+      // Autoconnect (language-server side) only signals the client via this
+      // request — it never goes through _setConnection(), so without this
+      // the status bar stays stuck on "Connect" unless the SQLTools tree
+      // view happens to be visible (see _setConnection for the same fix).
+      const active = await this.explorer.getActive();
+      statusBar.setText(active ? active.name : null);
     });
 
     // extension stuff
