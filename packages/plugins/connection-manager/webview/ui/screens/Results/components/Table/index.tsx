@@ -93,15 +93,21 @@ const Table = ({ setContextState }) => {
   }, [setFilters]);
 
   // ── Keyboard shortcuts ───────────────────────────────────────────────────
-  // Esc    → clear selection
-  // Ctrl+A → select all rows
-  // Ctrl+C → copy the active cell's value (skipped if the user has an
-  //          actual text selection — let the browser copy that instead)
+  // Esc         → clear selection
+  // Ctrl+A      → select all rows
+  // Ctrl+C      → copy the active cell's value (skipped if the user has an
+  //               actual text selection — let the browser copy that instead)
+  // Ctrl+Shift+C → copy the whole selected row(s) as CSV
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       // Ignore when focus is inside an input/textarea (e.g. filter row).
       const tag = (e.target as HTMLElement)?.tagName?.toLowerCase();
       if (tag === 'input' || tag === 'textarea') return;
+
+      // e.code (physical key) is used alongside e.key so the shortcut still
+      // matches regardless of Caps Lock state or Shift-driven letter case
+      // (Caps Lock/Shift turn e.key 'c' into 'C', which e.key alone would miss).
+      const isKeyC = e.code === 'KeyC' || e.key.toLowerCase() === 'c';
 
       if (e.key === 'Escape') {
         e.preventDefault();
@@ -110,7 +116,12 @@ const Table = ({ setContextState }) => {
       } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyA' || e.key.toLowerCase() === 'a')) {
         e.preventDefault();
         setSelection(rows.map((_, i) => i));
-      } else if ((e.ctrlKey || e.metaKey) && (e.code === 'KeyC' || e.key.toLowerCase() === 'c')) {
+      } else if ((e.ctrlKey || e.metaKey) && e.shiftKey && isKeyC) {
+        if (selection.length === 0) return;
+        e.preventDefault();
+        const selectedRows = (selection as number[]).map(i => rows[i]).filter(Boolean);
+        clipboardInsert(rowsToCSV(selectedRows));
+      } else if ((e.ctrlKey || e.metaKey) && !e.shiftKey && isKeyC) {
         // Don't hijack a real text selection made by the user (e.g. dragging
         // across part of a cell's value) — let the native copy handle that.
         if (window.getSelection()?.toString()) return;
@@ -124,7 +135,7 @@ const Table = ({ setContextState }) => {
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
-  }, [rows]);
+  }, [rows, selection]);
 
   // Track the last-clicked cell (left or right click) so Ctrl+C knows what
   // to copy.  Runs on mousedown, which — unlike click — isn't stopped from
