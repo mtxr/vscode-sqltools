@@ -12,7 +12,7 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
   protected title: string = `${DISPLAY_NAME} Results`;
   protected isOpen = false;
 
-  constructor(public requestId: string, private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) {
+  constructor(public requestId: string) {
     super();
 
     this.onDidDispose(() => {
@@ -117,14 +117,13 @@ class ResultsWebview extends WebviewProvider<ResultsScreenState> {
 
 export default class ResultsWebviewManager {
   private viewsMap: { [id: string]: ResultsWebview } = {};
-  constructor(private syncConsoleMessages: ((messages: NSDatabase.IResult['messages']) => void)) { }
 
   dispose = () => {
     return Promise.all(Object.keys(this.viewsMap).map(id => this.viewsMap[id].dispose()));
   }
 
   private createForId = (requestId: InternalID) => {
-    this.viewsMap[requestId] = new ResultsWebview(requestId, this.syncConsoleMessages);
+    this.viewsMap[requestId] = new ResultsWebview(requestId);
     this.viewsMap[requestId].onDidDispose(() => {
       delete this.viewsMap[requestId];
     });

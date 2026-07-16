@@ -902,7 +902,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
     // extension stuff
     Context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager(this.syncConsoleMessages)),
+      (this.resultsWebview = new ResultsWebviewManager()),
       (this.settingsWebview = new SettingsWebview()),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
