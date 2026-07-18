@@ -26,7 +26,8 @@ export const getEditorQueryDetails = (editor: TextEditor): { currentQuery: strin
   const prefixQueries = parse(prefix);
   const currentQuery = allQueries[prefixQueries.length-1];
   const startIndex = prefix.lastIndexOf(prefixQueries[prefixQueries.length - 1]);
-  const startPos = editor.document.positionAt(startIndex);
+  const leadingCommentsLength = (currentQuery.match(/^(\s*(--[^\n\r]*|\/\*[\s\S]*?\*\/))*\s*/) || [''])[0].length;
+  const startPos = editor.document.positionAt(startIndex + leadingCommentsLength);
   const endPos = editor.document.positionAt(startIndex + currentQuery.length);
   return {
     currentQuery,
