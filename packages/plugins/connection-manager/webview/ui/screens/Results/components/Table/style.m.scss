@@ -37,3 +37,116 @@
   color: var(--vscode-input-placeholderForeground);
   background: var(--vscode-inputOption-activeBackground);
 }
+
+.cellDirty {
+  background-color: rgba(229, 192, 123, 0.15) !important;
+  outline: 1px dashed rgba(229, 192, 123, 0.6);
+  outline-offset: -1px;
+}
+
+.toolbar {
+  display: flex;
+  align-items: center;
+  padding: 8px 16px;
+  background: var(--vscode-editorWidget-background, var(--vscode-editor-background, #252526));
+  border-bottom: 1px solid var(--vscode-panel-border, #3c3c3c);
+  gap: 12px;
+  
+  .pendingText {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground, #888);
+  }
+}
+
+.btnSave {
+  background: var(--vscode-button-background, #007acc);
+  color: var(--vscode-button-foreground, #ffffff);
+  border: none;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 2px;
+  
+  &:hover:not(:disabled) {
+    background: var(--vscode-button-hoverBackground, #0062a3);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.btnDiscard {
+  background: var(--vscode-button-secondaryBackground, #3a3d41);
+  color: var(--vscode-button-secondaryForeground, #ffffff);
+  border: none;
+  padding: 4px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 12px;
+  border-radius: 2px;
+  
+  &:hover:not(:disabled) {
+    background: var(--vscode-button-secondaryHoverBackground, #45494e);
+  }
+  
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+.spinner {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  border-radius: 50%;
+  border-top-color: var(--vscode-button-background, #007acc);
+  animation: spin 0.8s linear infinite;
+  margin-left: 6px;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.toast {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  padding: 12px 20px;
+  border-radius: 4px;
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 10000;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+  animation: slideIn 0.2s ease-out;
+
+  &.success {
+    background: var(--vscode-notifications-background, #333);
+    color: var(--vscode-notifications-foreground, #fff);
+    border-left: 4px solid var(--vscode-charts-green, #4caf50);
+  }
+
+  &.error {
+    background: var(--vscode-notifications-background, #333);
+    color: var(--vscode-notifications-foreground, #fff);
+    border-left: 4px solid var(--vscode-charts-red, #f44336);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
