@@ -101,6 +101,28 @@ export default class SQLite extends AbstractDriver<SQLiteLib.Database, any> impl
     await this.query('SELECT 1', {});
   }
 
+  public async updateRows(tableName: string, edits: Array<{ keys: Record<string, any>, original: Record<string, any>, modified: Record<string, any> }>) {
+    const db = await this.open();
+    let updatedRowCount = 0;
+    for (const edit of edits) {
+      const setCols = Object.keys(edit.modified);
+      if (setCols.length === 0) continue;
+      const whereCols = Object.keys(edit.keys);
+      
+      const sql = `UPDATE "${tableName}" SET ${setCols.map(c => `"${c}" = ?`).join(', ')} WHERE ${whereCols.map(c => `"${c}" = ?`).join(' AND ')}`;
+      const params = [...setCols.map(c => edit.modified[c]), ...whereCols.map(c => edit.keys[c])];
+      
+      await new Promise<void>((resolve, reject) => {
+        db.run(sql, params, function(err) {
+          if (err) return reject(err);
+          updatedRowCount += this.changes;
+          resolve();
+        });
+      });
+    }
+    return updatedRowCount;
+  }
+
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.type) {
       case ContextValue.CONNECTION:

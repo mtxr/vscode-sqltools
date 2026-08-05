@@ -88,6 +88,22 @@ export const GetInsertQueryRequest = new RequestType<
   void
 >('connection/GetInsertQueryRequest');
 
+export const UpdateRowsRequest = new RequestType<
+  {
+    connId: string;
+    tableName: string;
+    primaryKeys: string[];
+    edits: Array<{
+      keys: Record<string, any>;
+      original: Record<string, any>;
+      modified: Record<string, any>;
+    }>;
+  },
+  { updatedRowCount: number },
+  Error,
+  void
+>('connection/UpdateRowsRequest');
+
 
 // @OPTIMIZE: later this will be replace by the native library when available
 export interface ProgressNotificationStartParams {
