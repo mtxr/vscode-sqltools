@@ -176,6 +176,13 @@ export default class Connection {
     return insertQuery;
   }
 
+  public async getERDiagramData(schema: NSDatabase.ISchema) {
+    if (this.conn.getERDiagramData && typeof this.conn.getERDiagramData === 'function') {
+      return this.conn.getERDiagramData(schema);
+    }
+    return { tables: [], columns: {}, foreignKeys: [] };
+  }
+
   public searchItems(itemType: ContextValue, search: string = '', extraParams = {}) {
     return this.conn.searchItems(itemType, search, extraParams);
   }

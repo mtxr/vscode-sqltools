@@ -296,3 +296,22 @@ SHOW CREATE PROCEDURE \`${item => item.label}\`
 export const fetchTriggerDefinition: IBaseQueries['fetchTriggerDefinition'] = queryFactory`
 SHOW CREATE TRIGGER \`${item => item.label}\`
 `;
+
+export const fetchForeignKeys: IBaseQueries['fetchForeignKeys'] = queryFactory`
+SELECT
+  KCU.CONSTRAINT_NAME AS "constraintName",
+  KCU.TABLE_SCHEMA AS "sourceTableSchema",
+  KCU.TABLE_NAME AS "sourceTableName",
+  KCU.COLUMN_NAME AS "sourceColumnName",
+  KCU.REFERENCED_TABLE_SCHEMA AS "targetTableSchema",
+  KCU.REFERENCED_TABLE_NAME AS "targetTableName",
+  KCU.REFERENCED_COLUMN_NAME AS "targetColumnName"
+FROM
+  INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU
+WHERE
+  KCU.REFERENCED_TABLE_NAME IS NOT NULL
+  AND KCU.TABLE_SCHEMA = '${p => p.schema}'
+ORDER BY
+  KCU.TABLE_NAME,
+  KCU.COLUMN_NAME
+`;

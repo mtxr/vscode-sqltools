@@ -44,6 +44,9 @@
     "driver:pack:mssql": "(cd packages/driver.mssql/ && yarn run package && mv *.vsix '../../.')",
     "driver:pack:sqlite": "(cd packages/driver.sqlite/ && yarn run package && mv *.vsix '../../.')"
   },
+  "resolutions": {
+    "@types/d3-dispatch": "3.0.5"
+  },
   "devDependencies": {
     "@types/source-map-support": "^0.5.0",
     "cross-env": "^7.0.2",
@@ -57,6 +60,9 @@
     "source-map-support": "^0.5.11",
     "typescript": "~4.8.3",
     "@vscode/vsce": "^2.19.0",
-    "ts-node": "^9.1.1"
+    "ts-node": "^9.1.1",
+    "react-flow-renderer": "^10.3.17",
+    "dagre": "^0.8.5",
+    "@types/dagre": "^0.7.52"
   }
 }
