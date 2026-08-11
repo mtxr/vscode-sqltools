@@ -181,6 +181,32 @@ export default class PostgreSQL extends AbstractDriver<Pool, PoolConfig> impleme
       });
   }
 
+  public async updateRows(tableName: string, edits: Array<{ keys: Record<string, any>, original: Record<string, any>, modified: Record<string, any> }>) {
+    const pool = await this.open();
+    const cli = await pool.connect();
+    let updatedRowCount = 0;
+    try {
+      for (const edit of edits) {
+        const setCols = Object.keys(edit.modified);
+        if (setCols.length === 0) continue;
+        const whereCols = Object.keys(edit.keys);
+        
+        let paramIndex = 1;
+        const setClauses = setCols.map(c => `"${c}" = $${paramIndex++}`).join(', ');
+        const whereClauses = whereCols.map(c => `"${c}" = $${paramIndex++}`).join(' AND ');
+        
+        const sql = `UPDATE "${tableName}" SET ${setClauses} WHERE ${whereClauses}`;
+        const params = [...setCols.map(c => edit.modified[c]), ...whereCols.map(c => edit.keys[c])];
+        
+        const res = await cli.query(sql, params);
+        updatedRowCount += res.rowCount;
+      }
+    } finally {
+      cli.release();
+    }
+    return updatedRowCount;
+  }
+
   private getColumnNames(fields: FieldDef[]): string[] {
     return fields.reduce((names, { name }) => {
       const count = names.filter((n) => n === name).length;

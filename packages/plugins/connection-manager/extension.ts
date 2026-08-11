@@ -19,10 +19,11 @@ import { promises as fs } from 'fs';
 import { file } from 'tempy';
 import { CancellationTokenSource, commands, ConfigurationTarget, env as vscodeEnv, Progress, ProgressLocation, QuickPickItem, TextDocument, TextEditor, ThemeIcon, Uri, window, workspace } from 'vscode';
 import CodeLensPlugin from '../codelens/extension';
-import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest } from './contracts';
+import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTreeItemRequest, GetConnectionPasswordRequest, GetConnectionsRequest, GetInsertQueryRequest, GetDefinitionQueryForItemRequest, ProgressNotificationComplete, ProgressNotificationCompleteParams, ProgressNotificationStart, ProgressNotificationStartParams, ReleaseResultsRequest, RunCommandRequest, GetResultsRequest, SearchConnectionItemsRequest, TestConnectionRequest, UpdateRowsRequest } from './contracts';
 import DependencyManager from './dependency-manager/extension';
 import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
+import { UIAction } from './webview/ui/screens/Results/actions';
 import { removeAttachedConnection, attachConnection, getAttachedConnection } from './attached-files';
 
 const log = createLogger('conn-man');
@@ -103,6 +104,50 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       this.updateViewResults(view, payload);
     } catch (e) {
       this.errorHandler('Error while showing table records', e);
+    }
+  }
+
+  private ext_updateRows = async (params: {
+    connId: string;
+    tableName: string;
+    primaryKeys: string[];
+    edits: Array<{
+      keys: Record<string, any>;
+      original: Record<string, any>;
+      modified: Record<string, any>;
+    }>;
+    resultId: string;
+    requestId: string;
+  }) => {
+    try {
+      const { connId, tableName, primaryKeys, edits, resultId, requestId } = params;
+      const view = this.resultsWebview.get(requestId);
+      if (!view) {
+        throw new Error(`Results view not found for requestId: ${requestId}`);
+      }
+      
+      const { updatedRowCount } = await this.client.sendRequest(UpdateRowsRequest, {
+        connId,
+        tableName,
+        primaryKeys,
+        edits
+      });
+      
+      view.sendMessage(UIAction.UPDATE_ROWS_RESPONSE, {
+        success: true,
+        updatedRowCount,
+        resultId
+      });
+    } catch (e) {
+      this.errorHandler('Error saving changes to database.', e);
+      const view = this.resultsWebview.get(params.requestId);
+      if (view) {
+        view.sendMessage(UIAction.UPDATE_ROWS_RESPONSE, {
+          success: false,
+          error: e.message || String(e),
+          resultId: params.resultId
+        });
+      }
     }
   }
 
@@ -801,6 +846,7 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`selectConnection`, this.ext_selectConnection)
       .registerCommand(`showOutputChannel`, this.ext_showOutputChannel)
       .registerCommand(`showRecords`, this.ext_showRecords)
+      .registerCommand(`updateRows`, this.ext_updateRows)
       .registerCommand(`attachFileToConnection`, this.ext_attachFileToConnection)
       .registerCommand(`testConnection`, this.ext_testConnection)
       .registerCommand(`getConnections`, this.ext_getConnections)

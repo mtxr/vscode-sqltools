@@ -112,6 +112,28 @@ export default class MySQLDefault extends AbstractDriver<MySQLLib.Pool, MySQLLib
     });
   }
 
+  public async updateRows(tableName: string, edits: Array<{ keys: Record<string, any>, original: Record<string, any>, modified: Record<string, any> }>) {
+    const conn = await this.open();
+    let updatedRowCount = 0;
+    for (const edit of edits) {
+      const setCols = Object.keys(edit.modified);
+      if (setCols.length === 0) continue;
+      const whereCols = Object.keys(edit.keys);
+      
+      const sql = `UPDATE \`${tableName}\` SET ${setCols.map(c => `\`${c}\` = ?`).join(', ')} WHERE ${whereCols.map(c => `\`${c}\` = ?`).join(' AND ')}`;
+      const params = [...setCols.map(c => edit.modified[c]), ...whereCols.map(c => edit.keys[c])];
+      
+      await new Promise<void>((resolve, reject) => {
+        conn.query(sql, params, (error, results: any) => {
+          if (error) return reject(error);
+          updatedRowCount += (results && results.affectedRows) || 0;
+          resolve();
+        });
+      });
+    }
+    return updatedRowCount;
+  }
+
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
     return this.open().then((conn): Promise<NSDatabase.IResult[]> => {
       const { requestId } = opt;

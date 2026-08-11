@@ -1,12 +1,57 @@
-.footer {
+.left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
   button {
     background: var(--vscode-button-background);
     color: var(--vscode-button-foreground);
+    margin-right: 0.5rem;
+    border-radius: 4px;
+    border: none;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.15s ease-in-out;
+    padding: 4px 10px;
+    
     &:hover {
       background: var(--vscode-button-hoverBackground);
     }
-    &:not(:last-child) {
-      margin-right: 1rem;
+
+    &:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
     }
   }
+
+  .copyBtn {
+    padding: 6px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 28px;
+    height: 28px;
+  }
+
+  .pendingText {
+    font-size: 12px;
+    color: var(--vscode-descriptionForeground, #888);
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+  }
+
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    border-top-color: var(--vscode-button-background, #007acc);
+    animation: spin 0.8s linear infinite;
+    margin-left: 6px;
+  }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
 }

@@ -321,6 +321,7 @@ export interface IConnectionDriver {
    * Send a query to the SQL instance and receive the result
    */
   query(query: string, opt?: IQueryOptions): Promise<NSDatabase.IResult[]>;
+  updateRows?(tableName: string, edits: Array<{ keys: Record<string, any>, original: Record<string, any>, modified: Record<string, any> }>): Promise<number>;
   testConnection?(): Promise<void>;
   /**
    * Get a list of interface elements, i.e. folders, tables, colums, etc.
@@ -512,6 +513,9 @@ export namespace NSDatabase {
     pageSize?: number;
     queryType?: 'showRecords' | 'describeTable';
     queryParams?: { [k: string]: any };
+    tableName?: string;
+    primaryKeys?: string[];
+    isEditable?: boolean;
   }
   export type SearchableItem = IDatabase | ISchema | ITable | IColumn | IFunction | IProcedure | MConnectionExplorer.IChildItem;
   export type ParentItem = IDatabase | ISchema | ITable;
