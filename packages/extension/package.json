@@ -295,6 +295,15 @@
                 "command": "sqltools.copyTextFromConsoleMessages"
             },
             {
+                "title": "Copy All Messages",
+                "command": "sqltools.copyAllConsoleMessages"
+            },
+            {
+                "title": "Clear Messages",
+                "command": "sqltools.clearConsoleMessages",
+                "icon": "$(clear-all)"
+            },
+            {
                 "title": "Generate Insert Query",
                 "command": "sqltools.generateInsertQuery",
                 "category": "SQLTools Sidebar",
@@ -940,6 +949,18 @@
                     "default": true,
                     "description": "Auto open session file when connecting."
                 },
+                "sqltools.connectionSwitch": {
+                    "type": "object",
+                    "description": "Automatically switch the active connection when the focused file name matches a pattern. Keys are connection names (must match exactly); values are arrays of glob patterns (use * as wildcard) tested case-insensitively against the file's basename and its full path. The first matching connection wins. Example: { \"Postgres_DEV\": [\"*postgres*\", \"*pg*dev*\"], \"BigQuery_dev\": [\"*bq*dev*\"] }",
+                    "default": {},
+                    "additionalProperties": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "description": "Glob pattern (* = wildcard). Matched case-insensitively against file basename and full path."
+                        }
+                    }
+                },
                 "sqltools.sessionFilesFolder": {
                     "type": "string",
                     "default": "",
@@ -1052,6 +1073,14 @@
                     "when": "false"
                 },
                 {
+                    "command": "sqltools.copyAllConsoleMessages",
+                    "when": "false"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "false"
+                },
+                {
                     "command": "sqltools.refreshTree",
                     "when": "false"
                 },
@@ -1122,6 +1151,11 @@
                     "command": "sqltools.clearHistory",
                     "when": "view == sqltoolsViewHistoryExplorer",
                     "group": "navigation@1"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "navigation@1"
                 }
             ],
             "view/item/context": [
@@ -1189,6 +1223,16 @@
                     "command": "sqltools.copyTextFromConsoleMessages",
                     "when": "view == sqltoolsViewConsoleMessages",
                     "group": "sqltools.consoleMessages.edit@1"
+                },
+                {
+                    "command": "sqltools.copyAllConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "sqltools.consoleMessages.edit@2"
+                },
+                {
+                    "command": "sqltools.clearConsoleMessages",
+                    "when": "view == sqltoolsViewConsoleMessages",
+                    "group": "sqltools.consoleMessages.edit@3"
                 },
                 {
                     "command": "sqltools.selectConnection",

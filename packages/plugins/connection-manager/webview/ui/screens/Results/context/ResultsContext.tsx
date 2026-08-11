@@ -55,10 +55,6 @@ export const ResultsProvider = ({ children }: IResultsProviderProps) => {
     }
   }, [state.showConsole]);
 
-  useEffect(() => {
-    sendMessage(UIAction.REQUEST_SYNC_CONSOLE_MESSAGES, state.resultTabs[state.activeTab]?.messages ?? []);
-  }, [state, state.activeTab]);
-
   return (
     <ResultsContext.Provider value={{
       ...state,
