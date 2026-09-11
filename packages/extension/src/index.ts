@@ -13,6 +13,7 @@ import PluginResourcesMap from '@sqltools/util/plugin-resources';
 import SQLToolsLanguageClient from './language-client';
 import Timer from '@sqltools/util/timer';
 import Utils from './api/utils';
+import { registerSQLNotebook, deactivateSQLNotebook } from './notebook';
 
 const log = createLogger();
 
@@ -78,6 +79,9 @@ export class SQLToolsExtension implements IExtension {
   }
 
   public deactivate = (): void => {
+    // Clean up notebook resources
+    deactivateSQLNotebook();
+    
     return Context.subscriptions.forEach((sub) => void sub.dispose());
   }
 
@@ -295,30 +299,49 @@ export class SQLToolsExtension implements IExtension {
   }
 }
 
-let instance: SQLToolsExtension;
 export function activate(ctx: ExtensionContext) {
+  Context.set(ctx);
+  migrateFilesToNewPaths();
+  
+  // Register SQL notebook functionality
+  registerSQLNotebook(ctx);
+  
   try {
-    Context.set(ctx);
-    if (instance) return;
-    migrateFilesToNewPaths();
-    instance = new SQLToolsExtension();
-    instance.registerPlugin([
-      FormatterPlugin,
+    const ext = new SQLToolsExtension();
+    
+    // Register plugins - use the correct approach for each plugin
+    ext.registerPlugin([
+      // These are already plugin objects, don't need 'new'
       ConnectionManagerPlugin,
-      new HistoryManagerPlugin,
-      new BookmarksManagerPlugin,
-      new AuthenticationProviderPlugin,
-      new ObjectDropProviderPlugin,
-    ])
-    return instance.activate();
+      FormatterPlugin,
+      // These need instantiation as they're exported as classes
+      new ObjectDropProviderPlugin(),
+      new HistoryManagerPlugin(),
+      new BookmarksManagerPlugin(),
+      new AuthenticationProviderPlugin(),
+    ]);
 
-  } catch (err) {
-    log.fatal('failed to activate: %O', err);
+    return ext.activate();
+  } catch (e) {
+    // Create an error handler with a string message
+    const handler = ErrorHandler.create('Failed to activate extension');
+    // Then pass the actual error to the handler
+    handler(e);
   }
 }
 
 export function deactivate() {
-  if (!instance) return;
-  instance.deactivate();
-  instance = undefined;
+  // Clean up notebook resources
+  deactivateSQLNotebook();
+  
+  // Just call dispose on each subscription
+  if (Context.subscriptions) {
+    Context.subscriptions.forEach(sub => {
+      try {
+        sub.dispose();
+      } catch (e) {
+        // Ignore dispose errors
+      }
+    });
+  }
 }
