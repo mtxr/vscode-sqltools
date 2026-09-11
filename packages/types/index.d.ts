@@ -893,6 +893,16 @@ export interface ISettings {
   debug?: { namespaces?: string };
 
   'connectionExplorer.groupConnected'?: boolean;
+
+  /**
+   * Where SQLTools will store connections you define.
+   * 'auto' will use workspace settings if a workspace is open, and global settings otherwise.
+   * 'global' and 'workspace' will force the usage of global or workspace settings respectively.
+   * @type {string}
+   * @default 'auto'
+   * @memberof ISettings
+   */
+  connectionStore?: 'auto' | 'global' | 'workspace';
 }
 
 export interface IConfig extends ISettings {

@@ -989,6 +989,16 @@
                     "type": "boolean",
                     "description": "Display connections in two groups, 'Connected' and 'Not Connected'.",
                     "default": false
+                },
+                "sqltools.connectionStore": {
+                    "type": "string",
+                    "enum": [
+                        "auto",
+                        "global",
+                        "workspace"
+                    ],
+                    "default": "auto",
+                    "description": "Where SQLTools will store connections you define. 'auto' will use workspace settings if a workspace is open, and global settings otherwise. 'global' and 'workspace' will force the usage of global or workspace settings respectively."
                 }
             }
         },
