@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import Paper from '@material-ui/core/Paper';
 import {
   SortingState,
@@ -31,7 +31,8 @@ import TableCell from './TableCell';
 import computeColumnWidths from './computeColumnWidths';
 import sendMessage from '../../../../lib/messages';
 import TableRow from './TableRow';
-import { UIAction } from '../../../Settings/actions';
+import style from './style.m.scss';
+import { UIAction } from '../../actions';
 import { filterPredicate } from '../../lib/filterPredicate';
 import SortLabel from './SortLabel';
 import { toRegEx, clipboardInsert } from '../../../../lib/utils';
@@ -40,13 +41,95 @@ import QueryError from '../QueryError';
 import { MenuProvider } from '../../context/MenuContext';
 import useCurrentResult from '../../hooks/useCurrentResult';
 import useContextAction from '../../hooks/useContextAction';
+import useResultsContext from '../../hooks/useResultsContext';
 
 const Table = ({ setContextState }) => {
   const [filters, setFilters] = useState<(Filter & { regex?: RegExp })[]>([]);
   const [selection, setSelection] = useState<Array<number | string>>([]);
   const { exportResults, reRunQuery } = useContextAction();
   const { result } = useCurrentResult();
-  const { results: rows = [], cols = [], error, messages = [], page, pageSize, total, queryType, queryParams, requestId } = result || {};
+  const { edits, saving, setSaving, toast, setToast } = useResultsContext();
+  const { results: rows = [], cols = [], error, messages = [], page, pageSize, total, queryType, queryParams, requestId, resultId, tableName, primaryKeys, connId } = result || {};
+
+  const editedRows = useMemo(() => {
+    if (!resultId || !edits[resultId]) return rows;
+    return rows.map((row, idx) => {
+      if (edits[resultId][idx]) {
+        return { ...row, ...edits[resultId][idx] };
+      }
+      return row;
+    });
+  }, [rows, edits, resultId]);
+
+  const pendingEditsCount = useMemo(() => {
+    if (!resultId || !edits[resultId]) return 0;
+    let count = 0;
+    const rowIndexes = Object.keys(edits[resultId]);
+    for (const r of rowIndexes) {
+      count += Object.keys(edits[resultId][r] || {}).length;
+    }
+    return count;
+  }, [edits, resultId]);
+
+  const handleSave = useCallback(() => {
+    if (pendingEditsCount === 0 || !resultId) return;
+    
+    const resultEdits = edits[resultId];
+    const rowIndexes = Object.keys(resultEdits).map(Number);
+    
+    const serializedEdits = rowIndexes.map(rIndex => {
+      const originalRow = rows[rIndex];
+      const modifiedValues = resultEdits[rIndex];
+      
+      const keys: Record<string, any> = {};
+      const pkeys = primaryKeys || [];
+      
+      pkeys.forEach(pk => {
+        keys[pk] = originalRow[pk];
+      });
+      
+      return {
+        keys,
+        original: originalRow,
+        modified: modifiedValues
+      };
+    });
+
+    setSaving(true);
+    sendMessage(UIAction.CALL, {
+      command: `${process.env.EXT_NAMESPACE}.updateRows`,
+      args: [{
+        connId,
+        tableName,
+        primaryKeys,
+        edits: serializedEdits,
+        resultId,
+        requestId
+      }]
+    });
+  }, [pendingEditsCount, resultId, edits, rows, primaryKeys, connId, setSaving, requestId]);
+
+  useEffect(() => {
+    if (toast) {
+      const timer = setTimeout(() => {
+        setToast(null);
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toast, setToast]);
+
+  useEffect(() => {
+    const handleGlobalKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+        e.preventDefault();
+        if (pendingEditsCount > 0 && !saving) {
+          handleSave();
+        }
+      }
+    };
+    window.addEventListener('keydown', handleGlobalKeyDown);
+    return () => window.removeEventListener('keydown', handleGlobalKeyDown);
+  }, [pendingEditsCount, saving, handleSave]);
 
   const columnExtensions = useMemo(() => cols.map(columnName => ({ columnName, predicate: filterPredicate })), [cols]);
 
@@ -228,8 +311,13 @@ const Table = ({ setContextState }) => {
       onSelect={onMenuSelect}
     >
       <Paper square elevation={0} className="result">
+        {toast && (
+          <div className={`${style.toast} ${style[toast.type]}`}>
+            {toast.message}
+          </div>
+        )}
         {error && <QueryError messages={messages} />}
-        {!error && <Grid rows={rows} columns={columnObjNames} rootComponent={GridRoot}>
+        {!error && <Grid rows={editedRows} columns={columnObjNames} rootComponent={GridRoot}>
           <DataTypeProvider for={columnNames} availableFilterOperations={availableFilterOperations} />
           <SortingState />
           <IntegratedSorting />

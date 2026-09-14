@@ -54,6 +54,13 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
     });
   }
 
+  public async updateRows(tableName: string, edits: Array<{ keys: Record<string, any>, original: Record<string, any>, modified: Record<string, any> }>) {
+    if (typeof (this.driver as any).updateRows === 'function') {
+      return (this.driver as any).updateRows(tableName, edits);
+    }
+    throw new Error('MySQL xprotocol driver does not support spreadsheet updates');
+  }
+
   public async getChildrenForItem({ item, parent }: Arg0<IConnectionDriver['getChildrenForItem']>) {
     switch (item.type) {
       case ContextValue.CONNECTION:
