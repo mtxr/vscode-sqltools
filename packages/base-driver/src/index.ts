@@ -120,6 +120,24 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return Promise.resolve("");
   }
 
+  public async getERDiagramData(schema: NSDatabase.ISchema): Promise<{ tables: NSDatabase.ITable[], columns: { [tableName: string]: NSDatabase.IColumn[] }, foreignKeys: NSDatabase.IForeignKey[] }> {
+    const tables: NSDatabase.ITable[] = await this.queryResults(this.queries.fetchTables(schema));
+    const columns: { [tableName: string]: NSDatabase.IColumn[] } = {};
+    for (const table of tables) {
+      const cols: NSDatabase.IColumn[] = await this.queryResults(this.queries.fetchColumns(table));
+      columns[table.label] = cols;
+    }
+    let foreignKeys: NSDatabase.IForeignKey[] = [];
+    if (this.queries.fetchForeignKeys) {
+      try {
+        foreignKeys = await this.queryResults(this.queries.fetchForeignKeys(schema));
+      } catch (e) {
+        this.log.warn('Failed to fetch foreign keys: %O', e);
+      }
+    }
+    return { tables, columns, foreignKeys };
+  }
+
   public async toAbsolutePath(fsPath: string) {
     if (!path.isAbsolute(fsPath) && /\$\{workspaceFolder:(.+)}/g.test(fsPath)) {
       const workspaceName = fsPath.match(/\$\{workspaceFolder:(.+)}/)[1];

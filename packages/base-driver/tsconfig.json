@@ -12,6 +12,7 @@
     "resolveJsonModule": true,
     "sourceMap": false,
     "declaration": true,
+    "skipLibCheck": true,
     "target": "es6",
     "outDir": "./dist"
   },
