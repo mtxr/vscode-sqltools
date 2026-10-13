@@ -23,6 +23,21 @@ import { ConnectRequest, DisconnectRequest, ForceListRefresh, GetChildrenForTree
 import DependencyManager from './dependency-manager/extension';
 import { getExtension, resolveConnection } from './extension-util';
 import statusBar from './status-bar';
+
+/**
+ * Simple glob matcher: supports * as a wildcard, case-insensitive.
+ * Example: globMatch('*postgres*dev*', 'my-postgres-dev-query.sql') → true
+ */
+function globMatch(pattern: string, text: string): boolean {
+  const re = new RegExp(
+    '^' +
+    pattern.toLowerCase()
+      .replace(/[.+^${}()|[\]\\]/g, '\\$&') // escape regex metacharacters
+      .replace(/\*/g, '.*')                   // * → .*
+    + '$'
+  );
+  return re.test(text.toLowerCase());
+}
 import { removeAttachedConnection, attachConnection, getAttachedConnection } from './attached-files';
 
 const log = createLogger('conn-man');
@@ -138,9 +153,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
 
   private updateViewResults = (view: ResultsWebviewManager['viewsMap'][string], results: NSDatabase.IResult[]) => {
     view.updateResults(results);
-    if (results.length > 0)
-      this.syncConsoleMessages(results[0].messages);
-  }
+    if (results.length > 0) {
+      // Flatten messages from ALL result entries, not just results[0].
+      // Previously only the first statement's messages reached the Console
+      // panel, so SET/CALL/DELETE with no result set produced no feedback.
+      const allMessages = results.flatMap(r => r.messages ?? []);
+      this.syncConsoleMessages(allMessages);
+    }
+  };
 
   private syncConsoleMessages = (messages: NSDatabase.IResult['messages']) => {
     this.explorer.addConsoleMessages(messages || []);
@@ -619,6 +639,14 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       c = await this.client.sendRequest(ConnectRequest, { conn: c, password });
     }
     this.explorer.refresh();
+    // Update the status bar immediately.
+    // The standard path explorer.refresh() → getChildren() → getRootItems()
+    // → _onDidChangeActiveConnection → statusBar.setText() only fires when
+    // the SQLTools TreeView is visible.  When any other panel (e.g. Explorer)
+    // is active the tree is not queried and the status bar never updates.
+    // A direct call here makes the status bar always reflect the active
+    // connection regardless of which panel is currently focused.
+    statusBar.setText(c ? c.name : null);
     return c;
   }
 
@@ -666,6 +694,15 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     return commands.executeCommand(`${EXT_NAMESPACE}.copyMessages`, item, selectedNodes);
   }
 
+  private ext_copyAllConsoleMessages = async () => {
+    const items = this.explorer.getAllConsoleMessages();
+    return commands.executeCommand(`${EXT_NAMESPACE}.copyMessages`, null, items);
+  }
+
+  private ext_clearConsoleMessages = async () => {
+    this.explorer.clearConsoleMessages();
+  }
+
   private ext_copyTextFromTreeItem = async () => {
     const nodes = this.explorer.getSelection();
     if (!nodes || nodes.length === 0) return;
@@ -695,6 +732,39 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
   private changeTextEditorHandler = async (editor: TextEditor) => {
     if (!editor || !editor.document) return;
 
+    // ── Auto-switch connection by file name pattern ───────────────────────
+    // Setting format: { "ConnectionName": ["*pattern*", "*other*"] }
+    // Patterns support * as wildcard; matched case-insensitively against
+    // the file's basename and its full path.
+    const connectionSwitch: Record<string, string[]> =
+      workspace.getConfiguration(EXT_CONFIG_NAMESPACE).get('connectionSwitch', {});
+
+    if (Object.keys(connectionSwitch).length > 0) {
+      const filePath = editor.document.uri.fsPath;
+      const fileName = path.basename(filePath);
+
+      for (const [connName, patterns] of Object.entries(connectionSwitch)) {
+        if (!Array.isArray(patterns)) continue;
+        const matched = patterns.some(
+          p => globMatch(p, fileName) || globMatch(p, filePath)
+        );
+        if (matched) {
+          const connections: IConnection[] = await this.ext_getConnections({
+            connectedOnly: false,
+            sort: 'connectedFirst',
+          });
+          const target = connections.find(
+            c => c.name === connName || getConnectionId(c) === connName
+          );
+          if (target) {
+            await this.ext_selectConnection(getConnectionId(target), false);
+            return; // first match wins
+          }
+        }
+      }
+    }
+
+    // ── Existing: restore connection attached to this file ─────────────────
     const connId = getAttachedConnection(editor.document.uri);
     if (!connId) {
       return commands.executeCommand('setContext', `${EXT_NAMESPACE}.file.connectionAttached`, false);
@@ -806,6 +876,8 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
       .registerCommand(`getConnections`, this.ext_getConnections)
       .registerCommand(`detachConnectionFromFile`, this.ext_detachConnectionFromFile)
       .registerCommand(`copyTextFromConsoleMessages`, this.ext_copyTextFromConsoleMessages)
+      .registerCommand(`copyAllConsoleMessages`, this.ext_copyAllConsoleMessages)
+      .registerCommand(`clearConsoleMessages`, this.ext_clearConsoleMessages)
       .registerCommand(`copyTextFromTreeItem`, this.ext_copyTextFromTreeItem)
       .registerCommand(`getChildrenForTreeItem`, this.ext_getChildrenForTreeItem)
       .registerCommand(`getDefinitionQueryForItem`, this.ext_getDefinitionQueryForItem)
@@ -818,13 +890,19 @@ export class ConnectionManagerPlugin implements IExtensionPlugin {
     });
     this.client.onNotification(ProgressNotificationStart, this.handler_progressStart);
     this.client.onNotification(ProgressNotificationComplete, this.handler_progressComplete);
-    this.client.onRequest(ForceListRefresh, () => {
+    this.client.onRequest(ForceListRefresh, async () => {
       this.explorer.refresh();
+      // Autoconnect (language-server side) only signals the client via this
+      // request — it never goes through _setConnection(), so without this
+      // the status bar stays stuck on "Connect" unless the SQLTools tree
+      // view happens to be visible (see _setConnection for the same fix).
+      const active = await this.explorer.getActive();
+      statusBar.setText(active ? active.name : null);
     });
 
     // extension stuff
     Context.subscriptions.push(
-      (this.resultsWebview = new ResultsWebviewManager(this.syncConsoleMessages)),
+      (this.resultsWebview = new ResultsWebviewManager()),
       (this.settingsWebview = new SettingsWebview()),
       statusBar,
       workspace.onDidCloseTextDocument(this.onDidOpenOrCloseTextDocument),
