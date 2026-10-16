@@ -136,6 +136,7 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     return { message: message.toString(), date: new Date() };
   }
 
+  private sshTunnelClose?: () => void;
   public async createSshTunnel(
     ssh: {
       host: string;
@@ -151,9 +152,10 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
     },
     tunnelOptions?: Partial<TunnelOptions>
   ) {
+    this.closeSshTunnel();
     const [sshTunnel] = await createTunnel(
       {
-        autoClose: true,
+        autoClose: false,
         reconnectOnError: false,
         ...tunnelOptions,
       },
@@ -171,12 +173,18 @@ export default abstract class AbstractDriver<ConnectionType extends any, DriverO
         dstPort: db.port,
       }
     );
+    this.sshTunnelClose = () => {
+      sshTunnel.close();
+    };
     return {
       port: (sshTunnel.address() as AddressInfo).port,
-      close: () => {
-        sshTunnel.close();
-      },
+      close: () => this.closeSshTunnel(),
     };
+  }
+  public closeSshTunnel() {
+    const close = this.sshTunnelClose;
+    this.sshTunnelClose = undefined;
+    if (close) close();
   }
 
   static readonly CONSTANTS = {
