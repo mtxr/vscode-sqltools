@@ -50,10 +50,7 @@ export default function useContextAction() {
     }
     sendMessage(UIAction.CALL, {
       command: `${process.env.EXT_NAMESPACE}.executeQuery`,
-      args: [
-        query,
-        options as IQueryOptions
-      ],
+      args: [query, options as IQueryOptions],
     });
     return setState({ loading: true });
   }, [result]);
