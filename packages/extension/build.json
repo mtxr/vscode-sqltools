@@ -16,6 +16,7 @@
       "entries": {
         "Settings": "../plugins/connection-manager/webview/ui/screens/Settings/index.tsx",
         "Results": "../plugins/connection-manager/webview/ui/screens/Results/index.tsx",
+        "ERDiagram": "../plugins/connection-manager/webview/ui/screens/ERDiagram/index.tsx",
         "theme": "../plugins/connection-manager/webview/ui/sass/theme.scss"
       },
       "type": "webview"

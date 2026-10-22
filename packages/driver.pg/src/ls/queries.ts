@@ -445,6 +445,31 @@ WHERE tr.evtname = '${item.label}'
 }`;
 
 
+const fetchForeignKeys: IBaseQueries['fetchForeignKeys'] = queryFactory`
+SELECT
+  tc.constraint_name AS "constraintName",
+  tc.table_schema AS "sourceTableSchema",
+  tc.table_name AS "sourceTableName",
+  kcu.column_name AS "sourceColumnName",
+  ccu.table_schema AS "targetTableSchema",
+  ccu.table_name AS "targetTableName",
+  ccu.column_name AS "targetColumnName"
+FROM information_schema.table_constraints AS tc
+JOIN information_schema.key_column_usage AS kcu
+  ON tc.constraint_name = kcu.constraint_name
+  AND tc.table_schema = kcu.table_schema
+JOIN information_schema.constraint_column_usage AS ccu
+  ON ccu.constraint_name = tc.constraint_name
+  AND ccu.table_schema = tc.table_schema
+WHERE
+  tc.constraint_type = 'FOREIGN KEY'
+  AND tc.table_schema = '${p => p.schema}'
+  AND tc.table_catalog = '${p => p.database}'
+ORDER BY
+  tc.table_name,
+  kcu.column_name
+`;
+
 export default {
   describeTable,
   countRecords,
@@ -467,5 +492,6 @@ export default {
   fetchFunctionDefinition,
   fetchProcedureDefinition,
   fetchIndexDefinition,
-  fetchTriggerDefinition
+  fetchTriggerDefinition,
+  fetchForeignKeys
 };

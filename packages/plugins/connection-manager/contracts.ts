@@ -88,6 +88,13 @@ export const GetInsertQueryRequest = new RequestType<
   void
 >('connection/GetInsertQueryRequest');
 
+export const GetERDiagramDataRequest = new RequestType<
+  { conn: IConnection, schema: NSDatabase.ISchema },
+  { tables: NSDatabase.ITable[], columns: { [tableName: string]: NSDatabase.IColumn[] }, foreignKeys: NSDatabase.IForeignKey[] },
+  Error,
+  void
+>('connection/GetERDiagramDataRequest');
+
 
 // @OPTIMIZE: later this will be replace by the native library when available
 export interface ProgressNotificationStartParams {
