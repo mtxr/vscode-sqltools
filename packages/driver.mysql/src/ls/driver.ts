@@ -27,7 +27,7 @@ export default class MySQL<O = any> extends AbstractDriver<any, O> implements IC
   }
 
   public close() {
-    return this.driver.close();
+    return Promise.resolve(this.driver.close()).finally(() => this.driver.closeSshTunnel());
   }
 
   public query: (typeof AbstractDriver)['prototype']['query'] = (query, opt = {}) => {
