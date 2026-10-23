@@ -33,15 +33,20 @@ export default class Connection {
   }
 
   public async connect() {
-    if (!this.connected && this.conn.checkDependencies) {
-      await this.conn.checkDependencies();
-    }
+    try {
+      if (!this.connected && this.conn.checkDependencies) {
+        await this.conn.checkDependencies();
+      }
 
-    if (typeof this.conn.testConnection === 'function')
-      await this.conn.testConnection().catch(this.decorateException);
-    else
-      await this.query('SELECT 1;', { throwIfError: true });
-    this.connected = true;
+      if (typeof this.conn.testConnection === 'function')
+        await this.conn.testConnection().catch(this.decorateException);
+      else
+        await this.query('SELECT 1;', { throwIfError: true });
+      this.connected = true;
+    } catch (error) {
+      await this.close().catch(() => undefined);
+      throw error;
+    }
   }
 
   public setPassword(password: string) {
@@ -58,7 +63,9 @@ export default class Connection {
   public close() {
     if (this.needsPassword()) this.conn.credentials.password = null;
     this.connected = false;
-    return this.conn.close();
+    return Promise.resolve(this.conn.close()).finally(() => {
+      this.conn.closeSshTunnel?.();
+    });
   }
 
   public async describeTable(table: NSDatabase.ITable, opt: { requestId: InternalID }) {

@@ -357,6 +357,10 @@ export interface IConnectionDriver {
     }
   ): Promise<{ port: number }>;
   /** 
+   * Close the SSH tunnel opened for this driver (if any).
+   */
+  closeSshTunnel?(): void;
+  /** 
    * If implemented, will be used to provide completions based on the provided text and position.
    * @param text The full query text
    * @param currentOffset The position in the query where the completion is requested.
